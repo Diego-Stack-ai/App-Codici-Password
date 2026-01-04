@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Impostazioni</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden pb-24">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 flex items-center bg-white/90 dark:bg-[#101922]/90 backdrop-blur-md px-4 py-3 justify-between border-b border-gray-100 dark:border-gray-800">
+<h2 class="text-xl font-bold leading-tight tracking-tight flex-1 text-center">Impostazioni</h2>
+</div>
+<!-- Profile Section -->
+<div class="px-4 pt-6 pb-2">
+<div class="bg-white dark:bg-[#1C2733] rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-800">
+<div class="flex flex-col items-center gap-4">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-24 w-24 border-4 border-[#f0f2f4] dark:border-[#2a3441]" data-alt="Portrait of a smiling young professional man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuASBMag6usxD0ig7T5ZRN46BkvFmu2TUFiYoAWJ0jP_L4ovxRpzkGk34VuCirHxMGOzGavA0R7l4Idd7NADKVhLak-he5HSSEcuTrEORV1cY5er5iAM8bj8JGjQ_BJiXoX1kwHJ5Es1zYvccDNIhXYNV5aGlK-cesUtM_FawqSXxqYbhJcS9UwDIsC58X7LqwKadQoly8cKH5XjL53t3FW8ps6uPWKfCBb9PlE8UH26ucZYNn_hD2a3lY_1M_onRGHxD6ub_jPgyg4");'></div>
+<button class="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 border-2 border-white dark:border-[#1C2733] shadow-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+<div class="text-center">
+<h3 class="text-xl font-bold leading-tight tracking-tight">Mario Rossi</h3>
+<p class="text-[#617589] dark:text-gray-400 text-sm font-medium mt-1">mario.rossi@email.com</p>
+</div>
+<button class="mt-2 w-full max-w-[200px] flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-bold leading-normal tracking-wide">
+                        Gestisci Account
+                    </button>
+</div>
+</div>
+</div>
+<!-- Sicurezza Section -->
+<div class="px-4 pt-6">
+<h3 class="text-[#617589] dark:text-gray-400 text-xs font-bold uppercase tracking-wider px-2 mb-2 ml-1">Sicurezza</h3>
+<div class="flex flex-col bg-white dark:bg-[#1C2733] rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
+<!-- ListItem: Password -->
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group">
+<div class="flex items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 shrink-0 size-10">
+<span class="material-symbols-outlined filled">lock</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Cambio Password</p>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-[20px]">arrow_forward_ios</span>
+</div>
+<!-- ListItem: 2FA -->
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center justify-center rounded-xl bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 shrink-0 size-10">
+<span class="material-symbols-outlined filled">shield</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Autenticazione a due fattori</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[30px] w-[50px] cursor-pointer items-center rounded-full border-none bg-gray-200 dark:bg-gray-700 p-1 transition-colors has-[:checked]:bg-primary">
+<input checked="" class="peer invisible absolute" type="checkbox"/>
+<div class="h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-all peer-checked:translate-x-[20px]"></div>
+</label>
+</div>
+</div>
+<!-- ListItem: Biometrics -->
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0 size-10">
+<span class="material-symbols-outlined filled">face</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Face ID</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[30px] w-[50px] cursor-pointer items-center rounded-full border-none bg-gray-200 dark:bg-gray-700 p-1 transition-colors has-[:checked]:bg-primary">
+<input checked="" class="peer invisible absolute" type="checkbox"/>
+<div class="h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-all peer-checked:translate-x-[20px]"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Generale Section -->
+<div class="px-4 pt-6">
+<h3 class="text-[#617589] dark:text-gray-400 text-xs font-bold uppercase tracking-wider px-2 mb-2 ml-1">Generale</h3>
+<div class="flex flex-col bg-white dark:bg-[#1C2733] rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
+<!-- ListItem: Notifications -->
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center justify-center rounded-xl bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 shrink-0 size-10">
+<span class="material-symbols-outlined filled">notifications</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Notifiche</p>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-[20px]">arrow_forward_ios</span>
+</div>
+<!-- ListItem: Dark Mode -->
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 shrink-0 size-10">
+<span class="material-symbols-outlined filled">dark_mode</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Modalità Scura</p>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[30px] w-[50px] cursor-pointer items-center rounded-full border-none bg-gray-200 dark:bg-gray-700 p-1 transition-colors has-[:checked]:bg-primary">
+<input class="peer invisible absolute" type="checkbox"/>
+<div class="h-[22px] w-[22px] rounded-full bg-white shadow-sm transition-all peer-checked:translate-x-[20px]"></div>
+</label>
+</div>
+</div>
+<!-- ListItem: Language -->
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 shrink-0 size-10">
+<span class="material-symbols-outlined filled">language</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Lingua</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm text-gray-500 font-medium">Italiano</span>
+<span class="material-symbols-outlined text-gray-400 text-[20px]">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Supporto Section -->
+<div class="px-4 pt-6">
+<h3 class="text-[#617589] dark:text-gray-400 text-xs font-bold uppercase tracking-wider px-2 mb-2 ml-1">Supporto</h3>
+<div class="flex flex-col bg-white dark:bg-[#1C2733] rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shrink-0 size-10">
+<span class="material-symbols-outlined filled">help</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Aiuto e FAQ</p>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-[20px]">arrow_forward_ios</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<div class="flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shrink-0 size-10">
+<span class="material-symbols-outlined filled">privacy_tip</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-semibold truncate text-gray-900 dark:text-white">Privacy Policy</p>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-[20px]">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="px-4 pt-8 pb-6 flex flex-col items-center gap-4">
+<button class="w-full bg-white dark:bg-[#1C2733] text-red-500 text-base font-bold py-3.5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm active:scale-[0.98] transition-transform">
+                Esci dall'account
+            </button>
+<p class="text-xs text-gray-400 font-medium">Versione 2.4.0 (Build 302)</p>
+</div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#101922]/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-safe pt-2">
+<div class="flex justify-around items-end h-[60px] w-full pb-2">
+<div class="flex flex-col items-center justify-center w-full gap-1 group cursor-pointer">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary transition-colors">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center w-full gap-1 group cursor-pointer">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">lock</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary transition-colors">Vault</span>
+</div>
+<div class="flex flex-col items-center justify-center w-full gap-1 group cursor-pointer">
+<div class="bg-primary rounded-full p-3 -mt-8 shadow-lg shadow-primary/30 border-4 border-white dark:border-[#101922]">
+<span class="material-symbols-outlined text-white">add</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center w-full gap-1 group cursor-pointer">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">description</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary transition-colors">Documenti</span>
+</div>
+<div class="flex flex-col items-center justify-center w-full gap-1 cursor-pointer">
+<span class="material-symbols-outlined text-primary fill-current">settings</span>
+<span class="text-[10px] font-bold text-primary">Impostazioni</span>
+</div>
+</div>
+</div>
+</div>
+</body></html>

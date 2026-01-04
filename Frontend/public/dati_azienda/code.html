@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dati Azienda</title>
+<!-- Fonts and Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "primary-content": "#ffffff",
+                        "secondary": "#3e4b5b",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1c252e",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2a3441",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Utilities */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-secondary dark:text-gray-300 antialiased overflow-x-hidden pb-24">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-border-light dark:border-border-dark px-4 py-3 flex items-center justify-between">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors text-slate-900 dark:text-white">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h2 class="text-lg font-bold text-slate-900 dark:text-white flex-1 text-center">Dati Azienda</h2>
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors text-primary">
+<span class="material-symbols-outlined text-[24px]">edit</span>
+</button>
+</div>
+<!-- Main Content -->
+<div class="p-4 flex flex-col gap-5 max-w-md mx-auto w-full">
+<!-- Company Headline -->
+<div class="flex flex-col gap-1 mt-2">
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">TechSolutions S.r.l.</h1>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">ID: TS-2023-8892</p>
+</div>
+<!-- QR Code Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-5 shadow-sm border border-border-light dark:border-border-dark flex items-center justify-between gap-4">
+<div class="flex flex-col gap-2">
+<h3 class="text-base font-bold text-slate-900 dark:text-white">Condividi Profilo</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-snug">Scansiona il QR Code per acquisire i dati completi</p>
+<button class="mt-2 flex items-center gap-2 text-sm font-semibold text-primary hover:text-blue-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]">share</span>
+                    Condividi link
+                </button>
+</div>
+<div class="shrink-0 bg-white p-2 rounded-lg border border-gray-100">
+<img alt="QR Code for TechSolutions S.r.l. profile sharing" class="w-20 h-20 object-contain mix-blend-multiply" data-alt="QR Code for TechSolutions S.r.l. profile sharing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfbjLbJcjgZMFmHDGTBWi2dMSczNwZpI7uchqHhBrZ2VSw1wtfwGuyDHKRs8qN4fIQnspkwHQYSEF8OUwEt5iZ_QOXPpzdRCGGGD1GwSYP3ZN0wTOVRGsHdmIQDUPU0BW35BjuhsrS53KyMTcBxJjN1UyImAlbVA2ufCKeDBJ0VMcIEJLGEEPoWIEu1pVWegs_0Zr33asivyA52R-ZknebyuS8KXaMG_uSsYdb7wmJlWGXCjw4HfSLOhJ7l-bT7CtGXu3aOtSnmME"/>
+</div>
+</div>
+<!-- Section: Referente -->
+<div class="flex flex-col gap-3">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">Referente</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden">
+<!-- Person Info -->
+<div class="p-4 flex items-center gap-4 border-b border-border-light dark:border-border-dark">
+<div class="relative">
+<div class="w-14 h-14 rounded-full bg-cover bg-center" data-alt="Portrait of Mario Rossi, CEO" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCnTMOapj3ZWpXVvTSxdrf2P4tfxv9v_lVtTUxQlpq2q3LasxEeGjVLd7JmaRlv9q0u8X1h7FfDfj24bpwaIliy9u6hXv38hOzEZbg6JHikDjOYn1tLivQTXiLeGjj53nC84O4cqdn5ZVjEtI9Ar9y-O-j5qHLuHP9TCsSiugkh6YVUcADI1Cnu-6nPEH-cc2PY5qXKDxJBk_OQLKHmrFFYEhr3nd3UGJC5v_LoIW51ulSp3hFDr63kUdxzQ9vfZuX3hz9WHHBdXtE');"></div>
+<div class="absolute bottom-0 right-0 bg-green-500 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-surface-dark"></div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-base font-bold text-slate-900 dark:text-white truncate">Mario Rossi</p>
+<p class="text-sm text-primary font-medium truncate">Amministratore Delegato</p>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[22px]">call</span>
+</button>
+</div>
+<!-- Mobile Phone -->
+<div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">smartphone</span>
+<div class="flex flex-col">
+<span class="text-xs text-slate-500 dark:text-slate-400">Cellulare personale</span>
+<span class="text-sm font-medium text-slate-900 dark:text-white">+39 333 1234567</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-[20px]">content_copy</span>
+</div>
+</div>
+</div>
+<!-- Section: Sede Legale -->
+<div class="flex flex-col gap-3">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">Sede Legale</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-1">
+<div class="flex gap-2 p-3 items-start">
+<div class="flex-1 flex flex-col gap-1">
+<p class="text-base font-medium text-slate-900 dark:text-white">Via Alessandro Volta, 10</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">20121 Milano (MI)</p>
+<div class="flex gap-2 mt-2">
+<button class="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">map</span>
+                                Vedi Mappa
+                            </button>
+</div>
+</div>
+<div class="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 bg-cover bg-center overflow-hidden relative" data-alt="Map thumbnail showing Milan location" data-location="Milano" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDFlXG-efr6BBYSN4BhyhAL4lHFvkMrwpaSIjstzZdHWw2Q2491mcJmxgG3GtXx7dQSOk5tg-D942v7nPRtF6B6pFT5SqyN2_AIgeLubtximU5bUZmw-ODeNhrHcN2ZOl9fC5hzcAukk0W2cTBFZz_AQjVx2gYIsoFqQiP_L7alrgNgDCC9fky1_dSUVK7_w9rbkNMW0LfuAF8qosy7iVcu3zNJIf5lYTr27QskBtdrV6Av7rKzXnv6H4bm3b5MRq9q5c1qmjYflN0');">
+<!-- Fallback visual for map if image fails/generic -->
+<div class="absolute inset-0 bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/40 text-[32px]">location_on</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Dati Fiscali -->
+<div class="flex flex-col gap-3">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">Dati Fiscali &amp; Amministrativi</h3>
+<div class="grid grid-cols-2 gap-3">
+<!-- Card Item -->
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex flex-col gap-1 group cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Partita IVA</span>
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-slate-900 dark:text-white truncate">12345678901</span>
+<span class="material-symbols-outlined text-[16px] text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+</div>
+<!-- Card Item -->
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex flex-col gap-1 group cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Codice SDI</span>
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-slate-900 dark:text-white truncate">M5UXCR1</span>
+<span class="material-symbols-outlined text-[16px] text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+</div>
+<!-- Card Item -->
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex flex-col gap-1 group cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">CCIAA</span>
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-slate-900 dark:text-white truncate">MI-123456</span>
+<span class="material-symbols-outlined text-[16px] text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+</div>
+<!-- Card Item -->
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex flex-col gap-1 group cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Data Iscrizione</span>
+<div class="flex items-center justify-between">
+<span class="text-sm font-bold text-slate-900 dark:text-white truncate">12/05/2020</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Contatti Azienda -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark divide-y divide-border-light dark:divide-border-dark">
+<div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-slate-500 dark:text-slate-400">Telefono Aziendale</span>
+<span class="text-sm font-medium text-slate-900 dark:text-white">02 1234567</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-[20px] group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">fax</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-slate-500 dark:text-slate-400">Fax</span>
+<span class="text-sm font-medium text-slate-900 dark:text-white">02 1234568</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-[20px] group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+</div>
+<!-- Section: Note -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between px-1">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Note</h3>
+<span class="text-xs text-primary font-medium cursor-pointer">Modifica</span>
+</div>
+<div class="bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-xl border border-yellow-100 dark:border-yellow-900/30 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-yellow-400"></div>
+<p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                    Cliente VIP, pagamenti regolari a 30gg. Preferire contatti via mail nel pomeriggio. Rinnovo contratto previsto per Dicembre 2024.
+                </p>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 right-0 bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark px-6 pb-6 pt-3 z-50">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[24px] fill-current">domain</span>
+<span class="text-[10px] font-medium">Aziende</span>
+</button>
+<div class="relative -top-5">
+<button class="flex items-center justify-center w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-blue-500/40 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[28px]">qr_code_scanner</span>
+</button>
+</div>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">folder_shared</span>
+<span class="text-[10px] font-medium">Docs</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-[10px] font-medium">Impostazioni</span>
+</button>
+</div>
+</div>
+</body></html>

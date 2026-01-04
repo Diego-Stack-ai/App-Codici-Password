@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard Amministratore</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "primary-dark": "#0b66c3",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1c2630",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+            boxShadow: {
+                'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                'float': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Hide scrollbar for horizontal scrolling areas */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark transition-colors duration-200">
+<div class="relative flex h-full min-h-screen w-full max-w-md mx-auto flex-col overflow-x-hidden pb-10 bg-background-light dark:bg-background-dark">
+<!-- Top Bar -->
+<header class="sticky top-0 z-50 flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-5 py-4 justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-11 border-2 border-white dark:border-surface-dark shadow-sm" data-alt="Avatar profilo amministratore con sorriso" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAz0icrgrzc2XDqDO28MSgxCFsIM4aWg2Wol76raSSmmx0oJ49bi6UjwVIydScPl8zVFooM21Gfa_R3fLzlacHq-i1WElJc7rvPWZPO-Rjgfg39TTFnQAc2ekTMWUG6-IuoMdGveZSce66-LgYyJ8Nt6edD53-dNj-_GcK0YzUxvtp2WFLAPLZSxpT3TB2rfNDCzGq_MnPXVv58eabzo2ort9DWCFqXAlF9hTQHQMGAgJ1AnQEtcjGMU64gTFEx-8rqWAZ2BGW_OKA");'>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white dark:border-background-dark">
+                        S.ADMIN
+                    </div>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Bentornato,</span>
+<span class="text-sm font-bold text-gray-900 dark:text-white leading-tight">Alessandro Admin</span>
+</div>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-white dark:bg-surface-dark shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-200">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+</button>
+</header>
+<!-- Search Bar -->
+<div class="px-5 py-2">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-gray-400 text-[20px]">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 rounded-2xl bg-white dark:bg-surface-dark border-none text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm text-sm transition-all" placeholder="Cerca utenti, aziende, dati..." type="text"/>
+</div>
+</div>
+<!-- Hero Stats Horizontal Scroll -->
+<section class="mt-6">
+<div class="flex overflow-x-auto no-scrollbar gap-4 px-5 pb-4 snap-x snap-mandatory">
+<!-- Card 1: Users (Primary) -->
+<div class="snap-center shrink-0 min-w-[260px] p-5 rounded-2xl bg-gradient-to-br from-primary to-[#4ca2ff] shadow-float relative overflow-hidden text-white">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[120px] leading-none">group</span>
+</div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-6">
+<div class="flex items-start justify-between">
+<div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+<span class="material-symbols-outlined text-white text-[24px]">person</span>
+</div>
+<span class="bg-white/20 px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +5%
+                            </span>
+</div>
+<div>
+<p class="text-white/80 text-sm font-medium mb-1">Utenti Totali</p>
+<h3 class="text-3xl font-bold tracking-tight">1,240</h3>
+</div>
+</div>
+</div>
+<!-- Card 2: Companies (Dark) -->
+<div class="snap-center shrink-0 min-w-[260px] p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-card relative overflow-hidden">
+<div class="flex flex-col h-full justify-between gap-6">
+<div class="flex items-start justify-between">
+<div class="bg-orange-100 dark:bg-orange-900/30 p-2 rounded-xl text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined text-[24px]">business</span>
+</div>
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-lg text-xs font-semibold">
+                                +2 Nuove
+                            </span>
+</div>
+<div>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Aziende Gestite</p>
+<h3 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">85</h3>
+</div>
+</div>
+</div>
+<!-- Card 3: Alerts (Red) -->
+<div class="snap-center shrink-0 min-w-[260px] p-5 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 shadow-card relative overflow-hidden">
+<div class="flex flex-col h-full justify-between gap-6">
+<div class="flex items-start justify-between">
+<div class="bg-red-100 dark:bg-red-900/30 p-2 rounded-xl text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined text-[24px]">gpp_maybe</span>
+</div>
+<span class="text-gray-400 dark:text-gray-500 text-xs font-medium self-center">
+                                Oggi
+                            </span>
+</div>
+<div>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Alert Sicurezza</p>
+<h3 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">3</h3>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Actions Grid -->
+<section class="px-5 mt-4">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">Accesso Rapido</h3>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- Action 1 -->
+<button class="flex flex-col items-center justify-center p-5 bg-white dark:bg-surface-dark rounded-2xl shadow-sm hover:shadow-md transition-shadow group border border-transparent hover:border-primary/20">
+<div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-primary/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-primary text-[24px]">manage_accounts</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Utenti</span>
+<span class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Gestisci accessi</span>
+</button>
+<!-- Action 2 -->
+<button class="flex flex-col items-center justify-center p-5 bg-white dark:bg-surface-dark rounded-2xl shadow-sm hover:shadow-md transition-shadow group border border-transparent hover:border-primary/20">
+<div class="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-[24px]">key</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Accounts</span>
+<span class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Database pw</span>
+</button>
+<!-- Action 3 -->
+<button class="flex flex-col items-center justify-center p-5 bg-white dark:bg-surface-dark rounded-2xl shadow-sm hover:shadow-md transition-shadow group border border-transparent hover:border-primary/20">
+<div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-[24px]">domain</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Aziende</span>
+<span class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Profili aziendali</span>
+</button>
+<!-- Action 4 -->
+<button class="flex flex-col items-center justify-center p-5 bg-white dark:bg-surface-dark rounded-2xl shadow-sm hover:shadow-md transition-shadow group border border-transparent hover:border-primary/20">
+<div class="w-12 h-12 rounded-full bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-teal-600 dark:text-teal-400 text-[24px]">folder_shared</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Documenti</span>
+<span class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Archivio</span>
+</button>
+</div>
+</section>
+<!-- Critical Deadlines Section -->
+<section class="px-5 mt-8">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">Scadenze Critiche</h3>
+<a class="text-primary text-sm font-semibold hover:text-primary-dark" href="#">Vedi tutte</a>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Deadline Item 1 (Urgent) -->
+<div class="flex items-center p-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border-l-4 border-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Urgente</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">Scade Domani</span>
+</div>
+<h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">Rinnovo SSL - TechCorp Srl</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">Certificato di sicurezza dominio principale</p>
+</div>
+<button class="p-2 text-gray-400 hover:text-primary dark:text-gray-500">
+<span class="material-symbols-outlined text-[20px]">arrow_forward_ios</span>
+</button>
+</div>
+<!-- Deadline Item 2 (Warning) -->
+<div class="flex items-center p-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border-l-4 border-yellow-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Attenzione</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">3 Giorni</span>
+</div>
+<h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">Passaporto - Mario Rossi</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">Documento personale in scadenza</p>
+</div>
+<button class="p-2 text-gray-400 hover:text-primary dark:text-gray-500">
+<span class="material-symbols-outlined text-[20px]">arrow_forward_ios</span>
+</button>
+</div>
+<!-- Deadline Item 3 (Info) -->
+<div class="flex items-center p-4 bg-white dark:bg-surface-dark rounded-xl shadow-sm border-l-4 border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Avviso</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">7 Giorni</span>
+</div>
+<h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">Fatturazione Server</h4>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">Rinnovo abbonamento cloud</p>
+</div>
+<button class="p-2 text-gray-400 hover:text-primary dark:text-gray-500">
+<span class="material-symbols-outlined text-[20px]">arrow_forward_ios</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Recent Activity Log (Simplified) -->
+<section class="px-5 mt-8 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">Attività Recenti</h3>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm">
+<ul class="space-y-6 relative before:absolute before:inset-y-2 before:left-[19px] before:w-0.5 before:bg-gray-200 dark:before:bg-gray-700">
+<li class="relative pl-8 flex flex-col gap-1">
+<span class="absolute left-2.5 top-1.5 -ml-px h-4 w-4 rounded-full border-2 border-white dark:border-surface-dark bg-green-500"></span>
+<div class="flex justify-between items-center w-full">
+<p class="text-sm font-semibold text-gray-900 dark:text-white">Nuova azienda aggiunta</p>
+<span class="text-[10px] text-gray-400">10m fa</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400">Studio Legale Bianchi è stato registrato.</p>
+</li>
+<li class="relative pl-8 flex flex-col gap-1">
+<span class="absolute left-2.5 top-1.5 -ml-px h-4 w-4 rounded-full border-2 border-white dark:border-surface-dark bg-blue-500"></span>
+<div class="flex justify-between items-center w-full">
+<p class="text-sm font-semibold text-gray-900 dark:text-white">Aggiornamento Sistema</p>
+<span class="text-[10px] text-gray-400">2h fa</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400">Patch sicurezza v2.4 applicata con successo.</p>
+</li>
+<li class="relative pl-8 flex flex-col gap-1">
+<span class="absolute left-2.5 top-1.5 -ml-px h-4 w-4 rounded-full border-2 border-white dark:border-surface-dark bg-orange-400"></span>
+<div class="flex justify-between items-center w-full">
+<p class="text-sm font-semibold text-gray-900 dark:text-white">Accesso sospetto bloccato</p>
+<span class="text-[10px] text-gray-400">5h fa</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400">IP 192.168.x.x su account admin secondario.</p>
+</li>
+</ul>
+</div>
+</section>
+</div>
+</body></html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dettaglio Account Azienda</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden pb-24">
+<!-- Top App Bar -->
+<div class="flex items-center bg-white dark:bg-[#1a2632] p-4 pb-2 justify-between sticky top-0 z-20 shadow-sm">
+<div class="text-[#111418] dark:text-white flex size-12 shrink-0 items-center justify-center cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Dettaglio Account</h2>
+<div class="flex w-12 items-center justify-end cursor-pointer">
+<p class="text-primary text-base font-bold leading-normal tracking-[0.015em] shrink-0">Modifica</p>
+</div>
+</div>
+<!-- Header Image / Brand Section -->
+<div class="@container">
+<div class="@[480px]:px-4 @[480px]:py-3">
+<div class="relative bg-cover bg-center flex flex-col justify-end overflow-hidden bg-white dark:bg-[#1a2632] @[480px]:rounded-xl min-h-[180px]" data-alt="Abstract blue and purple gradient background symbolizing secure digital connection" style='background-image: linear-gradient(180deg, rgba(19, 127, 236, 0.1) 0%, rgba(16, 25, 34, 0.8) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAuPnyT3J-CcMn1cq9MqAvKpS9NLOLIHRN-TM6o6fdczvdt1aU9CzXlxgF6-wePohDgn3NIcnaAttHZm4BVpXW0eLj9tEWLSIv6DbOat2V04Go5IX30dQYP0OXaRe74Ob4jmFLCm90LDvw7ER1BX7D7LSIj9-EADSJQTxGBLhHV_n_lnmkFNlchs62X3zcOAM833uoqp6Z8l0SAs8E8FS0LNtwGpZ3trR_M-830L4v8CuJKkBMgi02XW2vRUBkpd6_MeyycWS6-TiQ");'>
+<!-- Logo Circle Overlapping -->
+<div class="absolute top-6 left-1/2 -translate-x-1/2 flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg">
+<!-- Placeholder for Brand Logo -->
+<span class="text-4xl font-bold text-primary">G</span>
+</div>
+<div class="flex flex-col items-center p-4 pb-6 pt-12 z-10 text-center">
+<h1 class="text-white tracking-tight text-[28px] font-bold leading-tight drop-shadow-md mt-4">Google Workspace</h1>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center rounded-md bg-white/20 px-2 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/30">Business</span>
+<span class="inline-flex items-center rounded-md bg-green-500/80 px-2 py-1 text-xs font-medium text-white">Attivo</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Content Container -->
+<div class="px-4 flex flex-col gap-5 mt-2">
+<!-- Credentials Card (Main) -->
+<div class="bg-white dark:bg-[#1a2632] rounded-xl p-4 shadow-sm border border-[#dbe0e6] dark:border-gray-700">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">vpn_key</span>
+<h3 class="text-base font-bold text-[#111418] dark:text-white">Credenziali d'Accesso</h3>
+</div>
+<!-- Utente -->
+<div class="mb-4">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium uppercase tracking-wide pb-1.5">Utente / Email</p>
+<div class="flex w-full items-center rounded-xl bg-background-light dark:bg-background-dark border border-[#dbe0e6] dark:border-gray-700 overflow-hidden">
+<input class="flex w-full bg-transparent text-[#111418] dark:text-white h-12 px-4 text-base font-medium focus:outline-none" readonly="" value="admin@azienda.it"/>
+<button class="flex h-12 w-12 items-center justify-center text-[#617589] dark:text-gray-400 hover:text-primary transition-colors border-l border-[#dbe0e6] dark:border-gray-700">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Password -->
+<div class="mb-4">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium uppercase tracking-wide pb-1.5">Password</p>
+<div class="flex w-full items-center rounded-xl bg-background-light dark:bg-background-dark border border-[#dbe0e6] dark:border-gray-700 overflow-hidden">
+<input class="flex w-full bg-transparent text-[#111418] dark:text-white h-12 px-4 text-base font-medium focus:outline-none" readonly="" type="password" value="SuperSecretPass123!"/>
+<button class="flex h-12 w-10 items-center justify-center text-[#617589] dark:text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="flex h-12 w-12 items-center justify-center text-[#617589] dark:text-gray-400 hover:text-primary transition-colors border-l border-[#dbe0e6] dark:border-gray-700">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Website -->
+<div>
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium uppercase tracking-wide pb-1.5">Sito Web</p>
+<div class="flex w-full items-center rounded-xl bg-background-light dark:bg-background-dark border border-[#dbe0e6] dark:border-gray-700 overflow-hidden group">
+<input class="flex w-full bg-transparent text-primary h-12 px-4 text-base font-medium focus:outline-none underline decoration-primary/30" readonly="" value="admin.google.com"/>
+<button class="flex h-12 w-12 items-center justify-center text-primary hover:bg-primary/10 transition-colors border-l border-[#dbe0e6] dark:border-gray-700">
+<span class="material-symbols-outlined text-[20px]">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Referent Section -->
+<div class="bg-white dark:bg-[#1a2632] rounded-xl p-4 shadow-sm border border-[#dbe0e6] dark:border-gray-700">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">badge</span>
+<h3 class="text-base font-bold text-[#111418] dark:text-white">Referente</h3>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-[#dbe0e6] dark:border-gray-700 last:border-0">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                            MR
+                        </div>
+<div>
+<p class="text-sm font-medium text-[#111418] dark:text-white">Mario Rossi</p>
+<p class="text-xs text-[#617589] dark:text-gray-400">Responsabile IT</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mt-3">
+<button class="flex items-center justify-center gap-2 p-3 rounded-lg bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-primary text-[20px]">call</span>
+<span class="text-sm font-medium">Ufficio</span>
+</button>
+<button class="flex items-center justify-center gap-2 p-3 rounded-lg bg-background-light dark:bg-background-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-primary text-[20px]">smartphone</span>
+<span class="text-sm font-medium">Mobile</span>
+</button>
+</div>
+</div>
+<!-- Details Grid (Using DescriptionList style logic) -->
+<div class="bg-white dark:bg-[#1a2632] rounded-xl p-4 shadow-sm border border-[#dbe0e6] dark:border-gray-700">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">info</span>
+<h3 class="text-base font-bold text-[#111418] dark:text-white">Dettagli Tecnici</h3>
+</div>
+<div class="grid grid-cols-2 gap-y-4 gap-x-4">
+<div class="flex flex-col gap-1">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-normal">ID Account</p>
+<p class="text-[#111418] dark:text-white text-sm font-medium">#829102</p>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-normal">Tipo Account</p>
+<p class="text-[#111418] dark:text-white text-sm font-medium">Enterprise</p>
+</div>
+<div class="col-span-2 flex flex-col gap-1 pt-2 border-t border-[#dbe0e6] dark:border-gray-700">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-normal mb-1">Stato Condivisione</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-500 text-[20px]">group</span>
+<p class="text-[#111418] dark:text-white text-sm font-medium">Condiviso con 4 amministratori</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Notes & Memorandum -->
+<div class="bg-white dark:bg-[#1a2632] rounded-xl p-4 shadow-sm border border-[#dbe0e6] dark:border-gray-700">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary">sticky_note_2</span>
+<h3 class="text-base font-bold text-[#111418] dark:text-white">Note &amp; Memorandum</h3>
+</div>
+<div class="mb-4">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium uppercase tracking-wide pb-1.5">Nota</p>
+<div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-800/30">
+<p class="text-sm text-[#111418] dark:text-yellow-100 leading-relaxed">Ricordarsi di rinnovare le licenze prima del 31 Dicembre. Contattare il fornitore per sconti volume.</p>
+</div>
+</div>
+<div>
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium uppercase tracking-wide pb-1.5">Memorandum</p>
+<div class="flex items-start gap-3 p-3 bg-background-light dark:bg-background-dark rounded-lg">
+<span class="material-symbols-outlined text-primary mt-0.5 text-[18px]">calendar_month</span>
+<div class="flex-1">
+<p class="text-sm font-bold text-[#111418] dark:text-white">Scadenza Rinnovo</p>
+<p class="text-xs text-[#617589] dark:text-gray-400">31 Dicembre 2024</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Attachments Section -->
+<div class="mb-4">
+<div class="flex items-center justify-between mb-3 px-1">
+<h3 class="text-base font-bold text-[#111418] dark:text-white">Allegati (3)</h3>
+<span class="text-xs font-bold text-primary cursor-pointer">Vedi tutti</span>
+</div>
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+<!-- File Item 1 -->
+<div class="flex-shrink-0 w-32 flex flex-col gap-2 group cursor-pointer">
+<div class="h-24 w-full bg-white dark:bg-[#1a2632] rounded-xl border border-[#dbe0e6] dark:border-gray-700 flex items-center justify-center relative overflow-hidden group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-red-50 dark:bg-red-900/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-red-500 text-4xl">picture_as_pdf</span>
+</div>
+</div>
+<p class="text-xs font-medium text-[#111418] dark:text-white truncate px-1">Contratto_2024.pdf</p>
+</div>
+<!-- File Item 2 -->
+<div class="flex-shrink-0 w-32 flex flex-col gap-2 group cursor-pointer">
+<div class="h-24 w-full bg-white dark:bg-[#1a2632] rounded-xl border border-[#dbe0e6] dark:border-gray-700 flex items-center justify-center relative overflow-hidden group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-blue-50 dark:bg-blue-900/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-500 text-4xl">description</span>
+</div>
+</div>
+<p class="text-xs font-medium text-[#111418] dark:text-white truncate px-1">Fattura_01.docx</p>
+</div>
+<!-- File Item 3 -->
+<div class="flex-shrink-0 w-32 flex flex-col gap-2 group cursor-pointer">
+<div class="h-24 w-full bg-white dark:bg-[#1a2632] rounded-xl border border-[#dbe0e6] dark:border-gray-700 flex items-center justify-center relative overflow-hidden group-hover:border-primary transition-colors">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-4xl">image</span>
+</div>
+</div>
+<p class="text-xs font-medium text-[#111418] dark:text-white truncate px-1">Screenshot_Config.png</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#1a2632] border-t border-[#dbe0e6] dark:border-gray-700 px-6 py-3 flex justify-between items-center z-30 pb-safe">
+<div class="flex flex-col items-center gap-1 cursor-pointer group">
+<span class="material-symbols-outlined text-[#617589] group-hover:text-primary dark:text-gray-400 dark:group-hover:text-primary transition-colors">home</span>
+<span class="text-[10px] font-medium text-[#617589] group-hover:text-primary dark:text-gray-400 dark:group-hover:text-primary transition-colors">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer group">
+<span class="material-symbols-outlined text-primary fill-1">lock</span>
+<span class="text-[10px] font-medium text-primary">Vault</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer group -mt-8">
+<div class="bg-primary h-14 w-14 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-white text-3xl">add</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer group">
+<span class="material-symbols-outlined text-[#617589] group-hover:text-primary dark:text-gray-400 dark:group-hover:text-primary transition-colors">search</span>
+<span class="text-[10px] font-medium text-[#617589] group-hover:text-primary dark:text-gray-400 dark:group-hover:text-primary transition-colors">Cerca</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer group">
+<span class="material-symbols-outlined text-[#617589] group-hover:text-primary dark:text-gray-400 dark:group-hover:text-primary transition-colors">person</span>
+<span class="text-[10px] font-medium text-[#617589] group-hover:text-primary dark:text-gray-400 dark:group-hover:text-primary transition-colors">Profilo</span>
+</div>
+</div>
+</div>
+<!-- Safe area padding fix for mobile browsers with bottom bars -->
+<style>
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Verifica Email</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#137fec",
+                "background-light": "#f6f7f8",
+                "background-dark": "#101922",
+                },
+                fontFamily: {
+                "display": ["Manrope", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark min-h-screen flex flex-col relative overflow-x-hidden">
+<!-- Top Navigation -->
+<div class="flex items-center justify-between p-4 sticky top-0 z-10">
+<button class="text-[#111418] dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<div class="flex-1"></div>
+</div>
+<!-- Main Content -->
+<div class="flex flex-col items-center justify-center w-full max-w-md mx-auto px-6 pt-4 pb-10 flex-grow">
+<!-- Hero Visual -->
+<div class="mb-8 relative group">
+<div class="absolute inset-0 bg-primary/20 blur-xl rounded-full transform scale-75 group-hover:scale-100 transition-transform duration-500"></div>
+<div class="relative bg-background-light dark:bg-[#1a2632] p-6 rounded-full border border-gray-200 dark:border-gray-700 shadow-xl">
+<span class="material-symbols-outlined text-primary text-5xl">mark_email_read</span>
+</div>
+</div>
+<!-- Text Content -->
+<div class="text-center mb-10 w-full">
+<h1 class="text-[#111418] dark:text-white tracking-tight text-[28px] font-bold leading-tight pb-3">
+                Controlla la tua posta
+            </h1>
+<p class="text-[#637588] dark:text-[#93a1b0] text-base font-normal leading-relaxed px-2">
+                Abbiamo inviato un codice a 6 cifre a <br/>
+<span class="text-[#111418] dark:text-white font-bold">mario.rossi@gmail.com</span>
+</p>
+</div>
+<!-- OTP Input -->
+<div class="w-full mb-10">
+<fieldset class="flex gap-2 sm:gap-3 justify-center w-full">
+<!-- Digit 1 -->
+<input aria-label="Digit 1" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
+<!-- Digit 2 -->
+<input aria-label="Digit 2" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
+<!-- Digit 3 -->
+<input aria-label="Digit 3" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
+<!-- Digit 4 -->
+<input aria-label="Digit 4" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
+<!-- Digit 5 -->
+<input aria-label="Digit 5" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
+<!-- Digit 6 -->
+<input aria-label="Digit 6" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
+</fieldset>
+</div>
+<!-- Actions -->
+<div class="w-full space-y-6">
+<button class="w-full bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center text-lg">
+                Verifica
+            </button>
+<div class="text-center">
+<p class="text-[#637588] dark:text-[#93a1b0] text-sm">
+                    Non hai ricevuto il codice? 
+                    <button class="text-primary font-bold hover:text-primary/80 transition-colors ml-1 inline-flex items-center gap-1">
+                        Invia di nuovo
+                        <span class="material-symbols-outlined text-sm">refresh</span>
+</button>
+</p>
+</div>
+</div>
+</div>
+</body></html>

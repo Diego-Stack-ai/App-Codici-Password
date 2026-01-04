@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Privati</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar hide for clean mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-dark": "#1c242d", 
+                        "text-secondary": "#9dabb9",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-white selection:bg-primary selection:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark border-x border-gray-800">
+<!-- Header Section -->
+<header class="flex flex-col gap-4 px-5 pt-8 pb-4 bg-background-light dark:bg-background-dark sticky top-0 z-20">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<p class="text-text-secondary text-sm font-medium tracking-wider uppercase">Sicurezza</p>
+<h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Account Privati</h1>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-200 dark:bg-card-dark text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+<span class="material-symbols-outlined text-text-secondary">search</span>
+</div>
+<input class="block w-full p-3 pl-10 text-sm border-none rounded-xl bg-slate-200 dark:bg-card-dark placeholder-text-secondary focus:ring-2 focus:ring-primary focus:bg-white dark:focus:bg-[#252d38] transition-all text-slate-900 dark:text-white" placeholder="Cerca tra 24 account..." type="text"/>
+</div>
+</header>
+<!-- Main Content: Scrollable List -->
+<main class="flex-1 overflow-y-auto px-5 pb-32 no-scrollbar space-y-3">
+<!-- Category Header -->
+<div class="flex items-center justify-between pt-2 pb-1">
+<h2 class="text-base font-bold text-slate-900 dark:text-white">I tuoi account</h2>
+<button class="text-xs font-semibold text-primary">Ordina per</button>
+</div>
+<!-- Card 1: Gmail (Email) -->
+<details class="group bg-white dark:bg-card-dark rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">Gmail</span>
+<span class="text-xs font-medium text-text-secondary">Posta Elettronica</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 group-open:-rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-0">
+<div class="h-px w-full bg-slate-100 dark:bg-gray-700/50 mb-4"></div>
+<div class="grid gap-4">
+<div class="space-y-1">
+<label class="text-xs font-medium text-text-secondary">Email / Username</label>
+<div class="flex items-center justify-between bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-sm font-medium dark:text-white truncate">mario.rossi@gmail.com</span>
+<button class="text-primary hover:text-primary/80"><span class="material-symbols-outlined text-[20px]">content_copy</span></button>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-medium text-text-secondary">Password</label>
+<div class="flex items-center justify-between bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-sm font-medium dark:text-white tracking-widest">••••••••••••</span>
+<div class="flex gap-3">
+<button class="text-text-secondary hover:text-white"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
+<button class="text-primary hover:text-primary/80"><span class="material-symbols-outlined text-[20px]">content_copy</span></button>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<span class="text-xs text-orange-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">warning</span> Scade tra 3 giorni
+                             </span>
+<button class="text-xs font-bold text-primary">Modifica</button>
+</div>
+</div>
+</div>
+</details>
+<!-- Card 2: UniCredit (Banking) -->
+<details class="group bg-white dark:bg-card-dark rounded-2xl shadow-sm overflow-hidden transition-all duration-300" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-600/10 text-red-600 dark:text-red-500">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">UniCredit</span>
+<span class="text-xs font-medium text-text-secondary">Banca &amp; Finanza</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 group-open:-rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-0">
+<div class="h-px w-full bg-slate-100 dark:bg-gray-700/50 mb-4"></div>
+<div class="grid gap-4">
+<div class="space-y-1">
+<label class="text-xs font-medium text-text-secondary">Codice Adesione</label>
+<div class="flex items-center justify-between bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-sm font-medium dark:text-white">88371920</span>
+<button class="text-primary hover:text-primary/80"><span class="material-symbols-outlined text-[20px]">content_copy</span></button>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-medium text-text-secondary">PIN Dispositivo</label>
+<div class="flex items-center justify-between bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-sm font-medium dark:text-white tracking-widest">•••••</span>
+<div class="flex gap-3">
+<button class="text-text-secondary hover:text-white"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
+<button class="text-primary hover:text-primary/80"><span class="material-symbols-outlined text-[20px]">content_copy</span></button>
+</div>
+</div>
+</div>
+<div class="flex justify-end items-center mt-2">
+<button class="text-xs font-bold text-primary">Modifica</button>
+</div>
+</div>
+</div>
+</details>
+<!-- Card 3: Netflix (Entertainment) -->
+<details class="group bg-white dark:bg-card-dark rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-500">
+<span class="material-symbols-outlined">movie</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">Netflix</span>
+<span class="text-xs font-medium text-text-secondary">Intrattenimento</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 group-open:-rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-0">
+<div class="h-px w-full bg-slate-100 dark:bg-gray-700/50 mb-4"></div>
+<p class="text-text-secondary text-sm">Contenuto nascosto...</p>
+</div>
+</details>
+<!-- Card 4: Instagram (Social) -->
+<details class="group bg-white dark:bg-card-dark rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined">photo_camera</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">Instagram</span>
+<span class="text-xs font-medium text-text-secondary">Social Network</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 group-open:-rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-0">
+<div class="h-px w-full bg-slate-100 dark:bg-gray-700/50 mb-4"></div>
+<p class="text-text-secondary text-sm">Contenuto nascosto...</p>
+</div>
+</details>
+<!-- Card 5: Amazon (Shopping) -->
+<details class="group bg-white dark:bg-card-dark rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500">
+<span class="material-symbols-outlined">shopping_cart</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">Amazon</span>
+<span class="text-xs font-medium text-text-secondary">Shopping</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 group-open:-rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-0">
+<div class="h-px w-full bg-slate-100 dark:bg-gray-700/50 mb-4"></div>
+<p class="text-text-secondary text-sm">Contenuto nascosto...</p>
+</div>
+</details>
+<!-- Card 6: Work ID (Document) -->
+<details class="group bg-white dark:bg-card-dark rounded-2xl shadow-sm overflow-hidden transition-all duration-300">
+<summary class="flex items-center justify-between p-4 cursor-pointer list-none select-none">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">badge</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">SPID</span>
+<span class="text-xs font-medium text-text-secondary">Identità Digitale</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 group-open:-rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-5 pt-0">
+<div class="h-px w-full bg-slate-100 dark:bg-gray-700/50 mb-4"></div>
+<p class="text-text-secondary text-sm">Contenuto nascosto...</p>
+</div>
+</details>
+</main>
+<!-- FAB: Floating Action Button -->
+<div class="absolute bottom-24 right-5 z-20">
+<button class="flex items-center justify-center w-14 h-14 bg-primary text-white rounded-2xl shadow-lg hover:bg-blue-600 active:scale-95 transition-all shadow-primary/40">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+<!-- Bottom Navigation -->
+<nav class="absolute bottom-0 w-full bg-white dark:bg-[#1c2127] border-t border-slate-200 dark:border-gray-800 pb-6 pt-2 px-6 z-30">
+<div class="flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">home</span>
+<span class="text-[10px] font-medium text-text-secondary group-hover:text-primary">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<div class="bg-primary/10 px-4 py-1 rounded-full">
+<span class="material-symbols-outlined text-primary fill-current">lock</span>
+</div>
+<span class="text-[10px] font-bold text-primary">Account</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">description</span>
+<span class="text-[10px] font-medium text-text-secondary group-hover:text-primary">Documenti</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">person</span>
+<span class="text-[10px] font-medium text-text-secondary group-hover:text-primary">Profilo</span>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

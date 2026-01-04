@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dettaglio Account Privato</title>
+<!-- Fonts and Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Hide scrollbar for attachments */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white overflow-x-hidden pb-24">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between backdrop-blur-md bg-opacity-95 dark:bg-opacity-95 border-b border-gray-200 dark:border-gray-800">
+<div class="text-[#111418] dark:text-white flex size-12 shrink-0 items-center justify-center cursor-pointer rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</div>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Dettaglio Account</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex size-12 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</div>
+<!-- Hero Profile Header -->
+<div class="flex flex-col items-center justify-center pt-6 pb-6 px-4">
+<div class="relative group">
+<div class="bg-center bg-no-repeat bg-cover rounded-2xl h-28 w-28 shadow-lg shadow-primary/20 border-4 border-white dark:border-gray-800" data-alt="Logo del servizio account con sfumatura colorata" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCN0sEkGo8-x4jHyTuKgdciRjkbozu2Q0FX6rvJw1Tu2omwGt-9HtXTZ_a1NatXY1BPk_Tm_sWSh-o1BvKrbVupjWfTcktrSeCbqZePHvEttRen_VzVcNGHs5FeOPApvU3pBnss_CnrZMPyFnuctOvq2ktj9rNFVB1_ez9whE7Dh4TnvGhHrgeBorOGDNYRZCTuERnZySowmOOQWQJOTvNyGoXlOG9IAhqbFVLB_McTlgzEBKgkEkDPZQQMwCD0s1eBXa5PfWBmZG8");'>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-primary text-white p-1.5 rounded-full border-4 border-background-light dark:border-background-dark flex items-center justify-center">
+<span class="material-symbols-outlined text-sm font-bold">lock</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center mt-4">
+<h1 class="text-[#111418] dark:text-white text-2xl font-bold leading-tight tracking-tight text-center">Netflix Premium</h1>
+<p class="text-primary text-sm font-medium leading-normal text-center mt-1 bg-primary/10 px-3 py-1 rounded-full">Intrattenimento</p>
+</div>
+</div>
+<!-- Credentials Section -->
+<div class="px-4">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-3 pt-2">Credenziali</h3>
+<div class="flex flex-col gap-4">
+<!-- Utente -->
+<label class="flex flex-col w-full">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-semibold uppercase tracking-wider pb-1.5 ml-1">Utente</p>
+<div class="flex w-full items-center rounded-xl bg-white dark:bg-[#1A2633] border border-gray-200 dark:border-gray-700 shadow-sm focus-within:ring-2 focus-within:ring-primary/50 overflow-hidden">
+<div class="pl-4 text-primary">
+<span class="material-symbols-outlined">person</span>
+</div>
+<input class="flex w-full bg-transparent border-none text-[#111418] dark:text-white h-12 px-3 text-base font-medium focus:ring-0" readonly="" value="mario.rossi@email.com"/>
+<button class="text-[#617589] hover:text-primary p-3 flex items-center justify-center border-l border-gray-100 dark:border-gray-700 transition-colors">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+</div>
+</label>
+<!-- Password -->
+<label class="flex flex-col w-full">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-semibold uppercase tracking-wider pb-1.5 ml-1">Password</p>
+<div class="flex w-full items-center rounded-xl bg-white dark:bg-[#1A2633] border border-gray-200 dark:border-gray-700 shadow-sm focus-within:ring-2 focus-within:ring-primary/50 overflow-hidden">
+<div class="pl-4 text-primary">
+<span class="material-symbols-outlined">key</span>
+</div>
+<input class="flex w-full bg-transparent border-none text-[#111418] dark:text-white h-12 px-3 text-base font-medium focus:ring-0" readonly="" type="password" value="SuperSecretPassword123"/>
+<button class="text-[#617589] hover:text-primary p-3 flex items-center justify-center border-l border-gray-100 dark:border-gray-700 transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</label>
+<!-- Sito Web -->
+<label class="flex flex-col w-full">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-semibold uppercase tracking-wider pb-1.5 ml-1">Sito Web</p>
+<div class="flex w-full items-center rounded-xl bg-white dark:bg-[#1A2633] border border-gray-200 dark:border-gray-700 shadow-sm focus-within:ring-2 focus-within:ring-primary/50 overflow-hidden">
+<div class="pl-4 text-primary">
+<span class="material-symbols-outlined">language</span>
+</div>
+<input class="flex w-full bg-transparent border-none text-primary underline decoration-primary/30 h-12 px-3 text-base font-medium focus:ring-0 cursor-pointer" readonly="" value="www.netflix.com"/>
+<button class="text-[#617589] hover:text-primary p-3 flex items-center justify-center border-l border-gray-100 dark:border-gray-700 transition-colors">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</div>
+</label>
+</div>
+</div>
+<!-- Details Section Grid -->
+<div class="px-4 mt-6">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-3">Dettagli Account</h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-white dark:bg-[#1A2633] p-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium pb-1">ID Account</p>
+<p class="text-[#111418] dark:text-white text-sm font-bold truncate">#8839201</p>
+</div>
+<div class="bg-white dark:bg-[#1A2633] p-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium pb-1">Tipo Account</p>
+<p class="text-[#111418] dark:text-white text-sm font-bold truncate">Famiglia 4K</p>
+</div>
+<div class="bg-white dark:bg-[#1A2633] p-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm col-span-2">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium pb-1">Nome Account Interno</p>
+<p class="text-[#111418] dark:text-white text-sm font-bold">Utenza Casa Mare</p>
+</div>
+</div>
+</div>
+<!-- Referent Section -->
+<div class="px-4 mt-6">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-3">Referente</h3>
+<div class="flex flex-col gap-3 bg-white dark:bg-[#1A2633] rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+<div class="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 pb-3">
+<div class="size-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">MR</div>
+<div class="flex flex-col flex-1">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium">Nome e Cognome</p>
+<p class="text-[#111418] dark:text-white text-base font-bold">Mario Rossi</p>
+</div>
+</div>
+<div class="flex gap-4 pt-1">
+<div class="flex-1">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium mb-1">Telefono</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-500 text-[20px]">call</span>
+<p class="text-[#111418] dark:text-white text-sm font-semibold">02 12345678</p>
+</div>
+</div>
+<div class="w-px bg-gray-100 dark:bg-gray-700"></div>
+<div class="flex-1">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium mb-1">Cellulare</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-500 text-[20px]">smartphone</span>
+<p class="text-[#111418] dark:text-white text-sm font-semibold">333 9876543</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Extra Info & Attachments -->
+<div class="px-4 mt-6">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-3">Altro</h3>
+<div class="flex flex-col gap-4">
+<!-- Shared Status -->
+<div class="flex items-center justify-between bg-white dark:bg-[#1A2633] p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+<div class="flex items-center gap-3">
+<div class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 p-2 rounded-lg">
+<span class="material-symbols-outlined">share</span>
+</div>
+<div>
+<p class="text-[#111418] dark:text-white text-sm font-bold">Condiviso</p>
+<p class="text-[#617589] dark:text-gray-400 text-xs">Accessibile a 2 persone</p>
+</div>
+</div>
+<!-- Toggle visual -->
+<div class="w-12 h-6 bg-green-500 rounded-full relative">
+<div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+</div>
+</div>
+<!-- Memorandum -->
+<div class="flex items-center gap-3 bg-white dark:bg-[#1A2633] p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+<div class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-300 p-2 rounded-lg">
+<span class="material-symbols-outlined">event</span>
+</div>
+<div class="flex-1">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium">Memorandum</p>
+<p class="text-[#111418] dark:text-white text-sm font-bold">Rinnovo il 15 Ottobre 2024</p>
+</div>
+</div>
+<!-- Note -->
+<div class="bg-white dark:bg-[#1A2633] p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-medium pb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">sticky_note_2</span>
+                    Nota
+                 </p>
+<p class="text-[#111418] dark:text-white text-sm leading-relaxed">
+                     L'abbonamento include 4 schermi contemporanei. Ricordarsi di aggiornare la carta di credito prepagata entro fine mese.
+                 </p>
+</div>
+<!-- Attachments -->
+<div class="mt-2">
+<p class="text-[#617589] dark:text-gray-400 text-xs font-semibold uppercase tracking-wider pb-3 ml-1">Allegati (2)</p>
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+<!-- File 1 -->
+<div class="flex-shrink-0 w-32 bg-white dark:bg-[#1A2633] rounded-xl border border-gray-200 dark:border-gray-700 p-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] bg-red-50 dark:bg-red-900/10 rounded-lg flex items-center justify-center text-red-500" data-alt="Icona file PDF">
+<span class="material-symbols-outlined text-3xl">picture_as_pdf</span>
+</div>
+<p class="text-xs font-medium text-[#111418] dark:text-white truncate">Contratto.pdf</p>
+</div>
+<!-- File 2 -->
+<div class="flex-shrink-0 w-32 bg-white dark:bg-[#1A2633] rounded-xl border border-gray-200 dark:border-gray-700 p-3 shadow-sm flex flex-col gap-2">
+<div class="w-full aspect-[4/3] bg-blue-50 dark:bg-blue-900/10 rounded-lg flex items-center justify-center text-blue-500" data-alt="Icona file immagine">
+<span class="material-symbols-outlined text-3xl">image</span>
+</div>
+<p class="text-xs font-medium text-[#111418] dark:text-white truncate">Schermata.png</p>
+</div>
+<!-- Add New -->
+<div class="flex-shrink-0 w-12 flex items-center justify-center">
+<button class="size-10 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 left-0 w-full bg-white dark:bg-[#1A2633] border-t border-gray-200 dark:border-gray-800 flex justify-around items-center py-3 z-50 pb-safe">
+<button class="flex flex-col items-center gap-1 group w-16">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary text-[26px]">grid_view</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 group w-16">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary text-[26px]">lock</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary">Vault</span>
+</button>
+<button class="relative -top-6 bg-primary text-white rounded-full size-14 shadow-lg shadow-primary/40 flex items-center justify-center border-4 border-white dark:border-[#101922]">
+<span class="material-symbols-outlined text-[30px]">add</span>
+</button>
+<button class="flex flex-col items-center gap-1 group w-16">
+<span class="material-symbols-outlined text-primary text-[26px]">description</span>
+<span class="text-[10px] font-medium text-primary">Dettagli</span>
+</button>
+<button class="flex flex-col items-center gap-1 group w-16">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary text-[26px]">settings</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary">Opzioni</span>
+</button>
+</div>
+</body></html>

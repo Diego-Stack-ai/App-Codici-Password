@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inserisci Codice Reset</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white antialiased">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top App Bar -->
+<div class="flex items-center px-4 py-4 justify-between sticky top-0 z-10 bg-background-light dark:bg-background-dark">
+<button class="text-gray-900 dark:text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h2 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Reset Password</h2>
+</div>
+<div class="flex flex-1 flex-col items-center justify-center w-full max-w-md mx-auto px-4 pb-8">
+<!-- Hero Icon -->
+<div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20">
+<span class="material-symbols-outlined text-primary text-5xl">mark_email_read</span>
+</div>
+<!-- Headline -->
+<h1 class="text-gray-900 dark:text-white tracking-tight text-[32px] font-extrabold leading-tight text-center pb-3">
+                Inserisci il Codice
+            </h1>
+<!-- Body Text -->
+<p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal pb-8 text-center px-4">
+                Abbiamo inviato un codice a 6 cifre alla tua email. Inseriscilo qui sotto per verificare la tua identità.
+            </p>
+<!-- Confirmation Code Inputs -->
+<div class="w-full flex justify-center mb-8">
+<fieldset class="flex gap-2 sm:gap-3">
+<input class="flex h-14 w-10 sm:w-12 text-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" inputmode="numeric" maxlength="1" pattern="\d*" placeholder="•" type="text"/>
+<input class="flex h-14 w-10 sm:w-12 text-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" inputmode="numeric" maxlength="1" pattern="\d*" placeholder="•" type="text"/>
+<input class="flex h-14 w-10 sm:w-12 text-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" inputmode="numeric" maxlength="1" pattern="\d*" placeholder="•" type="text"/>
+<input class="flex h-14 w-10 sm:w-12 text-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" inputmode="numeric" maxlength="1" pattern="\d*" placeholder="•" type="text"/>
+<input class="flex h-14 w-10 sm:w-12 text-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" inputmode="numeric" maxlength="1" pattern="\d*" placeholder="•" type="text"/>
+<input class="flex h-14 w-10 sm:w-12 text-center rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" inputmode="numeric" maxlength="1" pattern="\d*" placeholder="•" type="text"/>
+</fieldset>
+</div>
+<!-- Timer (Styled Compact) -->
+<div class="flex items-center gap-2 mb-8 bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-sm border border-gray-100 dark:border-gray-700">
+<span class="material-symbols-outlined text-primary text-xl">timer</span>
+<p class="text-gray-600 dark:text-gray-300 text-sm font-medium">Scade in <span class="text-primary font-bold">09:59</span></p>
+</div>
+<!-- Primary Action -->
+<button class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-blue-500/20 transition-all transform active:scale-[0.98] mb-6">
+                Verifica Codice
+            </button>
+<!-- Resend Link -->
+<div class="text-center">
+<p class="text-gray-500 dark:text-gray-400 text-sm">
+                    Non hai ricevuto il codice? 
+                    <a class="text-primary font-semibold hover:underline ml-1" href="#">Invia di nuovo</a>
+</p>
+</div>
+</div>
+<!-- Numeric Keypad Placeholder (Visual Representation for Design Completeness) -->
+<!-- In a real app, this is native. Here we show bottom spacing or a subtle hint of keyboard area if needed, 
+             but for a clean UI design output, usually leaving space at bottom is enough. 
+             I will add a generous bottom padding to simulate the phone feel. -->
+<div class="h-10 w-full"></div>
+</div>
+</body></html>

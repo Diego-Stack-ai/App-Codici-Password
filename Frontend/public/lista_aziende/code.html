@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lista Aziende</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1c2630",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                    boxShadow: {
+                        "soft": "0 4px 20px -2px rgba(0, 0, 0, 0.05)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display overflow-x-hidden antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-20 flex items-center justify-between bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-4 py-3 border-b border-gray-200/50 dark:border-gray-800/50">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-10 w-10 border-2 border-white dark:border-gray-700 shadow-sm cursor-pointer" data-alt="User profile avatar showing a smiling person" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCWgc29kx_JdLrw6RE308JPtytM7YsUEsDNYxAzfxCNWiVwxizdFLvJBOROoV0vVNDuJS3ErY5c6eUwE90Tlf87txo6VYM0b3I-Bi6LcH7iYwYwTUuUCwAxCPJQ8Arsldr9eBrFqNkzOu0ulUi5Q6xqweComT4LiK1yiw_Y_5fAYc3C41bnrrPtC4zNaN3jVn_MTS9d3Wa6N9WFZAPY9a0E9KCL9SDuxUp7_rPE68t2IgGPIEJT90e2ZZO6E9Di8DFmYOoLuDm8UQU");'>
+</div>
+<div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-background-dark"></div>
+</div>
+</div>
+<h1 class="text-lg font-bold tracking-tight text-center text-gray-900 dark:text-white">Le Mie Aziende</h1>
+<button class="flex items-center justify-center h-10 w-10 rounded-full bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300">
+<span class="material-symbols-outlined text-[26px]">notifications</span>
+</button>
+</header>
+<!-- Main Content Scroll Area -->
+<main class="flex-1 overflow-y-auto px-4 py-6 pb-28">
+<!-- Intro / Stats -->
+<div class="mb-6 flex items-center justify-between">
+<div>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">Totale Aziende</p>
+<h2 class="text-3xl font-bold text-gray-900 dark:text-white">3</h2>
+</div>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-primary">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="p-2 rounded-lg bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-primary">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+<!-- Company List -->
+<div class="flex flex-col gap-4">
+<!-- Card 1 -->
+<div class="group relative flex flex-col gap-4 rounded-2xl bg-card-light dark:bg-card-dark p-5 shadow-soft border border-gray-100 dark:border-gray-800 transition-all active:scale-[0.98]">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-[32px]">domain</span>
+</div>
+<div class="flex flex-col">
+<h3 class="text-lg font-bold leading-tight text-gray-900 dark:text-white">Tech Solutions S.r.l.</h3>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">P.IVA: IT12345678901</p>
+<div class="mt-1 flex items-center gap-1">
+<span class="block h-2 w-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Attiva</span>
+</div>
+</div>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-700/50"></div>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2 overflow-hidden">
+<div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDIF7iYH2FVYa4cq-kxhvS0z11BZZZyBuH0mKQh7Dys00IvpCpVQ7PULM3eJSBiB4dD5fJOufLyz7rKUhajMobnBtjsO8Z5otF_ZPLmh9hfHi9hNwfFSrZ89ceRzidDoSzCeZdLALusxdr0Dt48riKGway04igSNIzjiF0qH5l3BnoN0o_OiTOruM2sRVV1FB2LWXHrire7zKklCfHH1YvfIrJeCMAgmBI3MzTHF4dlWhfozjeLLruGOGcLB0J_SOrgZUHaqcp8yHA");'></div>
+<div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAsSAervAOc8O-JHPo8oocjbx1G-pwuSY_ebfhMHN2Mynj_iRAB42YvQvUfZ0LOKeZY-cLmYHYq8KCPhBu_n7PEEyFssz8ISCGJg8J0JDx4xYy5ivRSdRyBGl5zpyHATV2QS0xIYdl1rJPCr2-cuDtFwmwD3wNg_sXL67iiGwm7hFLr-uLXoCyIiK5zBuJae9hpgLw7hjqc34JSnirwE2bKFgXuua7VXhut5dRxpLRq82xFxhOnJYYo5fvjGz2J2enrS2urDwcET6k");'></div>
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 ring-2 ring-white dark:bg-gray-700 dark:ring-card-dark text-[10px] font-bold text-gray-500 dark:text-gray-300">+3</div>
+</div>
+<button class="flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">qr_code_2</span>
+<span class="hidden sm:inline">QR Code</span>
+</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative flex flex-col gap-4 rounded-2xl bg-card-light dark:bg-card-dark p-5 shadow-soft border border-gray-100 dark:border-gray-800 transition-all active:scale-[0.98]">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined text-[32px]">analytics</span>
+</div>
+<div class="flex flex-col">
+<h3 class="text-lg font-bold leading-tight text-gray-900 dark:text-white">Rossi Consulting</h3>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">P.IVA: IT98765432109</p>
+<div class="mt-1 flex items-center gap-1">
+<span class="block h-2 w-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Attiva</span>
+</div>
+</div>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-700/50"></div>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2 overflow-hidden">
+<div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBhSj8FudIvZ86cGtKLLBLUQ7UeqZLWezOztWoNwmYYzj27ie-z1fGuqC1ePFgMt6waWV4_t3EE4H3xx2FNg8FBKHeYNgbuf3TOjU5rtxZkVvEAdxKcfNDSJdOUF2iTpGw9so11iPHoMy_o2cZ5MNPuhbrGmW6_xa5NZskX16IVXpBUz8dSuGU6yprgWgIALjix5_aGCqTsVJcxVURZC7idHWyGWU4H1sM8JBEbwb7sDFH_ZQmnXij7tVtjauF0CUweBk4PfwwaRQs");'></div>
+</div>
+<button class="flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">qr_code_2</span>
+</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative flex flex-col gap-4 rounded-2xl bg-card-light dark:bg-card-dark p-5 shadow-soft border border-gray-100 dark:border-gray-800 transition-all active:scale-[0.98]">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined text-[32px]">bolt</span>
+</div>
+<div class="flex flex-col">
+<h3 class="text-lg font-bold leading-tight text-gray-900 dark:text-white">Green Energy SpA</h3>
+<p class="text-sm font-medium text-gray-500 dark:text-gray-400">P.IVA: IT11223344556</p>
+<div class="mt-1 flex items-center gap-1">
+<span class="block h-2 w-2 rounded-full bg-amber-500"></span>
+<span class="text-xs font-medium text-amber-600 dark:text-amber-400">In attesa</span>
+</div>
+</div>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-700/50"></div>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2 overflow-hidden">
+<div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB0Tj7DZMsknQyPcE2bovgccy7ozgNXURIeIRMGCS7L7cfBmikGUpSgFG2NaiJWMt8RjO84-a1v-H7y-dH5TkNNbextBJ8vZgcMzJSIFixpfgwyDKXL27goKTsFoc6OqLZPdYa41mtgq3iKp0cpiO_Nr8Dyb6CpdQetVUtzZv9nbhky5j4kn-BS1fciJJq4L0GRxEb6XeYe_4oJo-JaouQ0e8RNAxdk-jGvSZ_mr7yNmJ1sx86XPDqnuqb4Lr2wdpxNM2AWhiYm-7c");'></div>
+<div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBubb4z_N0HczIn0kWRCP5uJxMCgTUWP1hQ-5avJnuK9okMTSjdrqMoonUuNSO636J6ma__5KwSYYWX2NB3Qx3ANV4FSh8artOmV7EpwPbTNZZ5L10SoX3WFw1bd6VoxmBTn0_3me0RMSwjsOXPZ3Pp7IEf5NXrPLqYg1WRlIJjfxOhNL4IRyI7Jufz91aejVH3RRsNojsTJKeNa8JAGCUN4xbUqmjywAetLgQAiqi28HKua4-HQlhtyRlfP4WhmZ-JSzTSEEIu4oY");'></div>
+</div>
+<button class="flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">qr_code_2</span>
+</button>
+</div>
+</div>
+<!-- Add Button Area -->
+<div class="mt-4">
+<button class="group flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 bg-primary text-white gap-2 shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95">
+<span class="material-symbols-outlined text-[24px] group-hover:rotate-90 transition-transform">add</span>
+<span class="text-base font-bold tracking-wide">Aggiungi nuova Azienda</span>
+</button>
+<p class="text-center text-xs text-gray-400 mt-3 dark:text-gray-500">
+<span class="material-symbols-outlined align-middle text-[14px] mr-1">lock</span>
+                        I tuoi dati sono protetti e crittografati
+                    </p>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-safe">
+<div class="flex items-center justify-around h-16 max-w-md mx-auto">
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-[26px] filled">domain</span>
+<span class="text-[10px] font-medium">Aziende</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="#">
+<span class="material-symbols-outlined text-[26px]">lock</span>
+<span class="text-[10px] font-medium">Password</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="#">
+<span class="material-symbols-outlined text-[26px]">description</span>
+<span class="text-[10px] font-medium">Documenti</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="#">
+<span class="material-symbols-outlined text-[26px]">event</span>
+<span class="text-[10px] font-medium">Scadenze</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="#">
+<span class="material-symbols-outlined text-[26px]">person</span>
+<span class="text-[10px] font-medium">Profilo</span>
+</a>
+</div>
+</nav>
+<!-- Safe area padding for iPhone home indicator -->
+<div class="h-6 w-full bg-white dark:bg-card-dark"></div>
+</div>
+</body></html>

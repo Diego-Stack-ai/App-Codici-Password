@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Home Page</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display overflow-x-hidden">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<!-- TopAppBar -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="flex size-12 shrink-0 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Portrait of Alessandro, the user" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6qGRWVGh7-9kpTPR_RDqgxvJR9r6yvKCq4YSA_i8PVGdMQTvakXakQiQxu55kvrQ2BLNDf-u8VWUNtmyKXGU14Hr48u3o63eE7mTxHB5O0nUO3C-lpbUQHRqrPsAZTtx1z6NvPam0avjp7WbVt8OOI4Pwv2TQymBI-0CT9Y207xWgNWQVz4OG4-Q1nV3Tsacv84Ngu3vjTjPxvfVMMXdRpaZxEqW6tbI9tHZmIV2iprwyRJrpXYZE1wT3HP-zfdMSVoKSV1mLwrE");'></div>
+</div>
+<div class="flex flex-1 flex-col px-4">
+<p class="text-[#9dabb9] text-xs font-medium leading-normal">Buon pomeriggio,</p>
+<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Alessandro</h2>
+</div>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full size-10 bg-transparent text-[#111418] dark:text-white hover:bg-[#283039] transition-colors min-w-0 p-0">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+</button>
+</div>
+</div>
+<!-- ProfileStats -->
+<div class="flex flex-wrap gap-3 px-4 py-3">
+<div class="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-[#1c2127] p-4 items-start shadow-sm">
+<div class="flex items-center justify-between w-full">
+<p class="text-[#111418] dark:text-white tracking-light text-2xl font-bold leading-tight">2</p>
+<span class="material-symbols-outlined text-orange-500 text-[20px]">warning</span>
+</div>
+<div class="flex items-center gap-2">
+<p class="text-[#637588] dark:text-[#9dabb9] text-sm font-medium leading-normal">Scadenze imminenti</p>
+</div>
+</div>
+<div class="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-[#1c2127] p-4 items-start shadow-sm">
+<div class="flex items-center justify-between w-full">
+<p class="text-[#111418] dark:text-white tracking-light text-2xl font-bold leading-tight">98%</p>
+<span class="material-symbols-outlined text-primary text-[20px]">shield</span>
+</div>
+<div class="flex items-center gap-2">
+<p class="text-[#637588] dark:text-[#9dabb9] text-sm font-medium leading-normal">Sicurezza Vault</p>
+</div>
+</div>
+</div>
+<!-- Main Action Buttons (Modified Grid) -->
+<div class="flex flex-col gap-4 p-4">
+<div class="grid grid-cols-2 gap-4">
+<!-- Privato Button -->
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[150px]">lock</span>
+</div>
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm z-10">
+<span class="material-symbols-outlined text-[28px]">person</span>
+</div>
+<div class="text-left z-10">
+<h3 class="text-xl font-bold mb-1">Privato</h3>
+<p class="text-blue-100 text-sm font-medium">Cassaforte Personale</p>
+</div>
+</button>
+<!-- Azienda Button -->
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[150px]">apartment</span>
+</div>
+<div class="flex items-center justify-center w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm z-10">
+<span class="material-symbols-outlined text-[28px]">domain</span>
+</div>
+<div class="text-left z-10">
+<h3 class="text-xl font-bold mb-1">Azienda</h3>
+<p class="text-green-100 text-sm font-medium">Gestione Risorse</p>
+</div>
+</button>
+</div>
+<!-- Scadenze Button -->
+<button class="group relative flex flex-row items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-lg w-full overflow-hidden">
+<div class="absolute right-[-10px] bottom-[-40px] opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[180px]">calendar_month</span>
+</div>
+<div class="flex flex-col items-start gap-1 z-10">
+<h3 class="text-2xl font-bold">Scadenze</h3>
+<p class="text-orange-100 text-sm font-medium">Controlla i prossimi impegni</p>
+</div>
+<div class="flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm z-10">
+<span class="material-symbols-outlined text-[32px]">event_upcoming</span>
+</div>
+</button>
+</div>
+<!-- Spacer for visual separation -->
+<div class="px-4 pt-2 pb-2">
+<h3 class="text-[#111418] dark:text-white text-base font-bold leading-tight">Prossima Scadenza</h3>
+</div>
+<!-- Card (Next Deadline) -->
+<div class="px-4 pb-24">
+<div class="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-[#1c2127] p-4 shadow-[0_0_4px_rgba(0,0,0,0.05)] border border-[#dce0e5] dark:border-[#283039]">
+<div class="flex flex-[2_2_0px] flex-col gap-3 justify-center">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 mb-1">
+<div class="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold uppercase tracking-wide">Urgente</div>
+</div>
+<p class="text-[#111418] dark:text-white text-lg font-bold leading-tight">Assicurazione Auto</p>
+<p class="text-[#637588] dark:text-[#9dabb9] text-sm font-normal leading-normal">Scade tra 2 giorni</p>
+</div>
+<button class="flex items-center gap-1 text-primary text-sm font-bold mt-1 group w-fit">
+<span>Dettagli</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<div class="w-24 bg-center bg-no-repeat bg-cover rounded-lg shrink-0 self-stretch" data-alt="Icon representing car insurance" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBTZJXbJHIdReao5x_RumDalBMOoGJYaF-rj8W31rSPj3BgUmBGfn3bHTxElx6aidMJxG7V4cNhV_L026_yDqIqqdeStlX-ntf4lTUCvBtWpCw8TiAIFW5Fi8sz3zNIeLmNSOkfHuQp7NbbStUZlev4t3WLx_5_95FFDYdI8dK5NK5kQTu-3mJKl8-O4rymxKpDfE5p6hI-S1GlYOgqcLpLG8hxPYh1NH5qRZHymUblVkadBTM7_E56iuwkPC_IR7IsjJf-V1Z88pI");'></div>
+</div>
+</div>
+<!-- BottomNavBar -->
+<div class="fixed bottom-0 left-0 right-0 z-50">
+<!-- Glass effect overlay -->
+<div class="absolute inset-0 bg-background-light/90 dark:bg-[#1c2127]/90 backdrop-blur-md border-t border-[#dce0e5] dark:border-[#283039]"></div>
+<div class="relative flex justify-between items-center px-4 pb-safe pt-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] filled">home</span>
+<p class="text-xs font-bold leading-normal tracking-[0.015em]">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-[#637588] dark:text-[#9dabb9] p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">search</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Cerca</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-[#637588] dark:text-[#9dabb9] p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<div class="rounded-full bg-primary/10 dark:bg-primary/20 p-1 mb-[-4px] mt-[-4px]">
+<span class="material-symbols-outlined text-[28px] text-primary">add_circle</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em] text-primary">Aggiungi</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-[#637588] dark:text-[#9dabb9] p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Opzioni</p>
+</a>
+</div>
+<!-- Safe area spacing for iOS home indicator -->
+<div class="h-[env(safe-area-inset-bottom)] bg-transparent"></div>
+</div>
+</div>
+<style>
+        .filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>

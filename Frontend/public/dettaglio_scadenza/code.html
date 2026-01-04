@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dettaglio Scadenza</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f0f2f5", 
+                        "background-dark": "#101922",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e293b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white pb-24">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center justify-between transition-colors">
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="text-lg font-bold text-center flex-1 pr-10">Dettaglio Scadenza</h1>
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<main class="p-4 flex flex-col gap-6 max-w-md mx-auto w-full">
+<!-- Hero Card: Deadline Summary -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-5 shadow-sm border border-white/50 dark:border-gray-700 flex flex-col gap-4 relative overflow-hidden group">
+<!-- Decorative gradient blur -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all"></div>
+<div class="flex justify-between items-start z-10">
+<div class="flex flex-col">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-wider mb-2 w-fit">
+<span class="size-2 rounded-full bg-red-500 animate-pulse"></span>
+                        In Scadenza
+                    </span>
+<h2 class="text-2xl font-extrabold text-[#111418] dark:text-white leading-tight">Bollo Auto</h2>
+<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Scadenza annuale tassa di proprietà</p>
+</div>
+<div class="size-16 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 shadow-inner overflow-hidden">
+<!-- Vehicle Image -->
+<img alt="Red sports car front view details" class="w-full h-full object-cover" data-alt="Red sports car front view details" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOmJc_EEKYk1ZMFibTJWSj2GEm3ZF4fLECtyWwN6OXEjGOEFhugeP73qY3ulXvXL_3VBLlSFKqk_orkOyH0g_LX4u43FxEIwIJZKrzUNmmBumuvBEJOEfLpvuVElChyw2f8Jdj0eeSwyTsai_VIvwmLp2D1XUtPxHntw5ZnIf-50jnTW5zIs78jwlzSrPta7qATIzrAZQ8pR3_3saYBws3xWv6iMEvZJPUMwlyww7V7Cy-H8aW1r2CXHqPXgmO_fwBDNOcAzSRt9Y"/>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2 z-10">
+<p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Data Scadenza</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-black text-primary tracking-tight">15 Ott</span>
+<span class="text-xl font-bold text-gray-400 dark:text-gray-500">2024</span>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="grid grid-cols-2 gap-3 mt-2 z-10">
+<button class="flex items-center justify-center gap-2 bg-primary text-white py-2.5 px-4 rounded-xl font-semibold text-sm shadow-lg shadow-primary/30 hover:bg-blue-600 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+                    Paga Ora
+                </button>
+<button class="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 text-[#111418] dark:text-white py-2.5 px-4 rounded-xl font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">snooze</span>
+                    Posticipa
+                </button>
+</div>
+</div>
+<!-- Section: Veicolo & Intestatario -->
+<div class="flex flex-col gap-3">
+<h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">Dettagli Veicolo</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-white/50 dark:border-gray-700 overflow-hidden">
+<!-- Row 1: Intestatario -->
+<div class="flex items-center gap-4 p-4 border-b border-gray-100 dark:border-gray-800">
+<div class="size-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div class="flex flex-col flex-1">
+<span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Intestatario</span>
+<span class="text-base font-semibold text-[#111418] dark:text-white">Mario Rossi</span>
+</div>
+</div>
+<!-- Row 2: Modello -->
+<div class="flex items-center gap-4 p-4 border-b border-gray-100 dark:border-gray-800">
+<div class="size-10 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+<span class="material-symbols-outlined">directions_car</span>
+</div>
+<div class="flex flex-col flex-1">
+<span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Modello Veicolo</span>
+<span class="text-base font-semibold text-[#111418] dark:text-white">Fiat Panda Cross</span>
+</div>
+</div>
+<!-- Row 3: Targa -->
+<div class="flex items-center gap-4 p-4">
+<div class="size-10 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0">
+<span class="material-symbols-outlined">pin</span>
+</div>
+<div class="flex flex-col flex-1">
+<span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Numero Targa</span>
+<div class="flex items-center justify-between mt-1">
+<!-- Visual License Plate Badge -->
+<div class="flex bg-white dark:bg-gray-200 border-2 border-gray-800 rounded px-1 w-fit h-8 items-center shadow-sm">
+<div class="w-3 h-full bg-blue-700 rounded-sm mr-2 flex flex-col items-center justify-center gap-0.5">
+<div class="w-1.5 h-1.5 rounded-full border border-white flex items-center justify-center text-[4px] text-white">★</div>
+</div>
+<span class="font-mono font-bold text-gray-900 text-sm tracking-widest">AB 123 CD</span>
+<div class="w-3 h-full bg-blue-700 rounded-sm ml-2 flex flex-col items-center justify-end pb-0.5">
+<span class="text-[5px] text-white font-bold leading-none">24</span>
+</div>
+</div>
+<button class="text-primary text-xs font-semibold">Copia</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Comunicazione -->
+<div class="flex flex-col gap-3">
+<h3 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">Notifiche &amp; Contatti</h3>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-white/50 dark:border-gray-700 p-4 flex flex-col gap-4">
+<!-- Subject Header -->
+<div class="flex gap-3 items-start">
+<div class="mt-1 size-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400 shrink-0">
+<span class="material-symbols-outlined text-lg">mail</span>
+</div>
+<div class="flex-1">
+<span class="text-xs text-gray-500 dark:text-gray-400 font-medium block mb-0.5">Oggetto E-mail</span>
+<p class="text-base font-bold text-[#111418] dark:text-white leading-snug">Avviso Scadenza Bollo Auto AB123CD</p>
+</div>
+</div>
+<!-- Email Addresses -->
+<div class="grid grid-cols-1 gap-3 pl-11">
+<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+<div class="flex flex-col">
+<span class="text-[10px] text-gray-400 uppercase font-bold">Principale</span>
+<span class="text-sm text-gray-800 dark:text-gray-200 font-medium truncate">mario.rossi@email.it</span>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-lg">send</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+<div class="flex flex-col">
+<span class="text-[10px] text-gray-400 uppercase font-bold">Secondaria</span>
+<span class="text-sm text-gray-800 dark:text-gray-200 font-medium truncate">lavoro@azienda.com</span>
+</div>
+<span class="material-symbols-outlined text-gray-400 text-lg">send</span>
+</div>
+</div>
+<!-- Email Content Preview -->
+<div class="pl-11">
+<span class="text-xs text-gray-500 dark:text-gray-400 font-medium block mb-2">Testo Messaggio</span>
+<div class="bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-xl rounded-tl-none border border-blue-100 dark:border-blue-900/30">
+<p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">
+                            Gentile Cliente, le ricordiamo che il bollo della sua vettura targata AB123CD scadrà il 15 Ottobre...
+                        </p>
+<button class="mt-2 text-primary text-xs font-bold flex items-center gap-1 hover:underline">
+                            Leggi tutto
+                            <span class="material-symbols-outlined text-xs">open_in_new</span>
+</button>
+</div>
+</div>
+<!-- Last Notice Footer -->
+<div class="flex items-center gap-2 mt-2 pt-3 border-t border-gray-100 dark:border-gray-800 pl-2">
+<span class="material-symbols-outlined text-orange-500 text-sm">history</span>
+<p class="text-xs text-gray-500">Ultimo avviso inviato: <span class="font-semibold text-gray-700 dark:text-gray-300">Ieri, 14:30</span></p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-surface-light/90 dark:bg-surface-dark/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] z-50">
+<div class="flex justify-between items-center max-w-md mx-auto h-16">
+<!-- Home -->
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<!-- Vault/Secure -->
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">lock</span>
+<span class="text-[10px] font-medium">Cassaforte</span>
+</button>
+<!-- Deadlines (Active) -->
+<button class="relative flex flex-col items-center gap-1 text-primary transition-colors group -mt-4">
+<div class="size-14 bg-primary rounded-full shadow-lg shadow-primary/40 flex items-center justify-center text-white mb-1 group-hover:scale-105 transition-transform border-4 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined text-2xl">event</span>
+</div>
+<span class="text-[10px] font-bold">Scadenze</span>
+</button>
+<!-- Documents -->
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">folder_open</span>
+<span class="text-[10px] font-medium">Documenti</span>
+</button>
+<!-- Settings -->
+<button class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">settings</span>
+<span class="text-[10px] font-medium">Opzioni</span>
+</button>
+</div>
+<!-- Safe area spacing for iOS -->
+<div class="h-5 w-full"></div>
+</div>
+</body></html>

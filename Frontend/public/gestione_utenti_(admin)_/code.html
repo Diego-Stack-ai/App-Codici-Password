@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestione Utenti Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1A2632",
+                        "input-light": "#f0f2f4",
+                        "input-dark": "#23303e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for horizontal chips */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white transition-colors duration-200">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark">
+<!-- Top App Bar -->
+<header class="flex items-center p-4 pb-2 justify-between bg-background-light dark:bg-background-dark sticky top-0 z-10">
+<button class="text-[#111418] dark:text-white flex size-12 shrink-0 items-center justify-start hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-3xl">arrow_back</span>
+</button>
+<h2 class="text-[#111418] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
+                Gestione Utenti
+            </h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex items-center justify-center rounded-full size-10 bg-primary text-white hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</header>
+<!-- Search Bar -->
+<div class="px-4 py-3">
+<label class="flex flex-col h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-2xl h-full shadow-sm">
+<div class="text-[#617589] dark:text-gray-400 flex border-none bg-card-light dark:bg-card-dark items-center justify-center pl-4 rounded-l-2xl border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-2xl text-[#111418] dark:text-white focus:outline-0 focus:ring-0 border-none bg-card-light dark:bg-card-dark focus:border-none h-full placeholder:text-[#617589] dark:placeholder:text-gray-500 px-4 pl-2 text-base font-normal leading-normal" placeholder="Cerca nome, email o ruolo..." value=""/>
+</div>
+</label>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-3 px-4 py-2 overflow-x-auto hide-scrollbar">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary pl-5 pr-5 shadow-md shadow-primary/20 transition-transform active:scale-95">
+<p class="text-white text-sm font-semibold leading-normal">Tutti</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark border border-gray-100 dark:border-gray-700 pl-5 pr-5 shadow-sm transition-transform active:scale-95">
+<p class="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal">Admin</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark border border-gray-100 dark:border-gray-700 pl-5 pr-5 shadow-sm transition-transform active:scale-95">
+<p class="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal">Attivi</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark border border-gray-100 dark:border-gray-700 pl-5 pr-5 shadow-sm transition-transform active:scale-95">
+<p class="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal">In attesa</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-card-dark border border-gray-100 dark:border-gray-700 pl-5 pr-5 shadow-sm transition-transform active:scale-95">
+<p class="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal">Bloccati</p>
+</button>
+</div>
+<!-- Users List -->
+<div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 pb-20">
+<!-- User Card 1: Admin & Active -->
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 shadow-sm border border-transparent dark:border-gray-800 flex flex-col gap-3 group transition-all hover:shadow-md">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 ring-2 ring-offset-2 ring-offset-background-light dark:ring-offset-background-dark ring-primary" data-alt="Portrait of a smiling professional man in a suit" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCBgQ_55IK33xMu6J7cLPjGHRW5iUpEhxm4JIik9GGsYgvjhiL53XvNxAxxpuwZBrByaNLHxRjxB_r_Pk7_wJgbWRqepWo2mMgTGGmtFZYBM5OthWfYrOvm188TzfyvVzl3NL0uds5DWdy5m4ZyswVmXyro6PQFwCzu6U9EQjAm8lzoTehePI_IHENPhfcqaED2chfScVw9GrOYtG_ys0zzbiknhQyLWSEhLR43M2njKysbiPvsYd-Ici2rK60LtNIJ9hkGJ2oBsa8");'></div>
+<div class="absolute bottom-0 right-0 size-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-card-dark"></div>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<p class="text-[#111418] dark:text-white text-base font-bold leading-tight">Mario Rossi</p>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide">Admin</span>
+</div>
+<p class="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">mario.rossi@azienda.com</p>
+</div>
+</div>
+<button class="text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<span class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                             Attivo
+                        </span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center size-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">vpn_key</span>
+</button>
+<button class="flex items-center justify-center size-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- User Card 2: User & Active -->
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 shadow-sm border border-transparent dark:border-gray-800 flex flex-col gap-3 group transition-all hover:shadow-md">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14" data-alt="Portrait of a young woman with glasses" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD1Lf4ks_-dTWUZaFlba9ewtET6t15qwgaP38eRCN6w5OU1ik6FIR8jaltsWzq2y7B7rUm9eBuPivPhxItaek2xONlc9wXjs6-OWUHz1_I00muw-ZrtX4FvTEH_GWJFoX7rohHtTd_cqF298FeW46SfxU4VX12vrqvpuzPXZwNyCV_NH7uXXyJifuKBsNJ-bu07MPS-WdVitEV2yCuzLt298KvMC4EtA2wIZmkQ5LIX0ibQZx2tIhBS88IKI5dV1z2HYWaVD665wcM");'></div>
+<div class="absolute bottom-0 right-0 size-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-card-dark"></div>
+</div>
+<div class="flex flex-col">
+<p class="text-[#111418] dark:text-white text-base font-bold leading-tight">Luisa Verdi</p>
+<p class="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">luisa.verdi@design.it</p>
+</div>
+</div>
+<button class="text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<span class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                             Attivo
+                        </span>
+<span class="inline-flex items-center gap-1 rounded-lg bg-purple-50 dark:bg-purple-900/20 px-2 py-1 text-xs font-semibold text-purple-700 dark:text-purple-400">
+                             Design Team
+                        </span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center size-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">vpn_key</span>
+</button>
+<button class="flex items-center justify-center size-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- User Card 3: Pending -->
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 shadow-sm border border-transparent dark:border-gray-800 flex flex-col gap-3 group transition-all hover:shadow-md">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="flex items-center justify-center h-14 w-14 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xl font-bold">
+                                GB
+                            </div>
+<div class="absolute bottom-0 right-0 size-3.5 bg-amber-400 rounded-full border-2 border-white dark:border-card-dark"></div>
+</div>
+<div class="flex flex-col">
+<p class="text-[#111418] dark:text-white text-base font-bold leading-tight">Giovanni Bianchi</p>
+<p class="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">giovanni.bianchi@temp.com</p>
+</div>
+</div>
+<button class="text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<span class="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 px-2 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                             In Attesa
+                        </span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center h-9 px-3 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all shadow-sm text-sm font-semibold">
+                            Approva
+                        </button>
+<button class="flex items-center justify-center size-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- User Card 4: Blocked -->
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 shadow-sm border border-transparent dark:border-gray-800 flex flex-col gap-3 group transition-all hover:shadow-md opacity-80 hover:opacity-100">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="relative grayscale">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14" data-alt="Portrait of a serious man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAn03PVm3V7aB-GqWb_frWlpf1yxCOZxzCGdFbkT6JHeRg01y5im0lfS3VZePGGuyiqa2Gf2C1SDzNNsDZgukfES0zRBuRHObsNB4bKBGKXd_Y1cR1nz4jSc4eTl7UZvLDA8EvcUEaTCi7xaTmcql2xUZGFWoLlE6I-dCx6uQ4P-AFHvDCZ0tL4ZACGy31Tm6KxMnKhoiGAX5pu4RnEgEwIywq4z8FSzjIlScWa75q8GtLjtBiE_h3Jo-CDq5YduuoErgA1ReEG6t0");'></div>
+<div class="absolute bottom-0 right-0 size-3.5 bg-rose-500 rounded-full border-2 border-white dark:border-card-dark flex items-center justify-center">
+<span class="material-symbols-outlined text-[8px] text-white font-bold">close</span>
+</div>
+</div>
+<div class="flex flex-col">
+<p class="text-[#111418] dark:text-white text-base font-bold leading-tight line-through decoration-gray-400">Marco Neri</p>
+<p class="text-[#617589] dark:text-gray-400 text-sm font-normal leading-normal">marco.neri@ex-emp.com</p>
+</div>
+</div>
+<button class="text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="h-px w-full bg-gray-100 dark:bg-gray-700"></div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<span class="inline-flex items-center gap-1 rounded-lg bg-rose-50 dark:bg-rose-900/20 px-2 py-1 text-xs font-semibold text-rose-700 dark:text-rose-400">
+                             Bloccato
+                        </span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center size-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white transition-all shadow-sm group-hover:bg-white dark:group-hover:bg-gray-700">
+<span class="material-symbols-outlined text-[20px]">lock_open</span>
+</button>
+<button class="flex items-center justify-center size-9 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

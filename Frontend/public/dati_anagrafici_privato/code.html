@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dati Anagrafici Privato</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "primary-dark": "#0b5dc0",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1a2632",
+                        "text-main": "#111418",
+                        "text-main-dark": "#ffffff",
+                        "text-secondary": "#617589",
+                        "text-secondary-dark": "#9ba8b8",
+                        "border-light": "#dbe0e6",
+                        "border-dark": "#2a3b4d",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for cleaner look on mobile */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        
+        /* Smooth transition for details expansion */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Animation for detail opening */
+        details[open] summary ~ * {
+            animation: sweep .3s ease-in-out;
+        }
+
+        @keyframes sweep {
+            0%    {opacity: 0; transform: translateY(-10px)}
+            100%  {opacity: 1; transform: translateY(0)}
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-text-main dark:text-text-main-dark transition-colors duration-200">
+<!-- Mobile Container -->
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-xl">
+<!-- Top App Bar -->
+<header class="flex items-center px-4 pt-6 pb-2 justify-between bg-background-light dark:bg-background-dark sticky top-0 z-20">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-full active:bg-black/5 dark:active:bg-white/10 cursor-pointer transition-colors text-text-main dark:text-text-main-dark">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center text-text-main dark:text-text-main-dark">
+                Dati Anagrafici
+            </h2>
+<div class="flex w-10 items-center justify-end">
+<button class="text-primary font-bold text-sm leading-normal tracking-[0.015em] shrink-0 hover:text-primary-dark transition-colors">
+                    Modifica
+                </button>
+</div>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto pb-24">
+<!-- Profile Header -->
+<div class="flex p-4 flex-col items-center gap-6 mt-2">
+<div class="relative group">
+<!-- Avatar with gradient border for vibrant look -->
+<div class="absolute -inset-1 bg-gradient-to-br from-primary via-purple-500 to-pink-500 rounded-full opacity-70 blur-sm group-hover:opacity-100 transition duration-500"></div>
+<div class="relative bg-center bg-no-repeat bg-cover rounded-full size-32 border-4 border-background-light dark:border-background-dark shadow-sm" data-alt="Portrait of a young smiling man, casual business look" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAfwououjHV7nF3c8_xN-H8_QfrTC8Rg9elWhtnovKqOfeKEAmPUt4h8svK3ChO__elo7xwxTR_t2WrYW1_u3Sn2Ekzva6sJo6nEwddDtLSsihUXf-XFsL8zW5Lli-CN-30HE7j4gm1YVoS2L5ugVUb9UCsGCx-2FLh0vAUjpfZk5mTUNNs0lwy7WrkrNwowqQn5i0HHQkDPx4RPhSLA-g6NjdYl8KZDVeqwSLcYo431IRtMn6GJ7-Fqtp4tR0x2QG90MQob02bTdY");'>
+</div>
+<div class="absolute bottom-1 right-1 bg-green-500 border-4 border-background-light dark:border-background-dark size-6 rounded-full"></div>
+</div>
+<div class="flex flex-col items-center justify-center">
+<h1 class="text-2xl font-bold leading-tight tracking-tight text-center text-text-main dark:text-text-main-dark">Mario Rossi</h1>
+<span class="inline-flex items-center gap-1 mt-1 px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]">verified_user</span>
+                        Utente Privato
+                    </span>
+</div>
+</div>
+<!-- Action Panel: QR Code -->
+<div class="px-4 mb-6">
+<div class="flex flex-col items-center justify-between gap-4 rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-5 shadow-sm relative overflow-hidden">
+<!-- Decoration -->
+<div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl"></div>
+<div class="flex flex-row items-center w-full justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">qr_code_2</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<p class="text-text-main dark:text-text-main-dark text-base font-bold leading-tight">Il tuo QR Code</p>
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium leading-normal">Condividi rapidamente i tuoi dati</p>
+</div>
+</div>
+<button class="flex items-center justify-center rounded-xl h-9 px-4 bg-primary hover:bg-primary-dark text-white text-sm font-medium transition-all shadow-md shadow-primary/20">
+                            Mostra
+                        </button>
+</div>
+</div>
+</div>
+<!-- Collapsible Details Section -->
+<!-- Using HTML <details> for interaction without custom JS -->
+<details class="group px-4 mb-6" open="">
+<summary class="flex w-full cursor-pointer list-none items-center justify-center gap-2 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark py-3 text-sm font-bold text-text-main dark:text-text-main-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors mb-4 focus:outline-none focus:ring-2 focus:ring-primary/50">
+<span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">expand_more</span>
+<span class="group-open:hidden">Mostra tutti i dettagli</span>
+<span class="hidden group-open:inline">Nascondi dettagli</span>
+</summary>
+<!-- Data List Card -->
+<div class="rounded-2xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark overflow-hidden shadow-sm">
+<!-- Item: Cellulare -->
+<div class="flex items-center gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<div class="size-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined">smartphone</span>
+</div>
+<div class="flex-1 flex flex-col">
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium uppercase tracking-wider">Cellulare</p>
+<p class="text-text-main dark:text-text-main-dark text-sm font-semibold mt-0.5">+39 340 1234567</p>
+</div>
+<button class="text-text-secondary dark:text-text-secondary-dark hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+</div>
+<!-- Item: Nascita -->
+<div class="flex items-center gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<div class="size-10 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-500 shrink-0">
+<span class="material-symbols-outlined">cake</span>
+</div>
+<div class="flex-1 flex flex-col">
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium uppercase tracking-wider">Nascita</p>
+<p class="text-text-main dark:text-text-main-dark text-sm font-semibold mt-0.5">Roma (RM), 15/05/1990</p>
+</div>
+</div>
+<!-- Item: Residenza -->
+<div class="flex items-center gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<div class="size-10 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-500 shrink-0">
+<span class="material-symbols-outlined">home</span>
+</div>
+<div class="flex-1 flex flex-col">
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium uppercase tracking-wider">Residenza</p>
+<p class="text-text-main dark:text-text-main-dark text-sm font-semibold mt-0.5">Via dei Colori 12, Milano</p>
+</div>
+<button class="text-text-secondary dark:text-text-secondary-dark hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">map</span>
+</button>
+</div>
+<!-- Item: CAP -->
+<div class="flex items-center gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<div class="size-10 rounded-full bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center text-teal-500 shrink-0">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div class="flex-1 flex flex-col">
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium uppercase tracking-wider">CAP</p>
+<p class="text-text-main dark:text-text-main-dark text-sm font-semibold mt-0.5">20100</p>
+</div>
+</div>
+<!-- Item: Codice Fiscale -->
+<div class="flex items-center gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<div class="size-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 shrink-0">
+<span class="material-symbols-outlined">badge</span>
+</div>
+<div class="flex-1 flex flex-col">
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium uppercase tracking-wider">Codice Fiscale</p>
+<p class="text-text-main dark:text-text-main-dark text-sm font-semibold mt-0.5 font-mono">RSSMRA90E15H501Z</p>
+</div>
+<button class="text-text-secondary dark:text-text-secondary-dark hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+</div>
+<!-- Item: Telefono -->
+<div class="flex items-center gap-4 p-4 border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<div class="size-10 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-500 shrink-0">
+<span class="material-symbols-outlined">call</span>
+</div>
+<div class="flex-1 flex flex-col">
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium uppercase tracking-wider">Telefono Fisso</p>
+<p class="text-text-main dark:text-text-main-dark text-sm font-semibold mt-0.5">02 12345678</p>
+</div>
+</div>
+<!-- Item: Note -->
+<div class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<div class="size-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-300 shrink-0">
+<span class="material-symbols-outlined">sticky_note_2</span>
+</div>
+<div class="flex-1 flex flex-col">
+<p class="text-text-secondary dark:text-text-secondary-dark text-xs font-medium uppercase tracking-wider">Note</p>
+<p class="text-text-main dark:text-text-main-dark text-sm font-normal mt-0.5 italic">"Contattare solo ore pasti"</p>
+</div>
+</div>
+</div>
+</details>
+<div class="h-6"></div>
+</main>
+<!-- Bottom Navigation Bar (iOS Style) -->
+<!-- Added backdrop blur for glassmorphism effect typical in iOS -->
+<nav class="absolute bottom-0 w-full bg-white/90 dark:bg-card-dark/90 backdrop-blur-md border-t border-border-light dark:border-border-dark pb-6 pt-2 z-50">
+<div class="grid grid-cols-4 gap-1 px-2">
+<!-- Nav Item: Home -->
+<button class="group flex flex-col items-center justify-center p-2 text-text-secondary dark:text-text-secondary-dark hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[26px] mb-1 group-hover:scale-110 transition-transform">grid_view</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<!-- Nav Item: Passwords -->
+<button class="group flex flex-col items-center justify-center p-2 text-text-secondary dark:text-text-secondary-dark hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[26px] mb-1 group-hover:scale-110 transition-transform">vpn_key</span>
+<span class="text-[10px] font-medium">Password</span>
+</button>
+<!-- Nav Item: Documents -->
+<button class="group flex flex-col items-center justify-center p-2 text-text-secondary dark:text-text-secondary-dark hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[26px] mb-1 group-hover:scale-110 transition-transform">folder_open</span>
+<span class="text-[10px] font-medium">Documenti</span>
+</button>
+<!-- Nav Item: Profile (Active) -->
+<button class="flex flex-col items-center justify-center p-2 text-primary">
+<span class="material-symbols-outlined text-[26px] mb-1 fill-current font-variation-settings-fill">person</span>
+<span class="text-[10px] font-bold">Profilo</span>
+</button>
+</div>
+<!-- Home Indicator (iOS) -->
+<div class="w-full flex justify-center mt-2">
+<div class="w-32 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+</div>
+</nav>
+</div>
+<!-- Script to tweak icons for filled state in the nav bar if needed -->
+<script>
+        // Just a small helper to demonstrate "active" filled icon style
+        const activeIcons = document.querySelectorAll('.font-variation-settings-fill');
+        activeIcons.forEach(icon => {
+            icon.style.fontVariationSettings = "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+        });
+    </script>
+</body></html>
