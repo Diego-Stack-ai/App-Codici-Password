@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Azienda</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-dark": "#1c242d",
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        /* Custom details marker hide */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white">
+<!-- Top App Bar -->
+<header class="shrink-0 flex items-center justify-between px-4 pt-6 pb-2 bg-background-light dark:bg-background-dark z-20">
+<button class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-slate-900 dark:text-white transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">arrow_back_ios_new</span>
+</button>
+<div class="flex items-center gap-3">
+<!-- Company Logo Placeholder -->
+<div class="w-8 h-8 rounded-lg overflow-hidden relative shadow-sm">
+<div class="absolute inset-0 bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center" data-alt="Company logo with blue gradient background">
+<span class="text-white font-bold text-xs">TS</span>
+</div>
+</div>
+<h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">TechSolutions Inc.</h1>
+</div>
+<button class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 28px;">add</span>
+</button>
+</header>
+<!-- Scrollable Content -->
+<main class="flex-1 overflow-y-auto no-scrollbar relative">
+<div class="px-4 pb-32"> <!-- Bottom padding for FAB and Nav -->
+<!-- Search Bar -->
+<div class="sticky top-0 z-10 py-4 bg-background-light dark:bg-background-dark backdrop-blur-xl bg-opacity-90 dark:bg-opacity-90">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="block w-full pl-12 pr-4 py-3.5 rounded-xl border-none bg-white dark:bg-surface-dark text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:outline-none shadow-sm transition-all" placeholder="Cerca account aziendali..." type="text"/>
+</div>
+</div>
+<!-- Account List -->
+<div class="flex flex-col gap-4 mt-2">
+<!-- Card 1: Infrastructure (Collapsed) -->
+<details class="group bg-white dark:bg-surface-dark rounded-xl shadow-sm overflow-hidden border border-transparent dark:border-white/5 open:border-primary/50 dark:open:border-primary/50 transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none bg-white dark:bg-surface-dark group-open:bg-slate-50 dark:group-open:bg-[#232b36] transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
+<span class="material-symbols-outlined">dns</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">AWS Root</span>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Infrastruttura</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:text-primary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-4 pb-4 bg-slate-50 dark:bg-[#232b36]">
+<p class="text-sm text-slate-500 py-2">Loading details...</p>
+</div>
+</details>
+<!-- Card 2: Social Media (Expanded) -->
+<details class="group bg-white dark:bg-surface-dark rounded-xl shadow-lg shadow-primary/5 overflow-hidden border border-transparent dark:border-white/5 open:border-primary/50 dark:open:border-primary/50 transition-all" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none bg-white dark:bg-surface-dark group-open:bg-slate-50 dark:group-open:bg-[#232b36] transition-colors border-b border-transparent group-open:border-slate-100 dark:group-open:border-slate-700/50">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600 shrink-0">
+<span class="material-symbols-outlined">public</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">Facebook Aziendale</span>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Social Media</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:text-primary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="p-5 space-y-5 bg-slate-50 dark:bg-[#232b36]">
+<!-- Username Field -->
+<div class="space-y-1.5">
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">Username / Email</label>
+<div class="flex items-center justify-between bg-white dark:bg-background-dark rounded-lg p-3 border border-slate-200 dark:border-slate-700/50">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate pr-2">social@techsolutions.com</span>
+<button aria-label="Copy username" class="text-slate-400 hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-1.5">
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">Password</label>
+<div class="flex items-center justify-between bg-white dark:bg-background-dark rounded-lg p-3 border border-slate-200 dark:border-slate-700/50 group/pass hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-3 overflow-hidden">
+<span class="material-symbols-outlined text-emerald-500 text-[20px] shrink-0">lock</span>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200 tracking-[0.2em] truncate">••••••••••••</span>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="text-slate-400 hover:text-primary transition-colors p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-[20px]">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="pt-2 flex gap-3">
+<button class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                                Modifica
+                            </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 dark:bg-red-500/10 text-sm font-semibold text-red-600 dark:text-red-400 border border-transparent hover:border-red-200 dark:hover:border-red-900/30 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+                                Elimina
+                            </button>
+</div>
+</div>
+</details>
+<!-- Card 3: Communication (Collapsed) -->
+<details class="group bg-white dark:bg-surface-dark rounded-xl shadow-sm overflow-hidden border border-transparent dark:border-white/5 open:border-primary/50 dark:open:border-primary/50 transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none bg-white dark:bg-surface-dark group-open:bg-slate-50 dark:group-open:bg-[#232b36] transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0">
+<span class="material-symbols-outlined">chat</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">Slack Admin</span>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Comunicazione</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:text-primary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+</details>
+<!-- Card 4: Productivity (Collapsed) -->
+<details class="group bg-white dark:bg-surface-dark rounded-xl shadow-sm overflow-hidden border border-transparent dark:border-white/5 open:border-primary/50 dark:open:border-primary/50 transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none bg-white dark:bg-surface-dark group-open:bg-slate-50 dark:group-open:bg-[#232b36] transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
+<span class="material-symbols-outlined">work</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-slate-900 dark:text-white">Google Workspace</span>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Productivity</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:text-primary group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+</details>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<div class="absolute bottom-[90px] right-4 z-30">
+<button class="h-14 w-14 rounded-2xl bg-primary text-white shadow-xl shadow-primary/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300">
+<span class="material-symbols-outlined" style="font-size: 28px;">add</span>
+</button>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="shrink-0 bg-white dark:bg-[#1c2127] border-t border-slate-200 dark:border-slate-800 px-2 pb-6 pt-3 flex justify-around items-end z-40">
+<a class="group flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" href="#">
+<span class="material-symbols-outlined group-hover:-translate-y-1 transition-transform duration-300" style="font-size: 24px;">home</span>
+<span class="text-[10px] font-medium opacity-70">Home</span>
+</a>
+<a class="group flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" href="#">
+<span class="material-symbols-outlined group-hover:-translate-y-1 transition-transform duration-300" style="font-size: 24px;">person</span>
+<span class="text-[10px] font-medium opacity-70">Privati</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary relative" href="#">
+<div class="absolute -top-10 bg-primary/20 h-12 w-12 rounded-full blur-xl"></div>
+<span class="material-symbols-outlined fill-current" style="font-size: 26px; font-variation-settings: 'FILL' 1;">domain</span>
+<span class="text-[10px] font-bold">Azienda</span>
+</a>
+<a class="group flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" href="#">
+<span class="material-symbols-outlined group-hover:-translate-y-1 transition-transform duration-300" style="font-size: 24px;">settings</span>
+<span class="text-[10px] font-medium opacity-70">Settings</span>
+</a>
+</nav>
+</body></html>
