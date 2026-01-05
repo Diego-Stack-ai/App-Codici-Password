@@ -1,0 +1,18 @@
+body {
+  min-height: max(884px, 100dvh);
+}
+/* Custom scrollbar hiding for cleaner mobile look */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+/* Custom details marker hide */
+details > summary {
+    list-style: none;
+}
+details > summary::-webkit-details-marker {
+    display: none;
+}
