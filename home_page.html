@@ -4,22 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
+
+    <!-- 1. Custom Tailwind Config -->
+    <script src="js/tailwind-config.js"></script>
+    <!-- 2. Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 3. Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <header>
-        <button onclick="window.location.href='home_page.html'">HOME</button>
-        <button onclick="history.back()">INDIETRO</button>
+<body class="bg-light text-dark font-sans">
+    <header class="p-4 flex justify-between items-center bg-white shadow-md">
+        <div>
+            <button onclick="window.location.href='home_page.html'" class="bg-primary text-white py-2 px-4 rounded hover:bg-opacity-80">HOME</button>
+            <button onclick="history.back()" class="bg-secondary text-white py-2 px-4 rounded hover:bg-opacity-80 ml-2">INDIETRO</button>
+        </div>
+        <button id="logout-btn" class="bg-danger text-white py-2 px-4 rounded hover:bg-opacity-80">Logout</button>
     </header>
 
-    <main>
-        <h1>Home Page</h1>
-        <p>Welcome to the application!</p>
-        <button id="logout-btn">Logout</button>
+    <main class="container mx-auto p-4 mt-10">
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold mb-6">Home Page</h1>
+            <p>Welcome to the application!</p>
+        </div>
     </main>
 
     <!-- Load scripts -->
-    <script src="js/firebaseConfig.js"></script>
     <script src="js/db.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
