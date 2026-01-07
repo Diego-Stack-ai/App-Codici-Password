@@ -18,9 +18,14 @@
             <span class="material-symbols-outlined text-2xl">arrow_back</span>
         </button>
         <h1 class="text-lg font-bold flex-1 text-center pr-10">Dettaglio Scadenza</h1>
-        <button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
-            <span class="material-symbols-outlined text-2xl">more_vert</span>
-        </button>
+        <div class="relative">
+            <button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors" id="menu-button">
+                <span class="material-symbols-outlined text-2xl">more_vert</span>
+            </button>
+            <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-20 hidden" id="menu-dropdown">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" id="delete-button">Elimina</a>
+            </div>
+        </div>
     </div>
     <div class="flex flex-col items-center p-4 pt-8 text-center">
         <div class="w-20 h-20 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mb-4 ring-4 ring-white dark:ring-gray-800 shadow-lg">
@@ -70,6 +75,7 @@
         </button>
     </div>
 </div>
+<script src="assets/js/dettaglio_scadenza.js" type="module"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>
