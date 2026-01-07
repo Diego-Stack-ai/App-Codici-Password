@@ -1,69 +1,176 @@
-
 <!DOCTYPE html>
 <html class="dark" lang="it">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Dati Anagrafici Privato</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Account Privati</title>
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="assets/css/style.css" rel="stylesheet"/>
     <script src="assets/js/tailwind-config.js"></script>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-white antialiased">
-<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
-    <div class="flex items-center justify-between p-4 sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
-        <button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors" onclick="navigateTo('dashboard_privato')">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl">
+
+    <!-- Top App Bar -->
+    <header class="sticky top-0 z-20 flex items-center justify-between bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-4 py-3 border-b border-gray-200/50 dark:border-gray-800/50">
+        <a href="home_page.html" class="flex items-center justify-center h-10 w-10 rounded-full bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <span class="material-symbols-outlined text-2xl">arrow_back</span>
-        </button>
-        <h1 class="text-lg font-bold flex-1 text-center pr-10">Dati Anagrafici</h1>
-    </div>
-    <div class="flex flex-col items-center p-4 pt-8">
-        <div class="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-4 ring-4 ring-white dark:ring-gray-800 shadow-lg">
-            <img alt="User Avatar" class="w-full h-full rounded-full" src="assets/images/google-avatar.png"/>
+        </a>
+        <h1 class="text-lg font-bold tracking-tight text-center text-gray-900 dark:text-white">Account Privati</h1>
+        <div class="w-10"></div> <!-- Spacer -->
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto px-4 py-6 pb-28">
+
+        <!-- Filter Buttons -->
+        <div class="flex items-center gap-2 mb-6">
+            <button id="filter-all" class="filter-btn active flex-1 text-sm font-bold bg-primary text-white px-4 py-2 rounded-full shadow">Tutti</button>
+            <button id="filter-shared" class="filter-btn flex-1 text-sm font-semibold bg-white dark:bg-card-dark px-4 py-2 rounded-full shadow-sm">Condivisi</button>
+            <button id="filter-memorandum" class="filter-btn flex-1 text-sm font-semibold bg-white dark:bg-card-dark px-4 py-2 rounded-full shadow-sm">Memorandum</button>
         </div>
-        <h2 id="user-name" class="text-2xl font-bold">Mario Rossi</h2>
-        <div class="flex items-center gap-2 mt-2">
-            <p id="codice-fiscale" class="text-base text-[#617589]">RSSMRA80A01H501U</p>
-            <button class="copy-button text-primary hover:text-primary/80" data-copy-target="codice-fiscale">
-                <span class="material-symbols-outlined text-lg">content_copy</span>
-            </button>
-        </div>
-    </div>
-    <div class="flex flex-col p-4 space-y-3 flex-grow">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <h3 class="text-sm font-medium text-gray-500 mb-2">Informazioni di Contatto</h3>
-            <div class="space-y-3">
-                <div class="flex items-center">
-                    <span class="material-symbols-outlined text-gray-400 mr-3">mail</span>
-                    <p class="flex-1 text-base">mario.rossi@gmail.com</p>
+
+        <!-- Account List -->
+        <div id="account-list" class="flex flex-col gap-4">
+
+            <!-- Card 1: Standard Account (Shared) -->
+            <div class="account-card" data-shared="true" data-memorandum="false">
+                <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-soft border border-gray-100 dark:border-gray-800 transition-all">
+                    <!-- Closed State -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/images/google-icon.png" class="w-10 h-10" alt="Google Icon">
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">Google</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">mario.rossi@gmail.com</p>
+                            </div>
+                        </div>
+                        <button class="expand-trigger flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span class="material-symbols-outlined transition-transform">expand_more</span>
+                        </button>
+                    </div>
+                    <!-- Expandable Content -->
+                    <div class="expandable-content hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="space-y-3">
+                            <div class="relative flex items-center">
+                                <span class="material-symbols-outlined text-gray-400 w-6">lock</span>
+                                <input type="password" class="flex-1 bg-transparent border-none text-base font-mono pr-16" value="SuperSecret123!" readonly>
+                                <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
+                                    <button class="toggle-password text-gray-400 hover:text-primary">
+                                        <span class="material-symbols-outlined text-lg">visibility</span>
+                                    </button>
+                                    <button class="copy-button text-gray-400 hover:text-primary ml-2">
+                                        <span class="material-symbols-outlined text-lg">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="material-symbols-outlined text-gray-400 w-6">flag</span>
+                                <p class="text-sm text-green-500 font-medium">Condiviso</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="material-symbols-outlined text-gray-400 w-6">description</span>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Account principale per servizi Google.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center">
-                    <span class="material-symbols-outlined text-gray-400 mr-3">call</span>
-                    <p class="flex-1 text-base">+39 333 1234567</p>
+            </div>
+
+            <!-- Card 2: PEC Account (Memorandum) -->
+            <div class="account-card" data-shared="false" data-memorandum="true">
+                <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-soft border border-gray-100 dark:border-gray-800 transition-all">
+                    <!-- Closed State -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                             <img src="assets/images/pec-icon.png" class="w-10 h-10" alt="PEC Icon">
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">PEC Aruba</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">m.rossi@pec.aruba.it</p>
+                            </div>
+                        </div>
+                        <button class="expand-trigger flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span class="material-symbols-outlined transition-transform">expand_more</span>
+                        </button>
+                    </div>
+                    <!-- Expandable Content -->
+                    <div class="expandable-content hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                         <div class="space-y-3">
+                            <div class="relative flex items-center">
+                                <span class="material-symbols-outlined text-gray-400 w-6">lock</span>
+                                <input type="password" class="flex-1 bg-transparent border-none text-base font-mono pr-16" value="PecPasswordSecure!" readonly>
+                                <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
+                                     <button class="toggle-password text-gray-400 hover:text-primary">
+                                        <span class="material-symbols-outlined text-lg">visibility</span>
+                                    </button>
+                                    <button class="copy-button text-gray-400 hover:text-primary ml-2">
+                                        <span class="material-symbols-outlined text-lg">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="material-symbols-outlined text-gray-400 w-6">flag</span>
+                                <p class="text-sm text-blue-500 font-medium">Memorandum</p>
+                            </div>
+                             <div class="flex items-center">
+                                <span class="material-symbols-outlined text-gray-400 w-6">qr_code_2</span>
+                                 <p class="text-sm text-gray-500 dark:text-gray-400">QR Code visibile</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center">
-                    <span class="material-symbols-outlined text-gray-400 mr-3">home</span>
-                    <p class="flex-1 text-base">Via Garibaldi, 10, 00184 Roma</p>
+            </div>
+
+            <!-- Card 3: Standard Account (No flags) -->
+            <div class="account-card" data-shared="false" data-memorandum="false">
+                <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-soft border border-gray-100 dark:border-gray-800 transition-all">
+                    <!-- Closed State -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <img src="assets/images/amazon-icon.png" class="w-10 h-10" alt="Amazon Icon">
+                            <div>
+                                <h3 class="font-bold text-gray-900 dark:text-white">Amazon</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">mario.rossi.shop@email.com</p>
+                            </div>
+                        </div>
+                        <button class="expand-trigger flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span class="material-symbols-outlined transition-transform">expand_more</span>
+                        </button>
+                    </div>
+                    <!-- Expandable Content -->
+                    <div class="expandable-content hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-sm text-gray-500">Nessun dettaglio aggiuntivo.</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <h3 class="text-sm font-medium text-gray-500 mb-2">IBAN</h3>
-            <div class="flex items-center">
-                <p id="iban-field" class="flex-1 text-base font-mono">IT60X0542811101000000123456</p>
-                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="iban-field">
-                    <span class="material-symbols-outlined text-lg">content_copy</span>
-                </button>
-            </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-safe">
+        <div class="flex items-center justify-around h-16 max-w-md mx-auto">
+            <a href="home_page.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+            <a href="dati_anagrafici_privato.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary transition-colors">
+                 <span class="material-symbols-outlined filled">person</span>
+                <span class="text-[10px] font-medium">Privato</span>
+            </a>
+             <a href="lista_aziende.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">domain</span>
+                <span class="text-[10px] font-medium">Aziende</span>
+            </a>
+            <a href="scadenze.html" class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">event</span>
+                <span class="text-[10px] font-medium">Scadenze</span>
+            </a>
         </div>
-    </div>
-    <div class="p-4 sticky bottom-0 bg-background-light dark:bg-background-dark">
-        <button class="w-full h-14 bg-gray-200 dark:bg-[#1a222d] text-[#111418] dark:text-white font-bold text-lg rounded-xl transition-all active:scale-[0.98]">
-            Modifica
-        </button>
-    </div>
+    </nav>
 </div>
 <script src="assets/js/main.js"></script>
 </body>
