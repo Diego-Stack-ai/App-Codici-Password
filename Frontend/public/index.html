@@ -29,37 +29,36 @@
         Accedi al tuo account per gestire i tuoi dati in sicurezza.
       </p>
     </div>
-    <div class="w-full max-w-sm flex flex-col gap-5">
-      <div class="flex flex-col gap-2">
-        <label class="text-slate-900 dark:text-white text-base font-medium leading-normal pl-1">Username</label>
-        <div class="relative flex items-center">
-          <span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">person</span>
-          <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Username o Email" type="text" value=""/>
+    <form id="login-form" class="w-full max-w-sm flex flex-col gap-5">
+        <div class="flex flex-col gap-2">
+            <label for="email" class="text-slate-900 dark:text-white text-base font-medium leading-normal pl-1">Email</label>
+            <div class="relative flex items-center">
+                <span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">person</span>
+                <input id="email" type="email" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Email" required />
+            </div>
         </div>
-      </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-between items-center pl-1 pr-1">
-          <label class="text-slate-900 dark:text-white text-base font-medium leading-normal">Password</label>
+        <div class="flex flex-col gap-2">
+            <label for="password" class="text-slate-900 dark:text-white text-base font-medium leading-normal">Password</label>
+            <div class="relative flex items-center">
+                <span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
+                <input id="password" type="password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-12 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Inserisci la tua password" required />
+                <button type="button" class="toggle-password absolute right-4 text-slate-400 hover:text-primary transition-colors flex items-center">
+                    <span class="material-symbols-outlined">visibility</span>
+                </button>
+            </div>
+            <div class="flex justify-end mt-1">
+                <a class="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 text-sm font-semibold transition-colors hover:underline" href="reset_password.html">
+                    Password dimenticata?
+                </a>
+            </div>
         </div>
-        <div class="relative flex items-center">
-          <span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
-          <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-12 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Inserisci la tua password" type="password" value=""/>
-          <button class="toggle-password absolute right-4 text-slate-400 hover:text-primary transition-colors flex items-center">
-            <span class="material-symbols-outlined">visibility</span>
-          </button>
-        </div>
-        <div class="flex justify-end mt-1">
-          <a class="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 text-sm font-semibold transition-colors hover:underline" href="reset_password.html">
-            Password dimenticata?
-          </a>
-        </div>
-      </div>
-      <div class="h-2"></div>
-      <a class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-5 bg-primary hover:bg-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] w-full shadow-lg shadow-primary/25 transition-all active:scale-[0.98]" href="home_page.html">
-        <span class="truncate">ACCEDI</span>
-      </a>
-    </div>
+        <div class="h-2"></div>
+        <button type="submit" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-5 bg-primary hover:bg-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] w-full shadow-lg shadow-primary/25 transition-all active:scale-[0.98]">
+            <span class="truncate">ACCEDI</span>
+        </button>
+    </form>
   </div>
+    <div id="notification-banner" class="hidden fixed top-4 right-4 p-4 rounded-lg text-white z-50"></div>
   <div class="w-full p-6 text-center">
     <p class="text-slate-500 dark:text-slate-400 text-sm font-normal">
       Non hai un account?
@@ -69,5 +68,19 @@
   </div>
 </div>
 <script src="assets/js/main.js"></script>
+<script type="module">
+    import { login, checkAuthState } from './assets/js/auth.js';
+
+    checkAuthState(); // Redirect if already logged in
+
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        await login(email, password);
+    });
+</script>
 </body>
 </html>
