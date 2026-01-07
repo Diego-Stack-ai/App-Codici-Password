@@ -25,11 +25,12 @@
 <h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Alessandro</h2>
 </div>
 <div class="flex w-12 items-center justify-end">
-<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full size-10 bg-transparent text-[#111418] dark:text-white hover:bg-[#283039] transition-colors min-w-0 p-0">
-<span class="material-symbols-outlined text-[24px]">notifications</span>
-</button>
+    <button id="logout-button" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full size-10 bg-transparent text-[#111418] dark:text-white hover:bg-[#283039] transition-colors min-w-0 p-0" title="Logout">
+        <span class="material-symbols-outlined text-[24px]">logout</span>
+    </button>
 </div>
 </div>
+<div id="notification-banner" class="hidden fixed top-4 right-4 p-4 rounded-lg text-white z-50"></div>
 <!-- ProfileStats -->
 <div class="flex flex-wrap gap-3 px-4 py-3">
 <div class="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-[#1c2127] p-4 items-start shadow-sm">
@@ -147,4 +148,14 @@
 </div>
 </div>
 <script src="assets/js/main.js"></script>
+<script type="module">
+    import { logout, checkAuthState } from './assets/js/auth.js';
+
+    checkAuthState(); // Protect this page
+
+    const logoutButton = document.getElementById('logout-button');
+    logoutButton.addEventListener('click', () => {
+        logout();
+    });
+</script>
 </body></html>

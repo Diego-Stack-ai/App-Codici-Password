@@ -1,51 +1,195 @@
-import { auth } from './firebase-config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// Simulated Authentication and User Session Management
+
+import { getUsers, saveUsers } from './db.js';
+import { showNotification } from './utils.js'; // Assuming a showNotification function exists
 
 /**
- * Checks the user's authentication state and redirects them accordingly.
- * Public pages (like login, register) will redirect to the dashboard if the user is logged in.
- * Protected pages will redirect to the login page if the user is not logged in.
- * @param {function} [onUserLoggedIn] - Optional callback to execute if a user is logged in.
- * @param {function} [onUserLoggedOut] - Optional callback to execute if no user is logged in.
+ * Registers a new user.
+ * @param {string} nome - User's first name.
+ * @param {string} cognome - User's last name.
+ * @param {string} email - User's email.
+ * @param {string} password - User's password.
  */
-function checkAuthState(onUserLoggedIn, onUserLoggedOut) {
-  onAuthStateChanged(auth, (user) => {
-    const currentPage = window.location.pathname.split('/').pop();
-    // Assuming '', 'index.html', and 'registrati.html' are the only public/auth pages.
-    const isAuthPage = ['', 'index.html', 'registrati.html', 'reset_password.html', 'inserisci_codice_reset.html', 'imposta_nuova_password.html', 'verifica_email.html'].includes(currentPage);
+async function register(nome, cognome, email, password) {
+    const users = getUsers();
+    const userExists = users.some(user => user.email === email);
 
-    if (user) {
-      // User is signed in.
-      console.log("User is logged in:", user);
-
-      // If the user is on an authentication page, redirect to the dashboard.
-      if (isAuthPage) {
-        console.log("Redirecting to dashboard...");
-        window.location.href = 'dashboard_amministratore.html'; // Adjust as needed
-        return; // Stop further execution
-      }
-
-      // If a callback for logged-in users is provided, execute it.
-      if (onUserLoggedIn) {
-        onUserLoggedIn(user);
-      }
-    } else {
-      // User is signed out.
-      console.log("User is logged out.");
-
-      // If the user is not on an authentication page, redirect to the login page.
-      if (!isAuthPage) {
-        console.log("Redirecting to login page...");
-        window.location.href = 'index.html';
-        return; // Stop further execution
-      }
-
-      // If a callback for logged-out users is provided, execute it.
-      if (onUserLoggedOut) {
-        onUserLoggedOut();
-      }
+    if (userExists) {
+        showNotification("User with this email already exists.", "error");
+        return;
     }
-  });
+
+    // Generate a simulated 6-digit verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const newUser = {
+        id: Date.now().toString(),
+        nome,
+        cognome,
+        email,
+        password, // In a real app, this should be hashed
+        verified: false,
+        verificationCode,
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    // Store email temporarily to pass to the verification page
+    sessionStorage.setItem('emailForVerification', email);
+
+    console.log(`Simulated verification code for ${email}: ${verificationCode}`);
+    showNotification("Registration successful! Redirecting to email verification.", "success");
+
+    // Redirect to the email verification page
+    setTimeout(() => {
+        window.location.href = "verifica_email.html";
+    }, 2000);
 }
 
-export { checkAuthState };
+/**
+ * Verifies a user's email with a simulated code.
+ * @param {string} email - The user's email.
+ * @param {string} code - The 6-digit verification code.
+ */
+async function verifyEmail(email, code) {
+    const users = getUsers();
+    const user = users.find(u => u.email === email);
+
+    if (!user) {
+        showNotification("User not found.", "error");
+        return;
+    }
+
+    if (user.verificationCode === code) {
+        user.verified = true;
+        saveUsers(users);
+        showNotification("Email verified successfully! Logging you in.", "success");
+
+        // Log the user in by creating a session
+        sessionStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, nome: user.nome }));
+
+        setTimeout(() => {
+            window.location.href = "home_page.html";
+        }, 2000);
+    } else {
+        showNotification("Invalid verification code.", "error");
+    }
+}
+
+
+/**
+ * Logs a user in.
+ * @param {string} email - User's email.
+ * @param {string} password - User's password.
+ */
+async function login(email, password) {
+    const users = getUsers();
+    const user = users.find(u => u.email === email);
+
+    if (!user) {
+        showNotification("Invalid credentials.", "error");
+        return;
+    }
+
+    if (!user.verified) {
+        showNotification("Please verify your email before logging in.", "error");
+        sessionStorage.setItem('emailForVerification', email); // Help user re-verify
+        setTimeout(() => { window.location.href = "verifica_email.html"; }, 1500);
+        return;
+    }
+
+    if (user.password === password) {
+        // Create a "session"
+        sessionStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, nome: user.nome }));
+        showNotification("Login successful!", "success");
+
+        setTimeout(() => {
+            window.location.href = "home_page.html";
+        }, 1500);
+    } else {
+        showNotification("Invalid credentials.", "error");
+    }
+}
+
+/**
+ * Logs the current user out.
+ */
+function logout() {
+    sessionStorage.removeItem('loggedInUser');
+    window.location.href = "index.html";
+}
+
+
+/**
+ * Initiates the password reset process.
+ * @param {string} email - The user's email.
+ */
+async function resetPassword(email) {
+    const users = getUsers();
+    const userExists = users.some(user => user.email === email);
+
+    if (userExists) {
+        // In a real app, a token would be generated and emailed.
+        // Here, we'll just store the email to be reset.
+        sessionStorage.setItem('emailForPasswordReset', email);
+        showNotification("If a user with this email exists, a reset link has been sent.", "success");
+        setTimeout(() => {
+            window.location.href = `imposta_nuova_password.html`; // No token needed for simulation
+        }, 2000);
+    } else {
+        // Show a generic message to prevent user enumeration
+        showNotification("If a user with this email exists, a reset link has been sent.", "success");
+    }
+}
+
+/**
+ * Updates the user's password.
+ * @param {string} email - The user's email.
+ * @param {string} newPassword - The new password.
+ */
+async function updatePassword(email, newPassword) {
+    const users = getUsers();
+    const user = users.find(u => u.email === email);
+
+    if (user) {
+        user.password = newPassword;
+        saveUsers(users);
+        sessionStorage.removeItem('emailForPasswordReset');
+        showNotification("Password updated successfully. Please log in.", "success");
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 2000);
+    } else {
+        showNotification("Could not update password. User not found.", "error");
+    }
+}
+
+
+/**
+ * Checks the user's authentication state and redirects if necessary.
+ */
+function checkAuthState() {
+    const loggedInUser = sessionStorage.getItem('loggedInUser');
+    const currentPage = window.location.pathname.split('/').pop();
+    const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html', 'verifica_email.html', ''];
+
+    if (loggedInUser && authPages.includes(currentPage)) {
+        // User is logged in but on an auth page, redirect to home
+        window.location.href = 'home_page.html';
+    } else if (!loggedInUser && !authPages.includes(currentPage)) {
+        // User is not logged in and on a protected page, redirect to login
+        window.location.href = 'index.html';
+    }
+}
+
+
+export {
+    register,
+    verifyEmail,
+    login,
+    logout,
+    resetPassword,
+    updatePassword,
+    checkAuthState
+};
