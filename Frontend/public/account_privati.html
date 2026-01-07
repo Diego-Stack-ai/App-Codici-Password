@@ -14,9 +14,9 @@
 <body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-white antialiased">
 <div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
     <div class="flex items-center p-4 sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
-        <button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors" onclick="navigateTo('dashboard_privato')">
+        <a href="home_page.html" class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
             <span class="material-symbols-outlined text-2xl">arrow_back</span>
-        </button>
+        </a>
         <h1 class="text-lg font-bold flex-1 text-center pr-10">Account Privati</h1>
     </div>
     <div class="p-4 flex-grow">
@@ -25,65 +25,49 @@
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined">search</span>
         </div>
         <div class="space-y-3">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex items-center space-x-4">
-                <img class="w-10 h-10 rounded-full" src="assets/images/google-avatar.png" alt="Google Logo"/>
-                <div class="flex-1">
-                    <h3 class="font-bold">Google</h3>
-                    <input id="username-google" type="text" value="mario.rossi@gmail.com" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
+            <!-- Account Card Example -->
+            <div class="account-card bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                <div class="account-header p-4 flex items-center space-x-4 cursor-pointer">
+                    <img class="w-10 h-10 rounded-full" src="assets/images/google-avatar.png" alt="Google Logo"/>
+                    <div class="flex-1">
+                        <h3 class="font-bold">Google</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" id="username-google">mario.rossi@gmail.com</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-gray-400" title="Condiviso">group</span>
+                        <span class="material-symbols-outlined text-gray-400" title="Memorandum">description</span>
+                    </div>
+                    <span class="material-symbols-outlined expand-icon transition-transform">expand_more</span>
                 </div>
-                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="username-google">
-                    <span class="material-symbols-outlined text-[20px]">content_copy</span>
-                </button>
-                <button class="text-gray-400 hover:text-gray-600" onclick="navigateTo('dettaglio_account_privato')">
-                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                </button>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex items-center space-x-4">
-                <img class="w-10 h-10 rounded-full" src="assets/images/facebook-logo.png" alt="Facebook Logo"/>
-                <div class="flex-1">
-                    <h3 class="font-bold">Facebook</h3>
-                    <input id="username-facebook" type="text" value="mario.rossi.fb" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
+                <div class="account-body hidden">
+                    <div class="px-4 pb-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-500">Password</span>
+                            <div class="relative flex items-center">
+                                <input type="password" value="SuperSecretPassword123" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
+                                <button class="toggle-password text-gray-500 hover:text-primary">
+                                    <span class="material-symbols-outlined text-base">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                         <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-500">Sito Web</span>
+                            <a href="#" class="text-sm text-primary underline">www.google.com</a>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-2 flex justify-end">
+                         <a href="dettaglio_account_privato.html" class="text-sm font-bold text-primary hover:underline px-4 py-2">VAI AL DETTAGLIO</a>
+                    </div>
                 </div>
-                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="username-facebook">
-                    <span class="material-symbols-outlined text-[20px]">content_copy</span>
-                </button>
-                <button class="text-gray-400 hover:text-gray-600">
-                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                </button>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex items-center space-x-4">
-                <img class="w-10 h-10 rounded-full" src="assets/images/twitter-logo.jpg" alt="Twitter Logo"/>
-                <div class="flex-1">
-                    <h3 class="font-bold">Twitter</h3>
-                    <input id="username-twitter" type="text" value="@mario_rossi" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
-                </div>
-                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="username-twitter">
-                    <span class="material-symbols-outlined text-[20px]">content_copy</span>
-                </button>
-                <button class="text-gray-400 hover:text-gray-600">
-                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                </button>.
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex items-center space-x-4">
-                <img class="w-10 h-10 rounded-full" src="assets/images/github-logo.png" alt="GitHub Logo"/>
-                <div class="flex-1">
-                    <h3 class="font-bold">GitHub</h3>
-                    <input id="username-github" type="text" value="mariorossi-dev" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
-                </div>
-                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="username-github">
-                    <span class="material-symbols-outlined text-[20px]">content_copy</span>
-                </button>
-                <button class="text-gray-400 hover:text-gray-600">
-                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-                </button>
-            </div>
+             <!-- Add more account cards here -->
         </div>
     </div>
     <div class="p-4 sticky bottom-0 bg-background-light dark:bg-background-dark">
-        <button class="w-full h-14 bg-primary hover:bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/30 transition-all active:scale-[0.98]" onclick="navigateTo('aggiungi_account_privato')">
+        <a href="aggiungi_account_privato.html" class="w-full h-14 bg-primary hover:bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/30 transition-all active:scale-[0.98] flex items-center justify-center">
             <span class="material-symbols-outlined">add</span>
             Aggiungi Account
-        </button>
+        </a>
     </div>
 </div>
 <script src="assets/js/main.js"></script>

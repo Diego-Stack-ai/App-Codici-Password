@@ -1,0 +1,6 @@
+
+.qr-code-container canvas,
+.qr-code-container img {
+    display: block !important;
+    visibility: visible !important;
+}
