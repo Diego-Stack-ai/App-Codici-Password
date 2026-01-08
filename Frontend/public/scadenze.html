@@ -1,33 +1,14 @@
 <!DOCTYPE html>
-
-<html class="dark" lang="it"><head>
+<html class="dark" lang="it">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Scadenze</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
+<script src="/Frontend/public/assets/js/tailwind-config.js"></script>
 <style>
-        /* Custom scrollbar hide for horizontal scrolling */
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -35,23 +16,27 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+        .filled {
+            font-variation-settings: 'FILL' 1;
+        }
+</style>
+</head>
 <body class="bg-background-light dark:bg-background-dark font-display antialiased">
 <div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark text-slate-900 dark:text-white">
 <!-- Header -->
-<div class="flex items-center px-4 pt-6 pb-2 justify-between sticky top-0 z-10 bg-background-light dark:bg-background-dark bg-opacity-95 dark:bg-opacity-95 backdrop-blur-sm">
-<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] flex-1">Le tue Scadenze</h2>
-<div class="flex items-center justify-end">
-<button class="flex items-center justify-center rounded-full h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-<span class="material-symbols-outlined text-2xl">filter_list</span>
-</button>
-</div>
+<div class="flex items-center px-4 pt-6 pb-2 justify-between sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
+    <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+        <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Le tue Scadenze</h2>
+    <div class="flex items-center justify-end size-10">
+        <button class="flex items-center justify-center rounded-full h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+            <span class="material-symbols-outlined text-2xl">filter_list</span>
+        </button>
+    </div>
 </div>
 <!-- Filter Chips -->
 <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar shrink-0">
@@ -69,44 +54,40 @@
 </button>
 </div>
 <!-- List Content -->
-<div class="flex flex-col gap-3 px-4 pb-24 flex-1 overflow-y-auto">
+<div id="scadenze-list" class="flex flex-col gap-3 px-4 pb-24 flex-1 overflow-y-auto">
     <!-- Dynamic content will be injected here by scadenze.js -->
 </div>
 <!-- Floating Action Button -->
 <div class="absolute bottom-24 right-4 z-20">
-<button class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:scale-105 active:scale-95 transition-all duration-200">
+<a href="/Frontend/public/aggiungi_scadenza.html" class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:scale-105 active:scale-95 transition-all duration-200">
 <span class="material-symbols-outlined text-3xl">add</span>
-</button>
+</a>
 </div>
 <!-- Bottom Navigation -->
 <div class="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md bg-white dark:bg-[#1E252B] border-t border-slate-200 dark:border-slate-800 pb-safe">
 <div class="flex h-16 items-center justify-around px-2">
-<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors" onclick="location.href='home_page.html'">
+<a href="/Frontend/public/home_page.html" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
 <span class="material-symbols-outlined text-2xl">home</span>
 <span class="text-[10px] font-medium">Home</span>
-</button>
-<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
+</a>
+<a href="#" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
 <span class="material-symbols-outlined text-2xl">lock</span>
 <span class="text-[10px] font-medium">Password</span>
-</button>
-<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
+</a>
+<a href="/Frontend/public/gestione_allegati.html" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
 <span class="material-symbols-outlined text-2xl">folder</span>
 <span class="text-[10px] font-medium">Documenti</span>
-</button>
-<button class="flex flex-1 flex-col items-center justify-center gap-1 text-primary">
+</a>
+<a href="/Frontend/public/scadenze.html" class="flex flex-1 flex-col items-center justify-center gap-1 text-primary">
 <span class="material-symbols-outlined text-2xl filled">calendar_clock</span>
 <span class="text-[10px] font-medium">Scadenze</span>
-</button>
+</a>
 </div>
 <!-- iOS Home Indicator Spacing -->
 <div class="h-4 w-full bg-white dark:bg-[#1E252B]"></div>
 </div>
 </div>
-<<<<<<< HEAD
-<script src="assets/js/scadenze.js" type="module"></script>
-<script src="assets/js/main.js"></script>
+<script src="/Frontend/public/assets/js/main.js"></script>
+<script src="/Frontend/public/assets/js/scadenze.js" type="module"></script>
 </body>
 </html>
-=======
-</body></html>
->>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
