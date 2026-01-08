@@ -3,7 +3,7 @@
  * @param {string} message - The message to display.
  * @param {string} type - The type of notification ('success' or 'error').
  */
-function showNotification(message, type) {
+export function showNotification(message, type) {
   const banner = document.getElementById('notification-banner');
   if (!banner) {
     console.error('Notification banner not found!');
@@ -25,5 +25,3 @@ function showNotification(message, type) {
     banner.classList.add('hidden');
   }, 5000);
 }
-
-export { showNotification };
