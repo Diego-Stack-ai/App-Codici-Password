@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -59,7 +58,6 @@
 <span id="user-email" class="text-[#111418] dark:text-white font-bold">il tuo indirizzo email</span>
 </p>
 </div>
-<<<<<<< HEAD
 <!-- OTP Form -->
 <form id="verify-form" class="w-full">
     <div class="w-full mb-10">
@@ -89,6 +87,7 @@
 <script src="assets/js/main.js"></script>
 <script type="module">
     import { verifyEmail } from './assets/js/auth.js';
+    import { showNotification } from './assets/js/utils.js';
 
     document.addEventListener('DOMContentLoaded', () => {
         const userEmailSpan = document.getElementById('user-email');
@@ -118,39 +117,3 @@
 </script>
 </body>
 </html>
-=======
-<!-- OTP Input -->
-<div class="w-full mb-10">
-<fieldset class="flex gap-2 sm:gap-3 justify-center w-full">
-<!-- Digit 1 -->
-<input aria-label="Digit 1" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
-<!-- Digit 2 -->
-<input aria-label="Digit 2" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
-<!-- Digit 3 -->
-<input aria-label="Digit 3" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
-<!-- Digit 4 -->
-<input aria-label="Digit 4" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
-<!-- Digit 5 -->
-<input aria-label="Digit 5" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
-<!-- Digit 6 -->
-<input aria-label="Digit 6" class="flex h-14 w-10 sm:h-16 sm:w-12 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-transparent" maxlength="1" type="number" value=""/>
-</fieldset>
-</div>
-<!-- Actions -->
-<div class="w-full space-y-6">
-<button class="w-full bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center text-lg">
-                Verifica
-            </button>
-<div class="text-center">
-<p class="text-[#637588] dark:text-[#93a1b0] text-sm">
-                    Non hai ricevuto il codice? 
-                    <button class="text-primary font-bold hover:text-primary/80 transition-colors ml-1 inline-flex items-center gap-1">
-                        Invia di nuovo
-                        <span class="material-symbols-outlined text-sm">refresh</span>
-</button>
-</p>
-</div>
-</div>
-</div>
-</body></html>
->>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
