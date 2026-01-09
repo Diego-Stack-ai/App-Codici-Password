@@ -9,11 +9,31 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
 <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
 <style>
     body {
       min-height: max(884px, 100dvh);
     }
+  </style>
+  </head>
     .filled {
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
@@ -65,6 +85,8 @@
 <div class="flex flex-col gap-4 p-4">
 <div class="grid grid-cols-2 gap-4">
 <!-- Privato Button -->
+<a href="account_privati.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
 <a href="/Frontend/public/account_privati.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
 <div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[150px]">lock</span>
@@ -78,6 +100,8 @@
 </div>
 </a>
 <!-- Azienda Button -->
+<a href="lista_aziende.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
 <a href="/Frontend/public/lista_aziende.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
 <div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[150px]">apartment</span>
@@ -92,6 +116,7 @@
 </a>
 </div>
 <!-- Scadenze Button -->
+<a href="scadenze.html" class="group relative flex flex-row items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-lg w-full overflow-hidden">
 <a href="/Frontend/public/scadenze.html" class="group relative flex flex-row items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-lg w-full overflow-hidden">
 <div class="absolute right-[-10px] bottom-[-40px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[180px]">calendar_month</span>
@@ -156,17 +181,28 @@
 <div class="h-[env(safe-area-inset-bottom)] bg-transparent"></div>
 </div>
 </div>
+<script src="assets/js/main.js"></script>
+<script type="module">
+    import { logout, checkAuthState } from './assets/js/auth.js';
 <script type="module" src="/Frontend/public/assets/js/utils.js"></script>
 <script src="/Frontend/public/assets/js/main.js"></script>
 <script type="module">
     import { logout, checkAuthState } from '/Frontend/public/assets/js/auth.js';
-
     checkAuthState(); // Protect this page
-
     const logoutButton = document.getElementById('logout-button');
     logoutButton.addEventListener('click', () => {
         logout();
     });
 </script>
+</body></html>
+<style>
+        .filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>
 </body>
 </html>

@@ -13,11 +13,49 @@
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1c2630",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                    boxShadow: {
+                        "soft": "0 4px 20px -2px rgba(0, 0, 0, 0.05)",
+                    }
+                },
+            },
+        }
+    </script>
 <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
 <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
         .filled {
             font-variation-settings: 'FILL' 1;
         }
@@ -96,6 +134,7 @@
 </div>
 <!-- Add Button Area -->
 <div class="mt-4">
+<a href="aggiungi_nuova_azienda.html" class="group flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 bg-primary text-white gap-2 shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95">
 <a href="/Frontend/public/aggiungi_nuova_azienda.html" class="group flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 bg-primary text-white gap-2 shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95">
 <span class="material-symbols-outlined text-[24px] group-hover:rotate-90 transition-transform">add</span>
 <span class="text-base font-bold tracking-wide">Aggiungi nuova Azienda</span>
@@ -109,6 +148,19 @@
 <!-- Bottom Navigation -->
 <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-safe">
 <div class="flex items-center justify-around h-16 max-w-md mx-auto">
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary" href="lista_aziende.html">
+<span class="material-symbols-outlined text-[26px] filled">domain</span>
+<span class="text-[10px] font-medium">Aziende</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="account_privati.html">
+<span class="material-symbols-outlined text-[26px]">lock</span>
+<span class="text-[10px] font-medium">Password</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="gestione_allegati.html">
+<span class="material-symbols-outlined text-[26px]">description</span>
+<span class="text-[10px] font-medium">Documenti</span>
+</a>
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="scadenze.html">
 <a class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary" href="/Frontend/public/lista_aziende.html">
 <span class="material-symbols-outlined text-[26px] filled">domain</span>
 <span class="text-[10px] font-medium">Aziende</span>
@@ -125,13 +177,14 @@
 <span class="material-symbols-outlined text-[26px]">event</span>
 <span class="text-[10px] font-medium">Scadenze</span>
 </a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="#">
+<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="impostazioni.html">
 <span class="material-symbols-outlined text-[26px]">person</span>
 <span class="text-[10px] font-medium">Profilo</span>
 </a>
 </div>
 </nav>
 </div>
+</body></html>
 <script src="/Frontend/public/assets/js/main.js"></script>
 </body>
 </html>

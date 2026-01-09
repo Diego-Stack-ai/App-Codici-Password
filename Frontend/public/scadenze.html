@@ -7,6 +7,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hide for horizontal scrolling */
 <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
 <style>
         .hide-scrollbar::-webkit-scrollbar {
@@ -16,6 +36,13 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
         body {
             min-height: max(884px, 100dvh);
         }
@@ -54,6 +81,7 @@
 </button>
 </div>
 <!-- List Content -->
+<div class="flex flex-col gap-3 px-4 pb-24 flex-1 overflow-y-auto">
 <div id="scadenze-list" class="flex flex-col gap-3 px-4 pb-24 flex-1 overflow-y-auto">
     <!-- Dynamic content will be injected here by scadenze.js -->
 </div>
@@ -66,6 +94,7 @@
 <!-- Bottom Navigation -->
 <div class="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md bg-white dark:bg-[#1E252B] border-t border-slate-200 dark:border-slate-800 pb-safe">
 <div class="flex h-16 items-center justify-around px-2">
+<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors" onclick="location.href='home_page.html'">
 <a href="/Frontend/public/home_page.html" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
 <span class="material-symbols-outlined text-2xl">home</span>
 <span class="text-[10px] font-medium">Home</span>
@@ -87,7 +116,14 @@
 <div class="h-4 w-full bg-white dark:bg-[#1E252B]"></div>
 </div>
 </div>
+<script src="assets/js/scadenze.js" type="module"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
+</body></html>
+
 <script src="/Frontend/public/assets/js/main.js"></script>
 <script src="/Frontend/public/assets/js/scadenze.js" type="module"></script>
 </body>
 </html>
+

@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+
+<html class="light" lang="it"><head>
 <html class="light" lang="it">
 <head>
 <meta charset="utf-8"/>
@@ -10,9 +12,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
 <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
 <style>
         .material-symbols-outlined {
@@ -28,6 +55,13 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
 </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display antialiased">
@@ -136,5 +170,6 @@
 </div>
 </div>
 </div>
+</body></html>
 </body>
 </html>

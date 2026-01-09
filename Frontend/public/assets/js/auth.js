@@ -1,6 +1,7 @@
 // Simulated Authentication and User Session Management
 
 import { getUsers, saveUsers } from './db.js';
+import { showNotification } from './utils.js'; // Assuming a showNotification function exists
 import { showNotification } from './utils.js';
 
 const BASE_PATH = '/Frontend/public/';
@@ -45,6 +46,7 @@ async function register(nome, cognome, email, password) {
 
     // Redirect to the email verification page
     setTimeout(() => {
+        window.location.href = "verifica_email.html";
         window.location.href = `${BASE_PATH}verifica_email.html`;
     }, 2000);
 }
@@ -72,6 +74,7 @@ async function verifyEmail(email, code) {
         sessionStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, nome: user.nome }));
 
         setTimeout(() => {
+            window.location.href = "home_page.html";
             window.location.href = `${BASE_PATH}home_page.html`;
         }, 2000);
     } else {
@@ -97,6 +100,7 @@ async function login(email, password) {
     if (!user.verified) {
         showNotification("Please verify your email before logging in.", "error");
         sessionStorage.setItem('emailForVerification', email); // Help user re-verify
+        setTimeout(() => { window.location.href = "verifica_email.html"; }, 1500);
         setTimeout(() => { window.location.href = `${BASE_PATH}verifica_email.html`; }, 1500);
         return;
     }
@@ -107,6 +111,7 @@ async function login(email, password) {
         showNotification("Login successful!", "success");
 
         setTimeout(() => {
+            window.location.href = "home_page.html";
             window.location.href = `${BASE_PATH}home_page.html`;
         }, 1500);
     } else {
@@ -119,6 +124,7 @@ async function login(email, password) {
  */
 function logout() {
     sessionStorage.removeItem('loggedInUser');
+    window.location.href = "index.html";
     window.location.href = `${BASE_PATH}index.html`;
 }
 
@@ -137,6 +143,7 @@ async function resetPassword(email) {
         sessionStorage.setItem('emailForPasswordReset', email);
         showNotification("If a user with this email exists, a reset link has been sent.", "success");
         setTimeout(() => {
+            window.location.href = `imposta_nuova_password.html`; // No token needed for simulation
             window.location.href = `${BASE_PATH}imposta_nuova_password.html`; // No token needed for simulation
         }, 2000);
     } else {
@@ -160,11 +167,33 @@ async function updatePassword(email, newPassword) {
         sessionStorage.removeItem('emailForPasswordReset');
         showNotification("Password updated successfully. Please log in.", "success");
         setTimeout(() => {
+            window.location.href = "index.html";
             window.location.href = `${BASE_PATH}index.html`;
         }, 2000);
     } else {
         showNotification("Could not update password. User not found.", "error");
     }
+}
+
+
+/**
+ * Checks the user's authentication state and redirects if necessary.
+ */
+function checkAuthState() {
+    const loggedInUser = sessionStorage.getItem('loggedInUser');
+    const currentPage = window.location.pathname.split('/').pop();
+    const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html', 'verifica_email.html', ''];
+
+    if (loggedInUser && authPages.includes(currentPage)) {
+        // User is logged in but on an auth page, redirect to home
+        window.location.href = 'home_page.html';
+    } else if (!loggedInUser && !authPages.includes(currentPage)) {
+        // User is not logged in and on a protected page, redirect to login
+        window.location.href = 'index.html';
+    }
+}
+
+
 }
 
 
