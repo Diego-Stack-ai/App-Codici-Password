@@ -34,3 +34,18 @@ function saveUsers(users) {
 
 // Keep other exports if they are needed by other parts of the app
 export { getUsers, saveUsers, utenti };
+/**
+ * Retrieves the list of users from localStorage.
+ * If no users are found, returns an empty array.
+ * @returns {Array} The array of user objects.
+ */
+function getUsers() {
+    return utenti;
+}
+
+function saveUsers(users) {
+    // This is a no-op for the verification step
+}
+
+// Keep other exports if they are needed by other parts of the app
+export { getUsers, saveUsers, utenti };

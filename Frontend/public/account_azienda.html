@@ -1,45 +1,75 @@
 <!DOCTYPE html>
-<html class="dark" lang="it"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Account Azienda</title>
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                        "surface-dark": "#1c242d",
-                        "surface-light": "#ffffff",
-                    },
-                    fontFamily: {
-                        "display": ["Plus Jakarta Sans", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
-                },
-            },
-        }
-    </script>
-<style>
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        
+<html class="dark" lang="it">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Account Azienda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="assets/css/style.css" rel="stylesheet"/>
+    <script src="assets/js/tailwind-config.js"></script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-white antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
+    <div class="flex items-center justify-between p-4 sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
+        <button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors" onclick="navigateTo('lista_aziende')">
+            <span class="material-symbols-outlined text-2xl">arrow_back</span>
+        </button>
+        <h1 class="text-lg font-bold flex-1 text-center pr-10">Account</h1>
+    </div>
+    <div class="flex flex-col items-center p-4 pt-8">
+        <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-4 ring-4 ring-white dark:ring-gray-800">
+            <img alt="Tech Solutions S.r.l. Logo" class="w-12 h-12" src="assets/images/tailwind-mark.svg"/>
+        </div>
+        <h2 class="text-2xl font-bold">Tech Solutions S.r.l.</h2>
+        <p class="text-base text-[#617589]">3 Account</p>
+    </div>
+    <div class="p-4 flex-grow">
+        <div class="relative mb-4">
+            <input class="w-full h-12 pl-10 pr-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Cerca account..." type="search"/>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined">search</span>
+        </div>
+        <div class="space-y-3">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary">shield</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold">Gestionale Interno</h3>
+                    <input id="username-gestionale" type="text" value="admin@techsolutions.it" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
+                </div>
+                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="username-gestionale">
+                    <span class="material-symbols-outlined text-[20px]">content_copy</span>
+                </button>
+                <button class="text-gray-400 hover:text-gray-600" onclick="navigateTo('dettaglio_account_azienda')">
+                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                </button>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <img class="w-6 h-6" src="assets/images/google-favicon.png" alt="Google Favicon">
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold">Google Workspace</h3>
+                    <input id="username-google" type="text" value="info@techsolutions.it" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
+                </div>
+                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="username-google">
+                    <span class="material-symbols-outlined text-[20px]">content_copy</span>
+                </button>
+                <button class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="p-4 sticky bottom-0 bg-background-light dark:bg-background-dark">
+        <button class="w-full h-14 bg-primary hover:bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/30 transition-all active:scale-[0.98]" onclick="navigateTo('aggiungi_account_azienda')">
+            <span class="material-symbols-outlined">add</span>
+            Aggiungi Account
+        </button>
+    </div>
+
         /* Custom details marker hide */
         details > summary {
             list-style: none;
