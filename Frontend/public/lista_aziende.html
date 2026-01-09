@@ -44,55 +44,12 @@
 <div class="mb-6 flex items-center justify-between">
 <div>
 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Totale Aziende</p>
-<h2 class="text-3xl font-bold text-gray-900 dark:text-white">3</h2>
-</div>
-<div class="flex gap-2">
-<button class="p-2 rounded-lg bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-primary">
-<span class="material-symbols-outlined">filter_list</span>
-</button>
-<button class="p-2 rounded-lg bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-primary">
-<span class="material-symbols-outlined">search</span>
-</button>
+<h2 id="aziende-count" class="text-3xl font-bold text-gray-900 dark:text-white">0</h2>
 </div>
 </div>
 <!-- Company List -->
-<div class="flex flex-col gap-4">
-<!-- Card 1 -->
-<div class="account-card group relative flex flex-col gap-4 rounded-2xl bg-card-light dark:bg-card-dark p-5 shadow-soft border border-gray-100 dark:border-gray-800 transition-all">
-    <div class="account-header flex items-start justify-between cursor-pointer">
-        <div class="flex items-center gap-4">
-            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                <span class="material-symbols-outlined text-[32px]">domain</span>
-            </div>
-            <div class="flex flex-col">
-                <h3 class="text-lg font-bold leading-tight text-gray-900 dark:text-white">Tech Solutions S.r.l.</h3>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">P.IVA: IT12345678901</p>
-                <div class="mt-1 flex items-center gap-1">
-                    <span class="block h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Attiva</span>
-                </div>
-            </div>
-        </div>
-        <button class="expand-icon flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary transition-transform duration-300">
-            <span class="material-symbols-outlined">expand_more</span>
-        </button>
-    </div>
-    <div class="account-body hidden pt-4">
-        <div class="h-px w-full bg-gray-100 dark:bg-gray-700/50 mb-4"></div>
-        <div class="flex items-center justify-between">
-            <div class="flex -space-x-2 overflow-hidden">
-                <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("/Frontend/public/assets/images/employee-1.png");'></div>
-                <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("/Frontend/public/assets/images/employee-2.png");'></div>
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 ring-2 ring-white dark:bg-gray-700 dark:ring-card-dark text-[10px] font-bold text-gray-500 dark:text-gray-300">+3</div>
-            </div>
-            <button class="flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <span class="material-symbols-outlined text-[20px]">qr_code_2</span>
-                <span class="hidden sm:inline">QR Code</span>
-            </button>
-        </div>
-    </div>
-</div>
-<!-- Card 2 & 3 would follow the same expandable structure -->
+<div id="aziende-list" class="flex flex-col gap-4">
+<!-- Company cards will be dynamically inserted here -->
 </div>
 <!-- Add Button Area -->
 <div class="mt-4">
@@ -132,6 +89,6 @@
 </div>
 </nav>
 </div>
-<script src="/Frontend/public/assets/js/main.js"></script>
+<script type="module" src="/Frontend/public/assets/js/main.js" defer></script>
 </body>
 </html>
