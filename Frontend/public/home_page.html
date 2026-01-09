@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
-<head>
+
+<html class="dark" lang="it"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Home Page</title>
@@ -8,26 +8,38 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script src="/Frontend/public/assets/js/tailwind-config.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
 <style>
     body {
       min-height: max(884px, 100dvh);
     }
-    .filled {
-        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    }
-    .pb-safe {
-        padding-bottom: env(safe-area-inset-bottom, 20px);
-    }
-</style>
-</head>
+  </style>
+  </head>
 <body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display overflow-x-hidden">
 <div class="relative flex h-auto min-h-screen w-full flex-col">
 <!-- TopAppBar -->
 <div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
 <div class="flex size-12 shrink-0 items-center">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Portrait of Alessandro, the user" style='background-image: url("/Frontend/public/assets/images/user-avatar-4.png");'></div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Portrait of Alessandro, the user" style='background-image: url("assets/images/user-avatar-4.png");'></div>
 </div>
 <div class="flex flex-1 flex-col px-4">
 <p class="text-[#9dabb9] text-xs font-medium leading-normal">Buon pomeriggio,</p>
@@ -65,7 +77,11 @@
 <div class="flex flex-col gap-4 p-4">
 <div class="grid grid-cols-2 gap-4">
 <!-- Privato Button -->
-<a href="/Frontend/public/account_privati.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<<<<<<< HEAD
+<a href="account_privati.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+=======
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
 <div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[150px]">lock</span>
 </div>
@@ -78,7 +94,11 @@
 </div>
 </a>
 <!-- Azienda Button -->
-<a href="/Frontend/public/lista_aziende.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<<<<<<< HEAD
+<a href="lista_aziende.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+=======
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
 <div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[150px]">apartment</span>
 </div>
@@ -92,7 +112,7 @@
 </a>
 </div>
 <!-- Scadenze Button -->
-<a href="/Frontend/public/scadenze.html" class="group relative flex flex-row items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-lg w-full overflow-hidden">
+<a href="scadenze.html" class="group relative flex flex-row items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-lg w-full overflow-hidden">
 <div class="absolute right-[-10px] bottom-[-40px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[180px]">calendar_month</span>
 </div>
@@ -103,7 +123,7 @@
 <div class="flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm z-10">
 <span class="material-symbols-outlined text-[32px]">event_upcoming</span>
 </div>
-</a>
+</button>
 </div>
 <!-- Spacer for visual separation -->
 <div class="px-4 pt-2 pb-2">
@@ -125,7 +145,7 @@
 <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
 </button>
 </div>
-<div class="w-24 bg-center bg-no-repeat bg-cover rounded-lg shrink-0 self-stretch" data-alt="Icon representing car insurance" style='background-image: url("/Frontend/public/assets/images/car-insurance.png");'></div>
+<div class="w-24 bg-center bg-no-repeat bg-cover rounded-lg shrink-0 self-stretch" data-alt="Icon representing car insurance" style='background-image: url("assets/images/car-insurance.png");'></div>
 </div>
 </div>
 <!-- BottomNavBar -->
@@ -156,10 +176,10 @@
 <div class="h-[env(safe-area-inset-bottom)] bg-transparent"></div>
 </div>
 </div>
-<script type="module" src="/Frontend/public/assets/js/utils.js"></script>
-<script src="/Frontend/public/assets/js/main.js"></script>
+<<<<<<< HEAD
+<script src="assets/js/main.js"></script>
 <script type="module">
-    import { logout, checkAuthState } from '/Frontend/public/assets/js/auth.js';
+    import { logout, checkAuthState } from './assets/js/auth.js';
 
     checkAuthState(); // Protect this page
 
@@ -168,5 +188,15 @@
         logout();
     });
 </script>
-</body>
-</html>
+</body></html>
+=======
+<style>
+        .filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)

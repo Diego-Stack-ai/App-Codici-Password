@@ -4,15 +4,28 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Dati Anagrafici</title>
-    <!-- ... head content ... -->
+    <!-- Tailwind CSS, Google Fonts, Material Symbols -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark">
+<body class="bg-background-light dark:bg-background-dark font-display">
 <div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto">
-    <header class="sticky top-0 z-20 flex items-center justify-between p-4">
-        <a href="/Frontend/public/home_page.html" class="size-10">...</a>
+    <!-- Header -->
+    <header class="sticky top-0 z-20 flex items-center justify-between p-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md">
+        <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
         <h1 class="text-lg font-bold">Dati Anagrafici</h1>
-        <a href="/Frontend/public/home_page.html" class="size-10">...</a>
+        <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+            <span class="material-symbols-outlined">home</span>
+        </a>
     </header>
+    <!-- Main Content -->
     <main class="flex-grow p-4">
         <div class="flex flex-col items-center pt-8">
             <h2 id="user-name" class="text-2xl font-bold"></h2>

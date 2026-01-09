@@ -19,25 +19,18 @@ const utenti = [
             username: 'mario.rossi@gmail.com',
             password: 'PasswordGoogle',
             sitoWeb: 'https://google.com'
-        },
-        {
-            id: 'p-2',
-            nomeAccount: 'Facebook',
-            username: 'mario.rossi.fb',
-            password: 'PasswordFacebook',
-            sitoWeb: 'https://facebook.com'
         }
     ]
   }
 ];
 
 function getUsers() {
-    // For this verification step, we always return the hardcoded user.
     return utenti;
 }
 
 function saveUsers(users) {
-    // No-op for this verification step.
+    // This is a no-op for the verification step
 }
 
+// Keep other exports if they are needed by other parts of the app
 export { getUsers, saveUsers, utenti };
