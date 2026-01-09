@@ -13,37 +13,72 @@
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display">
-<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto">
-    <!-- Header -->
-    <header class="sticky top-0 z-20 flex items-center justify-between p-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md">
-        <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
-            <span class="material-symbols-outlined">arrow_back</span>
+<body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-white antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
+    <div class="flex items-center justify-between p-4 sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
+        <a href="home_page.html" class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+            <span class="material-symbols-outlined text-2xl">arrow_back</span>
         </a>
-        <h1 class="text-lg font-bold">Dati Anagrafici</h1>
-        <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
-            <span class="material-symbols-outlined">home</span>
-        </a>
-    </header>
-    <!-- Main Content -->
-    <main class="flex-grow p-4">
-        <div class="flex flex-col items-center pt-8">
-            <h2 id="user-name" class="text-2xl font-bold"></h2>
-            <p id="codice-fiscale" class="text-base text-gray-500"></p>
+        <h1 class="text-lg font-bold flex-1 text-center pr-10">Dati Anagrafici</h1>
+    </div>
+    <div class="flex flex-col items-center p-4 pt-8">
+        <div class="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-4 ring-4 ring-white dark:ring-gray-800 shadow-lg">
+            <img alt="User Avatar" class="w-full h-full rounded-full" src="assets/images/google-avatar.png"/>
         </div>
-        <div class="space-y-3 mt-8">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                <h3 class="text-sm font-medium text-gray-500 mb-2">Informazioni di Contatto</h3>
-                <p><strong>Email:</strong> <span id="email-view"></span></p>
-                <p><strong>Telefono:</strong> <span id="phone-view"></span></p>
-                <p><strong>Indirizzo:</strong> <span id="address-view"></span></p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-                <h3 class="text-sm font-medium text-gray-500 mb-2">IBAN</h3>
-                <p id="iban-view" class="font-mono"></p>
+        <h2 id="user-name" class="text-2xl font-bold">Mario Rossi</h2>
+        <div class="flex items-center gap-2 mt-2">
+            <p id="codice-fiscale" class="text-base text-[#617589]">RSSMRA80A01H501U</p>
+            <button class="copy-button text-primary hover:text-primary/80" data-copy-target="codice-fiscale">
+                <span class="material-symbols-outlined text-lg">content_copy</span>
+            </button>
+        </div>
+    </div>
+    <div class="flex flex-col p-4 space-y-3 flex-grow" id="form-container">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Informazioni di Contatto</h3>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-gray-400 mr-3">mail</span>
+                    <p id="email-view" class="flex-1 text-base">mario.rossi@gmail.com</p>
+                    <input type="email" id="email-edit" class="hidden flex-1 text-base bg-transparent border-none p-0 focus:ring-0" value="mario.rossi@gmail.com">
+                </div>
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-gray-400 mr-3">call</span>
+                    <p id="phone-view" class="flex-1 text-base">+39 333 1234567</p>
+                    <input type="tel" id="phone-edit" class="hidden flex-1 text-base bg-transparent border-none p-0 focus:ring-0" value="+39 333 1234567">
+                </div>
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-gray-400 mr-3">home</span>
+                    <p id="address-view" class="flex-1 text-base">Via Garibaldi, 10, 00184 Roma</p>
+                    <input type="text" id="address-edit" class="hidden flex-1 text-base bg-transparent border-none p-0 focus:ring-0" value="Via Garibaldi, 10, 00184 Roma">
+                </div>
             </div>
         </div>
-    </main>
-    <script type="module" src="/Frontend/public/assets/js/privato.js" defer></script>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">IBAN</h3>
+            <div class="flex items-center">
+                <p id="iban-view" class="flex-1 text-base font-mono">IT60X0542811101000000123456</p>
+                <input type="text" id="iban-edit" class="hidden flex-1 text-base font-mono bg-transparent border-none p-0 focus:ring-0" value="IT60X0542811101000000123456">
+                <button class="copy-button text-primary hover:text-primary/80" data-copy-target="iban-view">
+                    <span class="material-symbols-outlined text-lg">content_copy</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="p-4 sticky bottom-0 bg-background-light dark:bg-background-dark" id="footer-buttons">
+        <button id="edit-button" class="w-full h-14 bg-gray-200 dark:bg-[#1a222d] text-[#111418] dark:text-white font-bold text-lg rounded-xl transition-all active:scale-[0.98]">
+            Modifica
+        </button>
+        <div id="edit-actions" class="hidden flex gap-4">
+            <button id="cancel-button" class="w-full h-14 bg-gray-200 dark:bg-[#1a222d] text-[#111418] dark:text-white font-bold text-lg rounded-xl transition-all active:scale-[0.98]">
+                Annulla
+            </button>
+            <button id="save-button" class="w-full h-14 bg-primary text-white font-bold text-lg rounded-xl transition-all active:scale-[0.98]">
+                Salva
+            </button>
+        </div>
+    </div>
+</div>
+<script src="assets/js/main.js"></script>
 </body>
 </html>
