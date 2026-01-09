@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+
+    <!-- 1. Custom Tailwind Config -->
+    <script src="js/tailwind-config.js"></script>
+    <!-- 2. Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 3. Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light text-dark font-sans">
+    <header class="p-4 flex justify-between items-center bg-white shadow-md">
+        <div>
+            <button onclick="window.location.href='home_page.html'" class="bg-primary text-white py-2 px-4 rounded hover:bg-opacity-80">HOME</button>
+            <button onclick="history.back()" class="bg-secondary text-white py-2 px-4 rounded hover:bg-opacity-80 ml-2">INDIETRO</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 mt-10">
+        <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
+                    <input type="email" id="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+                    <div class="password-wrapper flex items-center mt-1">
+                        <input type="password" id="password" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        <span class="password-toggle-icon cursor-pointer p-2">👁️</span>
+                        <button type="button" class="copy-btn bg-gray-200 text-sm py-1 px-2 rounded hover:bg-gray-300 ml-2">Copy</button>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">Login</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Load scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

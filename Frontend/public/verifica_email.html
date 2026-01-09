@@ -1,21 +1,44 @@
 <!DOCTYPE html>
+
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Verifica Email</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="assets/css/style.css" rel="stylesheet"/>
-<script src="assets/js/tailwind-config.js"></script>
-</head>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#137fec",
+                "background-light": "#f6f7f8",
+                "background-dark": "#101922",
+                },
+                fontFamily: {
+                "display": ["Manrope", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
 <body class="font-display bg-background-light dark:bg-background-dark min-h-screen flex flex-col relative overflow-x-hidden">
 <!-- Top Navigation -->
 <div class="flex items-center justify-between p-4 sticky top-0 z-10">
-<button class="text-[#111418] dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
-<span class="material-symbols-outlined text-2xl">arrow_back</span>
-</button>
-<div class="flex-1"></div>
+    <a href="registrati.html" class="text-[#111418] dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+        <span class="material-symbols-outlined text-2xl">arrow_back</span>
+    </a>
+    <div class="flex-1"></div>
 </div>
 <!-- Main Content -->
 <div class="flex flex-col items-center justify-center w-full max-w-md mx-auto px-6 pt-4 pb-10 flex-grow">
@@ -33,9 +56,69 @@
             </h1>
 <p class="text-[#637588] dark:text-[#93a1b0] text-base font-normal leading-relaxed px-2">
                 Abbiamo inviato un codice a 6 cifre a <br/>
-<span class="text-[#111418] dark:text-white font-bold">mario.rossi@gmail.com</span>
+<span id="user-email" class="text-[#111418] dark:text-white font-bold">il tuo indirizzo email</span>
 </p>
 </div>
+<<<<<<< HEAD
+<!-- OTP Form -->
+<form id="verify-form" class="w-full">
+    <div class="w-full mb-10">
+        <fieldset class="flex gap-2 sm:gap-3 justify-center w-full">
+            <input id="code-input" aria-label="Verification Code" class="flex-grow h-14 text-center bg-white dark:bg-[#1a2632] border border-gray-300 dark:border-[#36414b] rounded-xl text-2xl font-bold text-[#111418] dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder-gray-400"
+                   maxlength="6" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="------" />
+        </fieldset>
+    </div>
+    <!-- Actions -->
+    <div class="w-full space-y-6">
+        <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center text-lg">
+            Verifica
+        </button>
+        <div class="text-center">
+            <p class="text-[#637588] dark:text-[#93a1b0] text-sm">
+                Non hai ricevuto il codice?
+                <button type="button" class="text-primary font-bold hover:text-primary/80 transition-colors ml-1 inline-flex items-center gap-1">
+                    Invia di nuovo
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                </button>
+            </p>
+        </div>
+    </div>
+</form>
+</div>
+<div id="notification-banner" class="hidden fixed top-4 right-4 p-4 rounded-lg text-white z-50"></div>
+<script src="assets/js/main.js"></script>
+<script type="module">
+    import { verifyEmail } from './assets/js/auth.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const userEmailSpan = document.getElementById('user-email');
+        const emailForVerification = sessionStorage.getItem('emailForVerification');
+
+        if (emailForVerification) {
+            userEmailSpan.textContent = emailForVerification;
+        } else {
+            userEmailSpan.textContent = "il tuo indirizzo email (non trovato!)";
+        }
+
+        const verifyForm = document.getElementById('verify-form');
+        verifyForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const code = document.getElementById('code-input').value;
+
+            if (emailForVerification && code.length === 6) {
+                await verifyEmail(emailForVerification, code);
+            } else if (!emailForVerification) {
+                 showNotification("Could not find email for verification. Please try registering again.", "error");
+            }
+            else {
+                showNotification("Please enter the 6-digit code.", "error");
+            }
+        });
+    });
+</script>
+</body>
+</html>
+=======
 <!-- OTP Input -->
 <div class="w-full mb-10">
 <fieldset class="flex gap-2 sm:gap-3 justify-center w-full">
@@ -55,13 +138,13 @@
 </div>
 <!-- Actions -->
 <div class="w-full space-y-6">
-<button class="w-full bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center text-lg" onclick="navigateTo('home_page')">
+<button class="w-full bg-primary hover:bg-blue-600 text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-[0.98] flex items-center justify-center text-lg">
                 Verifica
             </button>
 <div class="text-center">
 <p class="text-[#637588] dark:text-[#93a1b0] text-sm">
-                    Non hai ricevuto il codice? 
-                    <button class="text-primary font-bold hover:text-primary/80 transition-colors ml-1 inline-flex items-center gap-1" onclick="navigateTo('verifica_email')">
+                    Non hai ricevuto il codice?
+                    <button class="text-primary font-bold hover:text-primary/80 transition-colors ml-1 inline-flex items-center gap-1">
                         Invia di nuovo
                         <span class="material-symbols-outlined text-sm">refresh</span>
 </button>
@@ -69,6 +152,5 @@
 </div>
 </div>
 </div>
-<script src="assets/js/main.js"></script>
-</body>
-</html>
+</body></html>
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)

@@ -1,15 +1,17 @@
-
 <!DOCTYPE html>
 <html class="dark" lang="it">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Account Privati</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS, Google Fonts, Material Symbols -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="assets/css/style.css" rel="stylesheet"/>
-    <script src="assets/js/tailwind-config.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-white antialiased">
 <div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
@@ -69,7 +71,6 @@
             Aggiungi Account
         </a>
     </div>
-</div>
-<script src="assets/js/main.js"></script>
+    <script type="module" src="/Frontend/public/assets/js/privato.js" defer></script>
 </body>
 </html>

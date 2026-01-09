@@ -10,8 +10,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="assets/css/style.css" rel="stylesheet"/>
-<script src="assets/js/tailwind-config.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
   </head>
 <body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display overflow-x-hidden">
 <div class="relative flex h-auto min-h-screen w-full flex-col">
@@ -25,11 +46,12 @@
 <h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Alessandro</h2>
 </div>
 <div class="flex w-12 items-center justify-end">
-<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full size-10 bg-transparent text-[#111418] dark:text-white hover:bg-[#283039] transition-colors min-w-0 p-0">
-<span class="material-symbols-outlined text-[24px]">notifications</span>
-</button>
+    <button id="logout-button" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full size-10 bg-transparent text-[#111418] dark:text-white hover:bg-[#283039] transition-colors min-w-0 p-0" title="Logout">
+        <span class="material-symbols-outlined text-[24px]">logout</span>
+    </button>
 </div>
 </div>
+<div id="notification-banner" class="hidden fixed top-4 right-4 p-4 rounded-lg text-white z-50"></div>
 <!-- ProfileStats -->
 <div class="flex flex-wrap gap-3 px-4 py-3">
 <div class="flex min-w-[111px] flex-1 basis-[fit-content] flex-col gap-2 rounded-xl border border-[#dce0e5] dark:border-[#3b4754] bg-white dark:bg-[#1c2127] p-4 items-start shadow-sm">
@@ -55,7 +77,11 @@
 <div class="flex flex-col gap-4 p-4">
 <div class="grid grid-cols-2 gap-4">
 <!-- Privato Button -->
-<button onclick="navigateTo('account_privati')" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<<<<<<< HEAD
+<a href="account_privati.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+=======
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#137fec] to-[#0b4e92] text-white shadow-lg aspect-[4/5] overflow-hidden">
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
 <div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[150px]">lock</span>
 </div>
@@ -64,11 +90,15 @@
 </div>
 <div class="text-left z-10">
 <h3 class="text-xl font-bold mb-1">Privato</h3>
-<p class="text-blue-100 text-sm font-medium">Accedi ai tuoi dati privati</p>
+<p class="text-blue-100 text-sm font-medium">Cassaforte Personale</p>
 </div>
-</button>
+</a>
 <!-- Azienda Button -->
-<button onclick="navigateTo('lista_aziende')" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+<<<<<<< HEAD
+<a href="lista_aziende.html" class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+=======
+<button class="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br from-[#10b981] to-[#047857] text-white shadow-lg aspect-[4/5] overflow-hidden">
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
 <div class="absolute right-[-20px] top-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[150px]">apartment</span>
 </div>
@@ -77,12 +107,12 @@
 </div>
 <div class="text-left z-10">
 <h3 class="text-xl font-bold mb-1">Azienda</h3>
-<p class="text-green-100 text-sm font-medium">Gestisci i dati aziendali</p>
+<p class="text-green-100 text-sm font-medium">Gestione Risorse</p>
 </div>
-</button>
+</a>
 </div>
 <!-- Scadenze Button -->
-<button class="group relative flex flex-row items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-lg w-full overflow-hidden">
+<a href="scadenze.html" class="group relative flex flex-row items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-lg w-full overflow-hidden">
 <div class="absolute right-[-10px] bottom-[-40px] opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-[180px]">calendar_month</span>
 </div>
@@ -146,5 +176,27 @@
 <div class="h-[env(safe-area-inset-bottom)] bg-transparent"></div>
 </div>
 </div>
+<<<<<<< HEAD
 <script src="assets/js/main.js"></script>
+<script type="module">
+    import { logout, checkAuthState } from './assets/js/auth.js';
+
+    checkAuthState(); // Protect this page
+
+    const logoutButton = document.getElementById('logout-button');
+    logoutButton.addEventListener('click', () => {
+        logout();
+    });
+</script>
 </body></html>
+=======
+<style>
+        .filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
