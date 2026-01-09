@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html class="dark" lang="it">
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf--8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Account Privati</title>
     <!-- Tailwind CSS, Google Fonts, Material Symbols -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="/Frontend/public/assets/css/style.css" rel="stylesheet"/>
     <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    </style>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-white antialiased">
-<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl">
     <div class="flex items-center p-4 sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
-        <a href="home_page.html" class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+        <a href="/Frontend/public/home_page.html" class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
             <span class="material-symbols-outlined text-2xl">arrow_back</span>
         </a>
-        <h1 class="text-lg font-bold flex-1 text-center pr-10">Account Privati</h1>
+        <h1 class="text-lg font-bold flex-1 text-center">Account Privati</h1>
+        <a href="/Frontend/public/home_page.html" class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+            <span class="material-symbols-outlined text-2xl">home</span>
+        </a>
     </div>
     <div class="p-4 flex-grow">
         <div class="relative mb-4">
@@ -30,7 +29,7 @@
             <!-- Account Card Example -->
             <div class="account-card bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
                 <div class="account-header p-4 flex items-center space-x-4 cursor-pointer">
-                    <img class="w-10 h-10 rounded-full" src="assets/images/google-avatar.png" alt="Google Logo"/>
+                    <img class="w-10 h-10 rounded-full" src="/Frontend/public/assets/images/google-avatar.png" alt="Google Logo"/>
                     <div class="flex-1">
                         <h3 class="font-bold">Google</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400" id="username-google">mario.rossi@gmail.com</p>
@@ -46,19 +45,22 @@
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-gray-500">Password</span>
                             <div class="relative flex items-center">
-                                <input type="password" value="SuperSecretPassword123" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
+                                <input id="password-google" type="password" value="SuperSecretPassword123" class="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0" readonly>
                                 <button class="toggle-password text-gray-500 hover:text-primary">
                                     <span class="material-symbols-outlined text-base">visibility</span>
+                                </button>
+                                <button class="copy-button text-gray-500 hover:text-primary" data-copy-target="password-google">
+                                    <span class="material-symbols-outlined text-base">content_copy</span>
                                 </button>
                             </div>
                         </div>
                          <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-gray-500">Sito Web</span>
-                            <a href="#" class="text-sm text-primary underline">www.google.com</a>
+                            <a href="https://www.google.com" class="text-sm text-primary underline">www.google.com</a>
                         </div>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-900/50 p-2 flex justify-end">
-                         <a href="dettaglio_account_privato.html" class="text-sm font-bold text-primary hover:underline px-4 py-2">VAI AL DETTAGLIO</a>
+                         <a href="/Frontend/public/dettaglio_account_privato.html" class="text-sm font-bold text-primary hover:underline px-4 py-2">VAI AL DETTAGLIO</a>
                     </div>
                 </div>
             </div>
@@ -66,11 +68,12 @@
         </div>
     </div>
     <div class="p-4 sticky bottom-0 bg-background-light dark:bg-background-dark">
-        <a href="aggiungi_account_privato.html" class="w-full h-14 bg-primary hover:bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/30 transition-all active:scale-[0.98] flex items-center justify-center">
+        <a href="/Frontend/public/aggiungi_account_privato.html" class="w-full h-14 bg-primary hover:bg-blue-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/30 transition-all active:scale-[0.98] flex items-center justify-center">
             <span class="material-symbols-outlined">add</span>
             Aggiungi Account
         </a>
     </div>
     <script type="module" src="/Frontend/public/assets/js/privato.js" defer></script>
+    <script src="/Frontend/public/assets/js/main.js"></script>
 </body>
 </html>
