@@ -190,9 +190,11 @@
     import { logout, checkAuthState } from '/Frontend/public/assets/js/auth.js';
     checkAuthState(); // Protect this page
     const logoutButton = document.getElementById('logout-button');
-    logoutButton.addEventListener('click', () => {
-        logout();
-    });
+    if(logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            logout();
+        });
+    }
 </script>
 </body></html>
 <style>

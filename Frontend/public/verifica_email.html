@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -94,6 +93,7 @@
 <script src="assets/js/main.js"></script>
 <script type="module">
     import { verifyEmail } from './assets/js/auth.js';
+    import { showNotification } from './assets/js/utils.js';
 
     document.addEventListener('DOMContentLoaded', () => {
         const userEmailSpan = document.getElementById('user-email');
@@ -157,7 +157,6 @@
 </div>
 </div>
 </body></html>
-=======
 <!-- OTP Form -->
 <form id="verify-form" class="w-full">
     <div class="w-full mb-10">
