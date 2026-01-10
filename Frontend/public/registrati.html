@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <html class="dark" lang="it">
 <head>
     <meta charset="utf-8"/>
@@ -9,21 +10,14 @@
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="/Frontend/public/assets/css/style.css" rel="stylesheet"/>
-    <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
+    <link href="assets/css/style.css" rel="stylesheet"/>
+    <script src="assets/js/tailwind-config.js"></script>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white">
 <div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
     <div class="absolute top-4 left-4 z-20">
         <a href="index.html" class="flex items-center justify-center size-10 rounded-full bg-white/50 dark:bg-black/50 backdrop-blur-sm hover:bg-white/75 dark:hover:bg-black/75 transition-colors">
             <span class="material-symbols-outlined">arrow_back</span>
-        </a>
-    <div class="absolute top-4 left-4 z-20 flex gap-2">
-        <a href="/Frontend/public/index.html" class="flex items-center justify-center size-10 rounded-full bg-white/50 dark:bg-black/50 backdrop-blur-sm hover:bg-white/75 dark:hover:bg-black/75 transition-colors">
-            <span class="material-symbols-outlined">arrow_back</span>
-        </a>
-        <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full bg-white/50 dark:bg-black/50 backdrop-blur-sm hover:bg-white/75 dark:hover:bg-black/75 transition-colors">
-            <span class="material-symbols-outlined">home</span>
         </a>
     </div>
     <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -69,34 +63,6 @@
                 <div class="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-slate-700"></div>
                 <p class="text-xs text-slate-500 font-medium ml-2 min-w-[60px]">Sicurezza</p>
             </div>
-                <div class="relative">
-                    <input id="email" type="email" placeholder="nome@esempio.com" class="w-full rounded-xl border-slate-200 dark:border-[#3b4754] bg-white dark:bg-[#1c2127] h-14 px-4 pr-12 focus:border-primary focus:ring-primary" required />
-                    <button type="button" class="copy-button absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary" data-copy-target="email">
-                        <span class="material-symbols-outlined">content_copy</span>
-                    </button>
-                </div>
-            </div>
-            <div>
-                <label for="password" class="block mb-2 text-sm font-medium text-slate-900 dark:text-slate-300">Password</label>
-                <div class="relative">
-                    <input id="password" type="password" placeholder="Crea una password sicura" class="w-full rounded-xl border-slate-200 dark:border-[#3b4754] bg-white dark:bg-[#1c2127] h-14 px-4 pr-24 focus:border-primary focus:ring-primary" required />
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                        <button type="button" class="copy-button text-slate-400 hover:text-primary" data-copy-target="password">
-                            <span class="material-symbols-outlined">content_copy</span>
-                        </button>
-                        <button type="button" class="toggle-password text-slate-400 hover:text-primary">
-                            <span class="material-symbols-outlined">visibility</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-             <div class="flex gap-2 mb-4 mt-1 px-1 items-center">
-                <div class="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                <div class="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                <p class="text-xs text-slate-500 font-medium ml-2 min-w-[60px]">Sicurezza</p>
-            </div>
             <button type="submit" class="w-full h-14 bg-primary hover:bg-blue-600 active:scale-[0.98] transition-all rounded-xl text-white font-bold text-lg shadow-lg shadow-primary/30 flex items-center justify-center gap-2">
                 Registrati
                 <span class="material-symbols-outlined text-xl">arrow_forward</span>
@@ -110,7 +76,6 @@
         <p class="text-slate-600 dark:text-slate-400 text-sm">
             Hai già un account?
             <a class="text-primary font-bold hover:text-blue-400 transition-colors ml-1" href="index.html">Accedi qui</a>
-            <a class="text-primary font-bold hover:text-blue-400 transition-colors ml-1" href="/Frontend/public/index.html">Accedi qui</a>
         </p>
         <div class="mt-8 mx-auto w-1/3 h-1 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
     </div>
@@ -119,10 +84,6 @@
 <script src="assets/js/main.js"></script>
 <script type="module">
     import { register } from './assets/js/auth.js';
-<script type="module" src="/Frontend/public/assets/js/utils.js"></script>
-<script src="/Frontend/public/assets/js/main.js"></script>
-<script type="module">
-    import { register } from '/Frontend/public/assets/js/auth.js';
 
     const registerForm = document.getElementById('register-form');
     registerForm.addEventListener('submit', async (event) => {
@@ -137,6 +98,7 @@
 </script>
 </body>
 </html>
+=======
 
 <html class="dark" lang="it"><head>
 <meta charset="utf-8"/>
@@ -258,3 +220,4 @@
 </div>
 </div>
 </body></html>
+>>>>>>> 7e502e1 (Aggiornati i file HTML e PNG della cartella public)
