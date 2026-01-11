@@ -1,119 +1,146 @@
-import { getScadenze } from './db.js';
+import { getScadenze, deleteScadenza } from './db.js';
+import { showNotification } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const scadenzeContainer = document.querySelector('.flex.flex-col.gap-3.px-4.pb-24.flex-1.overflow-y-auto');
-    const filterButtons = document.querySelectorAll('.flex.gap-2.px-4.py-3 button');
-    const floatingActionButton = document.querySelector('.absolute.bottom-24.right-4.z-20 button');
+    const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    if (!loggedInUser || !loggedInUser.id) {
+        console.error("User not logged in or user ID is missing.");
+        window.location.href = 'index.html';
+        return;
+    }
+    const userId = loggedInUser.id;
 
-    // Mock user ID
-    const userId = 'user1';
+    const listContainer = document.querySelector('.flex-col.gap-3.px-4');
+    const filterButtons = document.querySelectorAll('.flex.gap-2.px-4 button');
+    const addButton = document.querySelector('.absolute.bottom-24.right-4 button');
 
-    let allScadenze = getScadenze(userId);
+    let currentFilter = 'Tutte';
+    let allScadenze = [];
 
+    // --- RENDER FUNCTION ---
     function renderScadenze(filter = 'Tutte') {
-        scadenzeContainer.innerHTML = '';
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const thisWeekEnd = new Date(today);
-        thisWeekEnd.setDate(thisWeekEnd.getDate() + (7 - today.getDay()));
-        thisWeekEnd.setHours(23, 59, 59, 999);
+        listContainer.innerHTML = ''; // Clear existing list
+        const now = new Date();
 
-        let filteredScadenze = allScadenze;
+        const filteredScadenze = allScadenze.filter(scadenza => {
+            const scadenzaDate = new Date(scadenza.data);
+            const diffDays = Math.ceil((scadenzaDate - now) / (1000 * 60 * 60 * 24));
 
-        if (filter !== 'Tutte') {
-            filteredScadenze = allScadenze.filter(s => {
-                if (filter === 'Urgenti') return s.status === 'urgent';
-                if (filter === 'In scadenza') return s.status === 'due';
-                if (filter === 'Completate') return s.status === 'completed';
-                return false;
-            });
-        }
-
-        const scadenzeOggi = filteredScadenze.filter(s => new Date(s.dueDate).toDateString() === today.toDateString());
-        const scadenzeSettimana = filteredScadenze.filter(s => {
-            const dueDate = new Date(s.dueDate);
-            return dueDate > today && dueDate <= thisWeekEnd;
+            if (filter === 'Tutte') return true;
+            if (filter === 'Urgenti') return diffDays >= 0 && diffDays <= 3;
+            if (filter === 'In scadenza') return diffDays > 3 && diffDays <= 15;
+            if (filter === 'Completate') return scadenza.stato === 'completata';
+            return false;
         });
-        const scadenzeFuture = filteredScadenze.filter(s => new Date(s.dueDate) > thisWeekEnd);
 
-        if (scadenzeOggi.length > 0) {
-            scadenzeContainer.innerHTML += `<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-2 mb-1">Oggi</p>`;
-            scadenzeOggi.forEach(scadenza => {
-                scadenzeContainer.innerHTML += createScadenzaCard(scadenza);
-            });
+        if (filteredScadenze.length === 0) {
+            listContainer.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 mt-8">Nessuna scadenza trovata.</p>`;
+            return;
         }
 
-        if (scadenzeSettimana.length > 0) {
-            scadenzeContainer.innerHTML += `<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-4 mb-1">Questa Settimana</p>`;
-            scadenzeSettimana.forEach(scadenza => {
-                scadenzeContainer.innerHTML += createScadenzaCard(scadenza);
-            });
-        }
-
-        if (scadenzeFuture.length > 0) {
-            scadenzeContainer.innerHTML += `<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-4 mb-1">Prossimamente</p>`;
-            scadenzeFuture.forEach(scadenza => {
-                scadenzeContainer.innerHTML += createScadenzaCard(scadenza);
-            });
-        }
+        filteredScadenze.forEach(scadenza => {
+            const card = createScadenzaCard(scadenza);
+            listContainer.appendChild(card);
+        });
     }
 
+    // --- CARD CREATION ---
     function createScadenzaCard(scadenza) {
-        let avatarOrIcon;
-        if (scadenza.avatar) {
-            avatarOrIcon = `<img alt="Avatar" class="h-full w-full object-cover" src="${scadenza.avatar}"/>`;
-        } else {
-            avatarOrIcon = `<div class="h-12 w-12 flex items-center justify-center shrink-0 overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
-                                <span class="material-symbols-outlined">${scadenza.icon || 'receipt_long'}</span>
-                            </div>`;
-        }
+        const card = document.createElement('div');
+        card.className = 'bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 flex items-center space-x-4';
 
-        let statusBadge;
-        if (scadenza.status === 'urgent') {
-            statusBadge = `<span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-500/10 px-2 py-1 text-xs font-bold text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-500/20">Oggi</span>
-                           <span class="material-symbols-outlined text-red-500 filled text-lg icon-filled">priority_high</span>`;
-        } else if (scadenza.status === 'completed') {
-            statusBadge = `<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-bold text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">Fatto</span>`;
-        } else if (scadenza.time) {
-            statusBadge = `<p class="text-sm font-semibold text-primary">${scadenza.time}</p>`;
-        } else {
-            const dueDate = new Date(scadenza.dueDate);
-            statusBadge = `<span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-bold text-primary ring-1 ring-inset ring-primary/20">${dueDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}</span>`;
-        }
+        const iconClass = getStatusIcon(scadenza.stato, new Date(scadenza.data));
 
-        return `
-            <div class="group relative flex flex-col gap-2 rounded-xl bg-white dark:bg-[#1E252B] p-4 shadow-sm border border-slate-200 dark:border-slate-800 active:scale-[0.98] transition-transform duration-200 ${scadenza.status === 'completed' ? 'opacity-60' : ''}" onclick="location.href='dettaglio_scadenza.html?id=${scadenza.id}'">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        ${avatarOrIcon}
-                        <div class="flex flex-col">
-                            <p class="text-base font-bold text-slate-900 dark:text-white leading-tight ${scadenza.status === 'completed' ? 'line-through' : ''}">${scadenza.title}</p>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">${scadenza.category}</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-end gap-1">
-                        ${statusBadge}
-                    </div>
+        card.innerHTML = `
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-full ${iconClass.bgColor} flex items-center justify-center">
+                    <span class="material-symbols-outlined text-2xl ${iconClass.textColor}">${iconClass.icon}</span>
                 </div>
             </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-lg font-bold truncate">${scadenza.oggetto_email}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">${getRelativeDate(scadenza.data)}</p>
+            </div>
+            <button class="delete-btn p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" data-id="${scadenza.id}">
+                <span class="material-symbols-outlined text-red-500">delete</span>
+            </button>
         `;
+
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('.delete-btn')) {
+                 window.location.href = `dettaglio_scadenza.html?id=${scadenza.id}`;
+            }
+        });
+
+        const deleteButton = card.querySelector('.delete-btn');
+        deleteButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm('Sei sicuro di voler eliminare questa scadenza?')) {
+                deleteScadenza(userId, scadenza.id);
+                loadScadenze(); // Reload and re-render
+                showNotification('Scadenza eliminata con successo.', 'success');
+            }
+        });
+
+        return card;
     }
 
+    // --- UTILITY FUNCTIONS ---
+    function getStatusIcon(stato, dataScadenza) {
+        const now = new Date();
+        const diffDays = Math.ceil((dataScadenza - now) / (1000 * 60 * 60 * 24));
+
+        if (stato === 'completata') {
+            return { icon: 'task_alt', bgColor: 'bg-green-100 dark:bg-green-900', textColor: 'text-green-500' };
+        }
+        if (diffDays < 0) {
+            return { icon: 'error', bgColor: 'bg-gray-100 dark:bg-gray-700', textColor: 'text-gray-500' }; // Scaduta
+        }
+        if (diffDays <= 3) {
+            return { icon: 'warning', bgColor: 'bg-red-100 dark:bg-red-900', textColor: 'text-red-500' }; // Urgente
+        }
+        if (diffDays <= 15) {
+            return { icon: 'hourglass_top', bgColor: 'bg-yellow-100 dark:bg-yellow-900', textColor: 'text-yellow-500' }; // In scadenza
+        }
+        return { icon: 'event', bgColor: 'bg-blue-100 dark:bg-blue-900', textColor: 'text-blue-500' }; // Normale
+    }
+
+    function getRelativeDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < -1) return `Scaduta da ${Math.abs(diffDays)} giorni`;
+        if (diffDays === -1) return 'Scaduta ieri';
+        if (diffDays === 0) return 'Scade oggi';
+        if (diffDays === 1) return 'Scade domani';
+        return `Scade tra ${diffDays} giorni`;
+    }
+
+    // --- EVENT LISTENERS ---
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
             filterButtons.forEach(btn => {
-                btn.classList.remove('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20');
-                btn.classList.add('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'hover:bg-slate-300', 'dark:hover:bg-slate-700');
+                btn.classList.remove('bg-primary', 'text-white', 'font-semibold');
+                btn.classList.add('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'font-medium');
             });
-            button.classList.add('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20');
-            button.classList.remove('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'hover:bg-slate-300', 'dark:hover:bg-slate-700');
-            renderScadenze(button.textContent.trim());
+            button.classList.add('bg-primary', 'text-white', 'font-semibold');
+            button.classList.remove('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'font-medium');
+
+            currentFilter = button.textContent.trim();
+            renderScadenze(currentFilter);
         });
     });
 
-    floatingActionButton.addEventListener('click', () => {
-        location.href = 'aggiungi_scadenza.html';
+    addButton.addEventListener('click', () => {
+        window.location.href = 'dettaglio_scadenza.html';
     });
 
-    renderScadenze();
+    // --- INITIAL LOAD ---
+    function loadScadenze() {
+        allScadenze = getScadenze(userId);
+        renderScadenze(currentFilter);
+    }
+
+    loadScadenze();
 });

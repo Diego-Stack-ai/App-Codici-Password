@@ -46,11 +46,16 @@ function saveScadenza(userId, scadenza) {
         if (scadenzaIndex !== -1) {
             users[userIndex].scadenze[scadenzaIndex] = scadenza;
         } else {
+            // Assign a new ID if it's a new deadline
+            if (!scadenza.id) {
+                scadenza.id = `scad_${Date.now()}`;
+            }
             users[userIndex].scadenze.push(scadenza);
         }
         saveUsers(users);
     }
 }
+
 
 /**
  * Deletes a deadline for a specific user.
@@ -68,5 +73,8 @@ function deleteScadenza(userId, scadenzaId) {
 
 // Initialize the base utenti array for the application.
 const utenti = [];
+
+
+
 
 export { getUsers, saveUsers, getScadenze, saveScadenza, deleteScadenza, utenti };

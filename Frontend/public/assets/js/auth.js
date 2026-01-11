@@ -67,7 +67,7 @@ async function verifyEmail(email, code) {
         showNotification("Email verified successfully! Logging you in.", "success");
 
         // Log the user in by creating a session
-        sessionStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, nome: user.nome }));
+        sessionStorage.setItem('loggedInUser', JSON.stringify({ id: user.id, email: user.email, nome: user.nome }));
 
         setTimeout(() => {
             window.location.href = "home_page.html";
@@ -101,7 +101,7 @@ async function login(email, password) {
 
     if (user.password === password) {
         // Create a "session"
-        sessionStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, nome: user.nome }));
+        sessionStorage.setItem('loggedInUser', JSON.stringify({ id: user.id, email: user.email, nome: user.nome }));
         showNotification("Login successful!", "success");
 
         setTimeout(() => {
