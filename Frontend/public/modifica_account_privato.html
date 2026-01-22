@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Modifica Account Privato</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3b82f6',
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0f1e;
+            color: #f8fafc;
+        }
+
+        .glass-header {
+            background: rgba(10, 15, 30, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Form Controls Overrides */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="url"],
+        textarea {
+            background-color: rgba(255, 255, 255, 0.03) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 1px #3b82f6 !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .filled {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased bg-[#0a0f1e] text-slate-50 selection:bg-blue-500/30">
+
+    <div
+        class="relative flex h-full min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-[#0a0f1e] border-x border-white/5">
+
+        <!-- Header -->
+        <header class="fixed top-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto glass-header z-50 px-4 py-3">
+            <div class="flex items-center justify-between w-full h-10 gap-4">
+                <button type="button" onclick="history.back()" id="btn-back"
+                    class="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+                </button>
+                <h2 class="text-white text-lg font-bold tracking-tight text-center flex-1">
+                    Modifica Account
+                </h2>
+                <!-- Home Link -->
+                <a href="home_page.html"
+                    class="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Spacer -->
+        <div class="h-16 w-full shrink-0"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-32">
+            <div id="loading-overlay"
+                class="fixed inset-0 bg-[#0a0f1e]/90 z-[60] flex items-center justify-center hidden">
+                <div class="flex flex-col items-center gap-3">
+                    <div class="size-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="font-bold text-gray-400 text-sm">Caricamento dati...</p>
+                </div>
+            </div>
+
+            <div class="w-full max-w-2xl mx-auto px-6 py-8 flex flex-col gap-8">
+
+                <!-- Logo Uploader -->
+                <div class="flex flex-col items-center justify-center">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('logo-input').click()">
+                        <div
+                            class="size-24 rounded-full bg-[#1e293b] flex items-center justify-center ring-4 ring-[#0a0f1e] shadow-xl overflow-hidden relative border border-white/10">
+                            <img id="account-logo-preview" alt="Logo" class="w-full h-full object-cover hidden"
+                                src="" />
+                            <div id="logo-placeholder"
+                                class="flex flex-col items-center justify-center text-gray-500 group-hover:text-blue-400 transition-colors">
+                                <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                            </div>
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-white text-2xl">edit</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="logo-input" accept="image/*" class="hidden" />
+                    <p class="text-xs text-gray-500 mt-3 font-medium uppercase tracking-wider">Cambia Logo</p>
+                </div>
+
+                <!-- 1. Dati Principali -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-blue-500">badge</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Dati Account</h3>
+                    </div>
+
+                    <div
+                        class="bg-[#1e293b]/50 border border-white/5 rounded-2xl p-5 space-y-5 shadow-lg backdrop-blur-sm">
+                        <!-- Nome Account -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nome
+                                Account</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">badge</span>
+                                <input id="account-name" type="text"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                    placeholder="Es. Paypal, Spotify..." />
+                            </div>
+                        </div>
+
+                        <!-- Username -->
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Username
+                                / Email</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">person</span>
+                                <input id="account-username" type="text"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                    placeholder="Email o Username" />
+                            </div>
+                        </div>
+
+                        <!-- Account & Password -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Codice
+                                    Cliente</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">pin</span>
+                                    <input id="account-code" type="text"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                        placeholder="Codice opzionale" />
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Password</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">key</span>
+                                    <input id="account-password" type="password"
+                                        class="w-full h-12 pl-10 pr-12 rounded-xl text-sm font-medium focus:outline-none font-mono tracking-wider"
+                                        placeholder="••••••••" />
+                                    <button type="button"
+                                        onclick="const i = document.getElementById('account-password'); i.type = i.type==='password'?'text':'password'; this.querySelector('span').textContent = i.type==='password'?'visibility_off':'visibility';"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                                        <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sito Web -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sito
+                                Web</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">language</span>
+                                <input id="account-url" type="url"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none text-blue-300"
+                                    placeholder="https://" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Coordinate Bancarie -->
+                <div class="space-y-4" id="banking-section">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-purple-500">account_balance</span>
+                            <h3 class="text-white text-sm font-bold uppercase tracking-wider">Coordinate Bancarie</h3>
+                        </div>
+                        <button type="button" id="btn-add-iban"
+                            class="text-blue-400 hover:text-blue-300 text-xs font-bold flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/10">
+                            <span class="material-symbols-outlined text-[16px]">add_circle</span> Aggiungi
+                        </button>
+                    </div>
+
+                    <div id="iban-list-container" class="space-y-4">
+                        <!-- IBANs will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 3. Referente -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-orange-500">assignment_ind</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Referente</h3>
+                    </div>
+
+                    <div
+                        class="bg-[#1e293b]/50 border border-white/5 rounded-2xl p-5 space-y-5 shadow-lg backdrop-blur-sm">
+                        <!-- Nome -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nome
+                                e Cognome</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">badge</span>
+                                <input id="ref-name" type="text"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                    placeholder="Nome Referente" />
+                            </div>
+                        </div>
+
+                        <!-- Contatti -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Telefono</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">call</span>
+                                    <input id="ref-phone" type="tel"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                        placeholder="Fisso" />
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Cellulare</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">smartphone</span>
+                                    <input id="ref-mobile" type="tel"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                        placeholder="Cellulare" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Note & Condivisione -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-teal-500">sticky_note_2</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Note & Opzioni</h3>
+                    </div>
+
+                    <!-- Note -->
+                    <div class="bg-[#1e293b]/50 border border-white/5 rounded-2xl overflow-hidden p-0 shadow-lg mb-4">
+                        <textarea id="account-note"
+                            class="w-full bg-transparent border-none p-5 text-sm leading-relaxed text-gray-300 placeholder:text-gray-600 focus:ring-0 min-h-[120px] resize-none"
+                            placeholder="Note aggiuntive..."></textarea>
+                    </div>
+
+                    <!-- Opzioni Flags -->
+                    <div
+                        class="bg-[#1e293b]/50 border border-white/5 rounded-2xl p-5 space-y-6 shadow-lg backdrop-blur-sm">
+                        <!-- Condiviso Toggle -->
+                        <div class="flex items-center justify-between group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="bg-blue-500/20 p-2 rounded-lg text-blue-400 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined filled">share</span>
+                                </div>
+                                <div>
+                                    <span class="block text-white text-sm font-bold">Account Condiviso</span>
+                                    <span class="block text-[10px] text-gray-500">Permetti l'accesso ad altri
+                                        utenti</span>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input class="sr-only peer" type="checkbox" id="flag-shared" />
+                                <div
+                                    class="w-11 h-6 bg-white/10 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all">
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Condivisione Panel -->
+                        <div id="shared-management"
+                            class="hidden pl-2 border-l-2 border-blue-500/20 ml-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <!-- Lista Invitati -->
+                            <div id="guests-list" class="space-y-2 mb-3">
+                                <!-- Popolato via JS -->
+                            </div>
+
+                            <!-- Input Invito -->
+                            <div class="relative">
+                                <div
+                                    class="flex items-center bg-black/40 rounded-xl border border-white/10 overflow-hidden focus-within:border-blue-500/50 transition-colors">
+                                    <input id="invite-email" type="email"
+                                        class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0 text-white placeholder:text-gray-600"
+                                        placeholder="Email utente da invitare">
+                                    <button id="btn-send-invite" type="button"
+                                        class="p-3 text-blue-400 hover:bg-white/5 border-l border-white/10 transition-colors">
+                                        <span class="material-symbols-outlined">person_add</span>
+                                    </button>
+                                </div>
+                                <div id="rubrica-suggestions"
+                                    class="hidden absolute top-full left-0 right-0 mt-1 bg-[#1e293b] border border-white/10 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
+                                    <!-- Popolato via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Memorandum Toggle -->
+                        <div class="flex items-center justify-between group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="bg-amber-500/20 p-2 rounded-lg text-amber-400 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined filled">lightbulb</span>
+                                </div>
+                                <div>
+                                    <span class="block text-white text-sm font-bold">Memorandum</span>
+                                    <span class="block text-[10px] text-gray-500">Metti in evidenza questo
+                                        account</span>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input class="sr-only peer" type="checkbox" id="flag-memo" />
+                                <div
+                                    class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-amber-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all">
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Memo Condiviso Toggle -->
+                        <div class="flex items-center justify-between group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined filled">share_reviews</span>
+                                </div>
+                                <div>
+                                    <span class="block text-white text-sm font-bold">Memorandum Condiviso</span>
+                                    <span class="block text-[10px] text-gray-500">Evidenzia anche per gli
+                                        invitati</span>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input class="sr-only peer" type="checkbox" id="flag-memo-shared" />
+                                <div
+                                    class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-emerald-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Fixed Bottom Action -->
+        <div
+            class="fixed bottom-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto p-4 bg-[#0a0f1e]/80 backdrop-blur-xl border-t border-white/5 z-40">
+            <button id="save-btn"
+                class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl shadow-lg shadow-blue-900/40 font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined">save</span>
+                Salva Modifiche
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Script -->
+    <script src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/modifica_account_privato.js"></script>
+</body>
+
+</html>

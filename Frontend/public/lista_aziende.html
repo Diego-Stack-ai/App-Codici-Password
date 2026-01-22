@@ -1,190 +1,152 @@
 <!DOCTYPE html>
-<html class="light" lang="it">
+<html class="dark" lang="it">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Lista Aziende</title>
-<!-- Google Fonts: Inter -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Theme Configuration -->
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                        "card-light": "#ffffff",
-                        "card-dark": "#1c2630",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
-                    boxShadow: {
-                        "soft": "0 4px 20px -2px rgba(0, 0, 0, 0.05)",
-                    }
-                },
-            },
-        }
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <script>
+        // FORCE DARK MODE
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
     </script>
-<script src="/Frontend/public/assets/js/tailwind-config.js"></script>
-<style>
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Lista Aziende</title>
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/app-icon.png?v=2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="App Codici">
+
+    <!-- Prevent Caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <script src="assets/js/tailwind-config.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+
         /* Custom scrollbar hiding for clean UI */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
+
         .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        body {
+            min-height: 100dvh;
+            background-color: #0a0f1e;
+        }
+
+        /* PUNTO LUCE A FARO (Standard Metodo A) */
+        .glass-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150%;
+            height: 120%;
+            background: radial-gradient(circle at 50% 0%,
+                    rgba(80, 150, 255, 0.6) 0%,
+                    rgba(80, 150, 255, 0) 60%);
+            filter: blur(80px);
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+            animation: glowFloat 5s ease-in-out infinite;
+        }
+
+        @keyframes glowFloat {
+            0% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(100px) scale(1.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+        }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-        .filled {
-            font-variation-settings: 'FILL' 1;
-        }
-        .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom, 1.5rem);
-        }
-</style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display overflow-x-hidden antialiased">
-<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl">
-<!-- Top App Bar -->
-<header class="sticky top-0 z-20 flex items-center justify-between bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-4 py-3 border-b border-gray-200/50 dark:border-gray-800/50">
-    <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-        <span class="material-symbols-outlined">arrow_back</span>
-    </a>
-    <h1 class="text-lg font-bold tracking-tight text-center text-gray-900 dark:text-white">Le Mie Aziende</h1>
-    <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-        <span class="material-symbols-outlined">home</span>
-    </a>
-</header>
-<!-- Main Content Scroll Area -->
-<main class="flex-1 overflow-y-auto px-4 py-6 pb-28">
-<!-- Intro / Stats -->
-<div class="mb-6 flex items-center justify-between">
-<div>
-<p class="text-sm font-medium text-gray-500 dark:text-gray-400">Totale Aziende</p>
-<h2 class="text-3xl font-bold text-gray-900 dark:text-white">3</h2>
-</div>
-<div class="flex gap-2">
-<button class="p-2 rounded-lg bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-primary">
-<span class="material-symbols-outlined">filter_list</span>
-</button>
-<button class="p-2 rounded-lg bg-white dark:bg-card-dark shadow-sm border border-gray-100 dark:border-gray-800 text-primary">
-<span class="material-symbols-outlined">search</span>
-</button>
-</div>
-</div>
-<!-- Company List -->
-<div class="flex flex-col gap-4">
-<!-- Card 1 -->
-<div class="account-card group relative flex flex-col gap-4 rounded-2xl bg-card-light dark:bg-card-dark p-5 shadow-soft border border-gray-100 dark:border-gray-800 transition-all">
-    <div class="account-header flex items-start justify-between cursor-pointer">
-        <div class="flex items-center gap-4">
-            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                <span class="material-symbols-outlined text-[32px]">domain</span>
-            </div>
-            <div class="flex flex-col">
-                <h3 class="text-lg font-bold leading-tight text-gray-900 dark:text-white">Tech Solutions S.r.l.</h3>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">P.IVA: IT12345678901</p>
-                <div class="mt-1 flex items-center gap-1">
-                    <span class="block h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Attiva</span>
+
+<body class="bg-[#0a0f1e] text-white font-display overflow-x-hidden antialiased">
+    <div
+        class="relative flex h-full min-h-screen w-full flex-col w-full md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">
+
+        <!-- GLOW LAYER (Animated) -->
+        <div class="glass-glow"></div>
+
+        <!-- Header (Fixed Glass) -->
+        <header
+            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-[#0a0f1e]/20 backdrop-blur-sm border-b border-white/5 z-50 transition-colors">
+            <div class="flex items-center px-4 h-16">
+                <a href="home_page.html"
+                    class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-white">
+                    <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+                </a>
+                <h1 class="text-lg font-bold tracking-tight text-center text-white flex-1">Aziende</h1>
+                <div class="flex items-center gap-1">
+                    <button id="sort-btn"
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-white"
+                        title="Ordina A-Z">
+                        <span class="material-symbols-outlined text-[24px]">sort_by_alpha</span>
+                    </button>
+                    <a href="aggiungi_nuova_azienda.html"
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-primary"
+                        title="Aggiungi Azienda">
+                        <span class="material-symbols-outlined text-[24px]">add</span>
+                    </a>
                 </div>
             </div>
-        </div>
-        <button class="expand-icon flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-primary transition-transform duration-300">
-            <span class="material-symbols-outlined">expand_more</span>
-        </button>
-    </div>
-    <div class="account-body hidden pt-4">
-        <div class="h-px w-full bg-gray-100 dark:bg-gray-700/50 mb-4"></div>
-        <div class="flex items-center justify-between">
-            <div class="flex -space-x-2 overflow-hidden">
-                <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("/Frontend/public/assets/images/employee-1.png");'></div>
-                <div class="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-card-dark bg-gray-200 bg-cover bg-center" data-alt="Employee portrait" style='background-image: url("/Frontend/public/assets/images/employee-2.png");'></div>
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 ring-2 ring-white dark:bg-gray-700 dark:ring-card-dark text-[10px] font-bold text-gray-500 dark:text-gray-300">+3</div>
+        </header>
+
+        <!-- Header Spacer -->
+        <div class="h-16 w-full shrink-0"></div>
+
+        <main class="flex-1 overflow-y-auto no-scrollbar mb-24">
+            <!-- Companies List Container -->
+            <div id="aziende-list-container" class="flex flex-col gap-4 p-4">
+                <!-- Loading Spinner (will be replaced by JS) -->
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    <p class="text-slate-500 mt-4 text-sm">Caricamento aziende...</p>
+                </div>
             </div>
-            <button class="flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <span class="material-symbols-outlined text-[20px]">qr_code_2</span>
-                <span class="hidden sm:inline">QR Code</span>
-            </button>
-        </div>
+        </main>
+
     </div>
-</div>
-<!-- Card 2 & 3 would follow the same expandable structure -->
-</div>
-<!-- Add Button Area -->
-<div class="mt-4">
-<a href="aggiungi_nuova_azienda.html" class="group flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 bg-primary text-white gap-2 shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95">
-<a href="/Frontend/public/aggiungi_nuova_azienda.html" class="group flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 bg-primary text-white gap-2 shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95">
-<span class="material-symbols-outlined text-[24px] group-hover:rotate-90 transition-transform">add</span>
-<span class="text-base font-bold tracking-wide">Aggiungi nuova Azienda</span>
-</a>
-<p class="text-center text-xs text-gray-400 mt-3 dark:text-gray-500">
-<span class="material-symbols-outlined align-middle text-[14px] mr-1">lock</span>
-                        I tuoi dati sono protetti e crittografati
-                    </p>
-</div>
-</main>
-<!-- Bottom Navigation -->
-<nav class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-card-dark/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-safe">
-<div class="flex items-center justify-around h-16 max-w-md mx-auto">
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary" href="lista_aziende.html">
-<span class="material-symbols-outlined text-[26px] filled">domain</span>
-<span class="text-[10px] font-medium">Aziende</span>
-</a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="account_privati.html">
-<span class="material-symbols-outlined text-[26px]">lock</span>
-<span class="text-[10px] font-medium">Password</span>
-</a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="gestione_allegati.html">
-<span class="material-symbols-outlined text-[26px]">description</span>
-<span class="text-[10px] font-medium">Documenti</span>
-</a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="scadenze.html">
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-primary" href="/Frontend/public/lista_aziende.html">
-<span class="material-symbols-outlined text-[26px] filled">domain</span>
-<span class="text-[10px] font-medium">Aziende</span>
-</a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="/Frontend/public/account_privati.html">
-<span class="material-symbols-outlined text-[26px]">lock</span>
-<span class="text-[10px] font-medium">Password</span>
-</a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="/Frontend/public/gestione_allegati.html">
-<span class="material-symbols-outlined text-[26px]">description</span>
-<span class="text-[10px] font-medium">Documenti</span>
-</a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="/Frontend/public/scadenze.html">
-<span class="material-symbols-outlined text-[26px]">event</span>
-<span class="text-[10px] font-medium">Scadenze</span>
-</a>
-<a class="flex flex-col items-center justify-center w-full h-full gap-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" href="impostazioni.html">
-<span class="material-symbols-outlined text-[26px]">person</span>
-<span class="text-[10px] font-medium">Profilo</span>
-</a>
-</div>
-</nav>
-</div>
-</body></html>
-<script src="/Frontend/public/assets/js/main.js"></script>
+
+    <!-- Bottom Glass Frame (Fixed) -->
+    <div
+        class="fixed bottom-0 left-0 right-0 w-full md:max-w-3xl lg:max-w-5xl mx-auto h-16 pointer-events-none z-50 backdrop-blur-sm border-t transition-colors bg-[#0a0f1e]/20 border-white/5">
+    </div>
+
+    <script src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/lista_aziende.js?v=2.0"></script>
 </body>
+
 </html>

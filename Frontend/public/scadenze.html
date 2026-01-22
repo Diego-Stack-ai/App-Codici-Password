@@ -1,129 +1,190 @@
-<!DOCTYPE html>
 <html class="dark" lang="it">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Scadenze</title>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
+    <meta charset="utf-8" />
+    <!-- Instant Theme Loader (Must be in HEAD) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Scadenze</title>
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/app-icon.png?v=2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="App Codici">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            background-color: #0a0f1e;
+            min-height: 100vh;
         }
-    </script>
-<style>
-        /* Custom scrollbar hide for horizontal scrolling */
-<script src="/Frontend/public/assets/js/tailwind-config.js"></script>
-<style>
-        .hide-scrollbar::-webkit-scrollbar {
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .filled {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        /* PUNTO LUCE A FARO (Standard Metodo A) */
+        .glass-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150%;
+            height: 120%;
+            background: radial-gradient(circle at 50% 0%,
+                    rgba(80, 150, 255, 0.6) 0%,
+                    rgba(80, 150, 255, 0) 60%);
+            filter: blur(80px);
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+            animation: glowFloat 5s ease-in-out infinite;
+        }
+
+        @keyframes glowFloat {
+            0% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(100px) scale(1.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        /* Hide scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-        .hide-scrollbar {
+
+        .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-        .filled {
-            font-variation-settings: 'FILL' 1;
-        }
-</style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display antialiased">
-<div class="relative flex h-full min-h-screen w-full flex-col overflow-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark text-slate-900 dark:text-white">
-<!-- Header -->
-<div class="flex items-center px-4 pt-6 pb-2 justify-between sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
-    <a href="/Frontend/public/home_page.html" class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-        <span class="material-symbols-outlined">arrow_back</span>
-    </a>
-    <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Le tue Scadenze</h2>
-    <div class="flex items-center justify-end size-10">
-        <button class="flex items-center justify-center rounded-full h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-            <span class="material-symbols-outlined text-2xl">filter_list</span>
-        </button>
+
+<body class="bg-[#0a0f1e] text-white font-display antialiased overflow-x-hidden">
+    <div
+        class="relative flex h-full min-h-screen w-full flex-col w-full md:max-w-3xl lg:max-w-5xl mx-auto bg-gradient-to-l from-[#030712] to-[#162e6e] shadow-2xl overflow-hidden">
+
+        <!-- GLOW LAYER (Animated) -->
+        <div class="glass-glow"></div>
+
+        <!-- Collapsible Search Bar -->
+        <div id="search-bar-container"
+            class="fixed top-16 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-[#0a0f1e]/20 backdrop-blur-md z-40 transition-all duration-500 -translate-y-full opacity-0 overflow-hidden border-b border-white/5 shadow-2xl">
+            <div class="p-4">
+                <div class="relative w-full">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/70 text-lg">search</span>
+                    <input id="deadline-search" type="text" placeholder="Cerca scadenze..."
+                        class="w-full h-11 pl-10 pr-4 bg-black/20 border border-white/5 rounded-xl text-sm focus:ring-2 focus:ring-primary transition-all text-white placeholder:text-white/40 outline-none">
+                </div>
+            </div>
+        </div>
+
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-24">
+            <!-- Header Spacer (OBLIGATORY) -->
+            <div class="h-16 w-full shrink-0"></div>
+
+            <!-- Sort Bar -->
+            <div class="px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-sm">sort</span>
+                    <span class="text-[10px] font-black text-white/50 uppercase tracking-widest">Ordina:</span>
+                    <span id="deadline-count"
+                        class="bg-primary shadow-[0_0_10px_rgba(19,127,236,0.3)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[24px] text-center">0</span>
+                </div>
+                <select id="deadline-sort"
+                    class="bg-black/20 border border-white/10 rounded-lg text-[10px] font-bold text-white/80 focus:ring-0 py-1 px-3 h-7 appearance-none cursor-pointer">
+                    <option value="date-asc" class="bg-[#112240] text-white">Data (Più vicina)</option>
+                    <option value="date-desc" class="bg-[#112240] text-white">Data (Più lontana)</option>
+                    <option value="name-asc" class="bg-[#112240] text-white">Nome (A-Z)</option>
+                    <option value="name-desc" class="bg-[#112240] text-white">Nome (Z-A)</option>
+                </select>
+            </div>
+
+            <!-- Filter Chips (Stati) -->
+            <div class="flex justify-center gap-2 px-4 py-3 overflow-x-auto no-scrollbar shrink-0">
+                <button
+                    class="filter-chip active flex h-7 shrink-0 items-center justify-center px-2.5 rounded-lg bg-primary text-white shadow-lg shadow-primary/30 text-[10px] font-black uppercase tracking-wider transition-all">
+                    Tutte
+                </button>
+                <button
+                    class="filter-chip flex h-7 shrink-0 items-center justify-center px-2.5 rounded-lg bg-black/20 border border-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-all">
+                    Urgenti
+                </button>
+                <button
+                    class="filter-chip flex h-7 shrink-0 items-center justify-center px-2.5 rounded-lg bg-black/20 border border-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-all">
+                    In scadenza
+                </button>
+                <button
+                    class="filter-chip flex h-7 shrink-0 items-center justify-center px-2.5 rounded-lg bg-black/20 border border-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-all">
+                    Completate
+                </button>
+            </div>
+
+            <!-- List Content -->
+            <div id="scadenze-list" class="flex flex-col gap-4 px-4 pb-10">
+                <div class="text-center py-20">
+                    <div class="inline-block relative">
+                        <div class="size-12 border-4 border-white/5 border-t-primary rounded-full animate-spin">
+                        </div>
+                    </div>
+                    <p class="text-white/30 text-xs mt-4 font-medium tracking-widest uppercase">Analisi dati...</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Glass Frame (Fixed) -->
+        <div
+            class="fixed bottom-0 left-0 right-0 w-full md:max-w-3xl lg:max-w-5xl mx-auto h-12 pointer-events-none z-50 backdrop-blur-md bg-[#0a0f1e]/20 border-t border-white/5">
+        </div>
+
+        <!-- Header -->
+        <header
+            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-[#0a0f1e]/20 backdrop-blur-sm border-b border-white/5 z-50 transition-colors">
+            <div class="flex items-center px-4 h-16">
+                <a href="home_page.html"
+                    class="flex items-center justify-center size-10 rounded-full hover:bg-white/10 transition-all text-white active:scale-90">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h2 class="text-sm font-black flex-1 text-center text-white uppercase tracking-[0.3em] ml-2">Scadenze
+                </h2>
+                <div class="flex items-center gap-1">
+                    <button id="toggle-search"
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-white/10 transition-all text-white active:scale-90">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                    <a href="aggiungi_scadenza.html"
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-white/10 transition-all text-white active:scale-90">
+                        <span class="material-symbols-outlined text-2xl">add</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
     </div>
-</div>
-<!-- Filter Chips -->
-<div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar shrink-0">
-<button class="flex h-9 shrink-0 items-center justify-center px-4 rounded-full bg-primary text-white shadow-md shadow-primary/20">
-<p class="text-sm font-semibold leading-normal">Tutte</p>
-</button>
-<button class="flex h-9 shrink-0 items-center justify-center px-4 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
-<p class="text-sm font-medium leading-normal">Urgenti</p>
-</button>
-<button class="flex h-9 shrink-0 items-center justify-center px-4 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
-<p class="text-sm font-medium leading-normal">In scadenza</p>
-</button>
-<button class="flex h-9 shrink-0 items-center justify-center px-4 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
-<p class="text-sm font-medium leading-normal">Completate</p>
-</button>
-</div>
-<!-- List Content -->
-<div class="flex flex-col gap-3 px-4 pb-24 flex-1 overflow-y-auto">
-<div id="scadenze-list" class="flex flex-col gap-3 px-4 pb-24 flex-1 overflow-y-auto">
-    <!-- Dynamic content will be injected here by scadenze.js -->
-</div>
-<!-- Floating Action Button -->
-<div class="absolute bottom-24 right-4 z-20">
-<a href="/Frontend/public/aggiungi_scadenza.html" class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:scale-105 active:scale-95 transition-all duration-200">
-<span class="material-symbols-outlined text-3xl">add</span>
-</a>
-</div>
-<!-- Bottom Navigation -->
-<div class="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md bg-white dark:bg-[#1E252B] border-t border-slate-200 dark:border-slate-800 pb-safe">
-<div class="flex h-16 items-center justify-around px-2">
-<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors" onclick="location.href='home_page.html'">
-<a href="/Frontend/public/home_page.html" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
-<span class="material-symbols-outlined text-2xl">home</span>
-<span class="text-[10px] font-medium">Home</span>
-</a>
-<a href="#" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
-<span class="material-symbols-outlined text-2xl">lock</span>
-<span class="text-[10px] font-medium">Password</span>
-</a>
-<a href="/Frontend/public/gestione_allegati.html" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
-<span class="material-symbols-outlined text-2xl">folder</span>
-<span class="text-[10px] font-medium">Documenti</span>
-</a>
-<a href="/Frontend/public/scadenze.html" class="flex flex-1 flex-col items-center justify-center gap-1 text-primary">
-<span class="material-symbols-outlined text-2xl filled">calendar_clock</span>
-<span class="text-[10px] font-medium">Scadenze</span>
-</a>
-</div>
-<!-- iOS Home Indicator Spacing -->
-<div class="h-4 w-full bg-white dark:bg-[#1E252B]"></div>
-</div>
-</div>
-<script src="assets/js/scadenze.js" type="module"></script>
-<script src="assets/js/main.js"></script>
-</body>
-</html>
-</body></html>
 
-<script src="/Frontend/public/assets/js/main.js"></script>
-<script src="/Frontend/public/assets/js/scadenze.js" type="module"></script>
+    <script src="assets/js/scadenze.js" type="module"></script>
 </body>
-</html>
 
+</html>

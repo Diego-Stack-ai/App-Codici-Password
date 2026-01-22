@@ -1,119 +1,226 @@
-import { getScadenze } from './db.js';
+import { auth, db } from './firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
+let currentUser = null;
+let allScadenze = [];
+
+// On Page Load
 document.addEventListener('DOMContentLoaded', () => {
-    const scadenzeContainer = document.querySelector('.flex.flex-col.gap-3.px-4.pb-24.flex-1.overflow-y-auto');
-    const filterButtons = document.querySelectorAll('.flex.gap-2.px-4.py-3 button');
-    const floatingActionButton = document.querySelector('.absolute.bottom-24.right-4.z-20 button');
+    const scadenzeContainer = document.querySelector('#scadenze-list');
+    const searchInput = document.getElementById('deadline-search');
+    const sortSelect = document.getElementById('deadline-sort');
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const toggleSearchBtn = document.getElementById('toggle-search');
+    const searchBarContainer = document.getElementById('search-bar-container');
 
-    // Mock user ID
-    const userId = 'user1';
+    let activeFilter = 'Tutte';
+    let searchQuery = '';
+    let sortType = 'date-asc';
 
-    let allScadenze = getScadenze(userId);
+    // Toggle Search Bar
+    if (toggleSearchBtn && searchBarContainer) {
+        toggleSearchBtn.onclick = () => {
+            const isHidden = searchBarContainer.classList.contains('-translate-y-full');
+            if (isHidden) {
+                searchBarContainer.classList.remove('-translate-y-full', 'opacity-0');
+                searchBarContainer.classList.add('translate-y-0', 'opacity-100');
+                if (searchInput) searchInput.focus();
+            } else {
+                searchBarContainer.classList.add('-translate-y-full', 'opacity-0');
+                searchBarContainer.classList.remove('translate-y-0', 'opacity-100');
+            }
+        };
+    }
 
-    function renderScadenze(filter = 'Tutte') {
-        scadenzeContainer.innerHTML = '';
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const thisWeekEnd = new Date(today);
-        thisWeekEnd.setDate(thisWeekEnd.getDate() + (7 - today.getDay()));
-        thisWeekEnd.setHours(23, 59, 59, 999);
+    // Initialize Auth Listener
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            await loadScadenze();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
 
-        let filteredScadenze = allScadenze;
+    async function loadScadenze() {
+        if (!currentUser) return;
+        try {
+            allScadenze = await getScadenze(currentUser.uid);
+            renderFilteredScadenze();
+        } catch (error) {
+            console.error("Errore recupero scadenze:", error);
+            if (scadenzeContainer) scadenzeContainer.innerHTML = `<p class="text-center p-4 text-red-500">Errore: ${error.message}</p>`;
+        }
+    }
 
-        if (filter !== 'Tutte') {
-            filteredScadenze = allScadenze.filter(s => {
-                if (filter === 'Urgenti') return s.status === 'urgent';
-                if (filter === 'In scadenza') return s.status === 'due';
-                if (filter === 'Completate') return s.status === 'completed';
-                return false;
+    async function getScadenze(userId) {
+        // Correct path: users/{userId}/scadenze
+        const scadenzeRef = collection(db, "users", userId, "scadenze");
+        const querySnapshot = await getDocs(scadenzeRef);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    function renderFilteredScadenze() {
+        if (!scadenzeContainer) return;
+
+        let filtered = [...allScadenze];
+
+        // 1. Filter by status
+        const now = new Date();
+        const thirtyDaysLater = new Date();
+        thirtyDaysLater.setDate(now.getDate() + 30);
+
+        if (activeFilter !== 'Tutte') {
+            filtered = filtered.filter(s => {
+                const dueDateValue = s.dueDate || s.date; // Support both just in case
+                const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
+                const expired = dueDate < now;
+                const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
+
+                if (activeFilter === 'Urgenti') return expired;
+                if (activeFilter === 'In scadenza') return isUpcoming;
+                if (activeFilter === 'Completate') return s.completed;
+                return true;
             });
         }
 
-        const scadenzeOggi = filteredScadenze.filter(s => new Date(s.dueDate).toDateString() === today.toDateString());
-        const scadenzeSettimana = filteredScadenze.filter(s => {
-            const dueDate = new Date(s.dueDate);
-            return dueDate > today && dueDate <= thisWeekEnd;
+        // 2. Search
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(s =>
+                (s.title && s.title.toLowerCase().includes(q)) ||
+                (s.category && s.category.toLowerCase().includes(q)) ||
+                (s.name && s.name.toLowerCase().includes(q)) ||
+                (s.veicolo_targa && s.veicolo_targa.toLowerCase().includes(q))
+            );
+        }
+
+        // 3. Sort
+        filtered.sort((a, b) => {
+            if (sortType.startsWith('date')) {
+                const dateAValue = a.dueDate || a.date;
+                const dateBValue = b.dueDate || b.date;
+                const dateA = (dateAValue && dateAValue.toDate) ? dateAValue.toDate() : new Date(dateAValue);
+                const dateB = (dateBValue && dateBValue.toDate) ? dateBValue.toDate() : new Date(dateBValue);
+                return sortType === 'date-asc' ? dateA - dateB : dateB - dateA;
+            } else {
+                const nameA = (a.title || "").toLowerCase();
+                const nameB = (b.title || "").toLowerCase();
+                return sortType === 'name-asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+            }
         });
-        const scadenzeFuture = filteredScadenze.filter(s => new Date(s.dueDate) > thisWeekEnd);
 
-        if (scadenzeOggi.length > 0) {
-            scadenzeContainer.innerHTML += `<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-2 mb-1">Oggi</p>`;
-            scadenzeOggi.forEach(scadenza => {
-                scadenzeContainer.innerHTML += createScadenzaCard(scadenza);
-            });
+        // 4. Render
+        if (filtered.length === 0) {
+            scadenzeContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 opacity-30">
+                    <span class="material-symbols-outlined text-6xl mb-4">event_busy</span>
+                    <p class="text-white font-bold uppercase tracking-widest text-xs">Nessuna scadenza trovata</p>
+                </div>`;
+            document.getElementById('deadline-count').textContent = '0';
+            return;
         }
 
-        if (scadenzeSettimana.length > 0) {
-            scadenzeContainer.innerHTML += `<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-4 mb-1">Questa Settimana</p>`;
-            scadenzeSettimana.forEach(scadenza => {
-                scadenzeContainer.innerHTML += createScadenzaCard(scadenza);
-            });
-        }
-
-        if (scadenzeFuture.length > 0) {
-            scadenzeContainer.innerHTML += `<p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mt-4 mb-1">Prossimamente</p>`;
-            scadenzeFuture.forEach(scadenza => {
-                scadenzeContainer.innerHTML += createScadenzaCard(scadenza);
-            });
-        }
+        document.getElementById('deadline-count').textContent = filtered.length;
+        scadenzeContainer.innerHTML = filtered.map(s => createScadenzaCard(s)).join('');
     }
 
     function createScadenzaCard(scadenza) {
-        let avatarOrIcon;
-        if (scadenza.avatar) {
-            avatarOrIcon = `<img alt="Avatar" class="h-full w-full object-cover" src="${scadenza.avatar}"/>`;
+        const dueDateValue = scadenza.dueDate || scadenza.date;
+        const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
+        const now = new Date();
+        const thirtyDaysLater = new Date();
+        thirtyDaysLater.setDate(now.getDate() + 30);
+
+        const expired = dueDate < now;
+        const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
+
+        let statusClasses = '';
+        let cardBaseGradient = '';
+        let glowColor = 'rgba(37, 99, 235, 0.3)'; // Default Blue Glow
+
+        if (expired) {
+            statusClasses = 'bg-red-500/20 text-red-500 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.4)]';
+            cardBaseGradient = 'linear-gradient(135deg, #7f1d1d 0%, #1e0707 100%)';
+            glowColor = 'rgba(239, 68, 68, 0.3)';
+        } else if (isUpcoming) {
+            statusClasses = 'bg-amber-500/20 text-amber-500 border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.4)]';
+            cardBaseGradient = 'linear-gradient(135deg, #f59e0b 0%, #92400e 100%)';
+            glowColor = 'rgba(245, 158, 11, 0.3)';
         } else {
-            avatarOrIcon = `<div class="h-12 w-12 flex items-center justify-center shrink-0 overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
-                                <span class="material-symbols-outlined">${scadenza.icon || 'receipt_long'}</span>
-                            </div>`;
+            statusClasses = 'bg-blue-500/20 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.4)]';
+            cardBaseGradient = 'linear-gradient(135deg, #1e40af 0%, #0f172a 100%)';
+            glowColor = 'rgba(37, 99, 235, 0.3)';
         }
 
-        let statusBadge;
-        if (scadenza.status === 'urgent') {
-            statusBadge = `<span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-500/10 px-2 py-1 text-xs font-bold text-red-600 dark:text-red-400 ring-1 ring-inset ring-red-500/20">Oggi</span>
-                           <span class="material-symbols-outlined text-red-500 filled text-lg icon-filled">priority_high</span>`;
-        } else if (scadenza.status === 'completed') {
-            statusBadge = `<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-bold text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">Fatto</span>`;
-        } else if (scadenza.time) {
-            statusBadge = `<p class="text-sm font-semibold text-primary">${scadenza.time}</p>`;
-        } else {
-            const dueDate = new Date(scadenza.dueDate);
-            statusBadge = `<span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-bold text-primary ring-1 ring-inset ring-primary/20">${dueDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}</span>`;
-        }
+        const avatarOrIcon = `
+            <div class="h-12 w-12 flex items-center justify-center shrink-0 overflow-hidden rounded-xl bg-white/10 border border-white/20 text-white shadow-lg backdrop-blur-md">
+                <span class="material-symbols-outlined text-2xl !text-white">${scadenza.icon || 'event_note'}</span>
+            </div>`;
 
         return `
-            <div class="group relative flex flex-col gap-2 rounded-xl bg-white dark:bg-[#1E252B] p-4 shadow-sm border border-slate-200 dark:border-slate-800 active:scale-[0.98] transition-transform duration-200 ${scadenza.status === 'completed' ? 'opacity-60' : ''}" onclick="location.href='dettaglio_scadenza.html?id=${scadenza.id}'">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex items-center gap-3">
+            <div class="flex flex-col gap-3 rounded-[24px] p-4 border border-white/20 active:scale-[0.98] transition-all duration-300 hover:-translate-y-1 cursor-pointer backdrop-blur-[18px] group overflow-hidden relative shadow-[0_15px_35px_rgba(0,0,0,0.5)]" 
+                 style="background: 
+                    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%),
+                    radial-gradient(circle at 0% 50%, ${glowColor} 0%, transparent 60%),
+                    radial-gradient(circle at 100% 50%, ${glowColor} 0%, transparent 60%),
+                    linear-gradient(110deg, transparent 42%, rgba(255,255,255,0.10) 49%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.10) 51%, transparent 58%),
+                    ${cardBaseGradient};
+                    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);"
+                 onclick="location.href='dettaglio_scadenza.html?id=${scadenza.id}'">
+                
+                <div class="flex items-center justify-between gap-3 relative z-10">
+                    <div class="flex items-center gap-3 min-w-0">
                         ${avatarOrIcon}
-                        <div class="flex flex-col">
-                            <p class="text-base font-bold text-slate-900 dark:text-white leading-tight ${scadenza.status === 'completed' ? 'line-through' : ''}">${scadenza.title}</p>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">${scadenza.category}</p>
+                        <div class="flex flex-col min-w-0">
+                            <p class="text-[9px] font-bold uppercase text-blue-300 tracking-widest mb-0.5 opacity-80">${scadenza.category || 'SCADENZA'}</p>
+                            <h3 class="text-base font-bold text-white leading-tight group-hover:text-blue-300 transition-colors">${scadenza.title}</h3>
+                            <p class="text-[11px] text-white/50 truncate mt-0.5">Ref: ${scadenza.name || 'Generale'}</p>
                         </div>
                     </div>
-                    <div class="flex flex-col items-end gap-1">
-                        ${statusBadge}
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                        <span class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-tight ${statusClasses} border backdrop-blur-md transition-transform group-hover:scale-110">
+                            ${dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).toUpperCase()}
+                        </span>
                     </div>
                 </div>
-            </div>
-        `;
+
+                ${scadenza.veicolo_targa ? `
+                <div class="mt-1 pt-2 border-t border-white/10 flex items-center justify-end relative z-10">
+                    <div class="flex items-center gap-2 px-2 py-0.5 rounded-md bg-white/5 border border-white/10">
+                        <span class="material-symbols-outlined text-[14px] text-white/40">directions_car</span>
+                        <span class="text-[10px] font-bold text-white/70 tracking-widest uppercase">${scadenza.veicolo_targa}</span>
+                    </div>
+                </div>` : ''}
+            </div>`;
     }
 
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            filterButtons.forEach(btn => {
-                btn.classList.remove('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20');
-                btn.classList.add('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'hover:bg-slate-300', 'dark:hover:bg-slate-700');
+    // listeners
+    if (searchInput) {
+        searchInput.oninput = (e) => {
+            searchQuery = e.target.value;
+            renderFilteredScadenze();
+        };
+    }
+
+    if (sortSelect) {
+        sortSelect.onchange = (e) => {
+            sortType = e.target.value;
+            renderFilteredScadenze();
+        };
+    }
+
+    filterChips.forEach(chip => {
+        chip.onclick = () => {
+            filterChips.forEach(c => {
+                c.classList.remove('active', 'bg-primary', 'text-white', 'font-black', 'shadow-lg', 'shadow-primary/20');
+                c.classList.add('bg-[#0a192f]/40', 'text-white/40', 'font-bold');
             });
-            button.classList.add('bg-primary', 'text-white', 'shadow-md', 'shadow-primary/20');
-            button.classList.remove('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300', 'hover:bg-slate-300', 'dark:hover:bg-slate-700');
-            renderScadenze(button.textContent.trim());
-        });
+            chip.classList.add('active', 'bg-primary', 'text-white', 'font-black', 'shadow-lg', 'shadow-primary/20');
+            chip.classList.remove('bg-[#0a192f]/40', 'text-white/40', 'font-bold');
+            activeFilter = chip.textContent.trim();
+            renderFilteredScadenze();
+        };
     });
-
-    floatingActionButton.addEventListener('click', () => {
-        location.href = 'aggiungi_scadenza.html';
-    });
-
-    renderScadenze();
 });

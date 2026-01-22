@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="dark" lang="it">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#e2e8f0">
+    <title>Archivio Account</title>
+    <!-- PWA / Mobile Capable -->
+    <script>
+        // FORCE DARK MODE (Theme Override)
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+    </script>
+    <link rel="manifest" href="manifest.json" />
+    <!-- Tailwind CSS, Google Fonts, Material Symbols -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+
+    <script>
+        window.tailwind = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#0A162A",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        body {
+            min-height: 100dvh;
+            background-color: #0a0f1e;
+        }
+
+        /* 3) FARO ANIMATO (GLASS GLOW) */
+        @keyframes glowFloat {
+
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: translateY(0) scale(1) translateX(-50%);
+            }
+
+            50% {
+                opacity: 0.9;
+                transform: translateY(-10px) scale(1.05) translateX(-50%);
+            }
+        }
+
+        .glass-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 150%;
+            height: 120%;
+            background: radial-gradient(ellipse at 50% 0%,
+                    rgba(80, 150, 255, 0.4) 0%,
+                    rgba(80, 150, 255, 0.15) 25%,
+                    rgba(80, 150, 255, 0.05) 50%,
+                    transparent 75%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            transform: translateX(-50%);
+            animation: glowFloat 4s ease-in-out infinite;
+        }
+
+        /* 9) BORDER GLOW RIFLETTENTE */
+        .border-glow {
+            position: relative;
+        }
+
+        .border-glow::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: inherit;
+            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.05));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Fix icon alignment */
+        .material-symbols-outlined {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body class="bg-[#0a0f1e] text-white font-display overflow-x-hidden antialiased selection:bg-blue-500/30">
+    <!-- 2) Contenitore Principale -->
+    <div
+        class="relative flex min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">
+
+        <!-- 3) Faro -->
+        <div class="glass-glow"></div>
+
+        <!-- 4) Header Fusion -->
+        <header
+            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl z-50 bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md">
+            <div class="flex items-center px-4 h-16 gap-4">
+                <a href="impostazioni.html"
+                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
+                    <span
+                        class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                </a>
+
+                <!-- Context Selector (Titanium Style) -->
+                <div class="flex-1 min-w-0 flex flex-col items-center justify-center relative z-10">
+                    <div class="relative w-full max-w-[220px]">
+                        <select id="archive-context-select"
+                            class="w-full bg-[#1e293b]/50 border border-white/10 rounded-lg text-sm font-bold text-center appearance-none focus:ring-2 focus:ring-blue-500/20 py-1.5 px-8 cursor-pointer text-white outline-none transition-all">
+                            <option value="all" class="bg-[#0a162a] text-white">Tutti gli archiviati</option>
+                            <option value="privato" class="bg-[#0a162a] text-white">Solo Archivio Privato</option>
+                            <!-- Companies injected here -->
+                        </select>
+                        <!-- Custom Arrow -->
+                        <span
+                            class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none text-lg">expand_more</span>
+
+                        <div class="flex items-center justify-center pointer-events-none mt-1">
+                            <span
+                                class="text-[9px] text-blue-400 font-medium uppercase tracking-widest opacity-80">Sorgente
+                                Dati</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty Trash Button -->
+                <button id="btn-empty-trash"
+                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 hover:bg-red-500/20 border-glow transition-all duration-300 active:scale-95 text-red-400"
+                    title="Svuota Archivio">
+                    <span
+                        class="material-symbols-outlined text-[24px] group-hover:rotate-12 transition-transform">delete_forever</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Header Spacer -->
+        <div class="h-20 w-full shrink-0"></div>
+
+        <div class="px-4 pb-24 flex-grow flex flex-col gap-4">
+            <!-- Search -->
+            <div
+                class="group flex w-full items-center rounded-xl border border-white/10 bg-black/20 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all shadow-inner overflow-hidden">
+                <div
+                    class="pl-4 text-white/40 flex items-center justify-center group-focus-within:text-blue-400 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">search</span>
+                </div>
+                <input
+                    class="w-full bg-transparent border-none text-white placeholder:text-white/30 h-12 px-3 text-base focus:ring-0"
+                    placeholder="Cerca nell'archivio..." type="search" />
+            </div>
+
+            <!-- Hint (Styled Badge) -->
+            <div class="flex justify-center gap-4 text-[10px] uppercase tracking-wide font-medium text-white/30">
+                <span class="flex items-center gap-1"><span
+                        class="material-symbols-outlined text-[14px]">swipe_left</span> Ripristina</span>
+                <span class="w-px h-3 bg-white/10"></span>
+                <span class="flex items-center gap-1">Elimina <span
+                        class="material-symbols-outlined text-[14px]">swipe_right</span></span>
+            </div>
+
+            <div id="accounts-container" class="space-y-3">
+                <div class="text-center py-10 text-gray-500 flex flex-col items-center">
+                    <span
+                        class="material-symbols-outlined animate-spin text-3xl mb-2 text-primary">progress_activity</span>
+                    Caricamento archivio...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5) Footer Fusion (Fixed) -->
+    <div
+        class="fixed bottom-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto h-20 pointer-events-none z-50 bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-sm">
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"
+        class="fixed bottom-24 left-0 right-0 p-4 flex flex-col items-center gap-2 pointer-events-none z-50"></div>
+
+    <!-- Module Script -->
+    <script src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/archivio_account.js?v=6"></script>
+    </div>
+</body>
+
+</html>

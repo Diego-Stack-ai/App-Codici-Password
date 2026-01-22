@@ -1,229 +1,353 @@
 <!DOCTYPE html>
-<html class="light" lang="it"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Nuovo Account Azienda</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script>
+<html lang="it" class="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Nuovo Account Azienda</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
         tailwind.config = {
-            darkMode: "class",
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                    },
                     fontFamily: {
-                        "display": ["Inter", "sans-serif"]
+                        sans: ['Inter', 'sans-serif'],
                     },
-                    borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                },
-            },
+                    colors: {
+                        primary: '#3b82f6', // Default Blue
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
         }
     </script>
-<style>.no-scrollbar::-webkit-scrollbar {
+    <style>
+        body {
+            background-color: #0a0f1e;
+            color: #f8fafc;
+        }
+
+        .glass-header {
+            background: rgba(10, 15, 30, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Form Controls Overrides */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="url"],
+        textarea {
+            background-color: rgba(255, 255, 255, 0.03) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 1px #3b82f6 !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
+
         .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
     </style>
-<style>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white flex flex-col h-screen overflow-hidden antialiased">
-<header class="flex-none bg-white dark:bg-[#1a222d] border-b border-[#e5e7eb] dark:border-[#2a3441] sticky top-0 z-50">
-<div class="flex items-center p-4 justify-between h-16">
-<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3441] transition-colors text-[#111418] dark:text-white">
-<span class="material-symbols-outlined">arrow_back_ios_new</span>
-</button>
-<h2 class="text-[#111418] dark:text-white text-lg font-bold leading-tight flex-1 text-center pr-10">
-                Nuovo Account Azienda
-            </h2>
-</div>
-</header>
-<main class="flex-1 overflow-y-auto no-scrollbar pb-32">
-<div class="w-full max-w-md mx-auto px-4 py-6 flex flex-col gap-6">
-<div class="space-y-4">
-<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Identificazione Azienda</h3>
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Nome Account</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">domain</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-12 pr-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="Es. Microsoft Azure, Fornitore X"/>
-</div>
-</div>
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Sito Web</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">language</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-12 pr-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="https://www.azienda.com" type="url"/>
-</div>
-</div>
-</div>
-<div class="space-y-4 pt-2">
-<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Credenziali di Accesso</h3>
-<div class="grid grid-cols-1 gap-4">
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Utente</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">person</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-12 pr-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="Email aziendale o Username"/>
-</div>
-</div>
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Account</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">folder_shared</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-12 pr-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="Codice cliente, reparto o sottoconto"/>
-</div>
-</div>
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Password</label>
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-4 text-gray-400">lock</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-12 pr-12 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="••••••••" type="password"/>
-<button class="absolute right-4 text-primary hover:text-blue-600 focus:outline-none">
-<span class="material-symbols-outlined">visibility</span>
-</button>
-</div>
-<div class="flex gap-1 mt-1 px-1">
-<div class="h-1 flex-1 bg-primary rounded-full"></div>
-<div class="h-1 flex-1 bg-primary rounded-full"></div>
-<div class="h-1 flex-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-<div class="h-1 flex-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-</div>
-</div>
-</div>
-</div>
-<div class="space-y-4 pt-2">
-<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Referente Aziendale</h3>
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Nome e Cognome Referente</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">badge</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-12 pr-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="Es. Mario Rossi"/>
-</div>
-</div>
-<div class="flex gap-4">
-<div class="flex flex-col gap-2 flex-1">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Telefono Referente</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">call</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-11 pr-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="02 123..." type="tel"/>
-</div>
-</div>
-<div class="flex flex-col gap-2 flex-1">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Cellulare Referente</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">smartphone</span>
-<input class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 pl-11 pr-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="333 99..." type="tel"/>
-</div>
-</div>
-</div>
-</div>
-<div class="space-y-4 pt-2">
-<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Dettagli &amp; Opzioni</h3>
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Tipo di Account</label>
-<div class="relative">
-<select class="w-full appearance-none rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] h-14 px-4 text-base text-[#111418] dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
-<option>Aziendale - Generale</option>
-<option>Fornitore</option>
-<option>Cliente</option>
-<option>Partner</option>
-<option>Ente Pubblico</option>
-</select>
-<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">expand_more</span>
-</div>
-</div>
-<div class="flex flex-col gap-2">
-<label class="text-[#111418] dark:text-white text-base font-medium leading-normal">Nota</label>
-<textarea class="w-full rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] bg-white dark:bg-[#1a222d] p-4 text-base text-[#111418] dark:text-white placeholder:text-[#617589] focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none" placeholder="Note operative, scadenze contrattuali o istruzioni speciali..."></textarea>
-</div>
-<div class="flex items-center justify-between bg-white dark:bg-[#1a222d] p-4 rounded-xl border border-[#dbe0e6] dark:border-[#3a4451]">
-<div class="flex items-center gap-3">
-<div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-primary">
-<span class="material-symbols-outlined">share</span>
-</div>
-<span class="text-[#111418] dark:text-white text-base font-medium">Account Condiviso</span>
-</div>
-<label class="relative inline-flex items-center cursor-pointer">
-<input class="sr-only peer" type="checkbox" value=""/>
-<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-</label>
-</div>
-<button class="w-full flex items-center justify-between bg-white dark:bg-[#1a222d] p-4 rounded-xl border border-[#dbe0e6] dark:border-[#3a4451] hover:bg-gray-50 dark:hover:bg-[#232d3b] transition-colors text-left group">
-<div class="flex items-center gap-3">
-<div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg text-purple-600 dark:text-purple-400">
-<span class="material-symbols-outlined">attach_file</span>
-</div>
-<span class="text-[#111418] dark:text-white text-base font-medium">Memorandum &amp; Allegati</span>
-</div>
-<span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">chevron_right</span>
-</button>
-</div>
-<div class="h-10"></div>
-</div>
-</main>
-<div class="fixed bottom-[88px] left-0 w-full p-4 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark pointer-events-none z-40">
-<div class="max-w-md mx-auto pointer-events-auto flex flex-col gap-3">
-<button class="flex w-full items-center justify-center overflow-hidden rounded-xl h-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30">
-<span class="material-symbols-outlined mr-2">save</span>
+</head>
+
+<body class="font-sans antialiased bg-[#0a0f1e] text-slate-50 selection:bg-blue-500/30">
+
+    <div
+        class="relative flex h-full min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-[#0a0f1e] border-x border-white/5">
+
+        <!-- Header -->
+        <header class="fixed top-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto glass-header z-50 px-4 py-3">
+            <div class="flex items-center justify-between w-full h-10 gap-4">
+                <button id="btn-back" onclick="history.back()"
+                    class="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+                </button>
+                <h2 class="text-white text-lg font-bold tracking-tight text-center flex-1">
+                    Nuovo Account Azienda
+                </h2>
+                <!-- Spacer to balance back button -->
+                <div class="w-10"></div>
+            </div>
+        </header>
+
+        <!-- Spacer -->
+        <div class="h-16 w-full shrink-0"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-32">
+            <div class="w-full max-w-2xl mx-auto px-6 py-8 flex flex-col gap-8">
+
+                <!-- 1. Identificazione -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-blue-500">domain_verification</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Identificazione</h3>
+                    </div>
+
+                    <div
+                        class="bg-[#1e293b]/50 border border-white/5 rounded-2xl p-5 space-y-4 shadow-lg backdrop-blur-sm">
+                        <!-- Nome Account -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nome
+                                Account</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">domain</span>
+                                <input id="nome-account" type="text"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                    placeholder="Es. Portale Fornitore X" />
+                            </div>
+                        </div>
+
+                        <!-- Sito Web -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Sito
+                                Web</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">language</span>
+                                <input id="sito-web" type="url"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none text-blue-300"
+                                    placeholder="https://" />
+                            </div>
+                        </div>
+
+                        <!-- Codice Società & N. Iscrizione -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Cod.
+                                    Società</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">pin</span>
+                                    <input id="codice-societa" type="text"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                        placeholder="Cod. 123" />
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">N.
+                                    Iscrizione</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">confirmation_number</span>
+                                    <input id="numero-iscrizione" type="text"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                        placeholder="Iscr. 456" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Credenziali -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-green-500">lock_person</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Credenziali</h3>
+                    </div>
+
+                    <div
+                        class="bg-[#1e293b]/50 border border-white/5 rounded-2xl p-5 space-y-4 shadow-lg backdrop-blur-sm">
+                        <!-- Utente -->
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Username
+                                / Email</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">person</span>
+                                <input id="utente" type="text"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                    placeholder="user@example.com" />
+                            </div>
+                        </div>
+
+                        <!-- Account -->
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Account
+                                ID</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">folder_shared</span>
+                                <input id="account" type="text"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none text-gray-300"
+                                    placeholder="Codice cliente / Sottoconto" />
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Password</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">key</span>
+                                <input id="password" type="password"
+                                    class="w-full h-12 pl-10 pr-24 rounded-xl text-sm font-medium focus:outline-none font-mono tracking-wider"
+                                    placeholder="••••••••" />
+
+                                <div
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-white/5 rounded-lg p-1 border border-white/5">
+                                    <button type="button"
+                                        onclick="const i = document.getElementById('password'); i.type = i.type==='password'?'text':'password'; this.querySelector('span').textContent = i.type==='password'?'visibility_off':'visibility';"
+                                        class="p-1.5 hover:bg-white/10 rounded-md transition-colors text-gray-400 hover:text-white">
+                                        <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                                    </button>
+                                    <div class="w-px h-4 bg-white/10 mx-0.5"></div>
+                                    <button type="button" onclick="copyToClipboard('password')"
+                                        class="p-1.5 hover:bg-white/10 rounded-md transition-colors text-gray-400 hover:text-white">
+                                        <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Coordinate Bancarie -->
+                <div class="space-y-4" id="banking-section">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-purple-500">account_balance</span>
+                            <h3 class="text-white text-sm font-bold uppercase tracking-wider">Coordinate Bancarie</h3>
+                        </div>
+                        <button type="button" id="btn-add-iban"
+                            class="text-blue-400 hover:text-blue-300 text-xs font-bold flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/10">
+                            <span class="material-symbols-outlined text-[16px]">add_circle</span> Aggiungi IBAN
+                        </button>
+                    </div>
+
+                    <div id="iban-list-container" class="space-y-4">
+                        <!-- IBANs will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 4. Referente -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-orange-500">assignment_ind</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Referente Aziendale</h3>
+                    </div>
+
+                    <div
+                        class="bg-[#1e293b]/50 border border-white/5 rounded-2xl p-5 space-y-4 shadow-lg backdrop-blur-sm">
+                        <!-- Nome -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nome
+                                e Cognome</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">badge</span>
+                                <input id="referente-nome" type="text"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                    placeholder="Es. Mario Rossi" />
+                            </div>
+                        </div>
+
+                        <!-- Contatti -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Telefono</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">call</span>
+                                    <input id="referente-telefono" type="tel"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                        placeholder="02..." />
+                                </div>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Cellulare</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">smartphone</span>
+                                    <input id="referente-cellulare" type="tel"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium focus:outline-none"
+                                        placeholder="333..." />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Note -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-teal-500">sticky_note_2</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Note</h3>
+                    </div>
+                    <div class="bg-[#1e293b]/50 border border-white/5 rounded-2xl overflow-hidden p-0 shadow-lg">
+                        <textarea id="note"
+                            class="w-full bg-transparent border-none p-5 text-sm leading-relaxed text-gray-300 placeholder:text-gray-600 focus:ring-0 min-h-[120px] resize-none"
+                            placeholder="Note aggiuntive..."></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Fixed Bottom Action -->
+        <div
+            class="fixed bottom-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto p-4 bg-[#0a0f1e]/80 backdrop-blur-xl border-t border-white/5 z-40">
+            <button id="btn-save"
+                class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl shadow-lg shadow-blue-900/40 font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined">save</span>
                 Salva Account
             </button>
-<button class="flex w-full items-center justify-center overflow-hidden rounded-xl h-10 bg-transparent text-gray-500 dark:text-gray-400 text-sm font-medium hover:text-[#111418] dark:hover:text-white transition-colors">
-                Annulla
-            </button>
-</div>
-</div>
-<nav class="flex-none h-[88px] bg-white dark:bg-[#1a222d] border-t border-[#e5e7eb] dark:border-[#2a3441] pb-6 z-50">
-<div class="grid grid-cols-4 h-full items-center justify-items-center">
-<a class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
-<span class="material-symbols-outlined text-2xl">home</span>
-<span class="text-[10px] font-medium">Home</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 text-primary" href="#">
-<div class="bg-primary/10 px-4 py-1 rounded-full">
-<span class="material-symbols-outlined text-2xl fill-current">domain</span>
-</div>
-<span class="text-[10px] font-medium">Azienda</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
-<span class="material-symbols-outlined text-2xl">search</span>
-<span class="text-[10px] font-medium">Cerca</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
-<span class="material-symbols-outlined text-2xl">settings</span>
-<span class="text-[10px] font-medium">Opzioni</span>
-</a>
-</div>
-</nav>
-</body></html>
+        </div>
+
+    </div>
+
+    <!-- Script -->
+    <script>
+        function copyToClipboard(elementId) {
+            const copyText = document.getElementById(elementId);
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value).then(() => {
+                // Simple toast if needed, or rely on native UI feedback
+            });
+        }
+    </script>
+    <script src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/aggiungi_account_azienda.js"></script>
+</body>
+
+</html>

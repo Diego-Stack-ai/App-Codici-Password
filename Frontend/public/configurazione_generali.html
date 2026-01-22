@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="dark" lang="it">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Configurazione Generali</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="assets/js/tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <style>
+        body {
+            background-color: #0a0f1e;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .toggle-arrow {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* 3) FARO ANIMATO (GLASS GLOW) */
+        @keyframes glowFloat {
+
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: translateY(0) scale(1) translateX(-50%);
+            }
+
+            50% {
+                opacity: 0.9;
+                transform: translateY(-10px) scale(1.05) translateX(-50%);
+            }
+        }
+
+        .glass-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 150%;
+            height: 120%;
+            background: radial-gradient(ellipse at 50% 0%,
+                    rgba(20, 184, 166, 0.3) 0%,
+                    rgba(20, 184, 166, 0.1) 25%,
+                    rgba(20, 184, 166, 0.05) 50%,
+                    transparent 75%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            transform: translateX(-50%);
+            animation: glowFloat 4s ease-in-out infinite;
+        }
+
+        /* 9) BORDER GLOW RIFLETTENTE */
+        .border-glow {
+            position: relative;
+        }
+
+        .border-glow::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: inherit;
+            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.05));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-[#0a0f1e] text-white font-display antialiased selection:bg-teal-500/30">
+    <!-- 2) Contenitore Principale -->
+    <div
+        class="relative flex min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">
+
+        <!-- 3) Faro -->
+        <div class="glass-glow"></div>
+
+        <!-- 4) Header Fusion -->
+        <header
+            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl z-50 bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md">
+            <div class="flex items-center px-4 h-16 gap-4">
+                <a href="regole_scadenze_veicoli.html"
+                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
+                    <span
+                        class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                </a>
+                <h1
+                    class="relative z-10 text-lg font-bold leading-tight tracking-tight text-center flex-1 text-white uppercase opacity-90 truncate">
+                    Config. Generali
+                </h1>
+                <a href="home_page.html"
+                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
+                    <span
+                        class="material-symbols-outlined text-[24px] group-hover:scale-110 transition-transform">home</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Header Spacer -->
+        <div class="h-20 w-full shrink-0"></div>
+
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-24 px-5 pt-2 space-y-6">
+
+            <!-- Section: Tipo Scadenza -->
+            <section
+                class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-teal-500/30">
+
+                <!-- 10) Glow Overlay Internal -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10">
+                </div>
+
+                <div onclick="toggleSection('types')"
+                    class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors">
+                    <h3 class="font-bold text-xs text-teal-400 uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px] filled">rule</span> Tipo Scadenza
+                    </h3>
+                    <div class="flex items-center gap-3 relative z-10">
+                        <button onclick="event.stopPropagation(); window.addTypeItem()"
+                            class="size-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400 hover:bg-teal-500 hover:text-white transition-all shadow-sm border border-teal-500/20 active:scale-90">
+                            <span class="material-symbols-outlined text-[20px]">add</span>
+                        </button>
+                        <span id="icon_types"
+                            class="material-symbols-outlined text-white/30 toggle-arrow text-[24px]">expand_more</span>
+                    </div>
+                </div>
+                <!-- Description -->
+                <div class="relative z-20 px-4 pb-3 text-[11px] text-gray-400 leading-relaxed border-b border-white/5">
+                    Configura tipi generali (es. "Palestra") con <strong class="text-white">Preavviso</strong> e <strong
+                        class="text-white">Replica</strong>.
+                </div>
+                <div id="container_types" class="hidden bg-black/40 relative z-20">
+                    <table class="w-full text-xs">
+                        <tbody id="tbody_types" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section: Testo Email -->
+            <section
+                class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-teal-500/30">
+
+                <!-- 10) Glow Overlay Internal -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10">
+                </div>
+
+                <div onclick="toggleSection('templates')"
+                    class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors">
+                    <h3 class="font-bold text-xs text-teal-400 uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px] filled">description</span> Template Email
+                    </h3>
+                    <div class="flex items-center gap-3 relative z-10">
+                        <button
+                            onclick="event.stopPropagation(); window.addItem('emailTemplates', 'Nuovo Testo Email:')"
+                            class="size-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400 hover:bg-teal-500 hover:text-white transition-all shadow-sm border border-teal-500/20 active:scale-90">
+                            <span class="material-symbols-outlined text-[20px]">add</span>
+                        </button>
+                        <span id="icon_templates"
+                            class="material-symbols-outlined text-white/30 toggle-arrow text-[24px]">expand_more</span>
+                    </div>
+                </div>
+                <div id="container_templates" class="hidden border-t border-white/5 bg-black/40 relative z-20">
+                    <table class="w-full text-xs">
+                        <tbody id="tbody_templates" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section: Sintassi Automatica (Deep Box Style) -->
+            <div class="pt-4">
+                <div class="flex items-center gap-2 px-1 mb-2">
+                    <span class="material-symbols-outlined text-teal-400 text-[20px] filled">info</span>
+                    <h3 class="text-teal-400 text-[10px] font-bold uppercase tracking-widest">
+                        Sintassi Automatica
+                    </h3>
+                </div>
+                <div
+                    class="bg-black/30 border border-white/10 rounded-2xl p-5 shadow-inner relative group transition-all duration-300 hover:border-teal-500/20">
+                    <div class="space-y-4 text-[12px] leading-relaxed">
+                        <div>
+                            <p
+                                class="text-[10px] font-bold text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
+                                <span class="size-1 bg-teal-500 rounded-full"></span> Oggetto Email Generato
+                            </p>
+                            <div
+                                class="font-mono text-[13px] text-teal-100 bg-teal-500/5 rounded-lg p-3 border border-teal-500/10">
+                                <span class="text-teal-400">[Oggetto]</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p
+                                class="text-[10px] font-bold text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
+                                <span class="size-1 bg-teal-500 rounded-full"></span> Corpo Email Generato
+                            </p>
+                            <div
+                                class="font-mono text-[13px] text-teal-100 bg-teal-500/5 rounded-lg p-3 border border-teal-500/10">
+                                <span class="opacity-40">"Ciao"</span> + <span class="text-white/80">[Nome]</span> +
+                                <span class="text-teal-400">[Oggetto]</span> + <span class="opacity-40">"in data"</span>
+                                + <span class="text-teal-300">[Data]</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-2 pt-2 opacity-40">
+                            <span class="material-symbols-outlined text-[14px]">tips_and_updates</span>
+                            <p class="text-[10px] italic leading-tight">
+                                Le istruzioni sono caricate dinamicamente in base alla tipologia scelta.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 5) Footer Fusion -->
+        <footer
+            class="fixed bottom-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl h-20 bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-sm pointer-events-none z-40">
+        </footer>
+    </div>
+
+    <script src="assets/js/configurazione_generali.js" type="module"></script>
+    </div>
+</body>
+
+</html>

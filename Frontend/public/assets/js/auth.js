@@ -1,87 +1,81 @@
-// Simulated Authentication and User Session Management
-
-import { getUsers, saveUsers } from './db.js';
-import { showNotification } from './utils.js'; // Assuming a showNotification function exists
+import { auth, db } from './firebase-config.js';
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    updateProfile,
+    sendPasswordResetEmail,
+    sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showNotification } from './utils.js';
 
-const BASE_PATH = '/Frontend/public/';
-
 /**
- * Registers a new user.
+ * Registers a new user using Firebase Auth.
  * @param {string} nome - User's first name.
  * @param {string} cognome - User's last name.
  * @param {string} email - User's email.
  * @param {string} password - User's password.
  */
 async function register(nome, cognome, email, password) {
-    const users = getUsers();
-    const userExists = users.some(user => user.email === email);
+    try {
+        // Client-side Password Validation
+        if (password.length < 6) {
+            throw { code: 'auth/weak-password', message: 'La password deve avere almeno 6 caratteri.' };
+        }
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (!specialCharRegex.test(password)) {
+            throw { code: 'auth/weak-password-special', message: 'La password deve contenere almeno un carattere speciale (!@#$%...).' };
+        }
 
-    if (userExists) {
-        showNotification("User with this email already exists.", "error");
-        return;
-    }
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-    // Generate a simulated 6-digit verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+        // Update profile with name
+        await updateProfile(user, {
+            displayName: `${nome} ${cognome}`.trim()
+        });
 
-    const newUser = {
-        id: Date.now().toString(),
-        nome,
-        cognome,
-        email,
-        password, // In a real app, this should be hashed
-        verified: false,
-        verificationCode,
-    };
+        // CREATE FIRESTORE DOCUMENT (Fix for "Account Not Found" issue)
+        await setDoc(doc(db, "users", user.uid), {
+            nome: nome,
+            cognome: cognome,
+            email: email,
+            createdAt: new Date(),
+            photoURL: "",
+            settings: { theme: 'system' }
+        });
 
-    users.push(newUser);
-    saveUsers(users);
+        // Send email verification (optional but recommended)
+        await sendEmailVerification(user);
+        console.log('Verification email sent to', user.email);
+        showNotification("Email di verifica inviata! Controlla la tua casella.", "success");
 
-    // Store email temporarily to pass to the verification page
-    sessionStorage.setItem('emailForVerification', email);
+        showNotification("Registrazione avvenuta con successo!", "success");
 
-    console.log(`Simulated verification code for ${email}: ${verificationCode}`);
-    showNotification("Registration successful! Redirecting to email verification.", "success");
+        // Removed automatic redirect to allow user to see verification modal.
+        // You can navigate manually after verification.
 
-    // Redirect to the email verification page
-    setTimeout(() => {
-        window.location.href = "verifica_email.html";
-        window.location.href = `${BASE_PATH}verifica_email.html`;
-    }, 2000);
-}
+        return true;
 
-/**
- * Verifies a user's email with a simulated code.
- * @param {string} email - The user's email.
- * @param {string} code - The 6-digit verification code.
- */
-async function verifyEmail(email, code) {
-    const users = getUsers();
-    const user = users.find(u => u.email === email);
-
-    if (!user) {
-        showNotification("User not found.", "error");
-        return;
-    }
-
-    if (user.verificationCode === code) {
-        user.verified = true;
-        saveUsers(users);
-        showNotification("Email verified successfully! Logging you in.", "success");
-
-        // Log the user in by creating a session
-        sessionStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, nome: user.nome }));
-
-        setTimeout(() => {
-            window.location.href = "home_page.html";
-            window.location.href = `${BASE_PATH}home_page.html`;
-        }, 2000);
-    } else {
-        showNotification("Invalid verification code.", "error");
+    } catch (error) {
+        console.error("Registration error:", error);
+        let message = `Errore registrazione: ${error.code || error.message}`;
+        if (error.code === 'auth/email-already-in-use') {
+            message = "Questa email è già registrata.";
+        } else if (error.code === 'auth/weak-password') {
+            message = "La password è troppo debole (min. 6 caratteri).";
+        } else if (error.code === 'auth/weak-password-special') {
+            message = error.message;
+        } else if (error.code === 'auth/network-request-failed') {
+            message = "Problema di connessione. Riprova.";
+        }
+        showNotification(message, "error");
+        alert(message); // Fallback alert ensures visibility if notification fails
+        return false;
     }
 }
-
 
 /**
  * Logs a user in.
@@ -89,138 +83,154 @@ async function verifyEmail(email, code) {
  * @param {string} password - User's password.
  */
 async function login(email, password) {
-    const users = getUsers();
-    const user = users.find(u => u.email === email);
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-    if (!user) {
-        showNotification("Invalid credentials.", "error");
-        return;
-    }
+        // CHECK IF USER EXISTS IN FIRESTORE
+        // If "Zombie" (Auth exists, DB missing), we Auto-Resurrect the profile.
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
 
-    if (!user.verified) {
-        showNotification("Please verify your email before logging in.", "error");
-        sessionStorage.setItem('emailForVerification', email); // Help user re-verify
-        setTimeout(() => { window.location.href = "verifica_email.html"; }, 1500);
-        setTimeout(() => { window.location.href = `${BASE_PATH}verifica_email.html`; }, 1500);
-        return;
-    }
+        if (!userDoc.exists()) {
+            console.warn("User authenticated but no Firestore profile. Auto-recovering profile...");
 
-    if (user.password === password) {
-        // Create a "session"
-        sessionStorage.setItem('loggedInUser', JSON.stringify({ email: user.email, nome: user.nome }));
-        showNotification("Login successful!", "success");
+            // Create a basic skeleton profile to allow access
+            await setDoc(userDocRef, {
+                email: email,
+                nome: "Utente",
+                cognome: "Ripristinato",
+                createdAt: new Date(),
+                photoURL: user.photoURL || "",
+                recreatedAfterDeletion: true
+            });
+
+            showNotification("Profilo ripristinato! Benvenuto.", "success");
+        } else {
+            showNotification("Login effettuato con successo!", "success");
+        }
 
         setTimeout(() => {
             window.location.href = "home_page.html";
-            window.location.href = `${BASE_PATH}home_page.html`;
-        }, 1500);
-    } else {
-        showNotification("Invalid credentials.", "error");
+        }, 1000);
+    } catch (error) {
+        console.error("Login error:", error);
+        let message = "Credenziali non valide.";
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            message = "Email o password errati.";
+        } else if (error.code === 'auth/too-many-requests') {
+            message = "Troppi tentativi falliti. Riprova più tardi.";
+        } else if (error.code === 'custom/user-deleted') {
+            message = error.message;
+        }
+        showNotification(message, "error");
     }
 }
 
 /**
  * Logs the current user out.
  */
-function logout() {
-    sessionStorage.removeItem('loggedInUser');
-    window.location.href = "index.html";
-    window.location.href = `${BASE_PATH}index.html`;
+async function logout() {
+    try {
+        await signOut(auth);
+        window.location.href = "index.html";
+    } catch (error) {
+        console.error("Logout error:", error);
+        showNotification("Errore durante il logout.", "error");
+    }
 }
-
 
 /**
  * Initiates the password reset process.
  * @param {string} email - The user's email.
  */
 async function resetPassword(email) {
-    const users = getUsers();
-    const userExists = users.some(user => user.email === email);
-
-    if (userExists) {
-        // In a real app, a token would be generated and emailed.
-        // Here, we'll just store the email to be reset.
-        sessionStorage.setItem('emailForPasswordReset', email);
-        showNotification("If a user with this email exists, a reset link has been sent.", "success");
-        setTimeout(() => {
-            window.location.href = `imposta_nuova_password.html`; // No token needed for simulation
-            window.location.href = `${BASE_PATH}imposta_nuova_password.html`; // No token needed for simulation
-        }, 2000);
-    } else {
-        // Show a generic message to prevent user enumeration
-        showNotification("If a user with this email exists, a reset link has been sent.", "success");
-    }
-}
-
-/**
- * Updates the user's password.
- * @param {string} email - The user's email.
- * @param {string} newPassword - The new password.
- */
-async function updatePassword(email, newPassword) {
-    const users = getUsers();
-    const user = users.find(u => u.email === email);
-
-    if (user) {
-        user.password = newPassword;
-        saveUsers(users);
-        sessionStorage.removeItem('emailForPasswordReset');
-        showNotification("Password updated successfully. Please log in.", "success");
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showNotification("Email di reset inviata! Controlla la tua casella di posta.", "success");
         setTimeout(() => {
             window.location.href = "index.html";
-            window.location.href = `${BASE_PATH}index.html`;
-        }, 2000);
-    } else {
-        showNotification("Could not update password. User not found.", "error");
+        }, 3000);
+    } catch (error) {
+        console.error("Reset password error:", error);
+        showNotification("Errore nell'invio dell'email di reset.", "error");
     }
 }
-
 
 /**
  * Checks the user's authentication state and redirects if necessary.
  */
 function checkAuthState() {
-    const loggedInUser = sessionStorage.getItem('loggedInUser');
-    const currentPage = window.location.pathname.split('/').pop();
-    const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html', 'verifica_email.html', ''];
+    onAuthStateChanged(auth, async (user) => {
+        const currentPage = window.location.pathname.split('/').pop();
+        const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
 
-    if (loggedInUser && authPages.includes(currentPage)) {
-        // User is logged in but on an auth page, redirect to home
-        window.location.href = 'home_page.html';
-    } else if (!loggedInUser && !authPages.includes(currentPage)) {
-        // User is not logged in and on a protected page, redirect to login
-        window.location.href = 'index.html';
+        // Normalize empty path to index.html
+        const isAuthPage = authPages.includes(currentPage) || currentPage === '';
+
+        if (user) {
+            // User is signed in.
+
+            // GLOBAL SAFETY CHECK: Verify Firestore Profile Exists
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (!userDoc.exists()) {
+                    console.warn("Global Auth Check: User authenticated but no Firestore profile. Auto-recovering...");
+                    // Auto-Recover Profile instead of kicking out
+                    await setDoc(userDocRef, {
+                        email: user.email,
+                        nome: "Utente",
+                        cognome: "Ripristinato",
+                        createdAt: new Date(),
+                        photoURL: user.photoURL || "",
+                        recreatedAfterDeletion: true
+                    });
+                    // Allow to proceed
+                }
+            } catch (e) {
+                console.error("Error verifying user profile:", e);
+                // Optional: Handle connectivity errors gracefully instead of blocking
+            }
+
+            if (isAuthPage) {
+                // If on registration page, wait for user to verify email or navigate manually
+                if (currentPage.includes('registrati') && !user.emailVerified) {
+                    return;
+                }
+                window.location.href = 'home_page.html';
+            }
+        } else {
+            // No user is signed in.
+            if (!isAuthPage) {
+                window.location.href = 'index.html';
+            }
+        }
+    });
+}
+
+// Resend verification email
+async function resendVerificationEmail() {
+    const user = auth.currentUser;
+    if (!user) {
+        showNotification('Devi effettuare il login prima di reinviare la verifica.', 'error');
+        return;
+    }
+    try {
+        await sendEmailVerification(user);
+        showNotification('Email di verifica reinviata!', 'success');
+    } catch (error) {
+        console.error('Resend verification error:', error);
+        showNotification('Errore nel reinvio della email di verifica.', 'error');
     }
 }
-
-
-}
-
-
-/**
- * Checks the user's authentication state and redirects if necessary.
- */
-function checkAuthState() {
-    const loggedInUser = sessionStorage.getItem('loggedInUser');
-    const currentPage = window.location.pathname.split('/').pop();
-    const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html', 'verifica_email.html', ''];
-
-    if (loggedInUser && authPages.includes(currentPage)) {
-        // User is logged in but on an auth page, redirect to home
-        window.location.href = `${BASE_PATH}home_page.html`;
-    } else if (!loggedInUser && !authPages.includes(currentPage)) {
-        // User is not logged in and on a protected page, redirect to login
-        window.location.href = `${BASE_PATH}index.html`;
-    }
-}
-
 
 export {
+    resendVerificationEmail,
     register,
-    verifyEmail,
     login,
     logout,
     resetPassword,
-    updatePassword,
     checkAuthState
 };

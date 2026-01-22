@@ -1,263 +1,801 @@
 <!DOCTYPE html>
+<html lang="it" class="dark">
 
-<html class="light" lang="it"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Aggiungi nuova Azienda</title>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Theme Config -->
-<script id="tailwind-config">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Aggiungi nuova Azienda</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
         tailwind.config = {
-            darkMode: "class",
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1a2632",
-                    },
                     fontFamily: {
-                        "display": ["Inter", "sans-serif"]
+                        sans: ['Inter', 'sans-serif'],
                     },
-                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
-                },
-            },
+                    colors: {
+                        primary: '#3b82f6',
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
         }
     </script>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
+    <style>
         body {
-            font-family: 'Inter', sans-serif;
+            background-color: #0a0f1e;
+            color: #f8fafc;
         }
-        /* Hide scrollbar for clean UI */
+
+        .glass-header {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Form Controls Overrides */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="date"],
+        textarea {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 1px #3b82f6 !important;
+        }
+
+        .checkbox-qr {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox-qr:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
+
         .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased overflow-x-hidden pb-24">
-<!-- Top App Bar -->
-<div class="sticky top-0 z-50 bg-surface-light dark:bg-surface-dark/95 backdrop-blur shadow-sm border-b border-slate-100 dark:border-slate-800 transition-colors">
-<div class="flex items-center p-4 justify-between h-16">
-<a href="lista_aziende.html" class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-<span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span>
-</a>
-<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">
-                Nuova Azienda
-            </h2>
-</div>
-</div>
-<!-- Main Content Form -->
-<div class="flex flex-col w-full max-w-md mx-auto">
-<!-- Section: Dati Generali -->
-<div class="mt-4">
-<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight px-4 pb-2 pt-2 flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">domain</span>
-                Dati Generali
-            </h3>
-<div class="flex flex-col gap-4 px-4 py-3">
-<!-- Ragione Sociale -->
-<label class="flex flex-col w-full">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Ragione Sociale <span class="text-red-500">*</span></span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">business</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="Es. Tech Solutions S.r.l." value=""/>
-</div>
-</label>
-<!-- Partita IVA & Codice SDI Row -->
-<div class="flex gap-3">
-<label class="flex flex-col flex-1 min-w-0">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Partita IVA <span class="text-red-500">*</span></span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">tag</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="00000000000" type="tel"/>
-</div>
-</label>
-<label class="flex flex-col w-1/3 min-w-[100px]">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Cod. SDI</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0 text-center uppercase" placeholder="XXXXXXX"/>
-</div>
-</label>
-</div>
-</div>
-</div>
-<div class="h-1 w-full bg-slate-100 dark:bg-slate-800 my-2"></div>
-<!-- Section: Referente -->
-<div>
-<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight px-4 pb-2 pt-4 flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">person</span>
-                Referente
-            </h3>
-<div class="flex flex-col gap-4 px-4 py-3">
-<!-- Titolo (Optional) -->
-<label class="flex flex-col w-full">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Titolo <span class="text-slate-400 font-normal">(Opzionale)</span></span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">badge</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="Es. Amministratore Delegato"/>
-</div>
-</label>
-<!-- Nome e Cognome Row -->
-<div class="flex gap-3">
-<label class="flex flex-col flex-1 min-w-0">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Nome</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-4 text-base focus:ring-0" placeholder="Mario"/>
-</div>
-</label>
-<label class="flex flex-col flex-1 min-w-0">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Cognome</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-4 text-base focus:ring-0" placeholder="Rossi"/>
-</div>
-</label>
-</div>
-<!-- Cellulare Referente -->
-<label class="flex flex-col w-full">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Cellulare</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">smartphone</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="+39 333 1234567" type="tel"/>
-</div>
-</label>
-</div>
-</div>
-<div class="h-1 w-full bg-slate-100 dark:bg-slate-800 my-2"></div>
-<!-- Section: Sede & Legale -->
-<div>
-<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight px-4 pb-2 pt-4 flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">gavel</span>
-                Sede &amp; Legale
-            </h3>
-<div class="flex flex-col gap-4 px-4 py-3">
-<!-- Indirizzo Sede Legale -->
-<label class="flex flex-col w-full">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Indirizzo Sede Legale</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">location_on</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="Via Roma 1, 00100 Milano"/>
-</div>
-</label>
-<!-- Numero CCIAA & Data Iscrizione -->
-<div class="flex gap-3">
-<label class="flex flex-col flex-1 min-w-0">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Num. CCIAA</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">confirmation_number</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="REA-12345"/>
-</div>
-</label>
-<label class="flex flex-col w-2/5 min-w-[130px]">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Data Iscr.</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" type="date"/>
-</div>
-</label>
-</div>
-</div>
-</div>
-<div class="h-1 w-full bg-slate-100 dark:bg-slate-800 my-2"></div>
-<!-- Section: Contatti Aziendali -->
-<div>
-<h3 class="text-slate-900 dark:text-white text-lg font-bold leading-tight px-4 pb-2 pt-4 flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">contact_phone</span>
-                Contatti &amp; Note
-            </h3>
-<div class="flex flex-col gap-4 px-4 py-3">
-<div class="flex gap-3">
-<!-- Telefono -->
-<label class="flex flex-col flex-1 min-w-0">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Telefono</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">call</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="02 1234567" type="tel"/>
-</div>
-</label>
-<!-- Fax -->
-<label class="flex flex-col flex-1 min-w-0">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Fax</span>
-<div class="flex w-full items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm">
-<div class="pl-4 text-slate-400 dark:text-slate-500 flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">fax</span>
-</div>
-<input class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 h-12 px-3 text-base focus:ring-0" placeholder="Opzionale" type="tel"/>
-</div>
-</label>
-</div>
-<!-- Note TextArea -->
-<label class="flex flex-col w-full">
-<span class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal pb-2">Note</span>
-<div class="flex w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all shadow-sm p-3">
-<textarea class="w-full bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 text-base focus:ring-0 resize-none h-24" placeholder="Inserisci eventuali note aggiuntive..."></textarea>
-</div>
-</label>
-</div>
-</div>
-<!-- Action Buttons -->
-<div class="flex flex-col gap-3 px-4 py-6 mt-2 pb-10">
-<button class="flex w-full items-center justify-center rounded-lg bg-primary h-14 text-white text-base font-bold leading-normal shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform">
-                Salva Azienda
-            </button>
-<a href="lista_aziende.html" class="flex w-full items-center justify-center rounded-lg bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 h-12 text-slate-500 dark:text-slate-400 text-base font-medium leading-normal transition-colors">
-                Annulla
-            </a>
-</div>
-</div>
-<!-- Bottom Navigation Bar -->
-<div class="fixed bottom-0 left-0 right-0 bg-surface-light dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800 pb-safe z-40">
-<div class="flex justify-between items-center h-[60px] px-6 max-w-md mx-auto">
-<a href="home_page.html" class="flex flex-col items-center justify-center gap-1 w-12 cursor-pointer group">
-<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-primary transition-colors text-[24px]">home</span>
-<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Home</span>
-</a>
-<a href="account_privati.html" class="flex flex-col items-center justify-center gap-1 w-12 cursor-pointer group">
-<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-primary transition-colors text-[24px]">lock</span>
-<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Vault</span>
-</a>
-<!-- Active State for Companies -->
-<a href="lista_aziende.html" class="flex flex-col items-center justify-center gap-1 w-12 cursor-pointer">
-<div class="bg-primary/10 rounded-full px-4 py-0.5 mb-0.5">
-<span class="material-symbols-outlined text-primary text-[24px] mt-1">domain</span>
-</div>
-<span class="text-[10px] font-bold text-primary">Aziende</span>
-</a>
-<a href="impostazioni.html" class="flex flex-col items-center justify-center gap-1 w-12 cursor-pointer group">
-<span class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-hover:text-primary transition-colors text-[24px]">settings</span>
-<span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 group-hover:text-primary">Opzioni</span>
-</a>
-</div>
-<!-- Safe area spacing for iOS home indicator -->
-<div class="h-5 w-full bg-surface-light dark:bg-surface-dark"></div>
-</div>
-</body></html>
+</head>
+
+<body class="font-sans antialiased bg-[#0a0f1e] text-slate-50 selection:bg-blue-500/30">
+
+    <div
+        class="relative flex h-full min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-[#0a0f1e]">
+
+        <!-- Header -->
+        <header class="fixed top-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto glass-header z-50 px-4 py-3">
+            <div class="flex items-center justify-between w-full h-10 gap-4">
+                <a href="lista_aziende.html" id="btn-back"
+                    class="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+                </a>
+                <h2 class="text-white text-lg font-bold tracking-tight text-center flex-1 pr-10">
+                    Nuova Azienda
+                </h2>
+            </div>
+        </header>
+
+        <!-- Spacer -->
+        <div class="h-16 w-full shrink-0"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-32">
+            <div class="min-h-full flex flex-col">
+
+                <!-- 1. Logo Upload -->
+                <div class="mt-6 flex flex-col items-center gap-4">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('logo-upload').click()">
+                        <div
+                            class="w-28 h-28 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 overflow-hidden transition-colors group-hover:border-blue-500/50 group-hover:bg-blue-500/5">
+                            <img id="logo-preview" src="" class="w-full h-full object-cover hidden">
+                            <div id="logo-placeholder"
+                                class="flex flex-col items-center text-gray-500 group-hover:text-blue-400 transition-colors">
+                                <span class="material-symbols-outlined text-3xl mb-1">add_a_photo</span>
+                                <span class="text-[10px] font-medium uppercase tracking-wider">Logo</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                            <span class="material-symbols-outlined text-white">edit</span>
+                        </div>
+                    </div>
+                    <input type="file" id="logo-upload" accept="image/*" class="hidden" onchange="previewLogo(this)">
+                </div>
+
+                <!-- 2. Dati Generali -->
+                <div class="mt-8 px-4">
+                    <div class="flex items-center gap-2 mb-4 px-1">
+                        <span class="material-symbols-outlined text-blue-500">domain</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Dati Generali</h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Ragione Sociale -->
+                        <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ragione
+                                    Sociale <span class="text-red-500">*</span></label>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                    <input type="checkbox" data-qr-field="ragioneSociale" checked
+                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
+                                </label>
+                            </div>
+                            <input id="ragione-sociale" type="text"
+                                class="w-full h-12 px-4 rounded-lg text-sm font-medium focus:outline-none"
+                                placeholder="Es. Tech Solutions S.r.l." />
+                        </div>
+
+                        <!-- P.IVA & SDI -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Partita
+                                        IVA <span class="text-red-500">*</span></label>
+                                    <label
+                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                        <input type="checkbox" data-qr-field="partitaIva" checked
+                                            class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
+                                    </label>
+                                </div>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">tag</span>
+                                    <input id="piva" type="tel"
+                                        class="w-full h-12 pl-10 pr-4 rounded-lg text-sm font-medium focus:outline-none placeholder-gray-600"
+                                        placeholder="00000000000" />
+                                </div>
+                            </div>
+                            <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Codice
+                                        SDI</label>
+                                    <label
+                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                        <input type="checkbox" data-qr-field="codiceSDI" checked
+                                            class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
+                                    </label>
+                                </div>
+                                <input id="codice-sdi" type="text"
+                                    class="w-full h-12 px-4 rounded-lg text-sm font-medium focus:outline-none text-center uppercase tracking-widest placeholder-gray-600"
+                                    placeholder="XXXXXXX" maxlength="7" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Referente -->
+                <div class="mt-8 px-4">
+                    <div class="flex items-center gap-2 mb-4 px-1">
+                        <span class="material-symbols-outlined text-blue-500">person</span>
+                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Referente</h3>
+                    </div>
+
+                    <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="relative group cursor-pointer shrink-0"
+                                onclick="document.getElementById('referente-photo-upload').click()">
+                                <div
+                                    class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition-colors">
+                                    <img id="referente-photo-preview" class="w-full h-full object-cover hidden"
+                                        src="" />
+                                    <span id="referente-photo-placeholder"
+                                        class="material-symbols-outlined text-2xl text-gray-600 group-hover:text-blue-400 transition-colors">person</span>
+                                </div>
+                                <input type="file" id="referente-photo-upload" accept="image/*" class="hidden"
+                                    onchange="previewReferentePhoto(this)">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Titolo
+                                        (Opzionale)</label>
+                                    <label
+                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                        <input type="checkbox" data-qr-field="referenteTitolo" checked
+                                            class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
+                                    </label>
+                                </div>
+                                <input id="referente-titolo" type="text"
+                                    class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                    placeholder="Es. Amministratore" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label
+                                        class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nome</label>
+                                    <input type="checkbox" data-qr-field="referenteNome" checked
+                                        class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
+                                </div>
+                                <input id="referente-nome" type="text"
+                                    class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                    placeholder="Mario" />
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label
+                                        class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Cognome</label>
+                                    <input type="checkbox" data-qr-field="referenteCognome" checked
+                                        class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
+                                </div>
+                                <input id="referente-cognome" type="text"
+                                    class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                    placeholder="Rossi" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label
+                                    class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Cellulare</label>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                    <input type="checkbox" data-qr-field="referenteCellulare" checked
+                                        class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
+                                </label>
+                            </div>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[18px]">smartphone</span>
+                                <input id="referente-cellulare" type="tel"
+                                    class="w-full h-10 pl-9 pr-3 rounded-lg text-sm focus:outline-none placeholder-gray-600"
+                                    placeholder="+39 333 ..." />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Sedi -->
+                <div class="mt-8 space-y-4 px-4">
+                    <!-- Sede Legale -->
+                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
+                        <button type="button" onclick="toggleSection('section-legale')"
+                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-blue-500">gavel</span>
+                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Legale</h3>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
+                                    onclick="event.stopPropagation()">
+                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                    <input type="checkbox" data-qr-field="qrLegale" checked
+                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
+                                </label>
+                            </div>
+                            <span id="arrow-section-legale"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="section-legale" class="border-t border-white/5 p-4 space-y-4 bg-black/20">
+                            <div class="flex gap-3">
+                                <div class="flex-[3]">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
+                                    <input id="indirizzo" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="Via Roma" />
+                                </div>
+                                <div class="flex-1">
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
+                                    <input id="civico" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
+                                        placeholder="1" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div class="col-span-2 md:col-span-1">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
+                                    <input id="citta" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="Milano" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
+                                    <input id="provincia" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
+                                        placeholder="MI" maxlength="2" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
+                                    <input id="cap" type="tel"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
+                                        placeholder="20100" maxlength="5" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <label class="text-[10px] text-gray-400 uppercase pl-1">CCIAA</label>
+                                        <input type="checkbox" data-qr-field="numeroCCIAA" checked
+                                            class="form-checkbox checkbox-qr w-3 h-3 rounded text-blue-500 focus:ring-0">
+                                    </div>
+                                    <input id="numero-cciaa" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="REA-123" />
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <label class="text-[10px] text-gray-400 uppercase pl-1">Data Iscrizione</label>
+                                        <input type="checkbox" data-qr-field="dataIscrizione" checked
+                                            class="form-checkbox checkbox-qr w-3 h-3 rounded text-blue-500 focus:ring-0">
+                                    </div>
+                                    <input id="data-iscrizione" type="date"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Sedi (Default collapsed) -->
+                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
+                        <button type="button" onclick="toggleSection('section-admin')"
+                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-blue-500">admin_panel_settings</span>
+                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Amministrativa
+                                </h3>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
+                                    onclick="event.stopPropagation()">
+                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                    <input type="checkbox" data-qr-field="qrAdmin" checked
+                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
+                                </label>
+                            </div>
+                            <span id="arrow-section-admin"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="section-admin" class="hidden border-t border-white/5 p-4 space-y-4 bg-black/20">
+                            <div class="flex gap-3">
+                                <div class="flex-[3]">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
+                                    <input id="admin-indirizzo" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                </div>
+                                <div class="flex-1">
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
+                                    <input id="admin-civico" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div class="col-span-2 md:col-span-1">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
+                                    <input id="admin-citta" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
+                                    <input id="admin-provincia" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
+                                        maxlength="2" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
+                                    <input id="admin-cap" type="tel"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
+                                        maxlength="5" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
+                        <button type="button" onclick="toggleSection('section-oper')"
+                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-blue-500">engineering</span>
+                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Operativa</h3>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
+                                    onclick="event.stopPropagation()">
+                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                    <input type="checkbox" data-qr-field="qrOper" checked
+                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
+                                </label>
+                            </div>
+                            <span id="arrow-section-oper"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="section-oper" class="hidden border-t border-white/5 p-4 space-y-4 bg-black/20">
+                            <div class="flex gap-3">
+                                <div class="flex-[3]">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
+                                    <input id="oper-indirizzo" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                </div>
+                                <div class="flex-1">
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
+                                    <input id="oper-civico" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div class="col-span-2 md:col-span-1">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
+                                    <input id="oper-citta" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
+                                    <input id="oper-provincia" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
+                                        maxlength="2" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
+                                    <input id="oper-cap" type="tel"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
+                                        maxlength="5" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
+                        <button type="button" onclick="toggleSection('section-comm')"
+                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-blue-500">storefront</span>
+                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Commerciale</h3>
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
+                                    onclick="event.stopPropagation()">
+                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                    <input type="checkbox" data-qr-field="qrComm" checked
+                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
+                                </label>
+                            </div>
+                            <span id="arrow-section-comm"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="section-comm" class="hidden border-t border-white/5 p-4 space-y-4 bg-black/20">
+                            <div class="flex gap-3">
+                                <div class="flex-[3]">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
+                                    <input id="comm-indirizzo" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                </div>
+                                <div class="flex-1">
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
+                                    <input id="comm-civico" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div class="col-span-2 md:col-span-1">
+                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
+                                    <input id="comm-citta" type="text"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
+                                    <input id="comm-provincia" type="text"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
+                                        maxlength="2" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
+                                    <input id="comm-cap" type="tel"
+                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
+                                        maxlength="5" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Email Aziendali -->
+                <div class="mt-8 px-4">
+                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
+                        <button type="button" onclick="toggleSection('section-email')"
+                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-blue-500">mail</span>
+                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Email Aziendali</h3>
+                            </div>
+                            <span id="arrow-section-email"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="section-email" class="hidden border-t border-white/5 p-4 space-y-6 bg-black/20">
+
+                            <!-- PEC -->
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-center mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-green-400 text-lg">verified</span>
+                                        <span class="text-xs font-bold text-white uppercase tracking-widest">PEC</span>
+                                    </div>
+                                    <label
+                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                        <input type="checkbox" data-qr-field="aziendaEmail" checked
+                                            class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
+                                    </label>
+                                </div>
+                                <div class="space-y-3">
+                                    <input id="email-pec" type="email"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="pec@azienda.it" />
+                                    <div class="relative">
+                                        <input id="email-pec-password" type="password"
+                                            class="w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none"
+                                            placeholder="Password PEC" />
+                                        <button type="button" onclick="togglePasswordVisibility('email-pec-password')"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                    </div>
+                                    <textarea id="email-pec-note"
+                                        class="w-full h-16 p-3 rounded-lg text-sm focus:outline-none resize-none"
+                                        placeholder="Note..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- AMMINISTRAZIONE -->
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-center mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-blue-400 text-lg">payments</span>
+                                        <span
+                                            class="text-xs font-bold text-white uppercase tracking-widest">Amministrazione</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <input id="email-amministrazione" type="email"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="amministrazione@azienda.it" />
+                                    <div class="relative">
+                                        <input id="email-amministrazione-password" type="password"
+                                            class="w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none"
+                                            placeholder="Password" />
+                                        <button type="button"
+                                            onclick="togglePasswordVisibility('email-amministrazione-password')"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PERSONALE -->
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-center mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-purple-400 text-lg">group</span>
+                                        <span
+                                            class="text-xs font-bold text-white uppercase tracking-widest">Personale</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <input id="email-personale" type="email"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="personale@azienda.it" />
+                                    <div class="relative">
+                                        <input id="email-personale-password" type="password"
+                                            class="w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none"
+                                            placeholder="Password" />
+                                        <button type="button"
+                                            onclick="togglePasswordVisibility('email-personale-password')"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MANUTENZIONE -->
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-center mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-orange-400 text-lg">build</span>
+                                        <span
+                                            class="text-xs font-bold text-white uppercase tracking-widest">Manutenzione</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <input id="email-manutenzione" type="email"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="manutenzione@azienda.it" />
+                                    <div class="relative">
+                                        <input id="email-manutenzione-password" type="password"
+                                            class="w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none"
+                                            placeholder="Password" />
+                                        <button type="button"
+                                            onclick="togglePasswordVisibility('email-manutenzione-password')"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ATTREZZATURA -->
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-center mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="material-symbols-outlined text-indigo-400 text-lg">precision_manufacturing</span>
+                                        <span
+                                            class="text-xs font-bold text-white uppercase tracking-widest">Attrezzatura</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <input id="email-attrezzatura" type="email"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="attrezzatura@azienda.it" />
+                                    <div class="relative">
+                                        <input id="email-attrezzatura-password" type="password"
+                                            class="w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none"
+                                            placeholder="Password" />
+                                        <button type="button"
+                                            onclick="togglePasswordVisibility('email-attrezzatura-password')"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MAGAZZINO -->
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-center mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-teal-400 text-lg">inventory_2</span>
+                                        <span
+                                            class="text-xs font-bold text-white uppercase tracking-widest">Magazzino</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <input id="email-magazzino" type="email"
+                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                        placeholder="magazzino@azienda.it" />
+                                    <div class="relative">
+                                        <input id="email-magazzino-password" type="password"
+                                            class="w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none"
+                                            placeholder="Password" />
+                                        <button type="button"
+                                            onclick="togglePasswordVisibility('email-magazzino-password')"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Altri Dati -->
+                <div class="mt-8 px-4">
+                    <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg space-y-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-yellow-500">info</span>
+                            <h3 class="text-white text-sm font-bold uppercase tracking-wider">Contatti & Note</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input id="telefono-azienda" type="tel"
+                                class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                placeholder="Telefono Aziendale" />
+                            <input id="fax-azienda" type="tel"
+                                class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" placeholder="Fax" />
+                        </div>
+                        <textarea id="note-azienda"
+                            class="w-full h-32 p-3 rounded-lg text-sm focus:outline-none resize-none"
+                            placeholder="Note generali sull'azienda..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Fixed Footer -->
+                <div
+                    class="fixed bottom-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto p-4 bg-[#0a0f1e]/80 backdrop-blur-xl border-t border-white/5 z-40">
+                    <button id="btn-save-azienda"
+                        class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl shadow-lg shadow-blue-900/40 font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                        <span class="material-symbols-outlined">save</span>
+                        Salva Azienda
+                    </button>
+                </div>
+
+                <!-- Toast -->
+                <div id="toast-container"
+                    class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 border border-white/10 text-white px-6 py-3 rounded-full text-sm font-bold shadow-2xl opacity-0 transition-all translate-y-10 pointer-events-none z-[100] flex items-center gap-2">
+                    <span id="toast-icon" class="material-symbols-outlined">info</span>
+                    <span id="toast-message">Messaggio...</span>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function toggleSection(id) {
+            const el = document.getElementById(id);
+            const arrow = document.getElementById('arrow-' + id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                if (arrow) arrow.style.transform = 'rotate(180deg)';
+            } else {
+                el.classList.add('hidden');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function togglePasswordVisibility(id) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') input.type = 'text';
+            else input.type = 'password';
+        }
+
+        // Preview Helpers (Used by JS but simplified here for inline)
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('logo-preview');
+                    const ph = document.getElementById('logo-placeholder');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    ph.classList.add('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewReferentePhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('referente-photo-preview');
+                    const ph = document.getElementById('referente-photo-placeholder');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    ph.classList.add('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+
+    <script src="assets/js/aggiungi_azienda.js" type="module"></script>
+</body>
+
+</html>

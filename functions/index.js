@@ -12,10 +12,10 @@ const {onRequest} = require("firebase-functions/https");
 const logger = require("firebase-functions/logger");
 
 // Set global options (per-function max instances)
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({maxInstances: 10});
 
 // Esempio di funzione funzionante, pronta al deploy
 exports.helloWorld = onRequest((req, res) => {
-  logger.info("Hello logs!", { structuredData: true });
+  logger.info("Hello logs!", {structuredData: true});
   res.send("Hello from Firebase!");
 });

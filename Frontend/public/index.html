@@ -1,221 +1,235 @@
 <!DOCTYPE html>
 <html class="dark" lang="it">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Accedi</title>
-  <link href="https://fonts.googleapis.com" rel="preconnect"/>
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="/Frontend/public/assets/css/style.css" rel="stylesheet"/>
-  <script src="/Frontend/public/assets/js/tailwind-config.js"></script>
-</head>
-<body>
-<div class="relative flex h-full min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden font-display transition-colors duration-200">
-  <div class="flex items-center p-4 justify-between">
-    <a href="/Frontend/public/home_page.html" class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-      <span class="material-symbols-outlined">home</span>
-    </a>
-    <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Login</h2>
-  </div>
-  <div class="flex-1 flex flex-col items-center justify-center w-full px-4 sm:px-6 pb-6">
-    <div class="flex flex-col items-center w-full max-w-sm mb-8">
-      <div class="relative w-32 h-32 mb-6 rounded-full overflow-hidden shadow-2xl shadow-primary/20 ring-4 ring-primary/20">
-        <div class="absolute inset-0 bg-gradient-to-tr from-primary to-purple-600 opacity-80 mix-blend-multiply"></div>
-        <div class="w-full h-full bg-center bg-cover" data-alt="Abstract 3D secure lock floating in blue space" style='background-image: url("/Frontend/public/assets/images/background.jpg");'></div>
-      </div>
-      <h1 class="text-slate-900 dark:text-white tracking-tight text-[32px] font-extrabold leading-tight text-center">Bentornato</h1>
-      <p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal mt-2 text-center max-w-[280px]">
-        Accedi al tuo account per gestire i tuoi dati in sicurezza.
-      </p>
-    </div>
-    <form id="login-form" class="w-full max-w-sm flex flex-col gap-5">
-        <div class="flex flex-col gap-2">
-            <label for="email" class="text-slate-900 dark:text-white text-base font-medium leading-normal pl-1">Email</label>
-            <div class="relative flex items-center">
-                <span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">person</span>
-                <input id="email" type="email" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Email" required />
-            </div>
-        </div>
-        <div class="flex flex-col gap-2">
-            <label for="password" class="text-slate-900 dark:text-white text-base font-medium leading-normal">Password</label>
-            <div class="relative flex items-center">
-                <span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
-                <input id="password" type="password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-12 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Inserisci la tua password" required />
-                <button type="button" class="toggle-password absolute right-4 text-slate-400 hover:text-primary transition-colors flex items-center">
-                    <span class="material-symbols-outlined">visibility</span>
-                </button>
-            </div>
-            <div class="flex justify-end mt-1">
-                <a class="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 text-sm font-semibold transition-colors hover:underline" href="reset_password.html">
-                    Password dimenticata?
-                </a>
-            </div>
-        </div>
-                <input id="email" type="email" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-12 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Email" required />
-                <button type="button" class="copy-button absolute right-4 text-slate-400 hover:text-primary transition-colors flex items-center" data-copy-target="email">
-                    <span class="material-symbols-outlined">content_copy</span>
-                </button>
-            </div>
-        </div>
-        <div class="flex flex-col gap-2">
-            <label for="password" class="text-slate-900 dark:text-white text-base font-medium leading-normal">Password</label>
-            <div class="relative flex items-center">
-                <span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
-                <input id="password" type="password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-24 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Inserisci la tua password" required />
-                <div class="absolute right-4 flex items-center gap-2">
-                    <button type="button" class="copy-button text-slate-400 hover:text-primary transition-colors flex items-center" data-copy-target="password">
-                        <span class="material-symbols-outlined">content_copy</span>
-                    </button>
-                    <button type="button" class="toggle-password text-slate-400 hover:text-primary transition-colors flex items-center">
-                        <span class="material-symbols-outlined">visibility</span>
-                    </button>
-                </div>
-            </div>
-            <div class="flex justify-end mt-1">
-                <a class="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 text-sm font-semibold transition-colors hover:underline" href="/Frontend/public/reset_password.html">
-                    Password dimenticata?
-                </a>
-            </div>
-        </div>
-        <div class="h-2"></div>
-        <button type="submit" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-5 bg-primary hover:bg-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] w-full shadow-lg shadow-primary/25 transition-all active:scale-[0.98]">
-            <span class="truncate">ACCEDI</span>
-        </button>
-    </form>
-  </div>
-    <div id="notification-banner" class="hidden fixed top-4 right-4 p-4 rounded-lg text-white z-50"></div>
-  <div class="w-full p-6 text-center">
-    <p class="text-slate-500 dark:text-slate-400 text-sm font-normal">
-      Non hai un account?
-      <a class="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 font-bold transition-colors ml-1 hover:underline" href="/Frontend/public/registrati.html">Registrati qui</a>
-    </p>
-    <div class="h-5"></div>
-  </div>
-</div>
-<script src="assets/js/main.js"></script>
-<script type="module">
-    import { login, checkAuthState } from './assets/js/auth.js';
-<script type="module" src="/Frontend/public/assets/js/utils.js"></script>
-<script src="/Frontend/public/assets/js/main.js"></script>
-<script type="module">
-    import { login, checkAuthState } from '/Frontend/public/assets/js/auth.js';
-
-    checkAuthState(); // Redirect if already logged in
-
-    const loginForm = document.getElementById('login-form');
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        await login(email, password);
-    });
-</script>
-</body>
-</html>
-<html class="dark" lang="it"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Accedi</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
+    <meta charset="utf-8" />
+    <script>
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
     </script>
-<style>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Codici & Password - Accedi</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/app-icon.png?v=2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        /* ALLINEAMENTO STANDARD AREA PRIVATA */
         body {
-            min-height: max(884px, 100dvh);
+            background-color: #0a0f1e;
+            /* Sfondo pieno come Area Privata */
+            min-height: 100vh;
+            margin: 0;
+            color: #ffffff;
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* REGOLA 15 - FARO ANIMATO (Standard Area Privata) */
+        .glass-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 150%;
+            height: 120%;
+            background: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            animation: glowFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes glowFloat {
+            0% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(100px) scale(1.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        .border-glow {
+            position: relative;
+        }
+
+        .border-glow::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1.5px;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0.6) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .saetta {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
+            background-size: 200% 100%;
+            pointer-events: none;
+            z-index: 5;
+            animation: shimmer 4s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
         }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body>
-<div class="relative flex h-full min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden font-display transition-colors duration-200">
-<div class="flex items-center p-4 justify-between">
-<button class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-<span class="material-symbols-outlined">arrow_back</span>
-</button>
-<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Login</h2>
-</div>
-<div class="flex-1 flex flex-col items-center justify-center w-full px-4 sm:px-6 pb-6">
-<div class="flex flex-col items-center w-full max-w-sm mb-8">
-<div class="relative w-32 h-32 mb-6 rounded-full overflow-hidden shadow-2xl shadow-primary/20 ring-4 ring-primary/20">
-<div class="absolute inset-0 bg-gradient-to-tr from-primary to-purple-600 opacity-80 mix-blend-multiply"></div>
-<div class="w-full h-full bg-center bg-cover" data-alt="Abstract 3D secure lock floating in blue space" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA7y2qzzUIhjZW4jLmv_lLerSlQj29WqZW3ZJ98hX-Pbzg49ZYWykcIrFweBWZCT5Qy7B9X0OEfPkWHtIjxVVpyXtOSlDXZsV9jpFXDN19ldKRm0Cwq2N_CM_ErC4GVHmG7OgdtZWar8lYEvhKI--6MyWIEDmEf3GQ7pPz80d2V6ceu7ulDLtLGh0zp4YpVl_YA6CIqjU5dh2faD7_lod-UOpJyE5EkG9yYGRYq7o63mM9jMi5B78SPDnVY8hjMZezD-1dhM3CCHRw");'></div>
-</div>
-<h1 class="text-slate-900 dark:text-white tracking-tight text-[32px] font-extrabold leading-tight text-center">Bentornato</h1>
-<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal mt-2 text-center max-w-[280px]">
-                    Accedi al tuo account per gestire i tuoi dati in sicurezza.
-                </p>
-</div>
-<div class="w-full max-w-sm flex flex-col gap-5">
-<div class="flex flex-col gap-2">
-<label class="text-slate-900 dark:text-white text-base font-medium leading-normal pl-1">Username</label>
-<div class="relative flex items-center">
-<span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">person</span>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Username o Email" type="text" value=""/>
-</div>
-</div>
-<div class="flex flex-col gap-2">
-<div class="flex justify-between items-center pl-1 pr-1">
-<label class="text-slate-900 dark:text-white text-base font-medium leading-normal">Password</label>
-</div>
-<div class="relative flex items-center">
-<span class="absolute left-4 text-slate-400 material-symbols-outlined text-[20px]">lock</span>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-slate-200 dark:border-none bg-white dark:bg-[#283039] focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-[#9dabb9] pl-12 pr-12 text-base font-normal leading-normal shadow-sm transition-all" placeholder="Inserisci la tua password" type="password" value=""/>
-<button class="absolute right-4 text-slate-400 hover:text-primary transition-colors flex items-center">
-<span class="material-symbols-outlined text-[20px]">visibility_off</span>
-</button>
-</div>
-<div class="flex justify-end mt-1">
-<a class="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 text-sm font-semibold transition-colors hover:underline" href="#">
-                            Password dimenticata?
-                        </a>
-</div>
-</div>
-<div class="h-2"></div>
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-5 bg-primary hover:bg-blue-600 text-white text-base font-bold leading-normal tracking-[0.015em] w-full shadow-lg shadow-primary/25 transition-all active:scale-[0.98]">
-<span class="truncate">ACCEDI</span>
-</button>
-<button class="flex items-center justify-center gap-2 w-full text-primary hover:text-blue-400 font-medium text-sm py-2 group">
-<span class="material-symbols-outlined group-hover:scale-110 transition-transform">fingerprint</span>
-<span>Accedi con Face ID</span>
-</button>
-</div>
-</div>
-<div class="w-full p-6 text-center">
-<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">
-                Non hai un account?
-                <a class="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 font-bold transition-colors ml-1 hover:underline" href="#">Registrati qui</a>
-</p>
-<div class="h-5"></div>
-</div>
-</div>
+</head>
 
-</body></html>
+<body class="bg-[#0a0f1e] antialiased">
+    <!-- 1. CONTENITORE PRINCIPALE (GRADIENTE METALLICO COME AREA PRIVATA) -->
+    <div
+        class="relative flex min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">
 
+        <!-- 2. FARO ANIMATO "VIVO" (Standard Area Privata - z-0) -->
+        <div class="glass-glow"></div>
+
+        <!-- Header Glass -->
+        <header
+            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md z-50">
+            <div class="flex items-center p-4 justify-center h-16">
+                <span class="text-white/40 font-bold tracking-widest text-xs uppercase select-none">Security
+                    Vault</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex items-center justify-center p-6 relative z-30 mb-8 mt-16 pb-24">
+
+            <!-- Login Card (Il Box Campi) -->
+            <div
+                class="w-full max-w-md bg-[#0a0f1e]/70 backdrop-blur-2xl rounded-[24px] border-glow overflow-hidden group hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-2xl relative z-40">
+                <div class="saetta"></div>
+
+
+                <!-- Glow Overlay -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[24px] pointer-events-none z-10">
+                </div>
+
+                <div class="px-8 pt-10 pb-10 relative z-10">
+                    <!-- Icon Section -->
+                    <div class="flex justify-center mb-8">
+                        <div
+                            class="h-20 w-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center shadow-2xl shadow-blue-500/20 ring-1 ring-white/20 relative border-glow group-hover:scale-110 transition-transform duration-500">
+                            <div class="saetta opacity-40"></div>
+                            <span
+                                class="material-symbols-outlined text-white text-[36px] drop-shadow-lg select-none">security</span>
+                        </div>
+                    </div>
+
+                    <h1
+                        class="text-3xl font-extrabold text-white text-center mb-1 select-none group-hover:translate-x-1 transition-transform duration-500">
+                        Accedi</h1>
+                    <p class="text-xs text-white/40 text-center mb-10 uppercase tracking-widest select-none font-bold">
+                        Protocollo Titanium</p>
+
+                    <form id="login-form" class="space-y-6">
+                        <div class="space-y-2">
+                            <label
+                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none">Username</label>
+                            <input id="email" type="email" placeholder="Email o Username" required
+                                class="w-full h-14 px-5 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-sm">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label
+                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none">Password</label>
+                            <div class="relative group">
+                                <input id="password" type="password" placeholder="••••••••" required
+                                    class="w-full h-14 px-5 pr-14 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-sm">
+                                <button type="button"
+                                    class="toggle-password absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
+                                    <span
+                                        class="material-symbols-outlined text-[20px] select-none">visibility_off</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-extrabold rounded-2xl shadow-xl transition-all active:scale-[0.98] border-glow group/btn overflow-hidden">
+                            <div class="relative z-10 flex items-center justify-center gap-2">
+                                <span class="tracking-widest uppercase text-xs">Autenticazione</span>
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </div>
+                        </button>
+                    </form>
+
+                    <div class="mt-8 text-center select-none">
+                        <a href="registrati.html"
+                            class="text-[10px] font-bold text-blue-400 hover:text-white transition-colors uppercase tracking-widest font-extrabold">Registra
+                            nuovo operatore</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Glass -->
+        <footer
+            class="fixed bottom-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-md z-50">
+            <div class="flex items-center p-4 justify-center h-16">
+                <p class="text-[10px] text-white/20 font-bold tracking-[0.4em] uppercase select-none">Security
+                    Protection System</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="assets/js/utils.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script type="module">
+        import { login, checkAuthState } from './assets/js/auth.js';
+        checkAuthState();
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const btn = e.target.querySelector('button[type="submit"]');
+                const original = btn.innerHTML;
+                try {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+                    await login(email, password);
+                } catch (err) {
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

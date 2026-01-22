@@ -4,3 +4,9 @@
     display: block !important;
     visibility: visible !important;
 }
+
+/* Fix for Date Input Icon in Dark Mode */
+.dark ::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
