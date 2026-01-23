@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html class="dark" lang="it">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
+    <title>Impostazioni</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        body {
+            min-height: 100dvh;
+            background-color: #0a0f1e;
+            color: #ffffff;
+        }
+
+        /* BORDO RIFLETTENTE (GLOW BORDER) */
+        .border-glow {
+            position: relative;
+        }
+
+        .border-glow::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.4) 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* 3) PUNTO LUCE A FARO (BEACON EFFECT) */
+        .glass-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150%;
+            height: 120%;
+            background: radial-gradient(ellipse at 50% 0%,
+                    rgba(80, 150, 255, 0.6) 0%,
+                    rgba(80, 150, 255, 0.2) 25%,
+                    rgba(80, 150, 255, 0.05) 50%,
+                    transparent 75%);
+            filter: blur(80px);
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+            animation: glowFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes glowFloat {
+            0% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(100px) scale(1.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-50%) translateY(-150px) scale(1);
+                opacity: 0.5;
+            }
+        }
+
+        /* 13) SAETTA ANIMATA (GOLD SHIMMER) */
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .saetta {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
+            background-size: 200% 100%;
+            animation: shimmer 4s infinite linear;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="font-display overflow-x-hidden antialiased bg-[#0a0f1e] text-white">
+    <div
+        class="relative flex h-full min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">
+
+        <!-- GLOW LAYER -->
+        <div class="glass-glow"></div>
+
+        <!-- 4) TopAppBar (Fixed Fusion Sfumato) -->
+        <div
+            class="fixed top-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto flex items-center bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md p-4 justify-between z-50 transition-colors duration-300">
+            <div class="flex size-12 shrink-0 items-center justify-center">
+                <a href="home_page.html"
+                    class="flex items-center justify-center p-2 rounded-full hover:bg-white/10 transition-colors text-white border-glow">
+                    <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+                </a>
+            </div>
+            <div class="flex flex-1 flex-col px-4 text-center">
+                <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
+                    Impostazioni</h2>
+            </div>
+            <div class="flex w-12 items-center justify-end">
+                <!-- Placeholder -->
+            </div>
+        </div>
+
+        <!-- Header Spacer -->
+        <div class="h-20 w-full shrink-0"></div>
+
+        <!-- Profile Section -->
+        <div class="relative z-10 px-4 pt-4 pb-2">
+            <div
+                class="bg-white/5 border-glow rounded-2xl p-6 shadow-lg backdrop-blur-md relative overflow-hidden group">
+                <!-- 13) Saetta (Metallic Shimmer) -->
+                <div class="saetta"></div>
+
+                <div class="flex flex-col items-center gap-4 relative z-10">
+                    <div class="relative group">
+                        <div id="user-avatar-settings"
+                            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-24 w-24 border-4 border-white/10 shadow-xl"
+                            data-alt="User Avatar" style='background-image: url("assets/images/user-avatar-5.png");'>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 id="user-name-settings"
+                            class="text-xl font-bold leading-tight tracking-tight text-white drop-shadow-md">
+                            Caricamento...</h3>
+                        <p id="user-email-settings" class="text-blue-200/70 text-sm font-medium mt-1">
+                            ...</p>
+                    </div>
+                    <button onclick="window.location.href='dati_anagrafici_privato.html'"
+                        class="mt-2 w-full max-w-[200px] flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-blue-600/20 text-blue-400 border-glow border-0 hover:bg-blue-600/30 hover:border-blue-400/50 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] text-sm font-bold leading-normal tracking-wide shadow-lg shadow-blue-900/20 relative group">
+                        <!-- 10) Glow Overlay -->
+                        <div
+                            class="absolute inset-0 bg-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        </div>
+                        <span class="relative z-10">Gestisci Account</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sicurezza Section -->
+        <div class="relative z-10 px-4 pt-6">
+            <h3 class="text-white/50 text-xs font-bold uppercase tracking-wider px-2 mb-2 ml-1">
+                Sicurezza</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <!-- 6,9,10) ListItem: Password -->
+                <div
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-orange-500/10 text-orange-400 shrink-0 size-10 border border-orange-500/20">
+                        <span class="material-symbols-outlined">lock</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Cambio Password</p>
+                    </div>
+                    <span
+                        class="relative z-10 material-symbols-outlined text-white/30 text-[20px] group-hover:text-white/60 transition-colors">arrow_forward_ios</span>
+                </div>
+
+                <!-- 6,9,10) ListItem: 2FA -->
+                <div
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-green-500/10 text-green-400 shrink-0 size-10 border border-green-500/20">
+                        <span class="material-symbols-outlined">shield</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Autenticazione a due fattori</p>
+                    </div>
+                    <div class="relative z-10 shrink-0">
+                        <label
+                            class="relative flex h-[24px] w-[44px] cursor-pointer items-center rounded-full border border-white/10 bg-black/40 p-1 transition-colors has-[:checked]:bg-green-600 has-[:checked]:border-green-500">
+                            <input checked="" class="peer invisible absolute" type="checkbox" />
+                            <div
+                                class="h-[18px] w-[18px] rounded-full bg-white shadow-sm transition-all peer-checked:translate-x-[18px]">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 6,9,10) ListItem: Biometrics -->
+                <div
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 shrink-0 size-10 border border-blue-500/20">
+                        <span class="material-symbols-outlined">face</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Face ID</p>
+                    </div>
+                    <div class="relative z-10 shrink-0">
+                        <label
+                            class="relative flex h-[24px] w-[44px] cursor-pointer items-center rounded-full border border-white/10 bg-black/40 p-1 transition-colors has-[:checked]:bg-blue-600 has-[:checked]:border-blue-500">
+                            <input checked="" class="peer invisible absolute" type="checkbox" />
+                            <div
+                                class="h-[18px] w-[18px] rounded-full bg-white shadow-sm transition-all peer-checked:translate-x-[18px]">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generale Section -->
+        <div class="relative z-10 px-4 pt-6">
+            <h3 class="text-white/50 text-xs font-bold uppercase tracking-wider px-2 mb-2 ml-1">
+                Generale</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <!-- 6,9,10) ListItem: Notifications -->
+                <a href="notifiche_history.html"
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 shrink-0 size-10 border border-red-500/20">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Notifiche</p>
+                    </div>
+                    <span
+                        class="relative z-10 material-symbols-outlined text-white/30 text-[20px] group-hover:text-white/60 transition-colors">arrow_forward_ios</span>
+                </a>
+
+                <!-- 6,9,10) ListItem: Archivio -->
+                <a href="archivio_account.html"
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 shrink-0 size-10 border border-violet-500/20">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Archivio</p>
+                    </div>
+                    <span
+                        class="relative z-10 material-symbols-outlined text-white/30 text-[20px] group-hover:text-white/60 transition-colors">arrow_forward_ios</span>
+                </a>
+
+                <!-- 6,9,10) ListItem: Language -->
+                <div
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 shrink-0 size-10 border border-teal-500/20">
+                        <span class="material-symbols-outlined">language</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Lingua</p>
+                    </div>
+                    <div class="relative z-10 flex items-center gap-2">
+                        <span
+                            class="text-sm text-white/50 font-medium group-hover:text-white/80 transition-colors">Italiano</span>
+                        <span
+                            class="material-symbols-outlined text-white/30 text-[20px] group-hover:text-white/60 transition-colors">arrow_forward_ios</span>
+                    </div>
+                </div>
+
+                <!-- 6,9,10) ListItem: Regole Invio E-mail -->
+                <a href="regole_scadenze_veicoli.html"
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 shrink-0 size-10 border border-indigo-500/20">
+                        <span class="material-symbols-outlined">mail</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Regole invio scadenze</p>
+                    </div>
+                    <span
+                        class="relative z-10 material-symbols-outlined text-white/30 text-[20px] group-hover:text-white/60 transition-colors">arrow_forward_ios</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Presentazione Section -->
+        <div class="relative z-10 px-4 pt-6">
+            <h3 class="text-white/50 text-xs font-bold uppercase tracking-wider px-2 mb-2 ml-1">
+                Presentazione</h3>
+
+            <!-- 6,9,10) Accordion: Informazioni sull'App -->
+            <div
+                class="group relative bg-white/5 border-glow rounded-2xl overflow-hidden shadow-lg mb-4 hover:-translate-y-1 transition-all duration-300">
+                <button onclick="toggleAccordion('presentazione-content', 'presentazione-chevron')"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    </div>
+                    <div
+                        class="flex items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 shrink-0 size-10 border border-blue-500/20">
+                        <span class="material-symbols-outlined">info</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Informazioni sull'App</p>
+                        <p class="text-xs text-white/40">Scopri cosa fa App Codici Password</p>
+                    </div>
+                    <span id="presentazione-chevron"
+                        class="material-symbols-outlined text-white/30 text-[20px] transition-transform">expand_more</span>
+                </button>
+
+                <div id="presentazione-content"
+                    class="hidden border-t border-white/5 px-4 py-4 space-y-6 text-sm bg-black/20">
+                    <div class="text-center pb-2 border-b border-white/5">
+                        <h4 class="text-xl font-bold text-blue-400">APP CODICI PASSWORD</h4>
+                        <p class="text-xs text-white/40 uppercase tracking-widest mt-1">Sistema di Gestione Credenziali
+                            e Condivisione</p>
+                    </div>
+                    <div class="space-y-3">
+                        <h5 class="font-bold text-white text-base border-l-4 border-blue-500 pl-3">
+                            PANORAMICA</h5>
+                        <p class="text-white/70 leading-relaxed text-justify">App Codici Password è
+                            un'applicazione web progressiva (PWA) per la gestione sicura di credenziali, password e note
+                            personali e aziendali.</p>
+                        <p class="text-white/70 leading-relaxed text-justify">L'app nasce per
+                            l'utente <strong>PRIVATO</strong>: chiunque può utilizzarla per gestire le proprie
+                            credenziali personali senza necessità di funzionalità aziendali. La sezione "Privato" è il
+                            cuore dell'applicazione e rappresenta il punto di partenza per tutti gli utenti.</p>
+                        <p class="text-white/70 leading-relaxed text-justify">Tuttavia, molte persone
+                            sono anche titolari di azienda, amministratori delegati, commercialisti, consulenti o
+                            semplici impiegati che hanno bisogno di salvare dati aziendali, gestire credenziali di
+                            clienti e organizzare scadenze professionali. Per queste esigenze, l'app offre una sezione
+                            "Azienda" dedicata, completamente opzionale ma perfettamente integrata.</p>
+                        <div class="border-l-2 border-white/20 pl-3 py-1">
+                            <p class="text-white/70 leading-relaxed italic text-sm">
+                                In sintesi: tutti partono da "Privato", e chi ne ha bisogno espande verso "Azienda".
+                            </p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <h5 class="font-bold text-white text-base border-l-4 border-blue-500 pl-3">
+                            CARATTERISTICHE PRINCIPALI</h5>
+                        <ul class="list-disc list-outside pl-5 space-y-1 text-white/70">
+                            <li><strong>Account Privati:</strong> Credenziali personali, allegati, logo</li>
+                            <li><strong>Account Aziendali:</strong> Dati anagrafici, P.IVA, QR Code</li>
+                            <li><strong>Memorandum:</strong> Note importanti condivisibili</li>
+                            <li><strong>Condivisione:</strong> Inviti via email con accetta/rifiuta</li>
+                            <li><strong>Scadenze:</strong> Calendario con notifiche anticipate</li>
+                            <li><strong>Sicurezza:</strong> Autenticazione Firebase, dati crittografati</li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3">
+                        <h5 class="font-bold text-white text-base border-l-4 border-blue-500 pl-3">
+                            FLUSSI PRINCIPALI</h5>
+                        <div class="space-y-2 text-white/70">
+                            <p><strong>1. Registrazione:</strong> Email/Google, profilo, dashboard.</p>
+                            <p><strong>2. Creazione Account:</strong> Privato/Azienda/Memo + credenziali.</p>
+                            <p><strong>3. Condivisione:</strong> Flag "Condiviso", rubrica, invio invito.</p>
+                            <p><strong>4. Scadenze:</strong> Creazione scadenza, notifica urgenze.</p>
+                        </div>
+                    </div>
+                    <div class="pt-6 border-t border-white/5 text-center">
+                        <p class="text-sm font-bold text-white/30">© Boschetto Diego</p>
+                        <p class="text-[10px] text-white/20">Tutti i diritti riservati</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6,9,10) Accordion 2: Le 5 Regole d'Oro -->
+            <div
+                class="group relative bg-white/5 border-glow rounded-2xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <button onclick="toggleAccordion('regole-content', 'regole-chevron')"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    </div>
+                    <div
+                        class="flex items-center justify-center rounded-xl bg-yellow-500/10 text-yellow-400 shrink-0 size-10 border border-yellow-500/20">
+                        <span class="material-symbols-outlined">verified</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Le 5 Regole d'Oro</p>
+                        <p class="text-xs text-white/40">Protocollo di sicurezza e condivisione</p>
+                    </div>
+                    <span id="regole-chevron"
+                        class="material-symbols-outlined text-white/30 text-[20px] transition-transform">expand_more</span>
+                </button>
+
+                <div id="regole-content" class="hidden border-t border-white/5 px-4 py-4 space-y-6 text-sm bg-black/20">
+                    <!-- SUB-ACCORDION 1: 5 Regole d'Oro -->
+                    <div class="rounded-lg overflow-hidden border border-yellow-500/20">
+                        <button onclick="toggleAccordion('gold-rules-content', 'gold-rules-chevron')"
+                            class="w-full flex items-center justify-between px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 active:scale-[0.99] transition-all relative overflow-hidden group">
+                            <!-- 10) Glow Overlay -->
+                            <div
+                                class="absolute inset-0 bg-yellow-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-sm font-bold text-yellow-400">LE 5 REGOLE D'ORO
+                                </h4>
+                                <p class="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">Guida alla
+                                    Condivisione</p>
+                            </div>
+                            <span id="gold-rules-chevron"
+                                class="material-symbols-outlined text-yellow-400 text-lg transition-transform">expand_more</span>
+                        </button>
+
+                        <div id="gold-rules-content" class="hidden p-3 space-y-4 bg-transparent">
+                            <!-- Regola 1 -->
+                            <div class="bg-white/5 p-3 rounded-lg border-l-4 border-yellow-500">
+                                <h5 class="font-bold text-white/90">1) REGOLA DELLA RUBRICA "PASSIVA"
+                                </h5>
+                                <p class="text-white/60 text-xs mt-1">La sezione "Rubrica Condivisi"
+                                    in home
+                                    serve solo per consultazione e per popolare i menu a tendina. Non si inviano inviti
+                                    da lì.
+                                </p>
+                            </div>
+
+                            <!-- Regola 2 -->
+                            <div class="bg-white/5 p-3 rounded-lg border-l-4 border-yellow-500">
+                                <h5 class="font-bold text-white/90">2) REGOLA "SHARE-ON-SAVE"</h5>
+                                <p class="text-white/60 text-xs mt-1">Non esiste un tasto "Invia
+                                    Invito"
+                                    separato. Tutto si fa col tasto "Salva Modifiche e invia l'invito". Se metti la
+                                    spunta
+                                    "Condiviso", devi scegliere un contatto.</p>
+                            </div>
+
+                            <!-- Regola 3 -->
+                            <div class="bg-white/5 p-3 rounded-lg border-l-4 border-yellow-500">
+                                <h5 class="font-bold text-white/90">3) VISIBILITÀ IMMEDIATA</h5>
+                                <p class="text-white/60 text-xs mt-1">Nella lista "Persone con
+                                    accesso" vedi
+                                    subito gli invitati (stato "In attesa"). Quando accettano, lo stato diventa
+                                    "Condiviso".</p>
+                            </div>
+
+                            <!-- Regola 4 -->
+                            <div class="bg-white/5 p-3 rounded-lg border-l-4 border-yellow-500">
+                                <h5 class="font-bold text-white/90">4) FLUSSO DI INVITO</h5>
+                                <ul class="list-disc pl-4 mt-1 text-white/60 text-xs space-y-1">
+                                    <li><strong>Rifiuto:</strong> Sparisce per chi rifiuta. Viene rimosso dalla lista
+                                        del
+                                        proprietario. Notifica inviata.</li>
+                                    <li><strong>Accettazione:</strong> Notifica al proprietario. Account va nella
+                                        sezione
+                                        dedicata ("Account Condivisi" o "Note Condivise").</li>
+                                </ul>
+                            </div>
+
+                            <!-- Regola 5 -->
+                            <div class="bg-white/5 p-3 rounded-lg border-l-4 border-yellow-500">
+                                <h5 class="font-bold text-white/90">5) REVOCA UNIFICATA</h5>
+                                <p class="text-white/60 text-xs mt-1">Due modi per revocare: tasto
+                                    rosso (-)
+                                    o togliere la spunta "Condiviso". In entrambi i casi: cancella inviti, pulisce lista
+                                    accessi, notifica l'utente.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-ACCORDION 2: Regole Visualizzazione Account -->
+                    <div class="rounded-lg overflow-hidden border border-blue-500/20 mt-4">
+                        <button onclick="toggleAccordion('account-rules-content', 'account-rules-chevron')"
+                            class="w-full flex items-center justify-between px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 active:scale-[0.99] transition-all relative overflow-hidden group">
+                            <!-- 10) Glow Overlay -->
+                            <div
+                                class="absolute inset-0 bg-blue-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-sm font-bold text-blue-400">REGOLE VISUALIZZAZIONE
+                                    ACCOUNT</h4>
+                                <p class="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">Come vengono
+                                    filtrati i dati</p>
+                            </div>
+                            <span id="account-rules-chevron"
+                                class="material-symbols-outlined text-blue-400 text-lg transition-transform">expand_more</span>
+                        </button>
+
+                        <div id="account-rules-content" class="hidden p-3 grid grid-cols-1 gap-3 bg-transparent">
+                            <!-- Account -->
+                            <div class="bg-blue-500/10 p-3 rounded-lg border-l-4 border-blue-500">
+                                <h5 class="font-bold text-white/90 flex items-center gap-2">
+                                    <span
+                                        class="material-symbols-outlined text-blue-400 text-sm">account_balance_wallet</span>
+                                    Account
+                                </h5>
+                                <p class="text-white/60 text-xs mt-1">
+                                    Include SOLO i tuoi account privati.
+                                    <br><strong>Esclude:</strong> Account ricevuti da altri E i tuoi account con spunta
+                                    "Condiviso".
+                                </p>
+                            </div>
+
+                            <!-- Account Condivisi -->
+                            <div class="bg-purple-500/10 p-3 rounded-lg border-l-4 border-purple-500">
+                                <h5 class="font-bold text-white/90 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-purple-400 text-sm">group</span>
+                                    Account Condivisi
+                                </h5>
+                                <p class="text-white/60 text-xs mt-1">
+                                    Include TUTTI gli account condivisi.
+                                    <br><strong>Comprende:</strong> Quelli ricevuti da altri E i tuoi account marcati
+                                    come "Condiviso".
+                                </p>
+                            </div>
+
+                            <!-- Memorandum -->
+                            <div class="bg-amber-500/10 p-3 rounded-lg border-l-4 border-amber-500">
+                                <h5 class="font-bold text-white/90 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-amber-500 text-sm">sticky_note_2</span>
+                                    Memorandum
+                                </h5>
+                                <p class="text-white/60 text-xs mt-1">
+                                    Include SOLO le note personali (sia create come Memorandum, sia Account con il
+                                    <strong>pallino "Memorandum" attivo</strong>).
+                                    <br><strong>Esclude:</strong> Note ricevute da altri E le tue note con spunta
+                                    "Condiviso".
+                                </p>
+                            </div>
+
+                            <!-- Memorandum Condivisi -->
+                            <div class="bg-emerald-500/10 p-3 rounded-lg border-l-4 border-emerald-500">
+                                <h5 class="font-bold text-white/90 flex items-center gap-2">
+                                    <span
+                                        class="material-symbols-outlined text-emerald-500 text-sm">folder_shared</span>
+                                    Memorandum Condivisi
+                                </h5>
+                                <p class="text-white/60 text-xs mt-1">
+                                    Include TUTTE le note condivise.
+                                    <br><strong>Comprende:</strong> Quelle ricevute da altri E le tue note marcate come
+                                    "Condiviso".
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supporto Section -->
+        <div class="relative z-10 px-4 pt-6">
+            <h3 class="text-white/50 text-xs font-bold uppercase tracking-wider px-2 mb-2 ml-1">
+                Supporto</h3>
+            <div class="flex flex-col gap-2">
+                <!-- 6,9,10) ListItem: Aiuto e FAQ -->
+                <div
+                    class="group relative overflow-hidden bg-white/5 border-glow rounded-xl p-3.5 flex items-center gap-4 cursor-pointer hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-md">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none z-0">
+                    </div>
+
+                    <div
+                        class="relative z-10 flex items-center justify-center rounded-xl bg-gray-500/20 text-gray-300 shrink-0 size-10 border border-gray-500/30">
+                        <span class="material-symbols-outlined">help</span>
+                    </div>
+                    <div class="relative z-10 flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Aiuto e FAQ</p>
+                    </div>
+                    <span
+                        class="relative z-10 material-symbols-outlined text-white/30 text-[20px] group-hover:text-white/60 transition-colors">arrow_forward_ios</span>
+                </div>
+            </div>
+
+            <!-- 6,9,10) Privacy Policy -->
+            <div
+                class="group relative bg-white/5 border-glow rounded-2xl overflow-hidden shadow-lg mt-4 hover:-translate-y-1 transition-all duration-300">
+                <button onclick="toggleAccordion('privacy-content', 'privacy-chevron')"
+                    class="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
+                    <!-- 10) Glow Overlay -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    </div>
+                    <div
+                        class="flex items-center justify-center rounded-xl bg-gray-500/20 text-gray-300 shrink-0 size-10 border border-gray-500/30">
+                        <span class="material-symbols-outlined">privacy_tip</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-base font-semibold truncate text-white">Privacy Policy</p>
+                        <p class="text-xs text-white/40">Trattamento dati e diritti</p>
+                    </div>
+                    <span id="privacy-chevron"
+                        class="material-symbols-outlined text-white/30 text-[20px] transition-transform">expand_more</span>
+                </button>
+
+                <div id="privacy-content"
+                    class="hidden border-t border-white/5 px-4 py-4 space-y-6 text-sm bg-black/20">
+                    <div class="text-center pb-2 border-b border-white/5">
+                        <h4 class="text-xl font-bold text-gray-200">PRIVACY POLICY</h4>
+                        <p class="text-[10px] text-white/30 uppercase mt-1">Informativa Estesa</p>
+                    </div>
+
+                    <!-- Sezione 1 -->
+                    <div class="bg-white/5 p-3 rounded-lg border-l-4 border-gray-500">
+                        <h5 class="font-bold text-white/90">1. TITOLARE DEL TRATTAMENTO</h5>
+                        <p class="text-white/60 text-xs mt-1">
+                            Il Titolare del trattamento dei dati è <strong>Boschetto Diego</strong>.
+                            L'applicazione è concepita per garantire la massima sicurezza e riservatezza.
+                        </p>
+                    </div>
+
+                    <!-- Sezione 2 -->
+                    <div class="bg-white/5 p-3 rounded-lg border-l-4 border-gray-500">
+                        <h5 class="font-bold text-white/90">2. DATI TRATTATI</h5>
+                        <ul class="list-disc pl-4 mt-1 text-white/60 text-xs space-y-1">
+                            <li><strong>Registrazione:</strong> Email, nome, avatar (per autenticazione).</li>
+                            <li><strong>Volontari:</strong> Credenziali, password, note (crittografati).</li>
+                            <li><strong>Tecnici:</strong> Log di sistema gestiti da Google Firebase.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Sezione 3 -->
+                    <div class="bg-white/5 p-3 rounded-lg border-l-4 border-gray-500">
+                        <h5 class="font-bold text-white/90">3. SICUREZZA E STORAGE</h5>
+                        <p class="text-white/60 text-xs mt-1">
+                            Utilizziamo l'infrastruttura sicura di <strong>Google Firebase</strong>. Connessioni SSL/TLS
+                            e database protetti.
+                            I dati sensibili sono accessibili solo all'utente proprietario e ai destinatari espliciti
+                            della condivisione.
+                        </p>
+                    </div>
+
+                    <!-- Sezione 4 -->
+                    <div class="bg-white/5 p-3 rounded-lg border-l-4 border-gray-500">
+                        <h5 class="font-bold text-white/90">4. CONDIVISIONE DATI</h5>
+                        <p class="text-white/60 text-xs mt-1">
+                            Nessun dato viene venduto a terzi. La condivisione avviene <strong>solo su tua esplicita
+                                azione</strong> tramite la funzione "Condividi" verso le email che selezioni.
+                        </p>
+                    </div>
+
+                    <!-- Sezione 5 -->
+                    <div class="bg-white/5 p-3 rounded-lg border-l-4 border-gray-500">
+                        <h5 class="font-bold text-white/90">5. DIRITTI UTENTE (GDPR)</h5>
+                        <ul class="list-disc pl-4 mt-1 text-white/60 text-xs space-y-1">
+                            <li>Diritto di accesso ai propri dati.</li>
+                            <li>Diritto alla cancellazione ("Oblio") eliminando l'account.</li>
+                            <li>Diritto di rettifica delle informazioni.</li>
+                        </ul>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/10 text-center">
+                        <p class="text-[10px] text-white/30">Ultimo aggiornamento: Gennaio 2026</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="relative z-10 px-4 pt-8 pb-32 mb-10 flex flex-col items-center gap-4">
+            <button id="logout-btn-settings"
+                class="w-full bg-red-600/10 border-glow text-red-500 border-0 text-base font-bold py-3.5 rounded-xl shadow-lg hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 relative overflow-hidden group">
+                <!-- 10) Glow Overlay -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                </div>
+                <span class="relative z-10">Esci dall'account</span>
+            </button>
+            <p class="text-xs text-white/20 font-medium">Versione 2.4.1 (Build 400 - Dark Titanium)</p>
+        </div>
+
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { auth, db } from './assets/js/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const avatarEl = document.getElementById('user-avatar-settings');
+        const nameEl = document.getElementById('user-name-settings');
+        const emailEl = document.getElementById('user-email-settings');
+        const logoutBtn = document.getElementById('logout-btn-settings');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    let userData = {};
+                    if (docSnap.exists()) userData = docSnap.data();
+
+                    const displayName = (userData.nome || userData.cognome)
+                        ? `${userData.nome || ''} ${userData.cognome || ''}`.trim()
+                        : (user.displayName || "Utente");
+
+                    if (nameEl) nameEl.textContent = displayName;
+                    if (emailEl) emailEl.textContent = user.email || "No Email";
+
+                    const photoURL = userData.photoURL || user.photoURL || "assets/images/user-avatar-5.png";
+                    if (avatarEl) avatarEl.style.backgroundImage = `url('${photoURL}')`;
+
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error("Logout error:", error);
+                    alert("Errore durante il logout");
+                }
+            });
+        }
+    </script>
+
+    <script>
+        function toggleAccordion(contentId, chevronId) {
+            const content = document.getElementById(contentId);
+            const chevron = document.getElementById(chevronId);
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                // Removed tailwind animations for simple hidden toggle to match darker theme smoothness
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            } else {
+                content.classList.add('hidden');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,89 +1,127 @@
-Regola 1 – CSS critico subito
+### Regola 1 – CSS critico subito
 •	Tutti i colori di sfondo principali devono essere definiti subito all’apertura della pagina.
 •	Colore sfondo pagina e contenitore principale: obbligatoriamente gradiente blu scuro (Metodo Titanium).
 •	Script critici (Firebase core: auth, database) caricati subito insieme al contenuto.
 •	Script secondari (analytics, crashlytics) possono essere caricati differiti.
+
 ________________________________________
-Regola 2 – Colori base e Faro
-•	Sfondo pagina: gradiente blu scuro, sempre presente, obbligatorio su tutte le pagine.
-•	Contenitore principale: gradiente blu scuro, sempre presente, obbligatorio.
-•	Faro animato (effetto “vivo” dall’alto): obbligatorio su tutte le pagine, sopra il contenitore.
-•	Bloccato l’accesso a temi chiari o variabili: l’utente non può cambiare tema.
-•	Tutti gli altri colori interni sono definiti pagina per pagina in Regola 14.
+
+### Regola 2 – Colori base e Dual Theme
+
+**Obiettivo:** Definire l'uso di colori e gradienti in modalità Dark/Light, rispettando il Metodo Titanium.
+
+**Linee guida operative:**
+*   **Effetti principali (Registro Titanium)**: `.titanium-bg`, `.titanium-box`, `.glass-glow`. Gestiscono già dual theme tramite classi `.dark` o predisposizione.
+*   **Classi semantiche e palette**: `.matrix-blue`, `.fusion-clean`. Devono rimanere neutre finché il Light non è richiesto.
+*   **Utility Tailwind dark**: Usata solo per micro-dettagli (es. divider). Mai colori hardcoded.
+
+**Nota Light (Platinum):**
+*   La variante Light si costruisce solo se necessaria.
+*   **Principio Chiave:** "Non definire colori Light arbitrari; creare solo quelli necessari alle pagine o componenti Platinum/Light."
+
 ________________________________________
-Regola 3 – Divieto gestione temi variabili
-•	Vietato qualunque tema “light”, “dark” o speciale.
-•	Blocca modifiche automatiche da sistema operativo (es. iOS, Android).
-•	Colori interni a pulsanti, card, campi devono essere definiti pagina per pagina (Regola 14).
+
+### Regola 3 – Gestione Tema App (Chiaro/Auto/Scuro)
+•	L'app deve gestire 3 stati tramite pulsante in Impostazioni:
+    1. **Chiaro**: Forza la rimozione della classe `dark`.
+    2. **Scuro**: Forza l'aggiunta della classe `dark`.
+    3. **Automatico**: Segue `window.matchMedia`.
+•	**Priorità Anti-Interferenza**: La scelta utente (`localStorage.theme`) VINCE SEMPRE sul sistema.
+•	**Script Critico**: Script sincrono in `<head>` obbligatorio per evitare flicker.
+
 ________________________________________
-Regola 4 – Layout e scroll
-•	Header e footer sempre fixed, z-index superiore al contenuto.
-•	Contenuto scrollabile sotto barre, ma blocchi principali non cliccabili o copiabili.
-•	Scroll solo sul contenitore centrale, proporzionale e responsivo a PC, tablet, mobile.
+
+### Regola 4 – Layout e gestione dello scroll
+
+•	Header e footer sempre fixed (z-index > contenuto).
+•	Scroll solo sul contenitore centrale, responsivo.
+•	**Contenitori Strutturali**: Wrapper e griglie NON intercettano interazioni (non cliccabili).
+•	**Elementi Funzionali**: Solo card, pulsanti, link e input sono interattivi.
+•	**Scroll e Interazione**: Non devono interferire con effetti visivi o beacon.
+
 ________________________________________
-Regola 5 – Aiuto base
-•	Ogni pagina deve avere:
-o	Testo descrittivo breve (non copiabile)
-o	Tooltip o icona informativa
-o	Messaggio contestuale
-•	Aiuto non blocca la navigazione.
-•	Tutti i testi descrittivi, istruzioni o regole dell’app devono essere non copiabili e non selezionabili.
+
+### Regola 5 – Aiuto base informativa
+
+•	Ogni pagina deve fornire aiuto contestuale.
+*   **Testi descrittivi**: Brevi, chiari, non interattivi.
+*   **Elementi informativi**: Tooltip, icone aiuto.
+*   Non bloccare la navigazione.
+*   Sempre leggibili e coerenti col tema (Dark/Light).
+
 ________________________________________
-Regola 6 – Tailwind CSS
-•	Usare solo per layout, moduli ed effetti.
-•	Colori principali definiti hardcoded (non dipendenti da Tailwind globale).
-•	Bloccare qualsiasi modifica automatica dei colori da Tailwind per i gradienti universali.
+
+### Regola 6 – Tailwind CSS
+•	Usare per layout, moduli ed effetti.
+•	Gestione Dual Theme obbligatoria tramite classi `dark:` o classi semantiche.
+•	Non usare colori hardcoded isolati; fare riferimento agli Effetti [#1]- [#16].
+
 ________________________________________
-Regola 7 – Regole operative Antigravity
-•	Antigravity deve leggere tutte le regole prima di generare codice.
-•	Non modificare layout, tema o logica senza permesso.
-•	Tutte le pagine rispettano:
-o	Layout base
-o	Tema globale bloccato
-o	Contenitore responsivo
-o	Aiuto obbligatorio
-•	Deve attendere input specifico pagina per pagina prima di creare o modificare qualsiasi pagina.
+
+### Regola 7 – Regole operative Antigravity
+•	Leggere tutte le regole prima di generare codice.
+•	Non modificare layout o logica senza permesso.
+•	Rispettare layout base, tema bloccato, contenitore responsivo.
+•	Attendere input specifico per ogni pagina.
+
 ________________________________________
-Regola 8 – Sicurezza & utenti
+
+### Regola 8 – Sicurezza & utenti
 •	Ogni utente vede solo dati propri o condivisi.
-•	Password e dati sensibili protetti tramite Firebase Security Rules.
-•	Eliminazione dati → confirm() obbligatorio.
-•	Mai eliminazioni silenziose o automatiche.
+•	Password e dati sensibili protetti da Security Rules.
+•	Eliminazione dati: `confirm()` obbligatorio. Mai eliminazioni silenziose.
+
 ________________________________________
-Regola 9 – Sintesi visiva
-•	Sfondo e contenitore sempre scuri (Metodo Titanium).
-•	Scroll sotto barre, overlay e modali rispettano z-index.
-•	Aiuto obbligatorio.
-•	Nessun Tailwind globale sui colori critici.
+
+### Regola 9 – Sintesi visiva
+•	Sfondo e contenitore seguono il tema attivo (vedi Effetti [#1] e [#2]).
+•	Scroll rispetta overlaping e z-index.
+•	Usa sempre le classi standard del Registro Effetti.
+
 ________________________________________
-Regola 10 – Standard Layout Universale “Glass Frame”
-•	Body: nessun padding verticale, colore di sfondo base definito.
-•	Contenitore principale: min-h-screen, shadow, overflow-hidden.
-•	Fasce Glass header/footer: fixed, z-50, backdrop-blur, semi-trasparenti.
-•	Contenuto scorre dietro le fasce, ultimo blocco mb-24 obbligatorio.
+
+### Regola 10 – Standard Layout Universale “Glass Frame”
+•	Body: zero padding verticale.
+•	Contenitore principale: `min-h-screen`, `shadow`, `overflow-hidden`.
+•	Fasce Glass: fixed, z-50, backdrop-blur.
+•	Contenuto scorre dietro, ultimo blocco `mb-24`.
+
 ________________________________________
-Regola 11 – Configurazione colori e pagine
-•	Colori universali: sfondo, contenitore, faro.
-•	Effetti obbligatori su tutte le pagine: hover, Beacon, Bacon, Glow.
-•	Pulsanti, liste, card: colori definiti pagina per pagina in Regola 14.
-•	Bloccare selezione e copia dei testi descrittivi o istruzioni all’interno dei contenitori.
+
+### Regola 11 – Configurazione colori e pagine
+
+**Descrizione:** Gestione colori ed effetti con focus su leggibilità e coerenza.
+
+*   **Colori Universali**: Definiti nel Registro Effetti [#1]-[#16].
+*   **Effetti Obbligatori**: Hover [#6], Beacon [#7], Border Glow [#9].
+*   **Palette**: Definite pagina per pagina o Matrix Palette [#15].
+*   **Dual Theme**: Blocchi informativi seguono il tema attivo.
+*   **Nota**: Per la protezione testi vedi Regola 17.
+
 ________________________________________
-Regola 12 – Responsive design
-•	Layout mobile-first: contenitore principale adatta dimensioni e proporzioni a PC, tablet e smartphone.
-•	Griglie adattive: 1 colonna mobile, 2 tablet, 3/4 desktop.
-•	Tutti gli elementi interattivi mantengono proporzioni, dimensioni e posizione coerenti con il Metodo Titanium.
+
+### Regola 12 – Responsive design
+•	Layout mobile-first.
+•	Griglie adattive (1 col mobile -> 4 col desktop).
+•	Elementi interattivi coerenti su tutti i device.
+
 ________________________________________
-Regola 13 – Eccezioni e elementi speciali
-•	Pulsante “+” per aggiungere account in header (z-50) rimane eccezione gestita centralmente.
-•	Gestione allegati centralizzata, logica concentrata in gestione_allegati.html.
-•	Tutti gli elementi interattivi rimangono conformi alla regola dei gradienti/blu scuro e al faro.
+
+### Regola 13 – Eccezioni e elementi speciali
+•	Pulsante “+” in header (z-50) è gestito centralmente.
+•	Gestione allegati centralizzata (`gestione_allegati.html`).
+•	Tutti gli elementi seguono il contrasto del tema attivo.
+
+________________________________________
+
 ### Regola 14 – Registro Pagine Metodo Titanium
 
-Monitoraggio dello stato di avanzamento. Ogni pagina deve essere portata dallo stato 🔴 allo stato 🟢.
+Monitoraggio dello stato di avanzamento.
+🔴 DA FARE | � INCOMPLETA (Dual Theme Req.) | 🟢 COMPLETATA
 
 | # | Stato | Nome Pagina | Contenitore | Faro | Effetti Card | Palette / Colori |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | 🟢 COMPLETATA | `index.html` (Login) | 1, 2 | 3 | 4, 5, 9, 13 | Fusion Clean |
+| 1 | 🟠 INCOMPLETA | `index.html` (Login) | 1, 2 | 3 | 4, 5, 9, 13 | Fusion Clean |
 | 2 | 🔴 DA FARE | `registrati.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 3 | 🔴 DA FARE | `verifica_email.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 4 | 🔴 DA FARE | `reset_password.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
@@ -91,7 +129,7 @@ Monitoraggio dello stato di avanzamento. Ogni pagina deve essere portata dallo s
 | 6 | 🔴 | `dashboard_amministratore.html` | Titanium Frame | Beacon (4s) | Premium | Matrix Cromatico |
 | 7 | 🔴 | `gestione_utenti_(admin).html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 8 | 🔴 | `account_azienda.html` | Titanium Frame | Beacon (4s) | Premium | Matrix Interno |
-| 9 | � COMPLETATA | `account_privati.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Cards**: Layout a griglia con card dinamiche. 1) **Architettura**: `bg-slate-500/5`, `border-glow`, `saetta`. 2) **Dati**: `view-label` (9px upper) + Glass Field per Utente/Account/Pass. 3) **Feedback**: Beacon colorato per tipologia (Standard/Shared/Memo).|
+| 9 | 🟠 INCOMPLETA | `account_privati.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Cards** |
 | 10 | 🔴 | `aggiungi_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 11 | 🔴 | `aggiungi_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 12 | 🔴 | `aggiungi_nuova_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
@@ -99,53 +137,73 @@ Monitoraggio dello stato di avanzamento. Ogni pagina deve essere portata dallo s
 | 14 | 🔴 | `modifica_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 15 | 🔴 | `modifica_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 16 | 🔴 | `modifica_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 17 | 🟢 COMPLETATA | `home_page.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 14, 15 | Matrix Fusion |
-| 18 | 🟢 COMPLETATA | `dati_anagrafici_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Section Box**: Architettura a nidificazione premium. 1) **Section Box**: `bg-color-500/5`, `border-white/5`, `rounded-2xl`, `p-5`. 2) **Dato Informativo**: Label tecnico (9px bold upper) + Glass Field + Utility on hover. 3) **Color-Coding**: Blue (Pers), Emerald (Res), Amber (Utenze), Violet (Doc), Rose (Tel), Cyan (Mail), Yellow (Note). |
-| 19 | 🟢 COMPLETATA | `area_privata.html` | 1, 2 | 3 | 4, 5, 9, 11 | **Dashboard Navigazione**: 4 card Matrix (Account / Account condivisi / Memorandum / Memo condivisi) - Nomenclatura in Title Case (No Uppercase). Widget Top 10 e Rubrica in Titanium Section Box. |
-| 20 | 🔴| `scadenze.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Scadenze**: 4 card Matrix (Account, Condivisi, Memo, Sh.Memo) + Widget Top 10 e Rubrica in Titanium Section Box. |
+| 17 | 🟠 INCOMPLETA | `home_page.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 14, 15 | Matrix Fusion |
+| 18 | 🟠 INCOMPLETA | `dati_anagrafici_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Section Box** |
+| 19 | 🟠 INCOMPLETA | `area_privata.html` | 1, 2 | 3 | 4, 5, 9, 11 | **Dashboard Navigazione** |
+| 20 | 🔴 | `scadenze.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Scadenze** |
 | 21 | 🔴 | `lista_aziende.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 22 | 🟢 COMPLETATA | `archivio_account.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Matrix Sidebar |
-| 23 | 🟢 COMPLETATA | `impostazioni.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | Fusion Glass |
-| 24 | 🟢 COMPLETATA | `regole_scadenze_veicoli.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Dark Menu Glow |
-| 25 | 🟢 COMPLETATA | `configurazione_automezzi.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
-| 26 | 🟢 COMPLETATA | `configurazione_documenti.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
-| 27 | 🟢 COMPLETATA | `configurazione_generali.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
+| 22 | 🟠 INCOMPLETA | `archivio_account.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Matrix Sidebar |
+| 23 | 🟠 INCOMPLETA | `impostazioni.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | Fusion Glass |
+| 24 | 🟠 INCOMPLETA | `regole_scadenze_veicoli.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Dark Menu Glow |
+| 25 | 🟠 INCOMPLETA | `configurazione_automezzi.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
+| 26 | 🟠 INCOMPLETA | `configurazione_documenti.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
+| 27 | 🟠 INCOMPLETA | `configurazione_generali.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
 | 28 | 🔴 | `privacy.html` | Titanium Frame | Beacon (4s) | Standard | Glass Read-Only |
 | 29 | 🔴 | `gestione_scadenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Matrix Scadenze |
 | 30 | 🔴 | `gestione_urgenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Red Glow Matrix |
 | 31 | 🔴 | `gestione_memorandum.html` | Titanium Frame | Beacon (4s) | Standard | Memo Matrix |
 | 32 | 🔴 | `gestione_memo_condivisi.html` | Titanium Frame | Beacon (4s) | Standard | Memo Shared Matrix |
 | 33 | 🔴 | `lista_contatti.html` | Titanium Frame | Beacon (4s) | Standard | Icone Contatti |
-| 34 | 🟢 COMPLETATA | `notifiche_history.html` | 1, 2 | 3 | 4, 5 | Fusion Blue |
-| 35 | 🟢 COMPLETATA | `dettaglio_account_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | **Titanium Glass Fields**: Layout informativo ultra-tecnico. 1) **Campi**: `bg-slate-500/5`, `border-glow`. 2) **Etichette**: `view-label` (9px upper bold). 3) **Layout**: Header Fusion con sottotitolo 'Privato' e rimozione badge categoria per massima pulizia visiva. |
+| 34 | 🟠 INCOMPLETA | `notifiche_history.html` | 1, 2 | 3 | 4, 5 | Fusion Blue |
+| 35 | 🟠 INCOMPLETA | `dettaglio_account_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | **Titanium Glass Fields** |
 
+________________________________________
 
+### Regola 15 – Impostazione Effetti Metodo Titanium
 
-•	Regola 15 – Impostazione Effetti Metodo Titanium
-Effetto / Elemento	Descrizione	Codice / Parametri	Applicazione
-==============================================
--1) Sfondo pagina (pagina 0)	Colore di base della pagina, garantisce contrasto con il contenitore metallico	class="bg-[#0a0f1e]"	Body / pagina completa, tutte le pagine Metodo Titanium
-==============================================
--2) Contenitore principale (Box)	Contenitore metallico responsivo a step (Mobile: 100%, Tablet: 3xl, Desktop: 5xl)	<div class="relative flex min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">	Tutte le pagine Metodo Titanium
-==============================================
--3) Faro animato (Glass Glow)	Punto luce blu di sfondo che "respira" dietro il contenuto (z-0)	.glass-glow { position: absolute; top: 0; left: 50%; width: 150%; height: 120%; background: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%); filter: blur(80px); z-index: 0; animation: glowFloat 4s ease-in-out infinite; }	Sfondo (z-0) / Tutte le pagine Metodo Titanium
-==============================================
--4) Header Fusion	Fascia superiore sfumata che si fonde con il contenuto	bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md (No border)	Tutte le pagine
-==============================================
--5) Footer Fusion	Fascia inferiore sfumata che si fonde con il contenuto	bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-md (No border)	Tutte le pagine
-==============================================
--6) Hover / Active (Evoluzione)	Effetto combinato di sollevamento, pressione e micro-interazioni interne per un feedback premium	hover:-translate-y-1 active:scale-[0.98] transition-all duration-300. Micro: group-hover:translate-x-1 (testo), group-hover:scale-110 (icone)	Box, pulsanti, card, sub-box
--7) Beacon (Standard)	Punto luce bianco centrato in alto alla card per profondità 3D	radial-gradient(circle at 50% 0%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 60%)	Interno Card
--8) Beacon Gold (Asimmetrico)	Punto luce spostato per card lunghe (evita il "taglio" visivo)	radial-gradient(circle at 80% 0%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%, height: 100%)	Interno Card (Premium)
--9) Border Glow Riflettente	Bordo luminoso con doppia maschera per compatibilità cross-browser	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;	Card / Bottoni
--10) Glow	Overlay luminoso o gradienti interni; evidenzia elementi dinamici o attivi	<div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[24px] pointer-events-none z-10"></div>	Box, sub-box, pulsanti interni
--11) Sub-box	Widget o contenitore informativo interno (es. Rubrica, Top Accounts)	bg-gradient-to-br from-slate-700 to-slate-900 rounded-[24px] shadow-lg shadow-black/20 relative overflow-hidden + class="border-glow"	Box principale
--12) Pulsante interno Sub-box	Pulsante cliccabile nel sub-box; può avere colore e overlay propri	Stile pulsante standard + eventuali effetti: hover, border glow, glow	Sub-box
--13) Saetta (Metallic Shimmer)	Riflesso metallico diagonale animato (z-10)	.saetta { background-size: 200% 100%; animation: shimmer 4s infinite linear; }	Card principali (Premium)
--14) Saetta Gold (Liste)	Riflesso metallico sottile per item interni alle liste	.saetta-gold { position: absolute; inset: 0; background: linear-gradient(110deg, transparent 42%, rgba(255,255,255,0.1) 50%, transparent 58%); animation: shimmer 4s infinite linear; }	Item interni (Scadenze, Urgenze)
--15) Matrix Palette (4 Box)	Set di gradienti standard per le card principali della Home	🔵 [#1976D2]→[#2196F3], 🟢 [#2E7D32]→[#00C853], 🟠 [#E65100]→[#FF9800], 🔴 [#1e0707]→[#450a0a]	Home Page / Dashboard
--16) Titanium Glass Card (Grid/List)	Nuovo standard per item di navigazione e record	bg-slate-500/5 + border-glow + saetta + view-label (9px bold upper) + Glass Field (Sensitive Data)	Account, Liste, Record dinamici
--17) Swipe Safety (Ghost Click Fix)	Prevenzione navigazione accidentale durante swipe	Capture phase blocking + hasMoved threshold detection (5px)	Ogni SwipeList v6 o superiore
-==============================================
+Gli effetti del design system sono definiti nel dettaglio nel file dedicato: `TITANIUM_EFFECTS.md`.
 
+| ID | Nome Effetto | Descrizione Breve | Variante Light Necessaria? |
+| :--- | :--- | :--- | :--- |
+| **[#1]** | **Sfondo Pagina** | `.titanium-bg` | Opzionale |
+| **[#2]** | **Contenitore** | `.titanium-box` | SÌ |
+| **[#3]** | **Faro (Glass Glow)** | `.glass-glow` | Opzionale |
+| **[#4]** | **Header Fusion** | `.titanium-header` | SÌ |
+| **[#5]** | **Footer Fusion** | `.titanium-footer` | SÌ |
+| **[#6]** | **Hover** | `.titanium-interactive` | NO | pulsanti che si alzano quando si passa sopra
+| **[#7]** | **Beacon** | `.beacon-light` | SÌ |
+| **[#8]** | **Beacon Gold** | `.beacon-gold` | SÌ |
+| **[#9]** | **Border Glow** | `.border-glow` | SÌ | bordi illuminati
+| **[#10]**| **Glass Shine** | Overlay luminoso | SÌ |e il riflesso vetroso sulle barre sotto e sopra e sui pulsanti sopra alle barre
+| **[#13]**| **Saetta** | `.saetta` | SÌ |
+| **[#14]**| **Saetta Gold** | `.saetta-gold` | SÌ |
+| **[#15]**| **Matrix Palette** | `.matrix-*` | SÌ |
+| **[#16]**| **Glass Card** | `.titanium-glass-card` | SÌ |
+| **[#17]**| **Swipe Safety** | (JS Logic) | SÌ |
+| **[#18]**| **Saetta Master** | `.saetta-master` | SÌ | Onda unica totale
+| **[#16]**| **Glass Card** | `.titanium-glass-card` | SÌ |
+| **[#17]**| **Swipe Safety** | JS Logic | NO |
 
+________________________________________
+
+### Regola 16 – Riferimento Codici
+Fare riferimento SEMPRE a `TITANIUM_EFFECTS.md` per i codici CSS/Tailwind completi.
+
+________________________________________
+
+### Regola 17 – Protezione testi
+**Descrizione:**
+Tutti i testi descrittivi, istruzioni e messaggi informativi devono essere non copiabili e non selezionabili.
+
+**Implementazione Pratica (Classi Utility):**
+```css
+.user-select-none {
+    @apply select-none; /* Tailwind */
+    user-select: none;
+}
+```
+
+**Utilizzo:**
+*   Applicare a: Blocchi testo, tooltip, messaggi aiuto.
+*   NON applicare a: Pulsanti, Link, Input.
+*   Codice: `<div class="user-select-none text-gray-400 ...">`
