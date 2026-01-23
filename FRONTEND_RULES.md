@@ -181,8 +181,8 @@ Gli effetti del design system sono definiti nel dettaglio nel file dedicato: `TI
 | **[#16]**| **Glass Card** | `.titanium-glass-card` | SÌ |
 | **[#17]**| **Swipe Safety** | (JS Logic) | SÌ |
 | **[#18]**| **Saetta Master** | `.saetta-master` | SÌ | Onda unica totale
-| **[#16]**| **Glass Card** | `.titanium-glass-card` | SÌ |
-| **[#17]**| **Swipe Safety** | JS Logic | NO |
+| **[#19]**| **Glass Card** | `.titanium-glass-card` | SÌ |
+| **[#20]**| **Swipe Safety** | JS Logic | NO |
 
 ________________________________________
 
