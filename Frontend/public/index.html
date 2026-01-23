@@ -7,7 +7,7 @@
         document.documentElement.classList.add('dark');
         localStorage.setItem('theme', 'dark');
     </script>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
     <meta name="color-scheme" content="dark only">
     <meta name="theme-color" content="#0a0f1e">
     <title>Codici & Password - Accedi</title>
@@ -160,7 +160,7 @@
                             <label
                                 class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none">Username</label>
                             <input id="email" type="email" placeholder="Email o Username" required
-                                class="w-full h-14 px-5 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-sm">
+                                class="w-full h-14 px-5 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base">
                         </div>
 
                         <div class="space-y-2">
@@ -168,7 +168,7 @@
                                 class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none">Password</label>
                             <div class="relative group">
                                 <input id="password" type="password" placeholder="••••••••" required
-                                    class="w-full h-14 px-5 pr-14 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-sm">
+                                    class="w-full h-14 px-5 pr-14 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base">
                                 <button type="button"
                                     class="toggle-password absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
                                     <span
@@ -211,24 +211,34 @@
     <script type="module">
         import { login, checkAuthState } from './assets/js/auth.js';
         checkAuthState();
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const btn = e.target.querySelector('button[type="submit"]');
-                const original = btn.innerHTML;
-                try {
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
-                    await login(email, password);
-                } catch (err) {
-                    btn.disabled = false;
-                    btn.innerHTML = original;
-                }
-            });
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    // iOS Zoom Fix
+                    const emailInput = document.getElementById('email');
+                    const passwordInput = document.getElementById('password');
+                    if (emailInput) emailInput.blur();
+                    if (passwordInput) passwordInput.blur();
+                    window.scrollTo(0, 0);
+
+                    const email = emailInput.value;
+                    const password = passwordInput.value;
+                    const btn = e.target.querySelector('button[type="submit"]');
+                    const original = btn.innerHTML;
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+                        await login(email, password);
+                    } catch (err) {
+                        btn.disabled = false;
+                        btn.innerHTML = original;
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

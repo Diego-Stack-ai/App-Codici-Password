@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="color-scheme" content="dark light">
     <title>Home Page</title>
 
@@ -441,7 +441,7 @@
 
         </main>
 
-        <footer class="titanium-footer">
+        <footer class="titanium-footer" style="flex-direction: column; gap: 0.5rem; padding-bottom: 2rem;">
             <div
                 style="display: flex; gap: 1rem; padding: 0.5rem; border-radius: 16px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
                 <button onclick="setTheme('light')"
@@ -449,6 +449,9 @@
                 <button onclick="setTheme('dark')"
                     style="padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; border:0; cursor:pointer; background:#000; color:#fff;">Dark</button>
             </div>
+            <p style="font-size: 10px; opacity: 0.5; color: white; margin: 0; text-align: center;">
+                Versione aggiornata e sicura (Solo Home lavorata con zoom nell'index)
+            </p>
         </footer>
     </div>
 
