@@ -144,31 +144,27 @@ Ogni effetto ha un ID numerico per rapido riferimento. I codici qui definiti son
 
 ---
 
-## [#9] BORDER GLOW
-**Descrizione:** Il bordo luminoso "magico" che sembra fatto di luce. Usa maschere css avanzate.
+## [#9] BORDER GLOW (Perimetro Premium)
+**Descrizione:** Definisce il perimetro del box per dare profondità e separazione. Gestione dual-theme asimmetrica.
 **Nome Classe:** `.border-glow`
-**Utilizzo:** Su Card, Bottoni, Input.
+**Utilizzo:** Su Card, Bottoni, Box Sezione.
+
 ```css
+/* LIGHT MODE: Perimetro Solido High-Definition */
 .border-glow {
-    position: relative;
-    /* Rimuove bordi standard se presenti */
-    border: 0; 
+    outline-offset: -2px; /* Rientro per sembrare un bordo interno */
+    border: none !important;
+    transition: all 0.3s;
 }
-.border-glow::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit; /* Segue il radius del genitore */
-    padding: 1.5px; /* Spessore bordo */
-    background: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0.6) 100%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-    z-index: 20;
+
+/* DARK MODE: Riflesso Cristallino */
+html.dark .border-glow {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    outline: none !important; /* Disattiva outline del rigido Light */
 }
 ```
+**Specifiche Colore (Light):** Utilizzare `outline: 2px solid var(--accent-color)`.
 
 ---
 
@@ -219,30 +215,34 @@ Ogni effetto ha un ID numerico per rapido riferimento. I codici qui definiti son
 
 ---
 
-## [#15] MATRIX PALETTE
-**Descrizione:** I gradienti fondamentali del sistema. Da applicare come sfondo.
-**Nomi Classi:** `.matrix-blue`, `.matrix-green`, `.matrix-orange`, `.matrix-red`, `.matrix-violet`, `.matrix-amber`
+## [#15] MATRIX PALETTE & C-BLADE
+**Descrizione:** Colori identitari e Linguetta Dinamica (C-Blade).
+**Nomi Classi:** `.matrix-blue`, `.matrix-green`, `.matrix-orange`, `.matrix-red`
+
+### 1. Linguetta Accessoria (::before)
+**Geometria:** Forma a "C" con raccordi a raggio e punte a lama (Length 35px).
 ```css
-/* Blue (Standard/Privato) */
-.matrix-blue   { background-image: linear-gradient(to bottom right, #1976D2, #2196F3); }
+[class*="matrix-"]::before {
+    content: ""; position: absolute; inset: 0;
+    border-left: 10px solid transparent; 
+    border-top: 12px solid transparent; border-bottom: 12px solid transparent;
+    border-radius: inherit; z-index: 5;
+    clip-path: polygon(0% 0%, 35px 0%, 22px 2px, 18px 5px, 13px 9px, 10px 15px, 10px calc(100% - 15px), ...);
+}
+```
 
-/* Green (Azienda) */
-.matrix-green  { background-image: linear-gradient(to bottom right, #2E7D32, #00C853); }
+### 2. Palette Colori (Light Mode)
+| Sezione | Classe | Colore Accento (Fascia/Bordo) |
+| :--- | :--- | :--- |
+| **Privato** | `.matrix-blue` | `#2196F3` |
+| **Azienda** | `.matrix-green` | `#00C853` |
+| **Scadenze** | `.matrix-orange` | `#FF9800` |
+| **Urgenze** | `.matrix-red` | `#9b1c1c` |
 
-/* Orange (Scadenze) */
-.matrix-orange { background-image: linear-gradient(to bottom right, #E65100, #FF9800); }
-
-/* Red (Urgenze) */
-.matrix-red    { background-image: linear-gradient(to bottom right, #1e0707, #450a0a); }
-
-/* Violet (Condivisi - da area_privata.html) */
-.matrix-violet { background-image: linear-gradient(to bottom right, #4f46e5, #6d28d9); }
-
-/* Amber (Memorandum - da area_privata.html) */
-.matrix-amber  { background-image: linear-gradient(to bottom right, #f59e0b, #ea580c); }
-
-/* Emerald/Teal (Memo Condivisi - da area_privata.html) */
-.matrix-teal   { background-image: linear-gradient(to bottom right, #10b981, #0d9488); }
+### 3. Palette Colori (Dark Mode)
+In modalità scura, i box usano gradienti lineari orizzontali (`to right`) definiti nel file `titanium.css`.
+```css
+html.dark .matrix-blue { background: linear-gradient(to right, #2196F3, #1976D2); }
 ```
 
 ---

@@ -10,15 +10,20 @@
     --text-light: #0f172a;
     --text-dark: #ffffff;
 
-    /* Matrix Colors - Default (Light) */
-    --matrix-blue-from: #60a5fa;
-    --matrix-blue-to: #3b82f6;
-    --matrix-green-from: #4ade80;
-    --matrix-green-to: #22c55e;
-    --matrix-orange-from: #fb923c;
-    --matrix-orange-to: #f97316;
     --matrix-red-from: #f87171;
     --matrix-red-to: #dc2626;
+
+    /* Neutral Accent UI - Light Mode */
+    --btn-neutral-bg: #ffffff;
+    --btn-neutral-text: #0f172a;
+    --btn-accent-width: 12px;
+
+    /* Solid Accent Colors (from Dark Model palette) */
+    --accent-blue: #2196F3;
+    --accent-green: #00C853;
+    --accent-orange: #FF9800;
+    --accent-red: #9b1c1c;
+    /* Compensated Ruby Red for Urgenze */
 
     /* Glow Effects */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
@@ -35,6 +40,11 @@ html.dark {
     --matrix-red-from: #450a0a;
     --matrix-red-to: #1e0707;
 
+    /* Full Color UI - Dark Mode Restored */
+    --btn-neutral-bg: transparent;
+    --btn-neutral-text: #ffffff;
+    --btn-accent-width: 0px;
+
     /* Glow Effects - Dark Override */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
 
@@ -48,7 +58,30 @@ html.dark {
     --z-glow: 1;
     --z-saetta: 2;
     --z-content: 10;
+    --z-icon: 15;
+    /* New layer: Above content, below header */
+    --z-interactive: 20;
+    /* Top layer for clicks */
     --z-header: 100;
+}
+
+.titanium-interactive {
+    z-index: var(--z-interactive);
+}
+
+/* 2.1 TITANIUM-BOX TEXT FOR ACCENT UI */
+[class*="matrix-"],
+[class*="matrix-"] h3,
+[class*="matrix-"] p,
+[class*="matrix-"] span {
+    color: var(--btn-neutral-text);
+}
+
+html.dark [class*="matrix-"],
+html.dark [class*="matrix-"] h3,
+html.dark [class*="matrix-"] p,
+html.dark [class*="matrix-"] span {
+    color: #ffffff !important;
 }
 
 /* 1. RESET & UTILITIES */
@@ -104,8 +137,25 @@ html.dark .titanium-box {
     z-index: var(--z-content);
 }
 
+/* 2.2 CONTENT SHIFT (User refinement) */
+/* Buttons - moderate shift */
+.matrix-blue>div:not(.bg-icon-container),
+.matrix-green>div:not(.bg-icon-container) {
+    padding-left: 1.25rem;
+}
+
+/* Big Boxes - balanced shift (52px from edges: 8px base + 44px internal) */
+.scadenze-content,
+#urgenze-card>div:nth-child(2),
+#urgenze-list {
+    padding-left: 2.75rem !important;
+    padding-right: 2.75rem !important;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
 /* 2.1 BOX TYPOGRAPHY */
-[class^="matrix-"] h3 {
+[class*="matrix-"] h3 {
     font-size: 1.25rem;
     font-weight: bold;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -113,7 +163,7 @@ html.dark .titanium-box {
     margin-bottom: 2px;
 }
 
-[class^="matrix-"] p {
+[class*="matrix-"] p {
     font-size: 0.75rem;
     font-weight: 500;
     opacity: 0.9;
@@ -123,7 +173,6 @@ html.dark .titanium-box {
 #urgenze-card h3 {
     font-size: 1.1rem;
     font-weight: bold;
-    text-transform: uppercase;
     margin: 0;
 }
 
@@ -221,12 +270,64 @@ html.dark .titanium-box {
     border-radius: 24px;
     overflow: hidden;
     transition: all 0.3s;
-    color: white;
     cursor: pointer !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     width: 100%;
     text-decoration: none;
+    background-color: var(--btn-neutral-bg);
+    /* STOP BACKGROUND FROM OVERLAPPING BORDER */
+    background-clip: padding-box !important;
+}
+
+/* THE BORDER GLOW - Clean Implementation */
+.border-glow {
+    outline-offset: -2px;
+    /* Inset slightly to look like a border */
+    border: none !important;
+}
+
+/* THE ACCENT BAR (::before) - 'C-Blade' Style (Sharp Tapered Tips) */
+.matrix-btn::before,
+[class*="matrix-"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 10px solid transparent;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-radius: inherit;
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    /* POLYGON CLIP: 'C-Blade' with Rounded Neck - Length 35px (Calibrated) */
+    -webkit-clip-path: polygon(0% 0%,
+            35px 0%,
+            22px 2px, 18px 5px, 13px 9px, 10px 15px,
+            10px calc(100% - 15px),
+            13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px),
+            35px 100%,
+            0% 100%);
+    clip-path: polygon(0% 0%,
+            35px 0%,
+            22px 2px, 18px 5px, 13px 9px, 10px 15px,
+            10px calc(100% - 15px),
+            13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px),
+            35px 100%,
+            0% 100%);
+}
+
+html.dark .matrix-btn::before,
+html.dark [class*="matrix-"]::before {
+    display: none;
+    /* Hide accent bar in Dark Mode as we use full gradients */
+}
+
+html.dark .matrix-btn,
+html.dark .matrix-blue,
+html.dark .matrix-green,
+html.dark .matrix-orange,
+html.dark .matrix-red {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .matrix-btn:hover,
@@ -237,21 +338,89 @@ html.dark .titanium-box {
     transform: translateY(-4px);
 }
 
-/* Colors - Dynamic (managed via CSS variables in :root/html.dark) */
+/* Colors - Dynamic (Accent in Light, Gradient in Dark) */
 .matrix-blue {
-    background: linear-gradient(to right, var(--matrix-blue-from), var(--matrix-blue-to));
+    background: var(--btn-neutral-bg);
+}
+
+.matrix-blue.border-glow {
+    outline: 2px solid var(--accent-blue) !important;
+}
+
+.matrix-blue::before {
+    border-left-color: var(--accent-blue);
+    border-top-color: var(--accent-blue);
+    border-bottom-color: var(--accent-blue);
 }
 
 .matrix-green {
-    background: linear-gradient(to right, var(--matrix-green-from), var(--matrix-green-to));
+    background: var(--btn-neutral-bg);
+}
+
+.matrix-green.border-glow {
+    outline: 2px solid var(--accent-green) !important;
+}
+
+.matrix-green::before {
+    border-left-color: var(--accent-green);
+    border-top-color: var(--accent-green);
+    border-bottom-color: var(--accent-green);
 }
 
 .matrix-orange {
-    background: linear-gradient(to right, var(--matrix-orange-from), var(--matrix-orange-to));
+    background: var(--btn-neutral-bg);
+}
+
+.matrix-orange.border-glow {
+    outline: 2px solid var(--accent-orange) !important;
+}
+
+.matrix-orange::before {
+    border-left-color: var(--accent-orange);
+    border-top-color: var(--accent-orange);
+    border-bottom-color: var(--accent-orange);
 }
 
 .matrix-red {
+    background: var(--btn-neutral-bg);
+}
+
+.matrix-red.border-glow {
+    outline: 2px solid var(--accent-red) !important;
+}
+
+.matrix-red::before {
+    border-left-color: var(--accent-red);
+    border-top-color: var(--accent-red);
+    border-bottom-color: var(--accent-red);
+}
+
+html.dark .matrix-blue {
+    background: linear-gradient(to right, var(--matrix-blue-from), var(--matrix-blue-to));
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    outline: none !important;
+}
+
+html.dark .matrix-green {
+    background: linear-gradient(to right, var(--matrix-green-from), var(--matrix-green-to));
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    outline: none !important;
+}
+
+html.dark .matrix-orange {
+    background: linear-gradient(to right, var(--matrix-orange-from), var(--matrix-orange-to));
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    outline: none !important;
+}
+
+html.dark .matrix-red {
     background: linear-gradient(to right, var(--matrix-red-from), var(--matrix-red-to));
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+    outline: none !important;
 }
 
 .no-lift:hover {
@@ -279,9 +448,49 @@ html.dark .glass-inner-list .list-item {
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* DYNAMIC CARD (List Items) */
+.dynamic-card {
+    min-height: 60px;
+    padding: 0.75rem 1rem !important;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center !important;
+    /* FORCE VERTICAL CENTER */
+    justify-content: flex-start;
+    /* Start from left */
+    gap: 1rem;
+    /* Space between icon and text */
+    border-radius: 16px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.dynamic-card .icon-circle {
+    width: 40px;
+    /* Slightly larger anchor */
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    /* Subtle background */
+    flex-shrink: 0;
+    /* Prevent shrinking */
+    margin-right: 0.5rem;
+    /* Additional space from text if needed */
+}
+
+html.dark .dynamic-card .icon-circle {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .titanium-interactive {
     transition: all 0.3s;
     cursor: pointer;
+    position: relative;
+    z-index: var(--z-interactive);
+    text-decoration: none;
 }
 
 .titanium-interactive:hover {
@@ -341,17 +550,59 @@ html.dark .glass-inner-list .list-item {
     position: absolute;
     right: -10px;
     bottom: -20px;
-    opacity: 0.2;
+    opacity: 0.15;
     transform: scale(1.1) rotate(12deg);
-    transition: transform 0.5s ease-out, opacity 0.5s ease;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
     pointer-events: none;
-    z-index: 1;
+    z-index: var(--z-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* GRADIENT ICONS FOR LIGHT MODE */
+.matrix-blue .bg-icon-container span {
+    background: linear-gradient(135deg, var(--accent-blue), transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.matrix-green .bg-icon-container span {
+    background: linear-gradient(135deg, var(--accent-green), transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.matrix-orange .bg-icon-container span {
+    background: linear-gradient(135deg, var(--accent-orange), transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.matrix-red .bg-icon-container span {
+    background: linear-gradient(135deg, var(--accent-red), transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* RESTORE WHITE ICONS IN DARK MODE (STRICT) */
+html.dark [class*="matrix-"] .bg-icon-container span {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: white !important;
+    color: white !important;
+    opacity: 0.4;
 }
 
 .matrix-btn:hover .bg-icon-container,
 [class^="matrix-"]:hover .bg-icon-container {
-    transform: scale(1.3) rotate(20deg) translate(-5px, -5px);
-    opacity: 0.3;
+    transform: scale(1.4) rotate(15deg) translate(-10px, -10px);
+    opacity: 0.4;
 }
 
 

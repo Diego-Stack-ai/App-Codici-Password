@@ -35,21 +35,21 @@ export async function loadExpiredDeadlines(user) {
 
                     const icon = deadline.icon || 'event';
                     return `
-                    <div class="titanium-interactive border-glow dynamic-card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem; transition: background 0.2s; padding: 0.75rem;">
-                         <div class="card-content">
-                            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,59,48,0.2); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,59,48,0.4);">
-                                 <span class="material-symbols-outlined" style="color: #ff6b6b; font-size: 18px;">${icon}</span>
+                    <a href="scadenze.html" class="titanium-interactive border-glow dynamic-card matrix-red">
+                         <div class="flex items-center gap-3 relative z-10 w-full">
+                            <div class="icon-circle" style="background: rgba(255,59,48,0.2); border: 1px solid rgba(255,59,48,0.4);">
+                                 <span class="material-symbols-outlined" style="font-size: 18px;">${icon}</span>
                             </div>
-                            <div class="card-text">
-                                <span style="font-size: 0.85rem; font-weight: bold; color: white;">${deadline.title}</span>
-                                <span style="font-size: 0.65rem; color: rgba(255,255,255,0.6);">${deadline.veicolo_modello || 'Nessun dettaglio'}</span>
+                            <div class="flex-1">
+                                <span class="font-bold" style="font-size: 0.85rem; display: block;">${deadline.title}</span>
+                                <span style="font-size: 0.65rem; opacity: 0.6;">${deadline.veicolo_modello || 'Nessun dettaglio'}</span>
+                            </div>
+                            <div class="flex flex-col items-end shrink-0">
+                                <span class="font-bold" style="font-size: 0.7rem;">${badgeText}</span>
+                                <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.4;">chevron_right</span>
                             </div>
                          </div>
-                         <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                             <span style="font-size: 0.7rem; font-weight: bold; color: #ff6b6b;">${badgeText}</span>
-                             <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.4;">chevron_right</span>
-                         </div>
-                    </div>`;
+                    </a>`;
                 }).join('');
             }
         }

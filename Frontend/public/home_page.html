@@ -26,7 +26,8 @@
             <div class="saetta-master"></div>
 
             <div class="grid-buttons">
-                <a href="area_privata.html" class="matrix-blue border-glow" style="height: 160px;">
+                <a href="area_privata.html" class="matrix-blue border-glow"
+                    style="height: 150px; margin-left: 10px; width: calc(100% - 10px);">
                     <div class="glass-shine"></div>
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined" style="font-size: 100px; color: white;">lock</span>
@@ -38,7 +39,8 @@
                     </div>
                 </a>
 
-                <a href="lista_aziende.html" class="matrix-green border-glow" style="height: 160px;">
+                <a href="lista_aziende.html" class="matrix-green border-glow"
+                    style="height: 150px; width: calc(100% - 10px);">
                     <div class="glass-shine"></div>
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined" style="font-size: 100px; color: white;">apartment</span>
@@ -50,8 +52,8 @@
                     </div>
                 </a>
 
-                <a href="scadenze.html" class="matrix-orange border-glow no-lift"
-                    style="grid-column: span 2; min-height: 100px; flex-direction: row; align-items: center;">
+                <div onclick="window.location.href='scadenze.html'" class="matrix-orange border-glow no-lift"
+                    style="grid-column: span 2; min-height: 100px; flex-direction: row; align-items: center; cursor: pointer; margin-left: 10px; margin-right: 10px; width: calc(100% - 20px); padding: 0.5rem;">
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined"
                             style="font-size: 200px; color: white;">calendar_month</span>
@@ -68,11 +70,11 @@
                             style="width: 100%; margin-top: 0.5rem; display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
 
             <div id="urgenze-card" class="matrix-red border-glow no-lift"
-                style="width: 100%; min-height: 160px; display: block; padding: 0.5rem;">
+                style="width: calc(100% - 20px); margin-left: 10px; margin-right: 10px; min-height: 160px; display: block; padding: 0.5rem;">
                 <div class="bg-icon-container" style="bottom: -30px; right: -10px;">
                     <span class="material-symbols-outlined" style="font-size: 240px; color: white;">warning</span>
                 </div>

@@ -51,6 +51,22 @@ ________________________________________
 
 ________________________________________
 
+### Regola 18 – Allineamento Premium Titanium
+
+**Obiettivo:** Garantire una simmetria perfetta e un allineamento "al righello" di tutti i contenuti.
+
+**Linee guida operative:**
+*   **Margini Laterali Totali**: Ogni contenuto interno ai box Matrix (Titoli, Liste, Testi) deve trovarsi a **52 pixel** esatti dai bordi laterali del box.
+    *   *Composizione*: 8px (padding base box) + 44px (padding interno contenuto).
+*   **Simmetria Obbligatoria**: Il margine di 52px deve essere identico sia a **Sinistra** che a **Destra**.
+*   **Geometria C-Blade**: La linguetta a "C" (::before) deve avere:
+    *   Spessore Fascia: 10px.
+    *   Spessore Vertici: 12px.
+    *   Lunghezza Punte: 35px (con raccordo a raggio interno).
+*   **Perimetri (Light)**: Bordo solidale coordinato di **2px** (tramite `outline` per evitare clipping).
+
+________________________________________
+
 ### Regola 6 – Tailwind CSS
 •	Usare per layout, moduli ed effetti.
 •	Gestione Dual Theme obbligatoria tramite classi `dark:` o classi semantiche.
