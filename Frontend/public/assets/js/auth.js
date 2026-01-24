@@ -161,11 +161,13 @@ async function resetPassword(email) {
  * Checks the user's authentication state and redirects if necessary.
  */
 function checkAuthState() {
+    let authChecked = false;
     onAuthStateChanged(auth, async (user) => {
+        if (authChecked) return;
+        authChecked = true;
+
         const currentPage = window.location.pathname.split('/').pop();
         const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
-
-        // Normalize empty path to index.html
         const isAuthPage = authPages.includes(currentPage) || currentPage === '';
 
         if (user) {

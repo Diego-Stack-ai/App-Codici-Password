@@ -131,8 +131,18 @@
             }
             applyTheme();
 
-            // 4. Autenticazione e Caricamento Dati
+            // 4. Autenticazione e Caricamento Dati (Protetto contro Redirect Fantasma)
+            let authChecked = false;
             onAuthStateChanged(auth, async (user) => {
+                if (authChecked) return; // Evitiamo esecuzioni multiple al boot
+
+                if (!user) {
+                    authChecked = true; // Confermiamo che non c'è utente
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                authChecked = true; // Utente trovato, procediamo
                 if (user) {
                     const uAvatar = document.getElementById('user-avatar');
                     const uName = document.getElementById('user-name');
