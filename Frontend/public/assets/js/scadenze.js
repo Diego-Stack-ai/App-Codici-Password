@@ -217,5 +217,12 @@ export async function loadUrgentDeadlinesCount(user) {
                 }).join('');
             }
         }
-    } catch (e) { console.error("Errore loadScadenze utility:", e); }
+    } catch (error) {
+        console.error("Errore loadScadenze utility:", error.code, error.message);
+        if (error.code === 'permission-denied') {
+            console.warn("Permessi insufficienti per leggere le scadenze (REGOLE FIRESTORE?)");
+        } else if (error.code === 'unavailable') {
+            console.warn("Il database non risponde. Controlla la connessione.");
+        }
+    }
 }

@@ -151,7 +151,20 @@
                             const photo = data.photoURL || data.avatar;
                             if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (error) {
+                        console.error("Errore recupero profilo utente:", error.code, error.message);
+                        const pWarning = document.getElementById('profile-warning');
+                        if (pWarning) pWarning.style.display = 'inline-block';
+                        if (uName) {
+                            uName.textContent = nameToShow;
+                            uName.title = "Profilo caricato in modalità base (Offline)";
+                        }
+                        if (error.code === 'permission-denied') {
+                            console.warn("Permessi insufficienti per leggere il profilo utente.");
+                        } else if (error.code === 'unavailable') {
+                            console.warn("Firestore non disponibile o connessione assente.");
+                        }
+                    }
 
                     if (logoutBtn) {
                         logoutBtn.onclick = async () => {

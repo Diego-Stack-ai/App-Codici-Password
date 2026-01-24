@@ -58,7 +58,12 @@ export async function loadExpiredDeadlines(user) {
                 }).join('');
             }
         }
-    } catch (e) {
-        console.error("Errore loadUrgenze:", e);
+    } catch (error) {
+        console.error("Errore loadUrgenze utility:", error.code, error.message);
+        if (error.code === 'permission-denied') {
+            console.warn("Permessi insufficienti per leggere le urgenze.");
+        } else if (error.code === 'unavailable') {
+            console.warn("Database temporaneamente non raggiungibile.");
+        }
     }
 }
