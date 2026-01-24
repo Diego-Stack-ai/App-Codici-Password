@@ -246,10 +246,10 @@ html:not(.dark) .matrix-orange .urgent-badge {
 }
 
 html:not(.dark) .matrix-red .urgent-badge {
-    background: rgba(220, 38, 38, 0.25);
-    /* Più visibile */
-    color: #991b1b;
-    border: 1.5px solid rgba(220, 38, 38, 0.4);
+    background: rgba(155, 28, 28, 0.20);
+    /* Rosso Fianchetto Soffuso */
+    color: #9b1c1c;
+    border: 1.5px solid rgba(155, 28, 28, 0.4);
 }
 
 /* Dark Mode - Restore high contrast */
