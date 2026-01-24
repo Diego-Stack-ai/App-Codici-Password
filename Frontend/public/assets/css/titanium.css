@@ -176,13 +176,15 @@ html.dark .titanium-box {
 
 /* Ottimizzazione Mobile Spazi Interni */
 @media (max-width: 480px) {
-
-    .card-text-block,
-    .box-content-main {
+    .card-text-block {
         padding-left: 0.5rem !important;
         /* Più vicino al bordo sx */
-        padding-right: 0.5rem !important;
-        /* Più spazio alla lista */
+    }
+
+    .box-content-main {
+        padding-left: 0 !important;
+        /* Forza espansione massima liste */
+        padding-right: 0 !important;
     }
 }
 
@@ -294,6 +296,18 @@ html.dark .titanium-box {
     .grid-2-cols {
         grid-template-columns: 1fr 1fr;
         gap: 0.75rem !important;
+    }
+
+    .matrix-blue,
+    .matrix-green {
+        padding: 1rem !important;
+        min-height: 120px !important;
+    }
+
+    .matrix-orange,
+    .matrix-red {
+        padding: 0.4rem !important;
+        /* Minimo padding per far allargare le liste al massimo */
     }
 
     .dashboard-grid>div {
