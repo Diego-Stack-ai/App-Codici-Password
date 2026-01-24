@@ -170,6 +170,8 @@ html.dark .titanium-box {
 .card-text-block,
 .box-content-main {
     padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    /* Aggiunto per simmetria */
 }
 
 /* Big Boxes extra breath on desktop/tablet */
@@ -326,8 +328,8 @@ html.dark .titanium-box {
 /* Allineamento differenziato per scopo */
 .matrix-blue,
 .matrix-green {
-    justify-content: flex-end;
-    /* Testo in basso per accesso rapido */
+    justify-content: center;
+    /* Centriamo verticalmente il testo per equilibrio */
 }
 
 .matrix-orange,
