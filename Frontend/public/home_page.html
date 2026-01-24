@@ -26,7 +26,7 @@
             <div class="saetta-master"></div>
 
             <p class="hero-notice">
-                Versione 2 - Versione con cellulare funzionante
+                Versione 2.1 - Versione con cellulare funzionante (Blindata)
             </p>
 
             <div class="dashboard-grid">
@@ -173,9 +173,9 @@
                         };
                     }
 
-                    // 5. Carica dati dai moduli esterni
-                    loadUrgentDeadlinesCount(user);
-                    loadExpiredDeadlines(user);
+                    // 5. Carica dati dai moduli esterni (Isolati per sicurezza)
+                    try { loadUrgentDeadlinesCount(user); } catch (e) { console.error("Errore modulo Scadenze:", e); }
+                    try { loadExpiredDeadlines(user); } catch (e) { console.error("Errore modulo Urgenze:", e); }
                 } else {
                     window.location.href = 'index.html';
                 }
