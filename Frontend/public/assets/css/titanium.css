@@ -174,6 +174,18 @@ html.dark .titanium-box {
     /* Aggiunto per simmetria */
 }
 
+/* Ottimizzazione Mobile Spazi Interni */
+@media (max-width: 480px) {
+
+    .card-text-block,
+    .box-content-main {
+        padding-left: 0.5rem !important;
+        /* Più vicino al bordo sx */
+        padding-right: 0.5rem !important;
+        /* Più spazio alla lista */
+    }
+}
+
 /* Big Boxes extra breath on desktop/tablet */
 @media (min-width: 481px) {
     .box-content-main {
@@ -328,8 +340,8 @@ html.dark .titanium-box {
 /* Allineamento differenziato per scopo */
 .matrix-blue,
 .matrix-green {
-    justify-content: center;
-    /* Centriamo verticalmente il testo per equilibrio */
+    justify-content: flex-start;
+    /* Testo in alto come richiesto */
 }
 
 .matrix-orange,
