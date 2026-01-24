@@ -225,11 +225,38 @@ html.dark .titanium-box {
 }
 
 .urgent-badge {
-    padding: 2px 8px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    font-size: 0.65rem;
-    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 11px;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+/* Light Mode specific colors for badges - Soft & Suffused */
+html:not(.dark) .matrix-orange .urgent-badge {
+    background: rgba(255, 152, 0, 0.15);
+    /* Soft Orange */
+    color: #e65100;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+html:not(.dark) .matrix-red .urgent-badge {
+    background: rgba(220, 38, 38, 0.15);
+    /* Soft Red */
+    color: #9b1c1c;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+/* Dark Mode - Restore high contrast */
+html.dark .urgent-badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* 3. EFFECTS - .glass-glow & .saetta-master */
