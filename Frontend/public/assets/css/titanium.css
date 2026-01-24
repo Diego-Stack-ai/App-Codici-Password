@@ -53,11 +53,19 @@ html.dark {
     --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
     --shimmer-intensity: rgba(255, 255, 255, 0.4);
 
-    /* Z-Index Stacking System */
-    --z-base: 0;
-    --z-glow: 1;
-    --z-saetta: 2;
+    /* Z-Index Stacking System (GLOBAL ARCHITECTURE) */
+    --z-bg: 0;
+    /* Backgrounds */
+    --z-effects: 5;
+    /* Saette, Glows */
     --z-content: 10;
+    /* Main Content */
+    --z-ui: 20;
+    /* Borders, Hover Lifts */
+    --z-header: 50;
+    /* Navigation (Must remain top) */
+    --z-modal: 100;
+    /* Modals/Popups */
     --z-icon: 15;
     /* New layer: Above content, below header */
     --z-interactive: 20;
@@ -129,15 +137,29 @@ html.dark .titanium-box {
 
 .titanium-main {
     flex: 1;
-    padding: 6rem 1rem;
+    /* SAFE AREA PADDING: Ensures content is never hidden behind header/footer */
+    padding: 8rem 1rem 8rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    /* STACKING CONTEXT LOCK */
     position: relative;
     z-index: var(--z-content);
+    isolation: isolate;
+    /* Force new stacking context */
+    /* FADE-OUT SCROLL EFFECT */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
 }
 
-/* 2.2 CONTENT SHIFT (User refinement) */
+/* 2.2 CONTENT SHIFT & STANDARDIZATION */
+.box-standard {
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 /* Buttons - moderate shift */
 .matrix-blue>div:not(.bg-icon-container),
 .matrix-green>div:not(.bg-icon-container) {
@@ -496,7 +518,8 @@ html.dark .dynamic-card .icon-circle {
 .titanium-interactive:hover {
     transform: translateY(-4px) !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    z-index: 100;
+    z-index: var(--z-ui);
+    /* Safe lift (20), below Header (50) */
     position: relative;
 }
 
