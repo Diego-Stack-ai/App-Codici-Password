@@ -27,6 +27,8 @@
 
     /* Glow Effects */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
+    --shimmer-intensity: rgba(14, 165, 233, 0.2);
+    --z-saetta: 80;
 }
 
 html.dark {
@@ -305,6 +307,31 @@ html.dark .titanium-box {
     background-clip: padding-box !important;
 }
 
+/* Dashboard Card Titles Uniformity */
+.matrix-btn h3,
+.matrix-blue h3,
+.matrix-green h3,
+.matrix-orange h3,
+.matrix-red h3 {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Dashboard Card Subtitles Uniformity */
+.matrix-btn p,
+.matrix-blue p,
+.matrix-green p,
+.matrix-orange p,
+.matrix-red p {
+    font-size: 0.8rem !important;
+    opacity: 0.7 !important;
+    margin: 2px 0 0 0 !important;
+    font-weight: 500;
+}
+
 /* THE BORDER GLOW - Clean Implementation */
 .border-glow {
     outline-offset: -2px;
@@ -575,8 +602,8 @@ html.dark .dynamic-card .icon-circle {
 /* 5.3 BACKGROUND ICON CONTAINER - Animated icons */
 .bg-icon-container {
     position: absolute;
-    right: -10px;
-    bottom: -20px;
+    right: 5px;
+    bottom: -5px;
     opacity: 0.15;
     transform: scale(1.1) rotate(12deg);
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
@@ -771,19 +798,34 @@ html.dark [class*="matrix-"] .bg-icon-container span {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #000;
+    /* ICONA NERA */
     cursor: pointer;
     position: relative;
+    transition: transform 0.2s, background 0.2s;
+}
+
+html.dark .btn-icon-logout {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    /* Icona bianca in Dark Mode per visibilità */
+}
+
+.btn-icon-logout:hover {
+    transform: scale(1.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .btn-icon-logout span {
-    font-size: 22px;
+    font-size: 24px;
+    /* Icona leggermente più grande e definita */
     z-index: 20;
+    color: inherit;
 }
 
 /* 6.1 MAIN CONTENT LAYOUT */

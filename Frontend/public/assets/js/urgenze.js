@@ -21,6 +21,12 @@ export async function loadExpiredDeadlines(user) {
         });
         expired.sort((a, b) => b.due - a.due);
 
+        // Update Badge Count
+        const badge = document.getElementById('expired-count-badge');
+        const count = document.getElementById('expired-count');
+        if (count) count.textContent = expired.length;
+        if (badge) badge.style.opacity = expired.length > 0 ? "1" : "0";
+
         const container = document.getElementById('urgenze-list');
         if (container) {
             if (expired.length === 0) {
