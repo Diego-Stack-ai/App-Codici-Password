@@ -178,12 +178,10 @@ html.dark .titanium-box {
 @media (max-width: 480px) {
     .card-text-block {
         padding-left: 0.5rem !important;
-        /* Più vicino al bordo sx */
     }
 
     .box-content-main {
         padding-left: 0 !important;
-        /* Forza espansione massima liste */
         padding-right: 0 !important;
     }
 }
@@ -339,8 +337,8 @@ html.dark .urgent-badge {
 
     .matrix-orange,
     .matrix-red {
-        padding: 0.1rem !important;
-        /* Minimo padding per far allargare le liste al massimo */
+        padding: 0.75rem !important;
+        /* Spazio di bellezza per non far toccare i bordi */
     }
 
     .dashboard-grid,
