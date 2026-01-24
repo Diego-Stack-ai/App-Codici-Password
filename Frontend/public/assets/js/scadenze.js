@@ -207,7 +207,7 @@ export async function loadUrgentDeadlinesCount(user) {
                                 <span class="material-symbols-outlined" style="font-size: 20px;">${deadline.icon || 'event'}</span>
                             </div>
                             <div class="card-text">
-                                <span class="card-title" style="font-size: 0.85rem; color: inherit;">${deadline.title}</span>
+                                <div class="card-title" style="font-size: 0.85rem; color: inherit;">${deadline.title}</div>
                             </div>
                             <div class="flex flex-col items-end shrink-0">
                                 <span class="font-bold" style="font-size: 0.7rem;">${badgeText}</span>

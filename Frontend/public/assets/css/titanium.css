@@ -357,18 +357,27 @@ html.dark .urgent-badge {
 
     .dynamic-card .card-title {
         font-size: 0.76rem !important;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        /* Limite a 2 righe */
-        line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        white-space: normal;
-        line-height: 1.2;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        white-space: normal !important;
+        line-height: 1.2 !important;
+        word-break: break-word;
     }
 
-    .dynamic-card .card-text {
-        max-width: calc(100% - 75px);
+    .card-content {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .card-text {
+        flex: 1;
+        min-width: 0;
+        /* Questo permette al clamp di funzionare in un flexbox */
     }
 }
 
