@@ -11,38 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/titanium.css">
-
-
 </head>
 
 <body>
     <div class="titanium-box">
         <div class="glass-glow"></div>
 
-        <!-- HEADER -->
-        <header class="titanium-header">
-            <div style="display: flex; align-items: center; width: 3rem; flex-shrink: 0;">
-                <div id="user-avatar" class="avatar-circle"
-                    style="background-image: url('assets/images/user-avatar-4.png');"></div>
-            </div>
-
-            <div class="user-info">
-                <p id="greeting-text" class="greeting-text">Caricamento...</p>
-                <h2 id="user-name" class="user-name">...</h2>
-            </div>
-
-            <div style="display: flex; align-items: center; justify-content: flex-end; width: 3rem;">
-                <!-- LOGOUT BUTTON -->
-                <button id="logout-button" class="border-glow"
-                    style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.05); border: none; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; position: relative;">
-                    <span class="material-symbols-outlined" style="font-size: 22px; z-index: 20;">logout</span>
-                </button>
-            </div>
-        </header>
+        <!-- HEADER PLACEHOLDER -->
+        <div id="header-placeholder"></div>
 
         <!-- MAIN -->
-        <main
-            style="flex: 1; padding: 6rem 1rem; display: flex; flex-direction: column; gap: 1rem; position: relative;">
+        <main class="titanium-main">
 
             <div class="saetta-master"></div>
 
@@ -114,196 +93,79 @@
             </div>
         </main>
 
-        <footer class="titanium-footer">
-            <div class="theme-switcher">
-                <button onclick="setTheme('light')">Light</button>
-                <button onclick="setTheme('dark')" class="btn-dark">Dark</button>
-            </div>
-            <p class="version-text">
-                Versione aggiornata e sicura (Solo Home lavorata con zoom nell'index)
-            </p>
-        </footer>
+        <!-- FOOTER PLACEHOLDER -->
+        <div id="footer-placeholder"></div>
     </div>
 
     <!-- SCRIPT FIREBASE -->
     <script type="module">
         import { auth, db } from './assets/js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { initComponents } from './assets/js/components.js';
+        import { loadUrgentDeadlinesCount } from './assets/js/scadenze.js';
+        import { loadExpiredDeadlines } from './assets/js/urgenze.js';
 
-        (function () {
-            const h = new Date().getHours();
-            const el = document.getElementById('greeting-text');
-            if (el) el.textContent = (h >= 5 && h < 13) ? "Buon giorno," : (h >= 13 && h < 17) ? "Buon pomeriggio," : "Buona sera,";
-        })();
+        async function start() {
+            // 1. Carica Header e Footer dai file esterni
+            await initComponents();
 
-        window.setTheme = function (mode) { localStorage.setItem('theme', mode); applyTheme(); }
-        function applyTheme() {
-            const p = localStorage.getItem('theme');
-            const d = p === 'dark' || (p !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (d) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
-        }
-        applyTheme();
+            // 2. Logica Saluto Temporale
+            (function () {
+                const h = new Date().getHours();
+                const el = document.getElementById('greeting-text');
+                if (el) el.textContent = (h >= 5 && h < 13) ? "Buon giorno," : (h >= 13 && h < 17) ? "Buon pomeriggio," : "Buona sera,";
+            })();
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const uAvatar = document.getElementById('user-avatar');
-                const uName = document.getElementById('user-name');
-                const logoutBtn = document.getElementById('logout-button');
-
-                let nameToShow = user.displayName || user.email.split('@')[0];
-                if (user.photoURL && uAvatar) uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
-                if (uName) uName.textContent = nameToShow;
-
-                try {
-                    const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const fullName = `${data.nome || ''} ${data.cognome || ''}`.trim();
-                        if (fullName) uName.textContent = fullName;
-                        const photo = data.photoURL || data.avatar;
-                        if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
-                    }
-                } catch (e) { console.error(e); }
-
-                if (logoutBtn) {
-                    logoutBtn.onclick = async () => {
-                        await signOut(auth);
-                        window.location.href = 'index.html';
-                    };
-                }
-
-                loadUrgentDeadlinesCount(user);
-                loadExpiredDeadlines(user);
-            } else {
-                window.location.href = 'index.html';
+            // 3. Gestione Temi (Light/Dark)
+            window.setTheme = function (mode) { localStorage.setItem('theme', mode); applyTheme(); }
+            function applyTheme() {
+                const p = localStorage.getItem('theme');
+                const d = p === 'dark' || (p !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (d) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
             }
-        });
+            applyTheme();
 
-        // 1. SCADENZE
-        async function loadUrgentDeadlinesCount(user) {
-            try {
-                const today = new Date(); today.setHours(0, 0, 0, 0);
-                const colRef = collection(db, "users", user.uid, "scadenze");
-                const snap = await getDocs(colRef);
+            // 4. Autenticazione e Caricamento Dati
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    const uAvatar = document.getElementById('user-avatar');
+                    const uName = document.getElementById('user-name');
+                    const logoutBtn = document.getElementById('logout-button');
 
-                const items = [];
-                snap.forEach(d => {
-                    const data = d.data();
-                    if (data.completed) return;
-                    if (data.dueDate) {
-                        const due = new Date(data.dueDate); due.setHours(0, 0, 0, 0);
-                        const days = data.notificationDaysBefore || 7;
-                        const start = new Date(due); start.setDate(start.getDate() - days);
+                    let nameToShow = user.displayName || user.email.split('@')[0];
+                    if (user.photoURL && uAvatar) uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
+                    if (uName) uName.textContent = nameToShow;
 
-                        // Logica Originale: Today deve essere tra start e due
-                        if (today >= start && today <= due) {
-                            items.push({ ...data, id: d.id, due: due });
+                    try {
+                        const docSnap = await getDoc(doc(db, "users", user.uid));
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            const fullName = `${data.nome || ''} ${data.cognome || ''}`.trim();
+                            if (fullName) uName.textContent = fullName;
+                            const photo = data.photoURL || data.avatar;
+                            if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
                         }
+                    } catch (e) { console.error(e); }
+
+                    if (logoutBtn) {
+                        logoutBtn.onclick = async () => {
+                            await signOut(auth);
+                            window.location.href = 'index.html';
+                        };
                     }
-                });
 
-                items.sort((a, b) => a.due - b.due);
-
-                const badge = document.getElementById('urgent-count-badge');
-                const count = document.getElementById('urgent-count');
-                if (count) count.textContent = items.length;
-                if (badge) badge.style.opacity = items.length > 0 ? "1" : "0";
-
-                const list = document.getElementById('deadline-list-container');
-                if (list) {
-                    if (items.length === 0) list.innerHTML = '';
-                    else {
-                        list.innerHTML = items.map(deadline => {
-                            const daysUntil = Math.ceil((deadline.due - today) / (1000 * 60 * 60 * 24));
-                            let badgeColor = 'background: #3b82f6;'; // blue
-                            let badgeText = `${daysUntil}g`;
-
-                            if (daysUntil < 0) { badgeColor = 'background: #ef4444;'; badgeText = 'Scaduto'; }
-                            else if (daysUntil === 0) { badgeColor = 'background: #ef4444;'; badgeText = 'Oggi'; }
-                            else if (daysUntil === 1) { badgeColor = 'background: #f97316;'; badgeText = 'Domani'; }
-                            else if (daysUntil <= 3) { badgeColor = 'background: #f97316;'; }
-
-                            const icon = deadline.icon || 'event';
-                            const title = deadline.title || 'Scadenza';
-
-                            // Card Gradient
-                            let cardGradient = 'linear-gradient(135deg, #FF9800 0%, #E65100 100%)';
-                            if (daysUntil < 0) cardGradient = 'linear-gradient(135deg, #6d1a1a 0%, #1a0505 100%)';
-
-                            return `
-                                <div class="titanium-interactive border-glow dynamic-card" style="background: ${cardGradient};">
-                                    <div class="card-shine"></div>
-                                    
-                                    <div class="card-content">
-                                        <span class="material-symbols-outlined" style="color: white; font-size: 18px;">${icon}</span>
-                                        <div class="card-text">
-                                            <span class="card-title">${title}</span>
-                                            <span class="card-subtext">
-                                                ${deadline.veicolo_modello || deadline.descrizione || ''}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card-badge" style="${badgeColor}">
-                                        ${badgeText}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    }
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        // 2. URGENZE
-        async function loadExpiredDeadlines(user) {
-            const today = new Date(); today.setHours(0, 0, 0, 0);
-            const snap = await getDocs(collection(db, "users", user.uid, "scadenze"));
-            const expired = [];
-            snap.forEach(d => {
-                const data = d.data();
-                if (!data.completed && data.dueDate) {
-                    const due = new Date(data.dueDate); due.setHours(0, 0, 0, 0);
-                    if (due < today) expired.push({ ...data, id: d.id, due });
+                    // 5. Carica dati dai moduli esterni
+                    loadUrgentDeadlinesCount(user);
+                    loadExpiredDeadlines(user);
+                } else {
+                    window.location.href = 'index.html';
                 }
             });
-            expired.sort((a, b) => b.due - a.due);
-
-            const container = document.getElementById('urgenze-list');
-            if (container) {
-                if (expired.length === 0) container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.4); font-size: 10px; font-style: italic; padding: 1rem;">Nessuna scadenza scaduta</p>';
-                else {
-                    container.innerHTML = expired.map(deadline => {
-                        const daysAgo = Math.ceil((today - deadline.due) / (1000 * 60 * 60 * 24));
-                        let badgeText = `${daysAgo}g fa`;
-                        if (daysAgo === 0) badgeText = 'Oggi';
-                        if (daysAgo === 1) badgeText = 'Ieri';
-
-                        const icon = deadline.icon || 'event';
-
-                        return `
-                        <div class="titanium-interactive border-glow dynamic-card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem; transition: background 0.2s; padding: 0.75rem;">
-                             <div class="card-content">
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,59,48,0.2); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,59,48,0.4);">
-                                     <span class="material-symbols-outlined" style="color: #ff6b6b; font-size: 18px;">${icon}</span>
-                                </div>
-                                <div class="card-text">
-                                    <span style="font-size: 0.85rem; font-weight: bold; color: white;">${deadline.title}</span>
-                                    <span style="font-size: 0.65rem; color: rgba(255,255,255,0.6);">${deadline.veicolo_modello || 'Nessun dettaglio'}</span>
-                                </div>
-                             </div>
-                             
-                             <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                                 <span style="font-size: 0.7rem; font-weight: bold; color: #ff6b6b;">${badgeText}</span>
-                                 <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.4;">chevron_right</span>
-                             </div>
-                        </div>
-                        `;
-                    }).join('');
-                }
-            }
         }
+
+        // Lancio
+        start();
     </script>
 </body>
 
