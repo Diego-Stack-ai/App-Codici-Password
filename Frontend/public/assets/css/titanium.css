@@ -108,6 +108,21 @@ html.dark .glass-glow {
     }
 }
 
+.grid-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 0px;
+}
+
+/* Specifico per mobile se necessario */
+@media (max-width: 480px) {
+    .grid-buttons {
+        gap: 0.75rem;
+    }
+}
+
 /* 4. MATRIX BUTTONS - Simplified Naming */
 .matrix-blue,
 .matrix-green,
@@ -169,6 +184,47 @@ html.dark .matrix-orange {
 
 html.dark .matrix-red {
     background: linear-gradient(to right, #450a0a, #1e0707);
+}
+
+.no-lift:hover {
+    transform: none !important;
+}
+
+/* 4.1 LISTS & INTERACTIVE */
+.list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+}
+
+.glass-inner-list .list-item {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .glass-inner-list .list-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.titanium-interactive {
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.titanium-interactive:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    position: relative;
+}
+
+.titanium-interactive:active {
+    transform: scale(0.98);
 }
 
 /* 5. COMPONENTS UTILITIES */
@@ -267,4 +323,18 @@ html.dark .titanium-footer {
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
 }
