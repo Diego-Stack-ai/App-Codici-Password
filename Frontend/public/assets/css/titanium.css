@@ -319,6 +319,12 @@ html.dark .urgent-badge {
 
 @media (max-width: 480px) {
 
+    /* Allarghiamo il contenitore principale per dare più spazio ai lati */
+    .titanium-main {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
     /* Layout Mobile: Massima larghezza per tutto */
     .grid-2-cols {
         grid-template-columns: 1fr 1fr;
@@ -333,17 +339,19 @@ html.dark .urgent-badge {
 
     .matrix-orange,
     .matrix-red {
-        padding: 0.4rem !important;
+        padding: 0.1rem !important;
         /* Minimo padding per far allargare le liste al massimo */
     }
 
+    .dashboard-grid,
     .dashboard-grid>div {
         width: 100% !important;
     }
 
     /* Ottimizzazione Liste: Singola riga con puntini sospensione */
     .dynamic-card {
-        padding: 0.5rem 0.75rem !important;
+        padding: 0.5rem 0.4rem !important;
+        /* Meno spazio ai lati per far espandere il testo */
         min-height: 55px;
     }
 
