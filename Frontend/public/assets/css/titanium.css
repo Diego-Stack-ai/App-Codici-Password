@@ -57,7 +57,11 @@ html.dark {
     --z-bg: 0;
     /* Backgrounds */
     --z-effects: 5;
-    /* Saette, Glows */
+    /* Saette, Glows (Background) */
+    --z-glow: 12;
+    /* Atmospheric Lighthouse Effect */
+    --z-saetta: 80;
+    /* Flying Beam (Faro) effect */
     --z-content: 10;
     /* Main Content */
     --z-ui: 20;
@@ -577,7 +581,8 @@ html.dark .dynamic-card .icon-circle {
     transform: scale(1.1) rotate(12deg);
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
     pointer-events: none;
-    z-index: var(--z-icon);
+    z-index: 20;
+    /* Lift above content for watermark effect */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -631,8 +636,9 @@ html.dark [class*="matrix-"] .bg-icon-container span {
 
 /* 4.2 DYNAMIC LIST ITEMS (JS Generated) */
 .dynamic-card {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    /* Force Side-by-Side (Content | Badge) */
+    align-items: center !important;
     justify-content: space-between;
     padding: 0.5rem;
     border-radius: 12px;
@@ -649,20 +655,35 @@ html.dark [class*="matrix-"] .bg-icon-container span {
     pointer-events: none;
 }
 
+/* Inner Wrappers */
 .dynamic-card .card-content {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    display: flex !important;
+    /* Force Horizontal Layout */
+    align-items: center !important;
+    /* Force Vertical Center */
+    justify-content: flex-start !important;
+    /* Force Left Alignment */
+    gap: 0.75rem;
+    /* Space between Icon and Text */
+    flex: 1;
+    width: 100%;
+    /* FORCE FULL WIDTH */
+    min-width: 0;
+    /* Prevents flex overflow */
     position: relative;
     z-index: 10;
-    flex: 1;
-    min-width: 0;
 }
 
 .dynamic-card .card-text {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    /* Vertically center the text block */
     min-width: 0;
+    flex: 1;
+    /* Push badge to right */
+    text-align: left;
+    /* Ensure text starts from left */
 }
 
 .dynamic-card .card-title {
@@ -693,12 +714,16 @@ html.dark [class*="matrix-"] .bg-icon-container span {
 
 
 /* 6. HEADER & FOOTER */
+/* 6. HEADER & FOOTER (TRUE FIXED ARCHITECTURE) */
 .titanium-header,
 .titanium-footer {
     position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
     max-width: 48rem;
-    z-index: var(--z-header);
+    z-index: 100 !important;
+    /* Force Top Layer */
     padding: 1rem;
     backdrop-filter: blur(12px);
     display: flex;
@@ -859,4 +884,35 @@ html.dark .titanium-footer {
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
+}
+
+/* RESTORED MATRIX CLASSES - CORRECTED */
+/* Light Mode: White Backgrounds */
+.matrix-blue,
+.matrix-green,
+.matrix-orange,
+.matrix-red {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode: Vibrant Gradients */
+html.dark .matrix-blue {
+    background: linear-gradient(135deg, var(--matrix-blue-from), var(--matrix-blue-to));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .matrix-green {
+    background: linear-gradient(135deg, var(--matrix-green-from), var(--matrix-green-to));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .matrix-orange {
+    background: linear-gradient(135deg, var(--matrix-orange-from), var(--matrix-orange-to));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark .matrix-red {
+    background: linear-gradient(135deg, var(--matrix-red-from), var(--matrix-red-to));
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }

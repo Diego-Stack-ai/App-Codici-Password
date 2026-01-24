@@ -202,15 +202,17 @@ export async function loadUrgentDeadlinesCount(user) {
                     return `
                     <a href="scadenze.html" class="titanium-interactive border-glow dynamic-card ${matrixClass}">
                         <div class="card-shine"></div>
-                        <div class="flex items-center gap-3 relative z-10">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">${deadline.icon || 'event'}</span>
-                            <div class="flex flex-col">
-                                <span class="font-bold" style="font-size: 0.85rem;">${deadline.title}</span>
-                                <span style="font-size: 0.65rem; opacity: 0.7;">${deadline.veicolo_modello || deadline.descrizione || ''}</span>
+                        <div class="card-content">
+                            <div class="icon-circle">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">${deadline.icon || 'event'}</span>
                             </div>
-                        </div>
-                        <div class="px-2 py-1 rounded-lg font-bold uppercase tracking-tighter relative z-10" style="font-size: 0.65rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
-                            ${badgeText}
+                            <div class="card-text">
+                                <span class="card-title" style="font-size: 0.85rem; color: inherit;">${deadline.title}</span>
+                            </div>
+                            <div class="flex flex-col items-end shrink-0">
+                                <span class="font-bold" style="font-size: 0.7rem;">${badgeText}</span>
+                                <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.4;">chevron_right</span>
+                            </div>
                         </div>
                     </a>`;
                 }).join('');

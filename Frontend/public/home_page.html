@@ -53,26 +53,36 @@
                 </a>
 
                 <div onclick="window.location.href='scadenze.html'" class="matrix-orange border-glow no-lift"
-                    style="grid-column: span 2; min-height: 100px; flex-direction: row; align-items: center; cursor: pointer; margin-left: 10px; margin-right: 10px; width: calc(100% - 20px); padding: 0.5rem;">
-                    <div class="bg-icon-container">
+                    style="grid-column: span 2; min-height: 100px; display: block; position: relative; cursor: pointer; margin-left: 10px; margin-right: 10px; width: calc(100% - 20px); padding: 0.5rem 0.5rem 0 0.5rem;">
+
+                    <!-- Icona Sfondo (Absolute Right) -->
+                    <div class="bg-icon-container" style="bottom: -30px; right: -10px;">
                         <span class="material-symbols-outlined"
                             style="font-size: 200px; color: white;">calendar_month</span>
                     </div>
-                    <div class="scadenze-content">
-                        <div class="scadenze-header">
-                            <h3>Scadenze</h3>
-                            <span id="urgent-count-badge" class="urgent-badge" style="opacity: 0;">
-                                <span id="urgent-count">0</span>
-                            </span>
+
+                    <!-- Contenuto -->
+                    <div class="scadenze-content" style="position: relative; z-index: 10; width: 100%;">
+                        <div
+                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 10px; width: 100%;">
+                            <div class="scadenze-header"
+                                style="display: flex; align-items: center; gap: 10px; margin-bottom: 0;">
+                                <h3 style="margin: 0;">Scadenze</h3>
+                                <span id="urgent-count-badge" class="urgent-badge" style="opacity: 0;">
+                                    <span id="urgent-count">0</span>
+                                </span>
+                            </div>
+                            <p style="margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.7;">Controlla i prossimi impegni
+                            </p>
                         </div>
-                        <p>Controlla i prossimi impegni</p>
                         <div id="deadline-list-container"
-                            style="width: 100%; margin-top: 0.5rem; display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+                            style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem;">
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- CARD 3: URGENZE (WIDE COL) -->
             <div id="urgenze-card" class="matrix-red border-glow no-lift"
                 style="width: calc(100% - 20px); margin-left: 10px; margin-right: 10px; min-height: 160px; display: block; padding: 0.5rem;">
                 <div class="bg-icon-container" style="bottom: -30px; right: -10px;">
