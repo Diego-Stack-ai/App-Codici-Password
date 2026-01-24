@@ -30,87 +30,72 @@
                 Versione definitiva vista Home Page con tema Chiaro/Scuro
             </p>
 
-            <div class="grid-buttons">
-                <a href="area_privata.html" class="matrix-blue border-glow"
-                    style="height: 150px; margin-left: 10px; width: calc(100% - 10px);">
-                    <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
-                        <span class="material-symbols-outlined" style="font-size: 100px; color: white;">lock</span>
-                    </div>
-                    <div
-                        style="z-index: 10; display: flex; flex-direction: column; align-items: flex-start; gap: 0rem;">
-                        <h3>Privato</h3>
-                        <p>Cassaforte Personale</p>
-                    </div>
-                </a>
+            <div class="dashboard-grid">
+                <!-- SEZIONE 1: ACCESSO RAPIDO -->
+                <div class="grid-2-cols">
+                    <a href="area_privata.html" class="matrix-blue border-glow">
+                        <div class="glass-shine"></div>
+                        <div class="bg-icon-container">
+                            <span class="material-symbols-outlined" style="font-size: 100px; color: white;">lock</span>
+                        </div>
+                        <div class="card-text-block">
+                            <h3>Privato</h3>
+                            <p>Cassaforte Personale</p>
+                        </div>
+                    </a>
 
-                <a href="lista_aziende.html" class="matrix-green border-glow"
-                    style="height: 150px; width: calc(100% - 10px);">
-                    <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
-                        <span class="material-symbols-outlined" style="font-size: 100px; color: white;">apartment</span>
-                    </div>
-                    <div
-                        style="z-index: 10; display: flex; flex-direction: column; align-items: flex-start; gap: 0rem;">
-                        <h3>Azienda</h3>
-                        <p>Gestione Risorse</p>
-                    </div>
-                </a>
+                    <a href="lista_aziende.html" class="matrix-green border-glow">
+                        <div class="glass-shine"></div>
+                        <div class="bg-icon-container">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 100px; color: white;">apartment</span>
+                        </div>
+                        <div class="card-text-block">
+                            <h3>Azienda</h3>
+                            <p>Gestione Risorse</p>
+                        </div>
+                    </a>
+                </div>
 
-                <div onclick="window.location.href='scadenze.html'" class="matrix-orange border-glow no-lift"
-                    style="grid-column: span 2; min-height: 100px; display: block; position: relative; cursor: pointer; margin-left: 10px; margin-right: 10px; width: calc(100% - 20px); padding: 0.5rem 0.5rem 0 0.5rem;">
-
-                    <!-- Icona Sfondo (Absolute Right) -->
+                <!-- SEZIONE 2: SCADENZE (FULL WIDTH) -->
+                <div onclick="window.location.href='scadenze.html'"
+                    class="matrix-orange border-glow scadenze-box no-lift">
                     <div class="bg-icon-container" style="bottom: 10px; right: 5px;">
                         <span class="material-symbols-outlined"
                             style="font-size: 200px; color: white;">calendar_month</span>
                     </div>
-
-                    <!-- Contenuto -->
-                    <div class="scadenze-content" style="position: relative; z-index: 10; width: 100%;">
-                        <div
-                            style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 10px; width: 100%;">
-                            <div class="scadenze-header"
-                                style="display: flex; align-items: center; gap: 10px; margin-bottom: 0;">
-                                <h3 style="margin: 0;">Scadenze</h3>
+                    <div class="box-content-main">
+                        <div class="box-header-flex">
+                            <div class="title-group">
+                                <h3>Scadenze</h3>
                                 <span id="urgent-count-badge" class="urgent-badge" style="opacity: 0;">
                                     <span id="urgent-count">0</span>
                                 </span>
                             </div>
                             <p>Controlla i prossimi impegni</p>
                         </div>
-                        <div id="deadline-list-container"
-                            style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem;">
-                        </div>
+                        <div id="deadline-list-container" class="dashboard-dynamic-list"></div>
                     </div>
                 </div>
-            </div>
 
-            <!-- CARD 3: URGENZE (WIDE COL) -->
-            <div id="urgenze-card" class="matrix-red border-glow no-lift"
-                style="width: calc(100% - 20px); margin-left: 10px; margin-right: 10px; min-height: 160px; display: block; padding: 0.5rem;">
-                <div class="bg-icon-container" style="bottom: 10px; right: 5px;">
-                    <span class="material-symbols-outlined" style="font-size: 240px; color: white;">warning</span>
-                </div>
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem; position: relative; z-index: 10;">
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 2px;">
-                            <h3 style="margin: 0;">Urgenze</h3>
-                            <span id="expired-count-badge" class="urgent-badge" style="opacity: 0;">
-                                <span id="expired-count">0</span>
-                            </span>
+                <!-- SEZIONE 3: URGENZE (FULL WIDTH) -->
+                <div id="urgenze-card" class="matrix-red border-glow urgenze-box no-lift">
+                    <div class="bg-icon-container" style="bottom: 10px; right: 5px;">
+                        <span class="material-symbols-outlined" style="font-size: 240px; color: white;">warning</span>
+                    </div>
+                    <div class="box-content-main">
+                        <div class="box-header-flex">
+                            <div class="title-group">
+                                <h3>Urgenze</h3>
+                                <span id="expired-count-badge" class="urgent-badge" style="opacity: 0;">
+                                    <span id="expired-count">0</span>
+                                </span>
+                            </div>
+                            <p>Pratiche scadute</p>
                         </div>
-                        <p style="margin: 0;">Pratiche scadute</p>
-                    </div>
-                    <div
-                        style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;">
-                        <span class="material-symbols-outlined" style="font-size: 18px; opacity: 0.6;">update</span>
+                        <div id="urgenze-list" class="dashboard-dynamic-list no-scrollbar"></div>
                     </div>
                 </div>
-                <div id="urgenze-list"
-                    style="position: relative; z-index: 10; padding: 0 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto;"
-                    class="no-scrollbar"></div>
             </div>
         </main>
 

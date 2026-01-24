@@ -211,7 +211,6 @@ export async function loadUrgentDeadlinesCount(user) {
                             </div>
                             <div class="flex flex-col items-end shrink-0">
                                 <span class="font-bold" style="font-size: 0.7rem;">${badgeText}</span>
-                                <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.4;">chevron_right</span>
                             </div>
                         </div>
                     </a>`;
