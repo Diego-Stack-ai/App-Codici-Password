@@ -12,11 +12,7 @@
         rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/titanium.css">
 
-    <!-- 
-    <style>
-        /* CSS INTERNO DISATTIVATO - ORA USIAMO TITANIUM.CSS PER MASSIMA PULIZIA */
-    </style>
-    -->
+
 </head>
 
 <body>
@@ -30,9 +26,9 @@
                     style="background-image: url('assets/images/user-avatar-4.png');"></div>
             </div>
 
-            <div style="flex: 1; display: flex; flex-direction: column; padding: 0 1rem; text-align: left;">
-                <p id="greeting-text" style="font-size: 0.75rem; opacity: 0.6; margin:0;">Caricamento...</p>
-                <h2 id="user-name" style="font-size: 1.1rem; font-weight: bold; margin:0;">...</h2>
+            <div class="user-info">
+                <p id="greeting-text" class="greeting-text">Caricamento...</p>
+                <h2 id="user-name" class="user-name">...</h2>
             </div>
 
             <div style="display: flex; align-items: center; justify-content: flex-end; width: 3rem;">
@@ -48,11 +44,9 @@
         <main
             style="flex: 1; padding: 6rem 1rem; display: flex; flex-direction: column; gap: 1rem; position: relative;">
 
-            <!-- SAETTA MASTER: UNICO RIFLESSO INTENSO -->
             <div class="saetta-master"></div>
 
             <div class="grid-buttons">
-                <!-- ROW 1 -->
                 <a href="area_privata.html" class="matrix-blue border-glow" style="height: 160px;">
                     <div class="glass-shine"></div>
                     <div class="bg-icon-container">
@@ -60,10 +54,8 @@
                     </div>
                     <div
                         style="z-index: 10; display: flex; flex-direction: column; align-items: flex-start; gap: 0rem;">
-                        <h3
-                            style="font-size: 1.25rem; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-bottom: 2px;">
-                            Privato</h3>
-                        <p style="font-size: 0.75rem; font-weight: 500; opacity: 0.9;">Cassaforte Personale</p>
+                        <h3>Privato</h3>
+                        <p>Cassaforte Personale</p>
                     </div>
                 </a>
 
@@ -74,31 +66,25 @@
                     </div>
                     <div
                         style="z-index: 10; display: flex; flex-direction: column; align-items: flex-start; gap: 0rem;">
-                        <h3
-                            style="font-size: 1.25rem; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-bottom: 2px;">
-                            Azienda</h3>
-                        <p style="font-size: 0.75rem; font-weight: 500; opacity: 0.9;">Gestione Risorse</p>
+                        <h3>Azienda</h3>
+                        <p>Gestione Risorse</p>
                     </div>
                 </a>
 
-                <!-- ROW 2: SCADENZE -->
                 <a href="scadenze.html" class="matrix-orange border-glow no-lift"
                     style="grid-column: span 2; min-height: 100px; flex-direction: row; align-items: center;">
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined"
                             style="font-size: 200px; color: white;">calendar_month</span>
                     </div>
-                    <div
-                        style="z-index: 10; display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2px;">
-                            <h3 style="font-size: 1.25rem; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-                                Scadenze</h3>
-                            <span id="urgent-count-badge"
-                                style="padding: 2px 8px; background: rgba(255,255,255,0.3); border-radius: 12px; font-size: 0.65rem; font-weight: bold; opacity: 0;">
+                    <div class="scadenze-content">
+                        <div class="scadenze-header">
+                            <h3>Scadenze</h3>
+                            <span id="urgent-count-badge" class="urgent-badge" style="opacity: 0;">
                                 <span id="urgent-count">0</span>
                             </span>
                         </div>
-                        <p style="font-size: 0.75rem; font-weight: 500; opacity: 0.9;">Controlla i prossimi impegni</p>
+                        <p>Controlla i prossimi impegni</p>
                         <div id="deadline-list-container"
                             style="width: 100%; margin-top: 0.5rem; display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
                         </div>
@@ -106,7 +92,6 @@
                 </a>
             </div>
 
-            <!-- 2. URGENZE -->
             <div id="urgenze-card" class="matrix-red border-glow no-lift"
                 style="width: 100%; min-height: 160px; display: block; padding: 0.5rem;">
                 <div class="bg-icon-container" style="bottom: -30px; right: -10px;">
@@ -115,8 +100,8 @@
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem; position: relative; z-index: 10;">
                     <div>
-                        <h3 style="font-size: 1.1rem; font-weight: bold; text-transform: uppercase;">Urgenze</h3>
-                        <p style="font-size: 0.7rem; opacity: 0.6;">Pratiche scadute</p>
+                        <h3>Urgenze</h3>
+                        <p>Pratiche scadute</p>
                     </div>
                     <div
                         style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;">
@@ -129,15 +114,12 @@
             </div>
         </main>
 
-        <footer class="titanium-footer" style="flex-direction: column; gap: 0.5rem; padding-bottom: 2rem;">
-            <div
-                style="display: flex; gap: 1rem; padding: 0.5rem; border-radius: 16px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
-                <button onclick="setTheme('light')"
-                    style="padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; border:0; cursor:pointer;">Light</button>
-                <button onclick="setTheme('dark')"
-                    style="padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; border:0; cursor:pointer; background:#000; color:#fff;">Dark</button>
+        <footer class="titanium-footer">
+            <div class="theme-switcher">
+                <button onclick="setTheme('light')">Light</button>
+                <button onclick="setTheme('dark')" class="btn-dark">Dark</button>
             </div>
-            <p style="font-size: 10px; opacity: 0.5; color: white; margin: 0; text-align: center;">
+            <p class="version-text">
                 Versione aggiornata e sicura (Solo Home lavorata con zoom nell'index)
             </p>
         </footer>
@@ -250,20 +232,20 @@
                             if (daysUntil < 0) cardGradient = 'linear-gradient(135deg, #6d1a1a 0%, #1a0505 100%)';
 
                             return `
-                                <div class="titanium-interactive border-glow" style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; border-radius: 12px; position: relative; overflow: hidden; background: ${cardGradient}; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                                    <div style="position: absolute; inset: 0; background: linear-gradient(to bottom right, rgba(255,255,255,0.2), transparent); opacity: 0.5; pointer-events: none;"></div>
+                                <div class="titanium-interactive border-glow dynamic-card" style="background: ${cardGradient};">
+                                    <div class="card-shine"></div>
                                     
-                                    <div style="display: flex; align-items: center; gap: 0.5rem; position: relative; z-index: 10; flex: 1; min-width: 0;">
+                                    <div class="card-content">
                                         <span class="material-symbols-outlined" style="color: white; font-size: 18px;">${icon}</span>
-                                        <div style="display: flex; flex-direction: column; min-width: 0;">
-                                            <span style="color: white; font-size: 11px; font-weight: bold; text-transform: uppercase;">${title}</span>
-                                            <span style="color: rgba(255,255,255,0.7); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <div class="card-text">
+                                            <span class="card-title">${title}</span>
+                                            <span class="card-subtext">
                                                 ${deadline.veicolo_modello || deadline.descrizione || ''}
                                             </span>
                                         </div>
                                     </div>
                                     
-                                    <div style="${badgeColor} padding: 2px 8px; border-radius: 12px; color: white; font-size: 10px; font-weight: bold; position: relative; z-index: 10; box-shadow: 0 2px 2px rgba(0,0,0,0.2);">
+                                    <div class="card-badge" style="${badgeColor}">
                                         ${badgeText}
                                     </div>
                                 </div>
@@ -301,12 +283,12 @@
                         const icon = deadline.icon || 'event';
 
                         return `
-                        <div class="titanium-interactive border-glow" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border-radius: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem; transition: background 0.2s;">
-                             <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div class="titanium-interactive border-glow dynamic-card" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem; transition: background 0.2s; padding: 0.75rem;">
+                             <div class="card-content">
                                 <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255,59,48,0.2); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,59,48,0.4);">
                                      <span class="material-symbols-outlined" style="color: #ff6b6b; font-size: 18px;">${icon}</span>
                                 </div>
-                                <div style="display: flex; flex-direction: column;">
+                                <div class="card-text">
                                     <span style="font-size: 0.85rem; font-weight: bold; color: white;">${deadline.title}</span>
                                     <span style="font-size: 0.65rem; color: rgba(255,255,255,0.6);">${deadline.veicolo_modello || 'Nessun dettaglio'}</span>
                                 </div>
