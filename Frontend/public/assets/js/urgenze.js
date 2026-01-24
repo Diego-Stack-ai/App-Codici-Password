@@ -26,7 +26,7 @@ export async function loadExpiredDeadlines(user) {
         const badge = document.getElementById('expired-count-badge');
         const count = document.getElementById('expired-count');
         if (count) count.textContent = expired.length;
-        if (badge) badge.style.opacity = expired.length > 0 ? "1" : "0";
+        if (badge) badge.style.opacity = expired.length > 0 ? "" : "0";
 
         const container = document.getElementById('urgenze-list');
         if (container) {

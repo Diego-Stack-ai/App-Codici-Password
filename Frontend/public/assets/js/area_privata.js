@@ -13,6 +13,7 @@ import {
     where,
     deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { logError } from './utils.js';
 
 // --- DOM ELEMENTS ---
 const topAccountsList = document.getElementById('top-accounts-list');
@@ -121,7 +122,7 @@ async function loadCounters(uid, email) {
                     if (isMemo) receivedMemo++;
                     else receivedStandard++;
                 }
-            } catch (e) { }
+            } catch (e) { logError("Invite Account Load", e); }
         }
 
         counts.shared = ownSharedStandard + receivedStandard;
@@ -132,7 +133,7 @@ async function loadCounters(uid, email) {
         updateBadge('count-shared', counts.shared, 'Account condivisi');
         updateBadge('count-shared-memo', counts.sharedMemo, 'Memo condivisi');
 
-    } catch (e) { console.error(e); }
+    } catch (e) { logError("LoadCounters", e); }
 }
 
 function updateBadge(id, count, label) {
@@ -182,32 +183,58 @@ async function loadTopAccounts(uid) {
             `;
             topAccountsList.appendChild(div);
         });
-    } catch (e) { topAccountsList.innerHTML = 'Errore'; }
+    } catch (e) {
+        logError("LoadTopAccounts", e);
+        topAccountsList.innerHTML = 'Errore caricamento accounts';
+    }
 }
 
 // --- RUBRICA ---
-window.toggleRubrica = () => {
+// --- RUBRICA ---
+const toggleRubrica = () => {
     const content = document.getElementById('rubrica-content');
     const chevron = document.getElementById('rubrica-chevron');
+    if (!content) return;
     content.classList.toggle('hidden');
-    chevron.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';
+    if (chevron) {
+        chevron.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
 };
 
-window.toggleAddContactForm = () => {
-    document.getElementById('add-contact-form').classList.toggle('hidden');
+const toggleAddContactForm = () => {
+    const form = document.getElementById('add-contact-form');
+    if (form) form.classList.toggle('hidden');
 };
+
+// Event Listeners for Rubrica Toggles
+const rubricaToggleBtn = document.getElementById('rubrica-toggle-btn');
+if (rubricaToggleBtn) {
+    rubricaToggleBtn.addEventListener('click', toggleRubrica);
+}
+
+const addContactBtn = document.getElementById('add-contact-btn');
+if (addContactBtn) {
+    addContactBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAddContactForm();
+    });
+}
 
 async function loadRubrica(uid) {
     if (!rubricaList) return;
     try {
         const contacts = await getContacts(uid);
         renderContacts(contacts, uid);
-    } catch (e) { console.error(e); }
+    } catch (e) { logError("LoadRubrica", e); }
 }
 
 function renderContacts(list, uid) {
     rubricaCounter.textContent = `(${list.length})`;
     rubricaList.innerHTML = list.length === 0 ? '<p class="text-xs text-gray-400 text-center py-4">Nessun contatto</p>' : '';
+
+    // Clear previous event listeners? No need, we are replacing innerHTML.
+    // However, we should ensure the container listener is set only once.
+    // It's set outside this function.
 
     list.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
     list.forEach(c => {
@@ -224,30 +251,54 @@ function renderContacts(list, uid) {
                 </div>
             </div>
             <div class="relative z-10 flex items-center gap-1">
-                <button class="p-1.5 text-primary hover:text-white hover:bg-white/10 rounded-full transition-colors" onclick="window.location.href='mailto:${c.email}'"><span class="material-symbols-outlined text-lg">mail</span></button>
-                <button class="p-1.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors" onclick="openEditContact('${c.id}', '${c.nome}', '${c.cognome}', '${c.email}')"><span class="material-symbols-outlined text-lg">edit</span></button>
-                <button class="p-1.5 text-gray-500 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors" onclick="removeContact('${uid}', '${c.id}')"><span class="material-symbols-outlined text-lg">delete</span></button>
+                <button class="p-1.5 text-primary hover:text-white hover:bg-white/10 rounded-full transition-colors" data-action="email" data-email="${c.email}"><span class="material-symbols-outlined text-lg pointer-events-none">mail</span></button>
+                <button class="p-1.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors" data-action="edit" data-id="${c.id}" data-nome="${c.nome}" data-cognome="${c.cognome || ''}" data-email="${c.email}"><span class="material-symbols-outlined text-lg pointer-events-none">edit</span></button>
+                <button class="p-1.5 text-gray-500 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors" data-action="delete" data-id="${c.id}"><span class="material-symbols-outlined text-lg pointer-events-none">delete</span></button>
             </div>
         `;
         rubricaList.appendChild(div);
     });
 }
 
-window.openEditContact = (id, n, c, e) => {
+// Event Delegation for Rubrica List Actions
+if (rubricaList) {
+    rubricaList.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        if (!action) return;
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        if (action === 'email') {
+            window.location.href = `mailto:${btn.dataset.email}`;
+        } else if (action === 'edit') {
+            openEditContact(btn.dataset.id, btn.dataset.nome, btn.dataset.cognome, btn.dataset.email);
+        } else if (action === 'delete') {
+            removeContact(user.uid, btn.dataset.id);
+        }
+    });
+}
+
+function openEditContact(id, n, c, e) {
     editingContactId = id;
     document.getElementById('contact-nome').value = n;
     document.getElementById('contact-cognome').value = c;
     document.getElementById('contact-email').value = e;
     document.getElementById('add-contact-form').classList.remove('hidden');
     document.getElementById('btn-add-contact').textContent = "Aggiorna";
-};
+}
 
-window.removeContact = async (uid, id) => {
+async function removeContact(uid, id) {
     if (confirm("Eliminare?")) {
-        await deleteDoc(doc(db, "users", uid, "contacts", id));
-        loadRubrica(uid);
+        try {
+            await deleteDoc(doc(db, "users", uid, "contacts", id));
+            loadRubrica(uid);
+        } catch (err) { logError("Rubrica Delete", err); }
     }
-};
+}
 
 const btnAdd = document.getElementById('btn-add-contact');
 if (btnAdd) {
@@ -271,6 +322,6 @@ if (btnAdd) {
             btnAdd.textContent = "Salva";
             document.getElementById('add-contact-form').classList.add('hidden');
             loadRubrica(user.uid);
-        } catch (err) { console.error(err); }
+        } catch (err) { logError("Rubrica Save", err); }
     };
 }

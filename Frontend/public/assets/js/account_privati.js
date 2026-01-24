@@ -2,6 +2,7 @@ import { auth, db } from './firebase-config.js';
 import { SwipeList } from './swipe-list-v6.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { logError } from './utils.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -143,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast("Pin su condivisi non persistente (Demo)", "info");
             }
         } catch (e) {
-            console.error(e);
+            logError("Pin Toggle", e);
             acc.isPinned = !newVal; // Revert
             filterAndRender();
             showToast("Errore nel modificare lo stato Pin", "error");
@@ -232,7 +233,7 @@ async function loadAccounts() {
             });
             sharedWithMeAccounts = (await Promise.all(promises)).filter(a => a !== null);
         } catch (e) {
-            console.error("Errore caricamento condivisi:", e);
+            logError("Shared Accounts Load", e);
         }
 
         // 2. LOAD OWN ACCOUNTS
@@ -262,7 +263,7 @@ async function loadAccounts() {
         filterAndRender();
 
     } catch (error) {
-        console.error("Errore Gen:", error);
+        logError("Accounts Master Load", error);
         showToast("Errore caricamento dati.", "error");
     }
 }
@@ -499,7 +500,7 @@ async function handleArchive(item) {
         showToast("Account archiviato", "success");
         allAccounts = allAccounts.filter(a => a.id !== id);
     } catch (e) {
-        console.error(e);
+        logError("Archive Account", e);
         showToast("Errore durante l'archiviazione", "error");
         filterAndRender();
     }
@@ -525,7 +526,7 @@ async function handleDelete(item) {
             filterAndRender();
         }
     } catch (e) {
-        console.error(e);
+        logError("Delete Account", e);
         showToast("Errore eliminazione", "error");
         filterAndRender();
     }

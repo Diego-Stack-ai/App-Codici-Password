@@ -1,104 +1,76 @@
 /* 
- * TITANIUM DESIGN SYSTEM - V1.0 
+ * TITANIUM DESIGN SYSTEM - V2.0 (Refactored)
  * Progetto: Codici & Password
- * Stile: Pure CSS (No Tailwind post-processing required)
+ * Stile: Pure CSS (Consolidated & DRY)
  */
 
+/* ==========================================================================
+   1. VARIABLES & TOKEN SYSTEM
+   ========================================================================== */
 :root {
+    /* Base Backgrounds & Text */
     --bg-light: #e2e8f0;
     --bg-dark: #0a0f1e;
     --text-light: #0f172a;
     --text-dark: #ffffff;
 
-    --matrix-red-from: #f87171;
-    --matrix-red-to: #dc2626;
-
-    /* Neutral Accent UI - Light Mode */
+    /* Base Matrix Colors (Light Mode Source) */
     --btn-neutral-bg: #ffffff;
     --btn-neutral-text: #0f172a;
-    --btn-accent-width: 12px;
 
-    /* Solid Accent Colors (from Dark Model palette) */
+    /* Core Accent Colors */
     --accent-blue: #2196F3;
     --accent-green: #00C853;
     --accent-orange: #FF9800;
     --accent-red: #9b1c1c;
-    /* Compensated Ruby Red for Urgenze */
 
-    /* Glow Effects */
+    /* Gradient Tokens (Light Defaults - usually unused or specific) */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
     --shimmer-intensity: rgba(14, 165, 233, 0.2);
+
+    /* Z-Index Architecture */
+    --z-bg: 0;
+    --z-effects: 5;
+    --z-glow: 5;
+    /* Faro: Sotto al contenuto */
+    --z-content: 10;
+    /* Main Box Layer */
+    --z-icon: 15;
+    --z-ui: 20;
+    --z-interactive: 25;
+    /* Pulsanti Lista */
     --z-saetta: 80;
+    /* Saetta: Sopra a tutto il content */
+    --z-header: 100;
+    /* Fasce */
+    --z-modal: 200;
 }
 
 html.dark {
-    /* Matrix Colors - Dark Mode Overrides */
+    /* Gradient Tokens (Dark Mode) */
     --matrix-blue-from: #2196F3;
     --matrix-blue-to: #1976D2;
     --matrix-green-from: #00C853;
     --matrix-green-to: #2E7D32;
     --matrix-orange-from: #FF9800;
     --matrix-orange-to: #E65100;
-    --matrix-red-from: #450a0a;
-    --matrix-red-to: #1e0707;
+    --matrix-red-from: #7f1d1d;
+    --matrix-red-to: #450a0a;
 
-    /* Full Color UI - Dark Mode Restored */
+    /* UI Overrides */
     --btn-neutral-bg: transparent;
     --btn-neutral-text: #ffffff;
-    --btn-accent-width: 0px;
-
-    /* Glow Effects - Dark Override */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
-
-    /* Premium Utilities Defaults */
-    --premium-border-width: 1.5px;
-    --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
     --shimmer-intensity: rgba(255, 255, 255, 0.4);
 
-    /* Z-Index Stacking System (GLOBAL ARCHITECTURE) */
-    --z-bg: 0;
-    /* Backgrounds */
-    --z-effects: 5;
-    /* Saette, Glows (Background) */
-    --z-glow: 12;
-    /* Atmospheric Lighthouse Effect */
-    --z-saetta: 80;
-    /* Flying Beam (Faro) effect */
-    --z-content: 10;
-    /* Main Content */
-    --z-ui: 20;
-    /* Borders, Hover Lifts */
-    --z-header: 50;
-    /* Navigation (Must remain top) */
-    --z-modal: 100;
-    /* Modals/Popups */
-    --z-icon: 15;
-    /* New layer: Above content, below header */
-    --z-interactive: 20;
-    /* Top layer for clicks */
-    --z-header: 100;
+    /* Premium Utils */
+    --premium-border-width: 1.5px;
+    --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
-.titanium-interactive {
-    z-index: var(--z-interactive);
-}
-
-/* 2.1 TITANIUM-BOX TEXT FOR ACCENT UI */
-[class*="matrix-"],
-[class*="matrix-"] h3,
-[class*="matrix-"] p,
-[class*="matrix-"] span {
-    color: var(--btn-neutral-text);
-}
-
-html.dark [class*="matrix-"],
-html.dark [class*="matrix-"] h3,
-html.dark [class*="matrix-"] p,
-html.dark [class*="matrix-"] span {
-    color: #ffffff !important;
-}
-
-/* 1. RESET & UTILITIES */
+/* ==========================================================================
+   2. GLOBAL RESET & BASE STYLES
+   ========================================================================== */
 * {
     box-sizing: border-box;
     -ms-overflow-style: none;
@@ -109,6 +81,10 @@ html.dark [class*="matrix-"] span {
     display: none;
 }
 
+/* ==========================================================================
+   RULE-MAPPING: EF-[#1] (SFONDO PAGINA) 🟢
+   Descrizione: Colore di sfondo base per l'intera pagina (Light/Dark).
+   ========================================================================== */
 body {
     font-family: 'Manrope', sans-serif;
     margin: 0;
@@ -122,7 +98,16 @@ html.dark body {
     color: var(--text-dark);
 }
 
-/* 2. LAYOUT - .titanium-box */
+/* ========================================================================== */
+
+/* ==========================================================================
+   3. LAYOUT STRUCTURES
+   ========================================================================== */
+/* ==========================================================================
+   RULE-MAPPING: EF-[#2] (CONTENITORE) 🟢
+   Descrizione: Il frame principale (.titanium-box). 
+   Dual Theme: SÌ (Gradiente Bianco/Azzurro in Light, Blu Notte in Dark).
+   ========================================================================== */
 .titanium-box {
     position: relative;
     display: flex;
@@ -141,123 +126,513 @@ html.dark .titanium-box {
     background: linear-gradient(to left, #030712, #162e6e);
 }
 
+/* ========================================================================== */
+
+.hero-notice {
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
 .titanium-main {
     flex: 1;
-    /* SAFE AREA PADDING: Ensures content is never hidden behind header/footer */
     padding: 8rem 1rem 8rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    /* STACKING CONTEXT LOCK */
     position: relative;
     z-index: var(--z-content);
     isolation: isolate;
-    /* Force new stacking context */
-    /* FADE-OUT SCROLL EFFECT */
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
     mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
 }
 
-/* 2.2 CONTENT SHIFT & STANDARDIZATION */
-.box-standard {
-    min-height: 160px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-/* 2.2 CONTENT SHIFT & STANDARDIZATION (PREMIUM ALIGNMENT) */
+/* Content Wrappers - Critical for full width alignment */
 .card-text-block,
 .box-content-main {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    /* Aggiunto per simmetria */
+    position: relative;
+    z-index: var(--z-content);
+    width: 100%;
 }
 
-/* Ottimizzazione Mobile Spazi Interni */
-@media (max-width: 480px) {
-    .card-text-block {
-        padding-left: 0.5rem !important;
-    }
-
-    .box-content-main {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
+.dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
 }
 
-/* Big Boxes extra breath on desktop/tablet */
-@media (min-width: 481px) {
-    .box-content-main {
-        padding-left: 2.75rem !important;
-        padding-right: 2.75rem !important;
-    }
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
 }
 
-/* 2.1 BOX TYPOGRAPHY */
-[class*="matrix-"] h3 {
-    font-size: 1.25rem;
-    font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    margin: 0;
-    margin-bottom: 2px;
-}
+/* ==========================================================================
+   4. TITANIUM MATRIX SYSTEM (The Unified Card Logic)
+   ========================================================================== */
 
-[class*="matrix-"] p {
-    font-size: 0.75rem;
-    font-weight: 500;
-    opacity: 0.9;
-    margin: 0;
-}
+/* 4.1 BASE CLASS DEFINITION (Structural) */
 
-#urgenze-card h3 {
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin: 0;
-}
 
-#urgenze-card p {
-    font-size: 0.7rem;
-    opacity: 0.6;
-    margin: 0;
+/* Badge & Title Layout */
+.title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .urgent-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 6px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 11px;
-    font-size: 0.7rem;
-    font-weight: 800;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    /* Pseudo-element BG for opacity control */
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    color: white !important;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Light Mode specific colors for badges - Soft & Suffused */
-html:not(.dark) .matrix-orange .urgent-badge {
-    background: rgba(255, 152, 0, 0.25);
-    /* Più visibile */
-    color: #c2410c;
-    border: 1.5px solid rgba(255, 152, 0, 0.4);
+.urgent-badge::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--accent);
+    opacity: 0.35;
+    z-index: -1;
 }
 
-html:not(.dark) .matrix-red .urgent-badge {
-    background: rgba(155, 28, 28, 0.20);
-    /* Rosso Fianchetto Soffuso */
-    color: #9b1c1c;
-    border: 1.5px solid rgba(155, 28, 28, 0.4);
+.urgent-badge span {
+    color: black !important;
 }
 
-/* Dark Mode - Restore high contrast */
-html.dark .urgent-badge {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+/* Header Flex with Divider Line */
+.box-header-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.6rem;
+    position: relative;
 }
 
-/* 3. EFFECTS - .glass-glow & .saetta-master */
+.box-header-flex::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--grad-from, var(--accent));
+    opacity: 0.3;
+    /* Light Mode: Subtle */
+}
+
+html.dark .box-header-flex::after {
+    opacity: 1;
+    /* Dark Mode: Fully Visible */
+}
+
+/* Minimize bottom padding for lists (Scadenze/Urgenze) */
+.matrix-orange,
+.matrix-red {
+    padding-top: 1.5rem !important;
+    /* Restored to original for Desktop */
+    padding-bottom: 0.6rem !important;
+    /* Closer to bottom edge */
+}
+
+/* 4.3 LIGHT THEME APPEARANCE */
+
+
+
+
+/* Typography Colors in Light Mode */
+html:not(.dark) [class*="matrix-"] h3,
+html:not(.dark) [class*="matrix-"] p,
+html:not(.dark) [class*="matrix-"] span {
+    color: var(--btn-neutral-text);
+}
+
+/* 4.4 DARK THEME APPEARANCE */
+
+
+/* 4.5 HOVER EFFECTS (Unified) */
+[class*="matrix-"]:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.no-lift:hover {
+    transform: none !important;
+}
+
+
+/* ==========================================================================
+   5. DECORATIONS & ACCENTS (The "Blade" & Icons)
+   ========================================================================== */
+
+/* 5.1 The C-Blade Accent (Light Mode Only) */
+
+
+/* 5.2 Background Icon Container (Watermark) */
+.bg-icon-container {
+    position: absolute;
+    right: 5px;
+    bottom: -5px;
+    opacity: 0.15;
+    transform: scale(1.1) rotate(12deg);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+    pointer-events: none;
+    z-index: var(--z-ui);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icon Gradient (Light Mode) */
+html:not(.dark) .bg-icon-container span {
+    background: linear-gradient(135deg, var(--accent), transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Icon White (Dark Mode) */
+html.dark .bg-icon-container span {
+    background: none !important;
+    -webkit-text-fill-color: white !important;
+    color: white !important;
+    opacity: 0.4;
+}
+
+/* Hover Animation for Icon */
+[class*="matrix-"]:hover .bg-icon-container {
+    transform: scale(1.4) rotate(15deg) translate(-10px, -10px);
+    opacity: 0.4;
+}
+
+/* 5.3 Typography inside Matrix Cards */
+[class*="matrix-"] h3 {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.2;
+    z-index: 10;
+}
+
+[class*="matrix-"] p {
+    font-size: 0.8rem !important;
+    opacity: 0.7 !important;
+    margin: 2px 0 0 0 !important;
+    font-weight: 500;
+    z-index: 10;
+}
+
+/* ==========================================================================
+   6. DYNAMIC UI ELEMENTS
+   ========================================================================== */
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#6] (HOVER) 🟢
+   Descrizione: Effetto di sollevamento per elementi interattivi.
+   Dual Theme: NO (Universale: Traslazione e Scala).
+   ========================================================================== */
+.titanium-interactive {
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    z-index: var(--z-interactive);
+    text-decoration: none;
+}
+
+.titanium-interactive:hover {
+    transform: translateY(-4px);
+    z-index: var(--z-ui);
+}
+
+.titanium-interactive:active {
+    scale: 0.98;
+}
+
+/* ========================================================================== */
+
+/* 6.2 Dynamic Card (List Items) */
+.dynamic-card {
+    display: flex !important;
+    width: 100%;
+    /* FORCE FULL WIDTH */
+    align-items: center !important;
+    justify-content: space-between;
+    padding: 0.75rem 1rem !important;
+    min-height: 60px;
+    margin-bottom: 0.5rem;
+    border-radius: 24px;
+    /* MATCHES MAIN BOX RADIUS */
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Internal Architecture of Dynamic Card */
+.dynamic-card .card-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 10;
+}
+
+.dynamic-card .icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+html.dark .dynamic-card .icon-circle {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dynamic-card .card-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    flex: 1;
+    text-align: left;
+}
+
+.dynamic-card .card-title {
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.dynamic-card .card-subtext {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dynamic-card .card-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 6.3 Headers & Footers (Fixed) */
+.titanium-header,
+.titanium-footer {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 48rem;
+    z-index: var(--z-header) !important;
+    padding: 0.8rem 1.25rem;
+    display: flex;
+    /* Reset direct backgrounds to allow pseudo-element masking */
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* SHARED GHOST LAYER (The Blur & Color) */
+.titanium-header::before,
+.titanium-footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: none;
+    transition: background 0.3s;
+}
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#4] (HEADER FUSION) 🟢
+   Descrizione: Fascia superiore fixed con sfumatura e blur.
+   Dual Theme: SÌ (Bianco 70% in Light, Blu Notte 70% in Dark).
+   ========================================================================== */
+.titanium-header {
+    top: 0;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.titanium-header::before {
+    background: rgba(255, 255, 255, 0.7);
+    /* Mask: Solid at top, invisible at bottom */
+    -webkit-mask-image: linear-gradient(to bottom, black 10%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 10%, transparent 100%);
+}
+
+html.dark .titanium-header::before {
+    background: rgba(10, 15, 30, 0.7);
+}
+
+/* ========================================================================== */
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#5] (FOOTER FUSION) 🟢
+   Descrizione: Fascia inferiore fixed con sfumatura inversa e blur.
+   Dual Theme: SÌ (Bianco 70% in Light, Blu Notte 70% in Dark).
+   ========================================================================== */
+.titanium-footer {
+    bottom: 0;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 2rem;
+}
+
+.titanium-footer::before {
+    background: rgba(255, 255, 255, 0.7);
+    /* Mask: Solid at bottom, invisible at top */
+    -webkit-mask-image: linear-gradient(to top, black 10%, transparent 100%);
+    mask-image: linear-gradient(to top, black 10%, transparent 100%);
+}
+
+html.dark .titanium-footer::before {
+    background: rgba(10, 15, 30, 0.7);
+}
+
+/* ========================================================================== */
+
+/* HEADER USER INFO ALIGNMENT */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    /* Greeting Top, Name Bottom */
+    align-items: flex-start;
+    /* Align Left (near avatar) */
+    justify-content: center;
+    margin-left: 1rem;
+    /* Spacing from avatar */
+    margin-right: auto;
+    /* Push logout to the far right */
+    line-height: 1.2;
+}
+
+.greeting-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+    opacity: 0.8;
+}
+
+.user-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* Header Avatar */
+.avatar-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Header Logout Button */
+.btn-icon-logout {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon-logout:hover {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ef4444;
+}
+
+/* Theme Switcher (Footer) - Centered & Styled */
+.theme-switcher {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    background: rgba(128, 128, 128, 0.1);
+    /* Subtle pill container */
+    padding: 4px;
+    border-radius: 24px;
+    margin: 0 auto;
+    /* Center horizontally */
+    width: fit-content;
+    backdrop-filter: blur(4px);
+}
+
+.theme-switcher button {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-switcher button:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+html.dark .theme-switcher button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* ==========================================================================
+   7. EFFECTS & UTILITIES
+   ========================================================================== */
+/* ==========================================================================
+   RULE-MAPPING: EF-[#3] (FARO - GLASS GLOW) 🟢
+   Descrizione: Effetto di retroilluminazione pulsante (respiro vivo).
+   Dual Theme: SÌ (Variabile --glow-gradient differenziata per Light/Dark).
+   ========================================================================== */
 .glass-glow {
     position: absolute;
     top: 0;
@@ -286,16 +661,41 @@ html.dark .urgent-badge {
     }
 }
 
-.saetta-master {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(110deg, transparent 40%, var(--shimmer-intensity) 50%, transparent 60%);
-    background-size: 200% 100%;
-    pointer-events: none;
-    z-index: var(--z-saetta);
-    animation: shimmer 5s infinite linear;
-    mix-blend-mode: overlay;
+/* ========================================================================== */
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#7] (BEACON - STANDARD) 🟢
+   Descrizione: Effetto faretto zenitale per dare tridimensionalità.
+   Dual Theme: SÌ (Luce bianca in Dark per contrasto, Luce azzurro/tenue in Light).
+   ========================================================================== */
+.beacon-light {
+    background-image: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
 }
+
+html:not(.dark) .beacon-light {
+    /* In Light mode on white cards, use a subtle accent glow */
+    background-image: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 60%);
+}
+
+/* ========================================================================== */
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#8] (BEACON GOLD - ASIMMETRICO) 🟢
+   Descrizione: Faretto spostato a destra (80%) per evitare tagli visivi su card larghe.
+   Dual Theme: SÌ (Luce calda/bianca in Dark, Luce ambra/tenue in Light).
+   ========================================================================== */
+.beacon-gold {
+    background-image: radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+html:not(.dark) .beacon-gold {
+    /* In Light mode, use a subtle warm glow */
+    background-image: radial-gradient(circle at 80% 0%, rgba(255, 152, 0, 0.15) 0%, transparent 100%);
+}
+
+/* ========================================================================== */
+
+
 
 @keyframes shimmer {
     0% {
@@ -307,418 +707,24 @@ html.dark .urgent-badge {
     }
 }
 
-.grid-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    width: 100%;
-    margin-bottom: 0px;
-}
-
-@media (max-width: 480px) {
-
-    /* Allarghiamo il contenitore principale per dare più spazio ai lati */
-    .titanium-main {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
-    }
-
-    /* Layout Mobile: Massima larghezza per tutto */
-    .grid-2-cols {
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem !important;
-    }
-
-    .matrix-blue,
-    .matrix-green {
-        padding: 1rem !important;
-        min-height: 120px !important;
-    }
-
-    .matrix-orange,
-    .matrix-red {
-        padding: 1.5rem !important;
-        /* Aumentato per toglierli dall'angolo */
-    }
-
-    .box-header-flex {
-        margin-top: 0.5rem;
-        /* Spinge il titolo verso il basso */
-    }
-
-    .dashboard-grid,
-    .dashboard-grid>div {
-        width: 100% !important;
-    }
-
-    /* Ottimizzazione Liste: Singola riga con puntini sospensione */
-    .dynamic-card {
-        padding: 0.5rem 0.4rem !important;
-        /* Meno spazio ai lati per far espandere il testo */
-        min-height: 55px;
-    }
-
-    .dynamic-card .card-title {
-        font-size: 0.76rem !important;
-        display: -webkit-box !important;
-        -webkit-line-clamp: 2 !important;
-        line-clamp: 2 !important;
-        -webkit-box-orient: vertical !important;
-        overflow: hidden !important;
-        white-space: normal !important;
-        line-height: 1.2 !important;
-        word-break: break-word;
-    }
-
-    .card-content {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        gap: 0.5rem;
-    }
-
-    .card-text {
-        flex: 1;
-        min-width: 0;
-        /* Questo permette al clamp di funzionare in un flexbox */
-    }
-}
-
-/* 4. DASHBOARD BASE CLASSES (SYSTEM) */
-.matrix-blue,
-.matrix-green,
-.matrix-orange,
-.matrix-red {
-    position: relative;
-    border-radius: 24px;
-    overflow: hidden;
-    padding: 1.5rem;
-    transition: all 0.3s;
-    cursor: pointer;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    min-height: 150px;
-}
-
-/* Allineamento differenziato per scopo */
-.matrix-blue,
-.matrix-green {
-    justify-content: flex-start;
-    /* Testo in alto come richiesto */
-}
-
-.matrix-orange,
-.matrix-red {
-    justify-content: flex-start;
-    /* Testo in alto per liste e header */
-}
-
-.card-text-block {
-    position: relative;
-    z-index: 10;
-}
-
-.box-content-main {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-}
-
-.box-header-flex {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 0.75rem;
-    margin-bottom: 1rem;
-    width: 100%;
-}
-
-.title-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.dashboard-dynamic-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-}
-
-/* Watermark Icons Positioning */
-.matrix-blue .bg-icon-container,
-.matrix-green .bg-icon-container {
-    bottom: -5px;
-    right: 5px;
-}
-
-.matrix-orange .bg-icon-container,
-.matrix-red .bg-icon-container {
-    bottom: 15px;
-    right: 15px;
-}
-
-/* Dashboard Card Titles Uniformity */
-.matrix-btn h3,
-.matrix-blue h3,
-.matrix-green h3,
-.matrix-orange h3,
-.matrix-red h3 {
-    font-size: 18px !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.02em;
-    margin: 0;
-    line-height: 1.2;
-}
-
-/* Dashboard Card Subtitles Uniformity */
-.matrix-btn p,
-.matrix-blue p,
-.matrix-green p,
-.matrix-orange p,
-.matrix-red p {
-    font-size: 0.8rem !important;
-    opacity: 0.7 !important;
-    margin: 2px 0 0 0 !important;
-    font-weight: 500;
-}
-
-/* THE BORDER GLOW - Clean Implementation */
+/* ==========================================================================
+   RULE-MAPPING: EF-[#9] (BORDER GLOW - PERIMETRO) 🟢
+   Descrizione: Definisce il perimetro del box (Premium Effect).
+   Dual Theme: SÌ (Light: Outline Solido 2px | Dark: Riflesso Cristallino via Mask).
+   ========================================================================== */
 .border-glow {
+    position: relative;
+    border: none !important;
     outline-offset: -2px;
-    /* Inset slightly to look like a border */
-    border: none !important;
 }
 
-/* THE ACCENT BAR (::before) - 'C-Blade' Style (Sharp Tapered Tips) */
-.matrix-btn::before,
-[class*="matrix-"]::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-left: 10px solid transparent;
-    border-top: 12px solid transparent;
-    border-bottom: 12px solid transparent;
-    border-radius: inherit;
-    z-index: 5;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    /* POLYGON CLIP: 'C-Blade' with Rounded Neck - Length 35px (Calibrated) */
-    -webkit-clip-path: polygon(0% 0%,
-            35px 0%,
-            22px 2px, 18px 5px, 13px 9px, 10px 15px,
-            10px calc(100% - 15px),
-            13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px),
-            35px 100%,
-            0% 100%);
-    clip-path: polygon(0% 0%,
-            35px 0%,
-            22px 2px, 18px 5px, 13px 9px, 10px 15px,
-            10px calc(100% - 15px),
-            13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px),
-            35px 100%,
-            0% 100%);
+/* Variante Light: Bordo solidale coordinato */
+html:not(.dark) .border-glow {
+    outline: 2px solid var(--accent, #ccc) !important;
 }
 
-html.dark .matrix-btn::before,
-html.dark [class*="matrix-"]::before {
-    display: none;
-    /* Hide accent bar in Dark Mode as we use full gradients */
-}
-
-html.dark .matrix-btn,
-html.dark .matrix-blue,
-html.dark .matrix-green,
-html.dark .matrix-orange,
-html.dark .matrix-red {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.matrix-btn:hover,
-.matrix-blue:hover,
-.matrix-green:hover,
-.matrix-orange:hover,
-.matrix-red:hover {
-    transform: translateY(-4px);
-}
-
-/* Colors - Dynamic (Accent in Light, Gradient in Dark) */
-.matrix-blue {
-    background: var(--btn-neutral-bg);
-}
-
-.matrix-blue.border-glow {
-    outline: 2px solid var(--accent-blue) !important;
-}
-
-.matrix-blue::before {
-    border-left-color: var(--accent-blue);
-    border-top-color: var(--accent-blue);
-    border-bottom-color: var(--accent-blue);
-}
-
-.matrix-green {
-    background: var(--btn-neutral-bg);
-}
-
-.matrix-green.border-glow {
-    outline: 2px solid var(--accent-green) !important;
-}
-
-.matrix-green::before {
-    border-left-color: var(--accent-green);
-    border-top-color: var(--accent-green);
-    border-bottom-color: var(--accent-green);
-}
-
-.matrix-orange {
-    background: var(--btn-neutral-bg);
-}
-
-.matrix-orange.border-glow {
-    outline: 2px solid var(--accent-orange) !important;
-}
-
-.matrix-orange::before {
-    border-left-color: var(--accent-orange);
-    border-top-color: var(--accent-orange);
-    border-bottom-color: var(--accent-orange);
-}
-
-.matrix-red {
-    background: var(--btn-neutral-bg);
-}
-
-.matrix-red.border-glow {
-    outline: 2px solid var(--accent-red) !important;
-}
-
-.matrix-red::before {
-    border-left-color: var(--accent-red);
-    border-top-color: var(--accent-red);
-    border-bottom-color: var(--accent-red);
-}
-
-html.dark .matrix-blue {
-    background: linear-gradient(to right, var(--matrix-blue-from), var(--matrix-blue-to));
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-    outline: none !important;
-}
-
-html.dark .matrix-green {
-    background: linear-gradient(to right, var(--matrix-green-from), var(--matrix-green-to));
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-    outline: none !important;
-}
-
-html.dark .matrix-orange {
-    background: linear-gradient(to right, var(--matrix-orange-from), var(--matrix-orange-to));
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-    outline: none !important;
-}
-
-html.dark .matrix-red {
-    background: linear-gradient(to right, var(--matrix-red-from), var(--matrix-red-to));
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-    outline: none !important;
-}
-
-.no-lift:hover {
-    transform: none !important;
-}
-
-/* 4.1 LISTS & INTERACTIVE */
-.list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem;
-    border-radius: 12px;
-    margin-bottom: 0.5rem;
-    transition: all 0.2s;
-}
-
-.glass-inner-list .list-item {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-html.dark .glass-inner-list .list-item {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* DYNAMIC CARD (List Items) */
-.dynamic-card {
-    min-height: 60px;
-    padding: 0.75rem 1rem !important;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center !important;
-    /* FORCE VERTICAL CENTER */
-    justify-content: flex-start;
-    /* Start from left */
-    gap: 1rem;
-    /* Space between icon and text */
-    border-radius: 16px !important;
-    position: relative;
-    overflow: hidden;
-}
-
-.dynamic-card .icon-circle {
-    width: 40px;
-    /* Slightly larger anchor */
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.05);
-    /* Subtle background */
-    flex-shrink: 0;
-    /* Prevent shrinking */
-    margin-right: 0.5rem;
-    /* Additional space from text if needed */
-}
-
-html.dark .dynamic-card .icon-circle {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.titanium-interactive {
-    transition: all 0.3s;
-    cursor: pointer;
-    position: relative;
-    z-index: var(--z-interactive);
-    text-decoration: none;
-}
-
-.titanium-interactive:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    z-index: var(--z-ui);
-    /* Safe lift (20), below Header (50) */
-    position: relative;
-}
-
-.titanium-interactive:active {
-    transform: scale(0.98);
-}
-
-/* 5. PREMIUM MODULES (Modular Utilities) */
-
-/* 5.1 BORDER GLOW - Adds a luminous perimeter */
-.border-glow {
-    position: relative;
-    border: none !important;
-}
-
-.border-glow::after {
+/* Variante Dark: Perimetro Premium sfumato */
+html.dark .border-glow::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -733,457 +739,283 @@ html.dark .dynamic-card .icon-circle {
     background: var(--premium-border-gradient);
 }
 
-/* 5.2 GLASS SHINE - Internal reflection on hover */
+/* ========================================================================== */
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#10] (GLASS SHINE - RIFLESSO) 🟢
+   Descrizione: Riflesso vetroso diagonale che compare al passaggio del mouse.
+   Dual Theme: SÌ (Luce intensa in Dark, Riflesso cristallino tenue in Light).
+   ========================================================================== */
 .glass-shine {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            transparent 51%);
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
     pointer-events: none;
-    z-index: 10;
+    z-index: 5;
+    border-radius: inherit;
 }
 
-/* Activation triggers for glass shine */
-.matrix-btn:hover .glass-shine,
-[class^="matrix-"]:hover .glass-shine,
+/* Attivazione al passaggio sopra qualsiasi box interattivo */
+[class*="matrix-"]:hover .glass-shine,
 .titanium-interactive:hover .glass-shine {
     opacity: 1;
 }
 
-/* 5.3 BACKGROUND ICON CONTAINER - Animated icons */
-.bg-icon-container {
-    position: absolute;
-    right: 5px;
-    bottom: -5px;
-    opacity: 0.15;
-    transform: scale(1.1) rotate(12deg);
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
-    pointer-events: none;
-    z-index: 20;
-    /* Lift above content for watermark effect */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+html.dark .glass-shine {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.25) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            transparent 51%);
 }
 
-/* GRADIENT ICONS FOR LIGHT MODE */
-.matrix-blue .bg-icon-container span {
-    background: linear-gradient(135deg, var(--accent-blue), transparent);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.matrix-green .bg-icon-container span {
-    background: linear-gradient(135deg, var(--accent-green), transparent);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.matrix-orange .bg-icon-container span {
-    background: linear-gradient(135deg, var(--accent-orange), transparent);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.matrix-red .bg-icon-container span {
-    background: linear-gradient(135deg, var(--accent-red), transparent);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* RESTORE WHITE ICONS IN DARK MODE (STRICT) */
-html.dark [class*="matrix-"] .bg-icon-container span {
-    background: none !important;
-    -webkit-background-clip: initial !important;
-    background-clip: initial !important;
-    -webkit-text-fill-color: white !important;
-    color: white !important;
-    opacity: 0.4;
-}
-
-.matrix-btn:hover .bg-icon-container,
-[class^="matrix-"]:hover .bg-icon-container {
-    transform: scale(1.4) rotate(15deg) translate(-10px, -10px);
-    opacity: 0.4;
-}
-
-
-/* 4.2 DYNAMIC LIST ITEMS (JS Generated) */
-.dynamic-card {
-    display: flex !important;
-    /* Force Side-by-Side (Content | Badge) */
-    align-items: center !important;
-    justify-content: space-between;
-    padding: 0.5rem;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.dynamic-card .card-shine {
+/* ==========================================================================
+   RULE-MAPPING: EF-[#13] (SAETTA - SHIMMER) 🟢
+   Descrizione: Riflesso metallico continuo per card e bottoni.
+   Dual Theme: SÌ (Opacità ridotta in Light, PIÙ intensa in Dark).
+   ========================================================================== */
+.saetta {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent);
-    opacity: 0.5;
+    background: linear-gradient(110deg, transparent 42%, var(--shimmer-intensity) 50%, transparent 58%);
+    background-size: 200% 100%;
+    animation: shimmer 4s infinite linear;
     pointer-events: none;
+    z-index: 1;
 }
 
-/* Inner Wrappers */
-.dynamic-card .card-content {
-    display: flex !important;
-    /* Force Horizontal Layout */
-    align-items: center !important;
-    /* Force Vertical Center */
-    justify-content: flex-start !important;
-    /* Force Left Alignment */
-    gap: 0.75rem;
-    /* Space between Icon and Text */
-    flex: 1;
-    width: 100%;
-    /* FORCE FULL WIDTH */
-    min-width: 0;
-    /* Prevents flex overflow */
-    position: relative;
-    z-index: 10;
-}
+/* ========================================================================== */
 
-.dynamic-card .card-text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    /* Vertically center the text block */
-    min-width: 0;
-    flex: 1;
-    /* Push badge to right */
-    text-align: left;
-    /* Ensure text starts from left */
-}
-
-.dynamic-card .card-title {
-    color: white;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.dynamic-card .card-subtext {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 9px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.dynamic-card .card-badge {
-    padding: 2px 8px;
-    border-radius: 12px;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-    position: relative;
-    z-index: 10;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-
-/* 6. HEADER & FOOTER */
-/* 6. HEADER & FOOTER (TRUE FIXED ARCHITECTURE) */
-.titanium-header,
-.titanium-footer {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 48rem;
-    z-index: 100 !important;
-    /* Force Top Layer */
-    padding: 1rem;
-    backdrop-filter: blur(12px);
-    display: flex;
-}
-
-.titanium-header {
-    top: 0;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), transparent);
-    align-items: center;
-    justify-content: space-between;
-}
-
-.titanium-header .user-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 0 1rem;
-    text-align: left;
-}
-
-.titanium-header .greeting-text {
-    font-size: 0.75rem;
+/* ==========================================================================
+   RULE-MAPPING: EF-[#14] (SAETTA GOLD - LISTE) 🟢
+   Descrizione: Variante più sottile del riflesso metallico per righe di liste.
+   Dual Theme: SÌ (Opacità ridotta in Light, PIÙ intensa in Dark).
+   ========================================================================== */
+.saetta-gold {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(110deg, transparent 42%, var(--shimmer-intensity) 50%, transparent 58%);
+    background-size: 200% 100%;
+    animation: shimmer 4s infinite linear;
     opacity: 0.6;
-    margin: 0;
+    /* Subtler than master saetta */
 }
 
-.titanium-header .user-name {
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin: 0;
+html.dark .saetta-gold {
+    opacity: 1;
 }
 
-.header-side-box {
-    display: flex;
-    align-items: center;
-    width: 3rem;
-    flex-shrink: 0;
-}
+/* ==========================================================================
+   RULE-MAPPING: EF-[#15] (MATRIX PALETTE & C-BLADE) 🟢
+   Descrizione: Colori identitari, logica card e Linguetta Dinamica (C-Blade).
+   Dual Theme: SÌ (Light: Glass Clean + C-Blade | Dark: Gradient Matrix).
+   ========================================================================== */
 
-.header-side-box.right {
-    justify-content: flex-end;
-}
-
-.btn-icon-logout {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #000;
-    /* ICONA NERA */
-    cursor: pointer;
+/* 15.1 BASE STRUCTURE */
+[class*="matrix-"] {
+    --accent: var(--btn-neutral-text);
     position: relative;
-    transition: transform 0.2s, background 0.2s;
-}
-
-html.dark .btn-icon-logout {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    /* Icona bianca in Dark Mode per visibilità */
-}
-
-.btn-icon-logout:hover {
-    transform: scale(1.1);
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.btn-icon-logout span {
-    font-size: 24px;
-    /* Icona leggermente più grande e definita */
-    z-index: 20;
-    color: inherit;
-}
-
-/* 6.1 MAIN CONTENT LAYOUT */
-.matrix-orange .scadenze-content {
-    z-index: var(--z-content);
+    z-index: 1;
+    border-radius: 24px;
+    overflow: hidden;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.1rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.matrix-orange .scadenze-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 2px;
-}
-
-.titanium-footer {
-    bottom: 0;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding-bottom: 2rem;
-}
-
-.theme-switcher {
-    display: flex;
-    gap: 1rem;
-    padding: 0.5rem;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    align-self: center;
-}
-
-.theme-switcher button {
-    padding: 0.5rem 1rem;
-    border-radius: 12px;
-    font-weight: bold;
-    border: 0;
+    min-height: 150px;
+    width: 100%;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
+    text-decoration: none;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
-.theme-switcher .btn-dark {
-    background: #000;
-    color: #fff;
+/* 15.2 COLOR VARIANTS */
+.matrix-blue {
+    --accent: var(--accent-blue);
+    --grad-from: var(--matrix-blue-from);
+    --grad-to: var(--matrix-blue-to);
 }
 
-.version-text {
-    font-size: 10px;
-    opacity: 0.5;
-    margin: 0;
-    text-align: center;
+.matrix-green {
+    --accent: var(--accent-green);
+    --grad-from: var(--matrix-green-from);
+    --grad-to: var(--matrix-green-to);
 }
 
-html.dark .titanium-header {
-    background: linear-gradient(to bottom, rgba(10, 15, 30, 0.9), transparent);
+.matrix-orange {
+    --accent: var(--accent-orange);
+    --grad-from: var(--matrix-orange-from);
+    --grad-to: var(--matrix-orange-to);
 }
 
-html.dark .titanium-footer {
-    background: linear-gradient(to top, rgba(10, 15, 30, 0.9), transparent);
-}
-
-/* 7. OTHER UTILS */
-.avatar-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #ccc;
-    background-size: cover;
-    background-position: center;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    display: block;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.material-symbols-outlined {
-    font-family: 'Material Symbols Outlined';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    display: inline-block;
-    line-height: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    white-space: nowrap;
-    direction: ltr;
-}
-
-/* RESTORED MATRIX CLASSES - CORRECTED */
-/* Light Mode: White Backgrounds */
-.matrix-blue,
-.matrix-green,
-.matrix-orange,
 .matrix-red {
-    background: #ffffff;
+    --accent: var(--accent-red);
+    --grad-from: var(--matrix-red-from);
+    --grad-to: var(--matrix-red-to);
+}
+
+/* 15.3 LIGHT THEME (Glass Clean + C-Blade) */
+html:not(.dark) [class*="matrix-"] {
+    background: var(--btn-neutral-bg);
     border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--btn-neutral-text);
 }
 
-/* Dark Mode: Vibrant Gradients */
-html.dark .matrix-blue {
-    background: linear-gradient(135deg, var(--matrix-blue-from), var(--matrix-blue-to));
+html:not(.dark) [class*="matrix-"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    border-radius: inherit;
+    border-left: 10px solid var(--accent);
+    border-top: 12px solid var(--accent);
+    border-bottom: 12px solid var(--accent);
+    -webkit-clip-path: polygon(0% 0%, 35px 0%, 22px 2px, 18px 5px, 13px 9px, 10px 15px, 10px calc(100% - 15px), 13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px), 35px 100%, 0% 100%);
+    clip-path: polygon(0% 0%, 35px 0%, 22px 2px, 18px 5px, 13px 9px, 10px 15px, 10px calc(100% - 15px), 13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px), 35px 100%, 0% 100%);
+}
+
+/* 15.4 DARK THEME (Gradient Matrix) */
+html.dark [class*="matrix-"] {
+    background: linear-gradient(135deg, var(--grad-from), var(--grad-to));
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
-html.dark .matrix-green {
-    background: linear-gradient(135deg, var(--matrix-green-from), var(--matrix-green-to));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* 15.5 TYPOGRAPHY & OVERRIDES */
+[class*="matrix-"] h3 {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    margin: 0;
+    z-index: 10;
 }
 
-html.dark .matrix-orange {
-    background: linear-gradient(135deg, var(--matrix-orange-from), var(--matrix-orange-to));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+[class*="matrix-"] p {
+    font-size: 0.8rem !important;
+    opacity: 0.7 !important;
+    font-weight: 500;
+    z-index: 10;
 }
 
-html.dark .matrix-red {
-    background: linear-gradient(135deg, var(--matrix-red-from), var(--matrix-red-to));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+html.dark [class*="matrix-"] h3,
+html.dark [class*="matrix-"] p {
+    color: #ffffff !important;
 }
 
-/* 8. DASHBOARD LAYOUT SYSTEM (REFINED) */
-.dashboard-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    /* SPAZIO DI BELLEZZA TRA I BLOCCHI VERTICALI */
-    width: 100%;
+/* ========================================================================== */
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#18] (SAETTA MASTER - TOTAL SHIMMER) 🟢
+   Descrizione: Unica grande onda luminosa che attraversa l'intera dashboard.
+   Dual Theme: SÌ (Standard in Light, Overlay in Dark per profondità).
+   ========================================================================== */
+.saetta-master {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 40%, var(--shimmer-intensity) 50%, transparent 60%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: var(--z-saetta);
+    animation: shimmer 5s infinite linear;
 }
 
-.grid-2-cols {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    width: 100%;
+html.dark .saetta-master {
+    mix-blend-mode: overlay;
 }
 
-/* Hover effects for dashboard items */
-.matrix-blue:hover,
-.matrix-green:hover,
-.matrix-orange:hover,
-.matrix-red:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+/* ========================================================================== */
+
+/* Icons Sizing Refinement */
+.titanium-icon-lg {
+    font-size: 100px !important;
+    color: white;
 }
 
-.hero-notice {
-    text-align: center;
-    font-size: 0.75rem;
-    font-weight: 800;
-    margin-bottom: 2rem;
-    opacity: 0.5;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    width: 100%;
+.titanium-icon-xl {
+    font-size: 200px !important;
+    color: white;
 }
 
-/* ============================================================
-   9. MOBILE OVERRIDES (LAST STAND - FORCE PRIORITY)
-   ============================================================ */
+.titanium-icon-xxl {
+    font-size: 240px !important;
+    color: white;
+}
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#16] (TITANIUM GLASS CARD) 🟢
+   Descrizione: Stile standard per le liste dati (Account, Log, File).
+   Dual Theme: SÌ (Dark: Sfondo scuro blur | Light: Vetro bianco pulito).
+   ========================================================================== */
+.titanium-glass-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+html.dark .titanium-glass-card {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+
+/* ========================================================================== */
+
+/* ==========================================================================
+   8. MOBILE OPTIMIZATIONS (Media Queries)
+   ========================================================================== */
 @media (max-width: 480px) {
     body .titanium-main {
         padding-left: 1rem !important;
         padding-right: 1rem !important;
     }
 
-    body .matrix-blue,
-    body .matrix-green {
-        padding: 1.25rem !important;
-        min-height: 130px !important;
+    /* 2-Column Grid Cards (Privato/Azienda) - Compact Padding */
+    /* Target any matrix card inside grid-2-cols */
+    body .grid-2-cols [class*="matrix-"] {
+        padding: 1.15rem !important;
+        min-height: 125px !important;
     }
 
+    /* Full Width Cards (Scadenze/Urgenze) - Standard Padding */
     body .matrix-orange,
     body .matrix-red {
-        padding: 1.5rem !important;
-        /* RIPRISTINATO SPAZIO DI BELLEZZA */
+        padding: 0 !important;
+        /* Zero top padding to push content to the top edge */
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        padding-bottom: 0.6rem !important;
     }
 
+    /* Header alignments */
     body .box-header-flex {
-        margin-top: 0.25rem !important;
-        margin-bottom: 1.25rem !important;
+        margin-top: -5px !important;
+        /* Negative margin to suck text even closer to the top */
+        margin-bottom: 0.8rem !important;
     }
 
-    body .dashboard-grid,
-    body .dashboard-grid>div {
-        width: 100% !important;
-    }
-
-    /* Liste: Più respiro laterale */
+    /* List Items - More breath */
     body .dynamic-card {
-        padding: 0.6rem 0.8rem !important;
+        padding: 0.6rem 0.6rem !important;
         min-height: 60px;
     }
 
+    body .dynamic-card .card-content {
+        gap: 0.6rem !important;
+    }
+
+    /* Optimize Title truncation on small screens */
     body .dynamic-card .card-title {
         font-size: 0.78rem !important;
         display: -webkit-box !important;
@@ -1194,17 +1026,5 @@ html.dark .matrix-red {
         white-space: normal !important;
         line-height: 1.3 !important;
         word-break: break-word;
-    }
-
-    body .card-content {
-        display: flex !important;
-        align-items: center !important;
-        width: 100% !important;
-        gap: 0.6rem !important;
-    }
-
-    body .card-text {
-        flex: 1 !important;
-        min-width: 0 !important;
     }
 }

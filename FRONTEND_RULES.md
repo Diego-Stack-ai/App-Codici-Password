@@ -179,31 +179,57 @@ ________________________________________
 
 Gli effetti del design system sono definiti nel dettaglio nel file dedicato: `TITANIUM_EFFECTS.md`.
 
-| ID | Nome Effetto | Descrizione Breve | Variante Light Necessaria? |
+| ID | Nome Effetto | Riferimento 🟢 | Light 🟢 | Descrizione |
 | :--- | :--- | :--- | :--- |
-| **[#1]** | **Sfondo Pagina** | `.titanium-bg` | Opzionale |
-| **[#2]** | **Contenitore** | `.titanium-box` | SÌ |
-| **[#3]** | **Faro (Glass Glow)** | `.glass-glow` | Opzionale |
-| **[#4]** | **Header Fusion** | `.titanium-header` | SÌ |
-| **[#5]** | **Footer Fusion** | `.titanium-footer` | SÌ |
-| **[#6]** | **Hover** | `.titanium-interactive` | NO | pulsanti che si alzano quando si passa sopra
-| **[#7]** | **Beacon** | `.beacon-light` | SÌ |
-| **[#8]** | **Beacon Gold** | `.beacon-gold` | SÌ |
-| **[#9]** | **Border Glow** | `.border-glow` | SÌ | bordi illuminati
-| **[#10]**| **Glass Shine** | Overlay luminoso | SÌ |e il riflesso vetroso sulle barre sotto e sopra e sui pulsanti sopra alle barre
-| **[#13]**| **Saetta** | `.saetta` | SÌ |
-| **[#14]**| **Saetta Gold** | `.saetta-gold` | SÌ |
-| **[#15]**| **Matrix Palette** | `.matrix-*` | SÌ |
-| **[#16]**| **Glass Card** | `.titanium-glass-card` | SÌ |
-| **[#17]**| **Swipe Safety** | (JS Logic) | SÌ |
-| **[#18]**| **Saetta Master** | `.saetta-master` | SÌ | Onda unica totale
-| **[#19]**| **Glass Card** | `.titanium-glass-card` | SÌ |
-| **[#20]**| **Swipe Safety** | JS Logic | NO |
+| **[#1]** | **Sfondo Pagina** | `.titanium-bg` 🟢 | Opzionale 🟢 | Colore base del body per evitare flash bianchi |
+| **[#2]** | **Contenitore** | `.titanium-box` 🟢 | SÌ 🟢 | Box principale metallico con gradiente e ombre |
+| **[#3]** | **Faro (Glass Glow)** | `.glass-glow` 🟢 | SÌ 🟢 | Luce ambientale pulsante sullo sfondo per profondità |
+| **[#4]** | **Header Fusion** | `.titanium-header` 🟢 | SÌ 🟢 | Barra superiore fissa con effetto Glass e blur |
+| **[#5]** | **Footer Fusion** | `.titanium-footer` 🟢 | SÌ 🟢 | Barra inferiore fissa con effetto Glass e blur |
+| **[#6]** | **Hover** | `.titanium-interactive` 🟢 | NO 🟢 | Micro-interazione che alza l'elemento all'hover |
+| **[#7]** | **Beacon** | `.beacon-light` 🟢 | SÌ 🟢 | Faretto zenitale centrale per tridimensionalità |
+| **[#8]** | **Beacon Gold** | `.beacon-gold` 🟢 | SÌ 🟢 | Faretto asimmetrico per card larghe |
+| **[#9]** | **Border Glow** | `.border-glow` 🟢 | SÌ 🟢 | Perimetro luminoso cristallino (Dark) o solido (Light) |
+| **[#10]**| **Glass Shine** | `.glass-shine` 🟢 | SÌ 🟢 | Riflesso vetroso diagonale all'hover su pulsanti e barre |
+| **[#13]**| **Saetta** | `.saetta` 🟢 | SÌ 🟢 | Riflesso metallico continuo (shimmer) su card e bottoni |
+| **[#14]**| **Saetta Gold** | `.saetta-gold` 🟢 | SÌ 🟢 | Variante sottile dello shimmer per righe di liste |
+| **[#15]**| **Matrix Palette** | `.matrix-*` 🟢 | SÌ 🟢 | Branding a colori (C-Blade) e gradienti per categorie |
+| **[#16]**| **Glass Card** | `.titanium-glass-card` 🟢 | SÌ 🟢 | Sfondo semitrasparente blurrato per elementi in lista |
+| **[#17]**| **Swipe Safety** | (JS Logic) 🟢 | NO 🟢 | Blocca click e navigazione durante lo swipe degli elementi nelle liste (Swipe List) |
+| **[#18]**| **Saetta Master** | `.saetta-master` 🟢 | SÌ 🟢 | Grande onda luminosa che attraversa l'intera dashboard |
+
 
 ________________________________________
 
-### Regola 16 – Riferimento Codici
-Fare riferimento SEMPRE a `TITANIUM_EFFECTS.md` per i codici CSS/Tailwind completi.
+### Appendice A – Sintesi Architettura Home Page (v4.5)
+*Questa sezione riassume lo stato attuale della Home Page per garantirne la ricostruibilità futura.*
+
+#### 1. Dual Theme System (L'essenza visiva)
+- **Light Mode (Glass Clean) ⚪**: Sfondo bianco semi-trasparente, bordi solidi coordinati e la **C-Blade** [#15] (linguetta dinamica a sinistra) che cambia colore in base alla categoria.
+- **Dark Mode (Titanium Power) 🔵**: Gradienti profondi (es. Blue to Indigo), bordi cristallini con maschera [#9] e riflessi accesi.
+
+#### 2. Gerarchia Z-Index (La gestione dei livelli)
+Per evitare sovrapposizioni errate, il sistema segue questa piramide:
+- **Livello 0 (`--z-bg`)**: Sfondo del body.
+- **Livello 5 (`--z-glow`)**: Il **Faro** (`.glass-glow` [#3]), che brilla *dietro* al contenuto.
+- **Livello 10 (`--z-content`)**: Il testo, le icone principali e i box card.
+- **Livello 20 (`--z-ui`)**: Elementi di interfaccia (badge, bottoni piccoli).
+- **Livello 80 (`--z-saetta`)**: La **Saetta Master** [#18], posizionata *sopra* tutto il contenuto per un riflesso totale.
+- **Livello 100 (`--z-header`)**: Header e Footer Fusion (sempre in primo piano).
+
+#### 3. Astuzie della Saetta (Shimmer Logic)
+- **Saetta Master [#18]**: È una singola onda grande che attraversa tutta la dashboard. Essendo al livello 80, "colpisce" anche le scritte, dando un effetto metallico realistico.
+- **Saetta Gold [#14]**: Usata nelle liste dati. È più lenta, sottile e con opacità ridotta in Light Mode per non appesantire la lettura.
+
+#### 4. Caratteristiche Box e Pulsanti
+- **Box Matrix [#15]**: Le card principali sono ibride: fungono da contenitori ma hanno comportamenti da pulsante (`.titanium-interactive` [#6]). All'hover si alzano (`translateY`) e attivano il `.glass-shine` [#10].
+- **Watermark**: Ogni card ha un'icona di sfondo (`.bg-icon-container`) che ruota e si ingrandisce all'hover per dare profondità.
+- **Liste**: Gli elementi in lista usano la `.titanium-glass-card` [#16], ottimizzata per lo scroll fluido, accoppiata alla logica **Swipe Safety** [#17].
+
+#### 5. Integrazione Dati (Logic Layer)
+- **Profilo**: Caricamento asincrono di Nome, Cognome e Avatar da Firestore (`users/{uid}`).
+- **Badge Notifiche**: Le card Scadenze e Urgenze mostrano badge numerici popolati in tempo reale dai moduli JS.
+- **Header/Footer**: Caricati dinamicamente tramite placeholder e la funzione `initComponents()`.
 
 ________________________________________
 

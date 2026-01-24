@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark light">
     <title>Home Page</title>
 
@@ -26,7 +26,7 @@
             <div class="saetta-master"></div>
 
             <p class="hero-notice">
-                Versione 2.1 - Versione con cellulare funzionante (Blindata)
+                Versione 4.5 - Versione con cellulare funzionante (Blindata)
             </p>
 
             <div class="dashboard-grid">
@@ -35,7 +35,8 @@
                     <a href="area_privata.html" class="matrix-blue border-glow">
                         <div class="glass-shine"></div>
                         <div class="bg-icon-container">
-                            <span class="material-symbols-outlined" style="font-size: 100px; color: white;">lock</span>
+                            <span class="material-symbols-outlined titanium-icon-lg" role="img"
+                                aria-label="Icona Cassaforte Personale">lock</span>
                         </div>
                         <div class="card-text-block">
                             <h3>Privato</h3>
@@ -46,8 +47,8 @@
                     <a href="lista_aziende.html" class="matrix-green border-glow">
                         <div class="glass-shine"></div>
                         <div class="bg-icon-container">
-                            <span class="material-symbols-outlined"
-                                style="font-size: 100px; color: white;">apartment</span>
+                            <span class="material-symbols-outlined titanium-icon-lg" role="img"
+                                aria-label="Icona Gestione Aziendale">apartment</span>
                         </div>
                         <div class="card-text-block">
                             <h3>Azienda</h3>
@@ -57,11 +58,11 @@
                 </div>
 
                 <!-- SEZIONE 2: SCADENZE (FULL WIDTH) -->
-                <div onclick="window.location.href='scadenze.html'"
+                <div data-href="scadenze.html" role="button" tabindex="0"
                     class="matrix-orange border-glow scadenze-box no-lift">
                     <div class="bg-icon-container" style="bottom: 10px; right: 5px;">
-                        <span class="material-symbols-outlined"
-                            style="font-size: 200px; color: white;">calendar_month</span>
+                        <span class="material-symbols-outlined titanium-icon-xl" role="img"
+                            aria-label="Calendario Scadenze">calendar_month</span>
                     </div>
                     <div class="box-content-main">
                         <div class="box-header-flex">
@@ -78,9 +79,11 @@
                 </div>
 
                 <!-- SEZIONE 3: URGENZE (FULL WIDTH) -->
-                <div id="urgenze-card" class="matrix-red border-glow urgenze-box no-lift">
+                <div id="urgenze-card" data-href="urgenze.html" role="button" tabindex="0"
+                    class="matrix-red border-glow urgenze-box no-lift">
                     <div class="bg-icon-container" style="bottom: 10px; right: 5px;">
-                        <span class="material-symbols-outlined" style="font-size: 240px; color: white;">warning</span>
+                        <span class="material-symbols-outlined titanium-icon-xxl" role="img"
+                            aria-label="Avviso Urgenze">warning</span>
                     </div>
                     <div class="box-content-main">
                         <div class="box-header-flex">
@@ -111,6 +114,7 @@
         import { loadUrgentDeadlinesCount } from './assets/js/scadenze.js';
         import { loadExpiredDeadlines } from './assets/js/urgenze.js';
         import { logError } from './assets/js/utils.js';
+        import { setTheme, applyTheme } from './assets/js/theme.js';
 
         async function start() {
             // 1. Carica Header e Footer dai file esterni
@@ -123,14 +127,23 @@
                 if (el) el.textContent = (h >= 5 && h < 13) ? "Buon giorno," : (h >= 13 && h < 17) ? "Buon pomeriggio," : "Buona sera,";
             })();
 
-            // 3. Gestione Temi (Light/Dark)
-            window.setTheme = function (mode) { localStorage.setItem('theme', mode); applyTheme(); }
-            function applyTheme() {
-                const p = localStorage.getItem('theme');
-                const d = p === 'dark' || (p !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                if (d) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
-            }
+            // 3. Gestione Temi (Modularizzato)
+            // 3. Gestione Temi (Modularizzato)
+            // L'import è stato spostato in alto nel modulo.
+            window.setTheme = setTheme;
             applyTheme();
+
+            // 3b. Gestione Navigazione Data-Href (Accessibilità + Separazione)
+            document.querySelectorAll('[data-href]').forEach(el => {
+                const nav = () => window.location.href = el.dataset.href;
+                el.addEventListener('click', nav);
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        nav();
+                    }
+                });
+            });
 
             // 4. Autenticazione e Caricamento Dati (Protetto contro Redirect Fantasma)
             let authChecked = false;
@@ -144,52 +157,50 @@
                 }
 
                 authChecked = true; // Utente trovato, procediamo
-                if (user) {
-                    const uAvatar = document.getElementById('user-avatar');
-                    const uName = document.getElementById('user-name');
-                    const logoutBtn = document.getElementById('logout-button');
 
-                    let nameToShow = user.displayName || user.email.split('@')[0];
-                    if (user.photoURL && uAvatar) uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
-                    if (uName) uName.textContent = nameToShow;
+                const uAvatar = document.getElementById('user-avatar');
+                const uName = document.getElementById('user-name');
+                const logoutBtn = document.getElementById('logout-button');
 
-                    try {
-                        const docSnap = await getDoc(doc(db, "users", user.uid));
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            const fullName = `${data.nome || ''} ${data.cognome || ''}`.trim();
-                            if (fullName) uName.textContent = fullName;
-                            const photo = data.photoURL || data.avatar;
-                            if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
-                        }
-                    } catch (error) {
-                        logError("Firestore Profile", error);
-                        const pWarning = document.getElementById('profile-warning');
-                        if (pWarning) pWarning.style.display = 'inline-block';
-                        if (uName) {
-                            uName.textContent = nameToShow;
-                            uName.title = "Profilo caricato in modalità base (Offline)";
-                        }
-                        if (error.code === 'permission-denied') {
-                            console.warn("Permessi insufficienti per leggere il profilo utente.");
-                        } else if (error.code === 'unavailable') {
-                            console.warn("Firestore non disponibile o connessione assente.");
-                        }
+                let nameToShow = user.displayName || user.email.split('@')[0];
+                if (user.photoURL && uAvatar) uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
+                if (uName) uName.textContent = nameToShow;
+
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        const fullName = `${data.nome || ''} ${data.cognome || ''}`.trim();
+                        if (fullName) uName.textContent = fullName;
+                        const photo = data.photoURL || data.avatar;
+                        if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
                     }
-
-                    if (logoutBtn) {
-                        logoutBtn.onclick = async () => {
-                            await signOut(auth);
-                            window.location.href = 'index.html';
-                        };
+                } catch (error) {
+                    logError("Firestore Profile", error);
+                    const pWarning = document.getElementById('profile-warning');
+                    if (pWarning) pWarning.style.display = 'inline-block';
+                    if (uName) {
+                        uName.textContent = nameToShow;
+                        uName.title = "Profilo caricato in modalità base (Offline)";
                     }
-
-                    // 5. Carica dati dai moduli esterni (Isolati per sicurezza)
-                    try { loadUrgentDeadlinesCount(user); } catch (e) { logError("Dashboard Scadenze", e); }
-                    try { loadExpiredDeadlines(user); } catch (e) { logError("Dashboard Urgenze", e); }
-                } else {
-                    window.location.href = 'index.html';
+                    if (error.code === 'permission-denied') {
+                        console.warn("Permessi insufficienti per leggere il profilo utente.");
+                    } else if (error.code === 'unavailable') {
+                        console.warn("Firestore non disponibile o connessione assente.");
+                    }
                 }
+
+                if (logoutBtn) {
+                    logoutBtn.onclick = async () => {
+                        await signOut(auth);
+                        window.location.href = 'index.html';
+                    };
+                }
+
+                // 5. Carica dati dai moduli esterni (Isolati per sicurezza)
+                try { loadUrgentDeadlinesCount(user); } catch (e) { logError("Dashboard Scadenze", e); }
+                try { loadExpiredDeadlines(user); } catch (e) { logError("Dashboard Urgenze", e); }
+
             });
         }
 

@@ -189,7 +189,7 @@ export async function loadUrgentDeadlinesCount(user) {
         const badge = document.getElementById('urgent-count-badge');
         const count = document.getElementById('urgent-count');
         if (count) count.textContent = items.length;
-        if (badge) badge.style.opacity = items.length > 0 ? "1" : "0";
+        if (badge) badge.style.opacity = items.length > 0 ? "" : "0";
 
         const list = document.getElementById('deadline-list-container');
         if (list) {

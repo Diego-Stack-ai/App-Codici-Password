@@ -26,6 +26,7 @@ import {
     getDownloadURL,
     deleteObject
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { logError } from './utils.js';
 
 // --- DOM Elements ---
 const avatarInput = document.getElementById('avatar-input');
@@ -87,6 +88,7 @@ function formatDateToIT(val) {
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
     } catch (e) {
+        logError("Date Formatter", e);
         return val;
     }
 }
@@ -1030,7 +1032,7 @@ function loadFromCache() {
         renderDocumentiView();
         renderDocumentiEdit();
 
-    } catch (e) { console.error("Errore Cache: " + e.message); }
+    } catch (e) { logError("Profile Cache Load", e); }
 }
 
 function saveToCache(data) {
@@ -1152,7 +1154,7 @@ onAuthStateChanged(auth, async (user) => {
                 });
                 existingAttachments = [...existingAttachments, ...subFiles];
             } catch (errSub) {
-                console.warn("Subcollection read error (personal_documents)", errSub);
+                logError("Profile Subcollection (Allegati)", errSub);
             }
 
             renderAttachmentsView();
@@ -1176,8 +1178,8 @@ onAuthStateChanged(auth, async (user) => {
         if (window.loadAttachmentCounters) window.loadAttachmentCounters(user.uid);
 
     } catch (err) {
-        console.error("Errore DB: " + err.message);
-        alert("Errore Inizializzazione: " + err.message);
+        logError("Profile Master Load", err);
+        alert("Errore Inizializzazione Dati");
     }
 });
 
@@ -1202,7 +1204,7 @@ if (avatarInput) {
                     // Need to get ref from URL
                     const oldRef = ref(storage, user.photoURL);
                     await deleteObject(oldRef);
-                } catch (e) { }
+                } catch (e) { logError("Delete Old Avatar", e); }
             }
 
             const storageRef = ref(storage, `users/${user.uid}/profile_v2_${Date.now()}.jpg`);
@@ -1218,8 +1220,8 @@ if (avatarInput) {
             showToast("Foto aggiornata su tutti i dispositivi!");
 
         } catch (error) {
-            console.error("Errore Upload: " + error.message);
-            showToast("Errore: " + error.message, 'error');
+            logError("Avatar Upload", error);
+            showToast("Errore caricamento foto", 'error');
         } finally {
             loadingOverlay.classList.add('hidden');
             isUploading = false;
@@ -1288,8 +1290,8 @@ realSaveButton.addEventListener('click', async () => {
         toggleEdit(false);
 
     } catch (e) {
-        console.error("Errore salvataggio: " + e.message);
-        showToast("Errore salvataggio: " + e.message, "error");
+        logError("Profile Save", e);
+        showToast("Errore durante il salvataggio", "error");
     } finally {
         icon.textContent = oldIcon;
         icon.classList.remove('animate-spin');
@@ -1480,7 +1482,7 @@ function updateQRCode() {
                 correctLevel: QRCode.CorrectLevel.M
             });
         }
-    } catch (e) { console.error("QR Small Error", e); }
+    } catch (e) { logError("QR Code Small Generation", e); }
 
     const zoomContainer = document.getElementById('qrcode-zoom-container');
     if (zoomContainer) {
@@ -1494,7 +1496,7 @@ function updateQRCode() {
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.M
             });
-        } catch (e) { console.error("QR Zoom Error", e); }
+        } catch (e) { logError("QR Code Zoom Generation", e); }
     }
 }
 
@@ -1721,8 +1723,8 @@ async function deleteContact(contactId) {
         showToast("Contatto eliminato");
         window.loadContacts(user.uid);
     } catch (e) {
-        console.error(e);
-        showToast("Errore eliminazione", "error");
+        logError("Contact Delete", e);
+        showToast("Errore eliminazione contatto", "error");
     }
 }
 
@@ -1780,8 +1782,8 @@ if (btnAddContact) {
             window.loadContacts(user.uid);
 
         } catch (e) {
-            console.error(e);
-            alert("Errore: " + e.message);
+            logError("Contact Update/Add", e);
+            alert("Errore salvataggio contatto");
             btnAddContact.textContent = editingContactId ? "Aggiorna" : "Salva";
         } finally {
             btnAddContact.disabled = false;
@@ -1838,7 +1840,7 @@ window.loadCounters = async function (uid) {
             // We pass the partials to the shared section to add with 'received' items
             window.ownSharedStandard = ownSharedStandard;
             window.ownSharedMemo = ownSharedMemo; // Store for next block
-        } catch (e) { console.error("Standard counts error:", e); }
+        } catch (e) { logError("Owned Accounts Counter", e); }
 
         // 2. Shared WITH me (Requires Index)
         // 2. Shared WITH me (ALIGNMENT FIX: Use Invites collection)
@@ -1877,7 +1879,7 @@ window.loadCounters = async function (uid) {
                     }
                     const accSnap = await getDoc(accRef);
                     if (accSnap.exists()) return accSnap.data();
-                } catch (e) { return null; }
+                } catch (e) { logError("Invite Account Detail Fetch", e); return null; }
                 return null;
             });
 
@@ -1897,7 +1899,7 @@ window.loadCounters = async function (uid) {
             updateBadge('count-shared-memo', finalSharedMemo);
 
         } catch (e) {
-            console.warn("Shared query error:", e);
+            logError("Shared Accounts Counter", e);
             updateBadge('count-shared', window.ownSharedStandard || 0);
             updateBadge('count-shared-memo', window.ownSharedMemo || 0);
         }
@@ -1906,10 +1908,10 @@ window.loadCounters = async function (uid) {
         try {
             const invitesSnap = await getDocs(query(collection(db, "invites"), where("recipientEmail", "==", auth.currentUser.email), where("status", "==", "pending")));
             // update if needed
-        } catch (e) { }
+        } catch (e) { logError("Pending Invites Counter", e); }
 
     } catch (e) {
-        console.error("General counters error:", e);
+        logError("General Dashboard Counters", e);
     }
 };
 
@@ -1920,7 +1922,7 @@ window.loadContacts = async function (uid) {
         const contacts = await getContacts(uid);
         renderContacts(contacts);
     } catch (e) {
-        console.error("Errore caricamento rubrica:", e);
+        logError("Rubrica Load", e);
     }
 };
 
@@ -1997,7 +1999,7 @@ window.loadTopAccounts = async function (uid) {
         });
 
     } catch (e) {
-        console.error("Top accounts error:", e);
+        logError("Top Accounts Dashboard", e);
         list.innerHTML = '<p class="text-xs text-red-400 text-center py-2">Errore caricamento.</p>';
     } finally {
         // Ensure spinner is removed
@@ -2044,7 +2046,7 @@ window.loadAttachmentCounters = async function (uid) {
         });
 
     } catch (e) {
-        console.warn("Error loading attachment counters:", e);
+        logError("Attachment Counters", e);
     }
 };
 

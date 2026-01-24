@@ -2,6 +2,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { logError } from './utils.js';
 
 console.log("Script Dati Azienda Caricato (Modular Mode)");
 
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } else {
-                console.error("Nessun ID azienda specificato");
+                logError("Azienda Detail", "Nessun ID azienda specificato");
                 alert("Errore: Nessun ID azienda specificato.");
                 window.location.href = 'lista_aziende.html';
             }
@@ -98,12 +99,12 @@ async function loadAziendaData(uid, aziendaId) {
             handleLogoAndQR(data);
             renderAllegati(data.allegati);
         } else {
-            console.error("Nessun documento trovato!");
+            logError("Azienda Load", "Nessun documento trovato per ID: " + aziendaId);
             document.getElementById('ragione-sociale').textContent = "Azienda non trovata";
         }
     } catch (error) {
-        console.error("Errore nel recupero dei dati:", error);
-        alert("Errore nel recupero dati: " + error.message);
+        logError("Azienda Detail Fetch", error);
+        alert("Errore caricamento dati azienda");
     }
 }
 
@@ -549,7 +550,7 @@ function setupInteractions() {
                         btnCancelNote.classList.add('hidden');
 
                     } catch (err) {
-                        console.error("Errore salvataggio note:", err);
+                        logError("Azienda Note Save", err);
                         showToast('Errore nel salvataggio.', 'error');
                         btnEditNote.textContent = 'Salva'; // Revert
                     }
@@ -581,7 +582,7 @@ function setupInteractions() {
                     navigator.clipboard.writeText(text).then(() => {
                         showToast('Copiato negli appunti!');
                     }).catch(err => {
-                        console.error('Errore copia:', err);
+                        logError("Clipboard Copy", err);
                         showToast('Errore durante la copia', 'error');
                     });
                 }
@@ -752,7 +753,7 @@ function generateQRCode(data, config) {
             });
         }
     } catch (e) {
-        console.error("QR Generation Error:", e);
+        logError("QR Code Generation", e);
         if (container) container.textContent = "Errore QR";
     }
 
@@ -770,7 +771,7 @@ function generateQRCode(data, config) {
                 correctLevel: QRCode.CorrectLevel.M
             });
         }
-    } catch (e) { console.error("Zoom QR Error", e); }
+    } catch (e) { logError("Zoom QR Generation", e); }
 }
 
 // QR Zoom Functions

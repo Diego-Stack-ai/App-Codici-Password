@@ -14,6 +14,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="assets/js/theme.js"></script>
     <style>
         body {
             min-height: 100dvh;
@@ -346,8 +347,8 @@
             <!-- 6,9,10) Accordion: Informazioni sull'App -->
             <div
                 class="group relative bg-white/5 border-glow rounded-2xl overflow-hidden shadow-lg mb-4 hover:-translate-y-1 transition-all duration-300">
-                <button onclick="toggleAccordion('presentazione-content', 'presentazione-chevron')"
-                    class="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
+                <button data-target="presentazione-content" data-chevron="presentazione-chevron"
+                    class="accordion-toggle w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
                     <!-- 10) Glow Overlay -->
                     <div
                         class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -424,8 +425,8 @@
             <!-- 6,9,10) Accordion 2: Le 5 Regole d'Oro -->
             <div
                 class="group relative bg-white/5 border-glow rounded-2xl overflow-hidden shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <button onclick="toggleAccordion('regole-content', 'regole-chevron')"
-                    class="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
+                <button data-target="regole-content" data-chevron="regole-chevron"
+                    class="accordion-toggle w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
                     <!-- 10) Glow Overlay -->
                     <div
                         class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -445,8 +446,8 @@
                 <div id="regole-content" class="hidden border-t border-white/5 px-4 py-4 space-y-6 text-sm bg-black/20">
                     <!-- SUB-ACCORDION 1: 5 Regole d'Oro -->
                     <div class="rounded-lg overflow-hidden border border-yellow-500/20">
-                        <button onclick="toggleAccordion('gold-rules-content', 'gold-rules-chevron')"
-                            class="w-full flex items-center justify-between px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 active:scale-[0.99] transition-all relative overflow-hidden group">
+                        <button data-target="gold-rules-content" data-chevron="gold-rules-chevron"
+                            class="accordion-toggle w-full flex items-center justify-between px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 active:scale-[0.99] transition-all relative overflow-hidden group">
                             <!-- 10) Glow Overlay -->
                             <div
                                 class="absolute inset-0 bg-yellow-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -518,8 +519,8 @@
 
                     <!-- SUB-ACCORDION 2: Regole Visualizzazione Account -->
                     <div class="rounded-lg overflow-hidden border border-blue-500/20 mt-4">
-                        <button onclick="toggleAccordion('account-rules-content', 'account-rules-chevron')"
-                            class="w-full flex items-center justify-between px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 active:scale-[0.99] transition-all relative overflow-hidden group">
+                        <button data-target="account-rules-content" data-chevron="account-rules-chevron"
+                            class="accordion-toggle w-full flex items-center justify-between px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 active:scale-[0.99] transition-all relative overflow-hidden group">
                             <!-- 10) Glow Overlay -->
                             <div
                                 class="absolute inset-0 bg-blue-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -623,8 +624,8 @@
             <!-- 6,9,10) Privacy Policy -->
             <div
                 class="group relative bg-white/5 border-glow rounded-2xl overflow-hidden shadow-lg mt-4 hover:-translate-y-1 transition-all duration-300">
-                <button onclick="toggleAccordion('privacy-content', 'privacy-chevron')"
-                    class="w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
+                <button data-target="privacy-content" data-chevron="privacy-chevron"
+                    class="accordion-toggle w-full flex items-center gap-4 px-4 py-3.5 hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer text-left relative z-10">
                     <!-- 10) Glow Overlay -->
                     <div
                         class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -724,6 +725,7 @@
         import { auth, db } from './assets/js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { logError } from './assets/js/utils.js';
 
         const avatarEl = document.getElementById('user-avatar-settings');
         const nameEl = document.getElementById('user-name-settings');
@@ -749,7 +751,7 @@
                     if (avatarEl) avatarEl.style.backgroundImage = `url('${photoURL}')`;
 
                 } catch (error) {
-                    console.error("Error fetching user data:", error);
+                    logError("User Data Load (Settings)", error);
                 }
             } else {
                 window.location.href = 'index.html';
@@ -762,7 +764,7 @@
                     await signOut(auth);
                     window.location.href = 'index.html';
                 } catch (error) {
-                    console.error("Logout error:", error);
+                    logError("Logout Error", error);
                     alert("Errore durante il logout");
                 }
             });
@@ -770,19 +772,27 @@
     </script>
 
     <script>
-        function toggleAccordion(contentId, chevronId) {
-            const content = document.getElementById(contentId);
-            const chevron = document.getElementById(chevronId);
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordions = document.querySelectorAll('.accordion-toggle');
+            accordions.forEach(acc => {
+                acc.addEventListener('click', () => {
+                    const contentId = acc.dataset.target;
+                    const chevronId = acc.dataset.chevron;
+                    const content = document.getElementById(contentId);
+                    const chevron = document.getElementById(chevronId);
 
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                // Removed tailwind animations for simple hidden toggle to match darker theme smoothness
-                if (chevron) chevron.style.transform = 'rotate(180deg)';
-            } else {
-                content.classList.add('hidden');
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
-            }
-        }
+                    if (!content) return;
+
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        if (chevron) chevron.style.transform = 'rotate(180deg)';
+                    } else {
+                        content.classList.add('hidden');
+                        if (chevron) chevron.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+        });
     </script>
 </body>
 

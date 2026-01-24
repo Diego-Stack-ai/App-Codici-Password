@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="utf-8" />
-    <script>
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
+    <script type="module">
+        import { applyTheme } from './assets/js/theme.js';
+        applyTheme();
     </script>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark only">
     <meta name="theme-color" content="#0a0f1e">
     <title>Codici & Password - Accedi</title>
