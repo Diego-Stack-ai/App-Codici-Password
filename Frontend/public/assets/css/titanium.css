@@ -337,8 +337,13 @@ html.dark .urgent-badge {
 
     .matrix-orange,
     .matrix-red {
-        padding: 0.75rem !important;
-        /* Spazio di bellezza per non far toccare i bordi */
+        padding: 1.25rem !important;
+        /* Aumentato per toglierli dall'angolo */
+    }
+
+    .box-header-flex {
+        margin-top: 0.5rem;
+        /* Spinge il titolo verso il basso */
     }
 
     .dashboard-grid,
