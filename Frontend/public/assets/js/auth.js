@@ -9,7 +9,7 @@ import {
     sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showNotification } from './utils.js';
+import { showNotification, logError } from './utils.js';
 
 /**
  * Registers a new user using Firebase Auth.
@@ -60,7 +60,7 @@ async function register(nome, cognome, email, password) {
         return true;
 
     } catch (error) {
-        console.error("Registration error:", error);
+        logError("Auth Registration", error);
         let message = `Errore registrazione: ${error.code || error.message}`;
         if (error.code === 'auth/email-already-in-use') {
             message = "Questa email è già registrata.";
@@ -114,7 +114,7 @@ async function login(email, password) {
             window.location.href = "home_page.html";
         }, 1000);
     } catch (error) {
-        console.error("Login error:", error);
+        logError("Auth Login", error);
         let message = "Credenziali non valide.";
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
             message = "Email o password errati.";
@@ -135,7 +135,7 @@ async function logout() {
         await signOut(auth);
         window.location.href = "index.html";
     } catch (error) {
-        console.error("Logout error:", error);
+        logError("Auth Logout", error);
         showNotification("Errore durante il logout.", "error");
     }
 }
@@ -152,7 +152,7 @@ async function resetPassword(email) {
             window.location.href = "index.html";
         }, 3000);
     } catch (error) {
-        console.error("Reset password error:", error);
+        logError("Auth ResetPassword", error);
         showNotification("Errore nell'invio dell'email di reset.", "error");
     }
 }
@@ -191,8 +191,8 @@ function checkAuthState() {
                     });
                     // Allow to proceed
                 }
-            } catch (e) {
-                console.error("Error verifying user profile:", e);
+            } catch (error) {
+                logError("Auth State ProfileVerify", error);
                 // Optional: Handle connectivity errors gracefully instead of blocking
             }
 
@@ -223,7 +223,7 @@ async function resendVerificationEmail() {
         await sendEmailVerification(user);
         showNotification('Email di verifica reinviata!', 'success');
     } catch (error) {
-        console.error('Resend verification error:', error);
+        logError("Auth ResendVerification", error);
         showNotification('Errore nel reinvio della email di verifica.', 'error');
     }
 }

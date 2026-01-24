@@ -4,6 +4,7 @@
  */
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { db } from './firebase-config.js';
+import { logError } from './utils.js';
 
 export async function loadExpiredDeadlines(user) {
     try {
@@ -59,7 +60,7 @@ export async function loadExpiredDeadlines(user) {
             }
         }
     } catch (error) {
-        console.error("Errore loadUrgenze utility:", error.code, error.message);
+        logError("Utility Urgenze", error);
         if (error.code === 'permission-denied') {
             console.warn("Permessi insufficienti per leggere le urgenze.");
         } else if (error.code === 'unavailable') {

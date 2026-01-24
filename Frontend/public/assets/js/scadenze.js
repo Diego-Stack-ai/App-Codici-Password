@@ -5,6 +5,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { logError } from './utils.js';
 
 // --- LOGICA PER LA PAGINA SCADENZE.HTML ---
 
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allScadenze = await getScadenze(currentUser.uid);
             renderFilteredScadenze();
         } catch (error) {
-            console.error("Errore recupero scadenze:", error);
+            logError("Scadenze Page", error);
             if (scadenzeContainer) scadenzeContainer.innerHTML = `<p class="text-center p-4 text-red-500">Errore: ${error.message}</p>`;
         }
     }
@@ -218,7 +219,7 @@ export async function loadUrgentDeadlinesCount(user) {
             }
         }
     } catch (error) {
-        console.error("Errore loadScadenze utility:", error.code, error.message);
+        logError("Utility Scadenze", error);
         if (error.code === 'permission-denied') {
             console.warn("Permessi insufficienti per leggere le scadenze (REGOLE FIRESTORE?)");
         } else if (error.code === 'unavailable') {

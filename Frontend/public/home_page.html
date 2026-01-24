@@ -110,6 +110,7 @@
         import { initComponents } from './assets/js/components.js';
         import { loadUrgentDeadlinesCount } from './assets/js/scadenze.js';
         import { loadExpiredDeadlines } from './assets/js/urgenze.js';
+        import { logError } from './assets/js/utils.js';
 
         async function start() {
             // 1. Carica Header e Footer dai file esterni
@@ -162,7 +163,7 @@
                             if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
                         }
                     } catch (error) {
-                        console.error("Errore recupero profilo utente:", error.code, error.message);
+                        logError("Firestore Profile", error);
                         const pWarning = document.getElementById('profile-warning');
                         if (pWarning) pWarning.style.display = 'inline-block';
                         if (uName) {
@@ -184,8 +185,8 @@
                     }
 
                     // 5. Carica dati dai moduli esterni (Isolati per sicurezza)
-                    try { loadUrgentDeadlinesCount(user); } catch (e) { console.error("Errore modulo Scadenze:", e); }
-                    try { loadExpiredDeadlines(user); } catch (e) { console.error("Errore modulo Urgenze:", e); }
+                    try { loadUrgentDeadlinesCount(user); } catch (e) { logError("Dashboard Scadenze", e); }
+                    try { loadExpiredDeadlines(user); } catch (e) { logError("Dashboard Urgenze", e); }
                 } else {
                     window.location.href = 'index.html';
                 }

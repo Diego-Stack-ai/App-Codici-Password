@@ -26,4 +26,13 @@ function showNotification(message, type) {
   }, 5000);
 }
 
-export { showNotification };
+/**
+ * Centralized error logger for the application.
+ * @param {string} context - Where the error happened (e.g., "Firestore User")
+ * @param {any} error - The error object or message
+ */
+function logError(context, error) {
+  console.error(`[${context}]`, error?.code || '', error?.message || error);
+}
+
+export { showNotification, logError };
