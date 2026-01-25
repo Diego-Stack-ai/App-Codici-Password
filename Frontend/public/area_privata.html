@@ -127,6 +127,20 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
+
+        /* BLOCCO INTERAZIONI NON DESIDERATE (UX NATIVA) */
+        .no-select {
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        .no-select input,
+        .no-select textarea,
+        .no-select [contenteditable="true"] {
+            -webkit-user-select: text;
+            user-select: text;
+        }
     </style>
 </head>
 
@@ -160,7 +174,7 @@
         <!-- Header Spacer -->
         <div class="h-20 w-full shrink-0"></div>
 
-        <main class="flex-1 overflow-y-auto no-scrollbar pb-24">
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-24 no-select">
 
             <!-- Account Navigation Grid (Refined Matrix) -->
             <div class="px-6 grid grid-cols-2 gap-4 mb-8 mt-4">

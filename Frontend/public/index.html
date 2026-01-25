@@ -104,6 +104,20 @@
                 background-position: 200% 0;
             }
         }
+
+        /* BLOCCO INTERAZIONI NON DESIDERATE (UX NATIVA) */
+        .no-select {
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        .no-select input,
+        .no-select textarea,
+        .no-select [contenteditable="true"] {
+            -webkit-user-select: text;
+            user-select: text;
+        }
     </style>
 </head>
 
@@ -125,7 +139,7 @@
         </header>
 
         <!-- Main Content -->
-        <main class="flex-1 flex items-center justify-center p-6 relative z-30 mb-8 mt-16 pb-24">
+        <main class="flex-1 flex items-center justify-center p-6 relative z-30 mb-8 mt-16 pb-24 no-select">
 
             <!-- Login Card (Il Box Campi) -->
             <div

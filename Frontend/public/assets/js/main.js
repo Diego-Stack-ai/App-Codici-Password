@@ -101,6 +101,26 @@ window.formatDateToIT = function (dateString) {
 
 document.addEventListener('DOMContentLoaded', function () {
 
+    // --- UX NATIVA: BLOCCO MENU CONTESTUALE E SELEZIONE (ECCETTO INPUT) ---
+    // Impedisce il long-press (menu contestuale) su testi e card
+    document.addEventListener('contextmenu', function (e) {
+        const tag = e.target.tagName.toLowerCase();
+        const isEditable = e.target.isContentEditable;
+        if (tag !== 'input' && tag !== 'textarea' && !isEditable) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Impedisce l'inizio della selezione per quei browser che non seguono solo il CSS
+    document.addEventListener('selectstart', function (e) {
+        const tag = e.target.tagName.toLowerCase();
+        const isEditable = e.target.isContentEditable;
+        if (tag !== 'input' && tag !== 'textarea' && !isEditable) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    // ----------------------------------------------------------------------
+
     // Funzione di navigazione (deprecata, ma mantenuta per retrocompatibilità se necessario)
     window.navigateTo = function (page) {
         window.location.href = `${page}.html`;

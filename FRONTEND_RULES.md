@@ -153,7 +153,7 @@ Monitoraggio dello stato di avanzamento.
 | 14 | 🔴 | `modifica_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 15 | 🔴 | `modifica_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 16 | 🔴 | `modifica_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 17 | 🟠 INCOMPLETA | `home_page.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 14, 15 | Matrix Fusion |
+| 17 | 🟢 COMPLETATA | home_page.html | 1, 2 | 3 | 4, 5, 6, 9, 10, 14, 15 | Matrix Fusion |
 | 18 | 🟠 INCOMPLETA | `dati_anagrafici_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Section Box** |
 | 19 | 🟠 INCOMPLETA | `area_privata.html` | 1, 2 | 3 | 4, 5, 9, 11 | **Dashboard Navigazione** |
 | 20 | 🔴 | `scadenze.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Scadenze** |

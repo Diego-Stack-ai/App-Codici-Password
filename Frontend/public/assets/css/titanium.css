@@ -81,6 +81,21 @@ html.dark {
     display: none;
 }
 
+/* BLOCCO INTERAZIONI NON DESIDERATE (UX NATIVA) */
+.no-select {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+/* ma NON sugli input e aree di testo editabili */
+.no-select input,
+.no-select textarea,
+.no-select [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
 /* ==========================================================================
    RULE-MAPPING: EF-[#1] (SFONDO PAGINA) 🟢
    Descrizione: Colore di sfondo base per l'intera pagina (Light/Dark).
@@ -213,6 +228,10 @@ html.dark .titanium-box {
 
 .urgent-badge span {
     color: black !important;
+}
+
+html.dark .urgent-badge span {
+    color: white !important;
 }
 
 /* Header Flex with Divider Line */
@@ -817,8 +836,8 @@ html.dark .saetta-gold {
    Dual Theme: SÌ (Light: Glass Clean + C-Blade | Dark: Gradient Matrix).
    ========================================================================== */
 
-/* 15.1 BASE STRUCTURE */
-[class*="matrix-"] {
+/* 15.1 BASE STRUCTURE (Solo per i Box Grandi, esclude le righe lista) */
+[class*="matrix-"]:not(.dynamic-card) {
     --accent: var(--btn-neutral-text);
     position: relative;
     z-index: 1;
@@ -862,13 +881,13 @@ html.dark .saetta-gold {
 }
 
 /* 15.3 LIGHT THEME (Glass Clean + C-Blade) */
-html:not(.dark) [class*="matrix-"] {
+html:not(.dark) [class*="matrix-"]:not(.dynamic-card) {
     background: var(--btn-neutral-bg);
     border: 1px solid rgba(0, 0, 0, 0.1);
     color: var(--btn-neutral-text);
 }
 
-html:not(.dark) [class*="matrix-"]::before {
+html:not(.dark) [class*="matrix-"]:not(.dynamic-card)::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -891,23 +910,23 @@ html.dark [class*="matrix-"] {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
-/* 15.5 TYPOGRAPHY & OVERRIDES */
-[class*="matrix-"] h3 {
+/* 15.5 TYPOGRAPHY & OVERRIDES (Dashboard-specific) */
+[class*="matrix-"]:not(.dynamic-card) h3 {
     font-size: 18px !important;
     font-weight: 800 !important;
     margin: 0;
     z-index: 10;
 }
 
-[class*="matrix-"] p {
+[class*="matrix-"]:not(.dynamic-card) p {
     font-size: 0.8rem !important;
     opacity: 0.7 !important;
     font-weight: 500;
     z-index: 10;
 }
 
-html.dark [class*="matrix-"] h3,
-html.dark [class*="matrix-"] p {
+html.dark [class*="matrix-"]:not(.dynamic-card) h3,
+html.dark [class*="matrix-"]:not(.dynamic-card) p {
     color: #ffffff !important;
 }
 

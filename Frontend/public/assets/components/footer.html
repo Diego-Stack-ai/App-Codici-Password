@@ -1,6 +1,16 @@
 <footer class="titanium-footer">
-    <div class="theme-switcher">
-        <button onclick="setTheme('light')">Light</button>
-        <button onclick="setTheme('dark')" class="btn-dark">Dark</button>
+    <div
+        style="display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; pointer-events: auto;">
+        <span
+            style="font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.4; letter-spacing: 0.1em;">Versione
+            5</span>
+        <div class="theme-switcher" style="margin: 0;">
+            <button onclick="setTheme('light')">Light</button>
+            <button onclick="setTheme('dark')" class="btn-dark">Dark</button>
+        </div>
+        <a href="impostazioni.html" class="titanium-interactive border-glow"
+            style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(128, 128, 128, 0.1); color: inherit; border-radius: 50%; text-decoration: none;">
+            <span class="material-symbols-outlined" style="font-size: 20px;">settings</span>
+        </a>
     </div>
 </footer>
