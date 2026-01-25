@@ -836,21 +836,25 @@ html.dark .saetta-gold {
    Dual Theme: SÌ (Light: Glass Clean + C-Blade | Dark: Gradient Matrix).
    ========================================================================== */
 
-/* 15.1 BASE STRUCTURE (Solo per i Box Grandi, esclude le righe lista) */
-[class*="matrix-"]:not(.dynamic-card) {
+/* 15.1 BASE STRUCTURE (Universale per colori e linguette) */
+[class*="matrix-"] {
     --accent: var(--btn-neutral-text);
     position: relative;
     z-index: 1;
     border-radius: 24px;
     overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* 15.1b LAYOUT BOX GRANDI (Solo dashboard, esclude liste) */
+[class*="matrix-"]:not(.dynamic-card) {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
     min-height: 150px;
     width: 100%;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    cursor: pointer;
-    text-decoration: none;
     justify-content: flex-start;
     align-items: flex-start;
 }
@@ -881,13 +885,13 @@ html.dark .saetta-gold {
 }
 
 /* 15.3 LIGHT THEME (Glass Clean + C-Blade) */
-html:not(.dark) [class*="matrix-"]:not(.dynamic-card) {
+html:not(.dark) [class*="matrix-"] {
     background: var(--btn-neutral-bg);
     border: 1px solid rgba(0, 0, 0, 0.1);
     color: var(--btn-neutral-text);
 }
 
-html:not(.dark) [class*="matrix-"]:not(.dynamic-card)::before {
+html:not(.dark) [class*="matrix-"]::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -1007,11 +1011,11 @@ html.dark .titanium-glass-card {
         min-height: 125px !important;
     }
 
-    /* Full Width Cards (Scadenze/Urgenze) - Standard Padding */
+    /* Full Width Cards (Scadenze/Urgenze) - Fixed Padding */
     body .matrix-orange,
     body .matrix-red {
-        padding: 0 !important;
-        /* Zero top padding to push content to the top edge */
+        padding-top: 1.25rem !important;
+        /* Padding restored for breathing room */
         padding-left: 1.5rem !important;
         padding-right: 1.5rem !important;
         padding-bottom: 0.6rem !important;
