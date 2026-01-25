@@ -117,45 +117,42 @@ ________________________________________
 ### Regola 14 – Registro Pagine Metodo Titanium
 
 Monitoraggio dello stato di avanzamento.
-🔴 DA FARE | � INCOMPLETA (Dual Theme Req.) | 🟢 COMPLETATA
+🔴 DA FARE |  INCOMPLETA (Dual Theme Req.) | 🟢 COMPLETATA
 
 | # | Stato | Nome Pagina | Contenitore | Faro | Effetti Card | Palette / Colori |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | � COMPLETATA | `index.html` (Login) | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
-| 2 | 🔴 DA FARE | `registrati.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 3 | 🔴 DA FARE | `verifica_email.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 4 | 🔴 DA FARE | `reset_password.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 5 | 🔴 DA FARE | `imposta_nuova_password.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 6 | 🔴 | `dashboard_amministratore.html` | Titanium Frame | Beacon (4s) | Premium | Matrix Cromatico |
-| 7 | 🔴 | `gestione_utenti_(admin).html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 8 | 🔴 | `account_azienda.html` | Titanium Frame | Beacon (4s) | Premium | Matrix Interno |
-| 9 | 🟠 INCOMPLETA | `account_privati.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Cards** |
-| 10 | 🔴 | `aggiungi_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 11 | 🔴 | `aggiungi_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 12 | 🔴 | `aggiungi_nuova_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 13 | 🔴 | `aggiungi_scadenza.html` | Titanium Frame | Beacon (4s) | Dinamico | Matrix Scadenze |
-| 14 | 🔴 | `modifica_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 15 | 🔴 | `modifica_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 16 | 🔴 | `modifica_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 17 | 🟢 COMPLETATA | home_page.html | 1, 2 | 3 | 4, 5, 6, 9, 10, 14, 15, 18 | Matrix Fusion |
-| 18 | 🟠 INCOMPLETA | `dati_anagrafici_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Section Box** |
-| 19 | 🟠 INCOMPLETA | `area_privata.html` | 1, 2 | 3 | 4, 5, 9, 11 | **Dashboard Navigazione** |
-| 20 | 🔴 | `scadenze.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Scadenze** |
-| 21 | 🔴 | `lista_aziende.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 22 | 🟠 INCOMPLETA | `archivio_account.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Matrix Sidebar |
-| 23 | 🟠 INCOMPLETA | `impostazioni.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | Fusion Glass |
-| 24 | 🟠 INCOMPLETA | `regole_scadenze_veicoli.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Dark Menu Glow |
-| 25 | 🟠 INCOMPLETA | `configurazione_automezzi.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
-| 26 | 🟠 INCOMPLETA | `configurazione_documenti.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
-| 27 | 🟠 INCOMPLETA | `configurazione_generali.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
-| 28 | 🔴 | `privacy.html` | Titanium Frame | Beacon (4s) | Standard | Glass Read-Only |
-| 29 | 🔴 | `gestione_scadenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Matrix Scadenze |
-| 30 | 🔴 | `gestione_urgenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Red Glow Matrix |
-| 31 | 🔴 | `gestione_memorandum.html` | Titanium Frame | Beacon (4s) | Standard | Memo Matrix |
-| 32 | 🔴 | `gestione_memo_condivisi.html` | Titanium Frame | Beacon (4s) | Standard | Memo Shared Matrix |
-| 33 | 🔴 | `lista_contatti.html` | Titanium Frame | Beacon (4s) | Standard | Icone Contatti |
-| 34 | 🟠 INCOMPLETA | `notifiche_history.html` | 1, 2 | 3 | 4, 5 | Fusion Blue |
-| 35 | 🟠 INCOMPLETA | `dettaglio_account_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | **Titanium Glass Fields** |
+| 1 | 🟢 COMPLETATA | `index.html` (Login) | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
+| 2 | 🟢 COMPLETATA | `registrati.html` | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Blue |
+| 3 | 🟢 COMPLETATA | `reset_password.html` | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
+| 4 | 🟢 COMPLETATA | `imposta_nuova_password.html` | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
+| 5 | 🔴 DA FARE | `account_azienda.html` | Titanium Frame | Beacon (4s) | Premium | Matrix Interno |
+| 6 | � COMPLETATA | `account_privati.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Cards** |
+| 7 | 🔴 DA FARE | `aggiungi_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 8 | � COMPLETATA | `aggiungi_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 9 | 🔴 DA FARE | `aggiungi_nuova_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 10 | 🔴 DA FARE | `aggiungi_scadenza.html` | Titanium Frame | Beacon (4s) | Dinamico | Matrix Scadenze |
+| 11 | 🔴 DA FARE | `modifica_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 12 | 🔴 DA FARE | `modifica_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 13 | 🔴 DA FARE | `modifica_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 14 | 🟢 COMPLETATA | `home_page.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 15, 18 | Matrix Fusion |
+| 17 | 🟠 INCOMPLETA | `dati_anagrafici_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Section Box** |
+| 18 | � COMPLETATA | `area_privata.html` | 1, 2 | 3 | 4, 5, 9, 11 | **Dashboard Navigazione** |
+| 19 | 🔴 DA FARE | `scadenze.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Scadenze** |
+| 20 | 🔴 DA FARE | `lista_aziende.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 21 | 🟠 INCOMPLETA | `archivio_account.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Matrix Sidebar |
+| 22 | 🟠 INCOMPLETA | `impostazioni.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | Fusion Glass |
+| 23 | 🟠 INCOMPLETA | `regole_scadenze_veicoli.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Dark Menu Glow |
+| 24 | 🟠 INCOMPLETA | `configurazione_automezzi.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
+| 25 | 🟠 INCOMPLETA | `configurazione_documenti.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
+| 26 | 🟠 INCOMPLETA | `configurazione_generali.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
+| 27 | 🔴 DA FARE | `privacy.html` | Titanium Frame | Beacon (4s) | Standard | Glass Read-Only |
+| 28 | 🔴 DA FARE | `gestione_scadenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Matrix Scadenze |
+| 29 | 🔴 DA FARE | `gestione_urgenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Red Glow Matrix |
+| 30 | 🔴 DA FARE | `gestione_memorandum.html` | Titanium Frame | Beacon (4s) | Standard | Memo Matrix |
+| 31 | 🔴 DA FARE | `gestione_memo_condivisi.html` | Titanium Frame | Beacon (4s) | Standard | Memo Shared Matrix |
+| 32 | 🔴 DA FARE | `lista_contatti.html` | Titanium Frame | Beacon (4s) | Standard | Icone Contatti |
+| 33 | 🟠 INCOMPLETA | `notifiche_history.html` | 1, 2 | 3 | 4, 5 | Fusion Blue |
+| 34 | 🟠 INCOMPLETA | `dettaglio_account_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | **Titanium Glass Fields** |
 
 ________________________________________
 

@@ -21,13 +21,17 @@ import { logError } from './utils.js';
  */
 async function register(nome, cognome, email, password) {
     try {
-        // Client-side Password Validation
-        if (password.length < 6) {
-            throw { code: 'auth/weak-password', message: 'La password deve avere almeno 6 caratteri.' };
+        // Client-side Password Validation (Protocollo 12-3-3)
+        if (password.length < 12) {
+            throw { code: 'auth/weak-password', message: 'La password deve avere almeno 12 caratteri.' };
         }
-        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
-        if (!specialCharRegex.test(password)) {
-            throw { code: 'auth/weak-password-special', message: 'La password deve contenere almeno un carattere speciale (!@#$%...).' };
+        const upperCount = (password.match(/[A-Z]/g) || []).length;
+        if (upperCount < 3) {
+            throw { code: 'auth/weak-password-upper', message: 'Servono almeno 3 lettere MAIUSCOLE.' };
+        }
+        const symbolCount = (password.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length;
+        if (symbolCount < 3) {
+            throw { code: 'auth/weak-password-symbols', message: 'Servono almeno 3 caratteri speciali (!@#...).' };
         }
 
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -85,13 +89,25 @@ async function register(nome, cognome, email, password) {
  */
 async function login(email, password) {
     try {
+        console.log("LOGIN START: ", email);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        console.log("AUTH SUCCESS: ", user.uid);
+
+        // FORZA REFRESH: Controlla lo stato reale su Firebase (evita cache vecchia)
+        await user.reload();
+        const updatedUser = auth.currentUser;
 
         // CHECK IF USER EXISTS IN FIRESTORE
-        // If "Zombie" (Auth exists, DB missing), we Auto-Resurrect the profile.
-        const userDocRef = doc(db, "users", user.uid);
+        const userDocRef = doc(db, "users", updatedUser.uid);
+        console.log("FETCHING DOC...");
         const userDoc = await getDoc(userDocRef);
+        console.log("DOC FETCHED: ", userDoc.exists());
+
+        if (!updatedUser.emailVerified) {
+            console.warn("Email non ancora verificata, ma procedo come da richiesta utente.");
+            showToast("Nota: Email non verificata, ma accesso consentito.", "warning");
+        }
 
         if (!userDoc.exists()) {
             console.warn("User authenticated but no Firestore profile. Auto-recovering profile...");
@@ -117,14 +133,20 @@ async function login(email, password) {
     } catch (error) {
         logError("Auth Login", error);
         let message = "Credenziali non valide.";
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             message = "Email o password errati.";
+        } else if (error.code === 'auth/invalid-email') {
+            message = "Formato email non valido.";
+        } else if (error.code === 'auth/email-not-verified') {
+            message = error.message;
         } else if (error.code === 'auth/too-many-requests') {
             message = "Troppi tentativi falliti. Riprova più tardi.";
         } else if (error.code === 'custom/user-deleted') {
             message = error.message;
         }
         showToast(message, "error");
+        // Rilanciamo l'errore per permettere al chiamante (login.js) di fermare lo spinner
+        throw error;
     }
 }
 
@@ -198,10 +220,7 @@ function checkAuthState() {
             }
 
             if (isAuthPage) {
-                // If on registration page, wait for user to verify email or navigate manually
-                if (currentPage.includes('registrati') && !user.emailVerified) {
-                    return;
-                }
+                // Rimosso blocco email verificata per fluidità Diego
                 window.location.href = 'home_page.html';
             }
         } else {

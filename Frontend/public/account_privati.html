@@ -1,230 +1,100 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html class="titanium-forced-dark dark" lang="it">
 
 <head>
-
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark only">
     <meta name="theme-color" content="#0a0f1e">
-    <title>Account Privati</title>
+    <title>Account Privati - Protocollo Titanium</title>
+
     <!-- PWA / Mobile Capable -->
     <link rel="manifest" href="manifest.json" />
-    <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/app-icon.png?v=2">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="App Codici">
-    <!-- Tailwind CSS, Google Fonts, Material Symbols -->
+
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <script src="assets/js/tailwind-config.js"></script>
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+
+    <!-- Design System Standard v2.0 -->
+    <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        .filled {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        body {
-            background-color: #0a0f1e;
-        }
-
-        /* --- METODO TITANIUM EFFECT SYSTEM --- */
-
-        /* 3) FARO ANIMATO (GLASS GLOW) */
-        .glass-glow {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 150%;
-            height: 120%;
-            background: radial-gradient(ellipse at 50% 0%,
-                    rgba(80, 150, 255, 0.6) 0%,
-                    rgba(80, 150, 255, 0.2) 25%,
-                    rgba(80, 150, 255, 0.05) 50%,
-                    transparent 75%);
-            filter: blur(80px);
-            z-index: 0;
-            animation: glowFloat 4s ease-in-out infinite;
-            pointer-events: none;
-        }
-
-        @keyframes glowFloat {
-
-            0%,
-            100% {
-                transform: translate(-50%, -10%) scale(1);
-                opacity: 0.7;
-            }
-
-            50% {
-                transform: translate(-50%, 5%) scale(1.1);
-                opacity: 1;
-            }
-        }
-
-        /* 9) BORDER GLOW RIFLETTENTE */
-        .border-glow {
-            position: relative;
-        }
-
-        .border-glow::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            padding: 1.5px;
-            background: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0.6) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        /* SAETTA ANIMATA (Metallic Shimmer) Scorrevole a DX */
-        .saetta {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .saetta::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
-            background-size: 200% 100%;
-            animation: shimmer 4s infinite linear;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-
-            100% {
-                background-position: 200% 0;
-            }
-        }
-
-        /* NO SCROLLBAR */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* VIEW LABELS (Standardized) */
-        .view-label {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* BLOCCO INTERAZIONI NON DESIDERATE (UX NATIVA) */
-        .no-select {
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            user-select: none;
-        }
-
-        .no-select input,
-        .no-select textarea,
-        .no-select [contenteditable="true"] {
-            -webkit-user-select: text;
-            user-select: text;
-        }
-    </style>
 </head>
 
-<body class="bg-[#0a0f1e] text-white font-display antialiased overflow-x-hidden">
-    <div
-        class="relative flex h-full min-h-screen w-full flex-col w-full md:max-w-3xl lg:max-w-5xl mx-auto bg-gradient-to-l from-[#030712] to-[#162e6e] shadow-2xl overflow-hidden">
+<body class="titanium-bg antialiased">
+    <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
+    <div class="titanium-box">
 
-        <!-- GLOW LAYER -->
+        <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
         <div class="glass-glow"></div>
 
-        <!-- 4) HEADER FUSION -->
-        <header
-            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md z-50">
-            <div class="flex items-center px-6 h-20 gap-4">
-                <a href="area_privata.html"
-                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                    <span
-                        class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-                </a>
-                <h1 id="page-title"
-                    class="relative z-10 text-xl font-bold leading-tight tracking-tight text-center flex-1 text-white opacity-90">
-                    Privato
-                </h1>
-                <div class="flex items-center gap-2">
-                    <button id="sort-btn" onclick="toggleSort()"
-                        class="group relative z-10 flex size-10 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                        <span class="material-symbols-outlined text-[22px]">sort_by_alpha</span>
-                    </button>
-                    <a href="aggiungi_account_privato.html"
-                        class="group relative z-10 flex size-10 items-center justify-center rounded-xl bg-primary hover:bg-primary-light border-glow transition-all duration-300 active:scale-95 text-white shadow-lg shadow-primary/20">
-                        <span class="material-symbols-outlined text-[24px]">add</span>
-                    </a>
-                    <a href="home_page.html"
-                        class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                        <span class="material-symbols-outlined text-[24px]">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <!-- 4. HEADER PLACEHOLDER -->
+        <div id="header-placeholder"></div>
 
-        <!-- Header Spacer -->
-        <div class="h-20 w-full shrink-0"></div>
+        <!-- MAIN CONTENT (Titanium Main Strategy) -->
+        <main class="titanium-main no-select">
 
-        <main class="flex-1 overflow-y-auto no-scrollbar mb-24 no-select">
-            <div class="px-6 py-4">
-                <!-- 6) SEARCH SECTION (Titanium Glass Section Box) -->
-                <div class="relative mb-6">
-                    <div
-                        class="relative border-glow bg-slate-500/5 rounded-2xl shadow-lg border border-white/5 overflow-hidden">
-                        <div class="flex items-center px-4 h-14 bg-black/5">
-                            <span class="material-symbols-outlined text-white/40 text-[20px] shrink-0">search</span>
-                            <input
-                                class="flex-1 bg-transparent border-none text-white placeholder:text-white/40 px-4 text-base focus:ring-0"
-                                placeholder="Cerca account..." type="search" />
-                        </div>
-                    </div>
-                </div>
-                <div id="accounts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-20">
-                    <!-- Accounts will be loaded here dynamically -->
-                    <div class="col-span-full text-center py-10 text-white/30 flex flex-col items-center">
+            <!-- 6. SAETTA MASTER (Riflesso Metallico Totale) -->
+            <div class="saetta-master"></div>
+
+            <!-- SEARCH SECTION (Standardized Titanium Search) -->
+            <div class="px-2 mb-6 relative z-40">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <span
-                            class="material-symbols-outlined animate-spin text-3xl mb-2 text-primary">progress_activity</span>
-                        Caricamento account...
+                            class="material-symbols-outlined text-white/20 group-focus-within:text-blue-400 transition-colors">search</span>
                     </div>
+                    <input type="search" placeholder="Cerca account o credenziali..."
+                        class="w-full h-14 pl-12 pr-6 rounded-2xl border border-white/10 bg-[#0a0f1e]/40 backdrop-blur-xl text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder:text-white/10">
                 </div>
             </div>
+
+            <!-- ACCOUNTS CONTAINER -->
+            <div id="accounts-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-24 px-2 relative z-30">
+                <!-- Data loading placeholder -->
+                <div class="col-span-full py-20 flex flex-col items-center justify-center space-y-4 opacity-40">
+                    <span class="material-symbols-outlined animate-spin text-4xl text-blue-400">sync</span>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em]">Sincronizzazione Titanium...</p>
+                </div>
+            </div>
+
         </main>
 
-        <!-- 5) FOOTER FUSION -->
-        <footer
-            class="fixed bottom-0 left-0 right-0 w-full md:max-w-3xl lg:max-w-5xl mx-auto h-24 pointer-events-none z-50 bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-md">
-        </footer>
+        <!-- 5. FOOTER PLACEHOLDER -->
+        <div id="footer-placeholder"></div>
 
+        <!-- ACTION BUTTON (FAB) - Integrated with latest Standard -->
+        <div class="fixed bottom-24 right-6 z-[60]">
+            <a href="aggiungi_account_privato.html" id="add-account-btn"
+                class="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-400 text-white shadow-2xl shadow-blue-500/40 border-glow hover:scale-110 active:scale-95 transition-all duration-300">
+                <span class="material-symbols-outlined text-[32px]">add</span>
+            </a>
+        </div>
 
-        <!-- FIREBASE COMPAT LIBRARIES -->
-        <!-- Module Script -->
-        <script src="assets/js/main.js"></script>
-        <script type="module" src="assets/js/account_privati.js?v=6"></script>
+        <!-- TOAST CONTAINER -->
+        <div id="toast-container"
+            class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-6 py-4 bg-[#0a0f1e]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-500 pointer-events-none">
+            <span id="toast-icon" class="material-symbols-outlined"></span>
+            <span id="toast-message" class="text-xs font-bold uppercase tracking-widest text-white"></span>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS MODULARI -->
+    <script type="module" src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/account_privati_titanium.js"></script>
+
+    <!-- Redirezione fallback per URL parametri se avviato con ?type= -->
+    <script>
+        // Manteniamo compatibilità con account_privati.js originale o il nuovo se rinominato
+    </script>
 </body>
 
 </html>

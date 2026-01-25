@@ -45,11 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 await login(email, password);
 
             } catch (err) {
-                // Ripristino in caso di errore
+                // Ripristino in caso di errore (incluso email non verificata)
                 btn.disabled = false;
                 btn.innerHTML = originalContent;
                 document.body.classList.remove('is-auth-loading');
-                console.error("Login Error:", err);
+
+                // Se l'errore è la verifica email, la notifica è già inviata da auth.js via Toast o Alert
+                console.error("Login Flow Interrupted:", err);
             }
         });
     }

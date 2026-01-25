@@ -81,6 +81,27 @@ html.dark {
     display: none;
 }
 
+/* 2.1 UX OPTIMIZATION: REMOVE TAP HIGHLIGHT (Fixed Square Click bug) */
+* {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+/* 2.2 GLOBAL INTERACTIVE FEEDBACK */
+a,
+button,
+[role="button"],
+[class*="matrix-"] {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+a:active,
+button:active,
+[role="button"]:active,
+[class*="matrix-"]:active {
+    transform: scale(0.96);
+}
+
 /* BLOCCO INTERAZIONI NON DESIDERATE (UX NATIVA) */
 .no-select {
     -webkit-user-select: none;
@@ -141,6 +162,43 @@ html.dark body {
 
 html.dark .titanium-box {
     background: linear-gradient(to left, #030712, #162e6e);
+}
+
+/* 3.1 BEACON ANIMATION (GLOWFLOAT) */
+.glass-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150%;
+    height: 120%;
+    background: radial-gradient(ellipse at 50% 0%,
+            var(--beacon-glow, rgba(80, 150, 255, 0.3)) 0%,
+            rgba(80, 150, 255, 0.1) 25%,
+            transparent 75%);
+    filter: blur(var(--beacon-blur));
+    opacity: 1;
+    pointer-events: none;
+    z-index: var(--z-bg);
+    animation: glowFloat 8s ease-in-out infinite;
+}
+
+html:not(.dark) .glass-glow {
+    --beacon-glow: rgba(14, 165, 233, 0.2);
+}
+
+@keyframes glowFloat {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(-100px) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(50px) scale(1.2);
+        opacity: 0.9;
+    }
 }
 
 /* ========================================================================== */
@@ -527,10 +585,8 @@ html.dark .titanium-header::before {
    ========================================================================== */
 .titanium-footer {
     bottom: 0;
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding-bottom: 2rem;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .titanium-footer::before {
@@ -547,35 +603,76 @@ html.dark .titanium-footer::before {
 /* ========================================================================== */
 
 /* HEADER USER INFO ALIGNMENT */
-.user-info {
+.header-stack {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.user-profile-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+}
+
+.user-info-text {
     display: flex;
     flex-direction: column;
-    /* Greeting Top, Name Bottom */
-    align-items: flex-start;
-    /* Align Left (near avatar) */
     justify-content: center;
-    margin-left: 1rem;
-    /* Spacing from avatar */
-    margin-right: auto;
-    /* Push logout to the far right */
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .greeting-text {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin: 0;
-    opacity: 0.8;
+    font-size: 8px;
+    font-weight: 500;
+    color: var(--text-dark);
+    /* Default Dark */
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+    margin-bottom: 1px;
+}
+
+html:not(.dark) .greeting-text {
+    color: var(--text-light);
 }
 
 .user-name {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     margin: 0;
-    color: var(--text-primary);
+    color: var(--text-dark);
+    /* Default Dark */
+    letter-spacing: -0.01em;
+    text-transform: capitalize;
+    /* "Solo l'iniziale in grande" */
+}
+
+html:not(.dark) .user-name {
+    color: var(--text-light);
+}
+
+/* FOOTER DYNAMIC LAYOUT */
+.footer-stack {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.build-tag {
+    font-size: 7px;
+    font-weight: 900;
+    color: var(--text-secondary);
+    opacity: 0.3;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
 }
 
 /* Header Avatar */
+/* Header Avatar Base (Universale) */
 .avatar-circle {
     width: 48px;
     height: 48px;
@@ -587,8 +684,8 @@ html.dark .titanium-footer::before {
     border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Header Logout Button */
-.btn-icon-logout {
+/* Header Action Button (Universale) */
+.btn-icon-header {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -602,9 +699,8 @@ html.dark .titanium-footer::before {
     transition: all 0.2s;
 }
 
-.btn-icon-logout:hover {
-    background: rgba(255, 0, 0, 0.1);
-    color: #ef4444;
+.btn-icon-header:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* Theme Switcher (Footer) - Centered & Styled */
@@ -1096,3 +1192,19 @@ html.titanium-forced-dark a[href="impostazioni.html"],
 html.titanium-forced-dark a[href="dati_anagrafici_privato.html"] {
     display: none !important;
 }
+
+/* ==========================================================================
+   BACKUP LOGICA ALTERNATIVA (Memoria Futura - Diego)
+   Descrizione: Questa era la "Logica Pesante" con Safe Area per mobile e 
+   disposizione a Dock centrale. Da ripristinare solo se serve ergonomia extra.
+   ========================================================================== 
+.titanium-footer-ALTERNATIVE {
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 2rem;
+}
+.titanium-footer-ALTERNATIVE::before {
+    mask-image: linear-gradient(to top, black 10%, transparent 100%);
+}
+*/

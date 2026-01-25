@@ -12,8 +12,71 @@ import { setTheme, applyTheme } from './theme.js';
  * Gestisce l'integrazione dati e l'interfaccia della dashboard principale.
  */
 
-// 1. Inizializzazione Componenti (Regola 1-5)
-initComponents();
+// 1. Inizializzazione Componenti (Header/Footer Puri)
+initComponents().then(() => {
+    const headerStack = document.getElementById('header-content');
+    if (headerStack) {
+        // Forza il layout a riga singola senza a capo
+        headerStack.style.display = 'flex';
+        headerStack.style.flexDirection = 'row';
+        headerStack.style.alignItems = 'flex-start';
+        headerStack.style.justifyContent = 'space-between';
+        headerStack.style.flexWrap = 'nowrap';
+        headerStack.style.width = '100%';
+
+        headerStack.innerHTML = `
+            <a href="dati_anagrafici_privato.html" class="user-profile-group group">
+                <div id="user-avatar" class="avatar-circle border-glow shrink-0" style="width: 42px; height: 42px;"></div>
+                <div class="user-info-text">
+                    <span id="greeting-text" class="greeting-text">...</span>
+                    <span id="user-name" class="user-name">...</span>
+                </div>
+            </a>
+            <button id="logout-button" class="btn-icon-header self-start" style="border: none; background: transparent; padding: 0; outline: none;">
+                <span class="material-symbols-outlined !text-xl">logout</span>
+            </button>
+        `;
+    }
+
+    // Iniezione Contenuto Footer (3 Sezioni: Vuoto | Tema | Settings)
+    const footerStack = document.getElementById('footer-content');
+    if (footerStack) {
+        // Forza il layout a 3 zone per tenere il tema al centro e l'ingranaggio a destra
+        footerStack.style.display = 'flex';
+        footerStack.style.alignItems = 'center';
+        footerStack.style.justifyContent = 'space-between';
+        footerStack.style.width = '100%';
+
+        footerStack.innerHTML = `
+            <div style="flex: 1;"></div> 
+            
+            <div class="flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity" style="flex: 2; justify-content: center;">
+                <div class="flex bg-white/5 p-1 rounded-full border border-white/5">
+                    <button onclick="setTheme('light')" class="text-[7px] font-black uppercase px-3 py-1 rounded-full hover:bg-white/10 transition-colors">Light</button>
+                    <button onclick="setTheme('dark')" class="text-[7px] font-black uppercase px-3 py-1 rounded-full hover:bg-white/10 transition-colors">Dark</button>
+                </div>
+                <span class="build-tag">v5.1 Build</span>
+            </div>
+
+            <div style="flex: 1; display: flex; justify-content: flex-end;">
+                <a href="impostazioni.html" class="btn-icon-header opacity-30 hover:opacity-100 transition-opacity group/settings">
+                    <span class="material-symbols-outlined !text-xl transform group-hover/settings:rotate-90 transition-transform duration-500" style="font-variation-settings: 'wght' 200;">tune</span>
+                </a>
+            </div>
+        `;
+    }
+
+    // Una volta iniettato, inizializza il logout
+    const logoutBtn = document.getElementById('logout-button');
+    if (logoutBtn) {
+        logoutBtn.onclick = async () => {
+            const { auth } = await import('./firebase-config.js');
+            const { signOut } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+            await signOut(auth);
+            window.location.href = 'index.html';
+        };
+    }
+});
 
 // 1b. Esposizione Temi
 window.setTheme = setTheme;
@@ -61,7 +124,13 @@ onAuthStateChanged(auth, async (user) => {
     const uName = document.getElementById('user-name');
     const logoutBtn = document.getElementById('logout-button');
 
-    let nameToShow = user.displayName || user.email.split('@')[0];
+    // Funzione interna per il formato amichevole (Iniziale Maiuscola)
+    const toFriendlyName = (name) => {
+        if (!name) return "";
+        return name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
+
+    let nameToShow = toFriendlyName(user.displayName || user.email.split('@')[0]);
     if (user.photoURL && uAvatar) uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
     if (uName) uName.textContent = nameToShow;
 
@@ -69,7 +138,7 @@ onAuthStateChanged(auth, async (user) => {
         const docSnap = await getDoc(doc(db, "users", user.uid));
         if (docSnap.exists()) {
             const data = docSnap.data();
-            const fullName = `${data.nome || ''} ${data.cognome || ''}`.trim();
+            const fullName = toFriendlyName(`${data.nome || ''} ${data.cognome || ''}`.trim());
             if (fullName) uName.textContent = fullName;
             const photo = data.photoURL || data.avatar;
             if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
