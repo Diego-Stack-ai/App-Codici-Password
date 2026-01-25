@@ -51,22 +51,6 @@ ________________________________________
 
 ________________________________________
 
-### Regola 18 – Allineamento Premium Titanium
-
-**Obiettivo:** Garantire una simmetria perfetta e un allineamento "al righello" di tutti i contenuti.
-
-**Linee guida operative:**
-*   **Margini Laterali Totali**: Ogni contenuto interno ai box Matrix (Titoli, Liste, Testi) deve trovarsi a **52 pixel** esatti dai bordi laterali del box.
-    *   *Composizione*: 8px (padding base box) + 44px (padding interno contenuto).
-*   **Simmetria Obbligatoria**: Il margine di 52px deve essere identico sia a **Sinistra** che a **Destra**.
-*   **Geometria C-Blade**: La linguetta a "C" (::before) deve avere:
-    *   Spessore Fascia: 10px.
-    *   Spessore Vertici: 12px.
-    *   Lunghezza Punte: 35px (con raccordo a raggio interno).
-*   **Perimetri (Light)**: Bordo solidale coordinato di **2px** (tramite `outline` per evitare clipping).
-
-________________________________________
-
 ### Regola 6 – Tailwind CSS
 •	Usare per layout, moduli ed effetti.
 •	Gestione Dual Theme obbligatoria tramite classi `dark:` o classi semantiche.
@@ -137,7 +121,7 @@ Monitoraggio dello stato di avanzamento.
 
 | # | Stato | Nome Pagina | Contenitore | Faro | Effetti Card | Palette / Colori |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | 🟠 INCOMPLETA | `index.html` (Login) | 1, 2 | 3 | 4, 5, 9, 13 | Fusion Clean |
+| 1 | � COMPLETATA | `index.html` (Login) | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
 | 2 | 🔴 DA FARE | `registrati.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 3 | 🔴 DA FARE | `verifica_email.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 4 | 🔴 DA FARE | `reset_password.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
@@ -153,7 +137,7 @@ Monitoraggio dello stato di avanzamento.
 | 14 | 🔴 | `modifica_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 15 | 🔴 | `modifica_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 16 | 🔴 | `modifica_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 17 | 🟢 COMPLETATA | home_page.html | 1, 2 | 3 | 4, 5, 6, 9, 10, 14, 15 | Matrix Fusion |
+| 17 | 🟢 COMPLETATA | home_page.html | 1, 2 | 3 | 4, 5, 6, 9, 10, 14, 15, 18 | Matrix Fusion |
 | 18 | 🟠 INCOMPLETA | `dati_anagrafici_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Section Box** |
 | 19 | 🟠 INCOMPLETA | `area_privata.html` | 1, 2 | 3 | 4, 5, 9, 11 | **Dashboard Navigazione** |
 | 20 | 🔴 | `scadenze.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Scadenze** |
@@ -197,36 +181,16 @@ Gli effetti del design system sono definiti nel dettaglio nel file dedicato: `TI
 | **[#16]**| **Glass Card** | `.titanium-glass-card` 🟢 | SÌ 🟢 | Sfondo semitrasparente blurrato per elementi in lista |
 | **[#17]**| **Swipe Safety** | (JS Logic) 🟢 | NO 🟢 | Blocca click e navigazione durante lo swipe degli elementi nelle liste (Swipe List) |
 | **[#18]**| **Saetta Master** | `.saetta-master` 🟢 | SÌ 🟢 | Grande onda luminosa che attraversa l'intera dashboard |
-
-
+| **[#19]**| **Visibilità Selettiva** | `.titanium-hide` 🟢 | SÌ 🟢 | Nasconde componenti standard (es. selettore tema) in pagine specifiche |
+| **[#20]**| **Sicurezza Tema Forzato** | `.titanium-forced-dark` 🟢 | SÌ 🟢 | Blocca la pagina in Dark Mode per privacy e coerenza grafica |
 ________________________________________
 
-### Appendice A – Sintesi Architettura Home Page (v4.5)
-*Questa sezione riassume lo stato attuale della Home Page per garantirne la ricostruibilità futura.*
-
-#### 1. Dual Theme System (L'essenza visiva)
-- **Light Mode (Glass Clean) ⚪**: Sfondo bianco semi-trasparente, bordi solidi coordinati e la **C-Blade** [#15] (linguetta dinamica a sinistra) che cambia colore in base alla categoria.
-- **Dark Mode (Titanium Power) 🔵**: Gradienti profondi (es. Blue to Indigo), bordi cristallini con maschera [#9] e riflessi accesi.
-
-#### 2. Gerarchia Z-Index (La gestione dei livelli)
-Per evitare sovrapposizioni errate, il sistema segue questa piramide:
-- **Livello 0 (`--z-bg`)**: Sfondo del body.
-- **Livello 5 (`--z-glow`)**: Il **Faro** (`.glass-glow` [#3]), che brilla *dietro* al contenuto.
-- **Livello 10 (`--z-content`)**: Il testo, le icone principali e i box card.
-- **Livello 20 (`--z-ui`)**: Elementi di interfaccia (badge, bottoni piccoli).
-- **Livello 80 (`--z-saetta`)**: La **Saetta Master** [#18], posizionata *sopra* tutto il contenuto per un riflesso totale.
-- **Livello 100 (`--z-header`)**: Header e Footer Fusion (sempre in primo piano).
-
-#### 3. Astuzie della Saetta (Shimmer Logic)
-- **Saetta Master [#18]**: È una singola onda grande che attraversa tutta la dashboard. Essendo al livello 80, "colpisce" anche le scritte, dando un effetto metallico realistico.
-- **Saetta Gold [#14]**: Usata nelle liste dati. È più lenta, sottile e con opacità ridotta in Light Mode per non appesantire la lettura.
-
-#### 4. Caratteristiche Box e Pulsanti
+#### Regola 16 - Caratteristiche Box e Pulsanti
 - **Box Matrix [#15]**: Le card principali sono ibride: fungono da contenitori ma hanno comportamenti da pulsante (`.titanium-interactive` [#6]). All'hover si alzano (`translateY`) e attivano il `.glass-shine` [#10].
 - **Watermark**: Ogni card ha un'icona di sfondo (`.bg-icon-container`) che ruota e si ingrandisce all'hover per dare profondità.
 - **Liste**: Gli elementi in lista usano la `.titanium-glass-card` [#16], ottimizzata per lo scroll fluido, accoppiata alla logica **Swipe Safety** [#17].
 
-#### 5. Integrazione Dati (Logic Layer)
+#### Regola 17 - Integrazione Dati (Logic Layer)
 - **Profilo**: Caricamento asincrono di Nome, Cognome e Avatar da Firestore (`users/{uid}`).
 - **Badge Notifiche**: Le card Scadenze e Urgenze mostrano badge numerici popolati in tempo reale dai moduli JS.
 - **Header/Footer**: Caricati dinamicamente tramite placeholder e la funzione `initComponents()`.
@@ -249,3 +213,85 @@ Tutti i testi descrittivi, istruzioni e messaggi informativi devono essere non c
 *   Applicare a: Blocchi testo, tooltip, messaggi aiuto.
 *   NON applicare a: Pulsanti, Link, Input.
 *   Codice: `<div class="user-select-none text-gray-400 ...">`
+
+________________________________________
+
+### Regola 18 – Allineamento Premium Titanium
+
+**Obiettivo:** Garantire una simmetria perfetta e un allineamento "al righello" di tutti i contenuti.
+
+**Linee guida operative:**
+*   **Margini Laterali Totali**: Ogni contenuto interno ai box Matrix (Titoli, Liste, Testi) deve trovarsi a **52 pixel** esatti dai bordi laterali del box.
+    *   *Composizione*: 8px (padding base box) + 44px (padding interno contenuto).
+*   **Simmetria Obbligatoria**: Il margine di 52px deve essere identico sia a **Sinistra** che a **Destra**.
+*   **Geometria C-Blade**: La linguetta a "C" (::before) deve avere:
+    *   Spessore Fascia: 10px.
+    *   Spessore Vertici: 12px.
+    *   Lunghezza Punte: 35px (con raccordo a raggio interno).
+*   **Perimetri (Light)**: Bordo solidale coordinato di **2px** (tramite `outline` per evitare clipping).
+### Regola 19 – Visibilità Selettiva (Hidden State)
+**Obiettivo:** Gestire la scomparsa di componenti standard in pagine critiche o stati pre-autenticazione.
+
+**Linee guida operative:**
+*   Utilizzare la classe utility `.titanium-hide` per rimuovere elementi dall'interfaccia senza alterare permanentemente il DOM.
+*   **Casi d'uso**: Nascondere il selettore tema o il pulsante impostazioni nella pagina di Login.
+*   **Comportamento**: L'elemento deve essere completamente invisibile e non occupare spazio (`display: none !important`).
+
+________________________________________
+
+### Regola 20 – Sicurezza Tema Forzato (Security Dark Mode)
+**Obiettivo:** Blindare esteticamente le pagine di accesso per trasmettere un senso di impenetrabilità e privacy.
+
+**Linee guida operative:**
+*   Aggiungere la classe `.titanium-forced-dark` al tag `<html>` della pagina.
+*   **Effetto**: La pagina rimane in modalità Dark indipendentemente dalle preferenze utente salvate nel `localStorage`.
+*   **Contextual Hiding**: Questa regola attiva automaticamente la Regola 19 sul selettore del tema per evitare incoerenze visive.
+
+
+
+
+________________________________________
+
+### Regola 21 – Pulizia Strutturale (External Assets Only)
+**Obiettivo:** Trasformare i file HTML in "gusci" puri, delegando tutta la logica e lo stile a file esterni per massima manutenibilità.
+
+**Linee guida operative:**
+*   **Zero CSS Inline**: Non utilizzare il tag <style> dentro i file HTML. Tutte le regole devono trovarsi in 	itanium.css o file CSS dedicati.
+*   **Zero JS Logic Inline**: Non scrivere la logica delle funzioni o i listener dei form dentro i file HTML.
+*   **Modulo Unico**: Ogni pagina deve avere un singolo punto di ingresso JS (es. <script type="module" src="assets/js/nome_pagina.js"></script>).
+*   **Ereditarietà**: La pagina deve fidarsi delle regole globali; se serve un'eccezione, va creata una classe di utility nel registro effetti.
+
+________________________________________
+
+### Regola 22 – Protocollo di Ottimizzazione HTML (TEMPORANEA)
+**Obiettivo:** Standardizzare e ripulire sistematicamente i file HTML esistenti portandoli al livello "Titanium Gold".
+
+**⚠️ NOTA IMPORTANTE:** Questa regola serve esclusivamente come guida operativa strutturale per completare la trasformazione di tutti i file del progetto. **AL TERMINE DEI LAVORI, QUESTA INTERA REGOLA DEVE ESSERE CANCELLATA DAL MANUALE.**
+
+**Istruzioni operative per i prossimi file HTML:**
+
+1.  **Collegamento Motore (Master CSS)**: Verificare che nell'header sia presente il link al file mastro: `<link rel="stylesheet" href="assets/css/titanium.css">`. Senza questo, la pagina non caricherà nessun effetto o gradiente.
+2.  **Applicazione Regole Fondamentali (1-5)**:
+    *   **Regola 1**: Applicare la classe `titanium-bg` al tag `<body>` per lo sfondo critico.
+    *   **Regola 2**: Usare la classe master `.titanium-box` per il contenitore principale (sostituendo classi Tailwind manuali).
+    *   **Regola 3**: Inserire `<div class="glass-glow"></div>` (Faro animato) all'inizio del contenitore.
+    *   **Regola 4**: Sostituire Header e Footer fisici con i placeholder: `<div id="header-placeholder"></div>` e `<div id="footer-placeholder"></div>`.
+    *   **Regola 5**: Inserire il blocco di aiuto informativo (Testo guida) protetto da `user-select-none`.
+3.  **DNA Tipografico (Coerenza Visiva)**: Tutte le informazioni secondarie (Versioni nel footer, testi di aiuto nelle card, note tecniche) devono usare lo stesso formato:
+    *   Classe: `text-[10px] text-white/30 italic user-select-none`.
+    *   Niente maiuscolo forzato (scrivere come testo normale, es: "Versione 5").
+4.  **Pulizia Asset (Regola 21)**: Eliminare ogni riga di CSS inline (`<style>`) e spostare la logica Javascript in un file esterno dedicato: `assets/js/nome_pagina.js`.
+5.  **Integrazione JS**: Richiamare il modulo JS a fine body: `<script type="module" src="assets/js/nome_pagina.js"></script>`.
+6.  **Controllo Effetti Dinamici**: Inserire div di servizio come `.saetta-master` all'inizio del tag `<main>`, basandosi sulla **tabella della Regola 14** per gli ID effetto.
+7.  **UX Blinda (Menu Contestuale)**: Verificare che il file `main.js` sia collegato correttamente. Questo assicura che il menu contestuale e la selezione siano disabilitati (eccetto negli input), dando l'effetto app nativa e impedendo azioni non autorizzate (ispeziona, copia URL, ecc.).
+8.  **Pulizia Residui**: Rimuovere ogni classe Tailwind orfana o commento superfluo che non serva alla struttura pura.
+9.  **Architettura 10/10 (Moduli)**: La logica JS non deve essere ammassata in un unico file. Verificare la distribuzione:
+    *   `ui-core.js`: Policy globali e feedback di sistema (Toast).
+    *   `ui-components.js`: Logica componenti universali (Toggles, Copy).
+    *   `ui-pages.js`: Logica specifica di pagina.
+    *   `utils.js`: Helper puri (date, chiamate).
+    *   `main.js`: Semplice entry-point (`type="module"`) che importa e inizializza i moduli sopra citati.
+10. **Refinement Enterprise**:
+    *   **Selezione Semantica**: Evitare selettori HTML generici (es. `button[type=submit]`). Usare attributi descrittivi (es. `[data-login-submit]`) per slegare la logica dalla struttura.
+    *   **Stato Globale**: Usare hook di stato sul body (es. `is-auth-loading`) durante i processi critici per gestire feedback visuali e blocchi di interazione a livello di sistema.
+    *   **Zero Duplicazione**: Non riscrivere la logica dei componenti (es. toggle password) nei moduli di pagina se è già gestita dai componenti globali.

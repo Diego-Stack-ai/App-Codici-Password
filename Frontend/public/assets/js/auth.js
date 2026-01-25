@@ -9,7 +9,8 @@ import {
     sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showNotification, logError } from './utils.js';
+import { showToast } from './ui-core.js';
+import { logError } from './utils.js';
 
 /**
  * Registers a new user using Firebase Auth.
@@ -50,9 +51,9 @@ async function register(nome, cognome, email, password) {
         // Send email verification (optional but recommended)
         await sendEmailVerification(user);
         console.log('Verification email sent to', user.email);
-        showNotification("Email di verifica inviata! Controlla la tua casella.", "success");
+        showToast("Email di verifica inviata! Controlla la tua casella.", "success");
 
-        showNotification("Registrazione avvenuta con successo!", "success");
+        showToast("Registrazione avvenuta con successo!", "success");
 
         // Removed automatic redirect to allow user to see verification modal.
         // You can navigate manually after verification.
@@ -71,7 +72,7 @@ async function register(nome, cognome, email, password) {
         } else if (error.code === 'auth/network-request-failed') {
             message = "Problema di connessione. Riprova.";
         }
-        showNotification(message, "error");
+        showToast(message, "error");
         alert(message); // Fallback alert ensures visibility if notification fails
         return false;
     }
@@ -105,9 +106,9 @@ async function login(email, password) {
                 recreatedAfterDeletion: true
             });
 
-            showNotification("Profilo ripristinato! Benvenuto.", "success");
+            showToast("Profilo ripristinato! Benvenuto.", "success");
         } else {
-            showNotification("Login effettuato con successo!", "success");
+            showToast("Login effettuato con successo!", "success");
         }
 
         setTimeout(() => {
@@ -123,7 +124,7 @@ async function login(email, password) {
         } else if (error.code === 'custom/user-deleted') {
             message = error.message;
         }
-        showNotification(message, "error");
+        showToast(message, "error");
     }
 }
 
@@ -136,7 +137,7 @@ async function logout() {
         window.location.href = "index.html";
     } catch (error) {
         logError("Auth Logout", error);
-        showNotification("Errore durante il logout.", "error");
+        showToast("Errore durante il logout.", "error");
     }
 }
 
@@ -147,13 +148,13 @@ async function logout() {
 async function resetPassword(email) {
     try {
         await sendPasswordResetEmail(auth, email);
-        showNotification("Email di reset inviata! Controlla la tua casella di posta.", "success");
+        showToast("Email di reset inviata! Controlla la tua casella di posta.", "success");
         setTimeout(() => {
             window.location.href = "index.html";
         }, 3000);
     } catch (error) {
         logError("Auth ResetPassword", error);
-        showNotification("Errore nell'invio dell'email di reset.", "error");
+        showToast("Errore nell'invio dell'email di reset.", "error");
     }
 }
 
@@ -216,15 +217,15 @@ function checkAuthState() {
 async function resendVerificationEmail() {
     const user = auth.currentUser;
     if (!user) {
-        showNotification('Devi effettuare il login prima di reinviare la verifica.', 'error');
+        showToast('Devi effettuare il login prima di reinviare la verifica.', 'error');
         return;
     }
     try {
         await sendEmailVerification(user);
-        showNotification('Email di verifica reinviata!', 'success');
+        showToast('Email di verifica reinviata!', 'success');
     } catch (error) {
         logError("Auth ResendVerification", error);
-        showNotification('Errore nel reinvio della email di verifica.', 'error');
+        showToast('Errore nel reinvio della email di verifica.', 'error');
     }
 }
 

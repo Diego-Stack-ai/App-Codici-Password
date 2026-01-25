@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/titanium.css?v=2">
+    <link rel="stylesheet" href="assets/css/titanium.css">
 
     <!-- PWA / Mobile Capable -->
     <link rel="manifest" href="manifest.json" />
@@ -22,23 +22,22 @@
     <meta name="theme-color" content="#0a0f1e">
 </head>
 
-<body>
+<body class="titanium-bg">
     <div class="titanium-box">
         <div class="glass-glow"></div>
 
         <!-- HEADER PLACEHOLDER -->
         <div id="header-placeholder"></div>
 
-        <!-- MAIN -->
-        <main class="titanium-main no-select">
+        <!-- MAIN (Data-Lock-UI for native effect) -->
+        <main class="titanium-main" data-lock-ui>
 
             <div class="saetta-master"></div>
-
 
             <div class="dashboard-grid">
                 <!-- SEZIONE 1: ACCESSO RAPIDO -->
                 <div class="grid-2-cols">
-                    <a href="area_privata.html" class="matrix-blue border-glow">
+                    <a href="area_privata.html" class="matrix-blue border-glow" data-ui-section="privato">
                         <div class="glass-shine"></div>
                         <div class="bg-icon-container">
                             <span class="material-symbols-outlined titanium-icon-lg" role="img"
@@ -46,11 +45,11 @@
                         </div>
                         <div class="card-text-block">
                             <h3>Privato</h3>
-                            <p>Cassaforte Personale</p>
+                            <p data-ui="hint">Cassaforte Personale</p>
                         </div>
                     </a>
 
-                    <a href="lista_aziende.html" class="matrix-green border-glow">
+                    <a href="lista_aziende.html" class="matrix-green border-glow" data-ui-section="azienda">
                         <div class="glass-shine"></div>
                         <div class="bg-icon-container">
                             <span class="material-symbols-outlined titanium-icon-lg" role="img"
@@ -58,13 +57,13 @@
                         </div>
                         <div class="card-text-block">
                             <h3>Azienda</h3>
-                            <p>Gestione Risorse</p>
+                            <p data-ui="hint">Gestione Risorse</p>
                         </div>
                     </a>
                 </div>
 
                 <!-- SEZIONE 2: SCADENZE (FULL WIDTH) -->
-                <div data-href="scadenze.html" role="button" tabindex="0"
+                <div data-href="scadenze.html" data-ui-section="scadenze" role="button" tabindex="0"
                     class="matrix-orange border-glow scadenze-box no-lift">
                     <div class="bg-icon-container" style="bottom: 10px; right: 5px;">
                         <span class="material-symbols-outlined titanium-icon-xl" role="img"
@@ -78,14 +77,14 @@
                                     <span id="urgent-count">0</span>
                                 </span>
                             </div>
-                            <p>Controlla i prossimi impegni</p>
+                            <p data-ui="hint">Controlla i prossimi impegni</p>
                         </div>
                         <div id="deadline-list-container" class="dashboard-dynamic-list"></div>
                     </div>
                 </div>
 
                 <!-- SEZIONE 3: URGENZE (FULL WIDTH) -->
-                <div id="urgenze-card" data-href="urgenze.html" role="button" tabindex="0"
+                <div id="urgenze-card" data-href="urgenze.html" data-ui-section="urgenze" role="button" tabindex="0"
                     class="matrix-red border-glow urgenze-box no-lift">
                     <div class="bg-icon-container" style="bottom: 10px; right: 5px;">
                         <span class="material-symbols-outlined titanium-icon-xxl" role="img"
@@ -99,7 +98,7 @@
                                     <span id="expired-count">0</span>
                                 </span>
                             </div>
-                            <p>Pratiche scadute</p>
+                            <p data-ui="hint">Pratiche scadute</p>
                         </div>
                         <div id="urgenze-list" class="dashboard-dynamic-list no-scrollbar"></div>
                     </div>
@@ -111,108 +110,9 @@
         <div id="footer-placeholder"></div>
     </div>
 
-    <!-- SCRIPT FIREBASE -->
-    <script type="module">
-        import { auth, db } from './assets/js/firebase-config.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-        import { initComponents } from './assets/js/components.js';
-        import { loadUrgentDeadlinesCount } from './assets/js/scadenze.js';
-        import { loadExpiredDeadlines } from './assets/js/urgenze.js';
-        import { logError } from './assets/js/utils.js';
-        import { setTheme, applyTheme } from './assets/js/theme.js';
-
-        async function start() {
-            // 1. Carica Header e Footer dai file esterni
-            await initComponents();
-
-            // 2. Logica Saluto Temporale
-            (function () {
-                const h = new Date().getHours();
-                const el = document.getElementById('greeting-text');
-                if (el) el.textContent = (h >= 5 && h < 13) ? "Buon giorno," : (h >= 13 && h < 17) ? "Buon pomeriggio," : "Buona sera,";
-            })();
-
-            // 3. Gestione Temi (Modularizzato)
-            // 3. Gestione Temi (Modularizzato)
-            // L'import è stato spostato in alto nel modulo.
-            window.setTheme = setTheme;
-            applyTheme();
-
-            // 3b. Gestione Navigazione Data-Href (Accessibilità + Separazione)
-            document.querySelectorAll('[data-href]').forEach(el => {
-                const nav = () => window.location.href = el.dataset.href;
-                el.addEventListener('click', nav);
-                el.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        nav();
-                    }
-                });
-            });
-
-            // 4. Autenticazione e Caricamento Dati (Protetto contro Redirect Fantasma)
-            let authChecked = false;
-            onAuthStateChanged(auth, async (user) => {
-                if (authChecked) return; // Evitiamo esecuzioni multiple al boot
-
-                if (!user) {
-                    authChecked = true; // Confermiamo che non c'è utente
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                authChecked = true; // Utente trovato, procediamo
-
-                const uAvatar = document.getElementById('user-avatar');
-                const uName = document.getElementById('user-name');
-                const logoutBtn = document.getElementById('logout-button');
-
-                let nameToShow = user.displayName || user.email.split('@')[0];
-                if (user.photoURL && uAvatar) uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
-                if (uName) uName.textContent = nameToShow;
-
-                try {
-                    const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const fullName = `${data.nome || ''} ${data.cognome || ''}`.trim();
-                        if (fullName) uName.textContent = fullName;
-                        const photo = data.photoURL || data.avatar;
-                        if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
-                    }
-                } catch (error) {
-                    logError("Firestore Profile", error);
-                    const pWarning = document.getElementById('profile-warning');
-                    if (pWarning) pWarning.style.display = 'inline-block';
-                    if (uName) {
-                        uName.textContent = nameToShow;
-                        uName.title = "Profilo caricato in modalità base (Offline)";
-                    }
-                    if (error.code === 'permission-denied') {
-                        console.warn("Permessi insufficienti per leggere il profilo utente.");
-                    } else if (error.code === 'unavailable') {
-                        console.warn("Firestore non disponibile o connessione assente.");
-                    }
-                }
-
-                if (logoutBtn) {
-                    logoutBtn.onclick = async () => {
-                        await signOut(auth);
-                        window.location.href = 'index.html';
-                    };
-                }
-
-                // 5. Carica dati dai moduli esterni (Isolati per sicurezza)
-                try { loadUrgentDeadlinesCount(user); } catch (e) { logError("Dashboard Scadenze", e); }
-                try { loadExpiredDeadlines(user); } catch (e) { logError("Dashboard Urgenze", e); }
-
-            });
-        }
-
-        // Lancio
-        start();
-    </script>
+    <!-- SCRIPTS MODULARI (10/10 Architecture) -->
+    <script type="module" src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/home.js"></script>
 </body>
 
 </html>

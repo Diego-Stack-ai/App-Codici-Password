@@ -283,3 +283,27 @@ html.dark .matrix-blue { background: linear-gradient(to right, #2196F3, #1976D2)
     mix-blend-mode: overlay; 
 }
 ```
+---
+ 
+ ## [#19] COMPONENT VISIBILITY (Hidden State)
+ **Descrizione:** Utility "blindata" per nascondere componenti standard (es. Selettore tema, Pulsanti Logout) in pagine specifiche o stati particolari (es. Login).
+ **Nome Classe:** `.titanium-hide`
+ **Utilizzo:** Da applicare al componente che si vuole rendere invisibile senza alterare il layout globale.
+ ```css
+ .titanium-hide {
+     display: none !important; /* L'uso di !important è qui giustificato per l'override globale di visibilità */
+ }
+ ```
+ 
+ ---
+ 
+ ## [#20] FORCED THEME (Security Dark)
+ **Descrizione:** Forza l'intera pagina a rimanere in modalità scura indipendentemente dalle preferenze utente, per massimizzare il senso di sicurezza e privacy.
+ **Metodo:** Si applica via HTML/CSS bloccando il ricalcolo del tema.
+ **Utilizzo:** All'interno del tag `<html>` o come utility specifica.
+ ```css
+ .titanium-forced-dark {
+     color-scheme: dark;
+     /* Blocca l'applicazione del tema light se presente */
+ }
+ ```
