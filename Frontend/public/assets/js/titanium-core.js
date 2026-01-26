@@ -69,13 +69,27 @@
 
     // Esecuzione immediata per il tema
     // Iniezione asset e protezioni al caricamento del DOM
+    // 3. TITANIUM STEALTH (Anti-FOUC & Smooth Reveal)
+    const style = document.createElement('style');
+    style.innerHTML = `body { opacity: 0; transition: opacity 0.4s ease-out; will-change: opacity; }`;
+    document.head.appendChild(style);
+
+    // Funzione di reveal
+    const revealContent = () => {
+        requestAnimationFrame(() => {
+            setTimeout(() => { document.body.style.opacity = '1'; }, 100);
+        });
+    };
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
             injectAssets();
             applyProtections();
+            revealContent(); // Reveal
         });
     } else {
         injectAssets();
         applyProtections();
+        revealContent(); // Reveal
     }
 })();
