@@ -19,13 +19,18 @@ initComponents().then(() => {
 
         headerStack.innerHTML = `
             <div class="header-stack w-full flex items-center justify-between relative">
-                <a href="impostazioni.html" class="btn-icon-header border-glow flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-white">
+                <!-- Pulsante Indietro (Sinistra) -->
+                <a href="impostazioni.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
                     <span class="material-symbols-outlined">arrow_back</span>
                 </a>
-                <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
+
+                <!-- Titolo (Centro - Assoluto per centratura perfetta) -->
+                <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
                     Regole Invio
                 </h2>
-                <a href="home_page.html" class="btn-icon-header border-glow flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-white">
+
+                <!-- Pulsante Home (Destra) -->
+                <a href="home_page.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
                     <span class="material-symbols-outlined">home</span>
                 </a>
             </div>
@@ -37,7 +42,7 @@ initComponents().then(() => {
     if (footerStack) {
         footerStack.innerHTML = `
             <div class="footer-stack" style="width: 100%; display: flex; justify-content: center; opacity: 0.3;">
-                <span class="text-[9px] font-bold uppercase tracking-[0.3em] font-mono text-white/50 user-select-none">${t('version')}</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.3em] font-mono text-gray-900/50 dark:text-white/50 user-select-none">${t('version')}</span>
             </div>
         `;
     }

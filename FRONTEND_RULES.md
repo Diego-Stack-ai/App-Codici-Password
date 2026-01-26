@@ -1,3 +1,11 @@
+### Regola 0 – I 5 Pilastri Fondamentali (DNA Titanium)
+•  Gli effetti [#1], [#2], [#3], [#4], [#5] costituiscono la **Fondazione Obbligatoria** dell'App.
+•  Siamo in presenza di un'architettura dual-core: ogni pilastro ha una variante **Dark (Metallo Blu)** e una variante **Light (Platino Cristallo)**.
+•  **NON OPZIONALI**: Ogni pagina deve caricare questi 5 elementi. Se mancano, la pagina non rispetta il protocollo.
+•  Questi effetti sono protetti: non possono essere nascosti dalla Regola [#19].
+
+________________________________________
+
 ### Regola 1 – CSS critico subito
 •	Tutti i colori di sfondo principali devono essere definiti subito all’apertura della pagina.
 •	Colore sfondo pagina e contenitore principale: obbligatoriamente gradiente blu scuro (Metodo Titanium).
@@ -12,7 +20,7 @@ ________________________________________
 
 **Linee guida operative:**
 *   **Effetti principali (Registro Titanium)**: `.titanium-bg`, `.titanium-box`, `.glass-glow`. Gestiscono già dual theme tramite classi `.dark` o predisposizione.
-*   **Classi semantiche e palette**: `.matrix-blue`, `.fusion-clean`. Devono rimanere neutre finché il Light non è richiesto.
+*   **Classi semantiche e palette**: `.matrix-blue`, `.fusion-blue`. Devono rimanere neutre finché il Light non è richiesto.
 *   **Utility Tailwind dark**: Usata solo per micro-dettagli (es. divider). Mai colori hardcoded.
 
 **Nota Light (Platinum):**
@@ -41,13 +49,14 @@ ________________________________________
 
 ________________________________________
 
-### Regola 5 – Aiuto base informativa
-
-•	Ogni pagina deve fornire aiuto contestuale.
-*   **Testi descrittivi**: Brevi, chiari, non interattivi.
-*   **Elementi informativi**: Tooltip, icone aiuto.
-*   Non bloccare la navigazione.
-*   Sempre leggibili e coerenti col tema (Dark/Light).
+### Regola 5 – Aiuto contestuale (Titanium Help Block)
+•	Ogni pagina deve fornire un blocco di aiuto informativo standard.
+*   **Implementazione**: Usare la classe CSS `.titanium-help-block`.
+*   **Caratteristiche**:
+    *   Testi brevi, chiari, in corsivo.
+    *   Sempre non selezionabili (`user-select-none`).
+    *   Dual Theme Automatico: Bianco 25% (Dark), Slate 40% (Light).
+*   **Utilizzo**: `<p class="titanium-help-block">Testo guida qui...</p>`.
 
 ________________________________________
 
@@ -119,29 +128,29 @@ ________________________________________
 Monitoraggio dello stato di avanzamento.
 🔴 DA FARE |  INCOMPLETA (Dual Theme Req.) | 🟢 COMPLETATA
 
-| # | Stato | Nome Pagina | Contenitore | Faro | Effetti Card | Palette / Colori |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | 🟢 COMPLETATA | `index.html` (Login) | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
-| 2 | 🟢 COMPLETATA | `registrati.html` | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Blue |
-| 3 | 🟢 COMPLETATA | `reset_password.html` | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
-| 4 | 🟢 COMPLETATA | `imposta_nuova_password.html` | 1, 2 | 3 | 4, 5, 9, 13, 18, 19, 20 | Fusion Clean |
+| # | Stato | Nome Pagina | Effetti Addizionali (ID) | Palette / Colori |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 🟢 COMPLETATA | `index.html` (Login) | 9, 19, 20, 21 | Fusion Blue |
+| 2 | 🟢 COMPLETATA | `registrati.html` | 9, 19, 20, 21 | Fusion Blue |
+| 3 | 🟢 COMPLETATA | `reset_password.html` | 9, 19, 20, 21 | Fusion Blue |
+| 4 | 🟢 COMPLETATA | `imposta_nuova_password.html` | 9, 19, 20, 21 | Fusion Blue |
 | 5 | 🔴 DA FARE | `account_azienda.html` | Titanium Frame | Beacon (4s) | Premium | Matrix Interno |
-| 6 | � COMPLETATA | `account_privati.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Cards** |
+| 6 | 🟠 INCOMPLETA | `account_privati.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Cards** |
 | 7 | 🔴 DA FARE | `aggiungi_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 8 | � COMPLETATA | `aggiungi_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
+| 8 | 🟠 INCOMPLETA | `aggiungi_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 9 | 🔴 DA FARE | `aggiungi_nuova_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 10 | 🔴 DA FARE | `aggiungi_scadenza.html` | Titanium Frame | Beacon (4s) | Dinamico | Matrix Scadenze |
 | 11 | 🔴 DA FARE | `modifica_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 12 | 🔴 DA FARE | `modifica_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
 | 13 | 🔴 DA FARE | `modifica_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 14 | 🟢 COMPLETATA | `home_page.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 15, 18 | Matrix Fusion |
-| 17 | 🟠 INCOMPLETA | `dati_anagrafici_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Section Box** |
-| 18 | � COMPLETATA | `area_privata.html` | 1, 2 | 3 | 4, 5, 9, 11 | **Dashboard Navigazione** |
-| 19 | 🔴 DA FARE | `scadenze.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Scadenze** |
-| 20 | 🔴 DA FARE | `lista_aziende.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 21 | 🟠 INCOMPLETA | `archivio_account.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Matrix Sidebar |
-| 22 | 🟠 INCOMPLETA | `impostazioni.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | Fusion Glass |
-| 23 | 🟠 INCOMPLETA | `regole_scadenze_veicoli.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Dark Menu Glow |
+| 14 | 🟢 COMPLETATA | `home_page.html` | 6, 9, 10, 15 | Matrix Fusion |
+| 17 | 🟠 INCOMPLETA | `dati_anagrafici_privato.html` | 6, 9, 10, 13 | **Titanium Glass Section Box** |
+| 18 | 🟠 INCOMPLETA | `area_privata.html` | 9, 11 | **Dashboard Navigazione** |
+| 19 | 🟠 INCOMPLETA | `scadenze.html` | 6, 9, 10, 13 | **Scadenze** |
+| 20 | 🟠 INCOMPLETA | `lista_aziende.html` | Standard | Palette Standard |
+| 21 | 🟠 INCOMPLETA | `archivio_account.html` | 6, 9, 10 | Matrix Sidebar |
+| 22 | 🟢 COMPLETATA | `impostazioni.html` | 6, 9, 10, 21 | Fusion Blue |
+| 23 | � COMPLETATA | `regole_scadenze_veicoli.html` | 6, 9, 10, 21 | Dark Menu Glow |
 | 24 | 🟠 INCOMPLETA | `configurazione_automezzi.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
 | 25 | 🟠 INCOMPLETA | `configurazione_documenti.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
 | 26 | 🟠 INCOMPLETA | `configurazione_generali.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | Form Input Glass |
@@ -162,9 +171,9 @@ Gli effetti del design system sono definiti nel dettaglio nel file dedicato: `TI
 
 | ID | Nome Effetto | Riferimento 🟢 | Light 🟢 | Descrizione |
 | :--- | :--- | :--- | :--- |
-| **[#1]** | **Sfondo Pagina** | `.titanium-bg` 🟢 | Opzionale 🟢 | Colore base del body per evitare flash bianchi |
-| **[#2]** | **Contenitore** | `.titanium-box` 🟢 | SÌ 🟢 | Box principale metallico con gradiente e ombre |
-| **[#3]** | **Faro (Glass Glow)** | `.glass-glow` 🟢 | SÌ 🟢 | Luce ambientale pulsante sullo sfondo per profondità |
+| **[#1]** | **Sfondo Pagina** | `.titanium-bg` 🟢 | SÌ 🟢 | Base obbligatoria per tutti i temi |
+| **[#2]** | **Titanium Box (Frame)** | `.titanium-box` 🟢 | SÌ 🟢 | La scocca esterna metallica (Obbligatoria) |
+| **[#3]** | **Faro (Glass Glow)** | `.glass-glow` 🟢 | SÌ 🟢 | Luce ambientale pulsante (300% altezza per scrolling) |
 | **[#4]** | **Header Fusion** | `.titanium-header` 🟢 | SÌ 🟢 | Barra superiore fissa con effetto Glass e blur |
 | **[#5]** | **Footer Fusion** | `.titanium-footer` 🟢 | SÌ 🟢 | Barra inferiore fissa con effetto Glass e blur |
 | **[#6]** | **Hover** | `.titanium-interactive` 🟢 | NO 🟢 | Micro-interazione che alza l'elemento all'hover |
@@ -172,14 +181,13 @@ Gli effetti del design system sono definiti nel dettaglio nel file dedicato: `TI
 | **[#8]** | **Beacon Gold** | `.beacon-gold` 🟢 | SÌ 🟢 | Faretto asimmetrico per card larghe |
 | **[#9]** | **Border Glow** | `.border-glow` 🟢 | SÌ 🟢 | Perimetro luminoso cristallino (Dark) o solido (Light) |
 | **[#10]**| **Glass Shine** | `.glass-shine` 🟢 | SÌ 🟢 | Riflesso vetroso diagonale all'hover su pulsanti e barre |
-| **[#13]**| **Saetta** | `.saetta` 🟢 | SÌ 🟢 | Riflesso metallico continuo (shimmer) su card e bottoni |
-| **[#14]**| **Saetta Gold** | `.saetta-gold` 🟢 | SÌ 🟢 | Variante sottile dello shimmer per righe di liste |
-| **[#15]**| **Matrix Palette** | `.matrix-*` 🟢 | SÌ 🟢 | Branding a colori (C-Blade) e gradienti per categorie |
+| **[#13]** | **Saetta (Master Grade)** | `.saetta` 🟢 | SÌ 🟢 | **UNICA** definizione ufficiale del riflesso metallico. Potente, z-index 999. |
+| **[#15]** | **Matrix Palette** | `.matrix-blue` etc. 🟢 | SÌ 🟢 | Sistema di colori semantici per box e card |
 | **[#16]**| **Glass Card** | `.titanium-glass-card` 🟢 | SÌ 🟢 | Sfondo semitrasparente blurrato per elementi in lista |
 | **[#17]**| **Swipe Safety** | (JS Logic) 🟢 | NO 🟢 | Blocca click e navigazione durante lo swipe degli elementi nelle liste (Swipe List) |
-| **[#18]**| **Saetta Master** | `.saetta-master` 🟢 | SÌ 🟢 | Grande onda luminosa che attraversa l'intera dashboard |
 | **[#19]**| **Visibilità Selettiva** | `.titanium-hide` 🟢 | SÌ 🟢 | Nasconde componenti standard (es. selettore tema) in pagine specifiche |
 | **[#20]**| **Sicurezza Tema Forzato** | `.titanium-forced-dark` 🟢 | SÌ 🟢 | Blocca la pagina in Dark Mode per privacy e coerenza grafica |
+| **[#21]**| **Titanium Vault (Card)** | `.titanium-vault` 🟢| SÌ 🟢 | Il box centrale "forziere" per Login e Registrazione |
 ________________________________________
 
 #### Regola 16 - Caratteristiche Box e Pulsanti
@@ -213,19 +221,17 @@ Tutti i testi descrittivi, istruzioni e messaggi informativi devono essere non c
 
 ________________________________________
 
-### Regola 18 – Allineamento Premium Titanium
+### Regola 18 – Allineamento Premium Titanium (Simmetria Enterprise)
+**Obiettivo**: Garantire una simmetria perfetta e un allineamento "al righello" di tutti i contenuti.
 
-**Obiettivo:** Garantire una simmetria perfetta e un allineamento "al righello" di tutti i contenuti.
-
-**Linee guida operative:**
-*   **Margini Laterali Totali**: Ogni contenuto interno ai box Matrix (Titoli, Liste, Testi) deve trovarsi a **52 pixel** esatti dai bordi laterali del box.
-    *   *Composizione*: 8px (padding base box) + 44px (padding interno contenuto).
-*   **Simmetria Obbligatoria**: Il margine di 52px deve essere identico sia a **Sinistra** che a **Destra**.
-*   **Geometria C-Blade**: La linguetta a "C" (::before) deve avere:
-    *   Spessore Fascia: 10px.
-    *   Spessore Vertici: 12px.
-    *   Lunghezza Punte: 35px (con raccordo a raggio interno).
-*   **Perimetri (Light)**: Bordo solidale coordinato di **2px** (tramite `outline` per evitare clipping).
+**Linee guida operative**:
+1.  **Standard Matrix (52 pixel)**: Obbligatorio per Box Matrix, Dashboard e Sezioni Informative.
+    *   *Calcolo*: 8px (Margine esterno/Padding Box) + 44px (Padding interno al contenuto).
+    *   *Effetto*: Il testo (Titoli, Liste, Paragrafi) deve iniziare esattamente a 52px dal bordo esterno del contenitore.
+2.  **Standard Liste/Form (Allineamento Dinamico)**:
+    *   Per liste di pulsanti (es. Impostazioni) o input fields, mantenere l'allineamento verticale degli elementi (Icone/Titoli) sulla stessa linea dei 52px, ma con padding laterali che favoriscano la cliccabilità su mobile.
+3.  **Simmetria**: Il margine deve essere identico sia a **Sinistra** che a **Destra**.
+    *   **Perimetri (Light)**: Bordo solidale coordinato di **2px** (tramite `outline` per evitare clipping).
 ### Regola 19 – Visibilità Selettiva (Hidden State)
 **Obiettivo:** Gestire la scomparsa di componenti standard in pagine critiche o stati pre-autenticazione.
 
@@ -253,9 +259,10 @@ ________________________________________
 **Obiettivo:** Trasformare i file HTML in "gusci" puri, delegando tutta la logica e lo stile a file esterni per massima manutenibilità.
 
 **Linee guida operative:**
-*   **Zero CSS Inline**: Non utilizzare il tag <style> dentro i file HTML. Tutte le regole devono trovarsi in 	itanium.css o file CSS dedicati.
+*   **Zero CSS Inline**: Non utilizzare il tag <style> dentro i file HTML. Tutte le regole devono trovarsi in titanium.css o file CSS dedicati.
+*   **Zero Logica Manuale nell'Header**: Non inserire link a Google Fonts, Material Symbols o Meta Tag Theme-Color manuali. Tutto il pre-caricamento critico è delegato a `titanium-core.js`.
 *   **Zero JS Logic Inline**: Non scrivere la logica delle funzioni o i listener dei form dentro i file HTML.
-*   **Modulo Unico**: Ogni pagina deve avere un singolo punto di ingresso JS (es. <script type="module" src="assets/js/nome_pagina.js"></script>).
+*   **Modulo Unico**: Ogni pagina deve avere un singolo punto di ingresso JS specifico (es. <script type="module" src="assets/js/nome_pagina.js"></script>).
 *   **Ereditarietà**: La pagina deve fidarsi delle regole globali; se serve un'eccezione, va creata una classe di utility nel registro effetti.
 
 ________________________________________
@@ -267,7 +274,8 @@ ________________________________________
 
 **Istruzioni operative per i prossimi file HTML:**
 
-1.  **Collegamento Motore (Master CSS)**: Verificare che nell'header sia presente il link al file mastro: `<link rel="stylesheet" href="assets/css/titanium.css">`. Senza questo, la pagina non caricherà nessun effetto o gradiente.
+1.  **Collegamento Motore (Master Core)**: Verificare che nell'header sia presente il link al file mastro: `<script src="assets/js/titanium-core.js"></script>`. Questo file gestisce automaticamente: Tema (anti-flicker), Font (Manrope), Icone e Protezioni UI.
+2.  **Collegamento Stile (Master CSS)**: Verificare che nell'header sia presente `<link rel="stylesheet" href="assets/css/titanium.css">`.
 2.  **Applicazione Regole Fondamentali (1-5)**:
     *   **Regola 1**: Applicare la classe `titanium-bg` al tag `<body>` per lo sfondo critico.
     *   **Regola 2**: Usare la classe master `.titanium-box` per il contenitore principale (sostituendo classi Tailwind manuali).
@@ -290,5 +298,56 @@ ________________________________________
     *   `main.js`: Semplice entry-point (`type="module"`) che importa e inizializza i moduli sopra citati.
 10. **Refinement Enterprise**:
     *   **Selezione Semantica**: Evitare selettori HTML generici (es. `button[type=submit]`). Usare attributi descrittivi (es. `[data-login-submit]`) per slegare la logica dalla struttura.
+
+________________________________________
+
+### Regola 23 – Gestione Header Dinamico (Standard Injection)
+**Obiettivo:** Personalizzare Titolo e Navigazione senza rompere la struttura dell'Header nativo (Regola 4).
+
+**Protocollo Operativo:**
+1.  Usare sempre `initComponents().then(...)` nel file JS della pagina.
+2.  Targettare l'elemento interno `header-content` (NON il placeholder esterno).
+3.  Iniettare la struttura Flex standard per garantire l'allineamento.
+
+**Snippet Standard (JS):**
+```javascript
+initComponents().then(() => {
+    const headerStack = document.getElementById('header-content');
+    if (headerStack) {
+        // Configurazione Layout
+        headerStack.style.display = 'flex';
+        headerStack.style.justifyContent = 'space-between';
+        headerStack.className = "px-4 w-full flex items-center relative";
+
+        // Iniezione Contenuto
+        headerStack.innerHTML = `
+            <!-- 1. Pulsante BACK (Opzionale) -->
+            <a href="pagina_precedente.html" class="btn-icon-header border-glow flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-white">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+
+            <!-- 2. TITOLO (Centrato Assoluto) -->
+            <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
+                NOME PAGINA
+            </h2>
+
+            <!-- 3. Pulsante HOME (Opzionale) -->
+            <a href="home_page.html" class="btn-icon-header border-glow flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-white">
+                <span class="material-symbols-outlined">home</span>
+            </a>
+        `;
+    }
+});
+```
+**Nota:** Se un pulsante (Back o Home) non serve, rimuovere semplicemente il blocco `<a>` corrispondente. Il titolo rimarrà perfettamente centrato.
+
+**Variante per Footer (Opzionale):**
+La stessa logica si applica al footer. Targettare `footer-content` per iniettare, ad esempio, la versione dell'app o azioni secondarie.
+```javascript
+const footerStack = document.getElementById('footer-content');
+if (footerStack) {
+    footerStack.innerHTML = `<span class="text-[9px] opacity-30 tracking-widest">${t('version')}</span>`;
+}
+```
     *   **Stato Globale**: Usare hook di stato sul body (es. `is-auth-loading`) durante i processi critici per gestire feedback visuali e blocchi di interazione a livello di sistema.
     *   **Zero Duplicazione**: Non riscrivere la logica dei componenti (es. toggle password) nei moduli di pagina se è già gestita dai componenti globali.

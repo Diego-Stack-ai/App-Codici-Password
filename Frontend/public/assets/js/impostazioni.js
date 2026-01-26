@@ -20,8 +20,8 @@ initComponents().then(() => {
 
         headerStack.innerHTML = `
             <div class="header-stack" style="justify-content: center; position: relative;">
-                <h2 class="text-white text-[11px] font-black uppercase tracking-widest">Impostazioni</h2>
-                <a href="home_page.html" class="btn-icon-header border-glow" style="position: absolute; right: 0;">
+                <h2 class="text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest">Impostazioni</h2>
+                <a href="home_page.html" class="btn-icon-header" style="position: absolute; right: 0;">
                     <span class="material-symbols-outlined">home</span>
                 </a>
             </div>
