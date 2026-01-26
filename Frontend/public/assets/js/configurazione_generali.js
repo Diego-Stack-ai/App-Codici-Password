@@ -1,230 +1,257 @@
+
+// configurazione_generali.js v1.7 - Titanium Gold
 import { db, auth } from './firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { initComponents } from './components.js';
+import { t } from './translations.js';
 
-let currentConfig = {
+// Setup Base (Header/Footer)
+initComponents().then(() => {
+    const headerStack = document.getElementById('header-content');
+    if (headerStack) {
+        headerStack.style.display = 'flex';
+        headerStack.style.alignItems = 'center';
+        headerStack.style.justifyContent = 'space-between';
+        headerStack.style.width = '100%';
+        headerStack.className = "px-4";
+
+        headerStack.innerHTML = `
+            <div class="header-stack w-full flex items-center justify-between relative">
+                <a href="regole_scadenze_veicoli.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
+                    Config. Generali
+                </h2>
+                <a href="home_page.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
+            </div>
+        `;
+    }
+
+    const footerStack = document.getElementById('footer-content');
+    if (footerStack) {
+        footerStack.innerHTML = `
+            <div class="footer-stack" style="width: 100%; display: flex; justify-content: center; opacity: 0.3;">
+                <span class="text-[9px] font-bold uppercase tracking-[0.3em] font-mono text-gray-900/50 dark:text-white/50 user-select-none">${t('version')}</span>
+            </div>
+        `;
+    }
+});
+
+function log(msg) {
+    console.log("[Config Generali] " + msg);
+}
+
+const DEFAULT_CONFIG = {
     deadlineTypes: [],
     emailTemplates: []
 };
 
-const log = (msg) => console.log(`[ConfigGenerali] ${msg}`);
+let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+let currentUser = null;
 
-window.toggleSection = (id) => {
-    const container = document.getElementById(`container_${id}`);
-    const icon = document.getElementById(`icon_${id}`);
-    if (!container || !icon) return;
+function renderTable(tbodyId, dataArray, listKey) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
 
-    const isHidden = container.classList.contains('hidden');
-    container.classList.toggle('hidden');
-    icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
-};
-
-window.loadConfig = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    try {
-        const docRef = doc(db, "users", user.uid, "settings", "generalConfig");
-        const docSnap = await getDoc(docRef);
-
-        const genConfig = docSnap.exists() ? docSnap.data() : {};
-
-        if (genConfig.deadlineTypes && genConfig.deadlineTypes.length > 0) {
-            currentConfig = genConfig;
-            log("Config loaded from Firestore");
-        } else {
-            log("No specific config found or empty, using new defaults");
-            currentConfig = {
-                deadlineTypes: [
-                    { name: "Sale Addolcitore", period: 7, freq: 14 },
-                    { name: "Federazione Italiana Vela", period: 7, freq: 70 },
-                    { name: "Visita medica", period: 7, freq: 14 },
-                    { name: "Tessera isola ecologica", period: 7, freq: 14 }
-                ],
-                emailTemplates: [
-                    "Il sale dell'addolcitore",
-                    "E' in scadenza il tuo certificato medico",
-                    "E' in scadenza la tua tessera FIV",
-                    "Isola ecologica"
-                ]
-            };
-            await window.saveConfig(currentConfig);
-        }
-
-        window.renderAllTables();
-    } catch (error) {
-        console.error("Error loading config:", error);
+    tbody.innerHTML = '';
+    if (!dataArray || dataArray.length === 0) {
+        tbody.innerHTML = '<tr><td class="px-4 py-3 text-gray-500 italic">Nessun dato</td></tr>';
+        return;
     }
-};
 
-window.saveConfig = async (config) => {
-    const user = auth.currentUser;
-    if (!user) return;
+    dataArray.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.className = "group hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-200 dark:border-white/5 last:border-0";
+        const safeListKey = listKey.replace(/'/g, "\\'");
 
-    try {
-        const docRef = doc(db, "users", user.uid, "settings", "generalConfig");
-        await setDoc(docRef, config);
-        log("Config saved to standardized Firestore path");
-    } catch (error) {
-        console.error("Error saving config:", error);
-    }
-};
+        tr.innerHTML = `
+             <td class="px-4 py-3 flex justify-between items-center text-gray-700 dark:text-gray-300">
+                <span class="font-medium">${item}</span>
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-teal-500/20 text-teal-600 dark:text-teal-500 transition-colors"
+                        onclick="window.editItem('${safeListKey}', ${index})">
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
+                        onclick="window.deleteItem('${safeListKey}', ${index})">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
 window.renderAllTables = () => {
-    renderTypesTable();
-    renderTemplatesTable();
-};
+    try {
+        const tbodyTypes = document.getElementById('tbody_types');
+        if (tbodyTypes) {
+            tbodyTypes.innerHTML = '';
+            if (!currentConfig.deadlineTypes || currentConfig.deadlineTypes.length === 0) {
+                tbodyTypes.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-gray-500 italic text-center text-xs">Nessun dato configurato</td></tr>';
+            } else {
+                currentConfig.deadlineTypes.forEach((item, index) => {
+                    if (typeof item === 'string') {
+                        item = { name: item, period: 7, freq: 3 };
+                        currentConfig.deadlineTypes[index] = item;
+                    }
+                    const name = item.name || '';
+                    const period = item.period || 7;
+                    const freq = item.freq || 3;
 
-function renderTypesTable() {
-    const tbody = document.getElementById('tbody_types');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    if (!currentConfig.deadlineTypes || currentConfig.deadlineTypes.length === 0) {
-        tbody.innerHTML = `<tr><td class="p-4 text-center text-gray-500 italic text-xs">Nessuna voce configurata</td></tr>`;
-        return;
+                    const tr = document.createElement('tr');
+                    tr.className = "group hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-200 dark:border-white/5 last:border-0";
+                    tr.innerHTML = `
+                         <td class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">${name}</td>
+                        <td class="px-2 py-3 text-center">
+                            <div class="inline-flex flex-col items-center gap-1">
+                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">Preavviso</span>
+                                <span class="font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded text-[10px] border border-teal-500/20">${period}gg</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 text-center">
+                            <div class="inline-flex flex-col items-center gap-1">
+                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">Replica</span>
+                                <span class="font-bold text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] border border-slate-200 dark:border-white/10">${freq}gg</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-3 text-right">
+                             <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-teal-500/20 text-teal-600 dark:text-teal-500 transition-colors"
+                                    onclick="window.editType(${index})">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
+                                    onclick="window.deleteItem('deadlineTypes', ${index})">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbodyTypes.appendChild(tr);
+                });
+            }
+        }
+        renderTable('tbody_templates', currentConfig.emailTemplates, 'emailTemplates');
+    } catch (e) {
+        log("Render Error: " + e.message);
     }
-
-    currentConfig.deadlineTypes.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.className = "group hover:bg-white/5 transition-colors border-b border-white/5 last:border-0";
-        tr.innerHTML = `
-            <td class="p-4 font-medium text-gray-300">${item.name}</td>
-            <td class="p-4 text-center text-gray-400 text-xs">
-                <span class="inline-flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-white/5">
-                    <span class="text-teal-400 font-bold">${item.period}g</span>
-                    <span class="text-gray-600">/</span>
-                    <span class="text-gray-300 font-bold">${item.freq}g</span>
-                </span>
-            </td>
-            <td class="p-4 text-right">
-                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button onclick="window.editType(${index})" class="size-8 flex items-center justify-center rounded-lg hover:bg-teal-500/20 text-teal-500 transition-colors">
-                        <span class="material-symbols-outlined !text-[18px]">edit</span>
-                    </button>
-                    <button onclick="window.deleteItem('deadlineTypes', ${index})" class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-500 transition-colors">
-                        <span class="material-symbols-outlined !text-[18px]">delete</span>
-                    </button>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function renderTemplatesTable() {
-    const tbody = document.getElementById('tbody_templates');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    if (!currentConfig.emailTemplates || currentConfig.emailTemplates.length === 0) {
-        tbody.innerHTML = `<tr><td class="p-4 text-center text-gray-500 italic text-xs">Nessun testo configurato</td></tr>`;
-        return;
-    }
-
-    currentConfig.emailTemplates.forEach((text, index) => {
-        const tr = document.createElement('tr');
-        tr.className = "group hover:bg-white/5 transition-colors border-b border-white/5 last:border-0";
-        tr.innerHTML = `
-            <td class="p-4 text-gray-400 leading-relaxed text-xs">"${text}"</td>
-            <td class="p-4 text-right">
-                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button onclick="window.editTemplate(${index})" class="size-8 flex items-center justify-center rounded-lg hover:bg-teal-500/20 text-teal-500 transition-colors">
-                        <span class="material-symbols-outlined !text-[18px]">edit</span>
-                    </button>
-                    <button onclick="window.deleteItem('emailTemplates', ${index})" class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-500 transition-colors">
-                        <span class="material-symbols-outlined !text-[18px]">delete</span>
-                    </button>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-window.addTypeItem = async () => {
-    const name = prompt("Nome Scadenza:");
-    if (!name) return;
-    const period = parseInt(prompt("Giorni Preavviso:", "30"));
-    const freq = parseInt(prompt("Giorni Replica:", "7"));
-
-    if (isNaN(period) || isNaN(freq)) return;
-
-    currentConfig.deadlineTypes.push({ name, period, freq });
-    window.renderAllTables();
-    await window.saveConfig(currentConfig);
 };
 
 window.editType = async (index) => {
     const item = currentConfig.deadlineTypes[index];
-    const name = prompt("Modifica Nome:", item.name);
+    const newName = prompt("Modifica Nome Scadenza:", item.name);
+    if (newName === null) return;
+    let newPeriod = prompt("Giorni di Periodo (Preavviso):", item.period);
+    if (newPeriod === null) return;
+    let newFreq = prompt("Giorni di Frequenza:", item.freq);
+    if (newFreq === null) return;
+
+    if (newName && !isNaN(newPeriod) && !isNaN(newFreq)) {
+        currentConfig.deadlineTypes[index] = {
+            name: newName.trim(),
+            period: parseInt(newPeriod),
+            freq: parseInt(newFreq)
+        };
+        window.renderAllTables();
+        await window.saveConfig(currentConfig);
+    }
+};
+
+window.addTypeItem = async () => {
+    const name = prompt("Nuovo Tipo Scadenza:");
     if (!name) return;
-    const period = parseInt(prompt("Modifica Preavviso:", item.period));
-    const freq = parseInt(prompt("Modifica Replica:", item.freq));
+    const period = prompt("Periodo (Preavviso gg) - Default 7:", "7");
+    if (period === null) return;
+    const freq = prompt("Frequenza (gg) - Default 3:", "3");
+    if (freq === null) return;
 
-    if (isNaN(period) || isNaN(freq)) return;
-
-    currentConfig.deadlineTypes[index] = { name, period, freq };
-    window.renderAllTables();
-    await window.saveConfig(currentConfig);
-};
-
-window.editTemplate = async (index) => {
-    const currentText = currentConfig.emailTemplates[index];
-    const newText = prompt("Modifica Testo Email:", currentText);
-
-    if (newText === null || !newText.trim()) return;
-
-    currentConfig.emailTemplates[index] = newText.trim();
-    window.renderAllTables();
-    await window.saveConfig(currentConfig);
-};
-
-window.addItem = async (key, promptMsg) => {
-    const val = prompt(promptMsg);
-    if (!val || !val.trim()) return;
-
-    if (!currentConfig[key]) currentConfig[key] = [];
-    currentConfig[key].push(val.trim());
+    if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
+    currentConfig.deadlineTypes.push({
+        name: name.trim(),
+        period: parseInt(period) || 7,
+        freq: parseInt(freq) || 3
+    });
 
     window.renderAllTables();
     await window.saveConfig(currentConfig);
 };
 
-window.deleteItem = async (key, index) => {
-    if (!confirm("Sei sicuro di voler eliminare questa voce?")) return;
-    currentConfig[key].splice(index, 1);
+window.saveConfig = async (newConfig) => {
+    if (!currentUser) return;
+    try {
+        const docRef = doc(db, "users", currentUser.uid, "settings", "generalConfig");
+        await setDoc(docRef, newConfig);
+        currentConfig = JSON.parse(JSON.stringify(newConfig));
+    } catch (e) {
+        log("Firestore Save ERROR: " + e.message);
+    }
+};
+
+window.loadConfig = async () => {
+    if (!currentUser) return;
+    try {
+        let docRef = doc(db, "users", currentUser.uid, "settings", "generalConfig");
+        let docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const cloudData = docSnap.data();
+            if (!cloudData.deadlineTypes) cloudData.deadlineTypes = DEFAULT_CONFIG.deadlineTypes;
+            if (!cloudData.emailTemplates) cloudData.emailTemplates = DEFAULT_CONFIG.emailTemplates;
+            currentConfig = cloudData;
+        } else {
+            currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            await window.saveConfig(currentConfig);
+        }
+        window.renderAllTables();
+    } catch (e) {
+        log("Firestore Load ERROR: " + e.message);
+    }
+};
+
+window.toggleSection = (key) => {
+    const container = document.getElementById(`container_${key}`);
+    const icon = document.getElementById(`icon_${key}`);
+    if (container) {
+        const isHidden = container.classList.toggle('hidden');
+        if (icon) icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
+};
+
+window.addItem = async (listKey, promptText) => {
+    const value = prompt(promptText);
+    if (!value || !value.trim()) return;
+    if (!currentConfig[listKey]) currentConfig[listKey] = [];
+    currentConfig[listKey].push(value.trim());
     window.renderAllTables();
     await window.saveConfig(currentConfig);
 };
 
-window.resetDefaults = async () => {
-    if (!confirm("Vuoi ripristinare i dati di default (Sale, FIV, ecc.)? Questa azione eliminerà le tue modifiche attuali.")) return;
-
-    currentConfig = {
-        deadlineTypes: [
-            { name: "Sale Addolcitore", period: 7, freq: 14 },
-            { name: "Federazione Italiana Vela", period: 7, freq: 70 },
-            { name: "Visita medica", period: 7, freq: 14 },
-            { name: "Tessera isola ecologica", period: 7, freq: 14 }
-        ],
-        emailTemplates: [
-            "Il sale dell'addolcitore",
-            "E' in scadenza il tuo certificato medico",
-            "E' in scadenza la tua tessera FIV",
-            "Isola ecologica"
-        ]
-    };
-
+window.editItem = async (listKey, index) => {
+    const currentValue = currentConfig[listKey][index];
+    const newValue = prompt("Modifica voce:", currentValue);
+    if (newValue === null || !newValue.trim()) return;
+    currentConfig[listKey][index] = newValue.trim();
     window.renderAllTables();
     await window.saveConfig(currentConfig);
-    alert("Dati ripristinati correttamente!");
 };
 
-onAuthStateChanged(auth, (user) => {
+window.deleteItem = async (listKey, index) => {
+    if (!confirm("Eliminare voce?")) return;
+    currentConfig[listKey].splice(index, 1);
+    window.renderAllTables();
+    await window.saveConfig(currentConfig);
+};
+
+// Initial Auth Setup
+onAuthStateChanged(auth, async (user) => {
     if (user) {
-        window.loadConfig();
-    } else {
-        window.location.href = 'index.html';
+        currentUser = user;
+        await window.loadConfig();
     }
 });

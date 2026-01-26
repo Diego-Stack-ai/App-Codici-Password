@@ -1,61 +1,83 @@
 
-// configurazione_documenti.js v1.0
-
-function log(msg) {
-    console.log("[Config Doc] " + msg);
-}
-
-log("Script Loading Started...");
-
+// configurazione_documenti.js v1.7 - Titanium Gold
 import { db, auth } from './firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { initComponents } from './components.js';
+import { t } from './translations.js';
 
-log("Imports Successful.");
+// Setup Base (Header/Footer)
+initComponents().then(() => {
+    const headerStack = document.getElementById('header-content');
+    if (headerStack) {
+        headerStack.style.display = 'flex';
+        headerStack.style.alignItems = 'center';
+        headerStack.style.justifyContent = 'space-between';
+        headerStack.style.width = '100%';
+        headerStack.className = "px-4";
 
-// --- CONFIGURATION ---
-// Usiamo un documento diverso per non sovrascrivere la configurazione automezzi
-const CONFIG_DOC_PATH = "settings/deadlineConfigDocuments";
+        headerStack.innerHTML = `
+            <div class="header-stack w-full flex items-center justify-between relative">
+                <a href="regole_scadenze_veicoli.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
+                    Config. Documenti
+                </h2>
+                <a href="home_page.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
+            </div>
+        `;
+    }
+
+    const footerStack = document.getElementById('footer-content');
+    if (footerStack) {
+        footerStack.innerHTML = `
+            <div class="footer-stack" style="width: 100%; display: flex; justify-content: center; opacity: 0.3;">
+                <span class="text-[9px] font-bold uppercase tracking-[0.3em] font-mono text-gray-900/50 dark:text-white/50 user-select-none">${t('version')}</span>
+            </div>
+        `;
+    }
+});
+
+function log(msg) {
+    console.log("[Config Documenti] " + msg);
+}
 
 const DEFAULT_CONFIG = {
-    deadlineTypes: [], // Oggetti Documento
-    models: [],       // Intestatari/Dettagli
-    emailTemplates: [] // Testi Email
+    deadlineTypes: [],
+    models: [],
+    emailTemplates: []
 };
 
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentUser = null;
 
-// --- FUNCTIONS ---
-
 function renderTable(tbodyId, dataArray, listKey) {
     const tbody = document.getElementById(tbodyId);
-    if (!tbody) {
-        log("Tbody not found: " + tbodyId);
-        return;
-    }
+    if (!tbody) return;
 
     tbody.innerHTML = '';
     if (!dataArray || dataArray.length === 0) {
-        tbody.innerHTML = '<tr><td class="px-4 py-3 text-gray-400 italic">Nessun dato</td></tr>';
+        tbody.innerHTML = '<tr><td class="px-4 py-3 text-gray-500 italic">Nessun dato</td></tr>';
         return;
     }
 
     dataArray.forEach((item, index) => {
         const tr = document.createElement('tr');
-        tr.className = "group hover:bg-white/5 transition-colors border-b border-white/5 last:border-0";
-
+        tr.className = "group hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-200 dark:border-white/5 last:border-0";
         const safeListKey = listKey.replace(/'/g, "\\'");
 
         tr.innerHTML = `
-            <td class="px-4 py-3 flex justify-between items-center text-gray-300">
+             <td class="px-4 py-3 flex justify-between items-center text-gray-700 dark:text-gray-300">
                 <span class="font-medium">${item}</span>
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-amber-500/20 text-amber-500 transition-colors"
+                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-amber-500/20 text-amber-600 dark:text-amber-500 transition-colors"
                         onclick="window.editItem('${safeListKey}', ${index})">
                         <span class="material-symbols-outlined text-[18px]">edit</span>
                     </button>
-                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-400 transition-colors"
+                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
                         onclick="window.deleteItem('${safeListKey}', ${index})">
                         <span class="material-symbols-outlined text-[18px]">delete</span>
                     </button>
@@ -68,8 +90,6 @@ function renderTable(tbodyId, dataArray, listKey) {
 
 window.renderAllTables = () => {
     try {
-        log("Rendering all tables...");
-
         const tbodyTypes = document.getElementById('tbody_types');
         if (tbodyTypes) {
             tbodyTypes.innerHTML = '';
@@ -78,36 +98,36 @@ window.renderAllTables = () => {
             } else {
                 currentConfig.deadlineTypes.forEach((item, index) => {
                     if (typeof item === 'string') {
-                        item = { name: item, period: 30, freq: 7 };
+                        item = { name: item, period: 30, freq: 15 };
                         currentConfig.deadlineTypes[index] = item;
                     }
                     const name = item.name || '';
                     const period = item.period || 30;
-                    const freq = item.freq || 7;
+                    const freq = item.freq || 15;
 
                     const tr = document.createElement('tr');
-                    tr.className = "group hover:bg-white/5 transition-colors border-b border-white/5 last:border-0";
+                    tr.className = "group hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-200 dark:border-white/5 last:border-0";
                     tr.innerHTML = `
-                        <td class="px-4 py-3 font-medium text-gray-300">${name}</td>
+                         <td class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">${name}</td>
                         <td class="px-2 py-3 text-center">
                             <div class="inline-flex flex-col items-center gap-1">
                                 <span class="text-[9px] text-gray-500 uppercase tracking-widest">Preavviso</span>
-                                <span class="font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded text-[10px] border border-amber-500/20">${period}gg</span>
+                                <span class="font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded text-[10px] border border-amber-500/20">${period}gg</span>
                             </div>
                         </td>
                         <td class="px-2 py-3 text-center">
                             <div class="inline-flex flex-col items-center gap-1">
                                 <span class="text-[9px] text-gray-500 uppercase tracking-widest">Replica</span>
-                                <span class="font-bold text-gray-300 bg-white/5 px-2 py-0.5 rounded text-[10px] border border-white/10">${freq}gg</span>
+                                <span class="font-bold text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] border border-slate-200 dark:border-white/10">${freq}gg</span>
                             </div>
                         </td>
                         <td class="px-2 py-3 text-right">
                              <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-amber-500/20 text-amber-500 transition-colors"
+                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-amber-500/20 text-amber-600 dark:text-amber-500 transition-colors"
                                     onclick="window.editType(${index})">
                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                 </button>
-                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-400 transition-colors"
+                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
                                     onclick="window.deleteItem('deadlineTypes', ${index})">
                                     <span class="material-symbols-outlined text-[18px]">delete</span>
                                 </button>
@@ -118,10 +138,8 @@ window.renderAllTables = () => {
                 });
             }
         }
-
         renderTable('tbody_models', currentConfig.models, 'models');
         renderTable('tbody_templates', currentConfig.emailTemplates, 'emailTemplates');
-        log("Render complete.");
     } catch (e) {
         log("Render Error: " + e.message);
     }
@@ -129,13 +147,10 @@ window.renderAllTables = () => {
 
 window.editType = async (index) => {
     const item = currentConfig.deadlineTypes[index];
-
     const newName = prompt("Modifica Nome Documento:", item.name);
     if (newName === null) return;
-
     let newPeriod = prompt("Giorni di Periodo (Preavviso):", item.period);
     if (newPeriod === null) return;
-
     let newFreq = prompt("Giorni di Frequenza:", item.freq);
     if (newFreq === null) return;
 
@@ -151,20 +166,18 @@ window.editType = async (index) => {
 };
 
 window.addTypeItem = async () => {
-    const name = prompt("Nuovo Tipo Documento (es. Passaporto):");
+    const name = prompt("Nuovo Tipo Documento:");
     if (!name) return;
-
     const period = prompt("Periodo (Preavviso gg) - Default 30:", "30");
     if (period === null) return;
-
-    const freq = prompt("Frequenza (gg) - Default 7:", "7");
+    const freq = prompt("Frequenza (gg) - Default 15:", "15");
     if (freq === null) return;
 
     if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
     currentConfig.deadlineTypes.push({
         name: name.trim(),
         period: parseInt(period) || 30,
-        freq: parseInt(freq) || 7
+        freq: parseInt(freq) || 15
     });
 
     window.renderAllTables();
@@ -172,32 +185,10 @@ window.addTypeItem = async () => {
 };
 
 window.addDocumentDetail = async () => {
-    // 1. Numero Documento
-    const numeroInput = prompt("Inserisci il Numero del Documento (es. AH12345):");
-    if (!numeroInput || !numeroInput.trim()) return;
-    const numero = numeroInput.trim().toUpperCase();
-
-    // 2. Tipo Documento (Selezionabile)
-    const tipoScelto = prompt("Seleziona Tipo Documento:\n1. Patente\n2. Carta Identità\n3. Altro (inserimento manuale)");
-    let tipoStr = "";
-    if (tipoScelto === "1") tipoStr = "Patente";
-    else if (tipoScelto === "2") tipoStr = "Carta Identità";
-    else if (tipoScelto === "3") tipoStr = prompt("Inserisci Tipo Documento manualmente:") || "Documento";
-    else return; // Annullato o scelta non valida
-
-    // 3. Proprietario (Selezionabile)
-    const proprietarioScelto = prompt("Seleziona Proprietario:\n1. Boschetto Diego\n2. Graziano Ester\n3. Altro (inserimento manuale)");
-    let proprietarioStr = "";
-    if (proprietarioScelto === "1") proprietarioStr = "Boschetto Diego";
-    else if (proprietarioScelto === "2") proprietarioStr = "Graziano Ester";
-    else if (proprietarioScelto === "3") proprietarioStr = prompt("Inserisci Proprietario manualmente:") || "Privato";
-    else return; // Annullato o scelta non valida
-
-    const finalModel = `${numero} - ${tipoStr} - ${proprietarioStr}`;
-
+    const value = prompt("Nuovo Dettaglio (Es. AH12345 - Patente - Rossi Mario):");
+    if (!value || !value.trim()) return;
     if (!currentConfig.models) currentConfig.models = [];
-    currentConfig.models.push(finalModel);
-
+    currentConfig.models.push(value.trim());
     window.renderAllTables();
     await window.saveConfig(currentConfig);
 };
@@ -205,11 +196,9 @@ window.addDocumentDetail = async () => {
 window.saveConfig = async (newConfig) => {
     if (!currentUser) return;
     try {
-        log("Saving to Firestore (Documents)...");
-        const docRef = doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments");
+        const docRef = doc(db, "users", currentUser.uid, "settings", "documentConfig");
         await setDoc(docRef, newConfig);
         currentConfig = JSON.parse(JSON.stringify(newConfig));
-        log("Saved successfully.");
     } catch (e) {
         log("Firestore Save ERROR: " + e.message);
     }
@@ -218,63 +207,19 @@ window.saveConfig = async (newConfig) => {
 window.loadConfig = async () => {
     if (!currentUser) return;
     try {
-        log("Loading config from Firestore...");
-        let docRef = doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments");
+        let docRef = doc(db, "users", currentUser.uid, "settings", "documentConfig");
         let docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            currentConfig = docSnap.data();
-            log("Config found in Cloud.");
+            const cloudData = docSnap.data();
+            if (!cloudData.deadlineTypes) cloudData.deadlineTypes = DEFAULT_CONFIG.deadlineTypes;
+            if (!cloudData.models) cloudData.models = DEFAULT_CONFIG.models;
+            if (!cloudData.emailTemplates) cloudData.emailTemplates = DEFAULT_CONFIG.emailTemplates;
+            currentConfig = cloudData;
         } else {
-            log("No config found. Initializing with defaults...");
             currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-        }
-
-        // --- PRE-POPULATE IF EMPTY ---
-        const initialTypes = [
-            "la tua patente",
-            "Il tuo documento di Identità",
-            "Il tuo passaporto",
-            "Il tuo codice fiscale"
-        ];
-
-        if (!currentConfig.deadlineTypes || currentConfig.deadlineTypes.length === 0) {
-            log("Auto-populating deadlineTypes...");
-            currentConfig.deadlineTypes = [
-                { name: "la tua patente", period: 30, freq: 7 },
-                { name: "Il tuo documento di Identità", period: 30, freq: 7 },
-                { name: "Il tuo passaporto", period: 30, freq: 7 },
-                { name: "Il tuo codice fiscale", period: 30, freq: 7 }
-            ];
             await window.saveConfig(currentConfig);
         }
-
-        // --- PRE-POPULATE EMAIL TEMPLATES IF EMPTY ---
-        if (!currentConfig.emailTemplates || currentConfig.emailTemplates.length === 0) {
-            log("Auto-populating emailTemplates...");
-            currentConfig.emailTemplates = [
-                "la tua patente",
-                "Il tuo documento di Identità",
-                "Il tuo passaporto",
-                "Il tuo codice fiscale"
-            ];
-            await window.saveConfig(currentConfig);
-        }
-
-        // --- PRE-POPULATE DOCUMENT DATA IF EMPTY ---
-
-        // --- PRE-POPULATE DOCUMENT DATA IF EMPTY ---
-        if (!currentConfig.models || currentConfig.models.length === 0) {
-            log("Auto-populating document models...");
-            currentConfig.models = [
-                "VI5686435H - Patente - Boschetto Diego",
-                "CA55677EP - Carta Identità - Boschetto Diego",
-                "CA80827BP - Carta Identità - Graziano Ester",
-                "U16P52625C - Patente - Graziano Ester"
-            ];
-            await window.saveConfig(currentConfig);
-        }
-
         window.renderAllTables();
     } catch (e) {
         log("Firestore Load ERROR: " + e.message);
@@ -293,10 +238,8 @@ window.toggleSection = (key) => {
 window.addItem = async (listKey, promptText) => {
     const value = prompt(promptText);
     if (!value || !value.trim()) return;
-
     if (!currentConfig[listKey]) currentConfig[listKey] = [];
     currentConfig[listKey].push(value.trim());
-
     window.renderAllTables();
     await window.saveConfig(currentConfig);
 };
@@ -304,10 +247,7 @@ window.addItem = async (listKey, promptText) => {
 window.editItem = async (listKey, index) => {
     const currentValue = currentConfig[listKey][index];
     const newValue = prompt("Modifica voce:", currentValue);
-
-    if (newValue === null) return;
-    if (!newValue.trim()) return;
-
+    if (newValue === null || !newValue.trim()) return;
     currentConfig[listKey][index] = newValue.trim();
     window.renderAllTables();
     await window.saveConfig(currentConfig);
@@ -320,8 +260,7 @@ window.deleteItem = async (listKey, index) => {
     await window.saveConfig(currentConfig);
 };
 
-// --- INITIALIZATION ---
-
+// Initial Auth Setup
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
