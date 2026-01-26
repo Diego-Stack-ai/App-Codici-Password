@@ -55,7 +55,6 @@ initComponents().then(() => {
                     <button onclick="setTheme('light')" class="text-[7px] font-black uppercase px-3 py-1 rounded-full hover:bg-white/10 transition-colors">Light</button>
                     <button onclick="setTheme('dark')" class="text-[7px] font-black uppercase px-3 py-1 rounded-full hover:bg-white/10 transition-colors">Dark</button>
                 </div>
-                <span class="build-tag">v5.1 Build</span>
             </div>
 
             <div style="flex: 1; display: flex; justify-content: flex-end;">

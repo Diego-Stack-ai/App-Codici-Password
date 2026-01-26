@@ -3,141 +3,34 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
-    <title>Regole Scadenze</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <!-- Tailwind -->
-    <script src="assets/js/tailwind-config.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regole Scadenze - Protocollo Titanium</title>
+
+    <!-- Titanium Core Engine -->
+    <script src="assets/js/titanium-core.js"></script>
+
+    <!-- Design System Master -->
+    <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <style>
-        body {
-            background-color: #0a0f1e;
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
-
-        .filled {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        /* 3) FARO ANIMATO (GLASS GLOW) */
-        @keyframes glowFloat {
-
-            0%,
-            100% {
-                opacity: 0.6;
-                transform: translateY(0) scale(1) translateX(-50%);
-            }
-
-            50% {
-                opacity: 0.9;
-                transform: translateY(-10px) scale(1.05) translateX(-50%);
-            }
-        }
-
-        .glass-glow {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 150%;
-            height: 120%;
-            background: radial-gradient(ellipse at 50% 0%,
-                    rgba(80, 150, 255, 0.4) 0%,
-                    rgba(80, 150, 255, 0.15) 25%,
-                    rgba(80, 150, 255, 0.05) 50%,
-                    transparent 75%);
-            filter: blur(80px);
-            z-index: 0;
-            pointer-events: none;
-            transform: translateX(-50%);
-            animation: glowFloat 4s ease-in-out infinite;
-        }
-
-        /* 9) BORDER GLOW RIFLETTENTE */
-        .border-glow {
-            position: relative;
-        }
-
-        .border-glow::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            padding: 1px;
-            border-radius: inherit;
-            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.05));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
 </head>
 
-<body class="bg-[#0a0f1e] text-white font-display antialiased selection:bg-blue-500/30">
-    <!-- 2) Contenitore Principale -->
-    <div
-        class="relative flex min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">
-
-        <!-- 3) Faro -->
+<body class="titanium-bg antialiased">
+    <div class="titanium-box">
         <div class="glass-glow"></div>
 
-        <!-- 4) Header Fusion -->
-        <header
-            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl z-50 bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md">
-            <div class="flex items-center px-4 h-16 gap-4">
-                <a href="impostazioni.html"
-                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                    <span
-                        class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-                </a>
-                <h2
-                    class="relative z-10 text-lg font-bold leading-tight tracking-tight text-center flex-1 text-white uppercase opacity-90">
-                    Regole Invio
-                </h2>
-                <a href="home_page.html"
-                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                    <span
-                        class="material-symbols-outlined text-[24px] group-hover:scale-110 transition-transform">home</span>
-                </a>
-            </div>
-        </header>
+        <!-- HEADER PURE -->
+        <div id="header-placeholder"></div>
 
-        <!-- Header Spacer -->
-        <div class="h-20 w-full shrink-0"></div>
-
-        <main
-            class="flex-1 overflow-y-auto no-scrollbar px-5 pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+        <main class="titanium-main no-select grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
 
             <!-- Section: Automezzi -->
             <a href="configurazione_automezzi.html" class="group relative block h-full">
-                <!-- 10) Glow Overlay (External) -->
                 <div
                     class="absolute inset-0 bg-blue-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
                 </div>
-                <!-- 6, 9) Card Container -->
                 <div
                     class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-[#1e293b]/80 border-glow backdrop-blur-md border border-white/5 hover:border-blue-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
-
-                    <!-- 10) Glow Overlay (Internal) -->
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10">
-                    </div>
-
+                    <div class="glass-shine"></div>
                     <div class="flex items-start justify-between">
                         <div
                             class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform duration-300">
@@ -146,34 +39,24 @@
                         <span
                             class="material-symbols-outlined text-gray-600 group-hover:text-blue-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
-
                     <div class="flex-1 min-w-0 pt-2">
                         <h3
                             class="text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-blue-400 transition-colors">
-                            Automezzi
-                        </h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed">
-                            Configura oggetti, periodi e frequenze email per veicoli
-                        </p>
+                            Automezzi</h3>
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed">Configura oggetti, periodi e
+                            frequenze email per veicoli</p>
                     </div>
                 </div>
             </a>
 
             <!-- Section: Documenti -->
             <a href="configurazione_documenti.html" class="group relative block h-full">
-                <!-- 10) Glow Overlay (External) -->
                 <div
                     class="absolute inset-0 bg-amber-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
                 </div>
-                <!-- 6, 9) Card Container -->
                 <div
                     class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-[#1e293b]/80 border-glow backdrop-blur-md border border-white/5 hover:border-amber-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
-
-                    <!-- 10) Glow Overlay (Internal) -->
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10">
-                    </div>
-
+                    <div class="glass-shine"></div>
                     <div class="flex items-start justify-between">
                         <div
                             class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500/20 to-amber-600/5 border border-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform duration-300">
@@ -182,34 +65,24 @@
                         <span
                             class="material-symbols-outlined text-gray-600 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
-
                     <div class="flex-1 min-w-0 pt-2">
                         <h3
                             class="text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-amber-400 transition-colors">
-                            Documenti
-                        </h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed">
-                            Gestione avvisi per Documenti e Scadenze Varie
-                        </p>
+                            Documenti</h3>
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed">Gestione avvisi per Documenti e
+                            Scadenze Varie</p>
                     </div>
                 </div>
             </a>
 
             <!-- Section: Generali -->
             <a href="configurazione_generali.html" class="group relative block h-full">
-                <!-- 10) Glow Overlay (External) -->
                 <div
                     class="absolute inset-0 bg-teal-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
                 </div>
-                <!-- 6, 9) Card Container -->
                 <div
                     class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-[#1e293b]/80 border-glow backdrop-blur-md border border-white/5 hover:border-teal-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
-
-                    <!-- 10) Glow Overlay (Internal) -->
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10">
-                    </div>
-
+                    <div class="glass-shine"></div>
                     <div class="flex items-start justify-between">
                         <div
                             class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-teal-600/5 border border-teal-500/20 text-teal-400 group-hover:scale-110 transition-transform duration-300">
@@ -218,33 +91,27 @@
                         <span
                             class="material-symbols-outlined text-gray-600 group-hover:text-teal-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
-
                     <div class="flex-1 min-w-0 pt-2">
                         <h3
                             class="text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-teal-400 transition-colors">
-                            Regole Generali
-                        </h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed">
-                            Configura oggetti e testi per scadenze generiche
-                        </p>
+                            Regole Generali</h3>
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed">Configura oggetti e testi per
+                            scadenze generiche</p>
                     </div>
                 </div>
             </a>
 
             <!-- Future Roadmap Memo (Full Width) -->
-            <div class="col-span-1 md:col-span-2 lg:col-span-3 pt-4">
+            <div class="col-span-1 md:col-span-2 lg:col-span-3 pt-4 pb-20">
                 <div class="flex items-center gap-2 px-1 mb-2">
                     <span class="material-symbols-outlined text-purple-400 text-[20px]">rocket_launch</span>
-                    <h3 class="text-purple-400 text-xs font-bold uppercase tracking-widest">
-                        APPUNTI SVILUPPO FUTURO
-                    </h3>
+                    <h3 class="text-purple-400 text-xs font-bold uppercase tracking-widest">APPUNTI SVILUPPO FUTURO</h3>
                 </div>
                 <div
                     class="bg-black/20 border border-white/10 rounded-2xl p-4 shadow-inner relative group focus-within:border-purple-500/30 transition-colors">
                     <textarea id="future_memo"
                         class="w-full bg-transparent border-none text-[12px] leading-relaxed text-gray-300 placeholder:text-gray-600 focus:ring-0 p-0 resize-none min-h-[140px] scrollbar-thin scrollbar-thumb-white/10"
                         placeholder="Scrivi qui i tuoi appunti per il futuro..."></textarea>
-
                     <div class="flex justify-end mt-2 pt-2 border-t border-white/5">
                         <button id="save_memo_btn"
                             class="text-[11px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-purple-500/10 transition-colors">
@@ -254,101 +121,21 @@
                 </div>
             </div>
 
+            <!-- Regola 5: Titanium Help Block -->
+            <div class="col-span-full text-center mt-4">
+                <p class="titanium-help-block">Seleziona una categoria per configurare le regole di invio automatico.
+                </p>
+            </div>
+
         </main>
 
-        <!-- 5) Footer Fusion -->
-        <footer
-            class="fixed bottom-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl h-20 bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-sm pointer-events-none z-40">
-        </footer>
+        <!-- FOOTER PURE -->
+        <div id="footer-placeholder"></div>
     </div>
 
-    <!-- Firebase Logic -->
-    <script type="module">
-        import { auth, db } from './assets/js/firebase-config.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-        const memoArea = document.getElementById('future_memo');
-        const saveBtn = document.getElementById('save_memo_btn');
-
-        const DEFAULT_MEMO = "";
-
-        // Nuovi appunti da unire agli esistenti (Versione Dettagliata)
-        const NEW_NOTES_TO_ADD = `
----------------------------------------------------
-[DA IMPLEMENTARE - DETTAGLIO SCADENZA e LOGICA]
-
-1. CAMPI MANCANTI NELLA UI
-   - Oggetto Email: Aggiungere visualizzazione nella sezione Configurazione Email.
-   - Regole Notifica: Mostrare Giorni di Preavviso (notificationDaysBefore) e Frequenza (notificationFrequency).
-   - WhatsApp: Indicare chiaramente se la notifica WhatsApp è attiva o meno.
-
-2. LOGICA CORPO EMAIL (Refactoring)
-   - Attualmente in dettaglio_scadenza.js la costruzione del testo è duplicata/manuale.
-   - AZIONE: Importare 'buildEmailBody' da scadenza_templates.js per garantire coerenza assoluta tra creazione e visualizzazione.
-
-3. GERARCHIA VISIVA (Hero Card)
-   - Attualmente il focus è sull'Oggetto (Titolo), con l'Intestatario come sottotitolo.
-   - VALUTAZIONE: Invertire o bilanciare meglio per rendere subito chiaro "CHI" è il soggetto (es. Nome Cliente in grande, Tipo Scadenza come etichetta).
----------------------------------------------------`;
-
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            // Load Memo
-            try {
-                const docRef = doc(db, "users", user.uid, "settings", "roadmap_memo");
-                const snap = await getDoc(docRef);
-
-                let currentText = DEFAULT_MEMO;
-                if (snap.exists() && snap.data().text) {
-                    currentText = snap.data().text;
-                }
-
-                // Append logic if not already present
-                if (!currentText.includes("DA IMPLEMENTARE - DETTAGLIO SCADENZA")) {
-                    currentText += NEW_NOTES_TO_ADD;
-                    // Auto-save the update
-                    await setDoc(docRef, { text: currentText }, { merge: true });
-                }
-
-                memoArea.value = currentText;
-
-            } catch (e) {
-                console.error("Error loading memo:", e);
-                memoArea.value = DEFAULT_MEMO;
-            }
-        });
-
-        saveBtn.onclick = async () => {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const originalText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<span class="material-symbols-outlined !text-[16px] animate-spin">refresh</span> SALVATAGGIO...';
-
-            try {
-                const docRef = doc(db, "users", user.uid, "settings", "roadmap_memo");
-                await setDoc(docRef, { text: memoArea.value }, { merge: true });
-
-                setTimeout(() => {
-                    saveBtn.innerHTML = '<span class="material-symbols-outlined !text-[16px]">done</span> SALVATO!';
-                    saveBtn.className = "text-[11px] font-bold text-green-400 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 transition-colors";
-
-                    setTimeout(() => {
-                        saveBtn.innerHTML = '<span class="material-symbols-outlined !text-[16px]">save</span> SALVA APPUNTO';
-                        saveBtn.className = "text-[11px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-purple-500/10 transition-colors";
-                    }, 2000);
-                }, 500);
-            } catch (e) {
-                alert("Errore nel salvataggio!");
-                saveBtn.innerHTML = originalText;
-            }
-        };
-    </script>
+    <!-- Scripts -->
+    <script type="module" src="assets/js/rules_engine.js"></script> <!-- Placeholder se serve -->
+    <script type="module" src="assets/js/regole_scadenze_veicoli.js"></script>
 </body>
 
 </html>

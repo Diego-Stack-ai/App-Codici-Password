@@ -117,6 +117,22 @@ button:active,
     user-select: text;
 }
 
+/* EF-[#5] - TITANIUM HELP BLOCK (Regola 5) */
+.titanium-help-block {
+    font-size: 11px;
+    font-style: italic;
+    user-select: none;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.25);
+    /* Default Dark: Bianco tenue */
+    transition: color 0.3s ease;
+}
+
+html:not(.dark) .titanium-help-block {
+    color: rgba(15, 23, 42, 0.4);
+    /* Light Mode: Grigio slate tenue */
+}
+
 /* ==========================================================================
    RULE-MAPPING: EF-[#1] (SFONDO PAGINA) 🟢
    Descrizione: Colore di sfondo base per l'intera pagina (Light/Dark).
@@ -142,8 +158,8 @@ html.dark body {
    3. LAYOUT STRUCTURES
    ========================================================================== */
 /* ==========================================================================
-   RULE-MAPPING: EF-[#2] (CONTENITORE) 🟢
-   Descrizione: Il frame principale (.titanium-box). 
+   RULE-MAPPING: EF-[#2] (TITANIUM BOX - FRAME) 🟢
+   Descrizione: La scocca esterna metallica dell'applicazione.
    Dual Theme: SÌ (Gradiente Bianco/Azzurro in Light, Blu Notte in Dark).
    ========================================================================== */
 .titanium-box {
@@ -158,10 +174,59 @@ html.dark body {
     transition: background 0.5s;
     background: linear-gradient(to bottom right, #ffffff, #bfdbfe);
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    /* Piano base della scocca (Sopra al Faro Z=5) */
 }
 
 html.dark .titanium-box {
     background: linear-gradient(to left, #030712, #162e6e);
+}
+
+/* ==========================================================================
+   RULE-MAPPING: EF-[#21] (TITANIUM VAULT - AUTH CARD) 🟢
+   Descrizione: Il box centrale "forziere" per Login e Registrazione.
+   Effetto: Vetro sfocato, bordo luminoso e levitazione.
+   ========================================================================== */
+.titanium-vault {
+    width: 100%;
+    max-width: 28rem;
+    background: rgba(10, 15, 30, 0.5);
+    /* Più trasparente per far passare la luce del Faro */
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+    position: relative;
+    z-index: 15;
+    /* Sopra al Box (10) ma sotto ai Modali */
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* INTEGRAZIONE AUTOMATICA SAETTA (MASTER GRADE - VERSIONE SOBRIA 15%) */
+.titanium-vault::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Configurazione Vault: Opacità ridotta al 15% per massima eleganza */
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 999;
+    animation: shimmer-master 6s infinite linear;
+}
+
+.titanium-vault:hover {
+    transform: translateY(-4px);
+}
+
+.titanium-vault:active {
+    transform: scale(0.98);
+}
+
+html:not(.dark) .titanium-vault {
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* 3.1 BEACON ANIMATION (GLOWFLOAT) */
@@ -171,7 +236,7 @@ html.dark .titanium-box {
     left: 50%;
     transform: translateX(-50%);
     width: 150%;
-    height: 120%;
+    height: 300%;
     background: radial-gradient(ellipse at 50% 0%,
             var(--beacon-glow, rgba(80, 150, 255, 0.3)) 0%,
             rgba(80, 150, 255, 0.1) 25%,
@@ -220,8 +285,8 @@ html:not(.dark) .glass-glow {
     position: relative;
     z-index: var(--z-content);
     isolation: isolate;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
 }
 
 /* Content Wrappers - Critical for full width alignment */
@@ -755,7 +820,7 @@ html.dark .theme-switcher button:hover {
     top: 0;
     left: 50%;
     width: 150%;
-    height: 120%;
+    height: 300%;
     filter: blur(80px);
     z-index: var(--z-glow);
     pointer-events: none;
@@ -895,37 +960,26 @@ html.dark .glass-shine {
    Descrizione: Riflesso metallico continuo per card e bottoni.
    Dual Theme: SÌ (Opacità ridotta in Light, PIÙ intensa in Dark).
    ========================================================================== */
+/* ==========================================================================
+   RULE-MAPPING: EF-[#13] (SAETTA - MASTER GRADE) 🟢
+   Descrizione: UNICA definizione ufficiale del riflesso metallico.
+   Potenza: Master Grade (Z-Index 999, Opacità 50%, Animazione 6s).
+   ========================================================================== */
 .saetta {
     position: absolute;
     inset: 0;
-    background: linear-gradient(110deg, transparent 42%, var(--shimmer-intensity) 50%, transparent 58%);
+    /* Configurazione Master Grade */
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
     background-size: 200% 100%;
-    animation: shimmer 4s infinite linear;
+    /* Più larga per evitare tagli davanti */
     pointer-events: none;
-    z-index: 1;
+    z-index: 999 !important;
+    animation: shimmer-master 6s infinite linear !important;
+    display: block !important;
 }
 
-/* ========================================================================== */
-
-/* ==========================================================================
-   RULE-MAPPING: EF-[#14] (SAETTA GOLD - LISTE) 🟢
-   Descrizione: Variante più sottile del riflesso metallico per righe di liste.
-   Dual Theme: SÌ (Opacità ridotta in Light, PIÙ intensa in Dark).
-   ========================================================================== */
-.saetta-gold {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background: linear-gradient(110deg, transparent 42%, var(--shimmer-intensity) 50%, transparent 58%);
-    background-size: 200% 100%;
-    animation: shimmer 4s infinite linear;
-    opacity: 0.6;
-    /* Subtler than master saetta */
-}
-
-html.dark .saetta-gold {
-    opacity: 1;
+html.dark .saetta {
+    mix-blend-mode: overlay;
 }
 
 /* ==========================================================================
@@ -1039,18 +1093,16 @@ html.dark [class*="matrix-"]:not(.dynamic-card) p {
    Descrizione: Unica grande onda luminosa che attraversa l'intera dashboard.
    Dual Theme: SÌ (Standard in Light, Overlay in Dark per profondità).
    ========================================================================== */
-.saetta-master {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(110deg, transparent 40%, var(--shimmer-intensity) 50%, transparent 60%);
-    background-size: 200% 100%;
-    pointer-events: none;
-    z-index: var(--z-saetta);
-    animation: shimmer 5s infinite linear;
-}
+/* PULIZIA: Vecchia definizione Master rimossa perché integrata in .saetta */
 
-html.dark .saetta-master {
-    mix-blend-mode: overlay;
+@keyframes shimmer-master {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 /* ========================================================================== */
@@ -1208,3 +1260,499 @@ html.titanium-forced-dark a[href="dati_anagrafici_privato.html"] {
     mask-image: linear-gradient(to top, black 10%, transparent 100%);
 }
 */
+
+/* ==========================================================================
+   8. SETTINGS COMPONENTS (iOS/Modern Style)
+   ========================================================================== */
+
+/* Titolo Sezione Small Caps */
+.settings-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-dark);
+    opacity: 0.4;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    margin-left: 1.5rem;
+}
+
+html:not(.dark) .settings-section-label {
+    color: #64748b;
+    opacity: 1;
+}
+
+/* Contenitore Gruppo Arrotondato */
+.settings-group {
+    background: rgba(255, 255, 255, 0.03);
+    /* Dark: Vetro ultra-sottile */
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+html:not(.dark) .settings-group {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Singola Voce di Impostazione */
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-item:active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+html:not(.dark) .settings-item {
+    border-bottom: 1px solid #f8fafc;
+}
+
+html:not(.dark) .settings-item:active {
+    background: #f8fafc;
+}
+
+/* Icona Arrotondata con Colore Pastello */
+.settings-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.25rem;
+    flex-shrink: 0;
+}
+
+.settings-icon-box span {
+    font-size: 22px !important;
+}
+
+/* Varianti Colore Icone */
+.icon-orange {
+    background: rgba(249, 115, 22, 0.15);
+    color: #fb923c;
+}
+
+.icon-green {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+}
+
+.icon-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.icon-purple {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+}
+
+.icon-rose {
+    background: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
+}
+
+.icon-emerald {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.icon-amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.icon-indigo {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+}
+
+html:not(.dark) .icon-orange {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+html:not(.dark) .icon-green {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+html:not(.dark) .icon-blue {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+html:not(.dark) .icon-purple {
+    background: #faf5ff;
+    color: #9333ea;
+}
+
+html:not(.dark) .icon-rose {
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+html:not(.dark) .icon-emerald {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+html:not(.dark) .icon-amber {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+html:not(.dark) .icon-indigo {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+/* Testo */
+.settings-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+html:not(.dark) .settings-title {
+    color: #1e293b;
+}
+
+.settings-subtitle {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 1px;
+}
+
+html:not(.dark) .settings-subtitle {
+    color: #64748b;
+}
+
+/* Custom Toggle Switch (Harden per evitare conflitti con Tailwind Forms) */
+.titanium-toggle {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 44px !important;
+    height: 24px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 100px !important;
+    position: relative !important;
+    cursor: pointer !important;
+    transition: background 0.3s !important;
+    border: none !important;
+    /* Rimuove bordo di Tailwind Forms */
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+}
+
+/* Rimuove l'icona a "V" (check) di default di Tailwind Forms */
+.titanium-toggle:checked,
+.titanium-toggle:indeterminate {
+    background-image: none !important;
+    background-color: #22c55e !important;
+}
+
+.titanium-toggle::before {
+    content: "" !important;
+    position: absolute !important;
+    width: 20px !important;
+    height: 20px !important;
+    background: white !important;
+    border-radius: 50% !important;
+    top: 2px !important;
+    left: 2px !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.titanium-toggle:checked::before {
+    transform: translateX(20px) !important;
+}
+
+html:not(.dark) .titanium-toggle {
+    background: #e2e8f0 !important;
+}
+
+html:not(.dark) .titanium-toggle:checked {
+    background: #22c55e !important;
+}
+
+/* Selettore Tempo (Segmented Control style) */
+.timer-selector {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.4rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+html:not(.dark) .timer-selector {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.timer-btn {
+    flex: 1;
+    padding: 0.75rem 0.25rem;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.timer-btn.active {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+html:not(.dark) .timer-btn {
+    color: #64748b;
+}
+
+html:not(.dark) .timer-btn.active {
+    background: #ffffff;
+    color: #2563eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   9. SECURITY SETUP MODAL (Onboarding)
+   ========================================================================== */
+.security-setup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(3, 7, 18, 0.85);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: setupFadeIn 0.5s ease;
+}
+
+.security-setup-card {
+    width: 100%;
+    max-width: 400px;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+html:not(.dark) .security-setup-overlay {
+    background: rgba(226, 232, 240, 0.8);
+}
+
+html:not(.dark) .security-setup-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.security-setup-card .icon-header {
+    width: 80px;
+    height: 80px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.security-setup-card h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+}
+
+html:not(.dark) .security-setup-card h2 {
+    color: #0f172a;
+}
+
+.security-setup-card p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+html:not(.dark) .security-setup-card p {
+    color: #64748b;
+}
+
+@keyframes setupFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Language Picker Modal */
+.lang-picker-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(3, 7, 18, 0.8);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: langSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 640px) {
+    .lang-picker-overlay {
+        align-items: center;
+    }
+}
+
+.lang-picker-card {
+    width: 100%;
+    max-width: 450px;
+    background: #0f172a;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px 32px 0 0;
+    padding: 2.5rem 1.5rem;
+    box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 640px) {
+    .lang-picker-card {
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+}
+
+html:not(.dark) .lang-picker-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+
+.lang-picker-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+html:not(.dark) .lang-picker-title {
+    color: #0f172a;
+}
+
+.lang-item {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.lang-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.lang-item.active {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+html:not(.dark) .lang-item {
+    background: #f8fafc;
+}
+
+html:not(.dark) .lang-item:hover {
+    background: #f1f5f9;
+}
+
+html:not(.dark) .lang-item.active {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.lang-flag {
+    font-size: 1.5rem;
+}
+
+.lang-name {
+    flex: 1;
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+    text-align: left;
+}
+
+html:not(.dark) .lang-name {
+    color: #0f172a;
+}
+
+.lang-check {
+    color: #2563eb;
+    visibility: hidden;
+}
+
+.lang-item.active .lang-check {
+    visibility: visible;
+}
+
+@keyframes langSlideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

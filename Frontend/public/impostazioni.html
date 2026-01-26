@@ -4,18 +4,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
     <title>Impostazioni - Protocollo Titanium</title>
 
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+    <!-- Titanium Core Engine (Tema, Font, Protezioni) -->
+    <script src="assets/js/titanium-core.js"></script>
 
-    <!-- Design System -->
+    <!-- Design System Master -->
     <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
@@ -28,213 +22,358 @@
         <div id="header-placeholder"></div>
 
         <main class="titanium-main no-select">
-            <div class="saetta-master"></div>
 
             <!-- PROFILO -->
             <div class="px-2 mb-6 relative z-40">
-                <div
-                    class="bg-[#0a0f1e]/40 backdrop-blur-2xl rounded-[32px] border border-white/5 border-glow p-6 shadow-2xl relative overflow-hidden group">
-                    <div class="saetta"></div>
-                    <div class="flex flex-col items-center gap-4 relative z-10">
-                        <div id="user-avatar-settings"
-                            class="size-24 rounded-full border-4 border-white/10 shadow-2xl bg-cover bg-center transition-transform group-hover:scale-105"
-                            style="background-image: url('assets/images/user-avatar-5.png');"></div>
-                        <div class="text-center">
-                            <h3 id="user-name-settings" class="user-name-title">Caricamento...</h3>
-                            <p id="user-email-settings" class="user-email-subtitle">...</p>
+                <div class="titanium-vault border-glow group mx-auto">
+                    <!-- Glow Overlay (Identico a Index) -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[24px] pointer-events-none z-10">
+                    </div>
+
+                    <div class="px-8 py-8 relative z-10">
+                        <div class="flex flex-col items-center gap-4">
+                            <div id="user-avatar-settings"
+                                class="size-24 rounded-full border-4 border-white/10 shadow-2xl bg-cover bg-center transition-transform group-hover:scale-105"
+                                style="background-image: url('assets/images/user-avatar-5.png');"></div>
+                            <div class="text-center">
+                                <h3 id="user-name-settings" class="user-name-title" data-t="loading">Caricamento...</h3>
+                            </div>
+                            <button onclick="window.location.href='dati_anagrafici_privato.html'"
+                                class="btn-titanium-primary relative overflow-hidden"
+                                style="box-shadow: none; filter: none;" data-t="manage_account_data">
+                                <div class="glass-shine"></div>
+                                Gestisci Dati Account
+                            </button>
                         </div>
-                        <button onclick="window.location.href='dati_anagrafici_privato.html'"
-                            class="btn-titanium-primary">
-                            Gestisci Account
-                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- GRUPPI IMPOSTAZIONI -->
-            <div class="px-2 space-y-8 relative z-40 pb-32">
+            <div class="px-2 space-y-6 relative z-40 pb-12">
 
-                <!-- 1. SICUREZZA -->
-                <section class="space-y-4">
-                    <div class="settings-group-title">
-                        <div class="dot bg-orange-500"></div>
-                        <span>Sicurezza</span>
-                    </div>
-                    <div class="space-y-3">
-                        <!-- Password (Link) -->
-                        <a href="imposta_nuova_password.html" class="settings-card group">
-                            <div class="flex items-center gap-4">
-                                <div class="icon-box bg-orange-500/10 text-orange-400 border-orange-500/20">
+                <!-- SICUREZZA -->
+                <div>
+                    <h4 class="settings-section-label" data-t="section_security">Sicurezza</h4>
+                    <div class="settings-group">
+                        <div class="settings-item" onclick="window.location.href='imposta_nuova_password.html'">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-orange">
                                     <span class="material-symbols-outlined">lock</span>
                                 </div>
-                                <span class="card-label">Cambio Password</span>
+                                <span class="settings-title" data-t="change_password">Cambio Password</span>
                             </div>
-                            <span class="material-symbols-outlined nav-arrow">chevron_right</span>
-                        </a>
-                        <!-- 2FA (Action) -->
-                        <div class="settings-card">
-                            <div class="flex items-center gap-4">
-                                <div class="icon-box bg-green-500/10 text-green-400 border-green-500/20">
-                                    <span class="material-symbols-outlined">shield</span>
-                                </div>
-                                <span class="card-label">Autenticazione 2FA</span>
-                            </div>
-                            <label class="titanium-switch">
-                                <input type="checkbox" checked class="sr-only peer">
-                                <div class="switch-body peer-checked:bg-green-600"></div>
-                            </label>
+                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
                         </div>
-                        <!-- Biometria (Action) -->
-                        <div class="settings-card">
-                            <div class="flex items-center gap-4">
-                                <div class="icon-box bg-blue-500/10 text-blue-400 border-blue-500/20">
-                                    <span class="material-symbols-outlined">fingerprint</span>
+                        <div class="settings-item">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-green">
+                                    <span class="material-symbols-outlined">verified_user</span>
                                 </div>
-                                <span class="card-label">Face ID / Touch ID</span>
+                                <span class="settings-title" data-t="two_factor_auth">Autenticazione a due
+                                    fattori</span>
                             </div>
-                            <label class="titanium-switch">
-                                <input type="checkbox" checked class="sr-only peer">
-                                <div class="switch-body peer-checked:bg-blue-600"></div>
-                            </label>
+                            <input type="checkbox" class="titanium-toggle">
                         </div>
-                    </div>
-                </section>
+                        <div class="settings-item">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">face</span>
+                                </div>
+                                <span class="settings-title" data-t="face_id">Face ID</span>
+                            </div>
+                            <input type="checkbox" id="face-id-toggle" class="titanium-toggle" checked>
+                        </div>
+                        <!-- SELETTORE BLOCCO AUTOMATICO -->
+                        <div class="p-5 border-t border-white/5">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="settings-icon-box icon-indigo !mr-0">
+                                    <span class="material-symbols-outlined">timer</span>
+                                </div>
+                                <span class="settings-title uppercase text-[10px] opacity-50 tracking-widest"
+                                    data-t="lock_inactivity">Tempo di
+                                    Inattività</span>
+                            </div>
 
-                <!-- 2. GENERALE -->
-                <section class="space-y-4">
-                    <div class="settings-group-title">
-                        <div class="dot bg-blue-500"></div>
-                        <span>Generale</span>
+                            <div class="timer-selector" id="lock-timer-selector">
+                                <button class="timer-btn" data-val="0" data-t="lock_immediately">Subito</button>
+                                <button class="timer-btn" data-val="1" data-t="lock_1min">1 Min</button>
+                                <button class="timer-btn active" data-val="3" data-t="lock_3min">3 Min</button>
+                                <button class="timer-btn" data-val="5" data-t="lock_5min">5 Min</button>
+                            </div>
+
+                            <p class="titanium-help-block mt-4 px-2" data-t="auto_lock_subtitle">
+                                Sblocco con username e password o attiva face id dell'app
+                            </p>
+                        </div>
                     </div>
-                    <div class="space-y-3">
-                        <a href="notifiche_history.html" class="settings-card group">
-                            <div class="flex items-center gap-4">
-                                <div class="icon-box bg-red-500/10 text-red-500 border-red-500/20">
+                </div>
+
+                <!-- GENERALE -->
+                <div>
+                    <h4 class="settings-section-label" data-t="section_general">Generale</h4>
+                    <div class="settings-group">
+                        <!-- Notifiche -->
+                        <div class="settings-item">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-rose">
                                     <span class="material-symbols-outlined">notifications</span>
                                 </div>
-                                <span class="card-label">Centro Notifiche</span>
+                                <span class="settings-title" data-t="notifications">Notifiche</span>
                             </div>
-                            <span class="material-symbols-outlined nav-arrow">chevron_right</span>
-                        </a>
-                        <a href="archivio_account.html" class="settings-card group">
-                            <div class="flex items-center gap-4">
-                                <div class="icon-box bg-violet-500/10 text-violet-400 border-violet-500/20">
+                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
+                        </div>
+                        <!-- Archivio -->
+                        <div class="settings-item">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-purple">
                                     <span class="material-symbols-outlined">inventory_2</span>
                                 </div>
-                                <span class="card-label">Archivio Digitale</span>
+                                <span class="settings-title" data-t="archive">Archivio</span>
                             </div>
-                            <span class="material-symbols-outlined nav-arrow">chevron_right</span>
-                        </a>
-                        <a href="regole_scadenze_veicoli.html" class="settings-card group">
-                            <div class="flex items-center gap-4">
-                                <div class="icon-box bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
-                                    <span class="material-symbols-outlined">mail</span>
-                                </div>
-                                <span class="card-label">Regole Invio E-mail</span>
-                            </div>
-                            <span class="material-symbols-outlined nav-arrow">chevron_right</span>
-                        </a>
-                        <!-- Lingua (Action) -->
-                        <div class="settings-card group">
-                            <div class="flex items-center gap-4">
-                                <div class="icon-box bg-teal-500/10 text-teal-400 border-teal-500/20">
+                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
+                        </div>
+
+                        <!-- Lingua (Accordion Integrato) -->
+                        <div class="settings-item accordion-header !border-t border-white/5"
+                            data-target="language-options">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-emerald">
                                     <span class="material-symbols-outlined">language</span>
                                 </div>
-                                <span class="card-label">Lingua Sistema</span>
+                                <span class="settings-title" data-t="language">Lingua</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-black text-white/40 uppercase">Italiano</span>
-                                <span class="material-symbols-outlined nav-arrow">chevron_right</span>
+                            <div class="settings-trailing">
+                                <span class="settings-value mr-2" id="current-lang-label"
+                                    data-t="language_current">Italiano</span>
+                                <span
+                                    class="material-symbols-outlined settings-chevron transition-transform duration-300">expand_more</span>
                             </div>
+                        </div>
+                        <div id="language-options"
+                            class="accordion-content hidden border-t border-white/5 p-4 bg-black/20">
+                            <!-- Opzioni Lingua -->
+                            <div class="space-y-2" id="language-list-container">
+                                <!-- ITALIANO -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group active"
+                                    data-lang="it">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/it.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="IT">
+                                        <span class="text-white text-sm">Italiano</span>
+                                    </div>
+                                    <span class="material-symbols-outlined text-emerald-400 check-icon">check</span>
+                                </button>
+                                <!-- INGLESE -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
+                                    data-lang="en">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/gb.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="EN">
+                                        <span class="text-white text-sm">English</span>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
+                                </button>
+                                <!-- SPAGNOLO -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
+                                    data-lang="es">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/es.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="ES">
+                                        <span class="text-white text-sm">Español</span>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
+                                </button>
+                                <!-- FRANCESE -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
+                                    data-lang="fr">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/fr.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="FR">
+                                        <span class="text-white text-sm">Français</span>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
+                                </button>
+                                <!-- TEDESCO -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
+                                    data-lang="de">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/de.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="DE">
+                                        <span class="text-white text-sm">Deutsch</span>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
+                                </button>
+                                <!-- CINESE -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
+                                    data-lang="zh">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/cn.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="ZH">
+                                        <span class="text-white text-sm">简体中文</span>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
+                                </button>
+                                <!-- HINDI (INDIANO) -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
+                                    data-lang="hi">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/in.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="HI">
+                                        <span class="text-white text-sm">हिन्दी</span>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
+                                </button>
+                                <!-- PORTOGHESE -->
+                                <button
+                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
+                                    data-lang="pt">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://flagcdn.com/w40/pt.png"
+                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="PT">
+                                        <span class="text-white text-sm">Português</span>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Regole Invio Scadenze (Integrato come ultimo item) -->
+                        <div class="settings-item !border-t border-white/5"
+                            onclick="window.location.href='regole_scadenze_veicoli.html'">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-indigo">
+                                    <span class="material-symbols-outlined">mail</span>
+                                </div>
+                                <span class="settings-title" data-t="expiry_rules">Regole invio scadenze</span>
+                            </div>
+                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
                         </div>
                     </div>
-                </section>
-
-                <!-- 3. DOCUMENTAZIONE & REGOLE (Da Test Theme) -->
-                <section class="space-y-4">
-                    <div class="settings-group-title">
-                        <div class="dot bg-emerald-500"></div>
-                        <span>Info & Protocolli</span>
-                    </div>
-                    <div
-                        class="bg-[#0a0f1e]/40 backdrop-blur-2xl rounded-[32px] border border-white/5 border-glow overflow-hidden">
-
-                        <!-- Info App -->
-                        <div class="border-b border-white/5">
-                            <button data-target="info-app-content" data-chevron="info-app-chevron"
-                                class="accordion-toggle w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors">
-                                <div class="flex items-center gap-4">
-                                    <span class="material-symbols-outlined text-blue-400">info</span>
-                                    <span class="text-xs font-bold text-white uppercase tracking-widest">Informazioni
-                                        App</span>
-                                </div>
-                                <span id="info-app-chevron"
-                                    class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
-                            </button>
-                            <div id="info-app-content" class="hidden p-6 space-y-6 bg-black/20">
-                                <div id="info-app-text-placeholder"
-                                    class="text-white/60 text-xs leading-relaxed space-y-4">
-                                    <!-- Caricato via JS da Test Theme -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Le 5 Regole d'Oro -->
-                        <div class="border-b border-white/5">
-                            <button data-target="rules-gold-content" data-chevron="rules-gold-chevron"
-                                class="accordion-toggle w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors">
-                                <div class="flex items-center gap-4">
-                                    <span class="material-symbols-outlined text-yellow-400">verified</span>
-                                    <span class="text-xs font-bold text-white uppercase tracking-widest">Le 5 Regole
-                                        d'Oro</span>
-                                </div>
-                                <span id="rules-gold-chevron"
-                                    class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
-                            </button>
-                            <div id="rules-gold-content" class="hidden p-6 space-y-4 bg-black/20">
-                                <div id="rules-gold-text-placeholder" class="space-y-4">
-                                    <!-- Caricato via JS da Test Theme -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Privacy Policy -->
-                        <div>
-                            <button data-target="privacy-policy-content" data-chevron="privacy-policy-chevron"
-                                class="accordion-toggle w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors">
-                                <div class="flex items-center gap-4">
-                                    <span class="material-symbols-outlined text-gray-400">privacy_tip</span>
-                                    <span class="text-xs font-bold text-white uppercase tracking-widest">Privacy
-                                        Policy</span>
-                                </div>
-                                <span id="privacy-policy-chevron"
-                                    class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
-                            </button>
-                            <div id="privacy-policy-content" class="hidden p-6 space-y-4 bg-black/20">
-                                <div id="privacy-policy-text-placeholder"
-                                    class="text-white/60 text-xs leading-relaxed space-y-4">
-                                    <!-- Caricato via JS da Test Theme -->
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
-                <!-- FOOTER ACTIONS -->
-                <section class="pt-6">
-                    <button id="logout-btn-settings" class="btn-logout-titanium">
-                        <div class="saetta"></div>
-                        <span>Esci dall'Account</span>
-                    </button>
-                    <p class="text-[8px] font-bold text-center text-white/10 uppercase tracking-widest mt-6">
-                        Titanium Protocol v5.1 Build 400 • Diego Boschetto
-                    </p>
-                </section>
+                </div>
             </div>
-        </main>
 
-        <div id="footer-placeholder"></div>
+            <!-- PRESENTAZIONE -->
+            <div>
+                <h4 class="settings-section-label" data-t="section_presentation">Presentazione</h4>
+                <div class="space-y-3">
+                    <!-- Info App -->
+                    <div class="settings-group !mb-0">
+                        <div class="settings-item accordion-header" data-target="info-app">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">info</span>
+                                </div>
+                                <div class="settings-label-group">
+                                    <span class="settings-title" data-t="app_info_title">Informazioni
+                                        sull'App</span>
+                                </div>
+                            </div>
+                            <span
+                                class="material-symbols-outlined settings-chevron transition-transform duration-300">expand_more</span>
+                        </div>
+                        <div id="info-app" class="accordion-content hidden border-t border-white/5">
+                            <div id="info-app-text-placeholder"></div>
+                        </div>
+                    </div>
+
+                    <!-- Le Regole -->
+                    <div class="settings-group !mb-0">
+                        <div class="settings-item accordion-header" data-target="rules-gold">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-amber">
+                                    <span class="material-symbols-outlined">verified</span>
+                                </div>
+                                <div class="settings-label-group">
+                                    <span class="settings-title" data-t="rules_title">Le regole da ricordare</span>
+                                </div>
+                            </div>
+                            <span
+                                class="material-symbols-outlined settings-chevron transition-transform duration-300">expand_more</span>
+                        </div>
+                        <div id="rules-gold" class="accordion-content hidden border-t border-white/5">
+                            <div id="rules-gold-text-placeholder"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUPPORTO -->
+            <div>
+                <h4 class="settings-section-label" data-t="section_support">Supporto</h4>
+                <div class="space-y-3">
+                    <div class="settings-group !mb-0">
+                        <div class="settings-item" onclick="window.location.href='supporto.html'">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">help</span>
+                                </div>
+                                <span class="settings-title" data-t="help_faq">Aiuto e FAQ</span>
+                            </div>
+                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-group !mb-0">
+                        <div class="settings-item accordion-header" data-target="privacy-policy">
+                            <div class="glass-shine"></div>
+                            <div class="flex items-center">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">policy</span>
+                                </div>
+                                <div class="settings-label-group">
+                                    <span class="settings-title" data-t="privacy_policy_title">Privacy Policy</span>
+                                    <span class="settings-subtitle" data-t="privacy_policy_subtitle">Trattamento
+                                        dati e diritti</span>
+                                </div>
+                            </div>
+                            <span
+                                class="material-symbols-outlined settings-chevron transition-transform duration-300">expand_more</span>
+                        </div>
+                        <div id="privacy-policy" class="accordion-content hidden border-t border-white/5">
+                            <div id="privacy-policy-text-placeholder"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Azione Logout -->
+            <div class="pt-6 px-6">
+                <button id="logout-btn-settings"
+                    class="w-full py-4 text-rose-500 font-bold text-sm bg-rose-500/5 rounded-2xl border border-rose-500/10 active:scale-95 transition-all"
+                    data-t="logout">
+                    Esci dall'account
+                </button>
+            </div>
+    </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
     </div>
 
     <!-- Scripts -->
