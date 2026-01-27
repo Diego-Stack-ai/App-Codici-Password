@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurazione Documenti - Protocollo Titanium</title>
+    <title data-t="documents_config_title">Configurazione Documenti - Protocollo Titanium</title>
 
-    <!-- Titanium Core Engine (Tema, Font, Protezioni) -->
-    <script src="assets/js/titanium-core.js"></script>
-
+    <!-- Titanium Engine Stack -->
+    <script src="assets/js/titanium-config.js"></script>
     <!-- Design System Master -->
     <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="assets/js/titanium-core.js"></script>
 </head>
 
 <body class="titanium-bg antialiased">
@@ -32,7 +32,8 @@
                     class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <h3
                         class="font-bold text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">mail</span> Tipo Documento
+                        <span class="material-symbols-outlined text-[20px] filled">mail</span> <span
+                            data-t="section_doc_type">Tipo Documento</span>
                     </h3>
                     <div class="flex items-center gap-3 relative z-10">
                         <button onclick="event.stopPropagation(); window.addTypeItem()"
@@ -44,11 +45,9 @@
                     </div>
                 </div>
                 <!-- Description -->
-                <div
-                    class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5">
-                    Configura i tipi (es. "Patente") con <strong
-                        class="text-gray-900 dark:text-white">Preavviso</strong> e <strong
-                        class="text-gray-900 dark:text-white">Replica</strong>.
+                <div class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5"
+                    data-t="section_doc_desc">
+                    Configura i tipi (es. "Patente") con Preavviso e Replica.
                 </div>
                 <div id="container_types"
                     class="hidden bg-slate-50 dark:bg-black/40 relative z-20 border-t border-slate-200 dark:border-white/5">
@@ -67,7 +66,8 @@
                     class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <h3
                         class="font-bold text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">badge</span> Dati & Proprietario
+                        <span class="material-symbols-outlined text-[20px] filled">badge</span> <span
+                            data-t="section_doc_data_owner">Dati & Proprietario</span>
                     </h3>
 
                     <div class="flex items-center gap-3 relative z-10">
@@ -80,10 +80,9 @@
                     </div>
                 </div>
                 <!-- Description -->
-                <div
-                    class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5">
-                    Formato: <strong class="text-gray-900 dark:text-white font-mono">Numero - Tipo -
-                        Proprietario</strong><br>
+                <div class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5"
+                    data-t="section_doc_data_desc">
+                    Formato: Numero - Tipo - Proprietario
                     (Es. "AH12345 - Patente - Rossi Mario")
                 </div>
                 <div id="container_models"
@@ -103,10 +102,12 @@
                     class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <h3
                         class="font-bold text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">description</span> Template Email
+                        <span class="material-symbols-outlined text-[20px] filled">description</span> <span
+                            data-t="section_email_template">Template Email</span>
                     </h3>
                     <div class="flex items-center gap-3 relative z-10">
-                        <button onclick="event.stopPropagation(); addItem('emailTemplates', 'Nuovo Testo Email:')"
+                        <button
+                            onclick="event.stopPropagation(); addItem('emailTemplates', document.documentElement.lang === 'it' ? 'Nuovo Testo Email:' : 'New Email Text:')"
                             class="size-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all shadow-sm border border-amber-500/20 active:scale-90">
                             <span class="material-symbols-outlined text-[20px]">add</span>
                         </button>
@@ -127,7 +128,8 @@
                 <div class="flex items-center gap-2 px-1 mb-2">
                     <span
                         class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[20px] filled">info</span>
-                    <h3 class="text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest">
+                    <h3 class="text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest"
+                        data-t="section_syntax_title">
                         Sintassi Automatica
                     </h3>
                 </div>
@@ -137,13 +139,14 @@
                         <div>
                             <p
                                 class="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
-                                <span class="size-1 bg-amber-500 rounded-full"></span> Oggetto Email Generato
+                                <span class="size-1 bg-amber-500 rounded-full"></span> <span
+                                    data-t="syntax_subject_generated">Oggetto Email Generato</span>
                             </p>
                             <div
                                 class="font-mono text-[13px] text-amber-800 dark:text-amber-100 bg-amber-500/5 rounded-lg p-3 border border-amber-500/10">
-                                <span class="opacity-40">"Scade"</span> + <span
+                                <span class="opacity-40" data-t="syntax_expires_capital">"Scade"</span> + <span
                                     class="text-amber-600 dark:text-amber-400">[Oggetto]</span>
-                                + <span class="opacity-40">"numero"</span> + <span
+                                + <span class="opacity-40" data-t="syntax_number_lower">"numero"</span> + <span
                                     class="text-gray-700 dark:text-white/80">[Doc]</span>
                             </div>
                         </div>
@@ -151,14 +154,15 @@
                         <div>
                             <p
                                 class="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
-                                <span class="size-1 bg-amber-500 rounded-full"></span> Corpo Email Generato
+                                <span class="size-1 bg-amber-500 rounded-full"></span> <span
+                                    data-t="syntax_body_generated">Corpo Email Generato</span>
                             </p>
                             <div
                                 class="font-mono text-[13px] text-amber-800 dark:text-amber-100 bg-amber-500/5 rounded-lg p-3 border border-amber-500/10">
-                                <span class="opacity-40">"Ciao"</span> + <span
+                                <span class="opacity-40" data-t="syntax_hello">"Ciao"</span> + <span
                                     class="text-gray-700 dark:text-white/80">[Nome]</span> +
                                 <span class="text-amber-600 dark:text-amber-400">[Oggetto]</span> + <span
-                                    class="opacity-40">"in
+                                    class="opacity-40" data-t="syntax_in_date">"in
                                     data"</span> + <span class="text-amber-700 dark:text-amber-300">[Data]</span>
                             </div>
                         </div>
@@ -166,7 +170,8 @@
                         <div class="flex items-start gap-2 pt-2 opacity-40">
                             <span
                                 class="material-symbols-outlined text-gray-900 dark:text-white text-[14px]">tips_and_updates</span>
-                            <p class="text-[10px] italic leading-tight text-gray-900 dark:text-white">
+                            <p class="text-[10px] italic leading-tight text-gray-900 dark:text-white"
+                                data-t="syntax_note">
                                 Regole valide solo se l'oggetto corrisponde a quelli configurati nelle liste superiori.
                             </p>
                         </div>

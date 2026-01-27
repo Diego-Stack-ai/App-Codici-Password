@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurazione Automezzi - Protocollo Titanium</title>
+    <title data-t="vehicles_config_title">Configurazione Automezzi - Protocollo Titanium</title>
 
-    <!-- Titanium Core Engine (Tema, Font, Protezioni) -->
-    <script src="assets/js/titanium-core.js"></script>
-
+    <!-- Titanium Engine Stack -->
+    <script src="assets/js/titanium-config.js"></script>
     <!-- Design System Master -->
     <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="assets/js/titanium-core.js"></script>
 </head>
 
 <body class="titanium-bg antialiased">
@@ -32,7 +32,8 @@
                     class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <h3
                         class="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">mail</span> Oggetto Email
+                        <span class="material-symbols-outlined text-[20px] filled">mail</span> <span
+                            data-t="section_email_subject">Oggetto Email</span>
                     </h3>
                     <div class="flex items-center gap-3 relative z-10">
                         <button onclick="event.stopPropagation(); window.addTypeItem()"
@@ -44,11 +45,9 @@
                     </div>
                 </div>
                 <!-- Description -->
-                <div
-                    class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5">
-                    Definisci i tipi di scadenza (es. "Assicurazione") con i relativi giorni di <strong
-                        class="text-gray-900 dark:text-white">Preavviso</strong> e <strong
-                        class="text-gray-900 dark:text-white">Replica</strong>.
+                <div class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5"
+                    data-t="section_email_desc">
+                    Definisci i tipi di scadenza (es. "Assicurazione") con i relativi giorni di Preavviso e Replica.
                 </div>
 
                 <div id="container_types"
@@ -68,11 +67,13 @@
                     class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <h3
                         class="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">directions_car</span> Modello & Targa
+                        <span class="material-symbols-outlined text-[20px] filled">directions_car</span> <span
+                            data-t="section_vehicle_model">Modello & Targa</span>
                     </h3>
 
                     <div class="flex items-center gap-3 relative z-10">
-                        <button onclick="event.stopPropagation(); addItem('models', 'Nuovo Veicolo (Modello - Targa):')"
+                        <button
+                            onclick="event.stopPropagation(); addItem('models', document.documentElement.lang === 'it' ? 'Nuovo Veicolo (Modello - Targa):' : 'New Vehicle (Model - Plate):')"
                             class="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm border border-blue-500/20 active:scale-90">
                             <span class="material-symbols-outlined text-[20px]">add</span>
                         </button>
@@ -81,10 +82,9 @@
                     </div>
                 </div>
                 <!-- Description -->
-                <div
-                    class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5">
-                    Formato standard: <strong class="text-gray-900 dark:text-white font-mono">Modello -
-                        Targa</strong><br>
+                <div class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5"
+                    data-t="section_vehicle_desc">
+                    Formato standard: Modello - Targa
                     (Es. "Fiat Panda - AB123CD")
                 </div>
 
@@ -106,10 +106,12 @@
                     class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                     <h3
                         class="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">description</span> Template Email
+                        <span class="material-symbols-outlined text-[20px] filled">description</span> <span
+                            data-t="section_email_template">Template Email</span>
                     </h3>
                     <div class="flex items-center gap-3 relative z-10">
-                        <button onclick="event.stopPropagation(); addItem('emailTemplates', 'Nuovo Testo Email:')"
+                        <button
+                            onclick="event.stopPropagation(); addItem('emailTemplates', document.documentElement.lang === 'it' ? 'Nuovo Testo Email:' : 'New Email Text:')"
                             class="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white transition-all shadow-sm border border-blue-500/20 active:scale-90">
                             <span class="material-symbols-outlined text-[20px]">add</span>
                         </button>
@@ -130,7 +132,8 @@
                 <div class="flex items-center gap-2 px-1 mb-2">
                     <span
                         class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[20px] filled">info</span>
-                    <h3 class="text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest">
+                    <h3 class="text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest"
+                        data-t="section_syntax_title">
                         Sintassi Automatica
                     </h3>
                 </div>
@@ -140,7 +143,8 @@
                         <div>
                             <p
                                 class="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
-                                <span class="size-1 bg-blue-500 rounded-full"></span> Oggetto Email Generato
+                                <span class="size-1 bg-blue-500 rounded-full"></span> <span
+                                    data-t="syntax_subject_generated">Oggetto Email Generato</span>
                             </p>
                             <div
                                 class="font-mono text-[13px] text-blue-800 dark:text-blue-100 bg-blue-500/5 rounded-lg p-3 border border-blue-500/10">
@@ -153,13 +157,14 @@
                         <div>
                             <p
                                 class="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
-                                <span class="size-1 bg-blue-500 rounded-full"></span> Corpo Email Generato
+                                <span class="size-1 bg-blue-500 rounded-full"></span> <span
+                                    data-t="syntax_body_generated">Corpo Email Generato</span>
                             </p>
                             <div
                                 class="font-mono text-[13px] text-blue-800 dark:text-blue-100 bg-blue-500/5 rounded-lg p-3 border border-blue-500/10">
                                 <span class="text-blue-600 dark:text-blue-400">[Oggetto]</span> + <span
-                                    class="text-gray-700 dark:text-white/80">[Targa]</span> + <span
-                                    class="opacity-40">"scade il"</span> +
+                                    class="text-gray-700 dark:text-white/80">[Targa]</span> + <span class="opacity-40"
+                                    data-t="syntax_expires_on">"scade il"</span> +
                                 <span class="text-blue-700 dark:text-blue-300">[Data]</span>
                             </div>
                         </div>
@@ -167,7 +172,8 @@
                         <div class="flex items-start gap-2 pt-2 opacity-40">
                             <span
                                 class="material-symbols-outlined text-gray-900 dark:text-white text-[14px]">tips_and_updates</span>
-                            <p class="text-[10px] text-gray-900 dark:text-white italic leading-tight">
+                            <p class="text-[10px] text-gray-900 dark:text-white italic leading-tight"
+                                data-t="syntax_note">
                                 Regole valide solo se l'oggetto corrisponde a quelli configurati nelle liste superiori.
                             </p>
                         </div>

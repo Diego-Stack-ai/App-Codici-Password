@@ -56,28 +56,32 @@
                         </div>
                     </div>
 
-                    <h1
-                        class="text-3xl font-extrabold text-white text-center mb-1 select-none group-hover:translate-x-1 transition-transform duration-500">
+                    <h1 class="text-3xl font-extrabold text-white text-center mb-1 select-none group-hover:translate-x-1 transition-transform duration-500"
+                        data-t="login_title">
                         Accedi</h1>
-                    <p class="text-xs text-white/40 text-center mb-6 uppercase tracking-widest select-none font-bold">
+                    <p class="text-xs text-white/40 text-center mb-6 uppercase tracking-widest select-none font-bold"
+                        data-t="login_subtitle">
                         Protocollo Titanium</p>
 
                     <!-- REGOLA 5 - AIUTO BASE INFORMATIVA (Semantica Enterprise) -->
-                    <p data-ui="hint" class="mb-10">
+                    <p data-ui="hint" class="mb-10" data-t="login_hint">
                         Inserisci le tue credenziali autorizzate per sbloccare l'accesso al sistema.
                     </p>
 
                     <form id="login-form" class="space-y-6">
                         <div class="space-y-2">
                             <label
-                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none">Username</label>
+                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none"
+                                data-t="username_label">Username</label>
                             <input id="email" type="email" placeholder="Email o Username" required
-                                class="w-full h-14 px-5 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base">
+                                class="w-full h-14 px-5 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base"
+                                data-t="username_placeholder">
                         </div>
 
                         <div class="space-y-2">
                             <label
-                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none">Password</label>
+                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none"
+                                data-t="password_label">Password</label>
                             <div class="relative group">
                                 <input id="password" type="password" placeholder="••••••••" required
                                     class="w-full h-14 px-5 pr-14 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base">
@@ -89,7 +93,8 @@
                             </div>
                             <div class="flex justify-end px-1 pt-1">
                                 <a href="reset_password.html"
-                                    class="text-[10px] font-bold text-white/50 hover:text-blue-400 uppercase tracking-widest transition-colors">Password
+                                    class="text-[10px] font-bold text-white/50 hover:text-blue-400 uppercase tracking-widest transition-colors"
+                                    data-t="forgot_password">Password
                                     dimenticata?</a>
                             </div>
                         </div>
@@ -97,7 +102,8 @@
                         <button type="submit" data-login-submit
                             class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-extrabold rounded-2xl shadow-xl transition-all active:scale-[0.98] border-glow group/btn overflow-hidden">
                             <div class="relative z-10 flex items-center justify-center gap-2">
-                                <span class="tracking-widest uppercase text-xs">Autenticazione</span>
+                                <span class="tracking-widest uppercase text-xs"
+                                    data-t="auth_button">Autenticazione</span>
                                 <span class="material-symbols-outlined text-sm">chevron_right</span>
                             </div>
                         </button>
@@ -105,7 +111,8 @@
 
                     <div class="mt-8 text-center select-none">
                         <a href="registrati.html"
-                            class="text-[10px] font-bold text-blue-400 hover:text-white transition-colors uppercase tracking-widest font-extrabold">Registrazione
+                            class="text-[10px] font-bold text-blue-400 hover:text-white transition-colors uppercase tracking-widest font-extrabold"
+                            data-t="register_link">Registrazione
                             nuovo utente</a>
                     </div>
                 </div>

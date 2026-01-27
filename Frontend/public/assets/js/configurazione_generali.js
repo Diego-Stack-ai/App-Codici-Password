@@ -22,7 +22,7 @@ initComponents().then(() => {
                     <span class="material-symbols-outlined">arrow_back</span>
                 </a>
                 <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
-                    Config. Generali
+                    ${t('header_config_general')}
                 </h2>
                 <a href="home_page.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
                     <span class="material-symbols-outlined">home</span>
@@ -39,6 +39,16 @@ initComponents().then(() => {
             </div>
         `;
     }
+
+    // --- TRADUZIONE STATICA DEL DOM ---
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (el.hasAttribute('placeholder')) {
+            el.setAttribute('placeholder', t(key));
+        } else {
+            el.textContent = t(key);
+        }
+    });
 });
 
 function log(msg) {
@@ -59,7 +69,7 @@ function renderTable(tbodyId, dataArray, listKey) {
 
     tbody.innerHTML = '';
     if (!dataArray || dataArray.length === 0) {
-        tbody.innerHTML = '<tr><td class="px-4 py-3 text-gray-500 italic">Nessun dato</td></tr>';
+        tbody.innerHTML = `<tr><td class="px-4 py-3 text-gray-500 italic">${t('no_data')}</td></tr>`;
         return;
     }
 
@@ -93,7 +103,7 @@ window.renderAllTables = () => {
         if (tbodyTypes) {
             tbodyTypes.innerHTML = '';
             if (!currentConfig.deadlineTypes || currentConfig.deadlineTypes.length === 0) {
-                tbodyTypes.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-gray-500 italic text-center text-xs">Nessun dato configurato</td></tr>';
+                tbodyTypes.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-gray-500 italic text-center text-xs">${t('no_data_configured')}</td></tr>`;
             } else {
                 currentConfig.deadlineTypes.forEach((item, index) => {
                     if (typeof item === 'string') {
@@ -110,13 +120,13 @@ window.renderAllTables = () => {
                          <td class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">${name}</td>
                         <td class="px-2 py-3 text-center">
                             <div class="inline-flex flex-col items-center gap-1">
-                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">Preavviso</span>
+                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">${t('text_notice')}</span>
                                 <span class="font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded text-[10px] border border-teal-500/20">${period}gg</span>
                             </div>
                         </td>
                         <td class="px-2 py-3 text-center">
                             <div class="inline-flex flex-col items-center gap-1">
-                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">Replica</span>
+                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">${t('text_replica')}</span>
                                 <span class="font-bold text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] border border-slate-200 dark:border-white/10">${freq}gg</span>
                             </div>
                         </td>
@@ -145,11 +155,11 @@ window.renderAllTables = () => {
 
 window.editType = async (index) => {
     const item = currentConfig.deadlineTypes[index];
-    const newName = prompt("Modifica Nome Scadenza:", item.name);
+    const newName = prompt(t('prompt_edit_general_name'), item.name);
     if (newName === null) return;
-    let newPeriod = prompt("Giorni di Periodo (Preavviso):", item.period);
+    let newPeriod = prompt(t('prompt_days_notice'), item.period);
     if (newPeriod === null) return;
-    let newFreq = prompt("Giorni di Frequenza:", item.freq);
+    let newFreq = prompt(t('prompt_freq_days'), item.freq);
     if (newFreq === null) return;
 
     if (newName && !isNaN(newPeriod) && !isNaN(newFreq)) {
@@ -164,11 +174,11 @@ window.editType = async (index) => {
 };
 
 window.addTypeItem = async () => {
-    const name = prompt("Nuovo Tipo Scadenza:");
+    const name = prompt(t('prompt_new_general_type'));
     if (!name) return;
-    const period = prompt("Periodo (Preavviso gg) - Default 7:", "7");
+    const period = prompt(t('prompt_period_default').replace('14', '7'), "7");
     if (period === null) return;
-    const freq = prompt("Frequenza (gg) - Default 3:", "3");
+    const freq = prompt(t('prompt_freq_default').replace('7', '3'), "3");
     if (freq === null) return;
 
     if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
@@ -234,7 +244,7 @@ window.addItem = async (listKey, promptText) => {
 
 window.editItem = async (listKey, index) => {
     const currentValue = currentConfig[listKey][index];
-    const newValue = prompt("Modifica voce:", currentValue);
+    const newValue = prompt(t('prompt_edit_item'), currentValue);
     if (newValue === null || !newValue.trim()) return;
     currentConfig[listKey][index] = newValue.trim();
     window.renderAllTables();
@@ -242,7 +252,7 @@ window.editItem = async (listKey, index) => {
 };
 
 window.deleteItem = async (listKey, index) => {
-    if (!confirm("Eliminare voce?")) return;
+    if (!confirm(t('confirm_delete_item'))) return;
     currentConfig[listKey].splice(index, 1);
     window.renderAllTables();
     await window.saveConfig(currentConfig);

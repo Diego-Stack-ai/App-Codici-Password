@@ -1,32 +1,21 @@
 /**
- * THEME MANAGER MODULE
- * Gestisce il tema (light/dark) dell'applicazione in modo centralizzato.
+ * THEME MANAGER MODULE (Wrapper)
+ * Delega tutta la logica a titanium-core.js v2.2
  */
 
-/**
- * Applica il tema basandosi sulle preferenze salvate o di sistema.
- */
 export function applyTheme() {
-    const pref = localStorage.getItem('theme');
-    // Logica: se 'dark', OPPURE (non è 'light' E la preferenza di sistema è dark)
-    const isDark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    if (isDark) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
+    // La logica è automatica in titanium-core.js
+    if (window.TitaniumTheme) {
+        window.TitaniumTheme.applyLogic();
     }
 }
 
-/**
- * Imposta manualmente il tema e lo salva nel localStorage.
- * @param {string} mode - 'light' o 'dark'
- */
 export function setTheme(mode) {
-    localStorage.setItem('theme', mode);
-    applyTheme();
+    if (window.TitaniumTheme) {
+        window.TitaniumTheme.setMode(mode);
+    } else {
+        // Fallback nel caso titanium-core non sia caricato (non dovrebbe succedere)
+        localStorage.setItem('theme', mode);
+        location.reload();
+    }
 }
-
-// Auto-run immediata per evitare FOUC (Flash of Unstyled Content) se importato come modulo
-// Nota: Funziona meglio se lo script è nel <head> o subito all'inizio del body.
-applyTheme();

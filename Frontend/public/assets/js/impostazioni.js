@@ -20,7 +20,7 @@ initComponents().then(() => {
 
         headerStack.innerHTML = `
             <div class="header-stack" style="justify-content: center; position: relative;">
-                <h2 class="text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest">Impostazioni</h2>
+                <h2 class="text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest">${t('settings_page_title')}</h2>
                 <a href="home_page.html" class="btn-icon-header" style="position: absolute; right: 0;">
                     <span class="material-symbols-outlined">home</span>
                 </a>
@@ -59,7 +59,7 @@ onAuthStateChanged(auth, async (user) => {
 
             const displayName = (userData.nome || userData.cognome)
                 ? `${userData.nome || ''} ${userData.cognome || ''}`.trim()
-                : (user.displayName || "Utente");
+                : (user.displayName || t('user_default'));
 
             if (nameEl) nameEl.textContent = displayName;
 
@@ -82,7 +82,7 @@ onAuthStateChanged(auth, async (user) => {
             if (faceIdToggle) faceIdToggle.checked = userData.biometric_lock ?? true;
             if (currentLockTimerEl) {
                 const timeout = userData.lock_timeout ?? 3;
-                currentLockTimerEl.textContent = timeout === 0 ? "Subito" : `${timeout} Minuti`;
+                currentLockTimerEl.textContent = timeout === 0 ? t('lock_immediately') : `${timeout} ${t('unit_minutes')}`;
             }
 
             // 2. Listener Face ID
@@ -108,6 +108,22 @@ onAuthStateChanged(auth, async (user) => {
                         btn.classList.add('active');
                         // Update DB
                         await updateDoc(docRef, { lock_timeout: next });
+                    });
+                });
+            }
+
+            // --- LOGICA TEMA (Chiaro, Scuro, Auto) ---
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            if (themeButtons.length > 0) {
+                const currentTheme = localStorage.getItem('theme') || 'dark';
+                themeButtons.forEach(btn => {
+                    if (btn.dataset.theme === currentTheme) btn.classList.add('active');
+                    else btn.classList.remove('active');
+
+                    btn.addEventListener('click', () => {
+                        const newTheme = btn.dataset.theme;
+                        localStorage.setItem('theme', newTheme);
+                        window.location.reload();
                     });
                 });
             }
@@ -170,38 +186,29 @@ document.addEventListener('DOMContentLoaded', () => {
         infoPlaceholder.innerHTML = `
             <div class="px-5 py-6">
                 <div class="text-center pb-4 border-b border-slate-200 dark:border-white/5 mb-4">
-                    <h4 class="text-lg font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter">App Codici Password</h4>
-                    <p class="text-[9px] text-gray-500 dark:text-white/30 uppercase tracking-[0.2em] mt-1">Sistema Gestione Credenziali</p>
+                    <h4 class="text-lg font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter">${t('app_info_system_name')}</h4>
+                    <p class="text-[9px] text-gray-500 dark:text-white/30 uppercase tracking-[0.2em] mt-1">${t('app_info_system_sub')}</p>
                 </div>
                 <div class="space-y-4 text-gray-700 dark:text-white/70">
                     <div class="space-y-3">
-                        <h5 class="font-bold text-gray-900 dark:text-white text-[11px] uppercase border-l-4 border-blue-500 pl-3">Panoramica</h5>
-                        <p class="text-[11px] leading-relaxed text-justify">App Codici Password è un'applicazione web progressiva (PWA) per la gestione sicura di credenziali, password e note personali e aziendali.</p>
-                        <p class="text-[11px] leading-relaxed text-justify">L'app nasce per l'utente <strong>PRIVATO</strong>: chiunque può utilizzarla per gestire le proprie credenziali personali senza necessità di funzionalità aziendali. La sezione "Privato" è il cuore dell'applicazione e rappresenta il punto di partenza per tutti gli utenti.</p>
-                        <p class="text-[11px] leading-relaxed text-justify">Tuttavia, molte persone sono anche titolari di azienda, amministratori delegati, commercialisti, consulenti o semplici impiegati che hanno bisogno di salvare dati aziendali, gestire credenziali di clienti e organizzare scadenze professionali. Per queste esigenze, l'app offre una sezione "Azienda" dedicata, completamente opzionale ma perfettamente integrata.</p>
+                        <h5 class="font-bold text-gray-900 dark:text-white text-[11px] uppercase border-l-4 border-blue-500 pl-3">${t('app_info_overview_title')}</h5>
+                        <p class="text-[11px] leading-relaxed text-justify">${t('app_info_overview_p1')}</p>
+                        <p class="text-[11px] leading-relaxed text-justify">${t('app_info_overview_p2')}</p>
+                        <p class="text-[11px] leading-relaxed text-justify">${t('app_info_overview_p3')}</p>
                         <div class="bg-blue-500/5 p-3 rounded-xl border border-blue-500/10 italic text-[10px] text-blue-700 dark:text-blue-300/60">
-                            "In sintesi: tutti partono da Privato, e chi ne ha bisogno espande verso Azienda."
+                            ${t('app_info_overview_quote')}
                         </div>
                     </div>
                     <div class="space-y-3">
-                        <h5 class="font-bold text-gray-900 dark:text-white text-[11px] uppercase border-l-4 border-blue-500 pl-3">Caratteristiche Principali</h5>
+                        <h5 class="font-bold text-gray-900 dark:text-white text-[11px] uppercase border-l-4 border-blue-500 pl-3">${t('app_info_features_title')}</h5>
                         <ul class="list-disc list-outside pl-5 space-y-1 text-[10px]">
-                            <li><strong>Account Privati:</strong> Credenziali personali, allegati, logo</li>
-                            <li><strong>Account Aziendali:</strong> Dati anagrafici, P.IVA, QR Code</li>
-                            <li><strong>Memorandum:</strong> Note importanti condivisibili</li>
-                            <li><strong>Condivisione:</strong> Inviti via email con accetta/rifiuta</li>
-                            <li><strong>Scadenze:</strong> Calendario con notifiche anticipate</li>
-                            <li><strong>Sicurezza:</strong> Autenticazione Firebase, dati crittografati</li>
+                            <li>${t('app_info_feat_1')}</li>
+                            <li>${t('app_info_feat_2')}</li>
+                            <li>${t('app_info_feat_3')}</li>
+                            <li>${t('app_info_feat_4')}</li>
+                            <li>${t('app_info_feat_5')}</li>
+                            <li>${t('app_info_feat_6')}</li>
                         </ul>
-                    </div>
-                    <div class="space-y-3">
-                        <h5 class="font-bold text-gray-900 dark:text-white text-[11px] uppercase border-l-4 border-blue-500 pl-3">Flussi Principali</h5>
-                        <div class="space-y-2 text-[10px]">
-                            <p><strong>1. Registrazione:</strong> Email/Google, profilo, dashboard.</p>
-                            <p><strong>2. Creazione Account:</strong> Privato/Azienda/Memo + credenziali.</p>
-                            <p><strong>3. Condivisione:</strong> Flag "Condiviso", rubrica, invio invito.</p>
-                            <p><strong>4. Scadenze:</strong> Creazione scadenza, notifica urgenze.</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -216,29 +223,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- LE 5 REGOLE D'ORO -->
                 <div class="space-y-3">
                     <div class="text-center pb-2">
-                        <h4 class="text-[10px] font-black text-yellow-600 dark:text-yellow-400 uppercase tracking-widest">Le 5 Regole d'Oro</h4>
+                        <h4 class="text-[10px] font-black text-yellow-600 dark:text-yellow-400 uppercase tracking-widest">${t('rules_gold_title')}</h4>
                     </div>
                     
                     <div class="space-y-2">
                         <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">1) Rubrica Passiva</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">La rubrica serve solo per consultazione. Non si inviano inviti da lì.</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_1_title')}</h5>
+                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_1_desc')}</p>
                         </div>
                         <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">2) Share-on-Save</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">L'invito parte premendo il tasto "Salva Modifiche".</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_2_title')}</h5>
+                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_2_desc')}</p>
                         </div>
                         <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">3) Visibilità Immediata</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">Negli "Accessi" vedi subito gli invitati in stato "In attesa".</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_3_title')}</h5>
+                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_3_desc')}</p>
                         </div>
                         <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">4) Flusso di Invito</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">Se l'utente rifiuta, sparisce da entrambe le parti. Se accetta, va in "Account Condivisi".</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_4_title')}</h5>
+                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_4_desc')}</p>
                         </div>
                         <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">5) Revoca Unificata</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">Togliendo la spunta "Condiviso" cancelli inviti, accessi e notifiche.</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_5_title')}</h5>
+                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_5_desc')}</p>
                         </div>
                     </div>
                 </div>
@@ -246,25 +253,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- REGOLE VISUALIZZAZIONE -->
                 <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-white/5">
                     <div class="text-center pb-2">
-                        <h4 class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Visualizzazione Dati</h4>
+                        <h4 class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">${t('data_view_title')}</h4>
                     </div>
 
                     <div class="grid grid-cols-1 gap-2">
                         <div class="p-3 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl border-l-2 border-blue-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">Account Privati</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">Solo i tuoi account NON condivisi.</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_private_title')}</h5>
+                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_private_desc')}</p>
                         </div>
                         <div class="p-3 bg-purple-500/5 dark:bg-purple-500/10 rounded-xl border-l-2 border-purple-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">Account Condivisi</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">TUTTI gli account condivisi (inviati e ricevuti).</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_shared_title')}</h5>
+                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_shared_desc')}</p>
                         </div>
                         <div class="p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border-l-2 border-amber-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">Memorandum</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">Solo i tuoi memo NON condivisi.</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_memo_title')}</h5>
+                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_memo_desc')}</p>
                         </div>
                         <div class="p-3 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-xl border-l-2 border-emerald-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">Memorandum Condivisi</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">TUTTE le note condivise (inviate e ricevute).</p>
+                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_memo_shared_title')}</h5>
+                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_memo_shared_desc')}</p>
                         </div>
                     </div>
                 </div>
@@ -278,57 +285,56 @@ document.addEventListener('DOMContentLoaded', () => {
         privacyPlaceholder.innerHTML = `
             <div class="px-5 py-6 space-y-4">
                 <div class="text-center pb-2">
-                    <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Privacy Policy</h4>
-                    <p class="text-[9px] text-gray-500 dark:text-white/30 uppercase mt-1">Informativa Estesa</p>
+                    <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">${t('privacy_policy_title')}</h4>
+                    <p class="text-[9px] text-gray-500 dark:text-white/30 uppercase mt-1">${t('privacy_extended_title')}</p>
                 </div>
 
                 <!-- 1. TITOLARE -->
                 <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">1. Titolare del Trattamento</h5>
+                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_1_title')}</h5>
                     <p class="text-[11px] text-gray-700 dark:text-white/60 leading-relaxed">
-                        Il Titolare del trattamento dei dati è <strong>Boschetto Diego</strong>.<br>
-                        L'applicazione è concepita per garantire la massima sicurezza e riservatezza.
+                        ${t('privacy_1_text')}
                     </p>
                 </div>
 
                 <!-- 2. DATI TRATTATI -->
                 <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">2. Dati Trattati</h5>
+                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_2_title')}</h5>
                     <ul class="list-disc pl-4 space-y-1 text-[11px] text-gray-700 dark:text-white/60">
-                        <li><strong>Registrazione:</strong> Email, nome, avatar (per autenticazione).</li>
-                        <li><strong>Volontari:</strong> Credenziali, password, note (crittografati).</li>
-                        <li><strong>Tecnici:</strong> Log di sistema gestiti da Google Firebase.</li>
+                        <li>${t('privacy_2_li1')}</li>
+                        <li>${t('privacy_2_li2')}</li>
+                        <li>${t('privacy_2_li3')}</li>
                     </ul>
                 </div>
 
                 <!-- 3. SICUREZZA -->
                 <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">3. Sicurezza e Storage</h5>
+                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_3_title')}</h5>
                     <p class="text-[11px] text-gray-700 dark:text-white/60 leading-relaxed">
-                        Utilizziamo l'infrastruttura sicura di <strong>Google Firebase</strong>. Connessioni SSL/TLS e database protetti. I dati sensibili sono accessibili solo all'utente proprietario e ai destinatari espliciti della condivisione.
+                        ${t('privacy_3_text')}
                     </p>
                 </div>
 
                 <!-- 4. CONDIVISIONE -->
                 <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">4. Condivisione Dati</h5>
+                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_4_title')}</h5>
                     <p class="text-[11px] text-gray-700 dark:text-white/60 leading-relaxed">
-                        Nessun dato viene venduto a terzi. La condivisione avviene <strong>solo su tua esplicita azione</strong> tramite la funzione "Condividi" verso le email che selezioni.
+                        ${t('privacy_4_text')}
                     </p>
                 </div>
 
                 <!-- 5. DIRITTI -->
                 <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">5. Diritti Utente (GDPR)</h5>
+                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_5_title')}</h5>
                     <ul class="list-disc pl-4 space-y-1 text-[11px] text-gray-700 dark:text-white/60">
-                        <li>Diritto di accesso ai propri dati.</li>
-                        <li>Diritto alla cancellazione ("Oblio") eliminando l'account.</li>
-                        <li>Diritto di rettifica delle informazioni.</li>
+                        <li>${t('privacy_5_li1')}</li>
+                        <li>${t('privacy_5_li2')}</li>
+                        <li>${t('privacy_5_li3')}</li>
                     </ul>
                 </div>
 
                 <div class="text-center pt-2">
-                    <p class="text-[9px] text-gray-400 dark:text-white/20 uppercase tracking-widest">Ultimo aggiornamento: Gennaio 2026</p>
+                    <p class="text-[9px] text-gray-400 dark:text-white/20 uppercase tracking-widest">${t('privacy_update_text')}</p>
                 </div>
             </div>
         `;

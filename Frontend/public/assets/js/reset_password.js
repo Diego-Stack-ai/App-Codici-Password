@@ -1,9 +1,22 @@
 import { resetPassword } from './auth.js';
+import { t } from './translations.js';
 
 /**
  * RESET_PASSWORD.JS - Protocollo Titanium
  * Gestione logica del recupero credenziali
  */
+
+// Traduzione statica immediata
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (el.hasAttribute('placeholder')) {
+            el.setAttribute('placeholder', t(key));
+        } else {
+            el.textContent = t(key);
+        }
+    });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const resetForm = document.getElementById('reset-form');

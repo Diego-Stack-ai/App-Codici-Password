@@ -50,11 +50,8 @@ initComponents().then(() => {
         footerStack.innerHTML = `
             <div style="flex: 1;"></div> 
             
-            <div class="flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity" style="flex: 2; justify-content: center;">
-                <div class="flex bg-white/5 p-1 rounded-full border border-white/5">
-                    <button onclick="setTheme('light')" class="text-[7px] font-black uppercase px-3 py-1 rounded-full hover:bg-white/10 transition-colors">Light</button>
-                    <button onclick="setTheme('dark')" class="text-[7px] font-black uppercase px-3 py-1 rounded-full hover:bg-white/10 transition-colors">Dark</button>
-                </div>
+            <div class="flex items-center gap-4 opacity-40" style="flex: 2; justify-content: center;">
+                <span class="text-[9px] font-bold uppercase tracking-[0.3em]" data-t="version">Titanium Protocol</span>
             </div>
 
             <div style="flex: 1; display: flex; justify-content: flex-end;">

@@ -1,9 +1,22 @@
 import { register, resendVerificationEmail } from './auth.js';
+import { t } from './translations.js';
 
 /**
  * REGISTRATI.JS - Protocollo Titanium
  * Gestione logica della pagina di registrazione
  */
+
+// Traduzione statica immediata
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (el.hasAttribute('placeholder')) {
+            el.setAttribute('placeholder', t(key));
+        } else {
+            el.textContent = t(key);
+        }
+    });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('register-form');

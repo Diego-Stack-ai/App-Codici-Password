@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impostazioni - Protocollo Titanium</title>
 
-    <!-- Titanium Core Engine (Tema, Font, Protezioni) -->
-    <script src="assets/js/titanium-core.js"></script>
-
+    <!-- Titanium Engine Stack -->
+    <script src="assets/js/titanium-config.js"></script>
     <!-- Design System Master -->
     <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="assets/js/titanium-core.js"></script>
 </head>
 
 <body class="titanium-bg antialiased">
@@ -138,6 +138,23 @@
                                 <span class="settings-title" data-t="archive">Archivio</span>
                             </div>
                             <span class="material-symbols-outlined settings-chevron">chevron_right</span>
+                        </div>
+
+                        <!-- SELETTORE TEMA (New v5.2) -->
+                        <div class="p-5 border-t border-slate-200 dark:border-white/5">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="settings-icon-box icon-blue !mr-0">
+                                    <span class="material-symbols-outlined">palette</span>
+                                </div>
+                                <span class="settings-title uppercase text-[10px] opacity-50 tracking-widest"
+                                    data-t="theme_title">Tema App</span>
+                            </div>
+
+                            <div class="timer-selector" id="theme-selector">
+                                <button class="theme-btn" data-theme="light" data-t="theme_light">Chiaro</button>
+                                <button class="theme-btn" data-theme="auto" data-t="theme_auto">Automatico</button>
+                                <button class="theme-btn" data-theme="dark" data-t="theme_dark">Scuro</button>
+                            </div>
                         </div>
 
                         <!-- Lingua (Accordion Integrato) -->

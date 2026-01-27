@@ -1,10 +1,24 @@
 import { login, checkAuthState } from './auth.js';
 import { initComponents } from './components.js';
+import { t } from './translations.js';
 
 /**
  * LOGIN PAGE MODULE
  * Gestisce l'autenticazione e l'inizializzazione della pagina index.html
  */
+
+// Traduzione statica immediata
+// Traduzione statica immediata
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (el.hasAttribute('placeholder')) {
+            el.setAttribute('placeholder', t(key));
+        } else {
+            el.textContent = t(key);
+        }
+    });
+});
 
 // 1. Inizializzazione Componenti Standard (Regola 17)
 initComponents();

@@ -1542,6 +1542,36 @@ html:not(.dark) .timer-btn.active {
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
+.theme-btn {
+    flex: 1;
+    padding: 0.75rem 0.25rem;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.theme-btn.active {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+html:not(.dark) .theme-btn {
+    color: #64748b;
+}
+
+html:not(.dark) .theme-btn.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
 /* ==========================================================================
    9. SECURITY SETUP MODAL (Onboarding)
    ========================================================================== */

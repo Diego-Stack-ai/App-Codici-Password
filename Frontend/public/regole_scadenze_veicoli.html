@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regole Scadenze - Protocollo Titanium</title>
+    <title data-t="expiry_rules_title_page">Regole Scadenze - Protocollo Titanium</title>
 
-    <!-- Titanium Core Engine -->
-    <script src="assets/js/titanium-core.js"></script>
-
+    <!-- Titanium Engine Stack -->
+    <script src="assets/js/titanium-config.js"></script>
     <!-- Design System Master -->
     <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="assets/js/titanium-core.js"></script>
 </head>
 
 <body class="titanium-bg antialiased">
@@ -40,10 +40,11 @@
                             class="material-symbols-outlined text-gray-600 group-hover:text-blue-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
                     <div class="flex-1 min-w-0 pt-2">
-                        <h3
-                            class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-blue-400 transition-colors">
+                        <h3 class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-blue-400 transition-colors"
+                            data-t="card_vehicles_title">
                             Automezzi</h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed">Configura oggetti, periodi e
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_vehicles_desc">
+                            Configura oggetti, periodi e
                             frequenze email per veicoli</p>
                     </div>
                 </div>
@@ -66,10 +67,11 @@
                             class="material-symbols-outlined text-gray-600 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
                     <div class="flex-1 min-w-0 pt-2">
-                        <h3
-                            class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-amber-400 transition-colors">
+                        <h3 class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-amber-400 transition-colors"
+                            data-t="card_documents_title">
                             Documenti</h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed">Gestione avvisi per Documenti e
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_documents_desc">
+                            Gestione avvisi per Documenti e
                             Scadenze Varie</p>
                     </div>
                 </div>
@@ -92,10 +94,11 @@
                             class="material-symbols-outlined text-gray-600 group-hover:text-teal-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
                     <div class="flex-1 min-w-0 pt-2">
-                        <h3
-                            class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-teal-400 transition-colors">
+                        <h3 class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-teal-400 transition-colors"
+                            data-t="card_general_title">
                             Regole Generali</h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed">Configura oggetti e testi per
+                        <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_general_desc">
+                            Configura oggetti e testi per
                             scadenze generiche</p>
                     </div>
                 </div>
@@ -105,17 +108,20 @@
             <div class="col-span-1 md:col-span-2 lg:col-span-3 pt-4 pb-20">
                 <div class="flex items-center gap-2 px-1 mb-2">
                     <span class="material-symbols-outlined text-purple-400 text-[20px]">rocket_launch</span>
-                    <h3 class="text-purple-400 text-xs font-bold uppercase tracking-widest">APPUNTI SVILUPPO FUTURO</h3>
+                    <h3 class="text-purple-400 text-xs font-bold uppercase tracking-widest"
+                        data-t="future_roadmap_title">APPUNTI SVILUPPO FUTURO</h3>
                 </div>
                 <div
                     class="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-inner relative group focus-within:border-purple-500/30 transition-colors">
                     <textarea id="future_memo"
                         class="w-full bg-transparent border-none text-[12px] leading-relaxed text-gray-900 dark:text-gray-300 placeholder:text-gray-600 focus:ring-0 p-0 resize-none min-h-[140px] scrollbar-thin scrollbar-thumb-white/10"
-                        placeholder="Scrivi qui i tuoi appunti per il futuro..."></textarea>
+                        placeholder="Scrivi qui i tuoi appunti per il futuro..."
+                        data-t="future_memo_placeholder"></textarea>
                     <div class="flex justify-end mt-2 pt-2 border-t border-slate-200 dark:border-white/5">
                         <button id="save_memo_btn"
                             class="text-[11px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-purple-500/10 transition-colors">
-                            <span class="material-symbols-outlined !text-[16px]">save</span> SALVA APPUNTO
+                            <span class="material-symbols-outlined !text-[16px]">save</span> <span
+                                data-t="save_memo_btn">SALVA APPUNTO</span>
                         </button>
                     </div>
                 </div>
@@ -123,7 +129,8 @@
 
             <!-- Regola 5: Titanium Help Block -->
             <div class="col-span-full text-center mt-4">
-                <p class="titanium-help-block">Seleziona una categoria per configurare le regole di invio automatico.
+                <p class="titanium-help-block" data-t="expiry_help_text">Seleziona una categoria per configurare le
+                    regole di invio automatico.
                 </p>
             </div>
 

@@ -12,7 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 0. Traduzione DOM
     document.querySelectorAll('[data-t]').forEach(el => {
         const key = el.getAttribute('data-t');
-        el.textContent = t(key);
+        if (el.hasAttribute('placeholder')) {
+            el.setAttribute('placeholder', t(key));
+        } else {
+            el.textContent = t(key);
+        }
     });
 
     const updateForm = document.getElementById('update-password-form');

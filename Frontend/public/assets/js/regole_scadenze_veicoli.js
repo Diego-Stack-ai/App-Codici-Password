@@ -26,7 +26,7 @@ initComponents().then(() => {
 
                 <!-- Titolo (Centro - Assoluto per centratura perfetta) -->
                 <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
-                    Regole Invio
+                    ${t('expiry_rules_title_page')}
                 </h2>
 
                 <!-- Pulsante Home (Destra) -->
@@ -46,6 +46,17 @@ initComponents().then(() => {
             </div>
         `;
     }
+
+    // Traduzione statica immediata per gli elementi della dashboard
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (el.hasAttribute('placeholder')) {
+            el.setAttribute('placeholder', t(key));
+        } else {
+            el.textContent = t(key);
+        }
+    });
+
 });
 
 const memoArea = document.getElementById('future_memo');
