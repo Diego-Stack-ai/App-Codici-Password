@@ -20,7 +20,7 @@ initComponents().then(() => {
 
         headerStack.innerHTML = `
             <div class="header-stack" style="justify-content: center; position: relative;">
-                <h2 class="text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest">${t('settings_page_title')}</h2>
+                <h2 class="text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest">${t('settings_title')}</h2>
                 <a href="home_page.html" class="btn-icon-header" style="position: absolute; right: 0;">
                     <span class="material-symbols-outlined">home</span>
                 </a>
@@ -144,8 +144,11 @@ onAuthStateChanged(auth, async (user) => {
             };
 
             // Aggiorna UI iniziale
-            if (currentLangLabel && langMap[currentLang]) {
-                currentLangLabel.textContent = langMap[currentLang];
+            if (currentLangLabel) {
+                const langObj = supportedLanguages.find(l => l.code === currentLang);
+                if (langObj) {
+                    currentLangLabel.textContent = langObj.name;
+                }
             }
 
             langButtons.forEach(btn => {
@@ -215,69 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // Le 5 Regole d'Oro Text
-    const rulesPlaceholder = document.getElementById('rules-gold-text-placeholder');
-    if (rulesPlaceholder) {
-        rulesPlaceholder.innerHTML = `
-            <div class="px-5 py-6 space-y-6">
-                <!-- LE 5 REGOLE D'ORO -->
-                <div class="space-y-3">
-                    <div class="text-center pb-2">
-                        <h4 class="text-[10px] font-black text-yellow-600 dark:text-yellow-400 uppercase tracking-widest">${t('rules_gold_title')}</h4>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_1_title')}</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_1_desc')}</p>
-                        </div>
-                        <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_2_title')}</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_2_desc')}</p>
-                        </div>
-                        <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_3_title')}</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_3_desc')}</p>
-                        </div>
-                        <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_4_title')}</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_4_desc')}</p>
-                        </div>
-                        <div class="p-3 bg-black/5 dark:bg-white/5 rounded-xl border-l-2 border-yellow-500/50">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('rule_5_title')}</h5>
-                            <p class="text-[10px] text-gray-600 dark:text-white/50 mt-1">${t('rule_5_desc')}</p>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- REGOLE VISUALIZZAZIONE -->
-                <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-white/5">
-                    <div class="text-center pb-2">
-                        <h4 class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">${t('data_view_title')}</h4>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-2">
-                        <div class="p-3 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl border-l-2 border-blue-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_private_title')}</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_private_desc')}</p>
-                        </div>
-                        <div class="p-3 bg-purple-500/5 dark:bg-purple-500/10 rounded-xl border-l-2 border-purple-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_shared_title')}</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_shared_desc')}</p>
-                        </div>
-                        <div class="p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border-l-2 border-amber-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_memo_title')}</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_memo_desc')}</p>
-                        </div>
-                        <div class="p-3 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-xl border-l-2 border-emerald-500">
-                            <h5 class="font-bold text-gray-900 dark:text-white text-[11px]">${t('view_memo_shared_title')}</h5>
-                            <p class="text-[10px] text-gray-700 dark:text-white/60 mt-1">${t('view_memo_shared_desc')}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
 
     // Privacy Policy Text (Aggiornato da Immagine Utente)
     const privacyPlaceholder = document.getElementById('privacy-policy-text-placeholder');

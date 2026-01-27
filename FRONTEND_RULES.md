@@ -129,13 +129,13 @@ Monitoraggio dello stato di avanzamento.
 | 13 | 🔴 DA FARE | `dati_anagrafici_privato.html` | Titanium Frame | Beacon (4s) | Standard | Info Grid |
 | 14 | 🔴 DA FARE | `aggiungi_nuova_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Form Matrix |
 | 15 | 🔴 DA FARE | `dettaglio_scadenza.html` | Titanium Frame | Beacon (4s) | Amber | Detail View |
-| 16 | � DA FARE | `aggiungi_scadenza.html` | Titanium Frame | Beacon (4s) | Standard | Form Matrix |
-| 17 | � DA FARE | `archivio_account.html` | Titanium Frame | Beacon (4s) | Standard | Matrix List |
-| 18 | � DA FARE | `home_page.html` | Titanium Frame | Beacon (4s) | Dashboard | Home Matrix |
+| 16 | 🔴 DA FARE | `aggiungi_scadenza.html` | Titanium Frame | Beacon (4s) | Standard | Form Matrix |
+| 17 | 🔴 DA FARE | `archivio_account.html` | Titanium Frame | Beacon (4s) | Standard | Matrix List |
+| 18 | 🟢 COMPLETATA | `home_page.html` | 3, 9, 10, 15, 23 | Matrix Dashboard |
 | 19 | 🟠 INCOMPLETA | `scadenze.html` | 6, 9, 10, 13 | **Scadenze** |
 | 20 | 🟠 INCOMPLETA | `lista_aziende.html` | Standard | Palette Standard |
 | 21 | 🟠 INCOMPLETA | `archivio_account.html` | 6, 9, 10 | Matrix Sidebar |
-| 22 | 🟢 COMPLETATA | `impostazioni.html` | 6, 9, 10, 23 | Fusion Blue |
+| 22 | 🟢 COMPLETATA | `impostazioni.html` | 3, 6, 9, 10, 23 | Fusion Blue |
 | 23 | 🟢 COMPLETATA | `regole_scadenze_veicoli.html` | 6, 9, 10, 23 | Dark Menu Glow |
 | 24 | 🟢 COMPLETATA | `configurazione_automezzi.html` | 6, 9, 10, 23 | Form Input Glass |
 | 25 | 🟢 COMPLETATA | `configurazione_documenti.html` | 6, 9, 10, 23 | Form Input Glass |
@@ -307,3 +307,48 @@ if (footerStack) {
 ```
 *   **Stato Globale**: Usare hook di stato sul body (es. `is-auth-loading`) durante i processi critici per gestire feedback visuali e blocchi di interazione a livello di sistema.
 *   **Zero Duplicazione**: Non riscrivere la logica dei componenti (es. toggle password) nei moduli di pagina se è già gestita dai componenti globali.
+
+________________________________________
+
+### Regola 24 – Titanium Theme Lock v2.2 (Standard Injection Stack)
+**Obiettivo:** Garantire che Tailwind CSS obbedisca alla logica dell'App (Titanium Core) ignorando le preferenze del Sistema Operativo, per evitare conflitti visivi (es. testi bianchi su sfondo bianco).
+
+**Protocollo Operativo (Ordine Script nel `<head>`):**
+L'ordine degli script è CRUCIALE e non negoziabile. Deve essere inserito in tutte le pagine standard (non auth).
+
+1.  **Titanium Config (`titanium-config.js`)**: Il Guardiano. Definisce `darkMode: 'class'` PRIMA che Tailwind esista.
+2.  **Titanium CSS (`titanium.css`)**: Il Design System Master.
+3.  **Tailwind CDN**: Il motore CSS.
+4.  **Titanium Core (`titanium-core.js`)**: Il cervello logico (Tema, Font, Protezioni).
+
+**Snippet Standard HTML:**
+```html
+<head>
+    <!-- ...meta vari... -->
+    <title>Titolo Pagina</title>
+
+    <!-- Titanium Engine Stack (ORDINE CRUCIALE) -->
+    <!-- 1. Configurazione: Blocca l'ascolto del sistema operativo -->
+    <script src="assets/js/titanium-config.js"></script>
+
+    <!-- 2. Stili Master -->
+    <link rel="stylesheet" href="assets/css/titanium.css">
+    
+    <!-- 3. Tailwind CDN (Ora sa che deve obbedire alla configurazione sopra) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- 4. Core Engine (Logica, Font, Protezioni) -->
+    <script src="assets/js/titanium-core.js"></script>
+</head>
+```
+**Eccezione Pagine Sicurezza (Lista Tassativa):**
+Le seguenti 4 pagine DEVONO essere forzate in Dark Mode (Regola 20) e NON devono includere `titanium-config.js`:
+1.  `index.html` (Login)
+2.  `registrati.html`
+3.  `reset_password.html`
+4.  `imposta_nuova_password.html`
+
+**Configurazione Obbligatoria per queste 4 pagine:**
+*   Tag HTML: `<html class="dark" lang="it">`
+*   Meta: `<meta name="color-scheme" content="dark only">`
+*   Titanium Core: Caricato normalmente (ma troverà già la classe dark).
