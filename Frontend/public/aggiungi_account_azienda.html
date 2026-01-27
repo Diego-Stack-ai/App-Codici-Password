@@ -14,6 +14,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
+    <!-- Titanium CSS -->
+    <link rel="stylesheet" href="assets/css/titanium.css">
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -217,16 +219,16 @@
                             <div class="relative">
                                 <span
                                     class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">key</span>
-                                <input id="password" type="password"
-                                    class="w-full h-12 pl-10 pr-24 rounded-xl text-sm font-medium focus:outline-none font-mono tracking-wider"
-                                    placeholder="••••••••" />
+                                <input id="password" type="text"
+                                    class="titanium-shield w-full h-12 pl-10 pr-24 rounded-xl text-sm font-medium focus:outline-none font-mono tracking-wider"
+                                    placeholder="********" />
 
                                 <div
                                     class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-white/5 rounded-lg p-1 border border-white/5">
                                     <button type="button"
-                                        onclick="const i = document.getElementById('password'); i.type = i.type==='password'?'text':'password'; this.querySelector('span').textContent = i.type==='password'?'visibility_off':'visibility';"
+                                        onclick="const i = document.getElementById('password'); i.classList.toggle('titanium-shield'); this.querySelector('span').textContent = i.classList.contains('titanium-shield')?'visibility':'visibility_off';"
                                         class="p-1.5 hover:bg-white/10 rounded-md transition-colors text-gray-400 hover:text-white">
-                                        <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
                                     </button>
                                     <div class="w-px h-4 bg-white/10 mx-0.5"></div>
                                     <button type="button" onclick="copyToClipboard('password')"

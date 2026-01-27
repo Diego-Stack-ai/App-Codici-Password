@@ -139,11 +139,9 @@
                     <!-- Utente -->
                     <div class="flex flex-col gap-1.5">
                         <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Utente</span>
-                        <div
-                            class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                            <input id="detail-username" type="password" readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0"
-                                value="">
+                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
+                            <input id="detail-username" type="text" readonly
+                                class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0">
                             <button
                                 class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
                                     class="material-symbols-outlined text-base">content_copy</span></button>
@@ -154,9 +152,8 @@
                     <div class="flex flex-col gap-1.5">
                         <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Account / Codice</span>
                         <div class="flex items-center bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                            <input id="detail-account" type="password" readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0"
-                                value="">
+                            <input id="detail-account" type="text" readonly
+                                class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0">
                             <button
                                 class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100"><span
                                     class="material-symbols-outlined text-base">content_copy</span></button>
@@ -195,11 +192,9 @@
                     <!-- Password -->
                     <div class="flex flex-col gap-1.5">
                         <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Password</span>
-                        <div
-                            class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                            <input id="detail-password" type="password" readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-mono focus:ring-0"
-                                value="">
+                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
+                            <input id="detail-password" type="text" readonly
+                                class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-mono tracking-wider focus:ring-0 uppercase">
                             <button id="toggle-password"
                                 class="p-3 text-gray-400 hover:text-primary border-l border-gray-100 "><span
                                     class="material-symbols-outlined text-base">visibility</span></button>
@@ -212,8 +207,7 @@
                     <!-- Sito Web -->
                     <div class="flex flex-col gap-1.5">
                         <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Sito Web</span>
-                        <div
-                            class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
+                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
                             <input id="detail-website" readonly
                                 class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-primary underline focus:ring-0"
                                 value="">
@@ -253,8 +247,7 @@
                     class="hidden space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div class="flex flex-col gap-1.5">
                         <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Nome e Cognome</span>
-                        <div
-                            class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
+                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
                             <input id="detail-referenteNome" readonly
                                 class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0" value="">
                             <button
@@ -297,13 +290,10 @@
 
             <!-- Note -->
             <section>
-                <h3
-                    class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
+                <h3 class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
                     Note</h3>
-                <div
-                    class="bg-gray-50  p-4 rounded-xl border border-gray-200  shadow-sm min-h-[100px] relative group">
-                    <p id="detail-note"
-                        class="text-sm leading-relaxed whitespace-pre-wrap text-gray-600 ">-
+                <div class="bg-gray-50  p-4 rounded-xl border border-gray-200  shadow-sm min-h-[100px] relative group">
+                    <p id="detail-note" class="text-sm leading-relaxed whitespace-pre-wrap text-gray-600 ">-
                     </p>
                     <button id="copy-note"
                         class="absolute top-2 right-2 p-2 text-gray-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"><span
@@ -313,8 +303,7 @@
 
             <!-- Allegati (Active!) -->
             <section>
-                <h3
-                    class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
+                <h3 class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
                     Allegati</h3>
                 <div id="attachments-section"
                     class="bg-gray-50  p-4 rounded-xl border border-gray-200  shadow-sm flex items-center justify-between group cursor-pointer hover:bg-gray-100  transition-colors"
@@ -340,8 +329,7 @@
 
             <!-- Opzioni e Visibilità (MATCHING PRIVATE ACCOUNT) -->
             <section class="pb-10">
-                <h3
-                    class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
+                <h3 class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
                     Opzioni e Visibilità</h3>
                 <div class="space-y-3">
                     <label

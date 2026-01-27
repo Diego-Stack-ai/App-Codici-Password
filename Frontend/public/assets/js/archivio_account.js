@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const isHidden = eye.textContent === 'visibility';
-        const dots = '••••••••';
+        const dots = '********';
 
         if (isHidden) {
             eye.textContent = 'visibility_off';
@@ -310,7 +310,7 @@ function filterAndRender() {
                                  <div class="flex items-center justify-between bg-black/20 rounded-md px-2 py-1 border border-white/5">
                                      <span class="opacity-60 mr-2">User:</span>
                                      <div class="flex items-center min-w-0 flex-1 justify-end gap-2">
-                                        <span id="user-text-${acc.id}" class="truncate font-mono text-white/90">••••••••</span>
+                                        <span id="user-text-${acc.id}" class="truncate font-mono text-white/90">********</span>
                                         <button class="copy-btn-dynamic text-white/50 hover:text-white transition-colors" data-copy="${(acc.username || acc.utente).replace(/"/g, '&quot;')}" title="Copia Username">
                                             <span class="material-symbols-outlined text-[16px]">content_copy</span>
                                         </button>
@@ -321,7 +321,7 @@ function filterAndRender() {
                                  <div class="flex items-center justify-between bg-black/20 rounded-md px-2 py-1 border border-white/5">
                                      <span class="opacity-60 mr-2">Acc:</span>
                                       <div class="flex items-center min-w-0 flex-1 justify-end gap-2">
-                                        <span id="acc-text-${acc.id}" class="truncate font-mono text-white/90">••••••••</span>
+                                        <span id="acc-text-${acc.id}" class="truncate font-mono text-white/90">********</span>
                                         <button class="copy-btn-dynamic text-white/50 hover:text-white transition-colors" data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account">
                                             <span class="material-symbols-outlined text-[16px]">content_copy</span>
                                         </button>
@@ -332,7 +332,7 @@ function filterAndRender() {
                                  <div class="flex items-center justify-between bg-black/20 rounded-md px-2 py-1 border border-white/5">
                                      <span class="opacity-60 mr-2">Pass:</span>
                                       <div class="flex items-center min-w-0 flex-1 justify-end gap-2">
-                                        <span id="pass-text-${acc.id}" class="truncate font-mono text-white/90">••••••••</span>
+                                        <span id="pass-text-${acc.id}" class="truncate font-mono text-white/90">********</span>
                                         <button class="copy-btn-dynamic text-white/50 hover:text-white transition-colors" data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password">
                                             <span class="material-symbols-outlined text-[16px]">content_copy</span>
                                         </button>

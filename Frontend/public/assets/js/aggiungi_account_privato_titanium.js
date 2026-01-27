@@ -105,8 +105,14 @@ function renderBankAccounts() {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
                     <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">Pass. Dispositiva</label>
-                    <input type="password" value="${acc.passwordDispositiva}" oninput="updateIbanField(${idx}, 'passwordDispositiva', this.value)"
-                           class="w-full h-12 px-5 rounded-2xl bg-black/40 border border-white/5 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/30">
+                    <div class="h-12 relative group/field">
+                        <input type="text" value="${acc.passwordDispositiva}" oninput="updateIbanField(${idx}, 'passwordDispositiva', this.value)"
+                               class="titanium-shield w-full h-full pl-5 pr-12 rounded-2xl bg-black/40 border border-white/5 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/30">
+                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" 
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-white/10 hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="space-y-2">
                     <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">Referente Banca</label>
@@ -148,8 +154,14 @@ function renderCard(iIdx, cIdx, card) {
                        class="h-10 px-4 rounded-xl bg-black/40 border border-white/5 text-[10px] text-center font-bold text-white">
                 <input type="text" placeholder="CCV" value="${card.ccv || ''}" oninput="updateCardField(${iIdx}, ${cIdx}, 'ccv', this.value)"
                        class="h-10 px-4 rounded-xl bg-black/40 border border-white/5 text-[10px] text-center font-bold text-white">
-                <input type="text" placeholder="PIN" value="${card.pin || ''}" oninput="updateCardField(${iIdx}, ${cIdx}, 'pin', this.value)"
-                       class="h-10 px-4 rounded-xl bg-black/40 border border-white/5 text-[10px] text-center font-bold text-white">
+                <div class="h-10 relative group/field">
+                    <input type="text" placeholder="PIN" value="${card.pin || ''}" oninput="updateCardField(${iIdx}, ${cIdx}, 'pin', this.value)"
+                           class="titanium-shield w-full h-full pl-4 pr-10 rounded-xl bg-black/40 border border-white/5 text-[10px] text-center font-bold text-white focus:ring-1 focus:ring-blue-500/50">
+                    <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-white/10 hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-[14px]">visibility</span>
+                    </button>
+                </div>
             </div>
         </div>
     `;

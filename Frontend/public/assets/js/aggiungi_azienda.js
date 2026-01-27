@@ -96,12 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const icon = document.getElementById('icon-' + id);
         if (!input) return;
 
-        if (input.type === 'password') {
-            input.type = 'text';
-            if (icon) icon.textContent = 'visibility_off';
-        } else {
-            input.type = 'password';
+        input.classList.toggle('titanium-shield');
+        if (input.classList.contains('titanium-shield')) {
             if (icon) icon.textContent = 'visibility';
+        } else {
+            if (icon) icon.textContent = 'visibility_off';
         }
     };
 

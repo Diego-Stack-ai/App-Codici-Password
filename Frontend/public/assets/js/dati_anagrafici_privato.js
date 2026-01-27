@@ -151,12 +151,12 @@ function renderEmailsView() {
                     <div class="mt-2 flex flex-col gap-1.5">
                         <label class="view-label text-cyan-400">Password</label>
                         <div class="glass-field glass-field-cyan group/field">
-                            <span class="text-sm font-mono tracking-wider password-text flex-1">••••••••</span>
+                            <span class="text-sm font-mono tracking-wider password-text flex-1">********</span>
                             <div class="flex items-center gap-1 opacity-0 group-hover/field:opacity-100 transition-opacity">
                                 <button class="text-cyan-400 p-1 hover:bg-cyan-500/10 rounded-lg transition-colors visibility-toggle" 
                                     onclick="const txt = this.parentElement.parentElement.querySelector('.password-text'); 
-                                             const isMasked = txt.textContent === '••••••••';
-                                             txt.textContent = isMasked ? '${e.password.replace(/'/g, "\\'")}' : '••••••••';
+                                             const isMasked = txt.textContent === '********';
+                                             txt.textContent = isMasked ? '${e.password.replace(/'/g, "\\'")}' : '********';
                                              this.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';">
                                     <span class="material-symbols-outlined text-lg">visibility_off</span>
                                 </button>

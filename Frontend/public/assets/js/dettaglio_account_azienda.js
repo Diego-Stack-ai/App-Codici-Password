@@ -199,7 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inputs
         const setVal = (id, val) => {
             const el = document.getElementById(id);
-            if (el) el.value = val || '';
+            if (!el) return;
+            el.value = val || '';
         };
 
         setVal('detail-nomeAccount', data.nomeAccount);
@@ -249,20 +250,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         <!-- PASSWORD & NOTA -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="flex flex-col gap-1.5">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Pass. Dispositiva</span>
-                                <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden">
-                                    <input readonly type="password"
-                                        class="flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-[#0A162A]"
-                                        value="${bank.passwordDispositiva || ''}">
-                                    <button onclick="const p=this.previousElementSibling; p.type=p.type==='password'?'text':'password'; this.querySelector('span').textContent=p.type==='password'?'visibility':'visibility_off';" class="p-2 text-gray-400">
-                                        <span class="material-symbols-outlined text-sm">visibility</span>
-                                    </button>
-                                    <button onclick="copyText('${bank.passwordDispositiva || ''}')" class="p-2 text-gray-400 hover:text-primary border-l border-black/5">
-                                        <span class="material-symbols-outlined text-sm">content_copy</span>
-                                    </button>
-                                </div>
-                            </div>
+                             <div class="flex flex-col gap-1.5">
+                                 <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Pass. Dispositiva</span>
+                                 <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden">
+                                     <input readonly type="text"
+                                         class="titanium-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-[#0A162A]"
+                                         value="${bank.passwordDispositiva || ''}">
+                                     <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                                         <span class="material-symbols-outlined text-sm">visibility</span>
+                                     </button>
+                                     <button onclick="copyText(this.parentElement.querySelector('input').value)" class="p-2 text-gray-400 hover:text-primary border-l border-black/5">
+                                         <span class="material-symbols-outlined text-sm">content_copy</span>
+                                     </button>
+                                 </div>
+                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Nota IBAN</span>
                                 <div class="selectable bg-blue-50/50 p-2.5 rounded-xl text-xs text-blue-800 border border-blue-100 min-h-[40px] flex items-center">
@@ -358,15 +359,16 @@ document.addEventListener('DOMContentLoaded', () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div class="flex flex-col gap-1.5">
-                                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">PIN</span>
-                                                <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
-                                                    <input readonly type="password" class="pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-[#0A162A]" value="${card.pin || ''}">
-                                                    <button onclick="const p=this.previousElementSibling; p.type=p.type==='password'?'text':'password'; this.querySelector('span').textContent=p.type==='password'?'visibility':'visibility_off';" class="p-2 text-gray-400">
-                                                        <span class="material-symbols-outlined text-sm">visibility</span>
-                                                    </button>
-                                                </div>
-                                            </div>
+                                             <div class="flex flex-col gap-1.5">
+                                                 <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">PIN</span>
+                                                  <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
+                                                      <input readonly type="text" class="titanium-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-[#0A162A]" 
+                                                         value="${card.pin || ''}">
+                                                      <button onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                                                          <span class="material-symbols-outlined text-sm">visibility</span>
+                                                      </button>
+                                                  </div>
+                                             </div>
                                         </div>
 
                                         ${card.note ? `
@@ -534,12 +536,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupListeners() {
         // Copy btns
         document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.onclick = () => window.copyText(btn.parentElement.querySelector('input').value);
+            btn.onclick = () => {
+                const input = btn.parentElement.querySelector('input');
+                window.copyText(input.value);
+            };
         });
         const copyNoteBtn = document.getElementById('copy-note');
         if (copyNoteBtn) copyNoteBtn.onclick = () => window.copyText(document.getElementById('detail-note').textContent);
 
-        // Toggle Password Visibility
+        // Toggle Password Visibility (Titanium Reveal Strategy)
         const toggle = document.getElementById('toggle-password');
         const passInput = document.getElementById('detail-password');
         const userInput = document.getElementById('detail-username');
@@ -547,12 +552,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (toggle && passInput) {
             toggle.onclick = () => {
-                const isPass = passInput.type === 'password';
-                const newType = isPass ? 'text' : 'password';
-                passInput.type = newType;
-                if (userInput) userInput.type = newType;
-                if (accInput) accInput.type = newType;
-                toggle.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
+                passInput.classList.toggle('titanium-shield');
+                if (userInput) userInput.classList.toggle('titanium-shield');
+                if (accInput) accInput.classList.toggle('titanium-shield');
+
+                const isMasked = passInput.classList.contains('titanium-shield');
+                toggle.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';
             };
         }
 

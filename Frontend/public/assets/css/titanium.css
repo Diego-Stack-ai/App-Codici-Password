@@ -102,6 +102,11 @@ button:active,
     transform: scale(0.96);
 }
 
+/* 2.3 TITANIUM SHIELD: Custom Asterisk Masking for inputs */
+.titanium-shield {
+    -webkit-text-security: asterisk !important;
+}
+
 /* BLOCCO INTERAZIONI NON DESIDERATE (UX NATIVA) */
 .no-select {
     -webkit-user-select: none;

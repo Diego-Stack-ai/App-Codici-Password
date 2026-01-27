@@ -14,6 +14,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
+    <!-- Titanium CSS -->
+    <link rel="stylesheet" href="assets/css/titanium.css">
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -578,14 +580,15 @@
                                         </button>
                                     </div>
                                     <div class="relative">
-                                        <input id="email-pec-password" type="password"
-                                            class="w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
+                                        <input id="email-pec-password" type="text"
+                                            class="titanium-shield w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
                                             placeholder="Password PEC" />
                                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                             <button type="button"
                                                 onclick="togglePasswordVisibility('email-pec-password')"
                                                 class="text-gray-500 hover:text-white p-1">
-                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                <span id="icon-email-pec-password"
+                                                    class="material-symbols-outlined text-[18px]">visibility</span>
                                             </button>
                                             <button onclick="copyToClipboard('email-pec-password')"
                                                 class="text-gray-500 hover:text-white p-1">
@@ -625,14 +628,15 @@
                                         </button>
                                     </div>
                                     <div class="relative">
-                                        <input id="email-amministrazione-password" type="password"
-                                            class="w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
+                                        <input id="email-amministrazione-password" type="text"
+                                            class="titanium-shield w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
                                             placeholder="Password" />
                                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                             <button type="button"
                                                 onclick="togglePasswordVisibility('email-amministrazione-password')"
                                                 class="text-gray-500 hover:text-white p-1">
-                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                <span id="icon-email-amministrazione-password"
+                                                    class="material-symbols-outlined text-[18px]">visibility</span>
                                             </button>
                                             <button onclick="copyToClipboard('email-amministrazione-password')"
                                                 class="text-gray-500 hover:text-white p-1">
@@ -669,14 +673,15 @@
                                         </button>
                                     </div>
                                     <div class="relative">
-                                        <input id="email-personale-password" type="password"
-                                            class="w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
+                                        <input id="email-personale-password" type="text"
+                                            class="titanium-shield w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
                                             placeholder="Password" />
                                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                             <button type="button"
                                                 onclick="togglePasswordVisibility('email-personale-password')"
                                                 class="text-gray-500 hover:text-white p-1">
-                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                <span id="icon-email-personale-password"
+                                                    class="material-symbols-outlined text-[18px]">visibility</span>
                                             </button>
                                             <button onclick="copyToClipboard('email-personale-password')"
                                                 class="text-gray-500 hover:text-white p-1">
@@ -705,14 +710,15 @@
                                         </button>
                                     </div>
                                     <div class="relative">
-                                        <input id="email-manutenzione-password" type="password"
-                                            class="w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
+                                        <input id="email-manutenzione-password" type="text"
+                                            class="titanium-shield w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
                                             placeholder="Password" />
                                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                             <button type="button"
                                                 onclick="togglePasswordVisibility('email-manutenzione-password')"
                                                 class="text-gray-500 hover:text-white p-1">
-                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                <span id="icon-email-manutenzione-password"
+                                                    class="material-symbols-outlined text-[18px]">visibility</span>
                                             </button>
                                             <button onclick="copyToClipboard('email-manutenzione-password')"
                                                 class="text-gray-500 hover:text-white p-1">
@@ -742,14 +748,15 @@
                                         </button>
                                     </div>
                                     <div class="relative">
-                                        <input id="email-attrezzatura-password" type="password"
-                                            class="w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
+                                        <input id="email-attrezzatura-password" type="text"
+                                            class="titanium-shield w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
                                             placeholder="Password" />
                                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                             <button type="button"
                                                 onclick="togglePasswordVisibility('email-attrezzatura-password')"
                                                 class="text-gray-500 hover:text-white p-1">
-                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                <span id="icon-email-attrezzatura-password"
+                                                    class="material-symbols-outlined text-[18px]">visibility</span>
                                             </button>
                                             <button onclick="copyToClipboard('email-attrezzatura-password')"
                                                 class="text-gray-500 hover:text-white p-1">
@@ -778,14 +785,15 @@
                                         </button>
                                     </div>
                                     <div class="relative">
-                                        <input id="email-magazzino-password" type="password"
-                                            class="w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
+                                        <input id="email-magazzino-password" type="text"
+                                            class="titanium-shield w-full h-10 pl-3 pr-20 rounded-lg text-sm focus:outline-none"
                                             placeholder="Password" />
                                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                             <button type="button"
                                                 onclick="togglePasswordVisibility('email-magazzino-password')"
                                                 class="text-gray-500 hover:text-white p-1">
-                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                <span id="icon-email-magazzino-password"
+                                                    class="material-symbols-outlined text-[18px]">visibility</span>
                                             </button>
                                             <button onclick="copyToClipboard('email-magazzino-password')"
                                                 class="text-gray-500 hover:text-white p-1">

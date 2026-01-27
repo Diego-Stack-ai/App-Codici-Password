@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const isHidden = eye.textContent === 'visibility';
-        const dots = '••••••••';
+        const dots = '********';
 
         if (isHidden) {
             eye.textContent = 'visibility_off'; // Show "Hide" icon
@@ -362,7 +362,7 @@ function renderList(list) {
         const pinClass = isPinned ? 'text-white' : 'text-white/40 group-hover:text-white/80';
         const pinTitle = isPinned ? 'Rimuovi dai fissati' : 'Fissa in alto';
 
-        const dots = '••••••••';
+        const dots = '********';
 
         return `
             <div class="relative overflow-hidden select-none swipe-row rounded-2xl h-full shadow-lg border-glow saetta transition-all duration-300 hover:-translate-y-1 group" 

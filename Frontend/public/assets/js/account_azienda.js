@@ -278,7 +278,7 @@ function renderList(list) {
                                     <div class="flex justify-between items-center text-left relative pr-5">
                                         <span class="text-white/60">Utente:</span>
                                         <div class="flex items-center min-w-0">
-                                            <span id="user-text-${acc.id}" class="text-white truncate mr-2">••••••••</span>
+                                            <span id="user-text-${acc.id}" class="text-white truncate mr-2">********</span>
                                         </div>
                                         <button class="copy-btn-dynamic absolute right-[-5px] p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors" data-copy="${acc.utente.replace(/"/g, '&quot;')}" title="Copia Username">
                                             <span class="material-symbols-outlined text-[19px]">content_copy</span>
@@ -288,7 +288,7 @@ function renderList(list) {
                                     <div class="flex justify-between items-center text-left relative pr-5">
                                         <span class="text-white/60">Account:</span>
                                         <div class="flex items-center min-w-0">
-                                            <span id="acc-text-${acc.id}" class="text-white truncate mr-2">••••••••</span>
+                                            <span id="acc-text-${acc.id}" class="text-white truncate mr-2">********</span>
                                         </div>
                                         <button class="copy-btn-dynamic absolute right-[-5px] p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors" data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account">
                                             <span class="material-symbols-outlined text-[19px]">content_copy</span>
@@ -298,7 +298,7 @@ function renderList(list) {
                                     <div class="flex justify-between items-center text-left relative pr-5">
                                         <span class="text-white/60">Pass:</span>
                                         <div class="flex items-center min-w-0">
-                                            <span id="pass-text-${acc.id}" class="text-white truncate mr-2 font-mono">••••••••</span>
+                                            <span id="pass-text-${acc.id}" class="text-white truncate mr-2 font-mono">********</span>
                                         </div>
                                         <button class="copy-btn-dynamic absolute right-[-5px] p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors" data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password">
                                             <span class="material-symbols-outlined text-[19px]">content_copy</span>
@@ -381,7 +381,7 @@ window.toggleTripleVisibility = (id) => {
     });
 
     const isHidden = eye.textContent === 'visibility';
-    const dots = '••••••••';
+    const dots = '********';
 
     if (isHidden) {
         eye.textContent = 'visibility_off';

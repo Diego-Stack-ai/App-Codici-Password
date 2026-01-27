@@ -60,6 +60,16 @@ function setupUI() {
         });
     }
 
+    // Main Password Toggle
+    const btnToggle = document.getElementById('btn-toggle-password');
+    const passInput = document.getElementById('account-password');
+    if (btnToggle && passInput) {
+        btnToggle.onclick = () => {
+            passInput.classList.toggle('titanium-shield');
+            btnToggle.querySelector('span').textContent = passInput.classList.contains('titanium-shield') ? 'visibility_off' : 'visibility';
+        };
+    }
+
     // Banking UI Logic
     const btnAddIban = document.getElementById('btn-add-iban');
     if (btnAddIban) {
@@ -165,9 +175,9 @@ function renderBankAccounts() {
                 <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Pass. Dispositiva</label>
                     <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                        <input type="password" class="dispositiva-input w-full bg-transparent border-none h-11 px-4 text-sm focus:ring-0" 
+                        <input type="text" class="dispositiva-input titanium-shield w-full bg-transparent border-none h-11 px-4 text-sm focus:ring-0" 
                             data-iban-idx="${ibanIdx}" value="${account.passwordDispositiva || ''}" placeholder="Password..." />
-                        <button type="button" onclick="const i=this.previousElementSibling; i.type=i.type==='password'?'text':'password'; this.querySelector('span').textContent=i.type==='password'?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
                             <span class="material-symbols-outlined text-sm">visibility</span>
                         </button>
                     </div>
@@ -284,8 +294,13 @@ function renderCardEntry(ibanIdx, cardIdx, card) {
                     </div>
                     <div class="flex flex-col gap-1.5">
                         <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">PIN</label>
-                        <input type="text" class="pin-input w-full bg-slate-50 border-none rounded-lg h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" placeholder="****" />
+                        <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
+                            <input type="text" class="pin-input titanium-shield w-full bg-transparent border-none h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" placeholder="****" />
+                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                                <span class="material-symbols-outlined text-sm">visibility</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

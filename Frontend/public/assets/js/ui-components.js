@@ -44,10 +44,22 @@ export function setupPasswordToggles() {
     buttons.forEach(button => {
         button.addEventListener('click', function () {
             const input = this.closest('.relative')?.querySelector('input') || this.previousElementSibling;
-            if (input && (input.type === 'password' || input.type === 'text')) {
+            if (!input) return;
+
+            const icon = this.querySelector('.material-symbols-outlined');
+
+            // 1. Supporto Titanium Shield (Standard Moderno)
+            if (input.classList.contains('titanium-shield') || input.id === 'password' || input.id === 'account-password') {
+                input.classList.toggle('titanium-shield');
+                const isShielded = input.classList.contains('titanium-shield');
+                if (icon) icon.textContent = isShielded ? 'visibility' : 'visibility_off';
+                return;
+            }
+
+            // 2. Fallback per type="password" (Standard Legacy)
+            if (input.type === 'password' || input.type === 'text') {
                 const isPassword = input.type === 'password';
                 input.type = isPassword ? 'text' : 'password';
-                const icon = this.querySelector('.material-symbols-outlined');
                 if (icon) icon.textContent = isPassword ? 'visibility' : 'visibility_off';
             }
         });

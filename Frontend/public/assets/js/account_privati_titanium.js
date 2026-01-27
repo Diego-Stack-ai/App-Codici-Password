@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const labels = card.querySelectorAll('[data-reveal]');
 
         const isHidden = eye.textContent === 'visibility';
-        const dots = '••••••••';
+        const dots = '********';
 
         if (isHidden) {
             eye.textContent = 'visibility_off';
@@ -186,7 +186,7 @@ function renderList(list) {
     container.innerHTML = list.map(acc => {
         const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
         const isPinned = !!acc.isPinned;
-        const dots = '••••••••';
+        const dots = '********';
 
         // Palette Matrix per Categoria
         let matrixClass = 'matrix-blue';
@@ -269,7 +269,7 @@ function renderList(list) {
  * HELPER: RENDERING FIELD (Titanium Style)
  */
 function renderField(label, value, icon, isSensitive = false) {
-    const displayValue = isSensitive ? '••••••••' : value;
+    const displayValue = isSensitive ? '********' : value;
     return `
         <div class="space-y-1.5">
             <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-white/20 ml-1">${label}</span>

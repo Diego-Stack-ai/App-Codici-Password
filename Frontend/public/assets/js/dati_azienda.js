@@ -432,7 +432,7 @@ function populateFields(data, id) {
                                 <div class="flex items-center gap-2 bg-[#0a0f1e] border border-white/10 rounded-lg p-2">
                                     <div class="flex-1 min-w-0 font-mono text-sm text-white truncate">
                                         ${item.data.password ? `
-                                        <span id="masked-${passId}">••••••••</span>
+                                        <span id="masked-${passId}">********</span>
                                         <span id="${rawPassId}" class="hidden">${item.data.password}</span>`
                         : '<span class="text-gray-500 italic">Nessuna password</span>'}
                                     </div>
@@ -805,11 +805,11 @@ window.togglePasswordVisibility = function (btn, maskedId, rawId) {
     const raw = document.getElementById(rawId);
     if (!masked || !raw) return;
 
-    if (masked.textContent === '••••••••') {
+    if (masked.textContent === '********') {
         masked.textContent = raw.textContent;
         btn.innerHTML = '<span class="material-symbols-outlined notranslate text-[14px]">visibility_off</span> NASCONDI';
     } else {
-        masked.textContent = '••••••••';
+        masked.textContent = '********';
         btn.innerHTML = '<span class="material-symbols-outlined notranslate text-[14px]">visibility</span> MOSTRA';
     }
 };
