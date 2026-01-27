@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo Privato</title>
+
+    <!-- Titanium Engine Stack (ORDINE CRUCIALE - Regola 24) -->
+    <!-- 1. Configurazione: Blocca l'ascolto del sistema operativo -->
+    <script src="assets/js/titanium-config.js"></script>
+
+    <!-- 2. Stili Master -->
+    <link rel="stylesheet" href="assets/css/titanium.css">
+
+    <!-- 3. Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- 4. Core Engine (Logica, Font, Protezioni) -->
+    <script src="assets/js/titanium-core.js"></script>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <!-- Fonts (Manrope & Symbols) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+</head>
+
+<body class="titanium-bg antialiased">
+    <div class="titanium-box">
+        <!-- Effects -->
+        <div class="glass-glow"></div>
+
+        <!-- Header -->
+        <div id="header-placeholder"></div>
+
+        <!-- Main Content -->
+        <main class="titanium-main pb-24 select-none">
+            <div class="saetta-master"></div>
+
+            <div class="px-4 py-6">
+                <!-- Avatar & Basic Info -->
+                <div
+                    class="flex flex-col items-center justify-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+                    <div class="relative w-28 h-28 mb-4 group">
+                        <div
+                            class="absolute inset-0 bg-blue-500/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500">
+                        </div>
+                        <img id="profile-avatar" src="assets/images/default-avatar.png"
+                            class="relative w-28 h-28 rounded-full border-2 border-slate-300 dark:border-white/10 shadow-2xl object-cover"
+                            alt="Avatar">
+                    </div>
+                    <h2 id="profile-name"
+                        class="text-2xl font-black text-slate-900 dark:text-white tracking-wide mb-1 text-center">
+                        Caricamento...</h2>
+                    <p id="profile-email" class="text-xs text-slate-500 dark:text-slate-400 font-mono tracking-wider">
+                        ...</p>
+                </div>
+
+                <!-- Info Cards Grid -->
+                <div class="grid gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+
+                    <!-- SECTION 1: DATI PERSONALI -->
+                    <div
+                        class="group relative border-glow rounded-2xl bg-white/60 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-blue-500/30">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-white/40 dark:from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10">
+                        </div>
+                        <button type="button" onclick="toggleSection('dati-personali-wrapper')"
+                            class="relative z-20 w-full flex items-center justify-between p-4 text-left hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-blue-500">person</span>
+                                <h3 class="text-slate-900 dark:text-white text-sm font-bold uppercase tracking-wider">
+                                    Dati
+                                    Personali</h3>
+                            </div>
+                            <span id="arrow-dati-personali-wrapper"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="dati-personali-wrapper"
+                            class="hidden relative z-20 border-t border-slate-200 dark:border-white/5 p-4 space-y-4 bg-slate-50 dark:bg-black/40">
+                            <!-- Field: Nome -->
+                            <div class="flex flex-col gap-1.5">
+                                <label
+                                    class="text-[9px] font-bold text-blue-500 uppercase tracking-wider pl-1">Nome</label>
+                                <div class="glass-field glass-field-blue group/field">
+                                    <div id="nome-view"
+                                        class="flex-1 font-semibold text-sm text-slate-900 dark:text-white">-</div>
+                                </div>
+                            </div>
+                            <!-- Field: Cognome -->
+                            <div class="flex flex-col gap-1.5">
+                                <label
+                                    class="text-[9px] font-bold text-blue-500 uppercase tracking-wider pl-1">Cognome</label>
+                                <div class="glass-field glass-field-blue group/field">
+                                    <div id="cognome-view"
+                                        class="flex-1 font-semibold text-sm text-slate-900 dark:text-white">-
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Field: CF -->
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-[9px] font-bold text-blue-500 uppercase tracking-wider pl-1">Codice
+                                    Fiscale</label>
+                                <div class="glass-field glass-field-blue group/field">
+                                    <div id="cf-view"
+                                        class="flex-1 font-mono text-sm text-slate-900 dark:text-white tracking-wide">-
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Field: Data Nascita & Luogo -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[9px] font-bold text-blue-500 uppercase tracking-wider pl-1">Data
+                                        Nascita</label>
+                                    <div class="glass-field glass-field-blue group/field">
+                                        <div id="birth_date-view"
+                                            class="flex-1 font-semibold text-sm text-slate-900 dark:text-white">-</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label
+                                        class="text-[9px] font-bold text-blue-500 uppercase tracking-wider pl-1">Luogo</label>
+                                    <div class="glass-field glass-field-blue group/field">
+                                        <div id="birth_place-view"
+                                            class="truncate flex-1 font-semibold text-sm text-slate-900 dark:text-white">
+                                            -</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: RESIDENZA -->
+                    <div
+                        class="group relative border-glow rounded-2xl bg-white/60 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-emerald-500/30">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-white/40 dark:from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10">
+                        </div>
+                        <button type="button" onclick="toggleSection('residenza-wrapper')"
+                            class="relative z-20 w-full flex items-center justify-between p-4 text-left hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-emerald-500">home</span>
+                                <h3 class="text-slate-900 dark:text-white text-sm font-bold uppercase tracking-wider">
+                                    Residenza
+                                </h3>
+                            </div>
+                            <span id="arrow-residenza-wrapper"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="residenza-wrapper"
+                            class="hidden relative z-20 border-t border-slate-200 dark:border-white/5 p-4 space-y-4 bg-slate-50 dark:bg-black/40">
+                            <!-- Field: Indirizzo Composto -->
+                            <div class="flex flex-col gap-1.5">
+                                <label
+                                    class="text-[9px] font-bold text-emerald-500 uppercase tracking-wider pl-1">Indirizzo</label>
+                                <div class="glass-field glass-field-emerald group/field">
+                                    <div id="field-address-full"
+                                        class="flex-1 font-semibold text-sm text-slate-900 dark:text-white">-</div>
+                                </div>
+                            </div>
+                            <!-- Field: Città Composto -->
+                            <div class="flex flex-col gap-1.5">
+                                <label
+                                    class="text-[9px] font-bold text-emerald-500 uppercase tracking-wider pl-1">Città</label>
+                                <div class="glass-field glass-field-emerald group/field">
+                                    <div id="field-city-full"
+                                        class="flex-1 font-semibold text-sm text-slate-900 dark:text-white">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: UTENZE (Placeholder) -->
+                    <div
+                        class="group relative border-glow rounded-2xl bg-white/60 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-amber-500/30">
+                        <button type="button" onclick="toggleSection('utenze-wrapper')"
+                            class="relative z-20 w-full flex items-center justify-between p-4 text-left hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-amber-500">bolt</span>
+                                <h3 class="text-slate-900 dark:text-white text-sm font-bold uppercase tracking-wider">
+                                    Utenze</h3>
+                            </div>
+                            <span id="arrow-utenze-wrapper"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="utenze-wrapper"
+                            class="hidden relative z-20 border-t border-slate-200 dark:border-white/5 p-4 bg-slate-50 dark:bg-black/40">
+                            <div id="utenze-view-container" class="grid grid-cols-1 gap-4">
+                                <!-- Populated by JS -->
+                                <p class="text-xs text-slate-400 italic text-center py-2">Caricamento utenze...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: DOCUMENTI (Placeholder) -->
+                    <div
+                        class="group relative border-glow rounded-2xl bg-white/60 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-violet-500/30">
+                        <button type="button" onclick="toggleSection('documenti-wrapper')"
+                            class="relative z-20 w-full flex items-center justify-between p-4 text-left hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-violet-500">folder_shared</span>
+                                <h3 class="text-slate-900 dark:text-white text-sm font-bold uppercase tracking-wider">
+                                    Documenti</h3>
+                            </div>
+                            <span id="arrow-documenti-wrapper"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="documenti-wrapper"
+                            class="hidden relative z-20 border-t border-slate-200 dark:border-white/5 p-4 bg-slate-50 dark:bg-black/40">
+                            <div id="documenti-view-container" class="space-y-4">
+                                <!-- Populated by JS -->
+                                <p class="text-xs text-slate-400 italic text-center py-2">Caricamento documenti...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 5: CONTATTI -->
+                    <div
+                        class="group relative border-glow rounded-2xl bg-white/60 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-rose-500/30">
+                        <button type="button" onclick="toggleSection('contatti-wrapper')"
+                            class="relative z-20 w-full flex items-center justify-between p-4 text-left hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-rose-500">call</span>
+                                <h3 class="text-slate-900 dark:text-white text-sm font-bold uppercase tracking-wider">
+                                    Contatti</h3>
+                            </div>
+                            <span id="arrow-contatti-wrapper"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="contatti-wrapper"
+                            class="hidden relative z-20 border-t border-slate-200 dark:border-white/5 p-4 bg-slate-50 dark:bg-black/40 space-y-4">
+                            <!-- Mobile -->
+                            <div class="flex flex-col gap-1.5">
+                                <label
+                                    class="text-[9px] font-bold text-rose-500 uppercase tracking-wider pl-1">Cellulare
+                                    Personale</label>
+                                <div class="glass-field glass-field-rose group/field flex justify-between items-center">
+                                    <div id="mobile_private-view"
+                                        class="flex-1 font-semibold text-sm text-slate-900 dark:text-white">-</div>
+                                    <button id="btn-call-mobile-sm"
+                                        class="w-8 h-8 flex items-center justify-center text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors">
+                                        <span class="material-symbols-outlined text-[20px]">call</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Phone Private -->
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-[9px] font-bold text-rose-500 uppercase tracking-wider pl-1">Telefono
+                                    Fisso</label>
+                                <div class="glass-field glass-field-rose group/field flex justify-between items-center">
+                                    <div id="phone_private-view"
+                                        class="flex-1 font-semibold text-sm text-slate-900 dark:text-white">-</div>
+                                    <button id="btn-call-phone-sm"
+                                        class="w-8 h-8 flex items-center justify-center text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors">
+                                        <span class="material-symbols-outlined text-[20px]">call</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 6: EMAIL (Placeholder) -->
+                    <div
+                        class="group relative border-glow rounded-2xl bg-white/60 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-cyan-500/30">
+                        <button type="button" onclick="toggleSection('emails-wrapper')"
+                            class="relative z-20 w-full flex items-center justify-between p-4 text-left hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-cyan-500">mail</span>
+                                <h3 class="text-slate-900 dark:text-white text-sm font-bold uppercase tracking-wider">
+                                    Email Personali</h3>
+                            </div>
+                            <span id="arrow-emails-wrapper"
+                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
+                        </button>
+                        <div id="emails-wrapper"
+                            class="hidden relative z-20 border-t border-slate-200 dark:border-white/5 p-4 bg-slate-50 dark:bg-black/40">
+                            <div id="email-view-container" class="space-y-4">
+                                <!-- Populated by JS -->
+                                <p class="text-xs text-slate-400 italic text-center py-2">Caricamento email...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 7: NOTE -->
+                    <div class="pt-4 pb-8">
+                        <div class="flex items-center gap-2 px-1 mb-2">
+                            <span class="material-symbols-outlined text-yellow-500 text-[20px] filled">edit_note</span>
+                            <label class="text-[9px] font-bold text-yellow-500 uppercase tracking-wider">Note
+                                Anagrafica</label>
+                        </div>
+                        <div
+                            class="bg-white/60 dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-inner relative group transition-all duration-300 hover:border-yellow-500/30">
+                            <div id="note-view"
+                                class="text-sm text-slate-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap min-h-[4rem] text-justify">
+                                -
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code (Semplice) -->
+                    <div
+                        class="bg-slate-200/50 dark:bg-white/5 backdrop-blur-sm p-6 rounded-3xl border border-slate-200 dark:border-white/5 flex flex-col items-center justify-center gap-4 mt-2">
+                        <div class="bg-white p-3 rounded-2xl shadow-lg shadow-black/20">
+                            <div id="qrcode"></div>
+                        </div>
+                        <p class="text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-[0.2em]">
+                            Condividi Profilo</p>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <div id="footer-placeholder"></div>
+
+        <!-- Toast -->
+        <div id="toast-container"
+            class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-6 py-4 bg-[#0a0f1e]/90 backdrop-blur-xl border border-slate-300 dark:border-white/10 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-500 pointer-events-none">
+            <span id="toast-icon" class="material-symbols-outlined text-emerald-400">check_circle</span>
+            <span id="toast-message"
+                class="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Messaggio</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="module" src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/profilo_privato.js"></script>
+</body>
+
+</html>

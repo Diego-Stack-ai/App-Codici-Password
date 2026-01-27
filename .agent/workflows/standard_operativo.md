@@ -7,7 +7,7 @@ description: Protocollo di Sicurezza Operativo per Antigravity
 Questo protocollo deve essere consultato ed eseguito per ogni richiesta dell'utente che comporti modifiche al codice, alla struttura o alla UI del progetto.
 
 ### 1. FASE DI ANALISI E RIFERIMENTO (OBBLIGATORIA)
-- **Rilettura Regole**: Prima di ogni azione, leggere il file `FRONTEND_RULES.md`. Non fare affidamento sulla memoria.
+- **Rilettura Regole**: Eseguire IMMEDIATAMENTE il tool `view_file` sul file `FRONTEND_RULES.md` per caricarne il contenuto. Non fare affidamento sulla memoria.
 - **Verifica Cronologia**: Usare `git log -p` o `git show` sui file oggetto della modifica per capire se ci sono stati inserimenti di dati o testi recenti che non devono essere persi.
 - **Identificazione Dati Critici**: Individuare testi (Privacy, FAQ, Regole), variabili di logica e identificatori (ID) che devono rimanere invariati.
 

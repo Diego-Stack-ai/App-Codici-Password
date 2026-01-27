@@ -58,5 +58,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 5. LOAD SHARED COMPONENTS (Header/Footer)
+    // Skip on Home Page to avoid race condition with home.js which loads them independently
+    const pathName = window.location.pathname;
+    const isHomePage = pathName.endsWith('home_page.html') || pathName.endsWith('/');
+    if (!pathName.includes('home_page.html')) {
+        loadSharedComponents();
+    }
+
     console.log("Titanium Framework Initialized (v10.1)");
 });
+
+// --- HELPER: COMPONENT LOADER ---
+async function loadSharedComponents() {
+    const headerPh = document.getElementById('header-placeholder');
+    if (headerPh) {
+        try {
+            const res = await fetch('assets/components/header.html');
+            if (res.ok) {
+                headerPh.innerHTML = await res.text();
+
+                // AUTO-POPULATE HEADER if empty
+                const headerContent = document.getElementById('header-content');
+                if (headerContent && !headerContent.hasChildNodes()) {
+                    const pageTitle = document.title.replace(' - App', '') || 'Titanium';
+                    headerContent.innerHTML = `
+                        <div class="flex items-center gap-3 p-4">
+                            <button onclick="window.history.back()" 
+                                class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white shadow-sm">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <h1 class="text-lg font-bold text-white tracking-wide truncate">${pageTitle}</h1>
+                        </div>
+                        <div class="flex items-center gap-3 pr-4">
+                             <!-- Optional Actions Placeholders -->
+                        </div>
+                    `;
+                }
+            }
+        } catch (e) { console.warn("Header load error", e); }
+    }
+
+    const footerPh = document.getElementById('footer-placeholder');
+    if (footerPh) {
+        try {
+            const res = await fetch('assets/components/footer.html');
+            if (res.ok) footerPh.innerHTML = await res.text();
+        } catch (e) { console.warn("Footer load error", e); }
+    }
+}

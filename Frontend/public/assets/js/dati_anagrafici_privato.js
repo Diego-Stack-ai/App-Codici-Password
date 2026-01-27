@@ -1100,7 +1100,7 @@ onAuthStateChanged(auth, async (user) => {
             }
             cacheUpdate.qrConfig = qrConfig;
             applyQRConfig();
-            updateQRCode();
+
 
             if (data.contactEmails) {
                 contactEmails = data.contactEmails;
@@ -1132,6 +1132,7 @@ onAuthStateChanged(auth, async (user) => {
             renderUtenzeEdit();
             renderDocumentiView();
             renderDocumentiEdit();
+            try { updateQRCode(); } catch (e) { console.warn("QR Init Warning", e); }
 
             if (data.allegati && Array.isArray(data.allegati)) {
                 existingAttachments = data.allegati;
@@ -1403,28 +1404,49 @@ function toggleEdit(on) {
     }
 }
 
+
 function applyQRConfig() {
     document.querySelectorAll('input[data-qr-field]').forEach(chk => {
         const f = chk.getAttribute('data-qr-field');
         chk.checked = !!qrConfig[f];
-        chk.onchange = () => {
+        chk.addEventListener('change', () => {
             qrConfig[f] = chk.checked;
             updateQRCode();
-        };
+        });
     });
 }
 
+// Make accessible globally
+// window.updateQRCode = updateQRCode; // Not needed, listeners attached via JS
+
 function updateQRCode() {
+    if (typeof QRCode === 'undefined') {
+        console.warn("QRCode library not loaded");
+        return;
+    }
     if (!qrContainer) return;
     qrContainer.innerHTML = "";
 
     const vals = {};
+    // Retrieve data primarily from VIEW elements (what is seen)
     fieldMap.forEach(f => {
         let v = "";
-        const el = document.getElementById(f + '-edit');
-        if (el) v = el.value.trim();
+        const viewEl = document.getElementById(f + '-view');
+        if (viewEl) {
+            v = viewEl.textContent.trim();
+            if (v === '-') v = ""; // Ignore placeholders
+        }
+        // Fallback to edit if view is empty or missing
+        if (!v) {
+            const editEl = document.getElementById(f + '-edit');
+            if (editEl) v = editEl.value.trim();
+        }
         vals[f] = v;
     });
+
+    // Special handling for Note (fieldMap has 'note', config uses 'notes')
+    const noteEl = document.getElementById('note-view');
+    if (noteEl && noteEl.textContent !== '-') vals['note'] = noteEl.textContent.trim();
 
     let v = "BEGIN:VCARD\nVERSION:3.0\n";
 
@@ -1444,7 +1466,14 @@ function updateQRCode() {
     });
 
     if (qrConfig['birth_date'] && vals.birth_date) {
-        const bday = vals.birth_date.replace(/-/g, '');
+        // Expecting DD/MM/YYYY from View
+        let bday = vals.birth_date;
+        if (bday.includes('/')) {
+            const parts = bday.split('/'); // dd, mm, yyyy
+            if (parts.length === 3) bday = parts[2] + parts[1] + parts[0];
+        } else {
+            bday = bday.replace(/-/g, '');
+        }
         v += `BDAY:${bday}\n`;
     }
 
@@ -1462,7 +1491,8 @@ function updateQRCode() {
     if ((qrConfig['birth_place'] && vals.birth_place) || (qrConfig['birth_province'] && vals.birth_province)) {
         extras.push(`Nato a: ${vals.birth_place || ""} (${vals.birth_province || ""})`);
     }
-    if (qrConfig['notes'] && vals.notes) extras.push(`Note: ${vals.notes}`);
+    // Mapping config 'notes' to val 'note'
+    if (qrConfig['notes'] && vals.note) extras.push(`Note: ${vals.note}`);
 
     if (extras.length > 0) {
         v += `NOTE:${extras.join('\\n')}\n`;
@@ -1475,14 +1505,17 @@ function updateQRCode() {
             qrContainer.innerHTML = "";
             new QRCode(qrContainer, {
                 text: v,
-                width: 150,
-                height: 150,
+                width: 100, // Reduced to fit standard container
+                height: 100,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.M
             });
         }
-    } catch (e) { logError("QR Code Small Generation", e); }
+    } catch (e) {
+        console.error("QR Generated Error", e);
+        qrContainer.innerHTML = '<span class="text-xs text-red-400">Error Lib</span>';
+    }
 
     const zoomContainer = document.getElementById('qrcode-zoom-container');
     if (zoomContainer) {
@@ -2062,3 +2095,6 @@ function updateSectionBadge(id, count) {
     }
 }
 
+
+
+

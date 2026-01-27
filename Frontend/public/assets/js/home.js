@@ -26,7 +26,7 @@ initComponents().then(() => {
         headerStack.style.width = '100%';
 
         headerStack.innerHTML = `
-            <a href="dati_anagrafici_privato.html" class="user-profile-group group">
+            <a href="profilo_privato.html" class="user-profile-group group">
                 <div id="user-avatar" class="avatar-circle border-glow shrink-0" style="width: 42px; height: 42px;"></div>
                 <div class="user-info-text">
                     <span id="greeting-text" class="greeting-text">...</span>

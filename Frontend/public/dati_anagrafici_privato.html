@@ -1,169 +1,21 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
     <title>Dati Anagrafici - Privato</title>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
-
-    <!-- Tailwind -->
+    <!-- Titanium Engine Stack -->
+    <script src="assets/js/titanium-config.js"></script>
+    <link rel="stylesheet" href="assets/css/titanium.css">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#3b82f6',
-                        slate: {
-                            850: '#1e293b',
-                            900: '#0f172a',
-                            950: '#020617',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="assets/js/titanium-core.js"></script>
 
     <!-- QR Code Lib -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        body {
-            background-color: #0a0f1e;
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
-
-        .filled {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        /* 3) FARO ANIMATO (GLASS GLOW) */
-        @keyframes glowFloat {
-
-            0%,
-            100% {
-                opacity: 0.6;
-                transform: translateY(0) scale(1) translateX(-50%);
-            }
-
-            50% {
-                opacity: 0.9;
-                transform: translateY(-10px) scale(1.05) translateX(-50%);
-            }
-        }
-
-        .glass-glow {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 150%;
-            height: 120%;
-            background: radial-gradient(ellipse at 50% 0%,
-                    rgba(59, 130, 246, 0.4) 0%,
-                    rgba(59, 130, 246, 0.15) 25%,
-                    rgba(59, 130, 246, 0.05) 50%,
-                    transparent 75%);
-            filter: blur(80px);
-            z-index: 0;
-            pointer-events: none;
-            transform: translateX(-50%);
-            animation: glowFloat 4s ease-in-out infinite;
-        }
-
-        /* 9) BORDER GLOW RIFLETTENTE */
-        .border-glow {
-            position: relative;
-        }
-
-        .border-glow::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            padding: 1px;
-            border-radius: inherit;
-            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.05));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="tel"],
-        input[type="date"],
-        textarea {
-            background-color: rgba(0, 0, 0, 0.3) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
-            border-radius: 12px !important;
-            transition: all 0.3s ease;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 15px -5px rgba(59, 130, 246, 0.5) !important;
-            background-color: rgba(0, 0, 0, 0.4) !important;
-            outline: none;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* View mode styles */
-        .view-field {
-            font-weight: 600;
-            color: #f8fafc;
-            min-height: 1.25rem;
-        }
-
-        .view-label {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding-left: 4px;
-            margin-bottom: -2px;
-        }
-
-        /* PROTEZIONE REGOLA 5 & 30: NON COPIABILE */
-        .no-copy {
-            user-select: none !important;
-            -webkit-user-select: none !important;
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
-            pointer-events: none;
-        }
-
-        .help-text {
-            user-select: none !important;
-            -webkit-user-select: none !important;
-            pointer-events: auto;
-        }
-
         /* 13) SAETTA (METALLIC SHIMMER) */
         @keyframes shimmer {
             0% {
@@ -262,63 +114,39 @@
         .glass-field-cyan:hover {
             border-color: rgba(6, 182, 212, 0.4);
         }
+
+        /* View mode styles */
+        .view-field {
+            font-weight: 600;
+            color: #f8fafc;
+            min-height: 1.25rem;
+        }
+
+        .view-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding-left: 4px;
+            margin-bottom: -2px;
+        }
+
+        .no-copy {
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            pointer-events: none;
+        }
     </style>
 </head>
 
-<body class="bg-[#0a0f1e] text-white font-display antialiased selection:bg-blue-500/30">
-    <!-- 2) Contenitore Principale -->
-    <div
-        class="relative flex min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-gradient-to-l from-[#030712] to-[#162e6e]">
-
-        <!-- 3) Faro -->
+<body class="titanium-bg">
+    <div class="titanium-box">
         <div class="glass-glow"></div>
 
-        <!-- 4) Header Fusion -->
-        <header
-            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl z-50 bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md">
-            <div class="flex items-center px-4 h-16 gap-4">
-                <a href="home_page.html" id="action-back-btn"
-                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                    <span
-                        class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-                </a>
+        <!-- HEADER PLACEHOLDER -->
+        <div id="header-placeholder"></div>
 
-                <h1 id="user-name"
-                    class="relative z-10 text-lg font-bold leading-tight tracking-tight text-center flex-1 text-white uppercase opacity-90 truncate">
-                    ...
-                </h1>
-
-                <!-- Actions Group -->
-                <div class="relative z-10 flex items-center gap-2">
-                    <button id="action-edit-btn"
-                        class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white"
-                        title="Modifica">
-                        <span class="material-symbols-outlined text-[22px]">edit</span>
-                    </button>
-                    <button id="action-cancel-btn"
-                        class="hidden flex size-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all active:scale-95"
-                        title="Annulla">
-                        <span class="material-symbols-outlined text-[22px]">close</span>
-                    </button>
-                    <button id="action-save-btn"
-                        class="hidden flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20 transition-all active:scale-95"
-                        title="Salva">
-                        <span class="material-symbols-outlined text-[22px] font-bold">check</span>
-                    </button>
-                    <a href="home_page.html"
-                        class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                        <span class="material-symbols-outlined text-[22px]">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
-
-        <!-- Header Spacer -->
-        <div class="h-16 w-full shrink-0"></div>
-
-
-
-        <!-- Main Content -->
+        <!-- MAIN -->
         <main class="titanium-main">
 
             <!-- Avatar & QR Section -->
@@ -367,7 +195,7 @@
 
                 <!-- SECTION 1: DATI PERSONALI -->
                 <div
-                    class="group relative border-glow saetta rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-blue-500/30">
+                    class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-blue-500/30">
 
                     <!-- 10) Glow Overlay Internal -->
                     <div
@@ -390,7 +218,7 @@
                     </button>
 
                     <div id="dati-personali-wrapper"
-                        class="hidden relative z-20 border-t border-white/5 p-4 space-y-4 bg-black/40">
+                        class="hidden relative z-20 border-t border-white/5 p-4 space-y-4 bg-slate-50 dark:bg-black/40">
                         <div class="flex justify-end pr-1">
                             <button onclick="copyPersonalData()"
                                 class="text-blue-400 text-[10px] font-bold uppercase tracking-wider hover:text-blue-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/5 saetta border-glow transition-all active:scale-95">
@@ -520,7 +348,7 @@
 
                 <!-- SECTION 2: RESIDENZA -->
                 <div
-                    class="group relative border-glow saetta rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-emerald-500/30">
+                    class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-emerald-500/30">
 
                     <!-- 10) Glow Overlay Internal -->
                     <div
@@ -543,7 +371,7 @@
                     </button>
 
                     <div id="residenza-wrapper"
-                        class="hidden relative z-20 border-t border-white/5 p-4 space-y-4 bg-black/40">
+                        class="hidden relative z-20 border-t border-white/5 p-4 space-y-4 bg-slate-50 dark:bg-black/40">
                         <div class="flex justify-end pr-1">
                             <button onclick="copyResidence()"
                                 class="text-emerald-400 text-[10px] font-bold uppercase tracking-wider hover:text-emerald-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/5 saetta border-glow transition-all active:scale-95">
@@ -632,7 +460,7 @@
 
                 <!-- SECTION 3: UTENZE -->
                 <div
-                    class="group relative border-glow saetta rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-amber-500/30">
+                    class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-amber-500/30">
 
                     <!-- 10) Glow Overlay Internal -->
                     <div
@@ -660,7 +488,8 @@
                         </div>
                     </div>
 
-                    <div id="utenze-wrapper" class="hidden relative z-20 border-t border-white/5 p-4 bg-black/40">
+                    <div id="utenze-wrapper"
+                        class="hidden relative z-20 border-t border-white/5 p-4 bg-slate-50 dark:bg-black/40">
                         <div id="utenze-view-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Populated by JS -->
                         </div>
@@ -672,7 +501,7 @@
 
                 <!-- SECTION 4: DOCUMENTI -->
                 <div
-                    class="group relative border-glow saetta rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-violet-500/30">
+                    class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-violet-500/30">
 
                     <!-- 10) Glow Overlay Internal -->
                     <div
@@ -700,7 +529,8 @@
                         </div>
                     </div>
 
-                    <div id="documenti-wrapper" class="hidden relative z-20 border-t border-white/5 p-4 bg-black/40">
+                    <div id="documenti-wrapper"
+                        class="hidden relative z-20 border-t border-white/5 p-4 bg-slate-50 dark:bg-black/40">
                         <div id="documenti-view-container" class="space-y-4">
                             <!-- Populated by JS -->
                         </div>
@@ -712,7 +542,7 @@
 
                 <!-- SECTION 5: CONTATTI -->
                 <div
-                    class="group relative border-glow saetta rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-rose-500/30">
+                    class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-rose-500/30">
 
                     <!-- 10) Glow Overlay Internal -->
                     <div
@@ -735,7 +565,7 @@
                     </button>
 
                     <div id="contatti-wrapper"
-                        class="hidden relative z-20 border-t border-white/5 p-4 space-y-6 bg-black/40">
+                        class="hidden relative z-20 border-t border-white/5 p-4 space-y-6 bg-slate-50 dark:bg-black/40">
                         <div class="bg-rose-500/5 border border-white/5 rounded-2xl p-5 shadow-sm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Cellulare -->
@@ -810,7 +640,7 @@
 
                 <!-- SECTION 6: EMAIL PERSONALI -->
                 <div
-                    class="group relative border-glow saetta rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-cyan-500/30">
+                    class="group relative border-glow rounded-2xl bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-white/10 hover:border-cyan-500/30">
 
                     <!-- 10) Glow Overlay Internal -->
                     <div
@@ -833,7 +663,8 @@
                         </div>
                     </div>
 
-                    <div id="emails-wrapper" class="hidden relative z-20 border-t border-white/5 p-4 bg-black/40">
+                    <div id="emails-wrapper"
+                        class="hidden relative z-20 border-t border-white/5 p-4 bg-slate-50 dark:bg-black/40">
                         <div id="email-view-container" class="space-y-3">
                             <!-- Populated by JS -->
                         </div>
@@ -872,30 +703,19 @@
                     </div>
                 </div>
 
-                <!-- 5) Aiuto / Descrizione Pagina (Deep Box Style) -->
-                <div class="help-text no-copy pt-4 pb-8 px-0.5">
-                    <div class="flex items-center gap-2 px-1 mb-2 text-blue-400">
-                        <span class="material-symbols-outlined text-[20px] filled">info</span>
-                        <h3 class="text-[10px] font-bold uppercase tracking-widest">
-                            Informazioni Pagina
-                        </h3>
-                    </div>
-                    <div
-                        class="bg-black/30 border border-white/10 rounded-2xl p-5 shadow-inner relative group transition-all duration-300 hover:border-blue-500/30 text-justify">
-                        <p class="text-sm text-gray-400 leading-relaxed">
-                            Gestisci qui i tuoi dati personali, documenti e contatti. Clicca sull'icona della matita per
-                            entrare in modalità modifica o sul tasto copia per prelevare velocemente i dati.
-                        </p>
-                    </div>
+                <!-- 5) Aiuto / Descrizione Pagina (Standard Titanium) -->
+                <div class="col-span-full text-center mt-4 pb-8 px-4">
+                    <p class="titanium-help-block">
+                        Gestisci qui i tuoi dati personali, documenti e contatti. Clicca sull'icona della matita per
+                        entrare in modalità modifica o sul tasto copia per prelevare velocemente i dati.
+                    </p>
                 </div>
 
             </div>
         </main>
 
-        <!-- 5) Footer Fusion -->
-        <footer
-            class="fixed bottom-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl h-20 bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-sm pointer-events-none z-40">
-        </footer>
+        <!-- FOOTER PLACEHOLDER -->
+        <div id="footer-placeholder"></div>
     </div>
 
     <!-- UI Helper Scripts -->
@@ -919,8 +739,9 @@
         }
     </script>
 
-    <!-- Main Logic -->
-    <script src="assets/js/dati_anagrafici_privato.js" type="module"></script>
+    <!-- SCRIPTS MODULARI (10/10 Architecture) -->
+    <script type="module" src="assets/js/main.js"></script>
+    <script type="module" src="assets/js/dati_anagrafici_privato.js"></script>
 </body>
 
 </html>
