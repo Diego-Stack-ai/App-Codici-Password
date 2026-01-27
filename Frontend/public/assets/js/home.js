@@ -5,6 +5,7 @@ import { initComponents } from './components.js';
 import { loadUrgentDeadlinesCount } from './scadenze.js';
 import { loadExpiredDeadlines } from './urgenze.js';
 import { logError } from './utils.js';
+import { t } from './translations.js';
 import { setTheme, applyTheme } from './theme.js';
 
 /**
@@ -51,7 +52,7 @@ initComponents().then(() => {
             <div style="flex: 1;"></div> 
             
             <div class="flex items-center gap-4 opacity-40" style="flex: 2; justify-content: center;">
-                <span class="text-[9px] font-bold uppercase tracking-[0.3em]" data-t="version">Titanium Protocol</span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.3em]">${t('version')}</span>
             </div>
 
             <div style="flex: 1; display: flex; justify-content: flex-end;">
@@ -61,6 +62,22 @@ initComponents().then(() => {
             </div>
         `;
     }
+
+    // --- TRADUZIONE STATICA DEL DOM (Home Page) ---
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (el.hasAttribute('placeholder')) {
+            el.setAttribute('placeholder', t(key));
+        } else {
+            el.textContent = t(key);
+        }
+    });
+
+    // --- TRADUZIONE ARIA-LABEL ---
+    document.querySelectorAll('[data-t-aria]').forEach(el => {
+        const key = el.getAttribute('data-t-aria');
+        el.setAttribute('aria-label', t(key));
+    });
 
     // Una volta iniettato, inizializza il logout
     const logoutBtn = document.getElementById('logout-button');
@@ -84,7 +101,12 @@ applyTheme();
 function updateGreeting() {
     const h = new Date().getHours();
     const el = document.getElementById('greeting-text');
-    if (el) el.textContent = (h >= 5 && h < 13) ? "Buon giorno," : (h >= 13 && h < 17) ? "Buon pomeriggio," : "Buona sera,";
+    if (el) {
+        const key = (h >= 5 && h < 13) ? "greeting_morning"
+            : (h >= 13 && h < 17) ? "greeting_afternoon"
+                : "greeting_evening";
+        el.textContent = t(key);
+    }
 }
 
 /**
