@@ -7,12 +7,12 @@
     <meta name="color-scheme" content="dark only">
     <meta name="theme-color" content="#0a0f1e">
     <title>Codici & Password - Accedi</title>
-    <link rel="manifest" href="manifest.json" />
+    <link rel="manifest" href="manifest.json?v=5.7" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="App Codici">
+    <meta name="application-name" content="App Codici">
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap"
@@ -20,7 +20,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/titanium.css">
+    <link rel="stylesheet" href="assets/css/titanium.css?v=5.7">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
 
@@ -61,7 +61,7 @@
                         Accedi</h1>
                     <p class="text-xs text-white/40 text-center mb-6 uppercase tracking-widest select-none font-bold"
                         data-t="login_subtitle">
-                        Protocollo Titanium</p>
+                        Protocollo Titanium v5.7</p>
 
                     <!-- REGOLA 5 - AIUTO BASE INFORMATIVA (Semantica Enterprise) -->
                     <p data-ui="hint" class="mb-10" data-t="login_hint">
@@ -73,7 +73,8 @@
                             <label
                                 class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none"
                                 data-t="username_label">Username</label>
-                            <input id="email" type="email" placeholder="Email o Username" required
+                            <input id="email" name="username" type="email" autocomplete="username"
+                                placeholder="Email o Username" required
                                 class="w-full h-14 px-5 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base"
                                 data-t="username_placeholder">
                         </div>
@@ -83,8 +84,10 @@
                                 class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none"
                                 data-t="password_label">Password</label>
                             <div class="relative group">
-                                <input id="password" type="text" placeholder="********" required
-                                    class="titanium-shield w-full h-14 px-5 pr-14 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base">
+                                <!-- TYPE PASSWORD + AUTOCOMPLETE per FaceID -->
+                                <input id="password" name="password" type="password" autocomplete="current-password"
+                                    placeholder="********" required
+                                    class="w-full h-14 px-5 pr-14 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base">
                                 <button type="button"
                                     class="toggle-password absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
                                     <span class="material-symbols-outlined text-[20px] select-none">visibility</span>
