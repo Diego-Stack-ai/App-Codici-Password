@@ -48,12 +48,13 @@
             <div class="grid grid-cols-2 gap-4 px-2 mb-8">
 
                 <!-- Account Standard -->
-                <a href="account_privati.html?type=standard" class="matrix-blue border-glow saetta group">
-                    <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
+                <a href="account_privati.html?type=standard"
+                    class="matrix-blue border-glow saetta group relative block w-full h-full overflow-hidden">
+                    <div class="glass-shine pointer-events-none"></div>
+                    <div class="bg-icon-container pointer-events-none">
                         <span class="material-symbols-outlined text-[40px] opacity-20">account_balance_wallet</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
                         <span id="count-standard"
                             class="text-[9px] font-bold uppercase tracking-widest text-white/40">Account (0)</span>
                         <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">
@@ -62,26 +63,28 @@
                 </a>
 
                 <!-- Condivisi -->
-                <a href="account_privati.html?type=shared" class="matrix-red border-glow saetta group">
-                    <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
+                <a href="account_privati.html?type=shared"
+                    class="matrix-red border-glow saetta group relative block w-full h-full overflow-hidden">
+                    <div class="glass-shine pointer-events-none"></div>
+                    <div class="bg-icon-container pointer-events-none">
                         <span class="material-symbols-outlined text-[40px] opacity-20">group</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
                         <span id="count-shared"
-                            class="text-[9px] font-bold uppercase tracking-widest text-white/40">Condivisi (0)</span>
+                            class="text-[9px] font-bold uppercase tracking-widest text-white/40">Invitati (0)</span>
                         <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">
                             Invitati</h3>
                     </div>
                 </a>
 
                 <!-- Memorandum -->
-                <a href="account_privati.html?type=memo" class="matrix-orange border-glow saetta group">
-                    <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
+                <a href="account_privati.html?type=memo"
+                    class="matrix-orange border-glow saetta group relative block w-full h-full overflow-hidden">
+                    <div class="glass-shine pointer-events-none"></div>
+                    <div class="bg-icon-container pointer-events-none">
                         <span class="material-symbols-outlined text-[40px] opacity-20">sticky_note_2</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
                         <span id="count-memo" class="text-[9px] font-bold uppercase tracking-widest text-white/40">Memo
                             (0)</span>
                         <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">Note
@@ -90,12 +93,13 @@
                 </a>
 
                 <!-- Memo Condivisi -->
-                <a href="account_privati.html?type=shared_memo" class="matrix-green border-glow saetta group">
-                    <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
+                <a href="account_privati.html?type=shared_memo"
+                    class="matrix-green border-glow saetta group relative block w-full h-full overflow-hidden">
+                    <div class="glass-shine pointer-events-none"></div>
+                    <div class="bg-icon-container pointer-events-none">
                         <span class="material-symbols-outlined text-[40px] opacity-20">folder_shared</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
                         <span id="count-shared-memo"
                             class="text-[9px] font-bold uppercase tracking-widest text-white/40">Memo Team (0)</span>
                         <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">
@@ -192,8 +196,8 @@
     </div>
 
     <!-- SCRIPTS MODULARI -->
-    <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/area_privata_titanium.js"></script>
+    <script type="module" src="assets/js/main.js?v=3.0"></script>
+    <script type="module" src="assets/js/area_privata_titanium.js?v=3.0"></script>
 </body>
 
 </html>
