@@ -9,7 +9,7 @@ import { showToast, showWarningModal } from './ui-core.js';
  * IMPOSTAZIONI PAGE MODULE (Titanium Account V1.1)
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+const initImpostazioni = () => {
     // 1. Traduzione statica immediata degli elementi presenti nel DOM
     const updateTranslations = () => {
         document.querySelectorAll('[data-t]').forEach(el => {
@@ -30,10 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Caricamento Testo Privacy
     setupPrivacyInfo();
+};
 
-    // 5. Caricamento Testo Privacy
-    setupPrivacyInfo();
-});
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initImpostazioni);
+} else {
+    initImpostazioni();
+}
 
 function setupPrivacyInfo() {
     const placeholder = document.getElementById('info-privacy-text-placeholder');
@@ -153,11 +156,97 @@ onAuthStateChanged(auth, async (user) => {
                 avatarEl.style.backgroundPosition = 'center';
             }
 
+            // --- QR CODE GENERATION ---
+            const qrContainer = document.getElementById('qrcode-settings');
+            if (qrContainer && typeof QRCode !== 'undefined') {
+                qrContainer.innerHTML = '';
+
+                // --- DYNAMIC vCard GENERATION (based on QR Flags) ---
+                const config = userData.qr_personal || {};
+
+                // 1. NOME & ANAGRAFICA
+                const sName = config.nome ? (userData.nome || '') : '';
+                const sSurname = config.cognome ? (userData.cognome || '') : '';
+                const fn = `${sName} ${sSurname}`.trim();
+
+                let notes = [];
+                if (config.cf && (userData.cf || userData.codiceFiscale)) notes.push(`CF: ${userData.cf || userData.codiceFiscale}`);
+                if (config.nascita && userData.birth_date) notes.push(`Nato il: ${userData.birth_date}`);
+                if (config.luogo && userData.birth_place) notes.push(`Nato a: ${userData.birth_place} ${userData.birth_province ? '(' + userData.birth_province + ')' : ''}`);
+
+                let vcardPayload = ['BEGIN:VCARD', 'VERSION:3.0'];
+
+                if (sName || sSurname) vcardPayload.push(`N:${sSurname};${sName};;;`);
+                if (fn) vcardPayload.push(`FN:${fn}`);
+                if (notes.length > 0) vcardPayload.push(`NOTE:${notes.join(' - ')}`);
+
+                // 2. TELEFONI
+                if (userData.contactPhones && Array.isArray(userData.contactPhones)) {
+                    userData.contactPhones.forEach(p => {
+                        if (p.shareQr && p.number) {
+                            let type = 'VOICE';
+                            const tLower = (p.type || '').toLowerCase();
+                            if (tLower.includes('cell')) type = 'CELL';
+                            else if (tLower.includes('lavoro') || tLower.includes('work')) type = 'WORK';
+                            else if (tLower.includes('casa') || tLower.includes('home') || tLower.includes('fisso')) type = 'HOME';
+                            vcardPayload.push(`TEL;TYPE=${type}:${p.number}`);
+                        }
+                    });
+                }
+
+                // 3. EMAIL
+                if (userData.contactEmails && Array.isArray(userData.contactEmails)) {
+                    userData.contactEmails.forEach(e => {
+                        if (e.shareQr && e.address) {
+                            vcardPayload.push(`EMAIL;TYPE=INTERNET:${e.address}`);
+                        }
+                    });
+                }
+
+                // 4. INDIRIZZI
+                if (userData.userAddresses && Array.isArray(userData.userAddresses)) {
+                    userData.userAddresses.forEach(a => {
+                        if (a.shareQr) {
+                            const street = `${a.address || ''} ${a.civic || ''}`.trim();
+                            const city = a.city || '';
+                            const region = a.province || '';
+                            const zip = a.cap || '';
+                            let type = 'HOME';
+                            const tLower = (a.type || '').toLowerCase();
+                            if (tLower.includes('lavoro')) type = 'WORK';
+                            vcardPayload.push(`ADR;TYPE=${type}:;;${street};${city};${region};${zip};`);
+                        }
+                    });
+                }
+
+                vcardPayload.push('END:VCARD');
+                const vcard = vcardPayload.join('\n');
+
+                // Store vCard for Modal Zoom
+                qrContainer.dataset.vcard = vcard;
+
+                try {
+                    new QRCode(qrContainer, {
+                        text: vcard,
+                        width: 90,
+                        height: 90,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } catch (e) {
+                    console.error("QR Error", e);
+                }
+            }
+
             // Logout
             if (logoutBtn) {
                 logoutBtn.onclick = async () => {
-                    await signOut(auth);
-                    window.location.href = 'index.html';
+                    const confirmed = await window.showConfirmModal(t('logout_confirm') || "Vuoi davvero uscire?");
+                    if (confirmed) {
+                        await signOut(auth);
+                        window.location.href = 'index.html';
+                    }
                 };
             }
 
@@ -196,6 +285,9 @@ function setupPremiumLanguageSelector(refreshCallback) {
     `).join('');
 
     btn.onclick = (e) => {
+        // Se il click avviene dentro il dropdown (es. sui pulsanti), non fare toggle qui
+        if (dropdown.contains(e.target)) return;
+
         e.stopPropagation();
         dropdown.classList.toggle('show');
     };
@@ -203,11 +295,14 @@ function setupPremiumLanguageSelector(refreshCallback) {
     document.addEventListener('click', () => dropdown.classList.remove('show'));
 
     dropdown.querySelectorAll('.lang-option').forEach(opt => {
-        opt.onclick = () => {
+        opt.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevenire interferenze col document listener
             const code = opt.dataset.code;
-            localStorage.setItem('app_language', code);
-            window.location.reload(); // Reload per rinfrescare tutto il sistema
-        };
+            if (code) {
+                localStorage.setItem('app_language', code);
+                window.location.reload();
+            }
+        });
     });
 }
 
@@ -278,9 +373,80 @@ function setupAccordions() {
             const targetId = acc.dataset.target;
             const content = document.getElementById(targetId);
             const chevron = acc.querySelector('.settings-chevron');
-            const isHidden = content.style.display === 'none';
-            content.style.display = isHidden ? 'block' : 'none';
-            if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+            if (content) {
+                const isShowing = content.classList.toggle('show');
+                // Force inline style per sicurezza ibrida come da protocollo V3
+                content.style.display = isShowing ? 'block' : 'none';
+                if (chevron) chevron.style.transform = isShowing ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
         };
     });
 }
+
+// --- QR ZOOM MODAL ---
+window.showQrModal = () => {
+    const qrContainer = document.getElementById('qrcode-settings');
+    const vcard = qrContainer ? qrContainer.dataset.vcard : null;
+
+    if (!vcard) {
+        console.warn("Nessun dato vCard trovato per il QR Code.");
+        return;
+    }
+
+    // Overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
+        z-index: 10000; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;
+    `;
+
+    // Content Box
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: white; padding: 2rem; border-radius: 30px;
+        box-shadow: 0 0 50px rgba(255, 255, 255, 0.2);
+        display: flex; flex-direction: column; align-items: center; gap: 2rem;
+        transform: scale(0.9); transition: transform 0.3s;
+    `;
+
+    // QR Div Large
+    const qrDivLarge = document.createElement('div');
+
+    // Close Button
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = "CHIUDI";
+    closeBtn.className = "auth-btn";
+    closeBtn.style.cssText = "width: auto; padding: 12px 40px; border-radius: 50px;";
+    closeBtn.onclick = () => {
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+        setTimeout(() => overlay.remove(), 300);
+    };
+
+    content.appendChild(qrDivLarge);
+    content.appendChild(closeBtn);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    // Render QR with Delay
+    setTimeout(() => {
+        try {
+            new QRCode(qrDivLarge, {
+                text: vcard,
+                width: 300,
+                height: 300,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            // Show Animation
+            overlay.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+        } catch (e) {
+            console.error("Zoom render error", e);
+            overlay.remove();
+        }
+    }, 50);
+};

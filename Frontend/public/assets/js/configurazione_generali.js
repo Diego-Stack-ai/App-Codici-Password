@@ -71,16 +71,16 @@ function renderTable(tbodyId, dataArray, listKey) {
         const safeListKey = listKey.replace(/'/g, "\\'");
 
         tr.innerHTML = `
-             <td class="px-4 py-3 flex justify-between items-center text-gray-700 dark:text-gray-300">
+             <td class="px-3 py-2 flex justify-between items-center text-gray-700 dark:text-gray-300 text-xs">
                 <span class="font-medium">${item}</span>
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-teal-500/20 text-teal-600 dark:text-teal-500 transition-colors"
+                    <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-teal-500/20 text-teal-600 dark:text-teal-500 transition-colors"
                         onclick="window.editItem('${safeListKey}', ${index})">
-                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                        <span class="material-symbols-outlined text-[14px]">edit</span>
                     </button>
-                    <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
+                    <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
                         onclick="window.deleteItem('${safeListKey}', ${index})">
-                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                        <span class="material-symbols-outlined text-[14px]">delete</span>
                     </button>
                 </div>
             </td>
@@ -109,28 +109,28 @@ window.renderAllTables = () => {
                     const tr = document.createElement('tr');
                     tr.className = "group hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-200 dark:border-white/5 last:border-0";
                     tr.innerHTML = `
-                         <td class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">${name}</td>
-                        <td class="px-2 py-3 text-center">
+                         <td class="px-3 py-2 font-medium text-gray-700 dark:text-gray-300 text-xs">${name}</td>
+                        <td class="px-2 py-2 text-center">
                             <div class="inline-flex flex-col items-center gap-1">
                                 <span class="text-[9px] text-gray-500 uppercase tracking-widest">${t('text_notice')}</span>
                                 <span class="font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded text-[10px] border border-teal-500/20">${period}gg</span>
                             </div>
                         </td>
-                        <td class="px-2 py-3 text-center">
+                        <td class="px-2 py-2 text-center">
                             <div class="inline-flex flex-col items-center gap-1">
                                 <span class="text-[9px] text-gray-500 uppercase tracking-widest">${t('text_replica')}</span>
                                 <span class="font-bold text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] border border-slate-200 dark:border-white/10">${freq}gg</span>
                             </div>
                         </td>
-                        <td class="px-2 py-3 text-right">
+                        <td class="px-2 py-2 text-right">
                              <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-teal-500/20 text-teal-600 dark:text-teal-500 transition-colors"
+                                <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-teal-500/20 text-teal-600 dark:text-teal-500 transition-colors"
                                     onclick="window.editType(${index})">
-                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    <span class="material-symbols-outlined text-[14px]">edit</span>
                                 </button>
-                                <button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
+                                <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
                                     onclick="window.deleteItem('deadlineTypes', ${index})">
-                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    <span class="material-symbols-outlined text-[14px]">delete</span>
                                 </button>
                             </div>
                         </td>
@@ -147,11 +147,11 @@ window.renderAllTables = () => {
 
 window.editType = async (index) => {
     const item = currentConfig.deadlineTypes[index];
-    const newName = prompt(t('prompt_edit_general_name'), item.name);
+    const newName = await window.showInputModal(t('prompt_edit_general_name'), item.name);
     if (newName === null) return;
-    let newPeriod = prompt(t('prompt_days_notice'), item.period);
+    let newPeriod = await window.showInputModal(t('prompt_days_notice'), item.period);
     if (newPeriod === null) return;
-    let newFreq = prompt(t('prompt_freq_days'), item.freq);
+    let newFreq = await window.showInputModal(t('prompt_freq_days'), item.freq);
     if (newFreq === null) return;
 
     if (newName && !isNaN(newPeriod) && !isNaN(newFreq)) {
@@ -166,11 +166,11 @@ window.editType = async (index) => {
 };
 
 window.addTypeItem = async () => {
-    const name = prompt(t('prompt_new_general_type'));
+    const name = await window.showInputModal(t('prompt_new_general_type'));
     if (!name) return;
-    const period = prompt(t('prompt_period_default').replace('14', '7'), "7");
+    const period = await window.showInputModal(t('prompt_period_default').replace('14', '7'), "7");
     if (period === null) return;
-    const freq = prompt(t('prompt_freq_default').replace('7', '3'), "3");
+    const freq = await window.showInputModal(t('prompt_freq_default').replace('7', '3'), "3");
     if (freq === null) return;
 
     if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
@@ -226,7 +226,7 @@ window.toggleSection = (key) => {
 };
 
 window.addItem = async (listKey, promptText) => {
-    const value = prompt(promptText);
+    const value = await window.showInputModal(promptText);
     if (!value || !value.trim()) return;
     if (!currentConfig[listKey]) currentConfig[listKey] = [];
     currentConfig[listKey].push(value.trim());
@@ -236,7 +236,7 @@ window.addItem = async (listKey, promptText) => {
 
 window.editItem = async (listKey, index) => {
     const currentValue = currentConfig[listKey][index];
-    const newValue = prompt(t('prompt_edit_item'), currentValue);
+    const newValue = await window.showInputModal(t('prompt_edit_item'), currentValue);
     if (newValue === null || !newValue.trim()) return;
     currentConfig[listKey][index] = newValue.trim();
     window.renderAllTables();

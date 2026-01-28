@@ -164,3 +164,97 @@ export function showWarningModal(title, message, callback = null) {
 // Esposizione globale
 window.showToast = showToast;
 window.showWarningModal = showWarningModal;
+
+/**
+ * [CORE UI] INPUT MODAL
+ * Sostituto Premium di prompt(). Restituisce una Promise.
+ * Risolve con value (stringa) se confermato, null se annullato.
+ */
+window.showInputModal = function (title, initialValue = '', placeholder = '') {
+    return new Promise((resolve) => {
+        const modalId = 'titanium-input-modal';
+        let modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.style.cssText = `
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999999; opacity: 0; transition: opacity 0.3s ease;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: rgba(15, 25, 50, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+            padding: 2rem; width: 90%; max-width: 360px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex; flex-direction: column; gap: 1.25rem;
+        `;
+
+        content.innerHTML = `
+            <div>
+                <h3 style="color: white; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.25rem;">${title}</h3>
+                <div style="height: 2px; width: 40px; background: #3b82f6; border-radius: 2px;"></div>
+            </div>
+            
+            <input type="text" value="${initialValue}" placeholder="${placeholder}" style="
+                width: 100%; background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+                padding: 1rem; color: white; font-size: 1rem; outline: none;
+                transition: border-color 0.2s;
+            " onfocus="this.style.borderColor = '#3b82f6'" onblur="this.style.borderColor = 'rgba(255,255,255,0.1)'">
+
+            <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                <button id="modal-cancel-btn" style="
+                    flex: 1; padding: 0.8rem; background: transparent;
+                    border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6);
+                    border-radius: 14px; font-weight: 600; cursor: pointer;
+                ">Annulla</button>
+                <button id="modal-confirm-btn" style="
+                    flex: 1; padding: 0.8rem; background: #2563eb;
+                    border: none; color: white; border-radius: 14px;
+                    font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+                ">Conferma</button>
+            </div>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        const input = content.querySelector('input');
+        const cancelBtn = content.querySelector('#modal-cancel-btn');
+        const confirmBtn = content.querySelector('#modal-confirm-btn');
+
+        // Animazione
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+            input.focus();
+            // Sposta cursore alla fine se c'è valore
+            if (initialValue) input.setSelectionRange(initialValue.length, initialValue.length);
+        }, 10);
+
+        const closeModal = (val) => {
+            modal.style.opacity = '0';
+            content.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                modal.remove();
+                resolve(val);
+            }, 300);
+        };
+
+        cancelBtn.onclick = () => closeModal(null);
+        confirmBtn.onclick = () => closeModal(input.value);
+
+        // Enter key per conferma
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') closeModal(input.value);
+            if (e.key === 'Escape') closeModal(null);
+        };
+    });
+};

@@ -1,42 +1,84 @@
 ---
-description: Protocollo Standard Titanium Impostazioni V1.0 (Based on Account V1.1)
+description: Protocollo Standard Titanium Impostazioni V3.0 (Stability & Maintenance Focus)
 ---
 
-# Titanium Impostazioni Standard Protocol V1.0
-> **NOTA:** Questo protocollo definisce lo standard per le pagine di configurazione e gestione dati (Impostazioni, Profilo, Dati Tecnici).
+# Titanium Impostazioni V3.0 (The Pragmatic Standard)
+> **Baseline Ufficiale**: Viene stabilito che la stabilità operativa, il cache busting e l'uso di componenti centralizzati (Modali/Toast) hanno priorità assoluta su qualsiasi purismo CSS.
 
-Questo workflow definisce lo standard per le pagine di gestione (Settings/Dati). L'obiettivo è mantenere la coerenza visiva "Titanium" per tutte le pagine di configurazione, garantendo un'esperienza premium e blindata.
+## 1. Ambito di Applicazione
+Questo protocollo governa le "Pagine Satellite" di configurazione e gestione dati dell'utente:
+1.  `profilo_privato.html` (Gestione Identità)
+2.  `configurazione_generali.html` (Configurazione Globale)
+3.  `configurazione_documenti.html` (Setup Tipi Doc)
+4.  `configurazione_automezzi.html` (Setup Flotta)
+5.  `impostazioni.html` (Hub Centrale)
 
-## 1. Pagine Target
-Questo stile deve essere applicato a:
-1.  `impostazioni.html` (Impostazioni App)
-2.  `profilo_privato.html` / `dati_anagrafici_privato.html` (Dati Personali)
-3.  `configurazione_automezzi.html` (Nuova pagina futura)
-4.  Qualsiasi pagina di gestione dati (es. Dati Tecnici, Configurazione Dispositivi).
+---
 
-## 2. Requisiti di Stile (auth_impostazioni.css)
-*   **CSS Unico**: Tutte queste pagine devono caricare `assets/css/auth_impostazioni.css`.
-*   **No Tailwind**: Come per l'intera suite Titanium, Tailwind è VIETATO in favore del Pure CSS.
-*   **Layout Adaptativo**: Utilizzare il `.settings-container` per gestire liste e gruppi di opzioni. Il `.glass-glow` (Faro) deve sempre fare da scenografia.
+## 2. Regole di Architettura (System Core)
 
-## 3. Standard Selettore Lingua (MANDATORIO)
-È VIETATO usare accordion o menu standard per il cambio lingua.
-*   **Standard**: Deve essere usato esclusivamente il **Floating Language Selector Premium** (`.lang-selector-container`).
-*   **Posizionamento**: Sempre in alto a destra (`top: 1.5rem; right: 1.5rem;`).
-*   **Coerenza**: La saetta sul bottone lingua deve essere presente e sincronizzata con la card profilo principale.
+### 2.1 Cache Busting Tassativo
+Ogni inclusione di file JS proprietario DEVE avere un parametro di versione esplicito che viene incrementato ad ogni deployment significativo.
+**VIETATO**: `<script src="assets/js/miofile.js"></script>`
+**OBBLIGATORIO**: `<script src="assets/js/miofile.js?v=3.0"></script>`
 
-## 4. Componenti UI Standard
-Ogni pagina di impostazione deve usare questi componenti:
-1.  **Card Profilo/Hero**: `.titanium-vault.profile-card` con bordo `.border-glow`.
-2.  **Lista Gruppi**: Struttura `.settings-group` (contenitore arrotondato).
-3.  **Voci Singole**: `.settings-item` (display flex con header e info).
-4.  **Icone Glass**: Glass box con classi colore (`.bg-blue-glass`, `.bg-amber-glass`, etc.).
-5.  **Toggle**: Usare rigorosamente l'input `.titanium-toggle`.
-6.  **Timer Selector**: Segmented control `.timer-selector` per opzioni temporizzate.
+### 2.2 Gestione Accordion (Modello Ibrido)
+Viene riconosciuta la necessità di stili inline per evitare FOUC (Flash of Unstyled Content).
+*   **HTML**: È permesso `style="display:none"` sugli `.accordion-content` per nasconderli al caricamento iniziale.
+*   **JS**: È autorizzato a manipolare `style.display` in tandem con `classList.arrow` per garantire fluidità.
+*   **CSS**: `auth_impostazioni.css` fornisce lo styling, ma il JS governa lo stato.
 
-## 5. Checklist di Validazione Impostazioni
-- [ ] **Pure CSS**: Tailwind rimosso completamente?
-- [ ] **Premium Selector**: Il selettore lingua fluttuante è presente e orientato correttamente?
-- [ ] **Coerenza Saetta**: La saetta è attiva su tutte le card e pulsanti premium?
-- [ ] **Multilanguage**: Tutte le etichette (label e descrizioni) hanno `data-t`?
-- [ ] **Responsive**: Il layout respira correttamente su schermi piccoli (< 768px)?
+### 2.3 Componenti UI Centralizzati
+Ogni interazione utente (Input, Conferma, Feedback) DEVE passare per `ui-core.js` (o `titanium-core.js`).
+*   ❌ **VIETATO**: `alert()`, `confirm()`, `prompt()`, Modali HTML ad-hoc nella pagina.
+*   ✅ **OBBLIGATORIO**:
+    *   Input: `await window.showInputModal("Titolo", "ValoreDefault")`
+    *   Conferma: `await window.showConfirmModal("Messaggio")`
+    *   Feedback: `window.showToast("Messaggio", "success/error")`
+
+---
+
+## 3. Standard Editoriale (Layout & HTML)
+
+### 3.1 Tabelle "Titanium Data"
+Le liste di configurazione devono seguire rigorosamente il markup "Glass Table":
+```html
+<table class="w-full text-xs">
+    <tr class="group hover:bg-white/5 transition-colors border-b border-white/5">
+        <!-- Contenuto -->
+        <td class="px-3 py-2">Dato</td>
+        <!-- Azioni (visibili on hover) -->
+        <td class="text-right opacity-0 group-hover:opacity-100">
+            <button onclick="window.editItem(...)">Edit</button>
+        </td>
+    </tr>
+</table>
+```
+*   **Densità**: Sempre `text-xs` (interfaccia tecnica professionale).
+*   **Interazione**: Le icone di azione (Edit/Delete) devono apparire solo all'hover sulla riga per ridurre il rumore visivo.
+
+### 3.2 Header Stack
+Il titolo della pagina non deve essere orfano.
+Se ci sono Nome e Cognome, devono essere impilati verticalmente (`flex-col`) con pesi tipografici diversi (Bold vs Medium) per creare gerarchia senza usare `<br>` forzati.
+
+---
+
+## 4. Checklist di Validazione V3 (Definition of Done)
+Un file si considera aggiornato a V3 SOLO se soddisfa TUTTI i seguenti punti:
+
+- [ ] **Versioning**: Lo script principale ha `?v=3.x`?
+- [ ] **No Native Alerts**: Ho cercato "alert", "confirm", "prompt" e non ho trovato nulla?
+- [ ] **Feedback Loop**: Ogni salvataggio termina con un `showToast`?
+- [ ] **Accordion**: Le chevron ruotano correttamente e i pannelli si aprono fluidamente?
+- [ ] **Clean HTML**: Non ci sono stili inline inutili (es. `width: 100%` su div che sono già block)?
+- [ ] **Console Clean**: Nessun errore rosso in console al caricamento.
+
+---
+
+## 5. Procedura di Migrazione (Workflow)
+Quando si aggiorna una pagina vecchia a V3:
+1.  **Backup**: Non toccare la logica business se funziona.
+2.  **Replace**: Sostituisci i prompt con i Modali.
+3.  **Enhance**: Aggiungi i Toast di successo.
+4.  **Tag**: Aggiorna la versione nello script tag.
+5.  **Verify**: Apri e verifica che non ci siano errori.

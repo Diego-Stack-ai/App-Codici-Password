@@ -27,10 +27,17 @@
         <!-- Faro Estetico -->
         <div class="glass-glow"></div>
 
-        <!-- HEADER FISSO -->
+        <!-- HEADER -->
         <header class="titanium-header">
-            <div id="header-content" class="header-stack">
-                <h2 class="header-title">Profilo Privato</h2>
+            <div class="header-stack">
+                <!-- BACK BUTTON -> IMPOSTAZIONI -->
+                <a href="impostazioni.html" class="btn-icon-header" style="left: 0; right: auto;">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+
+                <h1 class="header-title" style="margin-left: 0;">PROFILO UTENTE</h1>
+
+                <!-- HOME BUTTON -> HOME PAGE -->
                 <a href="home_page.html" class="btn-icon-header">
                     <span class="material-symbols-outlined">home</span>
                 </a>
@@ -39,111 +46,225 @@
 
         <main class="settings-container no-select">
 
-            <!-- 1. SEZIONE PROFILO (Card Centrata) -->
-            <div class="titanium-vault border-glow profile-card">
-                <div class="avatar-wrapper">
-                    <img id="profile-avatar" src="assets/images/user-avatar-5.png" class="avatar-main" alt="Avatar">
+            <!-- SEZIONE PROFILO (Horizontal Layout) -->
+            <div class="titanium-vault border-glow profile-card"
+                style="flex-direction: row; justify-content: space-between; align-items: center; text-align: left; padding: 2rem;">
+
+                <!-- SX: NOME E COGNOME -->
+                <div class="profile-info" style="align-items: flex-start; width: auto;">
+                    <h2 id="profile-firstname"
+                        style="margin: 0; font-size: 1.3rem; font-weight: 700; line-height: 1.2;">-</h2>
+                    <h2 id="profile-lastname"
+                        style="margin: 0; font-size: 1.3rem; font-weight: 500; line-height: 1.2; color: white;">-</h2>
                 </div>
-                <div class="profile-info">
-                    <h3 id="profile-name" class="auth-title" data-t="loading">Caricamento...</h3>
-                    <p id="profile-email" class="auth-subtitle"
-                        style="opacity: 0.5; font-size: 0.8rem; margin-top: 0.5rem;">...</p>
+
+                <!-- DX: AVATAR con Edit Overlay (Protocollo Gold) -->
+                <div class="avatar-wrapper"
+                    style="width: 70px; height: 70px; border-radius: 20px; box-shadow: 0 0 20px rgba(37, 99, 235, 0.4); margin-right: 0.5rem; position: relative; cursor: pointer;"
+                    onclick="document.getElementById('avatar-input').click()">
+                    <img id="profile-avatar" src="assets/images/user-avatar-5.png" class="avatar-main" alt="Avatar"
+                        style="border-radius: 18px; width: 100%; height: 100%; object-fit: cover;">
+                    <div class="avatar-edit-overlay"
+                        style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); border-radius: 18px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
+                        <span class="material-symbols-outlined"
+                            style="color: white; font-size: 1.5rem;">photo_camera</span>
+                    </div>
+                    <input type="file" id="avatar-input" accept="image/*" style="display: none;">
                 </div>
+
+                <style>
+                    .avatar-wrapper:hover .avatar-edit-overlay {
+                        opacity: 1 !important;
+                    }
+
+                    /* TITANIUM ACTION GRID V3.0 */
+                    .titanium-action-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 6px;
+                        flex-shrink: 0;
+                        width: 70px;
+                    }
+
+                    .titanium-action-btn {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        border: 1px solid transparent;
+                        /* Base border */
+                    }
+
+                    .titanium-action-btn:hover {
+                        transform: scale(1.05);
+                    }
+
+                    /* VARIANTI */
+                    .btn-view {
+                        background: rgba(255, 255, 255, 0.1);
+                        border-color: rgba(255, 255, 255, 0.2);
+                        color: white;
+                    }
+
+                    .btn-copy {
+                        background: rgba(255, 255, 255, 0.05);
+                        border-color: rgba(255, 255, 255, 0.1);
+                        color: white;
+                    }
+
+                    .btn-edit {
+                        background: rgba(37, 99, 235, 0.2);
+                        border-color: rgba(37, 99, 235, 0.3);
+                        color: #60a5fa;
+                    }
+
+                    .btn-delete {
+                        background: rgba(239, 68, 68, 0.15);
+                        border-color: rgba(239, 68, 68, 0.3);
+                        color: #f87171;
+                    }
+
+                    /* QR CHECKBOX V3.0 (Flags) */
+                    .qr-check {
+                        appearance: none;
+                        width: 18px;
+                        height: 18px;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        border-radius: 5px;
+                        background: rgba(0, 0, 0, 0.3);
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.2s;
+                        flex-shrink: 0;
+                        margin-right: 0.8rem;
+                    }
+
+                    .qr-check:checked {
+                        background: #3b82f6;
+                        border-color: #3b82f6;
+                        box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+                    }
+
+                    .qr-check:checked::after {
+                        content: 'check';
+                        font-family: 'Material Symbols Outlined';
+                        font-size: 14px;
+                        color: white;
+                        font-weight: 700;
+                    }
+
+                    .qr-check:hover {
+                        border-color: rgba(255, 255, 255, 0.8);
+                    }
+                </style>
             </div>
 
             <!-- 2. MASTER VAULT (Card Unificata) -->
             <div class="settings-vault">
 
-                <!-- GRUPPO ANAGRAFICA -->
-                <div class="settings-group">
-                    <h4 class="settings-group-title">Informazioni Anagrafiche</h4>
+                <!-- VIEW MODE CONTAINER -->
+                <div id="view-mode-container">
+                    <!-- GRUPPO ANAGRAFICA -->
+                    <div class="settings-group">
+                        <h4 class="settings-group-title">Informazioni Anagrafiche</h4>
 
-                    <!-- DATI PERSONALI -->
-                    <div class="settings-item accordion-header" data-target="dati-personali">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass">
-                                <span class="material-symbols-outlined">person</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label">Dati Personali</span>
-                                <span class="settings-desc">Nome, CF, Nascita</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="dati-personali" class="accordion-content">
-                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                            <div class="glass-field-titanium glass-field-blue">
-                                <span class="field-label">Nome</span>
-                                <span id="nome-view" class="field-value">-</span>
-                            </div>
-                            <div class="glass-field-titanium glass-field-blue">
-                                <span class="field-label">Cognome</span>
-                                <span id="cognome-view" class="field-value">-</span>
-                            </div>
-                            <div class="glass-field-titanium glass-field-blue">
-                                <span class="field-label">Codice Fiscale</span>
-                                <span id="cf-view" class="field-value"
-                                    style="font-family: monospace; letter-spacing: 0.1em;">-</span>
-                            </div>
-                            <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
-                                <div class="glass-field-titanium glass-field-blue">
-                                    <span class="field-label">Nascita</span>
-                                    <span id="birth_date-view" class="field-value">-</span>
+                        <!-- DATI PERSONALI -->
+                        <div class="settings-item accordion-header" data-target="dati-personali">
+                            <div class="settings-item-header">
+                                <div class="settings-item-info">
+                                    <div class="settings-icon-box bg-blue-glass">
+                                        <span class="material-symbols-outlined">person</span>
+                                    </div>
+                                    <div class="settings-text">
+                                        <span class="settings-label">Dati Personali</span>
+                                        <span class="settings-desc">Nome, CF, Nascita</span>
+                                    </div>
                                 </div>
-                                <div class="glass-field-titanium glass-field-blue">
-                                    <span class="field-label">Luogo</span>
-                                    <span id="birth_place-view" class="field-value">-</span>
+                                <div class="settings-actions" style="display:flex; gap:0.75rem; align-items:center;">
+                                    <button class="btn-icon-header"
+                                        style="position: relative; width: 32px; height: 32px; right: auto;"
+                                        onclick="event.stopPropagation(); window.editSection('dati-personali')">
+                                        <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+                                    </button>
+                                    <span class="material-symbols-outlined settings-chevron">expand_more</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <div id="dati-personali" class="accordion-content">
+                            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                <fieldset class="glass-field-titanium glass-field-blue">
+                                    <legend class="field-label">Nome</legend>
+                                    <span id="nome-view" class="field-value">-</span>
+                                </fieldset>
+                                <fieldset class="glass-field-titanium glass-field-blue">
+                                    <legend class="field-label">Cognome</legend>
+                                    <span id="cognome-view" class="field-value">-</span>
+                                </fieldset>
+                                <fieldset class="glass-field-titanium glass-field-blue">
+                                    <legend class="field-label">Codice Fiscale</legend>
+                                    <span id="cf-view" class="field-value"
+                                        style="font-family: monospace; letter-spacing: 0.1em;">-</span>
+                                </fieldset>
+                                <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
+                                    <fieldset class="glass-field-titanium glass-field-blue">
+                                        <legend class="field-label">Nascita</legend>
+                                        <span id="birth_date-view" class="field-value">-</span>
+                                    </fieldset>
+                                    <fieldset class="glass-field-titanium glass-field-blue">
+                                        <legend class="field-label">Luogo</legend>
+                                        <span id="birth_place-view" class="field-value">-</span>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
 
-                    <!-- RESIDENZA -->
-                    <div class="settings-item accordion-header" data-target="residenza-box">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-emerald-glass">
-                                <span class="material-symbols-outlined">home</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label">Residenza</span>
-                                <span class="settings-desc">Indirizzo e locazione</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="residenza-box" class="accordion-content">
-                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                            <div class="glass-field-titanium glass-field-emerald">
-                                <span class="field-label">Indirizzo</span>
-                                <span id="field-address-full" class="field-value">-</span>
-                            </div>
-                            <div class="glass-field-titanium glass-field-emerald">
-                                <span class="field-label">Città e CAP</span>
-                                <span id="field-city-full" class="field-value">-</span>
+                        <!-- RESIDENZA -->
+                        <div class="settings-item accordion-header" data-target="residenza-box">
+                            <div class="settings-item-header">
+                                <div class="settings-item-info">
+                                    <div class="settings-icon-box bg-emerald-glass">
+                                        <span class="material-symbols-outlined">home</span>
+                                    </div>
+                                    <div class="settings-text">
+                                        <span class="settings-label">Residenza</span>
+                                        <span class="settings-desc">Indirizzo e locazione</span>
+                                    </div>
+                                </div>
+                                <div class="settings-actions">
+                                    <span class="material-symbols-outlined settings-chevron">expand_more</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        <div id="residenza-box" class="accordion-content">
+                            <div id="indirizzi-view-container"
+                                style="display: flex; flex-direction: column; gap: 1rem;"></div>
+                        </div>
 
-                    <!-- CONTATTI -->
-                    <div class="settings-item accordion-header" data-target="contatti-box">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-rose-glass">
-                                <span class="material-symbols-outlined">call</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label">Contatti Digitali</span>
-                                <span class="settings-desc">Recapiti telefonici</span>
+                        <!-- CONTATTI -->
+                        <div class="settings-item accordion-header" data-target="contatti-box">
+                            <div class="settings-item-header">
+                                <div class="settings-item-info">
+                                    <div class="settings-icon-box bg-rose-glass">
+                                        <span class="material-symbols-outlined">call</span>
+                                    </div>
+                                    <div class="settings-text">
+                                        <span class="settings-label">Contatti Telefonici</span>
+                                        <span class="settings-desc">Recapiti telefonici</span>
+                                    </div>
+                                </div>
+                                <div class="settings-actions">
+                                    <span class="material-symbols-outlined settings-chevron">expand_more</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div id="contatti-box" class="accordion-content">
-                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                            <div class="glass-field-titanium glass-field-rose">
-                                <span class="field-label">Cellulare</span>
-                                <span id="mobile_private-view" class="field-value">-</span>
-                            </div>
-                            <div class="glass-field-titanium glass-field-rose">
-                                <span class="field-label">Fisso</span>
-                                <span id="phone_private-view" class="field-value">-</span>
+                        <div id="contatti-box" class="accordion-content">
+                            <div id="telefoni-view-container" style="display: flex; flex-direction: column; gap: 1rem;">
                             </div>
                         </div>
                     </div>
@@ -154,13 +275,18 @@
                     <h4 class="settings-group-title">Servizi & Documenti</h4>
 
                     <div class="settings-item accordion-header" data-target="utenze-box">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-amber-glass">
-                                <span class="material-symbols-outlined">bolt</span>
+                        <div class="settings-item-header">
+                            <div class="settings-item-info">
+                                <div class="settings-icon-box bg-amber-glass">
+                                    <span class="material-symbols-outlined">bolt</span>
+                                </div>
+                                <div class="settings-text">
+                                    <span class="settings-label" data-t="utenze_title">Utenze</span>
+                                    <span class="settings-desc">Luce, Gas, Acqua</span>
+                                </div>
                             </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="utenze_title">Utenze</span>
-                                <span class="settings-desc">Luce, Gas, Acqua</span>
+                            <div class="settings-actions">
+                                <span class="material-symbols-outlined settings-chevron">expand_more</span>
                             </div>
                         </div>
                     </div>
@@ -169,13 +295,18 @@
                     </div>
 
                     <div class="settings-item accordion-header" data-target="documenti-box">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-purple-glass">
-                                <span class="material-symbols-outlined">description</span>
+                        <div class="settings-item-header">
+                            <div class="settings-item-info">
+                                <div class="settings-icon-box bg-purple-glass">
+                                    <span class="material-symbols-outlined">description</span>
+                                </div>
+                                <div class="settings-text">
+                                    <span class="settings-label">Documenti</span>
+                                    <span class="settings-desc">CI, Patente, Passaporto</span>
+                                </div>
                             </div>
-                            <div class="settings-text">
-                                <span class="settings-label">Documenti Digitali</span>
-                                <span class="settings-desc">CI, Patente, Passaporto</span>
+                            <div class="settings-actions">
+                                <span class="material-symbols-outlined settings-chevron">expand_more</span>
                             </div>
                         </div>
                     </div>
@@ -185,13 +316,18 @@
                     </div>
 
                     <div class="settings-item accordion-header" data-target="emails-box">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-cyan-glass">
-                                <span class="material-symbols-outlined">mail</span>
+                        <div class="settings-item-header">
+                            <div class="settings-item-info">
+                                <div class="settings-icon-box bg-cyan-glass">
+                                    <span class="material-symbols-outlined">mail</span>
+                                </div>
+                                <div class="settings-text">
+                                    <span class="settings-label">Email</span>
+                                    <span class="settings-desc">Account e password</span>
+                                </div>
                             </div>
-                            <div class="settings-text">
-                                <span class="settings-label">Email Gestite</span>
-                                <span class="settings-desc">Account e password</span>
+                            <div class="settings-actions">
+                                <span class="material-symbols-outlined settings-chevron">expand_more</span>
                             </div>
                         </div>
                     </div>
@@ -202,7 +338,15 @@
 
                 <!-- GRUPPO NOTE -->
                 <div class="settings-group">
-                    <h4 class="settings-group-title">Note Anagrafica</h4>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 class="settings-group-title" style="margin: 0;">Note Anagrafica</h4>
+                        <button class="btn-icon-header"
+                            style="position: relative; width: 32px; height: 32px; right: auto;"
+                            onclick="window.editSection('note')">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span>
+                        </button>
+                    </div>
                     <div class="titanium-vault"
                         style="padding: 1.5rem; background: rgba(0,0,0,0.2); border-radius: 16px;">
                         <div id="note-view"
@@ -213,17 +357,7 @@
 
             </div> <!-- Fine Master Vault -->
 
-            <!-- 3. QR CODE (Esterno per focus visivo) -->
-            <div
-                style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 3rem; padding-bottom: 5rem;">
-                <div class="titanium-vault border-glow"
-                    style="padding: 1rem; background: white; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; border-radius: 20px;">
-                    <div id="qrcode"></div>
-                </div>
-                <span
-                    style="font-size: 0.6rem; font-weight: 800; letter-spacing: 0.2rem; color: var(--text-muted); text-transform: uppercase;">vCard
-                    Digital Profile</span>
-            </div>
+            <!-- 3. QR CODE REMOVED -->
 
         </main>
 
@@ -232,16 +366,15 @@
             <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
                 <span
                     style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V1.0
+                    Titanium Security Protocol V3.0
                 </span>
             </div>
         </footer>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/profilo_privato.js"></script>
+    <!-- Scripts con Cache Busting (Protocollo V3.0) -->
+    <script type="module" src="assets/js/main.js?v=3.1"></script>
+    <script type="module" src="assets/js/profilo_privato.js?v=3.1"></script>
 </body>
 
 </html>

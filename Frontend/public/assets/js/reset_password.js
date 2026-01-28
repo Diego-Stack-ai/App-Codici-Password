@@ -52,10 +52,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (err) {
                 console.error("Reset Error:", err);
+                if (window.showToast) window.showToast("Impossibile inviare email (Verifica l'indirizzo)", "error");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalContent;
             }
         });
     }
+
+    // Setup Language Selector
+    setupLanguageSelector();
 });
+
+import { supportedLanguages } from './translations.js';
+
+function setupLanguageSelector() {
+    const btn = document.getElementById('lang-toggle-btn');
+    const dropdown = document.getElementById('lang-dropdown');
+
+    if (!btn || !dropdown) return;
+
+    dropdown.innerHTML = supportedLanguages.map(lang => `
+        <button class="lang-option" data-code="${lang.code}" style="display:flex; align-items:center;">
+            <span class="flag" style="margin-right:8px;">${lang.flag}</span> ${lang.name}
+        </button>
+    `).join('');
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+        dropdown.classList.remove('show');
+    });
+
+    dropdown.querySelectorAll('.lang-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            const code = opt.getAttribute('data-code');
+            localStorage.setItem('app_language', code);
+            window.location.reload();
+        });
+    });
+}

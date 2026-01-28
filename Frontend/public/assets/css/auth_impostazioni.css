@@ -310,22 +310,25 @@ body {
 }
 
 .lang-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
+    position: relative;
+    /* Cambiato da absolute per far scendere i contenuti */
     width: 100%;
-    /* Largo quanto la pagina/container */
-    background: rgba(10, 15, 30, 0.9);
-    /* Vetro scuro ma traslucido */
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
-    padding: 0.6rem;
+    background: rgba(10, 15, 30, 0.6);
+    /* Leggermente più trasparente per integrarsi */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    /* Adattato raggio */
+    padding: 0.5rem;
     display: none;
     flex-direction: column;
     gap: 4px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(30px);
-    z-index: 1000;
+    box-shadow: none;
+    /* Rimosso ombra pesante dropdown */
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    /* Z-index basso basta se non è absolute */
+    margin-top: 1rem;
+    /* Spazio dall'header */
 }
 
 .lang-dropdown.show {
@@ -338,7 +341,8 @@ body {
    ========================================================================== */
 /* Container principale */
 .settings-container {
-    max-width: 800px;
+    max-width: 1000px;
+    /* Aumentato da 800px per più spazio */
     width: 95%;
     margin: 0 auto;
     padding: calc(var(--header-height) + 1.5rem) 1.25rem 5rem 1.25rem;
@@ -349,6 +353,8 @@ body {
     flex-direction: column;
     gap: 0.75rem;
 }
+
+
 
 /* Vault Wrapper (Svuotato per lasciare spazio alle singole card) */
 .settings-vault {
@@ -409,8 +415,17 @@ body {
     justify-content: space-between;
 }
 
+/* Rimosso effetto shimmer continuo dalle card secondarie per pulizia visuale */
 .settings-item::after {
     content: none;
+}
+
+/* Assicuro che il contenuto stia sopra */
+.settings-item-header,
+.settings-item-info,
+.accordion-content {
+    position: relative;
+    z-index: 2;
 }
 
 .settings-item:hover {
@@ -462,7 +477,34 @@ body {
     gap: 1.5rem;
     text-align: center;
     overflow: hidden;
+    position: relative;
+    /* Necessario per after */
     /* Fix angoli visibili */
+}
+
+/* EFFETTO SAETTA / SHIMMER */
+.profile-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.08) 50%, transparent 65%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    animation: shimmer-master 4s infinite linear;
+    z-index: 1;
+    /* Sopra background, sotto content */
+    border-radius: inherit;
+    /* Segue il bordo della card */
+}
+
+/* Assicuro che il contenuto stia sopra la luce */
+.profile-info,
+.avatar-wrapper {
+    position: relative;
+    z-index: 2;
 }
 
 .profile-info {
@@ -477,8 +519,6 @@ body {
     width: 100px;
     height: 100px;
     border-radius: 30px;
-    /* padding: 3px; */
-    /* background: var(--premium-border-gradient); */
     box-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
     overflow: hidden;
     /* Fix angoli visibili */
@@ -488,6 +528,8 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 27px;
+    object-fit: cover;
+    /* Fix per tag IMG */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -667,20 +709,50 @@ body {
     gap: 1rem;
     min-height: 3rem;
     transition: all 0.2s;
+    /* Reset per fieldset */
+    margin: 0;
+    min-inline-size: min-content;
+}
+
+/* Stile specifico se è un FIELDSET */
+fieldset.glass-field-titanium {
+    display: block;
+    /* Flex su fieldset è buggato */
+    padding: 0.5rem 1rem 0.8rem 1rem;
+    padding-top: 0.6rem;
 }
 
 .glass-field-titanium .field-label {
-    position: absolute;
-    top: -8px;
-    left: 12px;
+    /* Base style */
     font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 0 6px;
-    background: #111e3d;
-    /* Fondo solido per interrompere il bordo */
     line-height: 1;
+}
+
+/* OLD DIV STYLE */
+div.glass-field-titanium .field-label {
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    background: transparent;
+}
+
+/* NEW FIELDSET STYLE */
+legend.field-label {
+    width: auto;
+    margin-left: 4px;
+    color: inherit;
+    float: none;
+    display: table;
+}
+
+.glass-field-titanium .field-value {
+    display: block;
+    /* Importante per fieldset */
+    margin-top: 0.2rem;
 }
 
 .field-value {
@@ -740,6 +812,12 @@ body {
     color: #22d3ee;
 }
 
+.glass-field-cyan .field-value {
+    font-size: 0.8rem;
+    /* Riduzione font per email lunghe */
+    word-break: break-all;
+}
+
 /* ACCORDION REFINEMENT */
 .accordion-header {
     cursor: pointer;
@@ -788,4 +866,16 @@ body {
         gap: 1rem;
         align-items: flex-start;
     }
+}
+
+/* FIX DROPDOWN VISIBILITY */
+#lang-btn {
+    overflow: visible !important;
+    position: relative;
+    /* Ensure positioning context */
+}
+
+/* Ensure dropdown is on top */
+.lang-dropdown {
+    z-index: 9999 !important;
 }

@@ -119,6 +119,11 @@ function setupLoginForm() {
             btn.innerHTML = originalContent;
             document.body.classList.remove('is-auth-loading');
             console.error("Login Flow Interrupted:", err);
+
+            // Protocollo V3: Feedback Utente
+            const errorMsg = t('login_error') || "Credenziali non valide o errore di connessione.";
+            if (window.showToast) window.showToast(errorMsg, 'error');
+            else alert(errorMsg); // Fallback estremo
         }
     });
 }

@@ -20,6 +20,7 @@
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js"></script>
     <script src="assets/js/titanium-core.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> <!-- CDN Fix -->
 </head>
 
 <body class="antialiased">
@@ -41,10 +42,34 @@
 
             <!-- SEZIONE PROFILO -->
             <div class="titanium-vault border-glow profile-card">
-                <div class="avatar-wrapper">
-                    <div id="user-avatar-settings" class="avatar-main"
-                        style="background-image: url('assets/images/user-avatar-5.png');"></div>
+                <!-- Wrapper Orizzontale Avatar + QR -->
+                <div style="display: flex; gap: 1.5rem; align-items: center; justify-content: center; width: 100%;">
+
+                    <!-- Avatar -->
+                    <div class="avatar-wrapper">
+                        <div id="user-avatar-settings" class="avatar-main"
+                            style="background-image: url('assets/images/user-avatar-5.png');"></div>
+                    </div>
+
+                    <!-- QR Code System (Relative per posizionamento lente) -->
+                    <div style="position: relative; width: 100px; height: 100px;">
+
+                        <!-- QR Box -->
+                        <div id="qrcode-settings" class="titanium-vault"
+                            style="width: 100%; height: 100%; padding: 5px; background: white; border-radius: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(255,255,255,0.1);">
+                            <!-- Generato da JS -->
+                        </div>
+
+                        <!-- Lente Zoom (Absolute Bottom-Right Corner) -->
+                        <button onclick="window.showQrModal()"
+                            style="position: absolute; bottom: -8px; right: -8px; background: #3b82f6; border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10;">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 1rem; color: white;">zoom_in</span>
+                        </button>
+                    </div>
+
                 </div>
+
                 <div class="profile-info" style="width: 100%;">
                     <h3 id="user-name-settings" class="auth-title" data-t="loading">Caricamento...</h3>
                     <button onclick="window.location.href='profilo_privato.html'" class="auth-btn"
@@ -254,7 +279,7 @@
             <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
                 <span
                     style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Secure Vault V1.0
+                    Titanium Security Protocol V3.0
                 </span>
             </div>
         </footer>
@@ -267,8 +292,8 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/impostazioni.js"></script>
+    <script type="module" src="assets/js/main.js?v=3.0"></script>
+    <script type="module" src="assets/js/impostazioni.js?v=3.0"></script>
 </body>
 
 </html>
