@@ -107,47 +107,9 @@ ________________________________________
 
 ________________________________________
 
-### Regola 14 – Registro Pagine Metodo Titanium
+### Regola 14 – Registro Pagine (Spostato)
+*   Il monitoraggio dello stato di avanzamento delle pagine è ora gestito nel file dedicato: `STATO_PROGETTO.md`.
 
-Monitoraggio dello stato di avanzamento.
-🔴 DA FARE |  INCOMPLETA (Dual Theme Req.) | 🟢 COMPLETATA
-
-| # | Stato | Nome Pagina | Effetti Addizionali (ID) | Palette / Colori |
-| :--- | :--- | :--- | :--- | :--- |
-| 1 | 🟢 COMPLETATA | `index.html` (Login) | 9, 19, 20, 21 | Fusion Blue |
-| 2 | 🟢 COMPLETATA | `registrati.html` | 9, 19, 20, 21 | Fusion Blue |
-| 3 | 🟢 COMPLETATA | `reset_password.html` | 9, 19, 20, 21 | Fusion Blue |
-| 4 | 🟢 COMPLETATA | `imposta_nuova_password.html` | 9, 19, 20, 21 | Fusion Blue |
-| 5 | 🔴 DA FARE | `account_azienda.html` | Titanium Frame | Beacon (4s) | Premium | Matrix Interno |
-| 6 | 🟠 INCOMPLETA | `account_privati.html` | 1, 2 | 3 | 4, 5, 6, 9, 10, 13 | **Titanium Glass Cards** |
-| 7 | 🔴 DA FARE | `aggiungi_account_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 8 | 🟠 INCOMPLETA | `aggiungi_account_privato.html` | Titanium Frame | Beacon (4s) | Standard | Palette Standard |
-| 9 | 🔴 DA FARE | `dati_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Info Grid |
-| 10 | 🔴 DA FARE | `lista_aziende.html` | Titanium Frame | Beacon (4s) | Standard | Matrix List |
-| 11 | 🔴 DA FARE | `modifica_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Edit Grid |
-| 12 | 🔴 DA FARE | `area_privata.html` | Titanium Frame | Beacon (4s) | Dashboard | Matrix Home |
-| 13 | 🔴 DA FARE | `dati_anagrafici_privato.html` | Titanium Frame | Beacon (4s) | Standard | Info Grid |
-| 14 | 🔴 DA FARE | `aggiungi_nuova_azienda.html` | Titanium Frame | Beacon (4s) | Standard | Form Matrix |
-| 15 | 🔴 DA FARE | `dettaglio_scadenza.html` | Titanium Frame | Beacon (4s) | Amber | Detail View |
-| 16 | 🔴 DA FARE | `aggiungi_scadenza.html` | Titanium Frame | Beacon (4s) | Standard | Form Matrix |
-| 17 | 🔴 DA FARE | `archivio_account.html` | Titanium Frame | Beacon (4s) | Standard | Matrix List |
-| 18 | 🟢 COMPLETATA | `home_page.html` | 3, 9, 10, 15, 23 | Matrix Dashboard |
-| 19 | 🟠 INCOMPLETA | `scadenze.html` | 6, 9, 10, 13 | **Scadenze** |
-| 20 | 🟠 INCOMPLETA | `lista_aziende.html` | Standard | Palette Standard |
-| 21 | 🟠 INCOMPLETA | `archivio_account.html` | 6, 9, 10 | Matrix Sidebar |
-| 22 | 🟢 COMPLETATA | `impostazioni.html` | 3, 6, 9, 10, 23 | Fusion Blue |
-| 23 | 🟢 COMPLETATA | `regole_scadenze_veicoli.html` | 6, 9, 10, 23 | Dark Menu Glow |
-| 24 | 🟢 COMPLETATA | `configurazione_automezzi.html` | 6, 9, 10, 23 | Form Input Glass |
-| 25 | 🟢 COMPLETATA | `configurazione_documenti.html` | 6, 9, 10, 23 | Form Input Glass |
-| 26 | 🟢 COMPLETATA | `configurazione_generali.html` | 6, 9, 10, 23 | Form Input Glass |
-| 27 | 🔴 DA FARE | `privacy.html` | Titanium Frame | Beacon (4s) | Standard | Glass Read-Only |
-| 28 | 🔴 DA FARE | `gestione_scadenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Matrix Scadenze |
-| 29 | 🔴 DA FARE | `gestione_urgenze.html` | Titanium Frame | Beacon (4s) | Dinamico | Red Glow Matrix |
-| 30 | 🔴 DA FARE | `gestione_memorandum.html` | Titanium Frame | Beacon (4s) | Standard | Memo Matrix |
-| 31 | 🔴 DA FARE | `gestione_memo_condivisi.html` | Titanium Frame | Beacon (4s) | Standard | Memo Shared Matrix |
-| 32 | 🔴 DA FARE | `lista_contatti.html` | Titanium Frame | Beacon (4s) | Standard | Icone Contatti |
-| 33 | 🟠 INCOMPLETA | `notifiche_history.html` | 1, 2 | 3 | 4, 5 | Fusion Blue |
-| 34 | 🟠 INCOMPLETA | `dettaglio_account_privato.html` | 1, 2 | 3 | 4, 5, 6, 9, 10 | **Titanium Glass Fields** |
 
 ________________________________________
 

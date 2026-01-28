@@ -1,18 +1,15 @@
 <!DOCTYPE html>
-<html class="titanium-forced-dark dark" lang="it">
+<html lang="it" class="titanium-forced-dark">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
     <title>Codici & Password - Accedi</title>
+
     <link rel="manifest" href="manifest.json?v=5.7" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="App Codici">
-    <meta name="application-name" content="App Codici">
+
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap"
@@ -20,121 +17,92 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/titanium.css?v=5.7">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- TITANIUM AUTH SYSTEM V6.0 (Pure CSS) -->
+    <link rel="stylesheet" href="assets/css/auth_accesso.css?v=6.0">
 </head>
 
-<body class="titanium-bg antialiased">
-    <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
+<body>
+
     <div class="titanium-box">
 
-        <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="glass-glow"></div>
-
-        <!-- 4. HEADER PLACEHOLDER -->
-        <div id="header-placeholder"></div>
-
-        <!-- Main Content -->
-        <main class="titanium-main !items-center !justify-center">
-
-            <!-- Login Card (Il Box Campi) -->
-            <div class="titanium-vault border-glow group">
-
-
-                <!-- Glow Overlay -->
-                <div
-                    class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[24px] pointer-events-none z-10">
-                </div>
-
-                <div class="px-8 pt-10 pb-10 relative z-10">
-                    <!-- Icon Section -->
-                    <div class="flex justify-center mb-8">
-                        <div
-                            class="h-20 w-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center shadow-2xl shadow-blue-500/20 ring-1 ring-white/20 relative border-glow group-hover:scale-110 transition-transform duration-500">
-                            <span
-                                class="material-symbols-outlined text-white text-[36px] drop-shadow-lg">security</span>
-                        </div>
-                    </div>
-
-                    <h1 class="text-3xl font-extrabold text-white text-center mb-1 select-none group-hover:translate-x-1 transition-transform duration-500"
-                        data-t="login_title">
-                        Accedi</h1>
-                    <p class="text-xs text-white/40 text-center mb-6 uppercase tracking-widest select-none font-bold"
-                        data-t="login_subtitle">
-                        Protocollo Titanium v5.7</p>
-
-                    <!-- REGOLA 5 - AIUTO BASE INFORMATIVA (Semantica Enterprise) -->
-                    <p data-ui="hint" class="mb-10" data-t="login_hint">
-                        Inserisci le tue credenziali autorizzate per sbloccare l'accesso al sistema.
-                    </p>
-
-                    <form id="login-form" class="space-y-6">
-                        <div class="space-y-2">
-                            <label
-                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none"
-                                data-t="username_label">Username</label>
-                            <input id="email" name="username" type="email" autocomplete="username"
-                                placeholder="Email o Username" required
-                                class="w-full h-14 px-5 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base"
-                                data-t="username_placeholder">
-                        </div>
-
-                        <div class="space-y-2">
-                            <label
-                                class="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] ml-1 select-none"
-                                data-t="password_label">Password</label>
-                            <div class="relative group">
-                                <!-- TYPE PASSWORD + AUTOCOMPLETE per FaceID -->
-                                <input id="password" name="password" type="password" autocomplete="current-password"
-                                    placeholder="********" required
-                                    class="w-full h-14 px-5 pr-14 rounded-xl border border-white/10 bg-black/40 text-white shadow-inner focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-white/10 text-base">
-                                <button type="button"
-                                    class="toggle-password absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
-                                    <span class="material-symbols-outlined text-[20px] select-none">visibility</span>
-                                </button>
-                            </div>
-                            <div class="flex justify-end px-1 pt-1">
-                                <a href="reset_password.html"
-                                    class="text-[10px] font-bold text-white/50 hover:text-blue-400 uppercase tracking-widest transition-colors"
-                                    data-t="forgot_password">Password
-                                    dimenticata?</a>
-                            </div>
-                        </div>
-
-                        <button type="submit" data-login-submit
-                            class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-extrabold rounded-2xl shadow-xl transition-all active:scale-[0.98] border-glow group/btn overflow-hidden">
-                            <div class="relative z-10 flex items-center justify-center gap-2">
-                                <span class="tracking-widest uppercase text-xs"
-                                    data-t="auth_button">Autenticazione</span>
-                                <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            </div>
-                        </button>
-                    </form>
-
-                    <div class="mt-8 text-center select-none">
-                        <a href="registrati.html"
-                            class="text-[10px] font-bold text-blue-400 hover:text-white transition-colors uppercase tracking-widest font-extrabold"
-                            data-t="register_link">Registrazione
-                            nuovo utente</a>
-                    </div>
-                </div>
+        <!-- LANGUAGE SELECTOR -->
+        <div class="lang-selector-container">
+            <button class="lang-btn-float" id="lang-toggle-btn">
+                <span class="material-symbols-outlined" style="font-size: 18px;">language</span>
+                <span class="lang-label" data-t="language">Lingua</span>
+                <span class="material-symbols-outlined" style="font-size: 16px;">expand_more</span>
+            </button>
+            <div class="lang-dropdown" id="lang-dropdown">
+                <!-- JS will populate this -->
             </div>
-        </main>
+        </div>
 
-        <!-- 5. FOOTER PLACEHOLDER -->
-        <div id="footer-placeholder"></div>
+        <!-- Scenografia -->
+        <div class="glass-glow"></div>
+        <div class="auth-header"></div>
+        <div class="auth-footer"></div>
 
-        <!-- Standard Titanium Toast Container -->
-        <div id="toast-container"
-            class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-6 py-4 bg-[#0a0f1e]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-500 pointer-events-none">
-            <span id="toast-icon" class="material-symbols-outlined"></span>
-            <span id="toast-message" class="text-xs font-bold uppercase tracking-widest text-white"></span>
+        <!-- Card Login -->
+        <div class="titanium-vault border-glow">
+
+            <!-- Icona -->
+            <div class="security-icon-box">
+                <span class="material-symbols-outlined">security</span>
+            </div>
+
+            <!-- Titoli -->
+            <h1 class="auth-title" data-t="login_title">Accedi</h1>
+            <p class="auth-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
+
+            <!-- Form -->
+            <form id="login-form">
+
+                <!-- Email -->
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="username_label">Username</label>
+                    <input id="email" name="username" type="email" autocomplete="username" required class="auth-input"
+                        data-t="username_placeholder" placeholder="Email o Username">
+                </div>
+
+                <!-- Password -->
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="password_label">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required
+                        class="auth-input" placeholder="********">
+
+                    <button type="button" class="toggle-password">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+
+                    <a href="reset_password.html" class="link-forgot" data-t="forgot_password">Password dimenticata?</a>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" data-login-submit class="auth-btn" data-t="auth_button">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">login</span>
+                    Accedi
+                </button>
+
+            </form>
+
+            <!-- Register Link -->
+            <a href="registrati.html" class="link-register" data-t="register_link">
+                Registrazione nuovo utente
+            </a>
+
+            <!-- Footer Legale -->
+            <div class="legal-footer">
+                © 2026 BM Service S.R.L. - <span data-t="version">Titanium V6.0</span>
+            </div>
+
         </div>
     </div>
 
     <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/login.js"></script>
+
 </body>
 
 </html>

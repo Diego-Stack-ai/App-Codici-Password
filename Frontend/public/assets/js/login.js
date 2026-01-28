@@ -1,74 +1,145 @@
 import { login, checkAuthState } from './auth.js';
 import { initComponents } from './components.js';
-import { t } from './translations.js';
+import { t, supportedLanguages } from './translations.js';
 
 /**
  * LOGIN PAGE MODULE
  * Gestisce l'autenticazione e l'inizializzazione della pagina index.html
  */
 
-// Traduzione statica immediata
-// Traduzione statica immediata
 document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. TRADUZIONI (Immediata)
+    updatePageTranslations();
+
+    // 2. INIZIALIZZAZIONE COMPONENTI (Regola 17)
+    initComponents();
+
+    // 3. CHECK AUTH (Redirect se già loggato)
+    checkAuthState();
+
+    // 4. SETUP FORM
+    setupLoginForm();
+
+    // 5. SETUP TOGGLE PASSWORD (Locale e blindato)
+    setupPasswordToggle();
+
+    // 6. SETUP LANGUAGE SELECTOR
+    setupLanguageSelector();
+});
+
+function updatePageTranslations() {
     document.querySelectorAll('[data-t]').forEach(el => {
         const key = el.getAttribute('data-t');
         if (el.hasAttribute('placeholder')) {
             el.setAttribute('placeholder', t(key));
         } else {
-            el.textContent = t(key);
+            el.textContent = t(key); // Ricarica il testo
         }
     });
-});
+}
 
-// 1. Inizializzazione Componenti Standard (Regola 17)
-initComponents();
+/**
+ * Gestione Selettore Lingua Login
+ */
+function setupLanguageSelector() {
+    const btn = document.getElementById('lang-toggle-btn');
+    const dropdown = document.getElementById('lang-dropdown');
 
-// 2. Controllo stato autenticazione (Redirect se già loggato)
-checkAuthState();
+    if (!btn || !dropdown) return;
 
-// 3. Gestione Form di Login
-document.addEventListener('DOMContentLoaded', () => {
+    // Popola Opzioni
+    dropdown.innerHTML = supportedLanguages.map(lang => `
+        <button class="lang-option" data-code="${lang.code}">
+            <span class="flag">${lang.flag}</span> ${lang.name}
+        </button>
+    `).join('');
+
+    // Toggle Dropdown
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+    });
+
+    // Chiudi cliccando fuori
+    document.addEventListener('click', () => {
+        dropdown.classList.remove('show');
+    });
+
+    // Selezione Lingua
+    dropdown.querySelectorAll('.lang-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            const code = opt.getAttribute('data-code');
+            localStorage.setItem('app_language', code);
+
+            // Aggiorna traduzioni al volo
+            updatePageTranslations();
+        });
+    });
+}
+
+/**
+ * Gestione logica del form di login
+ */
+function setupLoginForm() {
     const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    if (!loginForm) return;
 
-            // SEMAforo ENTERPRISE: Hook di stato globale (Regola 10/10)
-            document.body.classList.add('is-auth-loading');
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            // Fix per evitare zoom tastiera su iOS e pulire la vista
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            if (emailInput) emailInput.blur();
-            if (passwordInput) passwordInput.blur();
-            window.scrollTo(0, 0);
+        // SEMAforo ENTERPRISE: Hook di stato globale (Regola 10/10)
+        document.body.classList.add('is-auth-loading');
 
-            const email = emailInput.value;
-            const password = passwordInput.value;
+        // Fix per evitare zoom tastiera su iOS e pulire la vista
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        if (emailInput) emailInput.blur();
+        if (passwordInput) passwordInput.blur();
+        window.scrollTo(0, 0);
 
-            // Selezione Semantica (Regola 22)
-            const btn = loginForm.querySelector('[data-login-submit]');
-            const originalContent = btn.innerHTML;
+        const email = emailInput.value;
+        const password = passwordInput.value;
 
-            try {
-                // Feedback visivo caricamento
-                btn.disabled = true;
-                btn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+        // Selezione Semantica (Regola 22)
+        const btn = loginForm.querySelector('[data-login-submit]');
+        const originalContent = btn.innerHTML;
 
-                // Tentativo di Login
-                await login(email, password);
+        try {
+            // Feedback visivo caricamento
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
 
-            } catch (err) {
-                // Ripristino in caso di errore (incluso email non verificata)
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
-                document.body.classList.remove('is-auth-loading');
+            // Tentativo di Login
+            await login(email, password);
 
-                // Se l'errore è la verifica email, la notifica è già inviata da auth.js via Toast o Alert
-                console.error("Login Flow Interrupted:", err);
+        } catch (err) {
+            // Ripristino in caso di errore
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+            document.body.classList.remove('is-auth-loading');
+            console.error("Login Flow Interrupted:", err);
+        }
+    });
+}
+
+/**
+ * Gestione visibilità password per pagina Auth
+ */
+function setupPasswordToggle() {
+    const toggleBtn = document.querySelector('.toggle-password');
+    const passInput = document.getElementById('password');
+
+    if (toggleBtn && passInput) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Previene submit accidentali
+            const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passInput.setAttribute('type', type);
+            // Cambio icona Google Material (visibility / visibility_off)
+            const icon = toggleBtn.querySelector('.material-symbols-outlined');
+            if (icon) {
+                icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
             }
         });
     }
-
-    // Nota: Il Toggle visibilità password è ora gestito globalmente da ui-components.js
-});
+}

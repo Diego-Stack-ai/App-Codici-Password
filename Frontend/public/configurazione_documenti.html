@@ -1,187 +1,207 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="titanium-forced-dark">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-t="documents_config_title">Configurazione Documenti - Protocollo Titanium</title>
+    <title data-t="documents_config_title">Configurazione Documenti - Titanium Account</title>
 
-    <!-- Titanium Engine Stack -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <!-- Design System Master (Solo Account) -->
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
+
+    <!-- CSS specifico per tabelle -->
+    <style>
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .divide-y>*+* {
+            border-top-width: 1px;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .filled {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+
+    <!-- Core Engine -->
     <script src="assets/js/titanium-config.js"></script>
-    <!-- Design System Master -->
-    <link rel="stylesheet" href="assets/css/titanium.css">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="assets/js/titanium-core.js"></script>
 </head>
 
-<body class="titanium-bg antialiased">
+<body class="antialiased">
     <div class="titanium-box">
+        <!-- Faro Estetico -->
         <div class="glass-glow"></div>
 
-        <!-- HEADER INIETTATO DA JS -->
-        <div id="header-placeholder"></div>
-
-        <main class="titanium-main">
-
-            <!-- Section: Tipo Documento -->
-            <section
-                class="group relative rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-amber-500/30">
-
-                <div class="glass-shine"></div>
-                <div onclick="toggleSection('types')"
-                    class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <h3
-                        class="font-bold text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">mail</span> <span
-                            data-t="section_doc_type">Tipo Documento</span>
-                    </h3>
-                    <div class="flex items-center gap-3 relative z-10">
-                        <button onclick="event.stopPropagation(); window.addTypeItem()"
-                            class="size-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all shadow-sm border border-amber-500/20 active:scale-90">
-                            <span class="material-symbols-outlined text-[20px]">add</span>
-                        </button>
-                        <span id="icon_types"
-                            class="material-symbols-outlined text-gray-400 dark:text-white/30 toggle-arrow text-[24px]">expand_more</span>
-                    </div>
+        <!-- HEADER FISSO -->
+        <header class="titanium-header">
+            <div id="header-content" class="header-stack">
+                <h2 class="header-title" data-t="documents_config_title">CONFIGURAZIONE DOCUMENTI</h2>
+                <div style="position: absolute; left: 0; display: flex; gap: 0.5rem;">
+                    <a href="regole_scadenze.html" class="btn-icon-header" style="position: relative;">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
                 </div>
-                <!-- Description -->
-                <div class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5"
-                    data-t="section_doc_desc">
-                    Configura i tipi (es. "Patente") con Preavviso e Replica.
+                <div style="position: absolute; right: 0; display: flex; gap: 0.5rem;">
+                    <a href="home_page.html" class="btn-icon-header" style="position: relative;">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
                 </div>
-                <div id="container_types"
-                    class="hidden bg-slate-50 dark:bg-black/40 relative z-20 border-t border-slate-200 dark:border-white/5">
-                    <table class="w-full text-xs">
-                        <tbody id="tbody_types" class="divide-y divide-slate-200 dark:divide-white/5"></tbody>
-                    </table>
-                </div>
-            </section>
+            </div>
+        </header>
 
-            <!-- Section: Info Documento -->
-            <section
-                class="group relative rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-amber-500/30">
+        <main class="settings-container no-select">
 
-                <div class="glass-shine"></div>
-                <div onclick="toggleSection('models')"
-                    class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <h3
-                        class="font-bold text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">badge</span> <span
-                            data-t="section_doc_data_owner">Dati & Proprietario</span>
-                    </h3>
+            <div class="settings-group">
+                <h4 class="settings-group-title">Logica Notifiche</h4>
 
-                    <div class="flex items-center gap-3 relative z-10">
-                        <button onclick="event.stopPropagation(); window.addDocumentDetail()"
-                            class="size-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all shadow-sm border border-amber-500/20 active:scale-90">
-                            <span class="material-symbols-outlined text-[20px]">add</span>
-                        </button>
-                        <span id="icon_models"
-                            class="material-symbols-outlined text-gray-400 dark:text-white/30 toggle-arrow text-[24px]">expand_more</span>
-                    </div>
-                </div>
-                <!-- Description -->
-                <div class="relative z-20 px-4 pb-3 text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed border-b border-slate-200 dark:border-white/5"
-                    data-t="section_doc_data_desc">
-                    Formato: Numero - Tipo - Proprietario
-                    (Es. "AH12345 - Patente - Rossi Mario")
-                </div>
-                <div id="container_models"
-                    class="hidden bg-slate-50 dark:bg-black/40 relative z-20 border-t border-slate-200 dark:border-white/5">
-                    <table class="w-full text-xs">
-                        <tbody id="tbody_models" class="divide-y divide-slate-200 dark:divide-white/5"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Section: Testo Email -->
-            <section
-                class="group relative rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] border border-slate-200 dark:border-white/10 hover:border-amber-500/30">
-
-                <div class="glass-shine"></div>
-                <div onclick="toggleSection('templates')"
-                    class="relative z-20 p-4 flex justify-between items-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                    <h3
-                        class="font-bold text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px] filled">description</span> <span
-                            data-t="section_email_template">Template Email</span>
-                    </h3>
-                    <div class="flex items-center gap-3 relative z-10">
-                        <button
-                            onclick="event.stopPropagation(); addItem('emailTemplates', document.documentElement.lang === 'it' ? 'Nuovo Testo Email:' : 'New Email Text:')"
-                            class="size-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all shadow-sm border border-amber-500/20 active:scale-90">
-                            <span class="material-symbols-outlined text-[20px]">add</span>
-                        </button>
-                        <span id="icon_templates"
-                            class="material-symbols-outlined text-gray-400 dark:text-white/30 toggle-arrow text-[24px]">expand_more</span>
-                    </div>
-                </div>
-                <div id="container_templates"
-                    class="hidden border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/40 relative z-20">
-                    <table class="w-full text-xs">
-                        <tbody id="tbody_templates" class="divide-y divide-slate-200 dark:divide-white/5"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Section: Sintassi Automatica -->
-            <div class="pt-4">
-                <div class="flex items-center gap-2 px-1 mb-2">
-                    <span
-                        class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[20px] filled">info</span>
-                    <h3 class="text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest"
-                        data-t="section_syntax_title">
-                        Sintassi Automatica
-                    </h3>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-inner relative group transition-all duration-300 hover:border-amber-500/20">
-                    <div class="space-y-4 text-[12px] leading-relaxed">
-                        <div>
-                            <p
-                                class="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
-                                <span class="size-1 bg-amber-500 rounded-full"></span> <span
-                                    data-t="syntax_subject_generated">Oggetto Email Generato</span>
-                            </p>
-                            <div
-                                class="font-mono text-[13px] text-amber-800 dark:text-amber-100 bg-amber-500/5 rounded-lg p-3 border border-amber-500/10">
-                                <span class="opacity-40" data-t="syntax_expires_capital">"Scade"</span> + <span
-                                    class="text-amber-600 dark:text-amber-400">[Oggetto]</span>
-                                + <span class="opacity-40" data-t="syntax_number_lower">"numero"</span> + <span
-                                    class="text-gray-700 dark:text-white/80">[Doc]</span>
+                <!-- 1. Tipo Documento -->
+                <div class="settings-item accordion-header" data-target="container_types" style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-emerald-glass">
+                                <span class="material-symbols-outlined filled">mail</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="section_doc_type">Tipo Documento</span>
+                                <span class="settings-desc" data-t="section_doc_desc">Configura i tipi con
+                                    Preavviso.</span>
                             </div>
                         </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button onclick="event.stopPropagation(); window.addTypeItem()" class="btn-icon-header"
+                                style="width: 32px; height: 32px; position: relative; border-radius: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 1.2rem;">add</span>
+                            </button>
+                            <span id="icon_types" class="material-symbols-outlined settings-chevron">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="container_types" class="accordion-content"
+                    style="display: none; padding: 0; overflow: hidden; background: rgba(0,0,0,0.2);">
+                    <table class="w-full text-xs">
+                        <tbody id="tbody_types"></tbody>
+                    </table>
+                </div>
 
-                        <div>
-                            <p
-                                class="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
-                                <span class="size-1 bg-amber-500 rounded-full"></span> <span
-                                    data-t="syntax_body_generated">Corpo Email Generato</span>
-                            </p>
-                            <div
-                                class="font-mono text-[13px] text-amber-800 dark:text-amber-100 bg-amber-500/5 rounded-lg p-3 border border-amber-500/10">
-                                <span class="opacity-40" data-t="syntax_hello">"Ciao"</span> + <span
-                                    class="text-gray-700 dark:text-white/80">[Nome]</span> +
-                                <span class="text-amber-600 dark:text-amber-400">[Oggetto]</span> + <span
-                                    class="opacity-40" data-t="syntax_in_date">"in
-                                    data"</span> + <span class="text-amber-700 dark:text-amber-300">[Data]</span>
+                <!-- 2. Dati & Proprietario -->
+                <div class="settings-item accordion-header" data-target="container_models" style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-amber-glass">
+                                <span class="material-symbols-outlined filled">badge</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="section_doc_data_owner">Dati & Proprietario</span>
+                                <span class="settings-desc" data-t="section_doc_data_desc">Numero - Tipo -
+                                    Proprietario</span>
                             </div>
                         </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button onclick="event.stopPropagation(); window.addDocumentDetail()"
+                                class="btn-icon-header"
+                                style="width: 32px; height: 32px; position: relative; border-radius: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 1.2rem;">add</span>
+                            </button>
+                            <span id="icon_models" class="material-symbols-outlined settings-chevron">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="container_models" class="accordion-content"
+                    style="display: none; padding: 0; overflow: hidden; background: rgba(0,0,0,0.2);">
+                    <table class="w-full text-xs">
+                        <tbody id="tbody_models" class="divide-y"></tbody>
+                    </table>
+                </div>
 
-                        <div class="flex items-start gap-2 pt-2 opacity-40">
-                            <span
-                                class="material-symbols-outlined text-gray-900 dark:text-white text-[14px]">tips_and_updates</span>
-                            <p class="text-[10px] italic leading-tight text-gray-900 dark:text-white"
-                                data-t="syntax_note">
-                                Regole valide solo se l'oggetto corrisponde a quelli configurati nelle liste superiori.
-                            </p>
+                <!-- 3. Template Email -->
+                <div class="settings-item accordion-header" data-target="container_templates" style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-purple-glass">
+                                <span class="material-symbols-outlined filled">description</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="section_email_template">Template Email</span>
+                                <span class="settings-desc">Testo personalizzato per l'invio</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <button
+                                onclick="event.stopPropagation(); window.addItem('emailTemplates', document.documentElement.lang === 'it' ? 'Nuovo Testo Email:' : 'New Email Text:')"
+                                class="btn-icon-header"
+                                style="width: 32px; height: 32px; position: relative; border-radius: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 1.2rem;">add</span>
+                            </button>
+                            <span id="icon_templates"
+                                class="material-symbols-outlined settings-chevron">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="container_templates" class="accordion-content"
+                    style="display: none; padding: 0; overflow: hidden; background: rgba(0,0,0,0.2);">
+                    <table class="w-full text-xs">
+                        <tbody id="tbody_templates" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sintassi Automatica -->
+            <div class="settings-group">
+                <h4 class="settings-group-title" data-t="section_syntax_title">Sintassi Automatica</h4>
+                <div class="titanium-vault" style="padding: 1.5rem; background: rgba(0,0,0,0.2); border-radius: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.8rem;">
+                        <div>
+                            <p style="color: var(--text-muted); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem;"
+                                data-t="syntax_subject_generated">Oggetto Email Generato</p>
+                            <div
+                                style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 10px; font-family: monospace;">
+                                <span style="opacity: 0.5;">"Scade"</span> + <span
+                                    style="color: #10b981;">[Oggetto]</span> + <span
+                                    style="opacity: 0.5;">"numero"</span> + [Doc]
+                            </div>
+                        </div>
+                        <div>
+                            <p style="color: var(--text-muted); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem;"
+                                data-t="syntax_body_generated">Corpo Email Generato</p>
+                            <div
+                                style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 10px; font-family: monospace;">
+                                <span style="opacity: 0.5;">"Ciao"</span> + [Nome] + <span
+                                    style="color: #10b981;">[Oggetto]</span> + <span style="opacity: 0.5;">"in
+                                    data"</span> + <span style="color: #fbbf24;">[Data]</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </main>
 
-        <!-- FOOTER INIETTATO DA JS -->
-        <div id="footer-placeholder"></div>
+        <!-- FOOTER PREMIUM -->
+        <footer class="titanium-footer">
+            <div style="opacity: 0.3; text-align: center;">
+                <span
+                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
+                    Titanium Security Protocol V1.0
+                </span>
+            </div>
+        </footer>
     </div>
 
     <!-- Scripts -->

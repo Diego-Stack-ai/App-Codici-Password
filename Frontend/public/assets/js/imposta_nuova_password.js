@@ -19,10 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const updateForm = document.getElementById('update-password-form');
+    const updateForm = document.getElementById('new-password-form');
     const cancelBtn = document.getElementById('cancel-password-update');
     const newPasswordInput = document.getElementById('new-password');
     const confirmPasswordInput = document.getElementById('confirm-password');
+
+    // --- TOGGLE PASSWORD LOGIC ---
+    const toggleBtn = document.querySelector('.toggle-password');
+    if (toggleBtn && newPasswordInput) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            newPasswordInput.setAttribute('type', type);
+            const icon = toggleBtn.querySelector('.material-symbols-outlined');
+            if (icon) icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+        });
+    }
 
     // --- LOGICA ANNULLA ---
     if (cancelBtn) {

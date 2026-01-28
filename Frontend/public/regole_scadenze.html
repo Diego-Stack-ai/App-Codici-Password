@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it" class="titanium-forced-dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regole Scadenze - Titanium Account</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <!-- Design System Master (Solo Account) -->
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
+
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js"></script>
+    <script src="assets/js/titanium-core.js"></script>
+</head>
+
+<body class="antialiased">
+    <div class="titanium-box">
+        <!-- Faro Estetico -->
+        <div class="glass-glow"></div>
+
+        <!-- HEADER FISSO -->
+        <header class="titanium-header">
+            <div id="header-content" class="header-stack">
+                <h2 class="header-title" data-t="expiry_rules_title_page">Regole Scadenze</h2>
+                <a href="impostazioni.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="settings-container no-select">
+
+            <div class="settings-group">
+                <!-- 1. AUTOMEZZI -->
+                <div class="settings-item" onclick="window.location.href='configurazione_automezzi.html'"
+                    style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-blue-glass">
+                                <span class="material-symbols-outlined">directions_car</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="card_vehicles_title">Automezzi</span>
+                                <span class="settings-desc">Configura regole invio veicoli</span>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="opacity: 0.3;">chevron_right</span>
+                    </div>
+                </div>
+
+                <!-- 2. DOCUMENTI -->
+                <div class="settings-item" onclick="window.location.href='configurazione_documenti.html'"
+                    style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-emerald-glass">
+                                <span class="material-symbols-outlined">description</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="card_documents_title">Documenti</span>
+                                <span class="settings-desc">Regole per documenti personali</span>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="opacity: 0.3;">chevron_right</span>
+                    </div>
+                </div>
+
+                <!-- 3. GENERICHE -->
+                <div class="settings-item" onclick="window.location.href='configurazione_generali.html'"
+                    style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-amber-glass">
+                                <span class="material-symbols-outlined">settings_applications</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="card_general_title">Regole Generali</span>
+                                <span class="settings-desc">Configura scadenze generiche</span>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined" style="opacity: 0.3;">chevron_right</span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Script di traduzione rapido -->
+    <script type="module">
+        import { t } from './assets/js/translations.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                const translation = t(key);
+                if (translation && translation !== key) {
+                    el.textContent = translation;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,50 +1,134 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { initComponents } from './components.js';
-import { logError } from './utils.js';
 import { t, getCurrentLanguage, supportedLanguages } from './translations.js';
+import { syncTimeoutWithFirestore } from './inactivity-timer.js';
+import { showToast, showWarningModal } from './ui-core.js';
 
 /**
- * IMPOSTAZIONI PAGE MODULE (Titanium Version)
+ * IMPOSTAZIONI PAGE MODULE (Titanium Account V1.1)
  */
 
-// 1. Inizializzazione Componenti (Header/Footer Puri)
-initComponents().then(() => {
-    const headerStack = document.getElementById('header-content');
-    if (headerStack) {
-        headerStack.style.display = 'flex';
-        headerStack.style.alignItems = 'center';
-        headerStack.style.justifyContent = 'space-between';
-        headerStack.style.width = '100%';
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Traduzione statica immediata degli elementi presenti nel DOM
+    const updateTranslations = () => {
+        document.querySelectorAll('[data-t]').forEach(el => {
+            const key = el.getAttribute('data-t');
+            el.textContent = t(key);
+        });
+    };
+    updateTranslations();
 
-        headerStack.innerHTML = `
-            <div class="header-stack" style="justify-content: center; position: relative;">
-                <h2 class="text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest">${t('settings_title')}</h2>
-                <a href="home_page.html" class="btn-icon-header" style="position: absolute; right: 0;">
-                    <span class="material-symbols-outlined">home</span>
-                </a>
-            </div>
-        `;
-    }
+    // 2. Setup Selettore Lingua Premium (Inline)
+    setupPremiumLanguageSelector(updateTranslations);
 
-    const footerStack = document.getElementById('footer-content');
-    if (footerStack) {
-        footerStack.innerHTML = `
-            <div class="footer-stack" style="width: 100%; display: flex; justify-content: center; opacity: 0.3;">
-                <span class="text-[9px] font-bold uppercase tracking-[0.3em]">${t('version')}</span>
-            </div>
-        `;
-    }
+    // 3. Gestore Accordion
+    setupAccordions();
 
-    // --- TRADUZIONE STATICA DEL DOM ---
-    document.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        el.textContent = t(key);
-    });
+    // 4. Caricamento Testo Informazioni App
+    setupAppInfo();
+
+    // 5. Caricamento Testo Privacy
+    setupPrivacyInfo();
+
+    // 5. Caricamento Testo Privacy
+    setupPrivacyInfo();
 });
 
-// 2. Stato Utente e Caricamento Dati
+function setupPrivacyInfo() {
+    const placeholder = document.getElementById('info-privacy-text-placeholder');
+    if (!placeholder) return;
+
+    placeholder.innerHTML = `
+        <div class="info-content" style="padding: 1.5rem; color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h3 style="color: white; font-weight: 800; margin-bottom: 0.25rem; text-transform: uppercase;">PRIVACY POLICY</h3>
+                <p style="font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.4);">INFORMATIVA ESTESA</p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">1. TITOLARE DEL TRATTAMENTO</h4>
+                <p>Il Titolare del trattamento dei dati è <strong>Boschetto Diego</strong>. L'applicazione è concepita per garantire la massima sicurezza e riservatezza.</p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">2. DATI TRATTATI</h4>
+                <ul style="list-style: none; padding: 0; margin: 0.5rem 0;">
+                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">• Registrazione:</strong> Email, nome, avatar (per autenticazione).</li>
+                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">• Volontari:</strong> Credenziali, password, note (crittografati).</li>
+                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">• Tecnici:</strong> Log di sistema gestiti da Google Firebase.</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">3. SICUREZZA E STORAGE</h4>
+                <p>Utilizziamo l'infrastruttura sicura di <strong>Google Firebase</strong>. Connessioni SSL/TLS e database protetti. I dati sensibili sono accessibili solo all'utente proprietario e ai destinatari espliciti della condivisione.</p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">4. CONDIVISIONE DATI</h4>
+                <p>Nessun dato viene venduto a terzi. La condivisione avviene <strong>solo su tua esplicita azione</strong> tramite la funzione "Condividi" verso le email che selezioni.</p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">5. DIRITTI UTENTE (GDPR)</h4>
+                <ul style="list-style: none; padding: 0; margin: 0.5rem 0;">
+                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">•</strong> Diritto di accesso ai propri dati.</li>
+                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">•</strong> Diritto alla cancellazione ("Oblio") eliminando l'account.</li>
+                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">•</strong> Diritto di rettifica delle informazioni.</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; font-size: 0.7rem; opacity: 0.4; margin-top: 2rem;">
+                <p>Ultimo aggiornamento: Gennaio 2026</p>
+            </div>
+        </div>
+    `;
+}
+
+function setupAppInfo() {
+    const placeholder = document.getElementById('info-app-text-placeholder');
+    if (!placeholder) return;
+
+    placeholder.innerHTML = `
+        <div class="info-content" style="padding: 1.5rem; color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h3 style="color: white; font-weight: 800; margin-bottom: 0.25rem;">APP CODICI PASSWORD</h3>
+                <p style="font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.4);">SISTEMA DI GESTIONE CREDENZIALI E CONDIVISIONE</p>
+            </div>
+
+            <h4 style="color: white; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid #3b82f6; padding-left: 10px; margin: 1.5rem 0 1rem 0;">Panoramica</h4>
+            <p style="margin-bottom: 1rem;"><strong>App Codici Password</strong> è un'applicazione web progressiva (PWA) per la gestione sicura di credenziali, password e note personali e aziendali.</p>
+            <p style="margin-bottom: 1rem;">L'app nasce per l'utente <strong>PRIVATO</strong>: chiunque può utilizzarla per gestire le proprie credenziali personali senza necessità di funzionalità aziendali. La sezione "Privato" è il cuore dell'applicazione e rappresenta il punto di partenza per tutti gli utenti.</p>
+            <p style="margin-bottom: 1rem;">Tuttavia, molte persone sono anche titolari di azienda o professionisti che hanno bisogno di salvare dati aziendali e organizzare scadenze. Per queste esigenze, l'app offre una sezione "Azienda" dedicata, opzionale ma perfettamente integrata.</p>
+            <p style="font-style: italic; opacity: 0.8; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">In sintesi: tutti partono da "Privato", e chi ne ha bisogno espande verso "Azienda".</p>
+
+            <h4 style="color: white; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid #3b82f6; padding-left: 10px; margin: 2rem 0 1rem 0;">Caratteristiche Principali</h4>
+            <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Account Privati:</strong> Credenziali, allegati, logo</li>
+                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Account Aziendali:</strong> Dati anagrafici, P.IVA, QR</li>
+                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Memorandum:</strong> Note importanti condivisibili</li>
+                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Condivisione:</strong> Inviti via email sicuri</li>
+                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Scadenze:</strong> Calendario con notifiche</li>
+                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Sicurezza:</strong> Firebase & Crittonomia</li>
+            </ul>
+
+            <h4 style="color: white; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid #3b82f6; padding-left: 10px; margin: 2rem 0 1rem 0;">Flussi Principali</h4>
+            <ol style="padding-left: 1.2rem; margin-bottom: 2rem;">
+                <li style="margin-bottom: 0.5rem;"><strong>Registrazione:</strong> Email/Google & Profilo</li>
+                <li style="margin-bottom: 0.5rem;"><strong>Creazione:</strong> Privato/Azienda/Memo</li>
+                <li style="margin-bottom: 0.5rem;"><strong>Condivisione:</strong> Rubrica e Inviti</li>
+                <li style="margin-bottom: 0.5rem;"><strong>Scadenze:</strong> Notifiche e Urgenze</li>
+            </ol>
+
+            <div style="text-align: center; font-size: 0.7rem; opacity: 0.5; margin-top: 3rem;">
+                <p>&copy; Boschetto Diego<br>Tutti i diritti riservati</p>
+            </div>
+        </div>
+    `;
+}
+
+// STATO UTENTE
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         try {
@@ -52,20 +136,24 @@ onAuthStateChanged(auth, async (user) => {
             const nameEl = document.getElementById('user-name-settings');
             const logoutBtn = document.getElementById('logout-btn-settings');
 
-            const docRef = doc(db, "users", user.uid);
-            const docSnap = await getDoc(docRef);
-            let userData = {};
-            if (docSnap.exists()) userData = docSnap.data();
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            let userData = userDoc.exists() ? userDoc.data() : {};
 
+            // Update Name
             const displayName = (userData.nome || userData.cognome)
                 ? `${userData.nome || ''} ${userData.cognome || ''}`.trim()
                 : (user.displayName || t('user_default'));
-
             if (nameEl) nameEl.textContent = displayName;
 
+            // Update Avatar
             const photoURL = userData.photoURL || user.photoURL || "assets/images/user-avatar-5.png";
-            if (avatarEl) avatarEl.style.backgroundImage = `url('${photoURL}')`;
+            if (avatarEl) {
+                avatarEl.style.backgroundImage = `url('${photoURL}')`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.style.backgroundPosition = 'center';
+            }
 
+            // Logout
             if (logoutBtn) {
                 logoutBtn.onclick = async () => {
                     await signOut(auth);
@@ -73,284 +161,126 @@ onAuthStateChanged(auth, async (user) => {
                 };
             }
 
-            // --- LOGICA SICUREZZA (Face ID & Blocco) ---
-            const faceIdToggle = document.getElementById('face-id-toggle');
-            const lockTimerSetting = document.getElementById('lock-timer-setting');
-            const currentLockTimerEl = document.getElementById('current-lock-timer');
+            // 3. Logic Sicurezza (Functional)
+            setupSecuritySections(user.uid, userData);
 
-            // 1. Caricamento stati iniziali
-            if (faceIdToggle) faceIdToggle.checked = userData.biometric_lock ?? true;
-            if (currentLockTimerEl) {
-                const timeout = userData.lock_timeout ?? 3;
-                currentLockTimerEl.textContent = timeout === 0 ? t('lock_immediately') : `${timeout} ${t('unit_minutes')}`;
-            }
-
-            // 2. Listener Face ID
-            if (faceIdToggle) {
-                faceIdToggle.addEventListener('change', async () => {
-                    await updateDoc(docRef, { biometric_lock: faceIdToggle.checked });
-                });
-            }
-
-            // 3. Listener Timer Selettore (Subito, 1, 3, 5)
-            const timerButtons = document.querySelectorAll('.timer-btn');
-            if (timerButtons.length > 0) {
-                // Imposta stato iniziale
-                const timeout = userData.lock_timeout ?? 3;
-                timerButtons.forEach(btn => {
-                    if (parseInt(btn.dataset.val) === timeout) btn.classList.add('active');
-                    else btn.classList.remove('active');
-
-                    btn.addEventListener('click', async () => {
-                        const next = parseInt(btn.dataset.val);
-                        // Update UI
-                        timerButtons.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        // Update DB
-                        await updateDoc(docRef, { lock_timeout: next });
-                    });
-                });
-            }
-
-            // --- LOGICA TEMA (Chiaro, Scuro, Auto) ---
-            const themeButtons = document.querySelectorAll('.theme-btn');
-            if (themeButtons.length > 0) {
-                const currentTheme = localStorage.getItem('theme') || 'dark';
-                themeButtons.forEach(btn => {
-                    if (btn.dataset.theme === currentTheme) btn.classList.add('active');
-                    else btn.classList.remove('active');
-
-                    btn.addEventListener('click', () => {
-                        const newTheme = btn.dataset.theme;
-                        localStorage.setItem('theme', newTheme);
-                        window.location.reload();
-                    });
-                });
-            }
-
-            // 4. LOGICA SELETTORE LINGUA (Nuovo Accordion Inline)
-            const langButtons = document.querySelectorAll('.lang-btn');
-            const currentLang = getCurrentLanguage();
-            const currentLangLabel = document.getElementById('current-lang-label');
-            const langMap = {
-                'it': 'Italiano',
-                'en': 'English',
-                'es': 'Español',
-                'fr': 'Français',
-                'de': 'Deutsch',
-                'zh': '简体中文',
-                'hi': 'हिन्दी',
-                'pt': 'Português'
-            };
-
-            // Aggiorna UI iniziale
-            if (currentLangLabel) {
-                const langObj = supportedLanguages.find(l => l.code === currentLang);
-                if (langObj) {
-                    currentLangLabel.textContent = langObj.name;
-                }
-            }
-
-            langButtons.forEach(btn => {
-                const btnLang = btn.getAttribute('data-lang');
-                const checkIcon = btn.querySelector('.check-icon');
-
-                // Stato Iniziale
-                if (btnLang === currentLang) {
-                    btn.classList.add('active');
-                    btn.classList.remove('opacity-50');
-                    if (checkIcon) checkIcon.classList.remove('opacity-0');
-                } else {
-                    btn.classList.remove('active');
-                    btn.classList.add('opacity-50');
-                    if (checkIcon) checkIcon.classList.add('opacity-0');
-                }
-
-                // Click Handler
-                btn.addEventListener('click', () => {
-                    localStorage.setItem('app_language', btnLang);
-                    window.location.reload(); // Ricarica per applicare traduzioni
-                });
-            });
+            // Logic Tema
+            setupThemeSelector();
 
         } catch (error) {
-            logError("User Data Load (Settings)", error);
+            console.error("Error loading user data:", error);
         }
     } else {
         window.location.href = 'index.html';
     }
 });
 
-// 3. Iniezione Contenuti Informativi (da Test Theme)
-document.addEventListener('DOMContentLoaded', () => {
-    // Info App Text
-    const infoPlaceholder = document.getElementById('info-app-text-placeholder');
-    if (infoPlaceholder) {
-        infoPlaceholder.innerHTML = `
-            <div class="px-5 py-6">
-                <div class="text-center pb-4 border-b border-slate-200 dark:border-white/5 mb-4">
-                    <h4 class="text-lg font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter">${t('app_info_system_name')}</h4>
-                    <p class="text-[9px] text-gray-500 dark:text-white/30 uppercase tracking-[0.2em] mt-1">${t('app_info_system_sub')}</p>
-                </div>
-                <div class="space-y-4 text-gray-700 dark:text-white/70">
-                    <div class="space-y-3">
-                        <h5 class="font-bold text-gray-900 dark:text-white text-[11px] uppercase border-l-4 border-blue-500 pl-3">${t('app_info_overview_title')}</h5>
-                        <p class="text-[11px] leading-relaxed text-justify">${t('app_info_overview_p1')}</p>
-                        <p class="text-[11px] leading-relaxed text-justify">${t('app_info_overview_p2')}</p>
-                        <p class="text-[11px] leading-relaxed text-justify">${t('app_info_overview_p3')}</p>
-                        <div class="bg-blue-500/5 p-3 rounded-xl border border-blue-500/10 italic text-[10px] text-blue-700 dark:text-blue-300/60">
-                            ${t('app_info_overview_quote')}
-                        </div>
-                    </div>
-                    <div class="space-y-3">
-                        <h5 class="font-bold text-gray-900 dark:text-white text-[11px] uppercase border-l-4 border-blue-500 pl-3">${t('app_info_features_title')}</h5>
-                        <ul class="list-disc list-outside pl-5 space-y-1 text-[10px]">
-                            <li>${t('app_info_feat_1')}</li>
-                            <li>${t('app_info_feat_2')}</li>
-                            <li>${t('app_info_feat_3')}</li>
-                            <li>${t('app_info_feat_4')}</li>
-                            <li>${t('app_info_feat_5')}</li>
-                            <li>${t('app_info_feat_6')}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
+function setupPremiumLanguageSelector(refreshCallback) {
+    const btn = document.getElementById('lang-btn');
+    const dropdown = document.getElementById('lang-dropdown');
+    const currentDisplay = document.getElementById('current-lang-display-full');
 
+    if (!btn || !dropdown) return;
 
-
-    // Privacy Policy Text (Aggiornato da Immagine Utente)
-    const privacyPlaceholder = document.getElementById('privacy-policy-text-placeholder');
-    if (privacyPlaceholder) {
-        privacyPlaceholder.innerHTML = `
-            <div class="px-5 py-6 space-y-4">
-                <div class="text-center pb-2">
-                    <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">${t('privacy_policy_title')}</h4>
-                    <p class="text-[9px] text-gray-500 dark:text-white/30 uppercase mt-1">${t('privacy_extended_title')}</p>
-                </div>
-
-                <!-- 1. TITOLARE -->
-                <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_1_title')}</h5>
-                    <p class="text-[11px] text-gray-700 dark:text-white/60 leading-relaxed">
-                        ${t('privacy_1_text')}
-                    </p>
-                </div>
-
-                <!-- 2. DATI TRATTATI -->
-                <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_2_title')}</h5>
-                    <ul class="list-disc pl-4 space-y-1 text-[11px] text-gray-700 dark:text-white/60">
-                        <li>${t('privacy_2_li1')}</li>
-                        <li>${t('privacy_2_li2')}</li>
-                        <li>${t('privacy_2_li3')}</li>
-                    </ul>
-                </div>
-
-                <!-- 3. SICUREZZA -->
-                <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_3_title')}</h5>
-                    <p class="text-[11px] text-gray-700 dark:text-white/60 leading-relaxed">
-                        ${t('privacy_3_text')}
-                    </p>
-                </div>
-
-                <!-- 4. CONDIVISIONE -->
-                <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_4_title')}</h5>
-                    <p class="text-[11px] text-gray-700 dark:text-white/60 leading-relaxed">
-                        ${t('privacy_4_text')}
-                    </p>
-                </div>
-
-                <!-- 5. DIRITTI -->
-                <div class="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                    <h5 class="font-bold text-gray-900 dark:text-white text-[11px] mb-2 uppercase tracking-wide">${t('privacy_5_title')}</h5>
-                    <ul class="list-disc pl-4 space-y-1 text-[11px] text-gray-700 dark:text-white/60">
-                        <li>${t('privacy_5_li1')}</li>
-                        <li>${t('privacy_5_li2')}</li>
-                        <li>${t('privacy_5_li3')}</li>
-                    </ul>
-                </div>
-
-                <div class="text-center pt-2">
-                    <p class="text-[9px] text-gray-400 dark:text-white/20 uppercase tracking-widest">${t('privacy_update_text')}</p>
-                </div>
-            </div>
-        `;
-    }
-
-    // Gestore Accordion (Nuova Classe .accordion-header)
-    const accordions = document.querySelectorAll('.accordion-header');
-    accordions.forEach(acc => {
-        acc.addEventListener('click', () => {
-            const contentId = acc.dataset.target;
-            const content = document.getElementById(contentId);
-            const chevron = acc.querySelector('.settings-chevron');
-
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                if (chevron) chevron.style.transform = 'rotate(180deg)';
-            } else {
-                content.classList.add('hidden');
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
-            }
-        });
-    });
-});
-
-/**
- * SHOW LANGUAGE PICKER MODAL
- */
-function showLanguagePicker() {
     const currentLang = getCurrentLanguage();
+    const langObj = supportedLanguages.find(l => l.code === currentLang);
+    if (currentDisplay && langObj) currentDisplay.textContent = langObj.name;
 
-    const overlay = document.createElement('div');
-    overlay.className = 'lang-picker-overlay';
-    overlay.id = 'lang-picker-modal';
+    // Popola dropdown
+    dropdown.innerHTML = supportedLanguages.map(lang => `
+        <button class="lang-option" style="width:100%; display:flex; align-items:center; gap:12px; padding:12px 16px; background:transparent; border:none; color:white; cursor:pointer; font-size:0.9rem; border-radius:10px; transition: background 0.2s;" data-code="${lang.code}">
+            <span style="font-size:1.2rem;">${lang.flag}</span>
+            <span style="font-weight: 500;">${lang.name}</span>
+            ${lang.code === currentLang ? '<span class="material-symbols-outlined" style="margin-left:auto; font-size:1.1rem; color:#34d399;">check_circle</span>' : ''}
+        </button>
+    `).join('');
 
-    let langItemsHtml = '';
-    supportedLanguages.forEach(lang => {
-        const isActive = lang.code === currentLang;
-        langItemsHtml += `
-            <div class="lang-item ${isActive ? 'active' : ''}" data-code="${lang.code}">
-                <span class="lang-flag">${lang.flag}</span>
-                <span class="lang-name">${lang.name}</span>
-                <span class="material-symbols-outlined lang-check">check_circle</span>
-            </div>
-        `;
-    });
-
-    overlay.innerHTML = `
-        <div class="lang-picker-card">
-            <h3 class="lang-picker-title">${t('select_language')}</h3>
-            <div class="lang-list">
-                ${langItemsHtml}
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    // Chiusura al click fuori
-    overlay.onclick = (e) => {
-        if (e.target === overlay) {
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.remove(), 400);
-        }
+    btn.onclick = (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
     };
 
-    // Gestione selezione
-    overlay.querySelectorAll('.lang-item').forEach(item => {
-        item.onclick = () => {
-            const newLang = item.dataset.code;
-            if (newLang !== currentLang) {
-                localStorage.setItem('app_language', newLang);
-                window.location.reload();
-            } else {
-                overlay.click(); // Chiudi se è uguale
-            }
+    document.addEventListener('click', () => dropdown.classList.remove('show'));
+
+    dropdown.querySelectorAll('.lang-option').forEach(opt => {
+        opt.onclick = () => {
+            const code = opt.dataset.code;
+            localStorage.setItem('app_language', code);
+            window.location.reload(); // Reload per rinfrescare tutto il sistema
+        };
+    });
+}
+
+function setupSecuritySections(uid, userData) {
+    const userDocRef = doc(db, "users", uid);
+
+    // 1. 2FA Toggle (In costruzione con Premium Modal)
+    const toggle2fa = document.getElementById('2fa-toggle');
+    if (toggle2fa) {
+        toggle2fa.checked = false;
+        toggle2fa.onchange = () => {
+            showWarningModal(
+                t('section_security'),
+                t('feature_coming_soon'),
+                () => { toggle2fa.checked = false; }
+            );
+        };
+    }
+
+    // 2. Face ID Toggle (In costruzione con Premium Modal)
+    const toggleFaceId = document.getElementById('face-id-toggle');
+    if (toggleFaceId) {
+        toggleFaceId.checked = false;
+        toggleFaceId.onchange = () => {
+            showWarningModal(
+                t('section_security'),
+                t('feature_coming_soon'),
+                () => { toggleFaceId.checked = false; }
+            );
+        };
+    }
+
+    // 3. Timer Inattività
+    const timerButtons = document.querySelectorAll('.timer-btn:not(.theme-btn)');
+    const currentTimeout = userData.lock_timeout ?? 3;
+    timerButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.val) === currentTimeout) btn.classList.add('active');
+        btn.onclick = async (e) => {
+            e.stopPropagation();
+            const val = parseInt(btn.dataset.val);
+            timerButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            await updateDoc(userDocRef, { lock_timeout: val });
+            await syncTimeoutWithFirestore(uid);
+            showToast(t('success_save'), 'success');
+        };
+    });
+}
+
+function setupThemeSelector() {
+    const themeButtons = document.querySelectorAll('.theme-btn');
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    themeButtons.forEach(btn => {
+        btn.classList.remove('active'); // Pulisce selezioni precedenti
+        if (btn.dataset.theme === currentTheme) btn.classList.add('active');
+        btn.onclick = () => {
+            localStorage.setItem('theme', btn.dataset.theme);
+            window.location.reload();
+        };
+    });
+}
+
+function setupAccordions() {
+    const accordions = document.querySelectorAll('.accordion-header');
+    accordions.forEach(acc => {
+        acc.onclick = () => {
+            const targetId = acc.dataset.target;
+            const content = document.getElementById(targetId);
+            const chevron = acc.querySelector('.settings-chevron');
+            const isHidden = content.style.display === 'none';
+            content.style.display = isHidden ? 'block' : 'none';
+            if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
         };
     });
 }

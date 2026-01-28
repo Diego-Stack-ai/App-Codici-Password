@@ -1,46 +1,39 @@
-
-// configurazione_documenti.js v1.7 - Titanium Gold
+// configurazione_documenti.js v1.8 - Titanium Gold (Refreshed)
 import { db, auth } from './firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { initComponents } from './components.js';
 import { t } from './translations.js';
 
-// Setup Base (Header/Footer)
+// --- ACCORDION LOGIC (Standalone) ---
+const initAccordion = () => {
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        // Rimuovi eventuali vecchi listener clonando? No, è modulo.
+        header.addEventListener('click', () => {
+            const targetId = header.getAttribute('data-target');
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                const isShowing = targetContent.classList.toggle('show');
+                // Forza lo stile inline per override
+                targetContent.style.display = isShowing ? 'block' : 'none';
+
+                const chevron = header.querySelector('.settings-chevron');
+                if (chevron) {
+                    chevron.style.transform = isShowing ? 'rotate(180deg)' : 'rotate(0deg)';
+                }
+            }
+        });
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAccordion);
+} else {
+    initAccordion();
+}
+
+// Setup Base (Traduzioni)
 initComponents().then(() => {
-    const headerStack = document.getElementById('header-content');
-    if (headerStack) {
-        headerStack.style.display = 'flex';
-        headerStack.style.alignItems = 'center';
-        headerStack.style.justifyContent = 'space-between';
-        headerStack.style.width = '100%';
-        headerStack.className = "px-4";
-
-        headerStack.innerHTML = `
-            <div class="header-stack w-full flex items-center justify-between relative">
-                <a href="regole_scadenze_veicoli.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </a>
-                <h2 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-900 dark:text-white text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
-                    ${t('header_config_documents')}
-                </h2>
-                <a href="home_page.html" class="btn-icon-header flex items-center justify-center p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-95 text-gray-900 dark:text-white">
-                    <span class="material-symbols-outlined">home</span>
-                </a>
-            </div>
-        `;
-    }
-
-    const footerStack = document.getElementById('footer-content');
-    if (footerStack) {
-        footerStack.innerHTML = `
-            <div class="footer-stack" style="width: 100%; display: flex; justify-content: center; opacity: 0.3;">
-                <span class="text-[9px] font-bold uppercase tracking-[0.3em] font-mono text-gray-900/50 dark:text-white/50 user-select-none">${t('version')}</span>
-            </div>
-        `;
-    }
-
-    // --- TRADUZIONE STATICA DEL DOM ---
     document.querySelectorAll('[data-t]').forEach(el => {
         const key = el.getAttribute('data-t');
         if (el.hasAttribute('placeholder')) {
@@ -206,7 +199,7 @@ window.addDocumentDetail = async () => {
 window.saveConfig = async (newConfig) => {
     if (!currentUser) return;
     try {
-        const docRef = doc(db, "users", currentUser.uid, "settings", "documentConfig");
+        const docRef = doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments");
         await setDoc(docRef, newConfig);
         currentConfig = JSON.parse(JSON.stringify(newConfig));
     } catch (e) {
@@ -217,7 +210,7 @@ window.saveConfig = async (newConfig) => {
 window.loadConfig = async () => {
     if (!currentUser) return;
     try {
-        let docRef = doc(db, "users", currentUser.uid, "settings", "documentConfig");
+        let docRef = doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments");
         let docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {

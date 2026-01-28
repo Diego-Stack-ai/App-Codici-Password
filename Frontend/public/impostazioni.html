@@ -1,377 +1,269 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="titanium-forced-dark">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostazioni - Protocollo Titanium</title>
+    <title>Impostazioni - Titanium Account</title>
 
-    <!-- Titanium Engine Stack -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <!-- Design System Master (Solo Account) -->
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
+
+    <!-- Core Engine -->
     <script src="assets/js/titanium-config.js"></script>
-    <!-- Design System Master -->
-    <link rel="stylesheet" href="assets/css/titanium.css">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="assets/js/titanium-core.js"></script>
 </head>
 
-<body class="titanium-bg antialiased">
+<body class="antialiased">
     <div class="titanium-box">
+        <!-- Faro Estetico -->
         <div class="glass-glow"></div>
 
-        <!-- HEADER INIETTATO DA JS -->
-        <div id="header-placeholder"></div>
+        <!-- HEADER FISSO -->
+        <header class="titanium-header">
+            <div id="header-content" class="header-stack">
+                <h2 class="header-title" data-t="settings_title">Impostazioni</h2>
+                <a href="home_page.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
+            </div>
+        </header>
 
-        <main class="titanium-main no-select">
+        <main class="settings-container no-select">
 
-            <!-- PROFILO -->
-            <div class="px-2 mb-6 relative z-40">
-                <div class="titanium-vault border-glow group mx-auto">
-                    <!-- Glow Overlay (Identico a Index) -->
-                    <div
-                        class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[24px] pointer-events-none z-10">
-                    </div>
-
-                    <div class="px-8 py-8 relative z-10">
-                        <div class="flex flex-col items-center gap-4">
-                            <div id="user-avatar-settings"
-                                class="size-24 rounded-full border-4 border-white/10 shadow-2xl bg-cover bg-center transition-transform group-hover:scale-105"
-                                style="background-image: url('assets/images/user-avatar-5.png');"></div>
-                            <div class="text-center">
-                                <h3 id="user-name-settings" class="user-name-title" data-t="loading">Caricamento...</h3>
+            <!-- SEZIONE PROFILO -->
+            <div class="titanium-vault border-glow profile-card">
+                <div class="avatar-wrapper">
+                    <div id="user-avatar-settings" class="avatar-main"
+                        style="background-image: url('assets/images/user-avatar-5.png');"></div>
+                </div>
+                <div class="profile-info" style="width: 100%;">
+                    <h3 id="user-name-settings" class="auth-title" data-t="loading">Caricamento...</h3>
+                    <button onclick="window.location.href='profilo_privato.html'" class="auth-btn"
+                        style="margin-top: 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div class="settings-icon-box bg-blue-glass"
+                                style="width: 32px; height: 32px; border-radius: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">account_circle</span>
                             </div>
-                            <button onclick="window.location.href='profilo_privato.html'"
-                                class="btn-titanium-primary relative overflow-hidden"
-                                style="box-shadow: none; filter: none;" data-t="manage_account_data">
-                                <div class="glass-shine"></div>
-                                Gestisci Dati Account
-                            </button>
+                            <span data-t="manage_account_data">Gestisci Account</span>
                         </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SICUREZZA -->
+            <div class="settings-group">
+                <h4 class="settings-group-title" data-t="section_security">Sicurezza</h4>
+
+                <div class="settings-item" id="row-password" style="cursor: pointer;"
+                    onclick="window.location.href='imposta_nuova_password.html'">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-amber-glass">
+                                <span class="material-symbols-outlined">lock</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="change_password">Cambio Password</span>
+                                <span class="settings-desc">Aggiorna la tua chiave d'accesso</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-item" id="row-2fa" style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-emerald-glass">
+                                <span class="material-symbols-outlined">verified_user</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="two_factor_auth">Autenticazione 2FA</span>
+                                <span class="settings-desc">Doppio livello di protezione</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="2fa-toggle" class="titanium-toggle">
+                    </div>
+                </div>
+
+                <div class="settings-item" id="row-faceid" style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-blue-glass">
+                                <span class="material-symbols-outlined">face</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="face_id">Face ID / Biometrico</span>
+                                <span class="settings-desc">Accesso rapido sicuro</span>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="face-id-toggle" class="titanium-toggle">
+                    </div>
+                </div>
+
+                <!-- Tempo di Inattività (Selector Inglobato) -->
+                <div class="settings-item">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-purple-glass">
+                                <span class="material-symbols-outlined">timer</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="lock_inactivity">Tempo di Inattività</span>
+                                <span class="settings-desc">Blocco automatico schermo</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timer-selector" id="lock-timer-selector"
+                        style="width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
+                        <button class="timer-btn" data-val="0" data-t="lock_immediately">Subito</button>
+                        <button class="timer-btn" data-val="1" data-t="lock_1min">1 Min</button>
+                        <button class="timer-btn" data-val="3" data-t="lock_3min">3 Min</button>
+                        <button class="timer-btn" data-val="5" data-t="lock_5min">5 Min</button>
                     </div>
                 </div>
             </div>
 
-            <!-- GRUPPI IMPOSTAZIONI -->
-            <div class="px-2 space-y-6 relative z-40 pb-12">
+            <!-- GENERALE -->
+            <div class="settings-group">
+                <h4 class="settings-group-title" data-t="section_general">Generale</h4>
 
-                <!-- SICUREZZA -->
-                <div>
-                    <h4 class="settings-section-label" data-t="section_security">Sicurezza</h4>
-                    <div class="settings-group">
-                        <div class="settings-item" onclick="window.location.href='imposta_nuova_password.html'">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-orange">
-                                    <span class="material-symbols-outlined">lock</span>
-                                </div>
-                                <span class="settings-title" data-t="change_password">Cambio Password</span>
+                <!-- Regole Scadenze -->
+                <div class="settings-item" onclick="window.location.href='regole_scadenze.html'"
+                    style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-amber-glass">
+                                <span class="material-symbols-outlined">calendar_month</span>
                             </div>
-                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
-                        </div>
-                        <div class="settings-item">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-green">
-                                    <span class="material-symbols-outlined">verified_user</span>
-                                </div>
-                                <span class="settings-title" data-t="two_factor_auth">Autenticazione a due
-                                    fattori</span>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="expiry_rules_title_page">Regole invio
+                                    scadenze</span>
+                                <span class="settings-desc">Configura notifiche e avvisi</span>
                             </div>
-                            <input type="checkbox" class="titanium-toggle">
-                        </div>
-                        <div class="settings-item">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-blue">
-                                    <span class="material-symbols-outlined">face</span>
-                                </div>
-                                <span class="settings-title" data-t="face_id">Face ID</span>
-                            </div>
-                            <input type="checkbox" id="face-id-toggle" class="titanium-toggle" checked>
-                        </div>
-                        <!-- SELETTORE BLOCCO AUTOMATICO -->
-                        <div class="p-5 border-t border-slate-200 dark:border-white/5">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="settings-icon-box icon-indigo !mr-0">
-                                    <span class="material-symbols-outlined">timer</span>
-                                </div>
-                                <span class="settings-title uppercase text-[10px] opacity-50 tracking-widest"
-                                    data-t="lock_inactivity">Tempo di
-                                    Inattività</span>
-                            </div>
-
-                            <div class="timer-selector" id="lock-timer-selector">
-                                <button class="timer-btn" data-val="0" data-t="lock_immediately">Subito</button>
-                                <button class="timer-btn" data-val="1" data-t="lock_1min">1 Min</button>
-                                <button class="timer-btn active" data-val="3" data-t="lock_3min">3 Min</button>
-                                <button class="timer-btn" data-val="5" data-t="lock_5min">5 Min</button>
-                            </div>
-
-                            <p class="titanium-help-block mt-4 px-2" data-t="auto_lock_subtitle">
-                                Sblocco con username e password o attiva face id dell'app
-                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- GENERALE -->
-                <div>
-                    <h4 class="settings-section-label" data-t="section_general">Generale</h4>
-                    <div class="settings-group">
-                        <!-- Notifiche -->
-                        <div class="settings-item">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-rose">
-                                    <span class="material-symbols-outlined">notifications</span>
-                                </div>
-                                <span class="settings-title" data-t="notifications">Notifiche</span>
+                <!-- LINGUA -->
+                <div class="settings-item" id="lang-btn" style="cursor: pointer; position: relative;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-emerald-glass">
+                                <span class="material-symbols-outlined">language</span>
                             </div>
-                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
-                        </div>
-                        <!-- Archivio -->
-                        <div class="settings-item">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-purple">
-                                    <span class="material-symbols-outlined">inventory_2</span>
-                                </div>
-                                <span class="settings-title" data-t="archive">Archivio</span>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="language">Lingua Applicazione</span>
+                                <span class="settings-desc" id="current-lang-display-full">Italiano</span>
                             </div>
-                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
                         </div>
+                    </div>
+                    <div id="lang-dropdown" class="lang-dropdown">
+                        <!-- Popolato da JS -->
+                    </div>
+                </div>
 
-                        <!-- SELETTORE TEMA (New v5.2) -->
-                        <div class="p-5 border-t border-slate-200 dark:border-white/5">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="settings-icon-box icon-blue !mr-0">
-                                    <span class="material-symbols-outlined">palette</span>
-                                </div>
-                                <span class="settings-title uppercase text-[10px] opacity-50 tracking-widest"
-                                    data-t="theme_title">Tema App</span>
+                <!-- TEMA (Selector Inglobato) -->
+                <div class="settings-item">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-blue-glass">
+                                <span class="material-symbols-outlined">palette</span>
                             </div>
-
-                            <div class="timer-selector" id="theme-selector">
-                                <button class="theme-btn" data-theme="light" data-t="theme_light">Chiaro</button>
-                                <button class="theme-btn" data-theme="auto" data-t="theme_auto">Automatico</button>
-                                <button class="theme-btn" data-theme="dark" data-t="theme_dark">Scuro</button>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="theme_title">Tema App</span>
+                                <span class="settings-desc">Personalizza il look</span>
                             </div>
                         </div>
-
-                        <!-- Lingua (Accordion Integrato) -->
-                        <div class="settings-item accordion-header !border-t border-slate-200 dark:border-white/5"
-                            data-target="language-options">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-emerald">
-                                    <span class="material-symbols-outlined">language</span>
-                                </div>
-                                <span class="settings-title" data-t="language">Lingua</span>
-                            </div>
-                            <div class="settings-trailing">
-                                <span class="settings-value mr-2" id="current-lang-label"
-                                    data-t="language_current">Italiano</span>
-                                <span
-                                    class="material-symbols-outlined settings-chevron transition-transform duration-300">expand_more</span>
-                            </div>
-                        </div>
-                        <div id="language-options"
-                            class="accordion-content hidden border-t border-slate-200 dark:border-white/5 p-4 bg-slate-50 dark:bg-black/20">
-                            <!-- Opzioni Lingua -->
-                            <div class="space-y-2" id="language-list-container">
-                                <!-- ITALIANO -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group active"
-                                    data-lang="it">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/it.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="IT">
-                                        <span class="text-gray-900 dark:text-white text-sm">Italiano</span>
-                                    </div>
-                                    <span class="material-symbols-outlined text-emerald-400 check-icon">check</span>
-                                </button>
-                                <!-- INGLESE -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
-                                    data-lang="en">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/gb.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="EN">
-                                        <span class="text-gray-900 dark:text-white text-sm">English</span>
-                                    </div>
-                                    <span
-                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
-                                </button>
-                                <!-- SPAGNOLO -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
-                                    data-lang="es">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/es.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="ES">
-                                        <span class="text-gray-900 dark:text-white text-sm">Español</span>
-                                    </div>
-                                    <span
-                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
-                                </button>
-                                <!-- FRANCESE -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
-                                    data-lang="fr">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/fr.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="FR">
-                                        <span class="text-gray-900 dark:text-white text-sm">Français</span>
-                                    </div>
-                                    <span
-                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
-                                </button>
-                                <!-- TEDESCO -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
-                                    data-lang="de">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/de.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="DE">
-                                        <span class="text-gray-900 dark:text-white text-sm">Deutsch</span>
-                                    </div>
-                                    <span
-                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
-                                </button>
-                                <!-- CINESE -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
-                                    data-lang="zh">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/cn.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="ZH">
-                                        <span class="text-gray-900 dark:text-white text-sm">简体中文</span>
-                                    </div>
-                                    <span
-                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
-                                </button>
-                                <!-- HINDI (INDIANO) -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
-                                    data-lang="hi">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/in.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="HI">
-                                        <span class="text-gray-900 dark:text-white text-sm">हिन्दी</span>
-                                    </div>
-                                    <span
-                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
-                                </button>
-                                <!-- PORTOGHESE -->
-                                <button
-                                    class="lang-btn w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group opacity-50 hover:opacity-100"
-                                    data-lang="pt">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://flagcdn.com/w40/pt.png"
-                                            class="w-6 h-6 rounded-full object-cover shadow-sm" alt="PT">
-                                        <span class="text-gray-900 dark:text-white text-sm">Português</span>
-                                    </div>
-                                    <span
-                                        class="material-symbols-outlined text-emerald-400 check-icon opacity-0">check</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Regole Invio Scadenze (Integrato come ultimo item) -->
-                        <div class="settings-item !border-t border-slate-200 dark:border-white/5"
-                            onclick="window.location.href='regole_scadenze_veicoli.html'">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-indigo">
-                                    <span class="material-symbols-outlined">mail</span>
-                                </div>
-                                <span class="settings-title" data-t="expiry_rules">Regole invio scadenze</span>
-                            </div>
-                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
-                        </div>
+                    </div>
+                    <div class="timer-selector" id="theme-selector"
+                        style="width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
+                        <button class="timer-btn theme-btn" data-theme="light" data-t="theme_light">Chiaro</button>
+                        <button class="timer-btn theme-btn" data-theme="auto" data-t="theme_auto">Auto</button>
+                        <button class="timer-btn theme-btn" data-theme="dark" data-t="theme_dark">Scuro</button>
                     </div>
                 </div>
             </div>
 
-            <!-- PRESENTAZIONE -->
-            <div>
-                <h4 class="settings-section-label" data-t="section_presentation">Presentazione</h4>
-                <div class="space-y-3">
-                    <!-- Info App -->
-                    <div class="settings-group !mb-0">
-                        <div class="settings-item accordion-header" data-target="info-app">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-blue">
-                                    <span class="material-symbols-outlined">info</span>
-                                </div>
-                                <div class="settings-label-group">
-                                    <span class="settings-title" data-t="app_info_title">Informazioni
-                                        sull'App</span>
-                                </div>
+            <!-- INFORMAZIONI -->
+            <div class="settings-group">
+                <h4 class="settings-group-title" data-t="section_support">Informazioni</h4>
+
+                <!-- App Info -->
+                <div class="settings-item accordion-header" data-target="info-app" style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-blue-glass">
+                                <span class="material-symbols-outlined">info</span>
                             </div>
-                            <span
-                                class="material-symbols-outlined settings-chevron transition-transform duration-300">expand_more</span>
-                        </div>
-                        <div id="info-app" class="accordion-content hidden border-t border-white/5">
-                            <div id="info-app-text-placeholder"></div>
-                        </div>
-                    </div>
-
-
-                </div>
-            </div>
-
-            <!-- SUPPORTO -->
-            <div>
-                <h4 class="settings-section-label" data-t="section_support">Supporto</h4>
-                <div class="space-y-3">
-                    <div class="settings-group !mb-0">
-                        <div class="settings-item" onclick="window.location.href='supporto.html'">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-blue">
-                                    <span class="material-symbols-outlined">help</span>
-                                </div>
-                                <span class="settings-title" data-t="help_faq">Aiuto e FAQ</span>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="app_info_title">Informazioni sull'App</span>
+                                <span class="settings-desc">Versione e crediti</span>
                             </div>
-                            <span class="material-symbols-outlined settings-chevron">chevron_right</span>
-                        </div>
-                    </div>
-
-                    <div class="settings-group !mb-0">
-                        <div class="settings-item accordion-header" data-target="privacy-policy">
-                            <div class="glass-shine"></div>
-                            <div class="flex items-center">
-                                <div class="settings-icon-box icon-blue">
-                                    <span class="material-symbols-outlined">policy</span>
-                                </div>
-                                <div class="settings-label-group">
-                                    <span class="settings-title" data-t="privacy_policy_title">Informativa sul
-                                        trattamento dei dati</span>
-                                </div>
-                            </div>
-                            <span
-                                class="material-symbols-outlined settings-chevron transition-transform duration-300">expand_more</span>
-                        </div>
-                        <div id="privacy-policy" class="accordion-content hidden border-t border-white/5">
-                            <div id="privacy-policy-text-placeholder"></div>
                         </div>
                     </div>
                 </div>
+                <div id="info-app" class="accordion-content" style="display: none;">
+                    <div id="info-app-text-placeholder"></div>
+                </div>
+
+                <!-- Privacy Policy -->
+                <div class="settings-item accordion-header" data-target="info-privacy" style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-indigo-glass">
+                                <span class="material-symbols-outlined">shield</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="privacy_title">Trattamento dati personali</span>
+                                <span class="settings-desc">Informativa e diritti</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="info-privacy" class="accordion-content" style="display: none;">
+                    <div id="info-privacy-text-placeholder"></div>
+                </div>
             </div>
 
-            <!-- Azione Logout -->
-            <div class="pt-6 px-6">
-                <button id="logout-btn-settings"
-                    class="w-full py-4 text-rose-500 font-bold text-sm bg-rose-500/5 rounded-2xl border border-rose-500/10 active:scale-95 transition-all"
-                    data-t="logout">
-                    Esci dall'account
+            <!-- Logout -->
+            <div style="margin-top: 2rem; padding-bottom: 5rem;">
+                <button id="logout-btn-settings" class="auth-btn auth-btn-danger">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="settings-icon-box bg-rose-glass"
+                            style="width: 32px; height: 32px; border-radius: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">logout</span>
+                        </div>
+                        <span data-t="logout">Esci dall'account</span>
+                    </div>
                 </button>
             </div>
-    </div>
-    </main>
 
-    <div id="footer-placeholder"></div>
+        </main>
+
+        <!-- FOOTER PREMIUM -->
+        <footer class="titanium-footer">
+            <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
+                <span
+                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
+                    Titanium Secure Vault V1.0
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-white text-[#0a0f1e] px-6 py-2.5 rounded-full text-sm font-bold shadow-2xl opacity-0 transition-opacity pointer-events-none z-[99999]">
+        Copiato!
     </div>
 
     <!-- Scripts -->

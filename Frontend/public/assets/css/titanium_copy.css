@@ -1,0 +1,394 @@
+/* 
+ * TITANIUM DESIGN SYSTEM - V4.3 (Auth Final Pure CSS - No Tailwind)
+ * File: titanium_copy.css
+ * Focus: Autonomia Totale. Login/Register/Reset senza dipendenze esterne.
+ */
+
+/* ==========================================================================
+   0. TOKEN DI BASE
+   ========================================================================== */
+:root {
+    --bg-light: #e2e8f0;
+    --bg-dark: #0a0f1e;
+    --primary-blue: #2563eb;
+    --primary-light: #60a5fa;
+    --text-white: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.5);
+
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
+    --z-glow: 5;
+}
+
+html.dark {
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
+    --premium-border-width: 1.5px;
+    --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
+}
+
+/* ==========================================================================
+   1. GLOBAL RESET & BASE
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: #0f172a;
+    font-family: 'Manrope', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* FORCED DARK MODE */
+html.titanium-forced-dark body {
+    background-color: #0a0f1e !important;
+    color: white !important;
+    color-scheme: dark !important;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* ==========================================================================
+   2. TITANIUM BOX (CENTERED LAYOUT)
+   ========================================================================== */
+.titanium-box {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    overflow: hidden;
+    background: linear-gradient(to left, #030712, #162e6e);
+    /* Dark gradient hardcoded */
+    z-index: 10;
+}
+
+/* ==========================================================================
+   3. GLASS GLOW (FARO)
+   ========================================================================== */
+.glass-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 150%;
+    height: 300%;
+    filter: blur(80px);
+    z-index: var(--z-glow);
+    pointer-events: none;
+    animation: glowFloat 5s ease-in-out infinite;
+    transform: translateX(-50%);
+    background: var(--glow-gradient);
+}
+
+@keyframes glowFloat {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(-150px) scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(100px) scale(1.4);
+        opacity: 0.9;
+    }
+}
+
+/* ==========================================================================
+   4. TITANIUM VAULT (CARD)
+   ========================================================================== */
+.titanium-vault {
+    width: 100%;
+    max-width: 28rem;
+    padding: 2.5rem 2rem;
+    /* Sostituisce p-8 pt-10 pb-10 */
+
+    background: rgba(10, 15, 30, 0.5);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+
+    position: relative;
+    z-index: 15;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* SAETTA */
+.titanium-vault::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 2;
+    animation: shimmer-master 6s infinite linear;
+}
+
+@keyframes shimmer-master {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.titanium-vault:hover {
+    transform: translateY(-4px);
+}
+
+/* ==========================================================================
+   5. COMPONENTI INTERNI (Sostituzione Tailwind)
+   ========================================================================== */
+
+/* ICON BOX */
+.security-icon-box {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem auto;
+    /* Centrato + margine sotto */
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.5s;
+}
+
+.titanium-vault:hover .security-icon-box {
+    transform: scale(1.1);
+}
+
+.security-icon-box span {
+    font-size: 36px;
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* TITOLI */
+.auth-title {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    color: white;
+    margin: 0 0 0.25rem 0;
+    letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+    font-size: 0.875rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 2rem;
+}
+
+/* INPUT SECTION */
+.auth-form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.auth-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    padding-left: 0.25rem;
+}
+
+.auth-input {
+    width: 100%;
+    height: 3.5rem;
+    padding: 0 1.25rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.auth-input:focus {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+/* TOGGLE PASSWORD */
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 2.3rem;
+    /* Tuning preciso verticalmente */
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+    font-size: 20px;
+}
+
+.toggle-password:hover {
+    color: white;
+}
+
+/* BOTTONE */
+.auth-btn {
+    width: 100%;
+    height: 3.5rem;
+    background: linear-gradient(to right, #2563eb, #3b82f6);
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 1rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.auth-btn:hover {
+    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+    transform: translateY(-2px);
+}
+
+.auth-btn:active {
+    transform: scale(0.98);
+}
+
+/* LINK UTILI */
+.link-forgot {
+    display: block;
+    text-align: right;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.link-register {
+    display: block;
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--primary-light);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* FOOTER LEGALE */
+.legal-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   6. BORDER GLOW (PREMIUM)
+   ========================================================================== */
+.border-glow {
+    position: relative;
+    border: none !important;
+}
+
+.border-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* ==========================================================================
+   7. FASCE ESTETICHE
+   ========================================================================== */
+.auth-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.auth-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   8. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 640px) {
+    .titanium-box {
+        max-width: 100%;
+    }
+
+    .titanium-vault {
+        width: 90%;
+        padding: 1.5rem;
+        border-radius: 20px;
+    }
+
+    .glass-glow {
+        width: 200%;
+        filter: blur(60px);
+    }
+
+    .auth-title {
+        font-size: 1.75rem;
+    }
+}
