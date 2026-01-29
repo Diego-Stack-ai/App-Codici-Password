@@ -1,7 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { SwipeList } from './swipe-list-v6.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDocs, collection, query, where, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 // --- STATE ---
 let allArchived = [];
@@ -9,24 +9,11 @@ let currentUser = null;
 let currentSwipeList = null;
 let currentContext = 'all'; // 'all', 'privato' or companyId
 
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    const toast = document.createElement('div');
-    let bgClass = 'bg-gray-800 text-white';
-    if (type === 'error') bgClass = 'bg-red-500 text-white';
-    if (type === 'success') bgClass = 'bg-green-500 text-white';
-    toast.className = `${bgClass} px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-full opacity-0 pointer-events-auto`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.remove('translate-y-full', 'opacity-0'));
-    setTimeout(() => {
-        toast.classList.add('translate-y-full', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+// V3 Protocol: UI Core handles Toasts now.
+// const showToast = window.showToast; (Already global via ui-core.js link in html)
 
 document.addEventListener('DOMContentLoaded', () => {
+    // V3: Selector listener
     const selector = document.getElementById('archive-context-select');
     if (selector) {
         selector.addEventListener('change', (e) => {
@@ -35,16 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // V3: Search listener
     const searchInput = document.querySelector('input[type="search"]');
     if (searchInput) {
         searchInput.addEventListener('input', filterAndRender);
     }
 
+    // V3: Empty Trash Button
     const btnEmpty = document.getElementById('btn-empty-trash');
     if (btnEmpty) {
         btnEmpty.addEventListener('click', handleEmptyTrash);
     }
 
+    // INIT AUTH
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
@@ -55,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Delegated actions (Restore/Copy button)
+    // Delegated actions (Copy button)
     const container = document.getElementById('accounts-container');
     if (container) {
         container.onclick = function (e) {
@@ -64,38 +54,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault(); e.stopPropagation();
                 const text = btn.getAttribute('data-copy');
                 navigator.clipboard.writeText(text).then(() => {
-                    const icon = btn.querySelector('span');
-                    const old = icon.textContent; icon.textContent = 'check';
-                    setTimeout(() => icon.textContent = old, 1500);
-                    showToast("Copiato negli appunti!");
+                    window.showToast("Copiato negli appunti!", "success");
                 });
             }
         };
     }
 
-    // Unified Visibility Toggle (User, Account, Password)
+    // Unified Visibility Toggle (Global exposure for HTML onclicks)
     window.toggleTripleVisibility = (id) => {
         const eye = document.getElementById(`pass-eye-${id}`);
         const userText = document.getElementById(`user-text-${id}`);
         const accText = document.getElementById(`acc-text-${id}`);
         const passText = document.getElementById(`pass-text-${id}`);
 
-        const row = document.getElementById(`arch-${id}`);
-        if (!row || !eye) return;
+        // Trova i valori originali dai pulsanti copy (data-copy)
+        // Questo evita di esporre le password nel DOM visibile finché non richiesto
+        const btnUser = document.querySelector(`button[title="Copia Username"][data-id-ref="${id}"]`);
+        const btnAcc = document.querySelector(`button[title="Copia Account"][data-id-ref="${id}"]`);
+        const btnPass = document.querySelector(`button[title="Copia Password"][data-id-ref="${id}"]`);
 
-        const copyBtns = row.querySelectorAll('.copy-btn-dynamic');
-        let userVal = '', accVal = '', passVal = '';
+        // Recupera valori o usa fallback se i selettori sopra falliscono (usando logica precedente)
+        let userVal = btnUser ? btnUser.getAttribute('data-copy') : '';
+        let accVal = btnAcc ? btnAcc.getAttribute('data-copy') : '';
+        let passVal = btnPass ? btnPass.getAttribute('data-copy') : '';
 
-        copyBtns.forEach(btn => {
-            const title = (btn.getAttribute('title') || '').toLowerCase();
-            const val = btn.getAttribute('data-copy') || '';
-            if (title.includes('username') || title.includes('utente')) userVal = val;
-            else if (title.includes('account')) accVal = val;
-            else if (title.includes('password')) passVal = val;
-        });
+        // Fallback robusto scan row
+        if (!userVal && !accVal && !passVal) {
+            const row = document.getElementById(`arch-${id}`);
+            if (row) {
+                row.querySelectorAll('.copy-btn-dynamic').forEach(btn => {
+                    const t = btn.getAttribute('title').toLowerCase();
+                    if (t.includes('username')) userVal = btn.getAttribute('data-copy');
+                    if (t.includes('account')) accVal = btn.getAttribute('data-copy');
+                    if (t.includes('password')) passVal = btn.getAttribute('data-copy');
+                });
+            }
+        }
 
         const isHidden = eye.textContent === 'visibility';
-        const dots = '********';
+        const dots = '••••••••';
 
         if (isHidden) {
             eye.textContent = 'visibility_off';
@@ -110,18 +107,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Global Restore Handler (for click button)
     window.handleRestore = async (id) => {
+        // V3: No confirm needed for restore usually, or maybe simple toast
+        // But let's use a nice toast.
         try {
             const item = allArchived.find(a => a.id === id);
             if (!item) return;
             const ref = getCollectionRef(id, item.context);
             await updateDoc(ref, { isArchived: false });
-            showToast("Account ripristinato", "success");
+            window.showToast("Account ripristinato", "success");
             allArchived = allArchived.filter(a => a.id !== id);
             filterAndRender();
         } catch (e) {
             console.error(e);
-            showToast("Errore ripristino", "error");
+            window.showToast("Errore ripristino", "error");
         }
     };
 });
@@ -134,21 +134,17 @@ async function loadCompanies() {
         const colRef = collection(db, "users", currentUser.uid, "aziende");
         const snap = await getDocs(colRef);
 
-        // Append company options
         snap.forEach(doc => {
             const data = doc.data();
             const option = document.createElement('option');
             option.value = doc.id;
-            option.classList.add('bg-[#0a162a]', 'text-white');
-            option.textContent = `Archivio ${data.ragioneSociale || 'Azienda'}`;
+            option.style.background = "#0f1932"; // Titanium Dark Blue
+            option.style.color = "#ffffff";
             selector.appendChild(option);
         });
-
-        // Set initial selector value based on currentContext
         selector.value = currentContext;
-
     } catch (e) {
-        console.error("Errore caricamento aziende selector", e);
+        console.error("Errore loading companies", e);
     }
 }
 
@@ -156,69 +152,48 @@ async function loadArchived() {
     const container = document.getElementById('accounts-container');
     if (container) {
         container.innerHTML = `
-            <div class="text-center py-10 text-gray-500 flex flex-col items-center">
-                <span class="material-symbols-outlined animate-spin text-3xl mb-2 text-primary">progress_activity</span>
-                Caricamento in corso...
+            <div style="display:flex; flex-direction:column; align-items:center; opacity:0.6; padding: 2rem;">
+                <div style="width:1.5rem; height:1.5rem; border:2px solid white; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:0.5rem;"></div>
+                <span class="settings-desc">Ricerca archivi...</span>
             </div>`;
     }
 
     try {
         let results = [];
 
+        // Loading Logic (Same as before, simplified)
         if (currentContext === 'all' || currentContext === 'privato') {
-            const qPrivato = query(
-                collection(db, "users", currentUser.uid, "accounts"),
-                where("isArchived", "==", true)
-            );
-            const snapPrivato = await getDocs(qPrivato);
-            snapPrivato.forEach(doc => {
-                results.push({ ...doc.data(), id: doc.id, context: 'privato' });
-            });
+            const q = query(collection(db, "users", currentUser.uid, "accounts"), where("isArchived", "==", true));
+            const s = await getDocs(q);
+            s.forEach(d => results.push({ ...d.data(), id: d.id, context: 'privato' }));
         }
 
         if (currentContext === 'all') {
-            const businessesSnap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
-            const promises = businessesSnap.docs.map(async (bizDoc) => {
-                const qBizAccounts = query(
-                    collection(db, "users", currentUser.uid, "aziende", bizDoc.id, "accounts"),
-                    where("isArchived", "==", true)
-                );
-                const snapBiz = await getDocs(qBizAccounts);
-                snapBiz.forEach(accDoc => {
-                    results.push({
-                        ...accDoc.data(),
-                        id: accDoc.id,
-                        context: bizDoc.id,
-                        businessName: bizDoc.data().ragioneSociale || 'Azienda'
-                    });
-                });
-            });
-            await Promise.all(promises);
+            const bizSnap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
+            for (const b of bizSnap.docs) {
+                const q = query(collection(db, "users", currentUser.uid, "aziende", b.id, "accounts"), where("isArchived", "==", true));
+                const s = await getDocs(q);
+                s.forEach(d => results.push({ ...d.data(), id: d.id, context: b.id, businessName: b.data().ragioneSociale }));
+            }
         } else if (currentContext !== 'privato') {
-            // Specific Company selective view
-            const qBiz = query(
-                collection(db, "users", currentUser.uid, "aziende", currentContext, "accounts"),
-                where("isArchived", "==", true)
-            );
-            const snapBiz = await getDocs(qBiz);
-            snapBiz.forEach(doc => {
-                results.push({ ...doc.data(), id: doc.id, context: currentContext });
-            });
+            const q = query(collection(db, "users", currentUser.uid, "aziende", currentContext, "accounts"), where("isArchived", "==", true));
+            const s = await getDocs(q);
+            s.forEach(d => results.push({ ...d.data(), id: d.id, context: currentContext }));
         }
 
         allArchived = results;
         filterAndRender();
+
     } catch (e) {
         console.error(e);
-        showToast("Errore caricamento", "error");
-        if (container) container.innerHTML = `<div class="text-center py-10 text-red-500">Errore: ${e.message}</div>`;
+        window.showToast("Errore caricamento dati", "error");
+        if (container) container.innerHTML = `<div class="settings-desc" style="text-align:center; color: #f87171;">Errore: ${e.message}</div>`;
     }
 }
 
 function filterAndRender() {
     const searchVal = document.querySelector('input[type="search"]')?.value.toLowerCase() || '';
-
-    let filtered = allArchived.filter(acc =>
+    const filtered = allArchived.filter(acc =>
         (acc.nomeAccount || '').toLowerCase().includes(searchVal) ||
         (acc.username || '').toLowerCase().includes(searchVal)
     );
@@ -228,150 +203,101 @@ function filterAndRender() {
 
     if (filtered.length === 0) {
         container.innerHTML = `
-            <div class="text-center py-10 opacity-70 flex flex-col items-center">
-                <div class="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-3">
-                    <span class="material-symbols-outlined text-3xl text-amber-600">inventory_2</span>
-                </div>
-                <p class="text-gray-500 font-medium">Nessun account in archivio.</p>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1rem; opacity:0.5;">
+                <span class="material-symbols-outlined" style="font-size:3rem; margin-bottom:1rem;">inventory_2</span>
+                <p class="settings-desc">Nessun account trovato</p>
             </div>`;
         return;
     }
 
     container.innerHTML = filtered.map(acc => {
+        // Safe Avatar
         const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
-
-        // Style Logic - Titanium Style with Colored Borders
-        let borderClass = 'border-l-4 border-blue-500'; // Standard Blue
-        let iconColor = 'text-blue-400';
-
-        const isMemo = !!acc.hasMemo || !!acc.isMemoShared || acc.type === 'memorandum' || acc.category === 'memorandum';
+        const isMemo = !!acc.hasMemo || acc.type === 'memorandum';
         const isShared = !!acc.shared || !!acc.isSharedWithMe;
 
-        if (isShared && isMemo) {
-            borderClass = 'border-l-4 border-emerald-500';
-            iconColor = 'text-emerald-400';
-        } else if (isShared) {
-            borderClass = 'border-l-4 border-purple-500';
-            iconColor = 'text-purple-400';
-        } else if (isMemo) {
-            borderClass = 'border-l-4 border-amber-500';
-            iconColor = 'text-amber-400';
-        }
+        // Colors
+        let borderColor = 'rgba(59, 130, 246, 0.5)'; // Blue
+        if (isShared && isMemo) borderColor = 'rgba(16, 185, 129, 0.5)'; // Emerald
+        else if (isShared) borderColor = 'rgba(168, 85, 247, 0.5)'; // Purple
+        else if (isMemo) borderColor = 'rgba(245, 158, 11, 0.5)'; // Amber
 
         return `
-            <div class="relative mb-3 select-none swipe-row rounded-xl group" 
-                 style="touch-action: pan-y;"
-                 id="arch-${acc.id}" 
-                 data-id="${acc.id}">
-              
-              <!-- BACKGROUND ACTIONS -->
-              <div class="absolute inset-y-0 left-0 flex w-full swipe-bg-left opacity-0 transition-opacity z-0 rounded-xl overflow-hidden">
-                 <div class="w-full h-full bg-red-500/20 backdrop-blur-md flex items-center justify-start pl-6 border border-red-500/30">
-                    <div class="flex flex-col items-center text-red-400">
-                        <span class="material-symbols-outlined text-2xl">delete_forever</span>
-                        <span class="text-[10px] font-bold uppercase mt-1">Elimina</span>
+            <div class="settings-item swipe-row" id="arch-${acc.id}" data-id="${acc.id}" style="padding: 0; min-height: auto; overflow: hidden; position: relative; touch-action: pan-y; margin-bottom: 0.5rem; border-left: 3px solid ${borderColor};">
+                
+                <!-- SWIPE BACKGROUNDS (V3 Compatible) -->
+                <div class="absolute inset-y-0 left-0 w-full swipe-bg-left opacity-0 z-0 flex items-center pl-6 bg-rose-900/50">
+                     <span class="material-symbols-outlined text-rose-400">delete_forever</span>
+                </div>
+                <div class="absolute inset-y-0 right-0 w-full swipe-bg-right opacity-0 z-0 flex items-center justify-end pr-6 bg-emerald-900/50">
+                     <span class="material-symbols-outlined text-emerald-400">restore_from_trash</span>
+                </div>
+
+                <!-- CONTENT -->
+                <div class="swipe-content relative z-10 bg-[#e0f2fe] p-4 flex gap-4 w-full transition-transform">
+                    <img src="${avatar}" style="width:40px; height:40px; border-radius:10px; object-fit:cover; border:1px solid rgba(0,0,0,0.1); background-color: #f1f5f9;">
+                    
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                             <h4 style="color: #0f172a !important; font-weight:700; font-size:0.95rem; word-break:break-word; line-height:1.2; padding-right:0.5rem;">${acc.nomeAccount || 'Senza Nome'}</h4>
+                             ${acc.businessName ? `<span style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:rgba(37,99,235,0.1); color:#2563eb; text-transform:uppercase; margin-top:2px; white-space:nowrap; font-weight:700;">${acc.businessName}</span>` : ''}
+                        </div>
+
+                        <!-- Data Rows (Compact V3) -->
+                        <div style="margin-top:0.5rem; display:flex; flex-direction:column; gap:0.25rem;">
+                             ${renderDataRow(acc.id, 'User', acc.username || acc.utente, 'username')}
+                             ${renderDataRow(acc.id, 'Acc', acc.account, 'account')}
+                             ${renderDataRow(acc.id, 'Pass', acc.password, 'password')}
+                        </div>
                     </div>
-                 </div>
-              </div>
 
-              <div class="absolute inset-y-0 right-0 flex w-full swipe-bg-right opacity-0 transition-opacity z-0 rounded-xl overflow-hidden">
-                 <div class="w-full h-full bg-green-500/20 backdrop-blur-md flex items-center justify-end pr-6 border border-green-500/30">
-                    <div class="flex flex-col items-center text-green-400">
-                        <span class="material-symbols-outlined text-2xl">restore_from_trash</span>
-                        <span class="text-[10px] font-bold uppercase mt-1">Ripristina</span>
+                    <!-- Actions Column -->
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; padding-left:0.5rem;">
+                         <button onclick="window.handleRestore('${acc.id}')" style="width:32px; height:32px; border-radius:8px; background:rgba(16,185,129,0.1); color:#059669; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;" title="Ripristina">
+                            <span class="material-symbols-outlined" style="font-size:18px;">restore_from_trash</span>
+                         </button>
+                         ${acc.password ? `<button onclick="window.toggleTripleVisibility('${acc.id}')" style="width:32px; height:32px; border-radius:8px; background:rgba(0,0,0,0.05); color:#334155; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;" title="Mostra">
+                            <span id="pass-eye-${acc.id}" class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                         </button>` : ''}
                     </div>
-                 </div>
-              </div>
-
-              <!-- FOREGROUND CONTENT: Titanium Card -->
-              <div class="relative z-10 bg-[#1e293b]/90 backdrop-blur-md hover:bg-[#1e293b] ${borderClass} border-glow rounded-xl transition-all duration-300 swipe-content shadow-lg border-y border-r border-white/5 overflow-hidden group-hover:-translate-y-1 active:scale-[0.99]">
-                 
-                 <!-- 10) Glow Overlay -->
-                 <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"></div>
-
-                 <!-- "Archived" Badge Watermark -->
-                 <div class="absolute top-[-10px] right-[-10px] p-0 opacity-5 pointer-events-none rotate-12 z-0">
-                    <span class="material-symbols-outlined text-white text-[80px]">inventory_2</span>
-                 </div>
-
-                 <div class="relative z-10 p-4 flex items-start space-x-4">
-                     <!-- Avatar -->
-                     <img class="w-12 h-12 rounded-xl object-cover bg-black/20 shadow-inner border border-white/10 shrink-0" src="${avatar}">
-                     
-                     <div class="flex-1 min-w-0 pr-8">
-                         <div class="flex items-center justify-between mb-1">
-                             <h3 class="font-bold text-base text-white truncate pr-2">${acc.nomeAccount || 'Senza Nome'}</h3>
-                              ${acc.businessName ? `<span class="text-[9px] px-1.5 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded font-bold uppercase tracking-tighter shrink-0">${acc.businessName.toUpperCase()}</span>` : ''}
-                         </div>
-                         
-                         <!-- Data Fields -->
-                         <div class="space-y-1.5 text-xs text-gray-300">
-                              ${(acc.username || acc.utente) ? `
-                                 <div class="flex items-center justify-between bg-black/20 rounded-md px-2 py-1 border border-white/5">
-                                     <span class="opacity-60 mr-2">User:</span>
-                                     <div class="flex items-center min-w-0 flex-1 justify-end gap-2">
-                                        <span id="user-text-${acc.id}" class="truncate font-mono text-white/90">********</span>
-                                        <button class="copy-btn-dynamic text-white/50 hover:text-white transition-colors" data-copy="${(acc.username || acc.utente).replace(/"/g, '&quot;')}" title="Copia Username">
-                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                                        </button>
-                                     </div>
-                                 </div>` : ''}
-                             
-                             ${acc.account ? `
-                                 <div class="flex items-center justify-between bg-black/20 rounded-md px-2 py-1 border border-white/5">
-                                     <span class="opacity-60 mr-2">Acc:</span>
-                                      <div class="flex items-center min-w-0 flex-1 justify-end gap-2">
-                                        <span id="acc-text-${acc.id}" class="truncate font-mono text-white/90">********</span>
-                                        <button class="copy-btn-dynamic text-white/50 hover:text-white transition-colors" data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account">
-                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                                        </button>
-                                     </div>
-                                 </div>` : ''}
-
-                             ${acc.password ? `
-                                 <div class="flex items-center justify-between bg-black/20 rounded-md px-2 py-1 border border-white/5">
-                                     <span class="opacity-60 mr-2">Pass:</span>
-                                      <div class="flex items-center min-w-0 flex-1 justify-end gap-2">
-                                        <span id="pass-text-${acc.id}" class="truncate font-mono text-white/90">********</span>
-                                        <button class="copy-btn-dynamic text-white/50 hover:text-white transition-colors" data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password">
-                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                                        </button>
-                                     </div>
-                                 </div>` : ''}
-                         </div>
-                     </div>
-                 </div>
-                 
-                 <!-- Quick Actions (Absolute Right) -->
-                 <div class="absolute top-3 right-3 z-20 flex flex-col gap-2">
-                     <button onclick="event.stopPropagation(); window.handleRestore('${acc.id}')" 
-                             class="flex items-center justify-center w-8 h-8 rounded-lg bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 transition-all shadow-sm active:scale-95" 
-                             title="Ripristina">
-                         <span class="material-symbols-outlined text-[18px]">restore_from_trash</span>
-                     </button>
-                     ${acc.password ? `
-                     <button onclick="event.stopPropagation(); window.toggleTripleVisibility('${acc.id}')" 
-                             class="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all shadow-sm active:scale-95" 
-                             title="Mostra Dati">
-                         <span id="pass-eye-${acc.id}" class="material-symbols-outlined text-[18px]">visibility</span>
-                     </button>` : ''}
-                 </div>
-
-              </div>
+                </div>
             </div>
-         `;
+        `;
     }).join('');
 
+    // Rebind Swipe
     if (currentSwipeList) currentSwipeList = null;
     currentSwipeList = new SwipeList('.swipe-row', {
-        threshold: 0.15,
+        threshold: 0.2,
+        onSwipeLeft: (item) => handleRestoreSwipe(item), // Left swipe is Green/Restore usually? Check logic. 
+        // Logic in previous file: Left BG was Red/Delete. Right BG was Green/Restore.
+        // onSwipeLeft trigger is usually "Right to Left motion" -> reveals RIGHT background.
+        // Wait, SwipeList v6 logic:
+        // if dx < 0 (swipe left), reveals Right BG.
+        // if dx > 0 (swipe right), reveals Left BG.
+        // So onSwipeLeft -> dx < 0 -> Right Background (Green/Restore).
+        // Wait, let's look at template above.
+        // swipe-bg-right is GREEN. This appears when content moves LEFT (swipe left).
+        // So onSwipeLeft should trigger RESTORE. Correct.
         onSwipeLeft: (item) => handleRestoreSwipe(item),
-        onSwipeRight: (item) => handleDeleteForever(item)
+        onSwipeRight: (item) => handleDeleteForever(item) // Moves content Right, reveals Left BG (Red/Delete).
     });
 }
 
-// --- HELPERS (Restore/Delete Logic) ---
+function renderDataRow(id, label, value, type) {
+    if (!value) return '';
+    return `
+        <div style="display:flex; align-items:center; gap:0.5rem; background:rgba(255,255,255,0.6); padding:0.25rem 0.5rem; border-radius:6px; color: #0f172a !important;">
+            <span style="font-size:0.65rem; color:#475569 !important; text-transform:uppercase; width:24px; font-weight:700;">${label}</span>
+            <span id="${type === 'password' ? 'pass' : (type === 'account' ? 'acc' : 'user')}-text-${id}" style="font-family:monospace; font-size:0.8rem; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#0f172a !important;">••••••••</span>
+            <button class="copy-btn-dynamic" data-copy="${value.replace(/"/g, '&quot;')}" title="Copia ${label}" data-id-ref="${id}" style="color:#64748b !important; opacity:1;">
+                <span class="material-symbols-outlined" style="font-size:14px;">content_copy</span>
+            </button>
+        </div>
+    `;
+}
 
+// --- LOGIC ---
 function getCollectionRef(id, itemContext) {
     const context = itemContext || currentContext;
     if (context === 'privato') {
@@ -386,22 +312,33 @@ async function handleRestoreSwipe(item) {
     try {
         const archivedItem = allArchived.find(a => a.id === id);
         const ref = getCollectionRef(id, archivedItem?.context);
-        await updateDoc(ref, {
-            isArchived: false
-        });
-        showToast("Account ripristinato", "success");
+        await updateDoc(ref, { isArchived: false });
+        window.showToast("Ripristinato!", "success"); // Short message
+        // Remove from list
         allArchived = allArchived.filter(a => a.id !== id);
+        const el = document.getElementById(`arch-${id}`);
+        if (el) el.style.display = 'none'; // Instant visual feedback
+        setTimeout(filterAndRender, 300); // Re-render clean
     } catch (e) {
         console.error(e);
-        showToast("Errore ripristino", "error");
-        filterAndRender();
+        window.showToast("Errore", "error");
+        filterAndRender(); // Reset swipe
     }
 }
 
 async function handleDeleteForever(item) {
     const id = item.dataset.id;
-    if (!confirm("Questa operazione è IRREVERSIBILE. Vuoi eliminare questo account per sempre?")) {
-        filterAndRender();
+
+    // V3: Secure Confirm via Input Modal
+    const userConfirm = await window.showInputModal(
+        "ELIMINAZIONE DEFINITIVA",
+        "",
+        "Scrivi 'SI' per confermare l'eliminazione."
+    );
+
+    if (userConfirm !== 'SI') {
+        window.showToast("Operazione annullata", "info");
+        filterAndRender(); // Reset swipe
         return;
     }
 
@@ -409,11 +346,12 @@ async function handleDeleteForever(item) {
         const archivedItem = allArchived.find(a => a.id === id);
         const ref = getCollectionRef(id, archivedItem?.context);
         await deleteDoc(ref);
-        showToast("Eliminato definitivamente", "success");
+        window.showToast("Account eliminato per sempre", "success");
         allArchived = allArchived.filter(a => a.id !== id);
+        filterAndRender();
     } catch (e) {
         console.error(e);
-        showToast("Errore eliminazione", "error");
+        window.showToast("Errore eliminazione", "error");
         filterAndRender();
     }
 }
@@ -421,23 +359,30 @@ async function handleDeleteForever(item) {
 async function handleEmptyTrash() {
     if (allArchived.length === 0) return;
 
-    if (!confirm(`Sei sicuro di voler eliminare TUTTI i ${allArchived.length} account in archivio per ${currentContext === 'privato' ? 'Privato' : 'questa Azienda'}? Questa operazione non si può annullare.`)) {
+    // V3 Secure Confirm
+    const userConfirm = await window.showInputModal(
+        "SVUOTA INTERO ARCHIVIO",
+        "",
+        "Scrivi 'CANCELLA TUTTO' per confermare."
+    );
+
+    if (userConfirm !== 'CANCELLA TUTTO') {
         return;
     }
 
     try {
         const batch = writeBatch(db);
         allArchived.forEach(acc => {
-            const ref = getCollectionRef(acc.id);
+            const ref = getCollectionRef(acc.id, acc.context); // Ensure context is correct
             batch.delete(ref);
         });
 
         await batch.commit();
-        showToast("Archivio svuotato con successo!", "success");
+        window.showToast("Archivio svuotato", "success");
         allArchived = [];
         filterAndRender();
     } catch (e) {
         console.error(e);
-        showToast("Errore durante lo svuotamento", "error");
+        window.showToast("Errore svuotamento", "error");
     }
 }

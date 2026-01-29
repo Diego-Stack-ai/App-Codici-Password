@@ -182,8 +182,8 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-white);
     transition: all 0.2s;
-    position: absolute;
-    right: 0;
+    /* position: absolute; REMOVED */
+    /* right: 0; REMOVED */
     text-decoration: none;
     /* Rimuove sottolineatura */
 }

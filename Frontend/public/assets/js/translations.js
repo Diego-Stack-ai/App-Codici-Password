@@ -88,11 +88,18 @@ export const translations = {
         lock_immediately: "Subito",
         lock_1min: "1 Min",
         lock_3min: "3 Min",
+        lock_3min: "3 Min",
         lock_5min: "5 Min",
+
+        notifications_history: "Storico Notifiche",
+        notifications_history_desc: "Visualizza avvisi passati",
 
         resend_link_text: "Reinvia email con link",
 
         // EXPIRY RULES DASHBOARD
+        account_archive: "Archivio Account",
+        account_archive_desc: "Gestisci gli account archiviati",
+
         expiry_rules_title_page: "Regole Scadenze",
         card_vehicles_title: "Automezzi",
         card_vehicles_desc: "Configura oggetti, periodi e frequenze email per veicoli",
@@ -319,8 +326,17 @@ export const translations = {
         lock_immediately: "Immediately",
         lock_1min: "1 Min",
         lock_3min: "3 Min",
+        lock_3min: "3 Min",
         lock_5min: "5 Min",
+
+        notifications_history: "Notifications History",
+        notifications_history_desc: "View past alerts",
+
         resend_link_text: "Resend email link",
+
+        account_archive: "Account Archive",
+        account_archive_desc: "Manage archived accounts",
+
         expiry_rules_title_page: "Expiry Rules",
         card_vehicles_title: "Vehicles",
         card_vehicles_desc: "Configure subjects, periods, and email frequencies for vehicles",
@@ -503,7 +519,14 @@ export const translations = {
         lock_immediately: "Inmediatamente",
         lock_1min: "1 Min",
         lock_3min: "3 Min",
+        lock_3min: "3 Min",
         lock_5min: "5 Min",
+
+        notifications_history: "Historial de Notificaciones",
+        notifications_history_desc: "Ver alertas pasadas",
+
+        account_archive: "Archivo de Cuentas",
+        account_archive_desc: "Gestionar cuentas archivadas",
 
         // GENERAL SECTION
         notifications: "Notificaciones",
@@ -712,7 +735,14 @@ export const translations = {
         lock_immediately: "Immédiatement",
         lock_1min: "1 Min",
         lock_3min: "3 Min",
+        lock_3min: "3 Min",
         lock_5min: "5 Min",
+
+        notifications_history: "Historique des Notifications",
+        notifications_history_desc: "Voir les alertes passées",
+
+        account_archive: "Archives des Comptes",
+        account_archive_desc: "Gérer les comptes archivés",
 
         // GENERAL SECTION
         notifications: "Notifications",

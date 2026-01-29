@@ -1,148 +1,210 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it" class="titanium-forced-dark">
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
-    <title>Privacy Policy</title>
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;display=swap" rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script src="assets/js/tailwind-config.js"></script>
-    <style>
-        body {
-            background-color: #0a0f1e;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Titanium</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <!-- Design System Master -->
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
+
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js"></script>
+    <script src="assets/js/titanium-core.js"></script>
 </head>
 
-<body class="bg-[#0a0f1e] text-white font-display antialiased selection:bg-slate-500/30">
-    <div
-        class="relative flex h-full min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto bg-gradient-to-l from-[#030712] to-[#162e6e] shadow-2xl overflow-hidden border-x border-white/5">
+<body class="antialiased">
+    <div class="titanium-box">
+        <!-- Faro Estetico -->
+        <div class="glass-glow"></div>
 
-        <!-- Header (Fixed Neutral Glass) -->
-        <header
-            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-[#0a0f1e]/80 backdrop-blur-xl border-b border-white/10 z-50">
-            <div class="flex items-center px-4 h-16 gap-4">
-                <a href="impostazioni.html"
-                    class="group flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                    <span
-                        class="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        <!-- HEADER FISSO -->
+        <header class="titanium-header">
+            <div id="header-content" class="header-stack"
+                style="flex-direction: row; justify-content: space-between; align-items: center;">
+
+                <!-- Sinistra: Indietro -->
+                <a href="impostazioni.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">arrow_back</span>
                 </a>
-                <h1 class="text-sm font-bold uppercase tracking-widest text-white">Privacy Policy</h1>
+
+                <!-- Centro: Titolo -->
+                <div
+                    style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 55%; text-align: center;">
+                    <h2 class="header-title"
+                        style="margin: 0; font-size: clamp(0.9rem, 2.5vw, 1.1rem); line-height: 1.1; white-space: normal;"
+                        data-t="privacy_policy_title">
+                        PRIVACY POLICY
+                    </h2>
+                    <span data-t="privacy_extended_title"
+                        style="display: block; font-size: 0.6rem; color: rgba(255,255,255,0.5); letter-spacing: 0.1em; margin-top: 2px;">INFORMATIVA
+                        ESTESA</span>
+                </div>
+
+                <!-- Destra: Home -->
+                <a href="home_page.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
             </div>
         </header>
 
-        <!-- Header Spacer -->
-        <div class="h-20 w-full shrink-0"></div>
+        <main class="settings-container no-select" style="padding-top: 5rem; gap: 1rem;">
 
-        <main class="titanium-main">
-
-            <!-- Content -->
-            <div class="space-y-6 text-sm text-gray-300 leading-relaxed text-justify">
-
-                <div
-                    class="bg-[#1e293b] p-5 rounded-2xl shadow-lg border border-white/5 hover:border-white/10 transition-colors">
-                    <h2 class="text-base font-bold text-white mb-2 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-gray-400">shield_person</span> 1. Titolare
-                    </h2>
-                    <p class="text-xs text-gray-400">
-                        Il Titolare del trattamento dei dati è <strong class="text-white">Boschetto Diego</strong>.<br>
-                        "App Codici Password" è concepita per garantire la massima sicurezza e riservatezza.
-                    </p>
-                </div>
-
-                <div
-                    class="bg-[#1e293b] p-5 rounded-2xl shadow-lg border border-white/5 hover:border-white/10 transition-colors">
-                    <h2 class="text-base font-bold text-white mb-3 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-gray-400">source</span> 2. Dati Trattati
-                    </h2>
-                    <ul class="space-y-3">
-                        <li class="flex gap-2 text-xs text-gray-400">
-                            <span class="text-white">•</span>
-                            <span><strong class="text-white">Registrazione:</strong> Email, nome e immagine (per
-                                autenticazione).</span>
-                        </li>
-                        <li class="flex gap-2 text-xs text-gray-400">
-                            <span class="text-white">•</span>
-                            <span><strong class="text-white">Volontari:</strong> Password, note, allegati salvati
-                                dall'utente.</span>
-                        </li>
-                        <li class="flex gap-2 text-xs text-gray-400">
-                            <span class="text-white">•</span>
-                            <span><strong class="text-white">Navigazione:</strong> Log tecnici (gestiti tramite Google
-                                Firebase).</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div
-                    class="bg-[#1e293b] p-5 rounded-2xl shadow-lg border border-white/5 hover:border-white/10 transition-colors">
-                    <h2 class="text-base font-bold text-white mb-2 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-gray-400">lock_open</span> 3. Sicurezza
-                    </h2>
-                    <p class="mb-3 text-xs text-gray-400">
-                        I dati sono trattati esclusivamente per fornire il servizio di memorizzazione.
-                    </p>
-                    <div class="flex items-start gap-3 bg-black/20 p-3 rounded-xl border border-white/5">
-                        <span class="material-symbols-outlined text-slate-400 text-lg mt-0.5">lock</span>
-                        <div>
-                            <p class="text-xs font-bold text-white">Storage Sicuro</p>
-                            <p class="text-[10px] mt-1 text-gray-500 leading-normal">
-                                Infrastruttura <strong class="text-gray-300">Google Firebase</strong>. Trasmissione
-                                protetta (SSL/TLS) e database criptati.
-                            </p>
+            <!-- 1. Titolare -->
+            <div class="settings-item" style="cursor: default;">
+                <div class="settings-item-header" style="flex-direction: column; align-items: start; gap: 0.75rem;">
+                    <div class="settings-item-info">
+                        <div class="settings-icon-box bg-emerald-glass">
+                            <span class="material-symbols-outlined">shield_person</span>
+                        </div>
+                        <div class="settings-text">
+                            <span class="settings-label" data-t="privacy_1_title">1. TITOLARE DEL TRATTAMENTO</span>
                         </div>
                     </div>
-                </div>
-
-                <div
-                    class="bg-[#1e293b] p-5 rounded-2xl shadow-lg border border-white/5 hover:border-white/10 transition-colors">
-                    <h2 class="text-base font-bold text-white mb-2 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-gray-400">share</span> 4. Condivisione
-                    </h2>
-                    <p class="text-xs text-gray-400">
-                        I dati <strong class="text-white">NON</strong> vengono venduti o ceduti a terzi.
-                    </p>
-                    <p class="mt-2 text-xs text-gray-400">
-                        La condivisione avviene solo su <strong>esplicita azione dell'utente</strong> verso indirizzi
-                        email specifici.
-                    </p>
-                </div>
-
-                <div
-                    class="bg-[#1e293b] p-5 rounded-2xl shadow-lg border border-white/5 hover:border-white/10 transition-colors">
-                    <h2 class="text-base font-bold text-white mb-2 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-gray-400">gavel</span> 5. Diritti
-                    </h2>
-                    <p class="text-xs text-gray-400 mb-2">
-                        In conformità al GDPR, hai diritto di:
-                    </p>
-                    <ul class="space-y-1 pl-1">
-                        <li class="text-xs text-gray-400">• Accedere ai tuoi dati.</li>
-                        <li class="text-xs text-gray-400">• Chiedere rettifica o cancellazione.</li>
-                        <li class="text-xs text-gray-400">• Revocare il consenso eliminando l'account.</li>
-                    </ul>
-                </div>
-
-                <div class="text-center pt-4 pb-8 border-t border-white/5">
-                    <p class="text-[10px] text-gray-600 uppercase tracking-widest">Ultimo aggiornamento: Gennaio 2026
+                    <p class="settings-desc" data-t="privacy_1_text"
+                        style="color: #94a3b8; font-size: 0.85rem; padding-left: 0.25rem; line-height: 1.5;">
+                        Il Titolare del trattamento dei dati è <strong style="color:white;">Boschetto Diego</strong>.
+                        L'applicazione è concepita per garantire la massima sicurezza e riservatezza.
                     </p>
                 </div>
             </div>
+
+            <!-- 2. Dati Trattati -->
+            <div class="settings-item" style="cursor: default;">
+                <div class="settings-item-header" style="flex-direction: column; align-items: start; gap: 0.75rem;">
+                    <div class="settings-item-info">
+                        <div class="settings-icon-box bg-blue-glass">
+                            <span class="material-symbols-outlined">source</span>
+                        </div>
+                        <div class="settings-text">
+                            <span class="settings-label" data-t="privacy_2_title">2. DATI TRATTATI</span>
+                        </div>
+                    </div>
+
+                    <ul class="settings-desc"
+                        style="list-style: none; padding: 0; margin-left: 0.5rem; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 1rem; color: #94a3b8; font-size: 0.85rem; line-height: 1.6;">
+                        <li style="margin-bottom: 0.5rem;" data-t="privacy_2_li1"><strong
+                                style="color:white;">Registrazione:</strong> Email, nome, avatar (per
+                            autenticazione).</li>
+                        <li style="margin-bottom: 0.5rem;" data-t="privacy_2_li2"><strong
+                                style="color:white;">Volontari:</strong> Credenziali, password, note
+                            (crittografati).</li>
+                        <li data-t="privacy_2_li3"><strong style="color:white;">Tecnici:</strong> Log di sistema gestiti
+                            da Google Firebase.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 3. Sicurezza -->
+            <div class="settings-item" style="cursor: default;">
+                <div class="settings-item-header" style="flex-direction: column; align-items: start; gap: 0.75rem;">
+                    <div class="settings-item-info">
+                        <div class="settings-icon-box bg-purple-glass">
+                            <span class="material-symbols-outlined">lock</span>
+                        </div>
+                        <div class="settings-text">
+                            <span class="settings-label" data-t="privacy_3_title">3. SICUREZZA E STORAGE</span>
+                        </div>
+                    </div>
+
+                    <p class="settings-desc" data-t="privacy_3_text"
+                        style="color: #94a3b8; font-size: 0.85rem; padding-left: 0.25rem; line-height: 1.5;">
+                        Utilizziamo l'infrastruttura sicura di <strong style="color:white;">Google Firebase</strong>.
+                        Connessioni SSL/TLS e database protetti. I dati sensibili sono accessibili solo all'utente
+                        proprietario e ai destinatari espliciti della condivisione.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 4. Condivisione -->
+            <div class="settings-item" style="cursor: default;">
+                <div class="settings-item-header" style="flex-direction: column; align-items: start; gap: 0.75rem;">
+                    <div class="settings-item-info">
+                        <div class="settings-icon-box bg-rose-glass">
+                            <span class="material-symbols-outlined">share</span>
+                        </div>
+                        <div class="settings-text">
+                            <span class="settings-label" data-t="privacy_4_title">4. CONDIVISIONE DATI</span>
+                        </div>
+                    </div>
+                    <p class="settings-desc" data-t="privacy_4_text"
+                        style="color: #94a3b8; font-size: 0.85rem; padding-left: 0.25rem; line-height: 1.5;">
+                        Nessun dato viene venduto a terzi. La condivisione avviene <strong style="color: white;">solo su
+                            tua esplicita azione</strong> tramite la funzione "Condividi" verso le email che selezioni.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 5. Diritti -->
+            <div class="settings-item" style="cursor: default;">
+                <div class="settings-item-header" style="flex-direction: column; align-items: start; gap: 0.75rem;">
+                    <div class="settings-item-info">
+                        <div class="settings-icon-box bg-amber-glass">
+                            <span class="material-symbols-outlined">gavel</span>
+                        </div>
+                        <div class="settings-text">
+                            <span class="settings-label" data-t="privacy_5_title">5. DIRITTI UTENTE (GDPR)</span>
+                        </div>
+                    </div>
+
+                    <ul class="settings-desc"
+                        style="list-style: none; padding: 0; margin-left: 0.5rem; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 1rem; color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">
+                        <li style="margin-bottom: 0.5rem;" data-t="privacy_5_li1">• Diritto di accesso ai propri dati.
+                        </li>
+                        <li style="margin-bottom: 0.5rem;" data-t="privacy_5_li2">• Diritto alla cancellazione ("Oblio")
+                            eliminando l'account.</li>
+                        <li data-t="privacy_5_li3">• Diritto di rettifica delle informazioni.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer: Update Date -->
+            <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem;">
+                <p style="font-size: 0.7rem; color: rgba(255,255,255,0.3); letter-spacing: 0.05em;"
+                    data-t="privacy_update_text">
+                    Ultimo aggiornamento: Gennaio 2026
+                </p>
+            </div>
+
         </main>
 
-        <!-- Bottom Glass Frame (Fixed) -->
-        <div
-            class="fixed bottom-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto h-16 pointer-events-none z-50 backdrop-blur-sm border-t transition-colors bg-[#0a0f1e]/20 border-white/5">
-        </div>
+        <!-- FOOTER PREMIUM -->
+        <footer class="titanium-footer">
+            <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
+                <span
+                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
+                    Titanium Security Protocol V3.0
+                </span>
+            </div>
+        </footer>
     </div>
+
+    <!-- Translation Logic -->
+    <script type="module">
+        import { t } from './assets/js/translations.js';
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                const translated = t(key);
+                if (translated && translated !== key) {
+                    el.innerHTML = translated;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', applyTranslations);
+        applyTranslations();
+    </script>
 </body>
 
 </html>

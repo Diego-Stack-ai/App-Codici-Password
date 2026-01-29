@@ -1,147 +1,212 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="titanium-forced-dark">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-t="expiry_rules_title_page">Regole Scadenze - Protocollo Titanium</title>
+    <title>Regole Scadenze - Titanium</title>
 
-    <!-- Titanium Engine Stack -->
-    <script src="assets/js/titanium-config.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
     <!-- Design System Master -->
-    <link rel="stylesheet" href="assets/css/titanium.css">
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
+
+    <!-- Legacy Tailwind (Required for Cards) -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js"></script>
     <script src="assets/js/titanium-core.js"></script>
+    <script src="assets/js/translations.js"></script>
+
+    <!-- Custom Glass Shine -->
+    <style>
+        .glass-shine {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.1) 45%, transparent 50%);
+            animation: shine 4s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+    </style>
 </head>
 
-<body class="titanium-bg antialiased">
+<body class="antialiased">
     <div class="titanium-box">
+        <!-- Faro Estetico -->
         <div class="glass-glow"></div>
 
-        <!-- HEADER PURE -->
-        <div id="header-placeholder"></div>
+        <!-- HEADER FISSO -->
+        <header class="titanium-header">
+            <div id="header-content" class="header-stack"
+                style="flex-direction: row; justify-content: space-between; align-items: center;">
 
-        <main class="titanium-main">
+                <!-- Sinistra: Indietro -->
+                <a href="impostazioni.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
 
-            <!-- Section: Automezzi -->
-            <a href="configurazione_automezzi.html" class="group relative block h-full">
-                <div
-                    class="absolute inset-0 bg-blue-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
-                </div>
-                <div
-                    class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 border-slate-200 dark:border-glow backdrop-blur-md border dark:border-white/5 hover:border-blue-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
-                    <div class="glass-shine"></div>
-                    <div class="flex items-start justify-between">
-                        <div
-                            class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform duration-300">
-                            <span class="material-symbols-outlined text-[26px]">directions_car</span>
+                <!-- Centro: Titolo -->
+                <h2 class="header-title"
+                    style="margin: 0; font-size: clamp(0.8rem, 2.5vw, 1.1rem); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 55%; text-align: center; line-height: 1.1; white-space: normal;"
+                    data-t="expiry_rules_title_page">
+                    Regole Scadenze
+                </h2>
+
+                <!-- Destra: Home -->
+                <a href="home_page.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="settings-container no-select" style="padding-top: 5rem; gap: 1rem;">
+
+            <!-- Grid Container -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+
+                <!-- Section: Automezzi -->
+                <a href="configurazione_automezzi.html" class="group relative block h-full">
+                    <div
+                        class="absolute inset-0 bg-blue-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
+                    </div>
+                    <div
+                        class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 border-slate-200 dark:border-glow backdrop-blur-md border dark:border-white/5 hover:border-blue-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
+                        <div class="glass-shine"></div>
+                        <div class="flex items-start justify-between">
+                            <div
+                                class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/5 border border-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform duration-300">
+                                <span class="material-symbols-outlined text-[26px]">directions_car</span>
+                            </div>
+                            <span
+                                class="material-symbols-outlined text-gray-400 group-hover:text-blue-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                         </div>
-                        <span
-                            class="material-symbols-outlined text-gray-600 group-hover:text-blue-400 group-hover:translate-x-1 transition-all">chevron_right</span>
-                    </div>
-                    <div class="flex-1 min-w-0 pt-2">
-                        <h3 class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-blue-400 transition-colors"
-                            data-t="card_vehicles_title">
-                            Automezzi</h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_vehicles_desc">
-                            Configura oggetti, periodi e
-                            frequenze email per veicoli</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Section: Documenti -->
-            <a href="configurazione_documenti.html" class="group relative block h-full">
-                <div
-                    class="absolute inset-0 bg-amber-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
-                </div>
-                <div
-                    class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 border-slate-200 dark:border-glow backdrop-blur-md border dark:border-white/5 hover:border-amber-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
-                    <div class="glass-shine"></div>
-                    <div class="flex items-start justify-between">
-                        <div
-                            class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500/20 to-amber-600/5 border border-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform duration-300">
-                            <span class="material-symbols-outlined text-[26px]">description</span>
+                        <div class="flex-1 min-w-0 pt-2">
+                            <h3 class="text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-blue-400 transition-colors"
+                                data-t="card_vehicles_title">Automezzi</h3>
+                            <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_vehicles_desc">
+                                Configura oggetti, periodi e frequenze email per veicoli</p>
                         </div>
-                        <span
-                            class="material-symbols-outlined text-gray-600 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </div>
-                    <div class="flex-1 min-w-0 pt-2">
-                        <h3 class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-amber-400 transition-colors"
-                            data-t="card_documents_title">
-                            Documenti</h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_documents_desc">
-                            Gestione avvisi per Documenti e
-                            Scadenze Varie</p>
-                    </div>
-                </div>
-            </a>
+                </a>
 
-            <!-- Section: Generali -->
-            <a href="configurazione_generali.html" class="group relative block h-full">
-                <div
-                    class="absolute inset-0 bg-teal-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
-                </div>
-                <div
-                    class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 border-slate-200 dark:border-glow backdrop-blur-md border dark:border-white/5 hover:border-teal-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
-                    <div class="glass-shine"></div>
-                    <div class="flex items-start justify-between">
-                        <div
-                            class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-teal-600/5 border border-teal-500/20 text-teal-400 group-hover:scale-110 transition-transform duration-300">
-                            <span class="material-symbols-outlined text-[26px]">settings_suggest</span>
+                <!-- Section: Documenti -->
+                <a href="configurazione_documenti.html" class="group relative block h-full">
+                    <div
+                        class="absolute inset-0 bg-amber-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
+                    </div>
+                    <div
+                        class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 border-slate-200 dark:border-glow backdrop-blur-md border dark:border-white/5 hover:border-amber-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
+                        <div class="glass-shine"></div>
+                        <div class="flex items-start justify-between">
+                            <div
+                                class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500/20 to-amber-600/5 border border-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform duration-300">
+                                <span class="material-symbols-outlined text-[26px]">description</span>
+                            </div>
+                            <span
+                                class="material-symbols-outlined text-gray-400 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">chevron_right</span>
                         </div>
-                        <span
-                            class="material-symbols-outlined text-gray-600 group-hover:text-teal-400 group-hover:translate-x-1 transition-all">chevron_right</span>
+                        <div class="flex-1 min-w-0 pt-2">
+                            <h3 class="text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-amber-400 transition-colors"
+                                data-t="card_documents_title">Documenti</h3>
+                            <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_documents_desc">
+                                Gestione avvisi per Documenti e Scadenze Varie</p>
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-0 pt-2">
-                        <h3 class="text-gray-900 dark:text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-teal-400 transition-colors"
-                            data-t="card_general_title">
-                            Regole Generali</h3>
-                        <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_general_desc">
-                            Configura oggetti e testi per
-                            scadenze generiche</p>
-                    </div>
-                </div>
-            </a>
+                </a>
 
-            <!-- Future Roadmap Memo (Full Width) -->
-            <div class="col-span-1 md:col-span-2 lg:col-span-3 pt-4 pb-20">
-                <div class="flex items-center gap-2 px-1 mb-2">
-                    <span class="material-symbols-outlined text-purple-400 text-[20px]">rocket_launch</span>
-                    <h3 class="text-purple-400 text-xs font-bold uppercase tracking-widest"
-                        data-t="future_roadmap_title">APPUNTI SVILUPPO FUTURO</h3>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-inner relative group focus-within:border-purple-500/30 transition-colors">
-                    <textarea id="future_memo"
-                        class="w-full bg-transparent border-none text-[12px] leading-relaxed text-gray-900 dark:text-gray-300 placeholder:text-gray-600 focus:ring-0 p-0 resize-none min-h-[140px] scrollbar-thin scrollbar-thumb-white/10"
-                        placeholder="Scrivi qui i tuoi appunti per il futuro..."
-                        data-t="future_memo_placeholder"></textarea>
-                    <div class="flex justify-end mt-2 pt-2 border-t border-slate-200 dark:border-white/5">
-                        <button id="save_memo_btn"
-                            class="text-[11px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-purple-500/10 transition-colors">
-                            <span class="material-symbols-outlined !text-[16px]">save</span> <span
-                                data-t="save_memo_btn">SALVA APPUNTO</span>
-                        </button>
+                <!-- Section: Generali -->
+                <a href="configurazione_generali.html" class="group relative block h-full">
+                    <div
+                        class="absolute inset-0 bg-teal-500/30 blur-2xl rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none">
+                    </div>
+                    <div
+                        class="relative flex flex-col h-full gap-4 p-5 rounded-2xl bg-white/80 dark:bg-[#1e293b]/80 border-slate-200 dark:border-glow backdrop-blur-md border dark:border-white/5 hover:border-teal-500/30 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-lg overflow-hidden">
+                        <div class="glass-shine"></div>
+                        <div class="flex items-start justify-between">
+                            <div
+                                class="size-12 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-teal-600/5 border border-teal-500/20 text-teal-400 group-hover:scale-110 transition-transform duration-300">
+                                <span class="material-symbols-outlined text-[26px]">settings_suggest</span>
+                            </div>
+                            <span
+                                class="material-symbols-outlined text-gray-400 group-hover:text-teal-400 group-hover:translate-x-1 transition-all">chevron_right</span>
+                        </div>
+                        <div class="flex-1 min-w-0 pt-2">
+                            <h3 class="text-white font-bold text-lg uppercase tracking-wider mb-1 group-hover:text-teal-400 transition-colors"
+                                data-t="card_general_title">Regole Generali</h3>
+                            <p class="text-xs text-gray-400 font-medium leading-relaxed" data-t="card_general_desc">
+                                Configura oggetti e testi per scadenze generiche</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Future Roadmap Memo (Full Width) -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-3 pt-4">
+                    <div class="flex items-center gap-2 px-1 mb-2">
+                        <span class="material-symbols-outlined text-purple-400 text-[20px]">rocket_launch</span>
+                        <h3 class="text-purple-400 text-xs font-bold uppercase tracking-widest"
+                            data-t="future_roadmap_title">APPUNTI SVILUPPO FUTURO</h3>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-inner relative group focus-within:border-purple-500/30 transition-colors"
+                        style="background: rgba(0,0,0,0.2);">
+                        <textarea id="future_memo"
+                            class="w-full bg-transparent border-none text-[12px] leading-relaxed text-gray-900 dark:text-gray-300 placeholder:text-gray-600 focus:ring-0 p-0 resize-none min-h-[140px] scrollbar-thin scrollbar-thumb-white/10"
+                            placeholder="Scrivi qui i tuoi appunti per il futuro..."
+                            data-t="future_memo_placeholder"></textarea>
+                        <div class="flex justify-end mt-2 pt-2 border-t border-slate-200 dark:border-white/5">
+                            <button id="save_memo_btn"
+                                class="text-[11px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-purple-500/10 transition-colors">
+                                <span class="material-symbols-outlined !text-[16px]">save</span> <span
+                                    data-t="save_memo_btn">SALVA APPUNTO</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Regola 5: Titanium Help Block -->
+            <!-- Help Block -->
             <div class="col-span-full text-center mt-4">
-                <p class="titanium-help-block" data-t="expiry_help_text">Seleziona una categoria per configurare le
-                    regole di invio automatico.
-                </p>
+                <p class="settings-desc" style="opacity: 0.6;" data-t="expiry_help_text">Seleziona una categoria per
+                    configurare le regole di invio automatico.</p>
             </div>
 
         </main>
 
-        <!-- FOOTER PURE -->
-        <div id="footer-placeholder"></div>
+        <!-- FOOTER PREMIUM -->
+        <footer class="titanium-footer">
+            <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
+                <span
+                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
+                    Titanium Security Protocol V3.0
+                </span>
+            </div>
+        </footer>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/rules_engine.js"></script> <!-- Placeholder se serve -->
+    <script src="assets/js/ui-core.js"></script>
+    <script type="module" src="assets/js/rules_engine.js"></script>
     <script type="module" src="assets/js/regole_scadenze_veicoli.js"></script>
 </body>
 

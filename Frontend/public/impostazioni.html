@@ -134,6 +134,23 @@
                     </div>
                 </div>
 
+                <!-- Storico Notifiche -->
+                <div class="settings-item" id="row-notifications-history" style="cursor: pointer;"
+                    onclick="window.location.href='notifiche_storia.html'">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-indigo-glass">
+                                <span class="material-symbols-outlined">history</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="notifications_history">Storico Notifiche</span>
+                                <span class="settings-desc" data-t="notifications_history_desc">Visualizza avvisi
+                                    passati</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Tempo di Inattività (Selector Inglobato) -->
                 <div class="settings-item">
                     <div class="settings-item-header">
@@ -173,6 +190,23 @@
                                 <span class="settings-label" data-t="expiry_rules_title_page">Regole invio
                                     scadenze</span>
                                 <span class="settings-desc">Configura notifiche e avvisi</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archivio Account -->
+                <div class="settings-item" onclick="window.location.href='archivio_account.html'"
+                    style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box bg-purple-glass">
+                                <span class="material-symbols-outlined">archive</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="account_archive">Archivio Account</span>
+                                <span class="settings-desc" data-t="account_archive_desc">Gestisci gli account
+                                    archiviati</span>
                             </div>
                         </div>
                     </div>
@@ -241,21 +275,24 @@
                 </div>
 
                 <!-- Privacy Policy -->
-                <div class="settings-item accordion-header" data-target="info-privacy" style="cursor: pointer;">
+                <div class="settings-item" onclick="window.location.href='privacy.html'" style="cursor: pointer;">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
                             <div class="settings-icon-box bg-indigo-glass">
                                 <span class="material-symbols-outlined">shield</span>
                             </div>
                             <div class="settings-text">
-                                <span class="settings-label" data-t="privacy_title">Trattamento dati personali</span>
-                                <span class="settings-desc">Informativa e diritti</span>
+                                <span class="settings-label" data-t="privacy_policy_title">Trattamento dati
+                                    personali</span>
+                                <span class="settings-desc" data-t="privacy_policy_subtitle">Informativa e
+                                    diritti</span>
                             </div>
                         </div>
+                        <div
+                            style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; opacity: 0.5;">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </div>
                     </div>
-                </div>
-                <div id="info-privacy" class="accordion-content" style="display: none;">
-                    <div id="info-privacy-text-placeholder"></div>
                 </div>
             </div>
 

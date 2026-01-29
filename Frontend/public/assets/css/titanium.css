@@ -631,6 +631,7 @@ html.dark .dynamic-card .icon-circle {
    ========================================================================== */
 .titanium-header {
     top: 0;
+    flex-direction: row; /* FORCE ROW */
     align-items: center;
     justify-content: space-between;
 }
