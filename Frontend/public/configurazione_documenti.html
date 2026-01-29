@@ -40,8 +40,9 @@
     </style>
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js"></script>
-    <script src="assets/js/titanium-core.js"></script>
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
 <body class="antialiased">
@@ -51,17 +52,24 @@
 
         <!-- HEADER FISSO -->
         <header class="titanium-header">
-            <div id="header-content" class="header-stack">
-                <h2 class="header-title"
-                    style="white-space: normal; line-height: 1.1; text-align: center; max-width: 60%; margin: 0 auto;"
-                    data-t="documents_config_title">CONFIGURAZIONE DOCUMENTI</h2>
-                <div style="position: absolute; left: 0; display: flex; gap: 0.5rem;">
-                    <a href="regole_scadenze.html" class="btn-icon-header" style="position: relative;">
+            <div class="header-balanced-container">
+                <!-- ZONA SINISTRA: Navigazione (1 icona) -->
+                <div class="header-left">
+                    <a href="regole_scadenze.html" class="btn-icon-header">
                         <span class="material-symbols-outlined">arrow_back</span>
                     </a>
                 </div>
-                <div style="position: absolute; right: 0; display: flex; gap: 0.5rem;">
-                    <a href="home_page.html" class="btn-icon-header" style="position: relative;">
+
+                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
+                <div class="header-center">
+                    <h2 class="header-title" data-t="documents_config_title">
+                        CONFIGURAZIONE DOCUMENTI
+                    </h2>
+                </div>
+
+                <!-- ZONA DESTRA: Home (1 icona) -->
+                <div class="header-right">
+                    <a href="home_page.html" class="btn-icon-header">
                         <span class="material-symbols-outlined">home</span>
                     </a>
                 </div>
@@ -192,14 +200,14 @@
             <div style="opacity: 0.3; text-align: center;">
                 <span
                     style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.0
+                    Titanium Security Protocol V3.5
                 </span>
             </div>
         </footer>
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/configurazione_documenti.js?v=2.2" type="module"></script>
+    <script src="assets/js/configurazione_documenti.js?v=3.5" type="module"></script>
 </body>
 
 </html>

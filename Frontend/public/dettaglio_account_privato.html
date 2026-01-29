@@ -151,23 +151,27 @@
         <!-- 4) HEADER FUSION -->
         <header
             class="fixed top-0 left-0 right-0 mx-auto w-full md:max-max-3xl lg:max-w-5xl bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md z-50">
-            <div class="flex items-center px-6 h-20 gap-4">
-                <a href="account_privati.html"
-                    class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                    <span
-                        class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-                </a>
-                <h1
-                    class="relative z-10 text-xl font-bold leading-tight tracking-tight text-center flex-1 text-white opacity-90">
-                    Dettaglio Account Privato
-                </h1>
-                <div class="flex items-center gap-2">
+            <div class="flex items-center px-6 h-20 relative">
+                <div class="flex items-center gap-2 z-10">
+                    <a href="account_privati.html"
+                        class="group relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
+                        <span
+                            class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                    </a>
                     <button id="btn-edit-page"
-                        class="group relative z-10 flex size-10 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
+                        class="group relative flex size-10 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
                         <span class="material-symbols-outlined text-[22px]">edit</span>
                     </button>
+                </div>
+
+                <h1
+                    class="absolute inset-0 flex items-center justify-center text-xl font-bold leading-tight tracking-tight text-center text-white opacity-90 pointer-events-none px-24">
+                    Dettaglio Account
+                </h1>
+
+                <div class="ml-auto z-10">
                     <a href="home_page.html"
-                        class="group relative z-10 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
+                        class="group relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
                         <span class="material-symbols-outlined text-[24px]">home</span>
                     </a>
                 </div>

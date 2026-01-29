@@ -23,9 +23,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Helper for Toast Notifications (Protocol Compliance)
+window.showToast = function (msg, type = 'success') {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+        background: ${type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)'};
+        color: white; padding: 0.75rem 1.5rem; border-radius: 50px;
+        font-weight: 600; font-size: 0.9rem; z-index: 100000;
+        backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        opacity: 0; transition: opacity 0.3s, bottom 0.3s;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.bottom = '3rem';
+    }, 10);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.bottom = '2rem';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+};
+
 function notify(msg, type = 'success') {
-    if (window.showToast) window.showToast(msg, type);
-    else console.log(`[${type}] ${msg}`);
+    window.showToast(msg, type);
 }
 
 // --- LOGIC: SECTION EDIT (SEQUENTIAL MODALS) ---
@@ -121,32 +145,77 @@ function setupAvatarEdit() {
 // --- STATE ---
 // (Variables moved to top)
 
-// --- LOGIC: ACCORDIONS ---
-function setupAccordions() {
+// --- LOGIC: ACCORDIONS (Rule 3.4 compliance) ---
+window.setupAccordions = function () {
     const accordions = document.querySelectorAll('.accordion-header');
     accordions.forEach(acc => {
-        acc.addEventListener('click', () => {
+        // Remove existing to avoid double listeners if re-rendered
+        acc.replaceWith(acc.cloneNode(true));
+    });
+
+    document.querySelectorAll('.accordion-header').forEach(acc => {
+        acc.addEventListener('click', (e) => {
+            e.preventDefault();
             const targetId = acc.dataset.target;
             const content = document.getElementById(targetId);
-            const chevron = acc.querySelector('.settings-chevron');
             if (!content) return;
 
             const isVisible = content.classList.contains('show');
-
             if (isVisible) {
                 content.classList.remove('show');
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
             } else {
                 content.classList.add('show');
-                if (chevron) chevron.style.transform = 'rotate(180deg)';
             }
         });
     });
 }
 
-function setText(id, text) {
+function setText(id, text, skipCopy = false) {
     const el = document.getElementById(id);
-    if (el) el.textContent = text || '-';
+    if (el) {
+        el.textContent = text || '-';
+        // Aggiungi pulsante di copia se non è un placeholder e non è richiesto lo skip
+        if (!skipCopy && text && text !== '-') {
+            addCopyButtonToField(id);
+        }
+    }
+}
+
+function addCopyButtonToField(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const parent = el.parentNode;
+    if (!parent) return;
+
+    if (parent.querySelector('.btn-copy-inline')) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-copy-inline';
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>';
+    btn.style.cssText = `
+        background:var(--surface-sub); border:1px solid var(--border-color); color:var(--text-primary); 
+        cursor:pointer; padding:6px; border-radius:8px; display:flex; 
+        align-items:center; justify-content:center; transition:all 0.2s;
+    `;
+    btn.onclick = (e) => {
+        e.stopPropagation();
+        const textToCopy = el.textContent;
+        if (textToCopy && textToCopy !== '-') {
+            navigator.clipboard.writeText(textToCopy).then(() => window.showToast('Copiato!'));
+        }
+    };
+
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.justifyContent = 'space-between';
+    wrapper.style.width = '100%';
+    wrapper.style.gap = '0.5rem';
+
+    el.parentNode.insertBefore(wrapper, el);
+    wrapper.appendChild(el);
+    wrapper.appendChild(btn);
 }
 
 function formatDateToIT(val) {
@@ -167,21 +236,52 @@ function renderEmailsView() {
     if (!container) return;
     container.innerHTML = '';
 
-    const visibleEmails = contactEmails.filter(e => e.visible);
+    // 1. ADD PANE (Internal Pane V3.0) - ULTRA PREMIUM DESIGN
+    const addPane = document.createElement('div');
+    addPane.id = 'pane-add-email';
+    addPane.className = 'accordion-content';
+    addPane.innerHTML = `
+        <div class="settings-group" style="margin-top:0.5rem; margin-bottom:2rem; padding:0; overflow:hidden; border:1px solid var(--border-color); background:var(--surface-vault); backdrop-filter:blur(20px); border-radius:24px; position:relative;">
+            <!-- Glow Background Effect -->
+            <div style="position:absolute; top:-20%; left:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%); filter:blur(30px); pointer-events:none;"></div>
+            
+            <div style="padding:1.5rem; position:relative; z-index:1;">
+                <div style="display:grid; gap:1.2rem;">
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#22d3ee; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Indirizzo Email</label>
+                        <input type="email" id="new-email-addr" placeholder="esempio@dominio.it" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem;">
+                    </div>
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#22d3ee; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Password Dedicata</label>
+                        <input type="text" id="new-email-pass" placeholder="Password per l'invio" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem;">
+                    </div>
+                </div>
 
-    // Add New Email Button (Top)
+                <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
+                    <button onclick="document.getElementById('pane-add-email').classList.remove('show')" class="titanium-btn-secondary" style="flex:1; border-radius:14px; font-weight:700; letter-spacing:1px;">ANNULLA</button>
+                    <button onclick="window.saveNewEmail()" class="titanium-btn-primary" style="flex:1; border-radius:14px; background:linear-gradient(135deg, #0891b2, #22d3ee); border:none; color:#083344; font-weight:800; letter-spacing:1px; box-shadow:0 10px 20px -5px rgba(34, 211, 238, 0.3);">SALVA DATI</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(addPane);
+
+    // 2. Add New Email Button (Trigger for Pane)
     const addBtn = document.createElement('button');
-    addBtn.className = 'auth-btn';
-    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem;";
-    addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">add</span> Aggiungi Email`;
-    addBtn.onclick = () => window.openAddEmailModal();
+    addBtn.className = 'auth-btn accordion-header';
+    addBtn.dataset.target = 'pane-add-email';
+    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem; width:100%;";
+    addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">alternate_email</span> Aggiungi Email`;
     container.appendChild(addBtn);
+
+    const visibleEmails = contactEmails.filter(e => e.visible);
 
     if (visibleEmails.length === 0) {
         const p = document.createElement('p');
         p.style.cssText = "text-align:center; opacity:0.5; font-size:0.8rem; padding:1rem;";
         p.textContent = "Nessuna email visibile";
         container.appendChild(p);
+        window.setupAccordions();
         return;
     }
 
@@ -292,39 +392,7 @@ function renderEmailsView() {
 }
 
 // --- EDIT FUNCTIONS ---
-window.openAddEmailModal = () => {
-    // Create Modal HTML
-    const modal = document.createElement('div');
-    modal.id = 'modal-add-email';
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center; z-index: 9999;
-    `;
-    modal.innerHTML = `
-        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:#0f1932; border:1px solid rgba(255,255,255,0.1); border-radius:20px;">
-            <h3 style="color:white; margin-bottom:1.5rem; text-align:center;">Aggiungi Email</h3>
-            
-            <div style="display:flex; flex-direction:column; gap:1rem;">
-                <input type="email" id="new-email-addr" placeholder="Indirizzo Email" 
-                       style="width:100%; padding:1rem; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white;">
-                
-                <input type="text" id="new-email-pass" placeholder="Password" 
-                       style="width:100%; padding:1rem; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white;">
-                
-                <div>
-                    <!-- Attachments removed from creation flow -->
-                </div>
-
-                <div style="display:flex; gap:1rem; margin-top:1rem;">
-                    <button onclick="window.closeAddEmailModal()" class="auth-btn" style="background:rgba(255,255,255,0.1); justify-content:center;">Annulla</button>
-                    <button onclick="window.saveNewEmail()" class="auth-btn" style="background:#2563eb; justify-content:center;">Salva</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
+// DEPRECATED: Modals removed in favor of Internal Panes V3.0
 
 window.closeAddEmailModal = () => {
     const m = document.getElementById('modal-add-email');
@@ -340,31 +408,28 @@ window.saveNewEmail = async () => {
         return;
     }
 
-    // Show Loading
-    const btn = document.querySelector('#modal-add-email button[onclick*="saveNewEmail"]');
-    btn.innerHTML = 'Salvando...';
-    btn.disabled = true;
+    const btn = document.querySelector('#pane-add-email .titanium-btn-primary');
+    if (btn) {
+        btn.textContent = 'SALVANDO...';
+        btn.disabled = true;
+    }
 
     try {
-        const newEmailObj = {
+        contactEmails.push({
             address: addr,
             password: pass || '',
             visible: true,
             attachments: []
-        };
-
-        contactEmails.push(newEmailObj);
-
-        await updateDoc(doc(db, "users", currentUserUid), {
-            contactEmails: contactEmails
         });
 
+        await updateDoc(doc(db, "users", currentUserUid), { contactEmails });
         window.location.reload();
     } catch (e) {
-        console.error(e);
-        notify("Errore salvataggio: " + e.message, 'error');
-        btn.innerHTML = 'Salva';
-        btn.disabled = false;
+        notify("Errore: " + e.message, 'error');
+        if (btn) {
+            btn.textContent = 'SALVA ACCOUNT';
+            btn.disabled = false;
+        }
     }
 };
 
@@ -414,16 +479,28 @@ window.openAttachmentManager = (index, type = 'email') => {
     managerTargetType = type;
 
     // Select Source
-    const sourceArr = (type === 'email') ? contactEmails : userDocuments;
-    const item = sourceArr[index];
+    let sourceArr, item, title, sub;
+    if (type === 'email') {
+        sourceArr = contactEmails;
+        item = sourceArr[index];
+        title = "Gestisci Allegati Email";
+        sub = item?.address || '';
+    } else if (type === 'document') {
+        sourceArr = userDocuments;
+        item = sourceArr[index];
+        title = "Gestisci Allegati Documento";
+        sub = item?.type || '';
+    } else if (type === 'utility') {
+        sourceArr = userUtilities;
+        item = sourceArr[index];
+        title = "Gestisci Allegati Utenza";
+        sub = item?.type || '';
+    }
 
     if (!item) return;
 
     // Deep copy
     currentManageAttachments = JSON.parse(JSON.stringify(item.attachments || []));
-
-    const title = (type === 'email') ? "Gestisci Allegati Email" : "Gestisci Allegati Documento";
-    const sub = (type === 'email') ? item.address : item.type;
 
     const modal = document.createElement('div');
     modal.id = 'modal-manage-attach';
@@ -433,19 +510,19 @@ window.openAttachmentManager = (index, type = 'email') => {
         display: flex; align-items: center; justify-content: center; z-index: 9999;
     `;
     modal.innerHTML = `
-        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:#0f1932; border:1px solid rgba(255,255,255,0.1); border-radius:20px;">
-            <h3 style="color:white; margin-bottom:1.5rem; text-align:center;">${title}</h3>
-            <p style="text-align:center; color:rgba(255,255,255,0.5); font-size:0.8rem; margin-bottom:1rem;">${sub}</p>
+        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:var(--surface-vault); border:1px solid var(--border-color); border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+            <h3 style="color:var(--text-primary); margin-bottom:1.5rem; text-align:center;">${title}</h3>
+            <p style="text-align:center; color:var(--text-secondary); font-size:0.8rem; margin-bottom:1rem;">${sub}</p>
             
             <div id="manager-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem; max-height:200px; overflow-y:auto;"></div>
 
             <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
-                <button class="auth-btn" style="flex:1; justify-content:center; background:rgba(37, 99, 235, 0.1); border:1px dashed rgba(37, 99, 235, 0.3);" 
+                <button class="auth-btn" style="flex:1; justify-content:center; background:var(--surface-sub); border:1px dashed var(--primary-blue); color:var(--primary-blue);" 
                         onclick="document.getElementById('manager-camera-input').click()">
                     <span class="material-symbols-outlined" style="font-size:18px; margin-right:0.5rem;">photo_camera</span>
                     Scatta
                 </button>
-                <button class="auth-btn" style="flex:1; justify-content:center; background:rgba(37, 99, 235, 0.1); border:1px dashed rgba(37, 99, 235, 0.3);" 
+                <button class="auth-btn" style="flex:1; justify-content:center; background:var(--surface-sub); border:1px dashed var(--primary-blue); color:var(--primary-blue);" 
                         onclick="document.getElementById('manager-file-input').click()">
                     <span class="material-symbols-outlined" style="font-size:18px; margin-right:0.5rem;">upload_file</span>
                     Libreria
@@ -456,8 +533,8 @@ window.openAttachmentManager = (index, type = 'email') => {
             <input type="file" id="manager-file-input" multiple style="display:none" onchange="window.addManagerFile(this)">
 
             <div style="display:flex; gap:1rem;">
-                <button onclick="document.getElementById('modal-manage-attach').remove()" class="auth-btn" style="background:rgba(255,255,255,0.1); justify-content:center;">Annulla</button>
-                <button onclick="window.saveManagerAttachments()" class="auth-btn" style="background:#2563eb; justify-content:center;">Salva</button>
+                <button onclick="document.getElementById('modal-manage-attach').remove()" class="auth-btn" style="background:var(--surface-sub); color:var(--text-primary); justify-content:center;">Annulla</button>
+                <button onclick="window.saveManagerAttachments()" class="auth-btn" style="background:var(--primary-blue); color:white; justify-content:center; box-shadow:0 4px 15px rgba(37, 99, 235, 0.3);">Salva</button>
             </div>
         </div>
     `;
@@ -475,7 +552,7 @@ window.renderManagerAttachments = () => {
     }
     currentManageAttachments.forEach((att, idx) => {
         const div = document.createElement('div');
-        div.style.cssText = "display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:0.5rem; border-radius:8px;";
+        div.style.cssText = "display:flex; align-items:center; justify-content:space-between; background:var(--surface-sub); border:1px solid var(--border-color); padding:0.5rem; border-radius:8px;";
         div.innerHTML = `
             <div style="display:flex; align-items:center; gap:0.5rem; overflow:hidden;">
                 <span class="material-symbols-outlined" style="font-size:16px; opacity:0.7;">description</span>
@@ -501,7 +578,10 @@ window.addManagerFile = async (input) => {
         btn.disabled = true;
 
         try {
-            const folder = (managerTargetType === 'email') ? 'email_attachments' : 'doc_attachments';
+            let folder;
+            if (managerTargetType === 'email') folder = 'email_attachments';
+            else if (managerTargetType === 'document') folder = 'doc_attachments';
+            else if (managerTargetType === 'utility') folder = 'utility_attachments';
 
             for (let i = 0; i < input.files.length; i++) {
                 const file = input.files[i];
@@ -525,8 +605,17 @@ window.saveManagerAttachments = async () => {
     if (currentManageIndex === null) return;
 
     // Select Source
-    const sourceArr = (managerTargetType === 'email') ? contactEmails : userDocuments;
-    const fieldName = (managerTargetType === 'email') ? 'contactEmails' : 'documenti';
+    let sourceArr, fieldName;
+    if (managerTargetType === 'email') {
+        sourceArr = contactEmails;
+        fieldName = 'contactEmails';
+    } else if (managerTargetType === 'document') {
+        sourceArr = userDocuments;
+        fieldName = 'documenti';
+    } else if (managerTargetType === 'utility') {
+        sourceArr = userUtilities;
+        fieldName = 'utenze';
+    }
 
     // Update local state
     sourceArr[currentManageIndex].attachments = currentManageAttachments;
@@ -575,14 +664,14 @@ window.showConfirmModal = (message) => {
             display: flex; align-items: center; justify-content: center; z-index: 10000;
         `;
         modal.innerHTML = `
-            <div class="settings-vault" style="width:90%; max-width:350px; padding:2rem; background:#0f1932; border:1px solid rgba(239, 68, 68, 0.3); border-radius:20px; text-align:center;">
+            <div class="settings-vault" style="width:90%; max-width:350px; padding:2rem; background:var(--surface-vault); border:1px solid rgba(239, 68, 68, 0.3); border-radius:20px; text-align:center;">
                 <span class="material-symbols-outlined" style="font-size:48px; color:#ef4444; margin-bottom:1rem;">warning</span>
-                <h3 style="color:white; margin-bottom:1rem;">Conferma Azione</h3>
-                <p style="color:rgba(255,255,255,0.7); font-size:0.9rem; margin-bottom:2rem;">${message}</p>
+                <h3 style="color:var(--text-primary); margin-bottom:1rem;">Conferma Azione</h3>
+                <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:2rem;">${message}</p>
                 
                 <div style="display:flex; gap:1rem; justify-content:center;">
-                    <button id="confirm-no-btn" class="auth-btn" style="background:rgba(255,255,255,0.1); justify-content:center;">Annulla</button>
-                    <button id="confirm-yes-btn" class="auth-btn" style="background:#ef4444; justify-content:center;">Elimina</button>
+                    <button id="confirm-no-btn" class="auth-btn" style="background:var(--surface-sub); color:var(--text-primary); justify-content:center;">Annulla</button>
+                    <button id="confirm-yes-btn" class="auth-btn" style="background:#ef4444; color:white; justify-content:center;">Elimina</button>
                 </div>
             </div>
         `;
@@ -599,22 +688,123 @@ window.showConfirmModal = (message) => {
     });
 };
 
+window.showInputModal = (title, initialValue = '') => {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+        `;
+        modal.innerHTML = `
+            <div class="settings-vault" style="width:90%; max-width:350px; padding:2rem; background:var(--surface-vault); border:1px solid var(--border-color); border-radius:20px;">
+                <h3 style="color:var(--text-primary); margin-bottom:1.5rem; text-align:center;">${title}</h3>
+                <input type="text" id="modal-input-field" value="${initialValue}" 
+                       style="width:100%; padding:1rem; background:var(--surface-sub); border:1px solid var(--border-color); border-radius:12px; color:var(--text-primary); margin-bottom:1.5rem; outline:none;">
+                <div style="display:flex; gap:1rem;">
+                    <button id="input-cancel-btn" class="auth-btn" style="flex:1; background:var(--surface-sub); color:var(--text-primary); justify-content:center;">Annulla</button>
+                    <button id="input-confirm-btn" class="auth-btn" style="flex:1; background:var(--primary-blue); color:white; justify-content:center;">Conferma</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const input = modal.querySelector('#modal-input-field');
+        input.focus();
+        input.select();
+
+        modal.querySelector('#input-cancel-btn').onclick = () => {
+            modal.remove();
+            resolve(null);
+        };
+        modal.querySelector('#input-confirm-btn').onclick = () => {
+            const val = input.value;
+            modal.remove();
+            resolve(val);
+        };
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                const val = input.value;
+                modal.remove();
+                resolve(val);
+            }
+        };
+    });
+};
+
+
 // --- RENDERING: ADDRESSES (DYNAMIC LIST) ---
 function renderAddressesView() {
     const container = document.getElementById('indirizzi-view-container');
     if (!container) return;
     container.innerHTML = '';
 
-    // Add Button
+    // 1. ADD PANE (Internal Pane V3.0) - ULTRA PREMIUM DESIGN
+    const addPane = document.createElement('div');
+    addPane.id = 'pane-add-address';
+    addPane.className = 'accordion-content';
+    addPane.innerHTML = `
+        <div class="settings-group" style="margin-top:0.5rem; margin-bottom:2rem; padding:0; overflow:hidden; border:1px solid var(--border-color); background:var(--surface-vault); backdrop-filter:blur(20px); border-radius:24px; position:relative;">
+            <!-- Glow Background Effect -->
+            <div style="position:absolute; top:-20%; right:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%); filter:blur(30px); pointer-events:none;"></div>
+            
+            <div style="padding:1.5rem; position:relative; z-index:1;">
+                <div style="display:grid; gap:1rem;">
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#10b981; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Tipo Unità</label>
+                        <select id="addr-type" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; width:100%;">
+                            <option value="Residenza">Residenza</option>
+                            <option value="Domicilio">Domicilio</option>
+                            <option value="Lavoro">Lavoro</option>
+                            <option value="Altro">Altro</option>
+                        </select>
+                    </div>
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#10b981; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Via / Piazza</label>
+                        <input type="text" id="addr-street" placeholder="Es. Via Roma" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem;">
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+                         <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                            <label class="field-label" style="font-size:0.65rem; color:#10b981; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Civico</label>
+                            <input type="text" id="addr-civic" placeholder="Es. 10/A" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem;">
+                        </div>
+                        <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                            <label class="field-label" style="font-size:0.65rem; color:#10b981; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">CAP</label>
+                            <input type="text" id="addr-cap" placeholder="Es. 35030" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem;">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:0.75rem;">
+                         <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                            <label class="field-label" style="font-size:0.65rem; color:#10b981; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Città</label>
+                            <input type="text" id="addr-city" placeholder="Es. Padova" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem;">
+                        </div>
+                        <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                            <label class="field-label" style="font-size:0.65rem; color:#10b981; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Prov.</label>
+                            <input type="text" id="addr-prov" placeholder="PD" class="titanium-input" maxlength="2" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; text-transform:uppercase;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
+                    <button onclick="document.getElementById('pane-add-address').classList.remove('show')" class="titanium-btn-secondary" style="flex:1; border-radius:14px; font-weight:700;">ANNULLA</button>
+                    <button onclick="window.confirmSaveAddress(null)" class="titanium-btn-primary" style="flex:1; border-radius:14px; background:linear-gradient(135deg, #059669, #10b981); border:none; color:#064e3b; font-weight:800; box-shadow:0 10px 20px -5px rgba(16, 185, 129, 0.3);">CONFERMA</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(addPane);
+
+    // 2. Add Button (Trigger for Pane)
     const addBtn = document.createElement('button');
-    addBtn.className = 'auth-btn';
-    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem;";
+    addBtn.className = 'auth-btn accordion-header';
+    addBtn.dataset.target = 'pane-add-address';
+    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem; width:100%;";
     addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">add_location_alt</span> Aggiungi Indirizzo`;
-    addBtn.onclick = () => window.openAddAddressModal();
     container.appendChild(addBtn);
 
     if (userAddresses.length === 0) {
         container.innerHTML += `<p style="text-align:center; opacity:0.5; font-size:0.8rem; padding:1rem;">Nessun indirizzo registrato</p>`;
+        window.setupAccordions();
         return;
     }
 
@@ -684,18 +874,18 @@ window.showAddressDetails = (index) => {
     // Helper to create read-only field
     const field = (label, value) => `
         <div style="margin-bottom:1rem;">
-            <div style="color:rgba(255,255,255,0.5); font-size:0.75rem; text-transform:uppercase; margin-bottom:0.25rem;">${label}</div>
-            <div style="color:white; font-size:1.1rem; font-weight:500;">${value || '-'}</div>
+            <div style="color:var(--text-secondary); font-size:0.75rem; text-transform:uppercase; margin-bottom:0.25rem;">${label}</div>
+            <div style="color:var(--text-primary); font-size:1.1rem; font-weight:500;">${value || '-'}</div>
         </div>
     `;
 
     modal.innerHTML = `
-        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:#0f1932; border:1px solid rgba(255,255,255,0.1); border-radius:20px; position:relative; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:var(--surface-vault); border:1px solid var(--border-color); border-radius:20px; position:relative; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
             <button onclick="document.getElementById('modal-address-details').remove()" 
-                    style="position:absolute; top:1rem; right:1rem; background:transparent; border:none; color:white; cursor:pointer;">
+                    style="position:absolute; top:1rem; right:1rem; background:transparent; border:none; color:var(--text-primary); cursor:pointer;">
                 <span class="material-symbols-outlined">close</span>
             </button>
-            <h3 style="color:white; margin-bottom:1.5rem; text-align:center;">Dettagli Indirizzo</h3>
+            <h3 style="color:var(--text-primary); margin-bottom:1.5rem; text-align:center;">Dettagli Indirizzo</h3>
             
             ${field('Tipo', addr.type)}
             ${field('Indirizzo', addr.address)}
@@ -708,74 +898,49 @@ window.showAddressDetails = (index) => {
             ${field('Città', addr.city)}
             ${field('Provincia', addr.province)}
 
-            <button onclick="document.getElementById('modal-address-details').remove()" class="auth-btn" style="width:100%; justify-content:center; margin-top:1rem;">Chiudi</button>
+            <button onclick="document.getElementById('modal-address-details').remove()" class="auth-btn" style="width:100%; justify-content:center; margin-top:1rem; background:var(--primary-blue); color:white;">Chiudi</button>
         </div>
     `;
     document.body.appendChild(modal);
 };
 
-window.openAddAddressModal = (editIndex = null) => {
-    const isEdit = editIndex !== null;
-    const data = isEdit ? userAddresses[editIndex] : { type: 'Residenza', address: '', civic: '', cap: '', city: '', province: '' };
+// DEPRECATED: Add Modal removed, only Edit Modal remains for complex data
+window.editAddress = async (index) => {
+    const addr = userAddresses[index];
+    if (!addr) return;
 
-    const modal = document.createElement('div');
-    modal.id = 'modal-address';
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center; z-index: 9999;
-    `;
+    // Use System Modals (InputModal) for single fields as per Rule 3.4 for editing
+    // Or open a full modal if multiple fields are needed.
+    // For Addresses, we have multiple fields, let's use the standard System Modal logic but customized.
 
-    // Style helper
-    const inputStyle = "width:100%; padding:0.8rem; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; margin-bottom:1rem;";
+    const type = await window.showInputModal("Tipo (Residenza, Lavoro...)", addr.type);
+    if (type === null) return;
 
-    modal.innerHTML = `
-        <div class="settings-vault" style="width:90%; max-width:450px; padding:2rem; background:#0f1932; border:1px solid rgba(255,255,255,0.1); border-radius:20px; max-height:90vh; overflow-y:auto;">
-            <h3 style="color:white; margin-bottom:1.5rem; text-align:center;">${isEdit ? 'Modifica' : 'Aggiungi'} Indirizzo</h3>
-            
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Tipo</label>
-            <select id="addr-type" style="${inputStyle} color:black;">
-                <option value="Residenza" ${data.type === 'Residenza' ? 'selected' : ''}>Residenza</option>
-                <option value="Domicilio" ${data.type === 'Domicilio' ? 'selected' : ''}>Domicilio</option>
-                <option value="Lavoro" ${data.type === 'Lavoro' ? 'selected' : ''}>Lavoro</option>
-                <option value="Altro" ${data.type === 'Altro' ? 'selected' : ''}>Altro</option>
-            </select>
+    const street = await window.showInputModal("Via / Piazza", addr.address);
+    if (street === null) return;
 
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Via / Piazza</label>
-            <input type="text" id="addr-street" value="${data.address || ''}" placeholder="Via Roma" style="${inputStyle}">
+    const civic = await window.showInputModal("Civico", addr.civic);
+    if (civic === null) return;
 
-            <div style="display:flex; gap:1rem;">
-                <div style="flex:1;">
-                    <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Civico</label>
-                    <input type="text" id="addr-civic" value="${data.civic || ''}" placeholder="10" style="${inputStyle}">
-                </div>
-                <div style="flex:1;">
-                    <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">CAP</label>
-                    <input type="text" id="addr-cap" value="${data.cap || ''}" placeholder="00100" style="${inputStyle}">
-                </div>
-            </div>
+    const cap = await window.showInputModal("CAP", addr.cap);
+    if (cap === null) return;
 
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Città</label>
-            <input type="text" id="addr-city" value="${data.city || ''}" placeholder="Roma" style="${inputStyle}">
+    const city = await window.showInputModal("Città", addr.city);
+    if (city === null) return;
 
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Provincia (Sigla)</label>
-            <input type="text" id="addr-prov" value="${data.province || ''}" placeholder="RM" style="${inputStyle}">
+    const prov = await window.showInputModal("Provincia", addr.province);
+    if (prov === null) return;
 
-            <div style="display:flex; gap:1rem; margin-top:1rem;">
-                <button onclick="document.getElementById('modal-address').remove()" class="auth-btn" style="background:rgba(255,255,255,0.1); justify-content:center;">Annulla</button>
-                <button onclick="window.confirmSaveAddress(${editIndex})" class="auth-btn" style="background:#2563eb; justify-content:center;">Salva</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
+    userAddresses[index] = { type, address: street, civic, cap, city, province: prov.toUpperCase() };
+    saveAddresses();
 };
 
-window.confirmSaveAddress = (editIndex) => {
+window.confirmSaveAddress = async (editIndex) => {
     const type = document.getElementById('addr-type').value;
     const address = document.getElementById('addr-street').value.trim();
+    const city = document.getElementById('addr-city').value.trim();
     const civic = document.getElementById('addr-civic').value.trim();
     const cap = document.getElementById('addr-cap').value.trim();
-    const city = document.getElementById('addr-city').value.trim();
     const prov = document.getElementById('addr-prov').value.trim().toUpperCase();
 
     if (!address || !city) {
@@ -783,20 +948,23 @@ window.confirmSaveAddress = (editIndex) => {
         return;
     }
 
-    const newAddr = { type, address, civic, cap, city, province: prov };
+    const data = { type, address, civic, cap, city, province: prov };
+    if (editIndex !== null) userAddresses[editIndex] = data;
+    else userAddresses.push(data);
 
-    if (editIndex !== null) {
-        userAddresses[editIndex] = newAddr;
-    } else {
-        userAddresses.push(newAddr);
-    }
-
-    document.getElementById('modal-address').remove();
     saveAddresses();
 };
 
-window.editAddress = (index) => {
-    window.openAddAddressModal(index);
+window.editAddress = async (index) => {
+    const a = userAddresses[index];
+    if (!a) return;
+
+    // Use InputModal for quick edits of primary fields
+    const newStreet = await window.showInputModal(`Modifica Indirizzo (${a.type})`, a.address);
+    if (newStreet !== null) {
+        a.address = newStreet.trim();
+        saveAddresses();
+    }
 };
 
 window.deleteAddress = async (index) => {
@@ -850,16 +1018,52 @@ function renderPhonesView() {
     if (!container) return;
     container.innerHTML = '';
 
-    // Add Button (Top)
+    // 1. ADD PANE (Internal Pane V3.0) - ULTRA PREMIUM DESIGN
+    const addPane = document.createElement('div');
+    addPane.id = 'pane-add-phone';
+    addPane.className = 'accordion-content';
+    addPane.innerHTML = `
+        <div class="settings-group" style="margin-top:0.5rem; margin-bottom:2rem; padding:0; overflow:hidden; border:1px solid var(--border-color); background:var(--surface-vault); backdrop-filter:blur(20px); border-radius:24px; position:relative;">
+            <!-- Glow Background Effect -->
+            <div style="position:absolute; bottom:-20%; left:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, transparent 70%); filter:blur(30px); pointer-events:none;"></div>
+            
+            <div style="padding:1.5rem; position:relative; z-index:1;">
+                <div style="display:grid; gap:1.2rem;">
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#f43f5e; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Destinazione</label>
+                        <select id="new-phone-type" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; width:100%;">
+                            <option value="Cellulare">Cellulare</option>
+                            <option value="Fisso">Fisso</option>
+                            <option value="Lavoro">Lavoro</option>
+                            <option value="Altro">Altro</option>
+                        </select>
+                    </div>
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#f43f5e; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Numero di Telefono</label>
+                        <input type="tel" id="new-phone-number" placeholder="+39 340 1234..." class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1.1rem; letter-spacing:1px;">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
+                    <button onclick="document.getElementById('pane-add-phone').classList.remove('show')" class="titanium-btn-secondary" style="flex:1; border-radius:14px; font-weight:700;">ANNULLA</button>
+                    <button onclick="window.confirmAddPhone()" class="titanium-btn-primary" style="flex:1; border-radius:14px; background:linear-gradient(135deg, #e11d48, #f43f5e); border:none; color:white; font-weight:800; box-shadow:0 10px 20px -5px rgba(244, 63, 94, 0.3);">SALVA NUMERO</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(addPane);
+
+    // 2. Add Button (Trigger for Pane)
     const addBtn = document.createElement('button');
-    addBtn.className = 'auth-btn';
-    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem;";
+    addBtn.className = 'auth-btn accordion-header';
+    addBtn.dataset.target = 'pane-add-phone';
+    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem; width:100%;";
     addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">add_call</span> Aggiungi Numero`;
-    addBtn.onclick = () => window.openAddPhoneModal();
     container.appendChild(addBtn);
 
     if (contactPhones.length === 0) {
         container.innerHTML += `<p style="text-align:center; opacity:0.5; font-size:0.8rem; padding:1rem;">Nessun numero registrato</p>`;
+        window.setupAccordions();
         return;
     }
 
@@ -896,40 +1100,7 @@ function renderPhonesView() {
     });
 }
 
-window.openAddPhoneModal = () => {
-    const modal = document.createElement('div');
-    modal.id = 'modal-add-phone';
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center; z-index: 9999;
-    `;
-
-    modal.innerHTML = `
-        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:#0f1932; border:1px solid rgba(255,255,255,0.1); border-radius:20px;">
-            <h3 style="color:white; margin-bottom:1.5rem; text-align:center;">Aggiungi Numero</h3>
-            
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Tipo</label>
-            <select id="new-phone-type" style="width:100%; padding:0.8rem; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:black; margin-bottom:1rem;">
-                <option value="Cellulare">Cellulare</option>
-                <option value="Fisso">Fisso</option>
-                <option value="Primario">Primario</option>
-                <option value="Lavoro">Lavoro</option>
-                <option value="Altro">Altro</option>
-            </select>
-
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Numero</label>
-            <input type="tel" id="new-phone-number" placeholder="+39 ..." 
-                   style="width:100%; padding:0.8rem; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; margin-bottom:1.5rem;">
-
-            <div style="display:flex; gap:1rem;">
-                <button onclick="document.getElementById('modal-add-phone').remove()" class="auth-btn" style="background:rgba(255,255,255,0.1); justify-content:center;">Annulla</button>
-                <button onclick="window.confirmAddPhone()" class="auth-btn" style="background:#2563eb; justify-content:center;">Salva</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
+// DEPRECATED: Phone modal removed
 
 window.confirmAddPhone = () => {
     const type = document.getElementById('new-phone-type').value;
@@ -982,18 +1153,59 @@ async function savePhones() {
 }
 
 // --- RENDERING: UTENZE ---
-// --- RENDERING: UTENZE ---
 function renderUtenzeView() {
     const container = document.getElementById('utenze-view-container');
     if (!container) return;
     container.innerHTML = '';
 
-    // Add New Utenza Button (Top)
+    // 1. ADD PANE (Internal Pane V3.0) - ULTRA PREMIUM DESIGN
+    let addrOptions = '<option value="" style="color:black;">Nessun indirizzo collegato</option>';
+    userAddresses.forEach(a => {
+        const val = `${a.address}, ${a.city} (${a.type})`;
+        addrOptions += `<option value="${val}" style="color:black;">${a.type}: ${a.address}, ${a.city}</option>`;
+    });
+
+    const addPane = document.createElement('div');
+    addPane.id = 'pane-add-utility';
+    addPane.className = 'accordion-content';
+    addPane.innerHTML = `
+        <div class="settings-group" style="margin-top:0.5rem; margin-bottom:2rem; padding:0; overflow:hidden; border:1px solid var(--border-color); background:var(--surface-vault); backdrop-filter:blur(20px); border-radius:24px; position:relative;">
+            <!-- Glow Background Effect -->
+            <div style="position:absolute; top:-20%; right:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, transparent 70%); filter:blur(30px); pointer-events:none;"></div>
+            
+            <div style="padding:1.5rem; position:relative; z-index:1;">
+                <div style="display:grid; gap:1.2rem;">
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#fbbf24; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Tipologia Servizio</label>
+                        <input type="text" id="util-type" placeholder="Es. Energia Elettrica, Gas, Fibra" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem;">
+                    </div>
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#fbbf24; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Codice Utente / POD</label>
+                        <input type="text" id="util-value" placeholder="Es. IT001E..." class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1.1rem; letter-spacing:1px; font-family:monospace;">
+                    </div>
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#fbbf24; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Indirizzo Fornitura</label>
+                        <select id="util-address" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; width:100%;">
+                            ${addrOptions}
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
+                    <button onclick="document.getElementById('pane-add-utility').classList.remove('show')" class="titanium-btn-secondary" style="flex:1; border-radius:14px; font-weight:700;">ANNULLA</button>
+                    <button onclick="window.confirmSaveUtility(null)" class="titanium-btn-primary" style="flex:1; border-radius:14px; background:linear-gradient(135deg, #d97706, #fbbf24); border:none; color:#451a03; font-weight:800; box-shadow:0 10px 20px -5px rgba(251, 191, 36, 0.3);">CONFERMA UTENZA</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(addPane);
+
+    // 2. Add Button (Trigger)
     const addBtn = document.createElement('button');
-    addBtn.className = 'auth-btn';
-    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem;";
+    addBtn.className = 'auth-btn accordion-header';
+    addBtn.dataset.target = 'pane-add-utility';
+    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem; width:100%;";
     addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">add_circle</span> Aggiungi Utenza`;
-    addBtn.onclick = () => window.openUtilityModal();
     container.appendChild(addBtn);
 
     if (userUtilities.length === 0) {
@@ -1001,163 +1213,128 @@ function renderUtenzeView() {
         p.style.cssText = "text-align:center; opacity:0.5; font-size:0.8rem; padding:1rem;";
         p.textContent = "Nessuna utenza registrata";
         container.appendChild(p);
+        window.setupAccordions();
         return;
     }
 
-    // Cache valid address labels
     const validLabels = userAddresses.map(a => `${a.address}, ${a.city} (${a.type})`);
-
     userUtilities.forEach((u, index) => {
         const div = document.createElement('fieldset');
         div.className = "glass-field-titanium glass-field-amber";
         div.style.marginBottom = "0.75rem";
 
-        let addrHtml = '';
-        if (u.address_label) {
-            const isValid = validLabels.includes(u.address_label);
-            const tooltip = isValid ? '' : 'Indirizzo non trovato (Cancellato o Modificato)';
+        let addrHtml = u.address_label ? `
+            <div style="font-size:0.75rem; opacity:0.8; margin-top:0.3rem; display:flex; align-items:center; gap:0.4rem; color:${validLabels.includes(u.address_label) ? 'inherit' : '#ef4444'};">
+                <span class="material-symbols-outlined" style="font-size:14px;">home</span>
+                ${u.address_label}
+            </div>` : '';
 
-            let iconElement;
-            let textColor;
-
-            if (isValid) {
-                iconElement = `<span class="material-symbols-outlined" style="font-size:14px;">home</span>`;
-                textColor = 'inherit';
-            } else {
-                // Warning: Red Circle with Yellow/Amber Triangle
-                iconElement = `
-                    <div style="display:flex; align-items:center; justify-content:center; width:24px; height:24px; border:2px solid #ef4444; border-radius:50%; background:rgba(239,68,68,0.1); flex-shrink:0;">
-                        <span class="material-symbols-outlined" style="font-size:16px; color:#eab308; font-variation-settings:'FILL' 1;">warning</span>
+        // Sezione Allegati Utenza
+        let utenteAttachmentsHtml = '<span class="field-value" style="opacity:0.7;">-</span>';
+        if (u.attachments && u.attachments.length > 0) {
+            utenteAttachmentsHtml = `<div style="display:flex; flex-direction:column; gap:0.5rem;">`;
+            u.attachments.forEach((att, attIndex) => {
+                utenteAttachmentsHtml += `
+                    <div style="display:flex; align-items:center; gap:0.5rem; justify-content:space-between;">
+                        <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:0;">
+                             <span class="material-symbols-outlined" style="font-size:16px;">attachment</span>
+                             <a href="${att.url}" target="_blank" style="color:#22d3ee; text-decoration:underline; font-size:0.85rem; word-break:break-all; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${att.name}</a>
+                        </div>
                     </div>
                 `;
-                textColor = '#ef4444';
-            }
-
-            addrHtml = `
-                <div style="font-size:0.75rem; opacity:0.8; margin-top:0.3rem; display:flex; align-items:center; gap:0.4rem; color:${textColor};" title="${tooltip}">
-                    ${iconElement} 
-                    ${u.address_label}
-                </div>
-            `;
+            });
+            utenteAttachmentsHtml += `</div>`;
         }
+
+        const attachmentsSection = `
+            <div style="width:100%; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
+                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                     <span class="field-label" style="opacity:0.7;">Allegati</span>
+                     <button onclick="event.preventDefault(); window.openAttachmentManager(${index}, 'utility')" 
+                             style="background:none; border:none; color:#22d3ee; cursor:pointer; display:flex; align-items:center;">
+                        <span class="material-symbols-outlined">add_circle</span>
+                     </button>
+                 </div>
+                 ${utenteAttachmentsHtml}
+            </div>
+        `;
 
         div.innerHTML = `
             <legend class="field-label">${u.type || 'Utenza'}</legend>
-            <div style="display:flex; justify-content:space-between; align-items:start; width:100%; gap:0.5rem;">
-                <div style="flex:1; min-width:0;">
-                    <span class="field-value" style="font-size:1.1rem; word-break:break-all;">${u.value || '-'}</span>
-                    ${addrHtml}
+            <div style="display:flex; flex-direction:column; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:start; width:100%; gap:0.5rem;">
+                    <div style="flex:1; min-width:0;">
+                        <span class="field-value" style="font-size:1.1rem; word-break:break-all;">${u.value || '-'}</span>
+                        ${addrHtml}
+                    </div>
+                    <div style="display:flex; gap:0.5rem; flex-shrink:0;">
+                        <button class="titanium-action-btn btn-edit" onclick="window.editUtenza(${index})">
+                            <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                        </button>
+                        <button class="titanium-action-btn btn-delete" onclick="window.deleteUtenza(${index})">
+                            <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                        </button>
+                        <button class="titanium-action-btn btn-copy" onclick="navigator.clipboard.writeText(\`${u.value?.replace(/`/g, '\\`') || ''}\`).then(() => window.showToast('Copiato!'))">
+                            <span class="material-symbols-outlined" style="font-size:18px;">content_copy</span>
+                        </button>
+                    </div>
                 </div>
-                <div style="display:flex; gap:0.5rem; flex-shrink:0;">
-                    <button class="titanium-action-btn btn-edit" 
-                            onclick="event.preventDefault(); window.editUtenza(${index})">
-                        <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
-                    </button>
-                    <button class="titanium-action-btn btn-delete" 
-                            onclick="event.preventDefault(); window.deleteUtenza(${index})">
-                        <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
-                    </button>
-                    <button class="titanium-action-btn btn-copy" 
-                            onclick="event.preventDefault(); navigator.clipboard.writeText('${(u.value || '').replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
-                        <span class="material-symbols-outlined" style="font-size:18px;">content_copy</span>
-                    </button>
-                </div>
+                ${attachmentsSection}
             </div>
         `;
         container.appendChild(div);
     });
 }
 
-// Unified Modal for Add/Edit Utility
-window.openUtilityModal = (editIndex = null) => {
-    const isEdit = editIndex !== null;
-    const data = isEdit ? userUtilities[editIndex] : { type: '', value: '', address_label: '' };
+// Unified Utility Logic
+window.editUtenza = async (index) => {
+    const u = userUtilities[index];
+    if (!u) return;
 
-    // Prepare Address Options
-    let addrOptions = '<option value="" style="color:black;">Nessun indirizzo collegato</option>';
-    userAddresses.forEach(a => {
-        const val = `${a.address}, ${a.city} (${a.type})`;
-        const selected = (data.address_label === val) ? 'selected' : '';
-        addrOptions += `<option value="${val}" style="color:black;" ${selected}>${a.type}: ${a.address}, ${a.city}</option>`;
-    });
-
-    const modal = document.createElement('div');
-    modal.id = 'modal-utility';
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center; z-index: 9999;
-    `;
-
-    // Style helper
-    const inputStyle = "width:100%; padding:0.8rem; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; margin-bottom:1rem;";
-
-    modal.innerHTML = `
-        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:#0f1932; border:1px solid rgba(255,255,255,0.1); border-radius:20px;">
-            <h3 style="color:white; margin-bottom:1.5rem; text-align:center;">${isEdit ? 'Modifica' : 'Aggiungi'} Utenza</h3>
-            
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Tipo (es. Luce, Gas, POD)</label>
-            <input type="text" id="util-type" value="${data.type || ''}" placeholder="Energia Elettrica" style="${inputStyle}">
-
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Codice / Valore</label>
-            <input type="text" id="util-value" value="${data.value || ''}" placeholder="IT001E..." style="${inputStyle}">
-
-            <label style="display:block; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.8rem;">Indirizzo Collegato</label>
-            <select id="util-address" style="${inputStyle} color:black;">
-                ${addrOptions}
-            </select>
-
-            <div style="display:flex; gap:1rem; margin-top:1rem;">
-                <button onclick="document.getElementById('modal-utility').remove()" class="auth-btn" style="background:rgba(255,255,255,0.1); justify-content:center;">Annulla</button>
-                <button onclick="window.confirmSaveUtility(${editIndex})" class="auth-btn" style="background:#2563eb; justify-content:center;">Salva</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
+    const val = await window.showInputModal(`Modifica Valore (${u.type})`, u.value);
+    if (val !== null) {
+        u.value = val.trim();
+        saveUtenze();
+    }
 };
 
 window.confirmSaveUtility = (editIndex) => {
-    const type = document.getElementById('util-type').value.trim();
-    const val = document.getElementById('util-value').value.trim();
-    const addr = document.getElementById('util-address').value;
+    const typeEl = document.getElementById('util-type');
+    const valEl = document.getElementById('util-value');
+    const addrEl = document.getElementById('util-address');
+
+    if (!typeEl || !valEl) return;
+
+    const type = typeEl.value.trim();
+    const val = valEl.value.trim();
+    const addr = addrEl ? addrEl.value : '';
 
     if (!type || !val) {
         notify("Inserisci Tipo e Valore", 'error');
         return;
     }
 
-    const newUtil = { type: type, value: val, address_label: addr };
+    const newUtil = { type, value: val, address_label: addr };
+    if (editIndex !== null) userUtilities[editIndex] = newUtil;
+    else userUtilities.push(newUtil);
 
-    if (editIndex !== null) {
-        userUtilities[editIndex] = newUtil;
-    } else {
-        userUtilities.push(newUtil);
-    }
-
-    document.getElementById('modal-utility').remove();
     saveUtenze();
-};
-
-window.editUtenza = (index) => {
-    window.openUtilityModal(index);
 };
 
 window.deleteUtenza = async (index) => {
     const confirmed = await window.showConfirmModal("Eliminare questa utenza?");
     if (!confirmed) return;
+
     userUtilities.splice(index, 1);
     saveUtenze();
 };
 
-async function saveUtenze() {
-    try {
-        await updateDoc(doc(db, "users", currentUserUid), {
-            utenze: userUtilities
-        });
-        window.location.reload();
-    } catch (err) {
-        notify("Errore salvataggio: " + err.message, 'error');
-    }
+function saveUtenze() {
+    updateDoc(doc(db, "users", currentUserUid), {
+        utenze: userUtilities
+    }).then(() => {
+        renderUtenzeView();
+    }).catch(e => notify("Errore salvataggio: " + e.message, 'error'));
 }
 
 // --- RENDERING: DOCUMENTI ---
@@ -1166,12 +1343,129 @@ function renderDocumentiView() {
     if (!container) return;
     container.innerHTML = '';
 
-    // Add New Document Button (Moved to TOP)
+    const allTypes = ['Carta d\'Identità', 'Patente', 'Passaporto', 'Codice Fiscale', 'Tessera Sanitaria', 'Altro'];
+    const available = allTypes.filter(t => !userDocuments.some(d => d.type === t) || t === 'Altro');
+    const optionsHtml = available.map(t => `<option value="${t}" style="color:black;">${t}</option>`).join('');
+
+    // 1. ADD PANE (Internal Pane V3.0) - INTERACTIVE DYNAMIC DESIGN
+    const addPane = document.createElement('div');
+    addPane.id = 'pane-add-document';
+    addPane.className = 'accordion-content';
+    addPane.innerHTML = `
+        <div class="settings-group" style="margin-top:0.5rem; margin-bottom:2rem; padding:0; overflow:hidden; border:1px solid var(--border-color); background:var(--surface-vault); backdrop-filter:blur(20px); border-radius:24px; position:relative;">
+            <!-- Glow Background Effect -->
+            <div style="position:absolute; top:-20%; left:20%; width:150px; height:150px; background:radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, transparent 70%); filter:blur(30px); pointer-events:none;"></div>
+            
+            <div style="padding:1.5rem; position:relative; z-index:1;">
+                <div style="display:grid; gap:1.2rem;">
+                    <!-- Dropdown Tipo -->
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label class="field-label" style="font-size:0.65rem; color:#a78bfa; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Tipologia Documento</label>
+                        <select id="new-doc-type-select-main" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; width:100%;">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+
+                    <!-- Input Numero (Sempre Visibile) -->
+                    <div class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                        <label id="label-num-doc" class="field-label" style="font-size:0.65rem; color:#a78bfa; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Numero</label>
+                        <input type="text" id="new-doc-number" placeholder="Inserisci numero..." class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; width:100%;">
+                    </div>
+
+                    <!-- Gruppo Campi Opzionali (Dinamici) -->
+                    <div id="dynamic-doc-fields" style="display:grid; gap:1.2rem;">
+                        <!-- Data Scadenza -->
+                        <div id="row-expiry" class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color);">
+                            <label class="field-label" style="font-size:0.65rem; color:#a78bfa; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Data di Scadenza</label>
+                            <input type="date" id="new-doc-expiry" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; width:100%; color-scheme:dark;">
+                        </div>
+
+                        <!-- Ente Rilascio (Patente/Passaporto/CI) -->
+                        <div id="row-emission" class="glass-field-titanium" style="padding:0.75rem 1rem; border:1px solid var(--border-color); display:none;">
+                            <label class="field-label" style="font-size:0.65rem; color:#a78bfa; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; display:block; font-weight:800;">Ente / Luogo Rilascio</label>
+                            <input type="text" id="new-doc-emission" placeholder="Es. Prefettura di Roma" class="titanium-input" style="background:transparent; border:none; padding:0; height:auto; color:var(--text-primary); font-size:1rem; width:100%;">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
+                    <button onclick="document.getElementById('pane-add-document').classList.remove('show')" class="titanium-btn-secondary" style="flex:1; border-radius:14px; font-weight:700;">ANNULLA</button>
+                    <button id="btn-save-document-inline" class="titanium-btn-primary" style="flex:1; border-radius:14px; background:linear-gradient(135deg, #7c3aed, #a78bfa); border:none; color:white; font-weight:800; box-shadow:0 10px 20px -5px rgba(124, 58, 237, 0.3);">SALVA DOCUMENTO</button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(addPane);
+
+    // Logic for Interactive UI
+    const docSelect = addPane.querySelector('#new-doc-type-select-main');
+    const docNumLabel = addPane.querySelector('#label-num-doc');
+    const rowExpiry = addPane.querySelector('#row-expiry');
+    const rowEmission = addPane.querySelector('#row-emission');
+    const btnSave = addPane.querySelector('#btn-save-document-inline');
+
+    const updateFieldsVisibility = (type) => {
+        docNumLabel.textContent = `Numero ${type}`;
+
+        // CF e Tessera Sanitaria non hanno ente (di solito)
+        if (type === 'Codice Fiscale') {
+            rowExpiry.style.display = 'none';
+            rowEmission.style.display = 'none';
+
+            // Suggerimento automatico se il campo è vuoto
+            const numInput = document.getElementById('new-doc-number');
+            if (numInput && !numInput.value) {
+                numInput.value = currentUserData.cf || currentUserData.codiceFiscale || '';
+            }
+        } else if (type === 'Tessera Sanitaria') {
+            rowExpiry.style.display = 'block';
+            rowEmission.style.display = 'none';
+        } else {
+            rowExpiry.style.display = 'block';
+            rowEmission.style.display = 'block';
+        }
+    };
+
+    if (docSelect) {
+        docSelect.onchange = () => updateFieldsVisibility(docSelect.value);
+        updateFieldsVisibility(docSelect.value);
+    }
+
+    if (btnSave) {
+        btnSave.onclick = async () => {
+            const type = docSelect.value;
+            const num = document.getElementById('new-doc-number').value.trim();
+            const expiry = document.getElementById('new-doc-expiry').value;
+            const emission = document.getElementById('new-doc-emission').value.trim();
+
+            if (!num) {
+                notify("Inserisci il numero del documento.", "error");
+                return;
+            }
+
+            userDocuments.push({
+                type: type,
+                num_serie: num,
+                expiry_date: expiry,
+                emission_body: emission,
+                attachments: []
+            });
+
+            try {
+                await updateDoc(doc(db, "users", currentUserUid), { documenti: userDocuments });
+                window.location.reload();
+            } catch (e) {
+                notify("Errore salvataggio: " + e.message, 'error');
+            }
+        };
+    }
+
+    // 2. Add Button (Trigger)
     const addBtn = document.createElement('button');
-    addBtn.className = 'auth-btn';
-    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem;";
-    addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">add</span> Aggiungi Documento`;
-    addBtn.onclick = () => window.openAddDocumentModal();
+    addBtn.className = 'auth-btn accordion-header';
+    addBtn.dataset.target = 'pane-add-document';
+    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem; width:100%;";
+    addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">description</span> Aggiungi Documento`;
     container.appendChild(addBtn);
 
     if (!userDocuments || userDocuments.length === 0) {
@@ -1179,6 +1473,7 @@ function renderDocumentiView() {
         p.style.cssText = "text-align:center; opacity:0.5; font-size:0.8rem; padding:1rem;";
         p.textContent = "Nessun documento registrato";
         container.appendChild(p);
+        window.setupAccordions();
         return;
     }
 
@@ -1187,99 +1482,65 @@ function renderDocumentiView() {
         div.className = "glass-field-titanium glass-field-violet";
         div.style.marginBottom = "1rem";
 
-        const wrapperStyle = "display:flex; flex-direction:column; align-items:flex-start; height:auto; padding:0.5rem 0; width:100%;";
-
-        let info = [];
-        // Robust Resolution of Document Number/ID
-        let num = docItem.num_serie || docItem.id_number || docItem.license_number || docItem.codice_fiscale || docItem.cf || docItem.numero || docItem.cf_value;
-
-        // Special Case: If it's a Fiscal Code document but has no number, try to fetch from user profile
-        if (!num && (docItem.type === 'Codice Fiscale' || docItem.type === 'Tessera Sanitaria')) {
+        let num = docItem.num_serie || docItem.id_number || docItem.license_number || docItem.cf_value || docItem.codice_fiscale || docItem.cf || docItem.codiceFiscale;
+        if (!num && docItem.type?.toLowerCase() === 'codice fiscale') {
             num = currentUserData.cf || currentUserData.codiceFiscale;
         }
+        if (!num) num = '-';
+        let expiry = docItem.expiry_date ? "Scadenza: " + docItem.expiry_date : '';
 
-        if (num) info.push(num);
-        if (docItem.expiry_date) info.push("Scadenza: " + (window.formatDateToIT ? window.formatDateToIT(docItem.expiry_date) : docItem.expiry_date));
-
-        // Attachments Logic
-        let attachmentsHtml = '<span class="field-value" style="opacity:0.7; font-size:0.8rem;">Nessun allegato</span>';
+        // Sezione Allegati Documento
+        let docAttachmentsHtml = '<span class="field-value" style="opacity:0.7;">-</span>';
         if (docItem.attachments && docItem.attachments.length > 0) {
-            attachmentsHtml = `<div style="display:flex; flex-direction:column; gap:0.5rem; width:100%;">`;
+            docAttachmentsHtml = `<div style="display:flex; flex-direction:column; gap:0.5rem;">`;
             docItem.attachments.forEach((att, attIndex) => {
-                attachmentsHtml += `
-                    <div style="display:flex; align-items:center; gap:0.5rem; justify-content:space-between; background:rgba(255,255,255,0.03); padding:0.4rem; border-radius:8px;">
+                docAttachmentsHtml += `
+                    <div style="display:flex; align-items:center; gap:0.5rem; justify-content:space-between;">
                         <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:0;">
-                             <span class="material-symbols-outlined" style="font-size:16px; opacity:0.7;">attachment</span>
-                             <a href="${att.url}" target="_blank" style="color:#22d3ee; text-decoration:none; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${att.name}</a>
+                             <span class="material-symbols-outlined" style="font-size:16px;">attachment</span>
+                             <a href="${att.url}" target="_blank" style="color:#22d3ee; text-decoration:underline; font-size:0.85rem; word-break:break-all; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${att.name}</a>
                         </div>
-                        <button onclick="event.preventDefault(); window.deleteSingleAttachment(${index}, ${attIndex}, 'document')" 
-                                style="background:none; border:none; color:rgba(239, 68, 68, 0.8); cursor:pointer; padding:0 0.5rem; display:flex; align-items:center;">
-                             <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
-                        </button>
                     </div>
                 `;
             });
-            attachmentsHtml += `</div>`;
+            docAttachmentsHtml += `</div>`;
         }
 
-        const attachmentsSection = `
+        const docAttachmentsSection = `
             <div style="width:100%; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
-                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.7rem;">
-                     <span class="field-label" style="opacity:0.7; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Allegati</span>
+                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                     <span class="field-label" style="opacity:0.7;">Allegati</span>
                      <button onclick="event.preventDefault(); window.openAttachmentManager(${index}, 'document')" 
-                             style="background:none; border:none; color:#22d3ee; cursor:pointer; display:flex; align-items:center; gap:0.3rem; font-size:0.8rem;">
-                        <span class="material-symbols-outlined" style="font-size:18px;">add_circle</span>
-                        Aggiungi
+                             style="background:none; border:none; color:#22d3ee; cursor:pointer; display:flex; align-items:center;">
+                        <span class="material-symbols-outlined">add_circle</span>
                      </button>
                  </div>
-                 ${attachmentsHtml}
+                 ${docAttachmentsHtml}
             </div>
         `;
 
         div.innerHTML = `
-            <legend class="field-label" style="font-weight:700; color:#a78bfa;">${docItem.type || 'Documento'}</legend>
-            <div style="${wrapperStyle}">
-                <div style="width:100%; display:flex; justify-content:space-between; align-items:start;">
-                    <div style="display:flex; flex-direction:column; gap:0.3rem; flex:1;">
-                        <span class="field-value" style="font-size:1.1rem; letter-spacing:0.02em;">${info[0] || '---'}</span>
-                        <span style="font-size:0.75rem; opacity:0.6; font-weight:600; color:#94a3b8;">${info[1] || ''}</span>
+            <legend class="field-label">${docItem.type || 'Documento'}</legend>
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <div>
+                        <span class="field-value" style="font-size:1.1rem;">${num}</span>
+                        <div style="font-size:0.75rem; opacity:0.6;">${expiry}</div>
                     </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; flex-shrink:0;">
-                         <!-- VIEW BUTTON -->
-                         <button class="action-view-doc" data-index="${index}" title="Visualizza Dettagli"
-                                style="width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; cursor:pointer;">
-                            <span class="material-symbols-outlined" style="font-size:16px;">visibility</span>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="titanium-action-btn btn-copy" title="Copia Numero" onclick="navigator.clipboard.writeText('${num.replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
+                            <span class="material-symbols-outlined" style="font-size:18px;">content_copy</span>
                         </button>
-                         <!-- COPY BUTTON -->
-                         <button style="width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; cursor:pointer;" 
-                                title="Copia Numero"
-                                onclick="event.preventDefault(); navigator.clipboard.writeText('${(info[0] || '').replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
-                            <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
-                        </button>
-                        <!-- EDIT BUTTON -->
-                        <button class="action-edit-doc" data-index="${index}" title="Modifica" 
-                                style="width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(37, 99, 235, 0.2); border:1px solid rgba(37, 99, 235, 0.3); color:#60a5fa; cursor:pointer;">
-                            <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
-                        </button>
-                        <!-- DELETE BUTTON -->
-                        <button class="action-delete-doc" data-index="${index}" title="Elimina" 
-                                style="width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; cursor:pointer;">
-                            <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
-                        </button>
+                        <button class="titanium-action-btn btn-view" onclick="window.showDocumentDetails(${index})"><span class="material-symbols-outlined" style="font-size:18px;">visibility</span></button>
+                        <button class="titanium-action-btn btn-edit" onclick="window.editUserDocument(${index})"><span class="material-symbols-outlined" style="font-size:18px;">edit</span></button>
+                        <button class="titanium-action-btn btn-delete" onclick="window.deleteUserDocument(${index})"><span class="material-symbols-outlined" style="font-size:18px;">delete</span></button>
                     </div>
                 </div>
-                ${attachmentsSection}
+                ${docAttachmentsSection}
             </div>
         `;
-
-        // Programmatic listeners for better stability
-        div.querySelector('.action-view-doc').onclick = (e) => { e.preventDefault(); window.showDocumentDetails(index); };
-        div.querySelector('.action-edit-doc').onclick = (e) => { e.preventDefault(); window.editUserDocument(index); };
-        div.querySelector('.action-delete-doc').onclick = (e) => { e.preventDefault(); window.deleteUserDocument(index); };
-
         container.appendChild(div);
     });
-
 }
 
 window.deleteUserDocument = async (index) => {
@@ -1305,55 +1566,17 @@ window.deleteUserDocument = async (index) => {
     } catch (e) { notify("Errore eliminazione: " + e.message, 'error'); }
 };
 
-window.openAddDocumentModal = () => {
-    const allTypes = ['Carta d\'Identità', 'Patente', 'Passaporto', 'Codice Fiscale', 'Tessera Sanitaria'];
-    const available = allTypes.filter(t => !userDocuments.some(d => d.type === t));
-
-    // Aggiungi opzione "Altro" sempre
-    available.push('Altro');
-
-    // FIX: Style color:black for options ensures visibility on white native dropdowns
-    const optionsHtml = available.map(t => `<option value="${t}" style="color:black;">${t}</option>`).join('');
-
-    const modal = document.createElement('div');
-    modal.id = 'modal-add-doc';
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center; z-index: 9999;
-    `;
-
-    modal.innerHTML = `
-        <div class="settings-vault" style="width:90%; max-width:400px; padding:2rem; background:#0f1932; border:1px solid rgba(255,255,255,0.1); border-radius:20px;">
-            <h3 style="color:white; margin-bottom:1.5rem; text-align:center;">Aggiungi Documento</h3>
-            
-            <p style="color:rgba(255,255,255,0.6); margin-bottom:0.5rem; font-size:0.9rem;">Seleziona il tipo di documento:</p>
-            <select id="new-doc-type-select" style="width:100%; padding:1rem; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; margin-bottom:1.5rem; appearance:none;">
-                ${optionsHtml}
-            </select>
-
-            <div style="display:flex; gap:1rem;">
-                <button onclick="document.getElementById('modal-add-doc').remove()" class="auth-btn" style="background:rgba(255,255,255,0.1); justify-content:center;">Annulla</button>
-                <button onclick="window.confirmAddDocType()" class="auth-btn" style="background:#2563eb; justify-content:center;">Avanti</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
+// DEPRECATED: Document modal selectors removed
 
 window.confirmAddDocType = () => {
-    const select = document.getElementById('new-doc-type-select');
-    if (!select) return;
-    const type = select.value;
-    if (type) {
-        window.initNewDocument(type);
+    // Funzione mantenuta per retrocompatibilità, ora la logica è nel listener diretto
+    const select = document.getElementById('new-doc-type-select-main');
+    if (select && select.value) {
+        window.initNewDocument(select.value);
     }
 };
 
 window.initNewDocument = async (type) => {
-    const modal = document.getElementById('modal-add-doc');
-    if (modal) modal.remove();
-
     const num = await window.showInputModal(`Numero ${type}`, "");
     if (num === null) return;
 
@@ -1377,8 +1600,8 @@ window.editUserDocument = async (index) => {
     const docItem = userDocuments[index];
     if (!docItem) return;
 
-    const currentNum = docItem.num_serie || docItem.id_number || docItem.license_number || "";
-    const newNum = await window.showInputModal(`Modifica Numero (${docItem.type})`, currentNum);
+    const currentNum = docItem.num_serie || docItem.id_number || docItem.license_number || docItem.cf_value || docItem.codice_fiscale || docItem.cf || docItem.codiceFiscale || "";
+    const newNum = await window.showInputModal(`Modifica Numero(${docItem.type})`, currentNum);
 
     if (newNum !== null) {
         docItem.num_serie = newNum;
@@ -1408,15 +1631,19 @@ window.showDocumentDetails = (index) => {
     const addField = (label, val) => {
         if (!val) return;
         fieldsHtml += `
-            <div style="padding:0.75rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05); margin-bottom:0.5rem;">
-                <span style="opacity:0.5; font-size:0.7rem; text-transform:uppercase; display:block; margin-bottom:0.25rem; color:#94a3b8;">${label}</span>
-                <span style="font-size:1rem; color:white; font-weight:500; word-break:break-all;">${val}</span>
+            <div style="padding:0.75rem; background:var(--surface-sub); border-radius:12px; border:1px solid var(--border-color); margin-bottom:0.5rem;">
+                <span style="opacity:0.6; font-size:0.7rem; text-transform:uppercase; display:block; margin-bottom:0.25rem; color:var(--text-secondary);">${label}</span>
+                <span style="font-size:1rem; color:var(--text-primary); font-weight:500; word-break:break-all;">${val}</span>
             </div>
         `;
     };
 
     addField("Tipo Documento", docItem.type);
-    addField("Numero / ID", docItem.num_serie || docItem.id_number || docItem.license_number || docItem.codice_fiscale);
+    let docNum = docItem.num_serie || docItem.id_number || docItem.license_number || docItem.cf_value || docItem.codice_fiscale || docItem.cf || docItem.codiceFiscale;
+    if (!docNum && docItem.type?.toLowerCase() === 'codice fiscale') {
+        docNum = currentUserData.cf || currentUserData.codiceFiscale;
+    }
+    addField("Numero / ID", docNum);
     addField("Data Scadenza", window.formatDateToIT ? window.formatDateToIT(docItem.expiry_date) : docItem.expiry_date);
     addField("Data Rilascio", window.formatDateToIT ? window.formatDateToIT(docItem.emission_date) : docItem.emission_date);
     addField("Ente Rilascio", docItem.emission_body);
@@ -1435,21 +1662,20 @@ window.showDocumentDetails = (index) => {
     modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter:blur(15px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1.5rem;";
 
     modal.innerHTML = `
-        <div class="settings-vault" style="width:100%; max-width:480px; max-height:85vh; overflow-y:auto; padding:2rem; background:#0f172a; border-radius:28px; border:1px solid rgba(255,255,255,0.1); position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div class="settings-vault" style="width:100%; max-width:480px; max-height:85vh; overflow-y:auto; padding:2rem; background:var(--surface-vault); border-radius:28px; border:1px solid var(--border-color); position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
             <button id="close-doc-details-x" 
-                    style="position:absolute; top:1.2rem; right:1.2rem; background:rgba(255,255,255,0.05); border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;">
+                    style="position:absolute; top:1.2rem; right:1.2rem; background:var(--surface-sub); border:none; color:var(--text-primary); border-radius:50%; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;">
                 <span class="material-symbols-outlined" style="font-size:24px;">close</span>
             </button>
-            <h3 style="color:white; margin-bottom:1.8rem; text-align:center; font-size:1.5rem; font-weight:700; letter-spacing:-0.01em;">Dettagli Documento</h3>
+            <h3 style="color:var(--text-primary); margin-bottom:1.8rem; text-align:center; font-size:1.5rem; font-weight:700; letter-spacing:-0.01em;">Dettagli Documento</h3>
             <div style="display:flex; flex-direction:column;">${fieldsHtml}</div>
             ${imgHtml}
-            <button id="close-doc-details-btn" class="auth-btn" style="background:#3b82f6; width:100%; justify-content:center; margin-top:2rem; height:3.8rem; font-weight:700; font-size:1rem; border-radius:16px;">Chiudi</button>
+            <button id="close-doc-details-btn" class="auth-btn" style="background:var(--primary-blue); color:white; width:100%; justify-content:center; margin-top:2rem; height:3.8rem; font-weight:700; font-size:1rem; border-radius:16px;">Chiudi</button>
         </div>
     `;
 
     document.body.appendChild(modal);
 
-    // Explicit close handlers
     const closeFn = () => { if (modal) modal.remove(); };
     modal.querySelector('#close-doc-details-x').onclick = closeFn;
     modal.querySelector('#close-doc-details-btn').onclick = closeFn;
@@ -1551,14 +1777,14 @@ onAuthStateChanged(auth, async (user) => {
         if (userDoc.exists()) {
             currentUserData = userDoc.data();
 
-            const fullName = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim() || 'Utente';
+            const fullName = `${currentUserData.nome || ''} ${currentUserData.cognome || ''} `.trim() || 'Utente';
             const mobile = currentUserData.mobile_private || '-';
 
             // Top Bar
             const firstName = currentUserData.nome || '';
             const lastName = currentUserData.cognome || '';
-            setText('profile-firstname', firstName);
-            setText('profile-lastname', lastName);
+            setText('profile-firstname', firstName, true);
+            setText('profile-lastname', lastName, true);
             // profile-email non esiste nell'HTML attuale, se lo aggiungessi servirebbe setText('profile-email', user.email);
 
             const avatar = document.getElementById('profile-avatar');
@@ -1569,7 +1795,7 @@ onAuthStateChanged(auth, async (user) => {
             setText('cognome-view', currentUserData.cognome);
             setText('cf-view', currentUserData.cf || currentUserData.codiceFiscale);
             setText('birth_date-view', formatDateToIT(currentUserData.birth_date));
-            setText('birth_place-view', `${currentUserData.birth_place || ''} ${currentUserData.birth_province ? '(' + currentUserData.birth_province + ')' : ''}`.trim());
+            setText('birth_place-view', `${currentUserData.birth_place || ''} ${currentUserData.birth_province ? '(' + currentUserData.birth_province + ')' : ''} `.trim());
 
             // Render QR Flags
             renderPersonalDataFlags();
@@ -1612,6 +1838,8 @@ onAuthStateChanged(auth, async (user) => {
 
             userDocuments = currentUserData.documenti || [];
             renderDocumentiView();
+
+            window.setupAccordions();
 
             // QR Code Placeholder (Removed from layout)
             const qrContainer = document.getElementById('qrcode');

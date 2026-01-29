@@ -26,6 +26,29 @@ const testo_email_wrapper = document.getElementById('testo_email_wrapper');
 const fileInput = document.getElementById('file-input');
 const attachmentsList = document.getElementById('attachments-list');
 
+// Accordion logic (Protocol V3.0 compliance)
+function setupAccordions() {
+    const accordions = document.querySelectorAll('.accordion-header');
+    accordions.forEach(acc => {
+        acc.addEventListener('click', () => {
+            const targetId = acc.dataset.target;
+            const content = document.getElementById(targetId);
+            const chevron = acc.querySelector('.settings-chevron');
+            if (!content) return;
+
+            const isVisible = content.classList.contains('show');
+
+            if (isVisible) {
+                content.classList.remove('show');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('show');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+}
+
 let currentUser = null;
 let currentRule = null;
 let userHasConfig = false;
@@ -51,7 +74,7 @@ window.setMode = (mode) => {
     const btnAuto = document.getElementById('mode-automezzi');
     const btnDoc = document.getElementById('mode-documenti');
     const btnGen = document.getElementById('mode-generali');
-    const vehicleLabel = document.querySelector('#vehicle_fields_wrapper span.text-slate-600');
+    const vehicleLabel = document.querySelector('#vehicle_fields_wrapper .settings-label');
     const vehicleIcon = document.querySelector('#vehicle_fields_wrapper .material-symbols-outlined');
 
     // Reset styles
@@ -83,6 +106,115 @@ window.setMode = (mode) => {
 // Stato Allegati
 let selectedFiles = []; // Nuovi file da caricare
 let existingAttachments = []; // Allegati già salvati (in caso di edit)
+
+// --- FUNZIONI GESTIONE ALLEGATI INLINE ---
+
+/**
+ * Gestisce la selezione di file (camera o libreria)
+ */
+function handleFileSelection(input) {
+    if (!input.files || input.files.length === 0) return;
+
+    // Aggiungi i nuovi file all'array
+    Array.from(input.files).forEach(file => {
+        selectedFiles.push(file);
+    });
+
+    // Aggiorna UI
+    renderAttachmentsList();
+    updateAttachmentsCount();
+
+    // Reset input
+    input.value = '';
+}
+
+/**
+ * Renderizza la lista degli allegati
+ */
+function renderAttachmentsList() {
+    const list = document.getElementById('attachments-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (selectedFiles.length === 0 && existingAttachments.length === 0) {
+        list.innerHTML = `<p style="text-align: center; opacity: 0.3; font-size: 0.8rem; padding: 1rem;" data-t="no_attachments">Nessun allegato aggiunto</p>`;
+        return;
+    }
+
+    // Mostra file nuovi (non ancora caricati)
+    selectedFiles.forEach((file, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 8px;";
+        div.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden;">
+                <span class="material-symbols-outlined" style="font-size: 16px; opacity: 0.7;">${file.type.startsWith('image/') ? 'image' : 'description'}</span>
+                <span style="color: var(--text-primary); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${file.name}</span>
+                <span style="font-size: 0.7rem; opacity: 0.5;">(${(file.size / 1024).toFixed(1)} KB)</span>
+            </div>
+            <button onclick="removeAttachment(${index}, 'new')" style="background: none; border: none; color: rgba(255,50,50,0.8); cursor: pointer; padding: 2px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+            </button>
+        `;
+        list.appendChild(div);
+    });
+
+    // Mostra allegati esistenti (già caricati)
+    existingAttachments.forEach((att, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: rgba(34,211,238,0.1); padding: 0.5rem; border-radius: 8px;";
+        div.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden;">
+                <span class="material-symbols-outlined" style="font-size: 16px; color: #22d3ee;">check_circle</span>
+                <a href="${att.url}" target="_blank" style="color: #22d3ee; text-decoration: underline; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">${att.name}</a>
+            </div>
+            <button onclick="removeAttachment(${index}, 'existing')" style="background: none; border: none; color: rgba(255,50,50,0.8); cursor: pointer; padding: 2px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+            </button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+/**
+ * Rimuove un allegato
+ */
+window.removeAttachment = (index, type) => {
+    if (type === 'new') {
+        selectedFiles.splice(index, 1);
+    } else {
+        existingAttachments.splice(index, 1);
+    }
+    renderAttachmentsList();
+    updateAttachmentsCount();
+};
+
+/**
+ * Aggiorna il contatore allegati
+ */
+function updateAttachmentsCount() {
+    const counter = document.getElementById('attachments-count');
+    if (counter) {
+        const total = selectedFiles.length + existingAttachments.length;
+        counter.textContent = total;
+        counter.style.display = total > 0 ? 'inline' : 'none';
+    }
+}
+
+// Event listeners per input file
+document.addEventListener('DOMContentLoaded', () => {
+    const cameraInput = document.getElementById('camera-input');
+    const fileInput = document.getElementById('file-input');
+
+    if (cameraInput) {
+        cameraInput.addEventListener('change', (e) => handleFileSelection(e.target));
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => handleFileSelection(e.target));
+    }
+});
+
 
 // --- FUNZIONI DI POPOLAMENTO ---
 
@@ -294,6 +426,7 @@ function finishLoad() {
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
+        setupAccordions(); // Attiva i pannelli interni
         await loadDynamicConfig();
 
         // Inizializza UI Allegati (mostra placeholder o link)
@@ -363,7 +496,7 @@ function updateUIForMode(mode) {
     const btnAuto = document.getElementById('mode-automezzi');
     const btnDoc = document.getElementById('mode-documenti');
     const btnGen = document.getElementById('mode-generali');
-    const vehicleLabel = document.querySelector('#vehicle_fields_wrapper span.text-slate-600');
+    const vehicleLabel = document.querySelector('#vehicle_fields_wrapper .settings-label');
     const vehicleIcon = document.querySelector('#vehicle_fields_wrapper .material-symbols-outlined');
 
     [btnAuto, btnDoc, btnGen].forEach(btn => {
@@ -423,7 +556,9 @@ function updateEmailExclusion() {
     const val2 = emailSecondariaSelect.value;
     if (val1 && val2 && val1 === val2 && val1 !== "manual" && val1 !== "-") {
         emailSecondariaSelect.value = "";
-        alert("Attenzione: Hai già selezionato questa email come Primaria.");
+        if (window.showToast) {
+            window.showToast("Attenzione: Hai già selezionato questa email come Primaria.", "error");
+        }
     }
 }
 emailPrimariaSelect?.addEventListener('change', updateEmailExclusion);
@@ -513,7 +648,9 @@ saveButton?.addEventListener('click', async () => {
         const email2 = (emailSecondariaSelect.value === 'manual') ? document.getElementById('email_secondaria_input').value.trim() : emailSecondariaSelect.value;
 
         if (!name || !type || !date || !email1) {
-            alert("Compila tutti i campi obbligatori!");
+            if (window.showToast) {
+                window.showToast("Compila tutti i campi obbligatori!", "error");
+            }
             saveButton.disabled = false;
             saveButton.innerHTML = originalBtnContent;
             return;
@@ -568,9 +705,12 @@ saveButton?.addEventListener('click', async () => {
             await updateDoc(docRef, data);
 
             // In Edit Mode, we just go back usually, or show toast. 
-            // Let's use standard alert for Edit for now as requested flow was about "New".
-            alert("Scadenza aggiornata!");
-            window.location.href = 'scadenze.html';
+            if (window.showToast) {
+                window.showToast("Scadenza aggiornata!", "success");
+            }
+            setTimeout(() => {
+                window.location.href = 'scadenze.html';
+            }, 1000);
         } else {
             console.log("Creazione nuova scadenza...");
             const docRef = await addDoc(collection(db, "users", currentUser.uid, "scadenze"), data);
@@ -581,78 +721,30 @@ saveButton?.addEventListener('click', async () => {
 
     } catch (error) {
         console.error(error);
-        alert("Errore salvataggio: " + error.message);
+        if (window.showToast) {
+            window.showToast("Errore salvataggio: " + error.message, "error");
+        }
         saveButton.disabled = false;
         saveButton.innerHTML = originalBtnContent;
     }
 });
 
-function showSuccessModal(newId) {
-    const modal = document.getElementById('success-modal');
-    const btnAttach = document.getElementById('btn-success-attachments');
-    const btnHome = document.getElementById('btn-success-home');
+async function showSuccessModal(newId) {
+    const confirmed = await window.showConfirmModal(
+        "SALVATA!",
+        "Vuoi caricare degli allegati per questa scadenza?",
+        "SÌ, GESTISCI",
+        "NO, LISTA"
+    );
 
-    if (modal) {
-        modal.classList.remove('hidden');
-
-        // Setup Navigation
-        if (btnAttach) {
-            btnAttach.onclick = () => {
-                // Navigate DIRECTLY to attachments page
-                window.location.href = `gestione_allegati.html?id=${newId}&context=scadenza&ownerId=${currentUser.uid}`;
-            };
-        }
-
-        if (btnHome) {
-            btnHome.onclick = () => {
-                window.location.href = 'scadenze.html';
-            };
-        }
+    if (confirmed) {
+        window.location.href = `gestione_allegati.html?id=${newId}&context=scadenza&ownerId=${currentUser.uid}`;
     } else {
-        // Fallback if modal missing
-        if (confirm("Scadenza salvata! Vuoi aggiungere allegati?")) {
-            window.location.href = `aggiungi_scadenza.html?id=${newId}`;
-        } else {
-            window.location.href = 'scadenze.html';
-        }
+        window.location.href = 'scadenze.html';
     }
 }
 
-// GESTIONE ISTRUZIONI
-// GESTIONE ISTRUZIONI CON ANIMAZIONI
-window.showInstructions = () => {
-    const el = document.getElementById('instructionsModal');
-    if (el) {
-        el.classList.remove('hidden');
-        // Doppi RAF per garantire che il browser registri il cambio di display prima della transizione
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                el.classList.remove('opacity-0');
-                const inner = el.querySelector('div');
-                if (inner) {
-                    inner.classList.remove('scale-95');
-                    inner.classList.add('scale-100');
-                }
-            });
-        });
-    }
-};
-
-window.closeInstructions = () => {
-    const el = document.getElementById('instructionsModal');
-    if (el) {
-        el.classList.add('opacity-0');
-        const inner = el.querySelector('div');
-        if (inner) {
-            inner.classList.add('scale-95');
-            inner.classList.remove('scale-100');
-        }
-        setTimeout(() => {
-            el.classList.add('hidden');
-        }, 300);
-        localStorage.setItem('instructionsShown', 'true');
-    }
-};
+// GESTIONE ISTRUZIONI (Legacy removed for Internal Pane V3.0)
 
 /**
  * Carica i dati di una scadenza esistente per la modifica

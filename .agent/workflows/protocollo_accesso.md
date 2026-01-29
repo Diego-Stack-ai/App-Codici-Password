@@ -3,8 +3,15 @@ description: Protocollo Standard Titanium Accesso V3.0 (Security, Versioning & U
 ---
 
 # Titanium Accesso V3.0 (The Secure Standard)
-> **Evolution Note**: Questa versione integra gli standard di stabilità "V3" (Cache Busting, UI Centralizzata) mantenendo l'obbligo del "Pure CSS" per le performance di login.
+> **Baseline Ufficiale**: Questo protocollo, insieme agli altri presenti in `.agent/workflows/`, costituisce l'unica fonte di istruzioni da seguire per lo sviluppo dell'app, salvo la creazione di nuovi protocolli o l'insorgere di conflitti tecnici attualmente non noti.
 
+## 2. Standard Design Titanium Gold
+Ogni pagina di accesso deve rispettare i seguenti pilastri estetici:
+*   **Matrix Palette**: Colori semantici Blue/Indigo per la sicurezza.
+*   **Titanium Vault [#21]**: Contenitore centrale perimetrale con `border-glow`.
+*   **Forced Dark Mode [#20]**: Le pagine auth sono bloccate in Dark Mode per sicurezza e coerenza.
+
+---
 ## 1. Ambito di Applicazione
 Questo protocollo governa le pagine pubbliche di ingresso (entry-points):
 1.  `index.html` (Login)

@@ -4,20 +4,30 @@
  */
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { collection, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, query, getDocs, orderBy, addDoc, Timestamp, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { logError } from './utils.js';
+import {
+    EMAILS,
+    VEHICLES,
+    DEADLINE_RULES,
+    buildEmailBody,
+    buildEmailSubject
+} from './scadenza_templates.js';
 
 // --- LOGICA PER LA PAGINA SCADENZE.HTML ---
 
 let currentUser = null;
 let allScadenze = [];
+let dynamicConfig = { deadlineTypes: [], models: [], plates: [], emailTemplates: [], names: [] };
+let unifiedConfigs = { automezzi: null, documenti: null, generali: null };
+let currentMode = 'automezzi';
+let currentRule = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     const scadenzeContainer = document.querySelector('#scadenze-list');
     if (!scadenzeContainer) return;
 
     const searchInput = document.getElementById('deadline-search');
-    const sortSelect = document.getElementById('deadline-sort');
     const filterChips = document.querySelectorAll('.filter-chip');
     const toggleSearchBtn = document.getElementById('toggle-search');
     const searchBarContainer = document.getElementById('search-bar-container');
@@ -28,17 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (toggleSearchBtn && searchBarContainer) {
         toggleSearchBtn.onclick = () => {
-            const isHidden = searchBarContainer.classList.contains('-translate-y-full');
-            if (isHidden) {
-                searchBarContainer.classList.remove('-translate-y-full', 'opacity-0');
-                searchBarContainer.classList.add('translate-y-0', 'opacity-100');
+            searchBarContainer.classList.toggle('active');
+            if (searchBarContainer.classList.contains('active')) {
                 if (searchInput) searchInput.focus();
-            } else {
-                searchBarContainer.classList.add('-translate-y-full', 'opacity-0');
-                searchBarContainer.classList.remove('translate-y-0', 'opacity-100');
             }
         };
     }
+
+    // Filter Chips logic update for Titanium
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            filterChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            activeFilter = chip.textContent.trim();
+            renderFilteredScadenze();
+        });
+    });
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -135,32 +150,77 @@ document.addEventListener('DOMContentLoaded', () => {
         const expired = dueDate < now;
         const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
 
-        let matrixClass = 'matrix-blue';
-        if (expired) matrixClass = 'matrix-red';
-        else if (isUpcoming) matrixClass = 'matrix-orange';
+        let accentColor = 'var(--accent-blue)';
+        let glassBg = 'bg-blue-glass';
+        if (expired) {
+            accentColor = 'var(--accent-red)';
+            glassBg = 'bg-red-glass';
+        } else if (isUpcoming) {
+            accentColor = 'var(--accent-amber)';
+            glassBg = 'bg-amber-glass';
+        }
 
         return `
-            <div class="titanium-interactive border-glow dynamic-card ${matrixClass}" 
+            <div class="settings-item" style="border-left: 4px solid ${accentColor}; cursor: pointer; margin-bottom: 0.75rem;" 
                  onclick="location.href='dettaglio_scadenza.html?id=${scadenza.id}'">
-                <div class="flex items-center gap-3 min-w-0 relative z-10">
-                    <div class="icon-circle">
-                        <span class="material-symbols-outlined text-xl">${scadenza.icon || 'event_note'}</span>
+                <div class="settings-item-header" style="position: relative;">
+                    <div class="settings-item-info" style="width: 100%;">
+                        <div class="settings-icon-box ${glassBg}">
+                            <span class="material-symbols-outlined filled">${scadenza.icon || 'event_note'}</span>
+                        </div>
+                        <div class="settings-text">
+                            <span class="settings-label" style="font-size: 0.65rem; opacity: 0.6;">${scadenza.category || 'SCADENZA'}</span>
+                            <span class="settings-label" style="font-size: 1rem; margin: 2px 0;">${scadenza.title}</span>
+                            <span class="settings-desc">Ref: ${scadenza.name || 'Generale'}</span>
+                        </div>
                     </div>
-                    <div class="flex flex-col min-w-0">
-                        <p class="text-[9px] font-bold uppercase tracking-widest mb-0.5 opacity-80">${scadenza.category || 'SCADENZA'}</p>
-                        <h3 class="text-base font-bold leading-tight transition-colors">${scadenza.title}</h3>
-                        <p class="text-[11px] opacity-50 truncate mt-0.5">Ref: ${scadenza.name || 'Generale'}</p>
-                    </div>
-                </div>
-                <div class="flex flex-col items-end gap-1 shrink-0 relative z-10">
-                    <span class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-tight border backdrop-blur-md">
+                    <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest text-white" 
+                          style="position: absolute; top: 0; right: 0;">
                         ${dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).toUpperCase()}
                     </span>
                 </div>
             </div>`;
     }
 
-    // listeners ...
+    const sortTrigger = document.getElementById('sort-trigger');
+    const sortMenu = document.getElementById('sort-menu');
+    const sortItems = document.querySelectorAll('.titanium-dropdown-item');
+    const currentSortLabel = document.getElementById('current-sort');
+
+    if (sortTrigger && sortMenu) {
+        sortTrigger.onclick = (e) => {
+            e.stopPropagation();
+            sortMenu.classList.toggle('show');
+        };
+
+        sortItems.forEach(item => {
+            item.onclick = (e) => {
+                e.stopPropagation();
+                const val = item.getAttribute('data-value');
+                sortType = val;
+
+                // Update UI
+                sortItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                if (currentSortLabel) currentSortLabel.textContent = item.textContent;
+
+                sortMenu.classList.remove('show');
+                renderFilteredScadenze();
+            };
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            sortMenu.classList.remove('show');
+        });
+    }
+
+    if (searchInput) {
+        searchInput.oninput = (e) => {
+            searchQuery = e.target.value;
+            renderFilteredScadenze();
+        };
+    }
 });
 
 

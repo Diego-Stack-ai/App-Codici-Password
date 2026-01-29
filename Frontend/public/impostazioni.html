@@ -18,8 +18,9 @@
     <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js"></script>
-    <script src="assets/js/titanium-core.js"></script>
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> <!-- CDN Fix -->
 </head>
 
@@ -30,11 +31,23 @@
 
         <!-- HEADER FISSO -->
         <header class="titanium-header">
-            <div id="header-content" class="header-stack">
-                <h2 class="header-title" data-t="settings_title">Impostazioni</h2>
-                <a href="home_page.html" class="btn-icon-header">
-                    <span class="material-symbols-outlined">home</span>
-                </a>
+            <div class="header-balanced-container">
+                <!-- ZONA SINISTRA: Vuota (placeholder per simmetria) -->
+                <div class="header-left"></div>
+
+                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
+                <div class="header-center">
+                    <h2 class="header-title" data-t="settings_title">
+                        Impostazioni
+                    </h2>
+                </div>
+
+                <!-- ZONA DESTRA: Home (1 icona) -->
+                <div class="header-right">
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                </div>
             </div>
         </header>
 
@@ -316,21 +329,17 @@
             <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
                 <span
                     style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.0
+                    Titanium Security Protocol V3.5
                 </span>
             </div>
         </footer>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast"
-        class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-white text-[#0a0f1e] px-6 py-2.5 rounded-full text-sm font-bold shadow-2xl opacity-0 transition-opacity pointer-events-none z-[99999]">
-        Copiato!
-    </div>
+
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.0"></script>
-    <script type="module" src="assets/js/impostazioni.js?v=3.0"></script>
+    <script type="module" src="assets/js/main.js?v=3.5"></script>
+    <script type="module" src="assets/js/impostazioni.js?v=3.5"></script>
 </body>
 
 </html>

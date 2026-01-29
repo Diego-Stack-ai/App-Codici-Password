@@ -103,22 +103,33 @@
         <!-- Header (Fixed Glass) -->
         <header
             class="fixed top-0 left-0 right-0 mx-auto w-full md:max-w-3xl lg:max-w-5xl bg-[#0a0f1e]/20 backdrop-blur-sm border-b border-white/5 z-50 transition-colors">
-            <div class="flex items-center px-4 h-16">
-                <a href="home_page.html"
-                    class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-white">
-                    <span class="material-symbols-outlined text-[24px]">arrow_back</span>
-                </a>
-                <h1 class="text-lg font-bold tracking-tight text-center text-white flex-1">Aziende</h1>
-                <div class="flex items-center gap-1">
+            <div class="flex items-center px-4 h-16 relative">
+                <div class="flex items-center gap-1 z-10">
+                    <a href="home_page.html"
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-white">
+                        <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+                    </a>
                     <button id="sort-btn"
                         class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-white"
                         title="Ordina A-Z">
                         <span class="material-symbols-outlined text-[24px]">sort_by_alpha</span>
                     </button>
+                </div>
+
+                <h1
+                    class="text-lg font-bold tracking-tight text-center text-white absolute inset-0 flex items-center justify-center pointer-events-none px-20">
+                    Aziende
+                </h1>
+
+                <div class="flex items-center gap-1 ml-auto z-10">
                     <a href="aggiungi_nuova_azienda.html"
                         class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-primary"
                         title="Aggiungi Azienda">
                         <span class="material-symbols-outlined text-[24px]">add</span>
+                    </a>
+                    <a href="home_page.html"
+                        class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 transition-colors text-white">
+                        <span class="material-symbols-outlined text-[24px]">home</span>
                     </a>
                 </div>
             </div>

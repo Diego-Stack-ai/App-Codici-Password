@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" >
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
@@ -18,8 +18,9 @@
     <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js"></script>
-    <script src="assets/js/titanium-core.js"></script>
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
 <body class="antialiased">
@@ -28,23 +29,89 @@
         <div class="glass-glow"></div>
 
         <!-- HEADER -->
+        <!-- HEADER FISSO -->
         <header class="titanium-header">
-            <div class="header-stack">
-                <!-- BACK BUTTON -> IMPOSTAZIONI -->
-                <a href="impostazioni.html" class="btn-icon-header" style="left: 0; right: auto;">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </a>
+            <div class="header-balanced-container">
+                <!-- ZONA SINISTRA: Navigazione (1 icona) -->
+                <div class="header-left">
+                    <a href="impostazioni.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
+                </div>
 
-                <h1 class="header-title" style="margin-left: 0;">PROFILO UTENTE</h1>
+                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
+                <div class="header-center">
+                    <h1 class="header-title" data-t="page_title_profile">
+                        PROFILO UTENTE
+                    </h1>
+                </div>
 
-                <!-- HOME BUTTON -> HOME PAGE -->
-                <a href="home_page.html" class="btn-icon-header">
-                    <span class="material-symbols-outlined">home</span>
-                </a>
+                <!-- ZONA DESTRA: Info + Home (2 icone - dispari, extra a dx) -->
+                <div class="header-right">
+                    <button type="button" class="btn-icon-header accordion-header" data-target="guida-pane">
+                        <span class="material-symbols-outlined">info</span>
+                    </button>
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                </div>
             </div>
         </header>
 
         <main class="settings-container no-select">
+
+            <!-- PANE: GUIDA RAPIDA (Regola 3.4) -->
+            <div id="guida-pane" class="accordion-content">
+                <div class="settings-group"
+                    style="margin-top: 0; border: 1px solid var(--accent-blue); background: var(--surface-sub);">
+                    <div style="padding: 1.5rem;">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="settings-icon-box bg-blue-glass">
+                                <span class="material-symbols-outlined">lightbulb</span>
+                            </div>
+                            <h3
+                                style="color:var(--text-primary); font-weight:900; letter-spacing:0.1em; font-size:0.875rem; text-transform:uppercase;">
+                                Guida Profilo</h3>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <span
+                                    class="size-6 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center text-xs font-bold">1</span>
+                                <p style="font-size:11px; color:var(--text-secondary); line-height:1.6;">Puoi gestire
+                                    ogni voce della pagina
+                                    (<span style="color:var(--text-primary); font-weight:bold;">Dati Personali,
+                                        Residenza, Utilità, Documenti,
+                                        Contatti, Note</span>)
+                                    utilizzando i tasti "+" o "edit" dedicati.</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <span
+                                    class="size-6 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center text-xs font-bold">2</span>
+                                <p style="font-size:11px; color:var(--text-secondary); line-height:1.6;">Usa i pulsanti
+                                    <span class="material-symbols-outlined"
+                                        style="font-size: 14px; vertical-align: middle;">edit</span> per modificare i
+                                    dati in modo rapido tramite modali di sistema.
+                                </p>
+                            </div>
+                            <div class="flex gap-3">
+                                <span
+                                    class="size-6 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center text-xs font-bold">3</span>
+                                <p style="font-size:11px; color:var(--text-secondary); line-height:1.6;">Seleziona la
+                                    <span style="color:var(--text-primary); font-weight:bold;">spunta QR</span> per
+                                    scegliere quali dati mostrare
+                                    quando condividi il tuo profilo.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button type="button" class="titanium-btn-primary w-full mt-6 py-3 text-[10px] accordion-header"
+                            data-target="guida-pane">
+                            HO CAPITO, CHIUDI GUIDA
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- SEZIONE PROFILO (Horizontal Layout) -->
             <div class="titanium-vault border-glow profile-card"
@@ -54,8 +121,8 @@
                 <div class="profile-info" style="align-items: flex-start; width: auto;">
                     <h2 id="profile-firstname"
                         style="margin: 0; font-size: 1.3rem; font-weight: 700; line-height: 1.2;">-</h2>
-                    <h2 id="profile-lastname"
-                        style="margin: 0; font-size: 1.3rem; font-weight: 500; line-height: 1.2; color: white;">-</h2>
+                    <h2 id="profile-lastname" style="margin: 0; font-size: 1.3rem; font-weight: 700; line-height: 1.2;">
+                        -</h2>
                 </div>
 
                 <!-- DX: AVATAR con Edit Overlay (Protocollo Gold) -->
@@ -105,15 +172,15 @@
 
                     /* VARIANTI */
                     .btn-view {
-                        background: rgba(255, 255, 255, 0.1);
-                        border-color: rgba(255, 255, 255, 0.2);
-                        color: white;
+                        background: var(--surface-sub);
+                        border-color: var(--border-color);
+                        color: var(--text-primary);
                     }
 
                     .btn-copy {
-                        background: rgba(255, 255, 255, 0.05);
-                        border-color: rgba(255, 255, 255, 0.1);
-                        color: white;
+                        background: var(--surface-sub);
+                        border-color: var(--border-color);
+                        color: var(--text-primary);
                     }
 
                     .btn-edit {
@@ -319,7 +386,7 @@
                         <div class="settings-item-header">
                             <div class="settings-item-info">
                                 <div class="settings-icon-box bg-cyan-glass">
-                                    <span class="material-symbols-outlined">mail</span>
+                                    <span class="material-symbols-outlined">email</span>
                                 </div>
                                 <div class="settings-text">
                                     <span class="settings-label">Email</span>
@@ -348,9 +415,9 @@
                         </button>
                     </div>
                     <div class="titanium-vault"
-                        style="padding: 1.5rem; background: rgba(0,0,0,0.2); border-radius: 16px;">
+                        style="padding: 1.5rem; background: var(--surface-sub); border-radius: 16px;">
                         <div id="note-view"
-                            style="font-size: 0.9rem; line-height: 1.6; color: rgba(255,255,255,0.8); white-space: pre-wrap;">
+                            style="font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap;">
                             -</div>
                     </div>
                 </div>
@@ -365,16 +432,17 @@
         <footer class="titanium-footer">
             <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
                 <span
-                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.0
+                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: var(--text-secondary); text-transform: uppercase;">
+                    Titanium Security Protocol V3.5
                 </span>
             </div>
         </footer>
     </div>
 
     <!-- Scripts con Cache Busting (Protocollo V3.0) -->
-    <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script type="module" src="assets/js/profilo_privato.js?v=3.1"></script>
+    <!-- Scripts -->
+    <script src="assets/js/main.js?v=3.5"></script>
+    <script src="assets/js/profilo_privato.js?v=3.5" type="module"></script>
 </body>
 
 </html>

@@ -105,10 +105,10 @@ export function showWarningModal(title, message, callback = null) {
 
     const content = document.createElement('div');
     content.style.cssText = `
-        background: rgba(15, 25, 50, 0.8);
+        background: var(--surface-vault);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border-color);
         border-radius: 24px;
         padding: 2.5rem 2rem;
         max-width: 320px;
@@ -123,12 +123,12 @@ export function showWarningModal(title, message, callback = null) {
         <div style="width: 60px; height: 60px; background: rgba(37, 99, 235, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
             <span class="material-symbols-outlined" style="font-size: 2rem; color: #3b82f6;">info</span>
         </div>
-        <h3 style="color: white; font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">${title}</h3>
-        <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5;">${message}</p>
+        <h3 style="color: var(--text-primary); font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">${title}</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5;">${message}</p>
         <button id="modal-ok-btn" style="
             width: 100%;
             padding: 1rem;
-            background: #2563eb;
+            background: var(--primary-blue);
             color: white;
             border: none;
             border-radius: 16px;
@@ -166,6 +166,82 @@ window.showToast = showToast;
 window.showWarningModal = showWarningModal;
 
 /**
+ * [CORE UI] CONFIRM MODAL
+ * Sostituto Premium di confirm(). Restituisce una Promise<boolean>.
+ */
+window.showConfirmModal = function (title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
+    return new Promise((resolve) => {
+        const modalId = 'titanium-confirm-modal';
+        let modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.style.cssText = `
+            position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999999; opacity: 0; transition: opacity 0.3s ease;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: var(--surface-vault);
+            border: 1px solid var(--border-color); border-radius: 24px;
+            padding: 2.5rem 2rem; width: 90%; max-width: 360px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        `;
+
+        content.innerHTML = `
+            <div style="width: 60px; height: 60px; background: rgba(37, 99, 235, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                <span class="material-symbols-outlined" style="font-size: 2rem; color: #3b82f6;">help_outline</span>
+            </div>
+            <h3 style="color: var(--text-primary); font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">${title}</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2.5rem; line-height: 1.5;">${message}</p>
+            
+            <div style="display: flex; gap: 0.75rem;">
+                <button id="confirm-cancel-btn" style="
+                    flex: 1; padding: 1rem; background: var(--surface-sub);
+                    border: 1px solid var(--border-color); color: var(--text-secondary);
+                    border-radius: 16px; font-weight: 600; cursor: pointer;
+                    text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem;
+                ">${cancelText}</button>
+                <button id="confirm-ok-btn" style="
+                    flex: 1; padding: 1rem; background: var(--primary-blue);
+                    border: none; color: white; border-radius: 16px;
+                    font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+                    text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8rem;
+                ">${confirmText}</button>
+            </div>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        // Animazione
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+        }, 10);
+
+        const closeModal = (val) => {
+            modal.style.opacity = '0';
+            content.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                modal.remove();
+                resolve(val);
+            }, 300);
+        };
+
+        content.querySelector('#confirm-cancel-btn').onclick = () => closeModal(false);
+        content.querySelector('#confirm-ok-btn').onclick = () => closeModal(true);
+    });
+};
+
+/**
  * [CORE UI] INPUT MODAL
  * Sostituto Premium di prompt(). Restituisce una Promise.
  * Risolve con value (stringa) se confermato, null se annullato.
@@ -188,8 +264,8 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
 
         const content = document.createElement('div');
         content.style.cssText = `
-            background: rgba(15, 25, 50, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+            background: var(--surface-vault);
+            border: 1px solid var(--border-color); border-radius: 24px;
             padding: 2rem; width: 90%; max-width: 360px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -198,25 +274,25 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
 
         content.innerHTML = `
             <div>
-                <h3 style="color: white; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.25rem;">${title}</h3>
-                <div style="height: 2px; width: 40px; background: #3b82f6; border-radius: 2px;"></div>
+                <h3 style="color: var(--text-primary); font-size: 1.1rem; font-weight: 800; margin-bottom: 0.25rem;">${title}</h3>
+                <div style="height: 2px; width: 40px; background: var(--primary-blue); border-radius: 2px;"></div>
             </div>
             
             <input type="text" value="${initialValue}" placeholder="${placeholder}" style="
-                width: 100%; background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
-                padding: 1rem; color: white; font-size: 1rem; outline: none;
+                width: 100%; background: var(--surface-sub);
+                border: 1px solid var(--border-color); border-radius: 12px;
+                padding: 1rem; color: var(--text-primary); font-size: 1rem; outline: none;
                 transition: border-color 0.2s;
-            " onfocus="this.style.borderColor = '#3b82f6'" onblur="this.style.borderColor = 'rgba(255,255,255,0.1)'">
+            " onfocus="this.style.borderColor = 'var(--primary-blue)'" onblur="this.style.borderColor = 'var(--border-color)'">
 
             <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
                 <button id="modal-cancel-btn" style="
-                    flex: 1; padding: 0.8rem; background: transparent;
-                    border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6);
+                    flex: 1; padding: 0.8rem; background: var(--surface-sub);
+                    border: 1px solid var(--border-color); color: var(--text-secondary);
                     border-radius: 14px; font-weight: 600; cursor: pointer;
                 ">Annulla</button>
                 <button id="modal-confirm-btn" style="
-                    flex: 1; padding: 0.8rem; background: #2563eb;
+                    flex: 1; padding: 0.8rem; background: var(--primary-blue);
                     border: none; color: white; border-radius: 14px;
                     font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
                 ">Conferma</button>

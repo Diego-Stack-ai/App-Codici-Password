@@ -18,8 +18,9 @@
     <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js"></script>
-    <script src="assets/js/titanium-core.js"></script>
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
 <body class="antialiased">
@@ -29,23 +30,23 @@
 
         <!-- HEADER FISSO -->
         <header class="titanium-header">
-            <div id="header-content" class="header-stack"
-                style="flex-direction: row; justify-content: space-between; align-items: center;">
+            <div class="header-balanced-container">
+                <!-- ZONA SINISTRA: Navigazione (1 icona) -->
+                <div class="header-left">
+                    <a href="impostazioni.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
+                </div>
 
-                <!-- Sinistra: Indietro -->
-                <a href="impostazioni.html" class="btn-icon-header">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </a>
+                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
+                <div class="header-center">
+                    <h2 class="header-title" data-t="notifications_history">
+                        Storico Notifiche
+                    </h2>
+                </div>
 
-                <!-- Centro: Titolo -->
-                <h2 class="header-title"
-                    style="margin: 0; font-size: clamp(0.8rem, 2.5vw, 1.1rem); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 55%; text-align: center; line-height: 1.1; white-space: normal;"
-                    data-t="notifications_history">
-                    Storico Notifiche
-                </h2>
-
-                <!-- Destra: Cestino + Home -->
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <!-- ZONA DESTRA: Delete + Home (2 icone - dispari, extra a dx) -->
+                <div class="header-right">
                     <button onclick="window.clearHistory()" class="btn-icon-header" style="color: #f87171;">
                         <span class="material-symbols-outlined">delete_sweep</span>
                     </button>
@@ -105,28 +106,25 @@
     <!-- Toast Notification -->
     <div id="toast"
         class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-white text-[#0a0f1e] px-6 py-2.5 rounded-full text-sm font-bold shadow-2xl opacity-0 transition-opacity pointer-events-none z-[99999]">
-    </div>
+        <style>
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
 
-    <!-- Inline Keyframes for Spinner if missing in CSS -->
-    <style>
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
+                to {
+                    transform: rotate(360deg);
+                }
             }
 
-            to {
-                transform: rotate(360deg);
+            .hidden {
+                display: none !important;
             }
-        }
+        </style>
 
-        .hidden {
-            display: none !important;
-        }
-    </style>
-
-    <!-- Scripts -->
-    <script src="assets/js/ui-core.js"></script>
-    <script type="module" src="assets/js/notifiche_storia.js?v=3.0"></script>
+        <!-- Scripts -->
+        <script src="assets/js/ui-core.js?v=3.5"></script>
+        <script type="module" src="assets/js/notifiche_storia.js?v=3.5"></script>
 </body>
 
 </html>

@@ -87,15 +87,26 @@ async function loadSharedComponents() {
                 if (headerContent && !headerContent.hasChildNodes()) {
                     const pageTitle = document.title.replace(' - App', '') || 'Titanium';
                     headerContent.innerHTML = `
-                        <div class="flex items-center gap-3 p-4">
-                            <button onclick="window.history.back()" 
-                                class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white shadow-sm">
-                                <span class="material-symbols-outlined">arrow_back</span>
-                            </button>
-                            <h1 class="text-lg font-bold text-white tracking-wide truncate">${pageTitle}</h1>
-                        </div>
-                        <div class="flex items-center gap-3 pr-4">
-                             <!-- Optional Actions Placeholders -->
+                        <div class="flex items-center justify-between w-full h-16 px-4 relative">
+                            <!-- Sinistra: Back -->
+                            <div class="z-10">
+                                <button onclick="window.history.back()" 
+                                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white shadow-sm">
+                                    <span class="material-symbols-outlined">arrow_back</span>
+                                </button>
+                            </div>
+
+                            <!-- Centro: Titolo -->
+                            <h1 class="absolute inset-0 flex items-center justify-center text-lg font-bold text-white tracking-wide pointer-events-none px-20 text-center truncate">
+                                ${pageTitle}
+                            </h1>
+
+                            <!-- Destra: Home -->
+                            <div class="z-10">
+                                <a href="home_page.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white shadow-sm">
+                                    <span class="material-symbols-outlined">home</span>
+                                </a>
+                            </div>
                         </div>
                     `;
                 }

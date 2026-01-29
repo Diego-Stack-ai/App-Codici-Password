@@ -18,9 +18,10 @@
     <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js"></script>
-    <script src="assets/js/titanium-core.js"></script>
-    <script src="assets/js/translations.js"></script>
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
+    <script src="assets/js/translations.js?v=3.5"></script>
 </head>
 
 <body class="antialiased">
@@ -30,26 +31,26 @@
 
         <!-- HEADER FISSO -->
         <header class="titanium-header">
-            <div id="header-content" class="header-stack"
-                style="flex-direction: row; justify-content: space-between; align-items: center;">
-
-                <!-- Sinistra: Indietro -->
-                <a href="impostazioni.html" class="btn-icon-header">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </a>
-
-                <!-- Centro: Titolo -->
-                <h2 class="header-title"
-                    style="margin: 0; font-size: clamp(0.8rem, 2.5vw, 1.1rem); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 45%; text-align: center; line-height: 1.1; white-space: normal;"
-                    data-t="account_archive">
-                    Archivio Account
-                </h2>
-
-                <!-- Destra: Cestino + Home -->
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="header-balanced-container">
+                <!-- ZONA SINISTRA: Navigazione + Delete (2 icone) -->
+                <div class="header-left">
+                    <a href="impostazioni.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
                     <button id="btn-empty-trash" class="btn-icon-header" style="color: #f87171;">
                         <span class="material-symbols-outlined">delete_forever</span>
                     </button>
+                </div>
+
+                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
+                <div class="header-center">
+                    <h2 class="header-title" data-t="account_archive">
+                        Archivio Account
+                    </h2>
+                </div>
+
+                <!-- ZONA DESTRA: Home (1 icona - dispari, extra a dx) -->
+                <div class="header-right">
                     <a href="home_page.html" class="btn-icon-header">
                         <span class="material-symbols-outlined">home</span>
                     </a>
@@ -115,29 +116,16 @@
             <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
                 <span
                     style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.0
+                    Titanium Security Protocol V3.5
                 </span>
             </div>
         </footer>
     </div>
 
-    <!-- Toast & Modals (via ui-core) -->
-    <div id="toast"
-        class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-white text-[#0a0f1e] px-6 py-2.5 rounded-full text-sm font-bold shadow-2xl opacity-0 transition-opacity pointer-events-none z-[99999]">
-    </div>
+
 
     <!-- Inline Utils -->
     <style>
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
         /* Fix per inputs in settings styling */
         input[type="search"]::placeholder {
             color: rgba(255, 255, 255, 0.3);
@@ -149,8 +137,8 @@
     </style>
 
     <!-- Scripts -->
-    <script src="assets/js/ui-core.js"></script>
-    <script type="module" src="assets/js/archivio_account.js?v=7"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/archivio_account.js?v=3.5"></script>
 </body>
 
 </html>

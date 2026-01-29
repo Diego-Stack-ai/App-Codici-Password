@@ -18,8 +18,9 @@
     <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js"></script>
-    <script src="assets/js/titanium-core.js"></script>
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
 <body class="antialiased">
@@ -29,31 +30,33 @@
 
         <!-- HEADER FISSO -->
         <header class="titanium-header">
-            <div id="header-content" class="header-stack"
-                style="flex-direction: row; justify-content: space-between; align-items: center;">
-
-                <!-- Sinistra: Indietro -->
-                <a href="impostazioni.html" class="btn-icon-header">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </a>
-
-                <!-- Centro: Titolo -->
-                <div
-                    style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 55%; text-align: center;">
-                    <h2 class="header-title"
-                        style="margin: 0; font-size: clamp(0.9rem, 2.5vw, 1.1rem); line-height: 1.1; white-space: normal;"
-                        data-t="privacy_policy_title">
-                        PRIVACY POLICY
-                    </h2>
-                    <span data-t="privacy_extended_title"
-                        style="display: block; font-size: 0.6rem; color: rgba(255,255,255,0.5); letter-spacing: 0.1em; margin-top: 2px;">INFORMATIVA
-                        ESTESA</span>
+            <div class="header-balanced-container">
+                <!-- ZONA SINISTRA: Navigazione (1 icona) -->
+                <div class="header-left">
+                    <a href="impostazioni.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
                 </div>
 
-                <!-- Destra: Home -->
-                <a href="home_page.html" class="btn-icon-header">
-                    <span class="material-symbols-outlined">home</span>
-                </a>
+                <!-- ZONA CENTRO: Titolo con Wrap Intelligente (2 righe) -->
+                <div class="header-center">
+                    <div style="text-align: center;">
+                        <h2 class="header-title" style="margin: 0; line-height: 1.1;" data-t="privacy_policy_title">
+                            PRIVACY POLICY
+                        </h2>
+                        <span data-t="privacy_extended_title"
+                            style="display: block; font-size: 0.6rem; color: rgba(255,255,255,0.5); letter-spacing: 0.1em; margin-top: 2px;">
+                            INFORMATIVA ESTESA
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ZONA DESTRA: Home (1 icona) -->
+                <div class="header-right">
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                </div>
             </div>
         </header>
 
@@ -182,7 +185,7 @@
             <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
                 <span
                     style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.0
+                    Titanium Security Protocol V3.5
                 </span>
             </div>
         </footer>
