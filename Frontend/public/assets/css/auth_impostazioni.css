@@ -1,29 +1,61 @@
 /* 
- * TITANIUM DESIGN SYSTEM - Impostazioni Variation V1.0
+ * TITANIUM DESIGN SYSTEM - Impostazioni Variation V2.0 (Dual Mode)
  * File: auth_impostazioni.css
- * Mode: TRUE DARK ONLY
+ * Mode: Adaptive (Light/Dark)
  */
 
 /* ==========================================================================
-   0. TOKEN DI BASE (Sincronizzati con Accesso V4.6)
+   0. TOKEN DI BASE (Dual Theme System)
    ========================================================================== */
 :root {
-    --bg-dark: #0a0f1e;
+    /* Default (Dark Mode Foundation) */
+    --bg-primary: #0a0f1e;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.5);
+
+    /* Surface Colors (Dark) */
+    --surface-glass: rgba(15, 25, 50, 0.4);
+    --surface-vault: rgba(10, 15, 30, 0.5);
+    --surface-sub: rgba(0, 0, 0, 0.2);
+    /* Sfondo interno per accordions/box */
+    --surface-hover: rgba(20, 30, 60, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+
+    /* Brand Colors */
     --primary-blue: #2563eb;
     --primary-light: #60a5fa;
-    --text-white: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.5);
 
     /* Glow Gradients */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
+    --titanium-box-gradient: linear-gradient(to left, #030712, #162e6e);
 
     /* Premium Border Utils */
     --premium-border-width: 1.5px;
     --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
 
-    /* Configurazione Layout Account */
     --sidebar-width: 280px;
     --header-height: 80px;
+}
+
+/* LIGHT MODE OVERRIDES */
+html:not(.dark) {
+    --bg-primary: #e2e8f0;
+    /* Slate 200 */
+    --text-primary: #0f172a;
+    /* Slate 900 */
+    --text-secondary: #64748b;
+    /* Slate 500 */
+
+    /* Surface Colors (Light) */
+    --surface-glass: rgba(255, 255, 255, 0.7);
+    --surface-vault: rgba(255, 255, 255, 0.6);
+    --surface-sub: rgba(255, 255, 255, 0.5);
+    /* Bianco meno trasparente per contrasto */
+    --surface-hover: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.1);
+
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
+    --titanium-box-gradient: linear-gradient(to bottom right, #f8fafc, #bfdbfe);
 }
 
 /* ==========================================================================
@@ -36,13 +68,13 @@
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-white);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: 'Manrope', sans-serif;
     margin: 0;
     min-height: 100vh;
-    color-scheme: dark;
     overflow-x: hidden;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* Scrollbar Premium */
@@ -96,11 +128,10 @@ body {
     width: 100%;
     flex-direction: column;
     justify-content: flex-start;
-    /* FIX: Inizia dall'alto per le impostazioni */
     align-items: center;
     margin: 0 auto;
     overflow: hidden;
-    background: linear-gradient(to left, #030712, #162e6e);
+    background: var(--titanium-box-gradient);
     z-index: 10;
 }
 
@@ -143,13 +174,13 @@ body {
 
 /* Effetto Sfocatura Sfumata (Maschera) */
 .titanium-header::before {
-    background: rgba(10, 15, 30, 0.9);
+    background: var(--surface-glass);
     -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
 }
 
 .titanium-footer::before {
-    background: rgba(10, 15, 30, 0.9);
+    background: var(--surface-glass);
     -webkit-mask-image: linear-gradient(to top, black 30%, transparent 100%);
     mask-image: linear-gradient(to top, black 30%, transparent 100%);
 }
@@ -167,7 +198,7 @@ body {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.3em;
-    color: var(--text-white);
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -198,11 +229,11 @@ body {
    ========================================================================== */
 .titanium-vault {
     position: relative;
-    background: rgba(10, 15, 30, 0.5);
+    background: var(--surface-vault);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
@@ -274,12 +305,12 @@ body {
 .lang-btn-float {
     position: relative;
     width: 100%;
-    background: rgba(15, 25, 50, 0.4);
+    background: var(--surface-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     border-radius: 20px;
-    color: var(--text-white);
+    color: var(--text-primary);
     padding: 1.25rem 1.5rem;
     font-size: 0.95rem;
     font-weight: 600;
@@ -384,17 +415,17 @@ body {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin-bottom: 1rem;
     padding-left: 0.5rem;
 }
 
 .settings-item {
     position: relative;
-    background: rgba(15, 25, 50, 0.4);
+    background: var(--surface-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 1.25rem 1.5rem;
     display: flex;
@@ -428,10 +459,106 @@ body {
     z-index: 2;
 }
 
+.accordion-content {
+    background: var(--surface-sub);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 0.75rem !important;
+    /* Ridotto per compattezza */
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+    display: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: fadeInScale 0.3s ease-out;
+}
+
+/* COMPACT TABLES FOR CONFIGURATION (Premium V3) */
+.accordion-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+    /* Distanza tra le righe per effetto card */
+}
+
+.accordion-content tr {
+    background: var(--surface-vault) !important;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.accordion-content tr:hover {
+    background: var(--surface-hover) !important;
+    transform: translateX(2px);
+}
+
+.accordion-content td {
+    font-size: 0.72rem !important;
+    padding: 0.6rem 0.5rem !important;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.accordion-content td:first-child {
+    border-left: 3px solid var(--primary-light);
+    /* Accento Titanium */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.accordion-content td:last-child {
+    border-right: 1px solid var(--border-color);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    text-align: right;
+}
+
+/* Action Buttons Styled */
+.accordion-content .flex.items-center.gap-1 {
+    opacity: 0.9 !important;
+    /* Sempre visibili */
+    justify-content: flex-end;
+}
+
+.accordion-content button.w-6.h-6 {
+    width: 26px !important;
+    height: 26px !important;
+    background: var(--surface-sub) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary) !important;
+}
+
+.accordion-content button.hover\:bg-teal-500\/20:hover {
+    background: rgba(45, 212, 191, 0.2) !important;
+    border-color: #2dd4bf !important;
+    color: #2dd4bf !important;
+}
+
+.accordion-content button.hover\:bg-red-500\/20:hover {
+    background: rgba(248, 113, 113, 0.2) !important;
+    border-color: #f87171 !important;
+    color: #f87171 !important;
+}
+
+.accordion-content .material-symbols-outlined {
+    font-size: 14px !important;
+}
+
+.accordion-content.show {
+    display: block;
+}
+
 .settings-item:hover {
     transform: translateY(-3px);
-    background: rgba(20, 30, 60, 0.5);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--surface-hover);
+    border-color: var(--primary-light);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -463,7 +590,7 @@ body {
 
 .settings-desc {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 /* AVATAR BOX */
@@ -541,12 +668,12 @@ body {
     position: relative;
     width: 100%;
     min-height: 4.5rem;
-    background: rgba(15, 25, 50, 0.4);
+    background: var(--surface-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     border-radius: 20px;
-    color: var(--text-white);
+    color: var(--text-primary);
     padding: 1rem 1.5rem;
     font-size: 1rem;
     font-weight: 700;
@@ -591,7 +718,7 @@ body {
     height: 24px;
     appearance: none;
     -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--border-color);
     border-radius: 20px;
     cursor: pointer;
     transition: 0.3s;
@@ -658,9 +785,9 @@ body {
     flex: 1;
     padding: 0.75rem;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    background: var(--surface-glass);
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 0.8rem;
     font-weight: 700;
@@ -699,8 +826,8 @@ body {
     width: 100%;
     position: relative;
     /* Per posizionamento label */
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 0.8rem 1rem;
     display: flex;
@@ -758,7 +885,7 @@ legend.field-label {
 .field-value {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--text-white);
+    color: var(--text-primary);
     flex: 1;
     word-break: break-all;
 }
@@ -824,41 +951,146 @@ legend.field-label {
 }
 
 .accordion-header:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.accordion-content {
-    background: rgba(10, 15, 30, 0.4);
-    /* Vetro scuro profondo */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 1.5rem;
-    margin-top: 0.75rem;
-    /* Stacco per effetto card fluttuante */
-    margin-bottom: 1.5rem;
-    display: none;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    position: relative;
-    animation: fadeInScale 0.3s ease-out;
-}
-
-.accordion-content.show {
-    display: block;
-    animation: fadeInScale 0.3s ease-out;
+    background: var(--surface-hover);
 }
 
 .settings-chevron {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: var(--text-muted);
+    color: var(--text-secondary);
+}
+
+/* INFO CONTENT ADAPTIVE (App Info & Privacy) */
+.info-content {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.info-content h3 {
+    color: var(--text-primary);
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.info-content h4 {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+}
+
+.info-content strong {
+    color: var(--text-primary);
+}
+
+.info-content .info-card {
+    background: var(--surface-sub);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.info-content .subtitle-caps {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.info-content .highlight-box {
+    font-style: italic;
+    background: var(--surface-sub);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.info-content .section-divider {
+    border-left: 3px solid var(--primary-light);
+    padding-left: 10px;
+    margin: 1.5rem 0 1rem 0;
+}
+
+/* SYNTAX BOX (Technical Preview) */
+.syntax-container {
+    background: var(--surface-sub);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 1.25rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    position: relative;
+    overflow: hidden;
+}
+
+.syntax-row {
+    margin-bottom: 1.25rem;
+}
+
+.syntax-row:last-child {
+    margin-bottom: 0;
+}
+
+.syntax-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.syntax-code {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.75rem !important;
+    /* Testo più piccolo come richiesto */
+    color: var(--text-primary);
+    display: flex;
+    flex-wrap: wrap;
+    /* Permette l'andata a capo */
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    line-height: 1.5;
+}
+
+html:not(.dark) .syntax-code {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+.syntax-token {
+    font-weight: 700;
+}
+
+.syntax-token.blue {
+    color: #60a5fa;
+}
+
+.syntax-token.emerald {
+    color: #34d399;
+}
+
+.syntax-token.amber {
+    color: #fbbf24;
+}
+
+.syntax-token.muted {
+    opacity: 0.5;
 }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
     .profile-card {
         flex-direction: column;
+        align-items: center;
         text-align: center;
+        padding: 1.5rem;
     }
 
     .settings-item {

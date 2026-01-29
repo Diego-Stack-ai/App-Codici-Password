@@ -12,6 +12,10 @@ Questo protocollo governa le "Pagine Satellite" di configurazione e gestione dat
 3.  `configurazione_documenti.html` (Setup Tipi Doc)
 4.  `configurazione_automezzi.html` (Setup Flotta)
 5.  `impostazioni.html` (Hub Centrale)
+6.  `archivio_account.html` (Archivio Credenziali)
+7.  `regole_scadenze.html` (Regole Scadenze Hub)
+8.  `notifiche_storia.html` (Storico Notifiche)
+9.  `privacy.html` (Privacy Policy)
 
 ---
 
@@ -35,6 +39,24 @@ Ogni interazione utente (Input, Conferma, Feedback) DEVE passare per `ui-core.js
     *   Input: `await window.showInputModal("Titolo", "ValoreDefault")`
     *   Conferma: `await window.showConfirmModal("Messaggio")`
     *   Feedback: `window.showToast("Messaggio", "success/error")`
+
+### 2.4 Standard Multilingua (i18n)
+Ogni pagina deve supportare nativamente il cambio lingua dinamico.
+*   **HTML**: Usare attributi `data-t="chiave_traduzione"` per ogni elemento testuale statico.
+*   **JS**: Includere `translations.js` e invocare `applyTranslations()` al caricamento.
+*   **Placeholders**: Anche gli attributi `placeholder` devono essere tradotti (es. `data-t-placeholder="search_text"`).
+*   **Verifica**: Controllare sempre che non ci siano testi hardcoded in italiano nel codice sorgente finale.
+
+### 2.5 Standard Tema (Dual Mode)
+Le impostazioni devono riflettere il tema scelto dall'utente (Auto/Light/Dark), abbandonando il "Forced Dark" delle vecchie versioni.
+*   **Palette Chiaro (Light Mode)**:
+    *   Sfondo: `#e2e8f0` (Slate-200) o Gradiente `white` -> `blue-100`.
+    *   Testo: `#0f172a` (Slate-900).
+    *   Cards/Moduli: `rgba(255, 255, 255, 0.7)` (Glass White).
+    *   Bordi: `rgba(0, 0, 0, 0.1)`.
+*   **Implementazione**:
+    *   Rimuovere la classe `titanium-forced-dark` dal tag `<html>`.
+    *   Assicurarsi che `auth_impostazioni.css` utilizzi variabili CSS (`--bg-primary`, `--text-primary`) che cambiano in base al selettore `html.dark`.
 
 ---
 
@@ -60,6 +82,11 @@ Le liste di configurazione devono seguire rigorosamente il markup "Glass Table":
 ### 3.2 Header Stack
 Il titolo della pagina non deve essere orfano.
 Se ci sono Nome e Cognome, devono essere impilati verticalmente (`flex-col`) con pesi tipografici diversi (Bold vs Medium) per creare gerarchia senza usare `<br>` forzati.
+
+### 3.3 Mobile Header Typography (Wrap Rule)
+In versione mobile, tutti i titoli delle pagine DEVONO poter andare a capo su due righe per evitare troncamenti o sovrapposizioni con i pulsanti di navigazione.
+*   **Regola**: È vietato forzare il titolo su una sola riga (`white-space: nowrap` è proibito se causa overflow).
+*   **Stile**: Utilizzare `line-height: 1.1` o `1.2` e assicurare che il container del titolo abbia spazio verticale sufficiente.
 
 ---
 

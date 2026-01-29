@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" class="titanium-forced-dark">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
@@ -39,7 +39,7 @@
 
                 <!-- Centro: Titolo -->
                 <h2 class="header-title"
-                    style="margin: 0; font-size: clamp(0.8rem, 2.5vw, 1.1rem); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 55%; text-align: center; line-height: 1.1;"
+                    style="margin: 0; font-size: clamp(0.8rem, 2.5vw, 1.1rem); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; max-width: 55%; text-align: center; line-height: 1.1; white-space: normal;"
                     data-t="notifications_history">
                     Storico Notifiche
                 </h2>
@@ -79,12 +79,14 @@
             <div id="empty-state" class="hidden"
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1rem; text-align: center;">
                 <div class="settings-icon-box bg-slate-glass"
-                    style="width: 60px; height: 60px; margin-bottom: 1rem; background: rgba(255,255,255,0.05);">
+                    style="width: 60px; height: 60px; margin-bottom: 1rem; background: var(--surface-sub);">
                     <span class="material-symbols-outlined"
-                        style="font-size: 2rem; opacity: 0.5;">notifications_off</span>
+                        style="font-size: 2rem; color: var(--text-secondary);">notifications_off</span>
                 </div>
-                <h3 style="color: white; font-weight: 700; margin-bottom: 0.5rem;">Nessuna notifica</h3>
-                <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">Non hai ancora ricevuto avvisi recenti.</p>
+                <h3 style="color: var(--text-primary); font-weight: 700; margin-bottom: 0.5rem;"
+                    data-t="no_notifications">Nessuna notifica</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;" data-t="no_notifications_desc">Non hai
+                    ancora ricevuto avvisi recenti.</p>
             </div>
 
         </main>

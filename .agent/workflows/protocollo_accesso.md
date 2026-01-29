@@ -36,6 +36,12 @@ L'interazione con l'utente deve essere premium e coerente con l'app interna.
     *   **Inline Errors**: Per errori di validazione form (es. "Email non valida"), usare i div dedicati nel DOM, non alert.
     *   **Modali**: Se serve confermare un'azione, usare `ui-core.js` -> `showConfirmModal`.
 
+### 2.4 Standard Multilingua (i18n)
+L'accesso deve essere comprensibile a tutti gli utenti.
+*   **Obbligo**: Ogni testo visibile deve essere mappato con `data-t`.
+*   **JS**: Assicurarsi che `translations.js` sia caricato e inizializzato.
+*   **Check**: Verificare che il selettore lingua aggiorni istantaneamente tutti i campi (label, button, placeholder).
+
 ---
 
 ## 3. Template HTML Standard V3
@@ -81,6 +87,11 @@ Ogni pagina Auth deve aderire a questo scheletro aggiornato:
 </body>
 </html>
 ```
+
+### 3.1 Mobile Header Typography
+I titoli delle card (es. "Imposta Nuova Password") DEVONO poter andare a capo su due righe nei dispositivi mobili.
+*   Evitare assolutamente troncamenti o overflow orizzontali.
+*   Impaginare il titolo in modo che il contenitore si espanda verticalmente se il testo è lungo.
 
 ---
 

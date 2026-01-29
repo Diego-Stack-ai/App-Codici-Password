@@ -43,42 +43,42 @@ function setupPrivacyInfo() {
     if (!placeholder) return;
 
     placeholder.innerHTML = `
-        <div class="info-content" style="padding: 1.5rem; color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6;">
+        <div class="info-content" style="padding: 1.5rem;">
             <div style="text-align: center; margin-bottom: 2rem;">
-                <h3 style="color: white; font-weight: 800; margin-bottom: 0.25rem; text-transform: uppercase;">PRIVACY POLICY</h3>
-                <p style="font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.4);">INFORMATIVA ESTESA</p>
+                <h3>PRIVACY POLICY</h3>
+                <p class="subtitle-caps">INFORMATIVA ESTESA</p>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">1. TITOLARE DEL TRATTAMENTO</h4>
+            <div class="info-card">
+                <h4>1. TITOLARE DEL TRATTAMENTO</h4>
                 <p>Il Titolare del trattamento dei dati è <strong>Boschetto Diego</strong>. L'applicazione è concepita per garantire la massima sicurezza e riservatezza.</p>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">2. DATI TRATTATI</h4>
+            <div class="info-card">
+                <h4>2. DATI TRATTATI</h4>
                 <ul style="list-style: none; padding: 0; margin: 0.5rem 0;">
-                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">• Registrazione:</strong> Email, nome, avatar (per autenticazione).</li>
-                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">• Volontari:</strong> Credenziali, password, note (crittografati).</li>
-                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">• Tecnici:</strong> Log di sistema gestiti da Google Firebase.</li>
+                    <li style="margin-bottom: 0.4rem;"><strong>• Registrazione:</strong> Email, nome, avatar (per autenticazione).</li>
+                    <li style="margin-bottom: 0.4rem;"><strong>• Volontari:</strong> Credenziali, password, note (crittografati).</li>
+                    <li style="margin-bottom: 0.4rem;"><strong>• Tecnici:</strong> Log di sistema gestiti da Google Firebase.</li>
                 </ul>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">3. SICUREZZA E STORAGE</h4>
+            <div class="info-card">
+                <h4>3. SICUREZZA E STORAGE</h4>
                 <p>Utilizziamo l'infrastruttura sicura di <strong>Google Firebase</strong>. Connessioni SSL/TLS e database protetti. I dati sensibili sono accessibili solo all'utente proprietario e ai destinatari espliciti della condivisione.</p>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">4. CONDIVISIONE DATI</h4>
+            <div class="info-card">
+                <h4>4. CONDIVISIONE DATI</h4>
                 <p>Nessun dato viene venduto a terzi. La condivisione avviene <strong>solo su tua esplicita azione</strong> tramite la funzione "Condividi" verso le email che selezioni.</p>
             </div>
 
-            <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                <h4 style="color: white; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.02em;">5. DIRITTI UTENTE (GDPR)</h4>
+            <div class="info-card">
+                <h4>5. DIRITTI UTENTE (GDPR)</h4>
                 <ul style="list-style: none; padding: 0; margin: 0.5rem 0;">
-                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">•</strong> Diritto di accesso ai propri dati.</li>
-                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">•</strong> Diritto alla cancellazione ("Oblio") eliminando l'account.</li>
-                    <li style="margin-bottom: 0.4rem;"><strong style="color: white;">•</strong> Diritto di rettifica delle informazioni.</li>
+                    <li style="margin-bottom: 0.4rem;"><strong>•</strong> Diritto di accesso ai propri dati.</li>
+                    <li style="margin-bottom: 0.4rem;"><strong>•</strong> Diritto alla cancellazione ("Oblio") eliminando l'account.</li>
+                    <li style="margin-bottom: 0.4rem;"><strong>•</strong> Diritto di rettifica delle informazioni.</li>
                 </ul>
             </div>
 
@@ -94,29 +94,29 @@ function setupAppInfo() {
     if (!placeholder) return;
 
     placeholder.innerHTML = `
-        <div class="info-content" style="padding: 1.5rem; color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6;">
+        <div class="info-content" style="padding: 1.5rem;">
             <div style="text-align: center; margin-bottom: 2rem;">
-                <h3 style="color: white; font-weight: 800; margin-bottom: 0.25rem;">APP CODICI PASSWORD</h3>
-                <p style="font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.4);">SISTEMA DI GESTIONE CREDENZIALI E CONDIVISIONE</p>
+                <h3>APP CODICI PASSWORD</h3>
+                <p class="subtitle-caps">SISTEMA DI GESTIONE CREDENZIALI E CONDIVISIONE</p>
             </div>
 
-            <h4 style="color: white; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid #3b82f6; padding-left: 10px; margin: 1.5rem 0 1rem 0;">Panoramica</h4>
+            <h4 class="section-divider">Panoramica</h4>
             <p style="margin-bottom: 1rem;"><strong>App Codici Password</strong> è un'applicazione web progressiva (PWA) per la gestione sicura di credenziali, password e note personali e aziendali.</p>
             <p style="margin-bottom: 1rem;">L'app nasce per l'utente <strong>PRIVATO</strong>: chiunque può utilizzarla per gestire le proprie credenziali personali senza necessità di funzionalità aziendali. La sezione "Privato" è il cuore dell'applicazione e rappresenta il punto di partenza per tutti gli utenti.</p>
             <p style="margin-bottom: 1rem;">Tuttavia, molte persone sono anche titolari di azienda o professionisti che hanno bisogno di salvare dati aziendali e organizzare scadenze. Per queste esigenze, l'app offre una sezione "Azienda" dedicata, opzionale ma perfettamente integrata.</p>
-            <p style="font-style: italic; opacity: 0.8; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">In sintesi: tutti partono da "Privato", e chi ne ha bisogno espande verso "Azienda".</p>
+            <p class="highlight-box">In sintesi: tutti partono da "Privato", e chi ne ha bisogno espande verso "Azienda".</p>
 
-            <h4 style="color: white; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid #3b82f6; padding-left: 10px; margin: 2rem 0 1rem 0;">Caratteristiche Principali</h4>
+            <h4 class="section-divider">Caratteristiche Principali</h4>
             <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
-                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Account Privati:</strong> Credenziali, allegati, logo</li>
-                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Account Aziendali:</strong> Dati anagrafici, P.IVA, QR</li>
-                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Memorandum:</strong> Note importanti condivisibili</li>
-                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Condivisione:</strong> Inviti via email sicuri</li>
-                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Scadenze:</strong> Calendario con notifiche</li>
-                <li style="margin-bottom: 0.5rem;"><strong style="color: white;">• Sicurezza:</strong> Firebase & Crittonomia</li>
+                <li style="margin-bottom: 0.5rem;"><strong>• Account Privati:</strong> Credenziali, allegati, logo</li>
+                <li style="margin-bottom: 0.5rem;"><strong>• Account Aziendali:</strong> Dati anagrafici, P.IVA, QR</li>
+                <li style="margin-bottom: 0.5rem;"><strong>• Memorandum:</strong> Note importanti condivisibili</li>
+                <li style="margin-bottom: 0.5rem;"><strong>• Condivisione:</strong> Inviti via email sicuri</li>
+                <li style="margin-bottom: 0.5rem;"><strong>• Scadenze:</strong> Calendario con notifiche</li>
+                <li style="margin-bottom: 0.5rem;"><strong>• Sicurezza:</strong> Firebase & Crittonomia</li>
             </ul>
 
-            <h4 style="color: white; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-left: 3px solid #3b82f6; padding-left: 10px; margin: 2rem 0 1rem 0;">Flussi Principali</h4>
+            <h4 class="section-divider">Flussi Principali</h4>
             <ol style="padding-left: 1.2rem; margin-bottom: 2rem;">
                 <li style="margin-bottom: 0.5rem;"><strong>Registrazione:</strong> Email/Google & Profilo</li>
                 <li style="margin-bottom: 0.5rem;"><strong>Creazione:</strong> Privato/Azienda/Memo</li>
@@ -277,7 +277,7 @@ function setupPremiumLanguageSelector(refreshCallback) {
 
     // Popola dropdown
     dropdown.innerHTML = supportedLanguages.map(lang => `
-        <button class="lang-option" style="width:100%; display:flex; align-items:center; gap:12px; padding:12px 16px; background:transparent; border:none; color:white; cursor:pointer; font-size:0.9rem; border-radius:10px; transition: background 0.2s;" data-code="${lang.code}">
+        <button class="lang-option" style="width:100%; display:flex; align-items:center; gap:12px; padding:12px 16px; background:transparent; border:none; color:var(--text-primary); cursor:pointer; font-size:0.9rem; border-radius:10px; transition: background 0.2s;" data-code="${lang.code}">
             <span style="font-size:1.2rem;">${lang.flag}</span>
             <span style="font-weight: 500;">${lang.name}</span>
             ${lang.code === currentLang ? '<span class="material-symbols-outlined" style="margin-left:auto; font-size:1.1rem; color:#34d399;">check_circle</span>' : ''}
