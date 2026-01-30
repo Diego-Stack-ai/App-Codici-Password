@@ -7,10 +7,10 @@
     <title data-t="home_page_title">Home Page</title>
 
     <!-- Titanium Engine Stack -->
-    <script src="assets/js/titanium-config.js"></script>
-    <link rel="stylesheet" href="assets/css/titanium.css">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script src="assets/js/titanium-core.js"></script>
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.5">
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script src="assets/js/ui-core.js?v=3.5"></script>
 
     <!-- PWA / Mobile Capable -->
     <link rel="manifest" href="manifest.json" />
@@ -23,11 +23,11 @@
 </head>
 
 <body class="titanium-bg">
+    <!-- HEADER PLACEHOLDER -->
+    <div id="header-placeholder"></div>
+
     <div class="titanium-box">
         <div class="glass-glow pointer-events-none"></div>
-
-        <!-- HEADER PLACEHOLDER -->
-        <div id="header-placeholder"></div>
 
         <!-- MAIN (Data-Lock-UI for native effect) -->
         <main class="titanium-main" data-lock-ui>
@@ -36,7 +36,7 @@
                 <!-- SEZIONE 1: ACCESSO RAPIDO -->
                 <div class="grid-2-cols">
                     <a href="area_privata.html" class="matrix-blue border-glow" data-ui-section="privato">
-                        <div class="glass-shine"></div>
+
                         <div class="bg-icon-container">
                             <span class="material-symbols-outlined titanium-icon-lg" role="img"
                                 aria-label="Icona Cassaforte Personale" data-t-aria="aria_private">lock</span>
@@ -48,7 +48,7 @@
                     </a>
 
                     <a href="lista_aziende.html" class="matrix-green border-glow" data-ui-section="azienda">
-                        <div class="glass-shine"></div>
+
                         <div class="bg-icon-container">
                             <span class="material-symbols-outlined titanium-icon-lg" role="img"
                                 aria-label="Icona Gestione Aziendale" data-t-aria="aria_company">apartment</span>
@@ -69,11 +69,11 @@
                     </div>
                     <div class="box-content-main">
                         <div class="box-header-flex">
-                            <div class="title-group">
-                                <h3 data-t="section_deadlines_title">Scadenze</h3>
-                                <span id="urgent-count-badge" class="urgent-badge" style="opacity: 0;">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span id="urgent-count-badge" class="urgent-badge" style="opacity: 0; margin-left: 0;">
                                     <span id="urgent-count">0</span>
                                 </span>
+                                <h3 data-t="section_deadlines_title" style="margin-bottom: 0;">Scadenze</h3>
                             </div>
                             <p data-ui="hint" data-t="section_deadlines_desc">Controlla i prossimi impegni</p>
                         </div>
@@ -90,11 +90,11 @@
                     </div>
                     <div class="box-content-main">
                         <div class="box-header-flex">
-                            <div class="title-group">
-                                <h3 data-t="section_urgencies_title">Urgenze</h3>
-                                <span id="expired-count-badge" class="urgent-badge" style="opacity: 0;">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span id="expired-count-badge" class="urgent-badge" style="opacity: 0; margin-left: 0;">
                                     <span id="expired-count">0</span>
                                 </span>
+                                <h3 data-t="section_urgencies_title" style="margin-bottom: 0;">Urgenze</h3>
                             </div>
                             <p data-ui="hint" data-t="section_urgencies_desc">Pratiche scadute</p>
                         </div>
@@ -104,13 +104,14 @@
             </div>
         </main>
 
-        <!-- FOOTER PLACEHOLDER -->
-        <div id="footer-placeholder"></div>
     </div>
 
+    <!-- FOOTER PLACEHOLDER -->
+    <div id="footer-placeholder"></div>
+
     <!-- SCRIPTS MODULARI (10/10 Architecture) -->
-    <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/home.js"></script>
+    <script type="module" src="assets/js/main.js?v=3.5"></script>
+    <script type="module" src="assets/js/home.js?v=3.5"></script>
 </body>
 
 </html>

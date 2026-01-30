@@ -20,7 +20,7 @@
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.5"></script>
     <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script src="assets/js/ui-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
 <body class="antialiased">
@@ -106,7 +106,7 @@
                                 <span class="material-symbols-outlined">person</span>
                             </div>
                             <div class="settings-text w-full">
-                                <span class="settings-label">Intestatario</span>
+                                <span class="settings-label" data-t="holder_label">Intestatario</span>
                                 <span id="detail-intestatario" class="font-bold text-base block mt-1"
                                     style="color: var(--text-primary);">...</span>
                             </div>
@@ -170,7 +170,7 @@
                                         style="color: var(--text-primary); word-break: break-all;">...</span>
                                 </div>
                             </div>
-                            <button onclick="copyField('display-veicolo')"
+                            <button onclick="copyToClipboardText('display-veicolo')"
                                 class="size-10 flex items-center justify-center rounded-xl bg-white/5 text-gray-500 hover:text-white transition-colors">
                                 <span class="material-symbols-outlined text-[20px]">content_copy</span>
                             </button>
@@ -233,24 +233,19 @@
         </main>
 
         <!-- FOOTER PREMIUM -->
-        <footer class="titanium-footer" style="margin-top: 3rem; margin-bottom: 2rem;">
-            <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
-                <span
-                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.5
-                </span>
-            </div>
-        </footer>
+        <div id="footer-placeholder"></div>
     </div>
 
     <!-- Scripts -->
     <script type="module" src="assets/js/dettaglio_scadenza.js?v=3.5"></script>
     <script>
-        window.copyField = (id) => {
-            const val = document.getElementById(id).value;
+        window.copyToClipboardText = (id) => {
+            const el = document.getElementById(id);
+            const val = el.innerText || el.textContent;
             navigator.clipboard.writeText(val);
             if (window.showToast) {
-                window.showToast(translations[currentLang]?.toast_copied || "Copiato!", "success");
+                // Cerchiamo di usare la traduzione se disponibile, o fallback
+                window.showToast("Copiato!", "success");
             }
         }
     </script>

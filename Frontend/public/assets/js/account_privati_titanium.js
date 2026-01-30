@@ -4,6 +4,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/fi
 import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { logError } from './utils.js';
 import { showToast } from './ui-core.js';
+import { t } from './translations.js';
 
 // --- TITANIUM STATE (v10.1) ---
 let allAccounts = [];
@@ -24,9 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.addEventListener('input', filterAndRender);
     }
 
+    // 0. TRADUZIONI (Immediata)
+    updatePageTranslations();
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
+            updateDynamicTitles();
             await loadAccounts();
         } else {
             window.location.href = 'index.html';
@@ -46,9 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (isOwner) {
                 await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), { isPinned: newVal });
-                showToast(newVal ? "Account fissato in alto" : "Fissaggio rimosso", "success");
+                showToast(newVal ? t('account_pinned') || "Account fissato in alto" : t('pin_removed') || "Fissaggio rimosso", "success");
             } else {
-                showToast("Dati condivisi: Pin non persistente", "warning");
+                showToast(t('shared_pin_warning') || "Dati condivisi: Pin non persistente", "warning");
             }
         } catch (e) {
             logError("Pin Toggle", e);
@@ -107,10 +112,11 @@ async function loadAccounts() {
             const promises = invitesSnap.docs.map(async invDoc => {
                 const invData = invDoc.data();
                 try {
-                    const accSnap = await getDoc(doc(db, "users", invData.senderUid, "accounts", invData.accountId));
+                    const ownerUid = invData.ownerId || invData.senderUid; // Support both just in case
+                    const accSnap = await getDoc(doc(db, "users", ownerUid, "accounts", invData.accountId));
                     if (accSnap.exists()) {
                         sharedAccountIds.add(accSnap.id);
-                        return { ...accSnap.data(), id: accSnap.id, isOwner: false, ownerId: invData.senderUid, _isShared: true };
+                        return { ...accSnap.data(), id: accSnap.id, isOwner: false, ownerId: ownerUid, _isShared: true };
                     }
                 } catch (e) { }
                 return null;
@@ -118,21 +124,60 @@ async function loadAccounts() {
             sharedWithMeAccounts = (await Promise.all(promises)).filter(a => a !== null);
         } catch (e) { }
 
-        // 3. Merge
-        const ownAccounts = ownSnap.docs.map(doc => ({
-            ...doc.data(),
-            id: doc.id,
-            isOwner: true,
-            ownerId: currentUser.uid,
-            _isMemo: !!doc.data().isMemo || doc.data().type === 'memorandum'
-        })).filter(a => !a.isArchived);
+        // 3. Merge and Normalize Flags
+        try {
+            allAccounts = [...ownSnap.docs.map(doc => {
+                const d = doc.data();
+                const isShared = !!d.shared || !!d.isMemoShared;
+                const isMemo = !!d.isMemo || d.type === 'memorandum' || !!d.hasMemo;
+                return {
+                    ...d,
+                    id: doc.id,
+                    isOwner: true,
+                    ownerId: currentUser.uid,
+                    _isShared: isShared,
+                    _isMemo: isMemo
+                };
+            }).filter(a => !a.isArchived), ...sharedWithMeAccounts.map(a => {
+                const isShared = true; // By definition if it's in this list
+                const isMemo = !!a.isMemo || a.type === 'memorandum' || !!a.hasMemo || !!a.isMemoShared;
+                return {
+                    ...a,
+                    _isShared: isShared,
+                    _isMemo: isMemo
+                };
+            })];
+        } catch (mergeErr) {
+            console.error("Merge error", mergeErr);
+            allAccounts = [];
+        }
 
-        allAccounts = [...ownAccounts, ...sharedWithMeAccounts];
         filterAndRender();
 
     } catch (error) {
         logError("Accounts Engine", error);
-        showToast("Errore sicronizzazione dati", "error");
+        const container = document.getElementById('accounts-container');
+        if (container) {
+            container.innerHTML = `<div class="col-span-full py-10 text-center text-red-400">${t('sync_error') || 'Errore Sincronizzazione Protetti'}</div>`;
+        }
+        showToast(t('sync_error') || "Errore sicronizzazione dati", "error");
+    }
+}
+
+/**
+ * Update Titles based on URL Type
+ */
+function updateDynamicTitles() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type') || 'standard';
+    const titleEl = document.getElementById('page-title');
+
+    if (titleEl) {
+        let key = 'section_personal_accounts';
+        if (type === 'shared') key = 'section_shared_accounts';
+        if (type === 'memo') key = 'section_note';
+        if (type === 'shared_memo') key = 'section_shared_note';
+        titleEl.textContent = t(key);
     }
 }
 
@@ -146,8 +191,9 @@ function filterAndRender() {
 
     let filtered = allAccounts.filter(acc => {
         if (type === 'standard') return !acc._isShared && !acc._isMemo;
-        if (type === 'shared') return acc._isShared;
-        if (type === 'memo') return acc._isMemo;
+        if (type === 'shared') return acc._isShared && !acc._isMemo;
+        if (type === 'memo') return !acc._isShared && acc._isMemo;
+        if (type === 'shared_memo') return acc._isShared && acc._isMemo;
         return true;
     });
 
@@ -174,88 +220,95 @@ function renderList(list) {
     const container = document.getElementById('accounts-container');
     if (!container) return;
 
+    // --- ACCENT COLORS MAPPING (Aligned with Area Privata) ---
+    const getAccentColors = (acc) => {
+        const isBanking = (Array.isArray(acc.banking) && acc.banking.length > 0) || (acc.banking && acc.banking.iban);
+        if (isBanking) return { key: 'emerald', via: 'via-emerald-500/40', bg: 'bg-emerald-500', hex: '#10b981' };
+        if (acc._isMemo) return { key: 'amber', via: 'via-amber-500/40', bg: 'bg-amber-500', hex: '#f59e0b' };
+        if (acc._isShared) return { key: 'rose', via: 'via-rose-500/40', bg: 'bg-rose-500', hex: '#f43f5e' };
+        return { key: 'blue', via: 'via-blue-500/40', bg: 'bg-blue-500', hex: '#3b82f6' };
+    };
+
     if (list.length === 0) {
         container.innerHTML = `
             <div class="col-span-full py-20 text-center opacity-30 select-none">
                 <span class="material-symbols-outlined text-5xl mb-3">folder_open</span>
-                <p class="text-xs uppercase tracking-widest font-bold">Nessun account protetto</p>
+                <p class="text-xs uppercase tracking-widest font-bold">${t('no_accounts_found') || 'Nessun account protetto'}</p>
             </div>`;
         return;
     }
 
-    container.innerHTML = list.map(acc => {
-        const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
-        const isPinned = !!acc.isPinned;
-        const dots = '********';
+    try {
+        container.innerHTML = list.map(acc => {
+            const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
+            const isPinned = !!acc.isPinned;
+            const colors = getAccentColors(acc);
 
-        // Palette Matrix per Categoria
-        let matrixClass = 'matrix-blue';
-        if (acc._isShared) matrixClass = 'matrix-red';
-        if (acc._isMemo) matrixClass = 'matrix-orange';
-
-        return `
-            <div class="swipe-row relative group h-full" 
-                 id="acc-${acc.id}" 
-                 data-id="${acc.id}"
-                 data-owner="${acc.isOwner}">
-                
-                <!-- BACKGROUND ACTIONS (Swipe) -->
-                <div class="absolute inset-0 flex transition-opacity pointer-events-none">
-                    <div class="w-full flex justify-start items-center bg-red-600/20 pl-8 rounded-[24px]">
-                        <span class="material-symbols-outlined text-red-500">delete</span>
-                    </div>
-                    <div class="w-full flex justify-end items-center bg-amber-600/20 pr-8 rounded-[24px]">
-                        <span class="material-symbols-outlined text-amber-500">archive</span>
-                    </div>
-                </div>
-
-                <!-- FOREGROUND: Titanium Glass Card -->
-                <div class="swipe-content relative z-10 bg-[#0a0f1e]/60 backdrop-blur-2xl rounded-[24px] border border-white/5 border-glow hover:-translate-y-1 transition-all duration-300 shadow-2xl overflow-hidden">
-                    <div class="saetta opacity-20"></div>
+            return `
+                <div class="swipe-row relative group h-full" 
+                     id="acc-${acc.id}" 
+                     data-id="${acc.id}"
+                     data-owner="${acc.isOwner}">
                     
-                    <!-- Top Matrix Accent -->
-                    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
-
-                    <div class="p-6">
-                        <div class="flex items-start justify-between mb-6">
-                            <div class="flex items-center gap-4">
-                                <div class="relative">
-                                    <img src="${avatar}" class="size-12 rounded-xl object-cover bg-white/5 border border-white/10 p-0.5">
-                                    <div class="absolute -bottom-1 -right-1 size-3 rounded-full bg-blue-500 border-2 border-[#0a0f1e]"></div>
-                                </div>
-                                <div class="flex flex-col">
-                                    <h3 class="text-white font-black text-lg leading-tight truncate max-w-[150px]">${acc.nomeAccount || 'Account'}</h3>
-                                    <span class="text-[9px] uppercase tracking-widest text-white/30 font-bold">Protetto Titanium</span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <button onclick="window.togglePin('${acc.id}', ${acc.isOwner})" 
-                                        class="size-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 transition-colors ${isPinned ? 'text-blue-400' : 'text-white/20'}">
-                                    <span class="material-symbols-outlined text-[18px] ${isPinned ? 'filled' : ''}">push_pin</span>
-                                </button>
-                                <button onclick="window.toggleReveal('${acc.id}')" 
-                                        class="size-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-white/20 hover:text-white">
-                                    <span class="material-symbols-outlined text-[18px] reveal-eye">visibility</span>
-                                </button>
-                            </div>
+                    <!-- BACKGROUND ACTIONS (Swipe) -->
+                    <div class="absolute inset-0 flex transition-opacity pointer-events-none">
+                        <div class="w-full flex justify-start items-center bg-red-600/20 pl-8 rounded-[24px]">
+                            <span class="material-symbols-outlined text-red-500">delete</span>
                         </div>
-
-                        <!-- Data Fields -->
-                        <div class="space-y-4">
-                            ${acc.username ? renderField("Username", acc.username, "account_circle") : ''}
-                            ${acc.password ? renderField("Password", acc.password, "key", true) : ''}
+                        <div class="w-full flex justify-end items-center bg-amber-600/20 pr-8 rounded-[24px]">
+                            <span class="material-symbols-outlined text-amber-500">archive</span>
                         </div>
-
-                        <!-- Action Link -->
-                        <a href="dettaglio_account_privato.html?id=${acc.id}" class="mt-6 flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group/link">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-white/40 group-hover/link:text-white transition-colors">Vedi Dettagli Completi</span>
-                            <span class="material-symbols-outlined text-sm text-white/20 group-hover/link:text-blue-400 group-hover/link:translate-x-1 transition-all">chevron_right</span>
-                        </a>
                     </div>
-                </div>
-            </div>`;
-    }).join('');
+    
+                    <!-- FOREGROUND: Titanium Solid Card -->
+                    <div onclick="window.location.href='dettaglio_account_privato.html?id=${acc.id}${acc.isOwner ? '' : '&owner=' + acc.ownerId}'" 
+                         class="swipe-content matrix-card-compact matrix-${colors.key} border-glow transition-all duration-300">
+                        
+                        <!-- Parentesi (C-Blade) dinamica Shape: Concave Parenthesis -->
+                        <div class="absolute inset-y-0 left-0 w-6 pointer-events-none z-0 opacity-15 dark:opacity-30" 
+                             style="background: linear-gradient(to right, ${colors.hex}, transparent); clip-path: polygon(0% 0%, 100% 0%, 20% 50%, 100% 100%, 0% 100%);">
+                        </div>
+
+                        <!-- Top Matrix Accent -->
+                        <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent ${colors.via} to-transparent"></div>
+    
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="relative">
+                                        <img src="${avatar}" class="size-6 rounded-md object-cover bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-0.5">
+                                        <div class="absolute -bottom-0.5 -right-0.5 size-1.5 rounded-full ${colors.bg} border border-white dark:border-[#0a0f1e]"></div>
+                                    </div>
+                                    <div class="flex flex-col min-w-0">
+                                        <h3 class="text-slate-900 dark:text-white font-black text-[12px] leading-tight truncate max-w-[140px]">${acc.nomeAccount || t('account')}</h3>
+                                    </div>
+                                </div>
+    
+                                <div class="flex items-center gap-1">
+                                    <button onclick="event.stopPropagation(); window.togglePin('${acc.id}', ${acc.isOwner})" 
+                                            class="size-6 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors ${isPinned ? 'text-blue-600' : 'text-slate-300 dark:text-white/20'}">
+                                        <span class="material-symbols-outlined text-[13px] ${isPinned ? 'filled' : ''}">push_pin</span>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); window.toggleReveal('${acc.id}')" 
+                                            class="size-6 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-300 dark:text-white/20 hover:text-slate-600 dark:hover:text-white">
+                                        <span class="material-symbols-outlined text-[13px] reveal-eye">visibility</span>
+                                    </button>
+                                </div>
+                            </div>
+    
+                            <div class="space-y-0.5 mt-1 relative z-10">
+                            ${acc.username ? renderField("User", acc.username, "person") : ''}
+                            ${acc.account || acc.codice ? renderField("Acc", acc.account || acc.codice, "identifier") : ''}
+                            ${acc.password ? renderField("Pass", acc.password, "key", true) : ''}
+                        </div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    } catch (renderErr) {
+        console.error("Render error", renderErr);
+        container.innerHTML = '<div class="col-span-full py-10 text-center text-red-500">Errore Rendering Matrix</div>';
+    }
 
     // Re-init Swipe Logic
     new SwipeList('.swipe-row', {
@@ -270,24 +323,21 @@ function renderList(list) {
  */
 function renderField(label, value, icon, isSensitive = false) {
     const displayValue = isSensitive ? '********' : value;
+    const safeValue = String(value || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     return `
-        <div class="space-y-1.5">
-            <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-white/20 ml-1">${label}</span>
-            <div class="h-12 flex items-center justify-between px-4 bg-black/40 border border-white/5 rounded-2xl relative group/field overflow-hidden">
-                <div class="saetta opacity-5"></div>
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <span class="material-symbols-outlined text-white/20 text-[18px]">${icon}</span>
-                    <span data-reveal 
-                          data-real-value="${value.replace(/"/g, '&quot;')}" 
-                          class="text-white text-sm font-bold truncate">
-                        ${displayValue}
-                    </span>
-                </div>
-                <button onclick="navigator.clipboard.writeText('${value.replace(/'/g, "\\'")}').then(() => showToast('Copiato nel protocollo', 'success'))"
-                        class="size-8 flex items-center justify-center rounded-lg hover:bg-white/5 text-white/10 hover:text-blue-400 transition-all opacity-0 group-hover/field:opacity-100">
-                    <span class="material-symbols-outlined text-[18px]">content_copy</span>
-                </button>
+        <div class="matrix-field-compact group/field">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span class="material-symbols-outlined text-slate-400 dark:text-white/20 text-[14px]">${icon}</span>
+                <span data-reveal 
+                      data-real-value="${safeValue}" 
+                      class="truncate">
+                    ${displayValue}
+                </span>
             </div>
+            <button onclick="event.stopPropagation(); navigator.clipboard.writeText('${safeValue}').then(() => window.showToast(t('copied_to_protocol') || 'Copiato nel protocollo', 'success'))"
+                    class="size-6 flex items-center justify-center rounded-md hover:bg-slate-200 dark:hover:bg-white/5 text-slate-300 dark:text-white/10 hover:text-blue-600 dark:hover:text-blue-400 transition-all opacity-0 group-hover/field:opacity-100">
+                <span class="material-symbols-outlined text-[14px]">content_copy</span>
+            </button>
         </div>`;
 }
 
@@ -296,26 +346,75 @@ function renderField(label, value, icon, isSensitive = false) {
  */
 async function handleArchive(item) {
     const id = item.dataset.id;
-    if (confirm("Archiviare questo account?")) {
+    const confirmed = await window.showConfirmModal(
+        t('archive_title_confirm') || "ARCHIVIAZIONE",
+        t('archive_desc_confirm') || "Vuoi spostare questo account nell'archivio?",
+        t('archive_btn_confirm') || "ARCHIVIA",
+        t('cancel') || "ANNULLA"
+    );
+
+    if (confirmed) {
         try {
             await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), { isArchived: true });
-            showToast("Account archiviato", "success");
+            window.showToast(t('account_archived') || "Account archiviato", "success");
             loadAccounts();
         } catch (e) { logError("Archive", e); }
     } else {
-        renderList(allAccounts); // Reset UI
+        filterAndRender(); // Reset UI Swipe state
     }
 }
 
 async function handleDelete(item) {
     const id = item.dataset.id;
-    if (confirm("ELIMINARE DEFINITIVAMENTE l'account?")) {
+    const confirmed = await window.showConfirmModal(
+        t('delete_title_confirm') || "ELIMINAZIONE DEFINITIVA",
+        t('delete_desc_confirm') || "Questa azione non può essere annullata. Rimuovere definitivamente l'account?",
+        t('delete_btn_confirm') || "ELIMINA",
+        t('cancel') || "ANNULLA"
+    );
+
+    if (confirmed) {
         try {
             await deleteDoc(doc(db, "users", currentUser.uid, "accounts", id));
-            showToast("Protocollo eliminato", "success");
+            window.showToast(t('protocol_deleted') || "Protocollo eliminato", "success");
             loadAccounts();
         } catch (e) { logError("Delete", e); }
     } else {
-        renderList(allAccounts); // Reset UI
+        filterAndRender(); // Reset UI Swipe state
     }
+}
+
+/**
+ * [I18N] UPDATE PAGE TRANSLATIONS
+ * Scansiona il DOM per attributi data-t e data-t-placeholder
+ */
+export function updatePageTranslations() {
+    // 1. Testo diretto
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        const translated = t(key);
+        if (!translated || translated === key) return;
+
+        // Preserva icone se presenti
+        const icon = el.querySelector('.material-symbols-outlined');
+        if (icon) {
+            let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
+            if (textNode) {
+                textNode.textContent = translated;
+            } else {
+                el.appendChild(document.createTextNode(translated));
+            }
+        } else {
+            el.textContent = translated;
+        }
+    });
+
+    // 2. Placeholder
+    document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-t-placeholder');
+        const translated = t(key);
+        if (translated && translated !== key) {
+            el.setAttribute('placeholder', translated);
+        }
+    });
 }

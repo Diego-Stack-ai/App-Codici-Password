@@ -1,7 +1,23 @@
+import { initComponents } from './components.js';
+
 /**
- * TITANIUM UI CORE
- * Gestisce le policy globali di UX e i componenti di sistema (Toast, Feedback)
+ * [CORE UI] INITIALIZATION
  */
+function init() {
+    // Carica componenti condivisi (Header/Footer) se i placeholder esistono
+    initComponents();
+
+    // Inizializza UX bloccata
+    initLockedUX();
+}
+
+// Esegui al caricamento
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
 
 /**
  * [POLICY] BLOCCO UX NATIVA (APP BLINDA)
@@ -161,7 +177,7 @@ export function showWarningModal(title, message, callback = null) {
     };
 }
 
-// Esposizione globale
+// Esposizione globale (già gestita via window.X = X per i nuovi moduli)
 window.showToast = showToast;
 window.showWarningModal = showWarningModal;
 

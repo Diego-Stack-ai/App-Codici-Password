@@ -129,34 +129,12 @@ window.clearHistory = async function () {
     if (!user) return;
 
     // V3: Usa Modal di ui-core invece di confirm()
-    const confirmed = await window.showInputModal(
+    const confirmed = await window.showConfirmModal(
         "Conferma Cancellazione",
-        "",
-        "Scrivi 'CANCELLA' per confermare" // Simuliamo un confirm robusto o usiamo un modal custom se disponibile?
-        // ui-core ha showWarningModal (solo ok) e showInputModal. 
-        // Non ha un showConfirmModal semplice (bool).
-        // Protocollo dice: Confirm: `await window.showConfirmModal("Messaggio")`
-        // Ma guardando ui-core.js che ho letto prima, NON C'È showConfirmModal!
-        // C'è solo showInputModal e showWarningModal.
-        // Wait, ui-core.js read in step 99 DOES NOT HAVE showConfirmModal explicitly exported properly?
-        // Let me re-read step 99 output.
-        // Lines 165-166: window.showToast = showToast; window.showWarningModal = showWarningModal; window.showInputModal = ...
-        // No showConfirmModal.
-        // But the protocol says it is mandatory. 
-        // Typically showInputModal returning null is cancel. 
-        // I will implement a safe confirm using standard confirm() for now OR use showInputModal as a trick.
-        // Or better, I'll stick to the "standard" likely implemented in other V3 pages.
-        // Given I must follow V3 check list "No Native Alerts", and I don't see showConfirmModal in ui-core,
-        // I will assume I should use showInputModal asking for confirmation or I simply missed it in ui-core check.
-        // Actually, looking at ui-core again, there is NO confirm modal. 
-        // I will use showToast for error and native confirm for now if strictly necessary, BUT "No Native Alerts" is a rule.
-        // I'll use showInputModal as a makeshift confirm: "Clicca Conferma per procedere o Annulla".
+        "Vuoi davvero svuotare tutto lo storico delle notifiche?"
     );
 
-    // Poiché showInputModal chiede un input, faccio un workaround UX:
-    // Se l'utente preme Conferma (resolve con stringa vuota o testo), procedo.
-    // Se Annulla (resolve null), fermo.
-    if (confirmed === null) return;
+    if (!confirmed) return;
 
     const listContainer = document.getElementById('notifications-list');
     const emptyState = document.getElementById('empty-state');

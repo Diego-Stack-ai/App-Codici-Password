@@ -40,22 +40,14 @@ export async function loadExpiredDeadlines(user) {
                     if (daysAgo === 0) badgeText = 'Oggi';
                     if (daysAgo === 1) badgeText = 'Ieri';
 
-                    const icon = deadline.icon || 'event';
                     return `
-                    <a href="scadenze.html" class="titanium-interactive border-glow dynamic-card matrix-red">
-                        <div class="card-shine"></div>
-                        <div class="card-content">
-                            <div class="icon-circle">
-                                <span class="material-symbols-outlined" style="font-size: 20px;">${icon}</span>
-                            </div>
-                            <div class="card-text">
-                                <div class="card-title" style="font-size: 0.85rem; color: inherit;">${deadline.title}</div>
-                            </div>
-                            <div class="flex flex-col items-end shrink-0">
-                                <span class="font-bold" style="font-size: 0.7rem;">${badgeText}</span>
-                            </div>
-                         </div>
-                    </a>`;
+                    <div class="micro-list-item">
+                        <div class="item-content">
+                            <span class="material-symbols-outlined">${deadline.icon || 'event'}</span>
+                            <span class="item-title">${deadline.title}</span>
+                        </div>
+                        <span class="item-badge">${badgeText}</span>
+                    </div>`;
                 }).join('');
             }
         }

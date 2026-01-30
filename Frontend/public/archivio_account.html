@@ -15,12 +15,12 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Design System Master -->
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.5"></script>
     <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script src="assets/js/ui-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
     <script src="assets/js/translations.js?v=3.5"></script>
 </head>
 
@@ -72,8 +72,10 @@
                         </div>
                         <select id="archive-context-select"
                             style="width: 100%; background: transparent; border: none; color: white; font-weight: 600; font-size: 0.9rem; outline: none; margin-left: 0.5rem; cursor: pointer;">
-                            <option value="all" style="background: #0f1932; color: white;">Tutti gli archiviati</option>
-                            <option value="privato" style="background: #0f1932; color: white;">Solo Archivio Privato
+                            <option value="all" style="background: #0f1932; color: white;" data-t="archive_all">Tutti
+                                gli archiviati</option>
+                            <option value="privato" style="background: #0f1932; color: white;"
+                                data-t="archive_private_only">Solo Archivio Privato
                             </option>
                         </select>
                     </div>
@@ -82,6 +84,7 @@
                 <!-- Search -->
                 <div style="position: relative;">
                     <input type="search" placeholder="Cerca nell'archivio..." class="settings-item"
+                        data-t-placeholder="archive_search_placeholder"
                         style="width: 100%; padding-left: 3rem; margin-bottom: 0; background: rgba(15, 25, 50, 0.6); font-size: 0.9rem;">
                     <span class="material-symbols-outlined"
                         style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); opacity: 0.5; pointer-events: none;">search</span>
@@ -92,8 +95,8 @@
             <div
                 style="display: flex; justify-content: center; gap: 1rem; opacity: 0.4; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
                 <span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined"
-                        style="font-size: 14px;">swipe_left</span> Ripristina</span>
-                <span style="display: flex; align-items: center; gap: 4px;">Elimina <span
+                        style="font-size: 14px;">swipe_left</span> <span data-t="restore">Ripristina</span></span>
+                <span style="display: flex; align-items: center; gap: 4px;"><span data-t="delete">Elimina</span> <span
                         class="material-symbols-outlined" style="font-size: 14px;">swipe_right</span></span>
             </div>
 
@@ -105,21 +108,14 @@
                     <div
                         style="width: 1.5rem; height: 1.5rem; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 0.5rem;">
                     </div>
-                    <span style="font-size: 0.8rem;">Caricamento...</span>
+                    <span style="font-size: 0.8rem;" data-t="loading">Caricamento...</span>
                 </div>
             </div>
 
         </main>
 
         <!-- FOOTER PREMIUM -->
-        <footer class="titanium-footer">
-            <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
-                <span
-                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.5
-                </span>
-            </div>
-        </footer>
+        <div id="footer-placeholder"></div>
     </div>
 
 
@@ -137,7 +133,6 @@
     </style>
 
     <!-- Scripts -->
-    <script src="assets/js/ui-core.js?v=3.5"></script>
     <script type="module" src="assets/js/archivio_account.js?v=3.5"></script>
 </body>
 

@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html class="titanium-forced-dark dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
+
     <title>Nuovo Account Privato - Protocollo Titanium</title>
 
     <!-- PWA / Mobile Capable -->
@@ -16,15 +15,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Nuovo Account">
 
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+    <!-- Design System Master (Titanium Gold v3.5) -->
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <link rel="stylesheet" href="assets/css/titanium.css?v=3.5">
 
-    <!-- Design System Standard v2.0 -->
-    <link rel="stylesheet" href="assets/css/titanium.css">
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
 
@@ -35,8 +34,24 @@
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
         <div class="glass-glow"></div>
 
-        <!-- 4. HEADER PLACEHOLDER -->
-        <div id="header-placeholder"></div>
+        <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
+        <header class="titanium-header">
+            <div class="header-balanced-container">
+                <div class="header-left">
+                    <button onclick="history.back()" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                </div>
+                <div class="header-center">
+                    <h2 class="header-title" data-t="new_account">Nuovo Account</h2>
+                </div>
+                <div class="header-right">
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                </div>
+            </div>
+        </header>
 
         <!-- MAIN CONTENT (Titanium Main Strategy) -->
         <main class="titanium-main no-select">
@@ -54,7 +69,8 @@
                         <div id="logo-placeholder"
                             class="flex flex-col items-center justify-center text-white/20 group-hover:text-blue-400 transition-colors">
                             <span class="material-symbols-outlined text-4xl mb-1">add_photo_alternate</span>
-                            <span class="text-[8px] font-black uppercase tracking-widest">Identità Visiva</span>
+                            <span class="text-[8px] font-black uppercase tracking-widest"
+                                data-t="visual_identity">Identità Visiva</span>
                         </div>
                     </div>
                 </div>
@@ -68,7 +84,8 @@
                 <section class="space-y-4">
                     <div class="flex items-center gap-3 px-2">
                         <div class="size-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Dati Protocollo
+                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40"
+                            data-t="access_protocol_data">Dati Protocollo
                             Accesso</h3>
                     </div>
 
@@ -77,7 +94,8 @@
 
                         <!-- Nome Account -->
                         <div class="space-y-2">
-                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">Servizio /
+                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2"
+                                data-t="service_name">Servizio /
                                 Nome</label>
                             <div class="h-14 relative group/field">
                                 <span
@@ -89,7 +107,8 @@
 
                         <!-- Username -->
                         <div class="space-y-2">
-                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">Username /
+                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2"
+                                data-t="username_email">Username /
                                 Email</label>
                             <div class="h-14 relative group/field">
                                 <span
@@ -102,7 +121,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Codice Account -->
                             <div class="space-y-2">
-                                <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">Codice
+                                <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2"
+                                    data-t="customer_code">Codice
                                     Cliente</label>
                                 <div class="h-14 relative group/field">
                                     <span
@@ -113,7 +133,8 @@
                             </div>
                             <!-- Password -->
                             <div class="space-y-2">
-                                <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">Chiave
+                                <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2"
+                                    data-t="secret_key">Chiave
                                     Segreta</label>
                                 <div class="h-14 relative group/field">
                                     <span
@@ -130,7 +151,8 @@
 
                         <!-- URL -->
                         <div class="space-y-2">
-                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">URL
+                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2"
+                                data-t="direct_access_url">URL
                                 Accesso Diretto</label>
                             <div class="h-14 relative group/field">
                                 <span
@@ -148,7 +170,8 @@
                     <div class="flex items-center justify-between px-2">
                         <div class="flex items-center gap-3">
                             <div class="size-2 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
-                            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Finanza e IBAN
+                            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40"
+                                data-t="finance_iban">Finanza e IBAN
                             </h3>
                         </div>
                         <button type="button" id="btn-add-iban"
@@ -165,14 +188,16 @@
                 <section class="space-y-4">
                     <div class="flex items-center gap-3 px-2">
                         <div class="size-2 bg-orange-500 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.6)]"></div>
-                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Gestore Protocollo
+                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40"
+                            data-t="protocol_manager">Gestore Protocollo
                         </h3>
                     </div>
 
                     <div
                         class="bg-[#0a0f1e]/40 backdrop-blur-2xl rounded-[32px] border border-white/5 border-glow p-6 space-y-6 shadow-2xl">
                         <div class="space-y-2">
-                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2">Contatto
+                            <label class="text-[9px] font-black uppercase tracking-widest text-white/20 ml-2"
+                                data-t="direct_contact">Contatto
                                 Diretto</label>
                             <div class="h-14 relative group/field">
                                 <span
@@ -202,13 +227,14 @@
                 <section class="space-y-4">
                     <div class="flex items-center gap-3 px-2">
                         <div class="size-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
-                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Note e Metodi di
+                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40"
+                            data-t="sync_notes_methods">Note e Metodi di
                             Sincronizzazione</h3>
                     </div>
 
                     <div
                         class="bg-[#0a0f1e]/40 backdrop-blur-2xl rounded-[32px] border border-white/5 border-glow p-0 overflow-hidden shadow-2xl">
-                        <textarea id="account-note" placeholder="Note operative Titanium..."
+                        <textarea id="account-note" data-t-placeholder="titanium_notes_placeholder"
                             class="w-full h-32 bg-transparent border-none p-6 text-sm font-bold text-white/80 placeholder:text-white/5 focus:ring-0 resize-none"></textarea>
                     </div>
 
@@ -220,7 +246,8 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-blue-400">share</span>
-                                <span class="text-xs font-black uppercase tracking-widest text-white/80">Protocollo
+                                <span class="text-xs font-black uppercase tracking-widest text-white/80"
+                                    data-t="shared_protocol">Protocollo
                                     Condiviso</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
@@ -235,9 +262,9 @@
                         <div id="shared-management" class="hidden pl-6 border-l-2 border-white/5 space-y-4 py-2">
                             <div id="invited-emails-list" class="flex flex-wrap gap-2"></div>
                             <div class="h-12 relative flex">
-                                <input id="invite-email" type="email" placeholder="Email da invitare"
+                                <input id="invite-email" type="email" data-t-placeholder="invite_email_placeholder"
                                     class="flex-1 h-full px-4 rounded-l-xl bg-black/40 border border-white/5 text-xs text-white focus:ring-0 transition-all">
-                                <button id="btn-add-invite-list"
+                                <button id="btn-add-invite-list" data-t="invite"
                                     class="px-5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white text-xs font-black rounded-r-xl border border-white/5 transition-all">INVITA</button>
                             </div>
                         </div>
@@ -248,7 +275,8 @@
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-amber-500 text-xl filled">bookmark</span>
-                                <span class="text-xs font-black uppercase tracking-widest text-white/80">Evidenzia come
+                                <span class="text-xs font-black uppercase tracking-widest text-white/80"
+                                    data-t="highlight_as_memo">Evidenzia come
                                     Memo</span>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
@@ -265,7 +293,8 @@
                 <section class="space-y-4">
                     <div class="flex items-center gap-3 px-2">
                         <div class="size-2 bg-slate-400 rounded-full shadow-[0_0_8px_rgba(148,163,184,0.6)]"></div>
-                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Archivio Digitale
+                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40"
+                            data-t="digital_archive">Archivio Digitale
                         </h3>
                     </div>
 
@@ -277,9 +306,11 @@
                             <span class="material-symbols-outlined text-3xl">cloud_upload</span>
                         </div>
                         <div class="text-center">
-                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Carica Documenti
+                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40"
+                                data-t="upload_documents">Carica Documenti
                             </p>
-                            <p class="text-[8px] font-bold text-white/10">PDF, Immagini, DOCX (Max 10MB)</p>
+                            <p class="text-[8px] font-bold text-white/10" data-t="upload_specs">PDF, Immagini, DOCX (Max
+                                10MB)</p>
                         </div>
                     </button>
                     <input type="file" id="file-input" multiple class="hidden">
@@ -295,27 +326,21 @@
             <button id="save-btn"
                 class="w-full h-16 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-2xl shadow-[0_20px_40px_rgba(37,99,235,0.3)] border-glow font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 transition-all active:scale-[0.98] group overflow-hidden relative">
                 <div class="saetta"></div>
-                <span class="relative z-10">Sincronizza Protocollo</span>
+                <span class="relative z-10" data-t="sync_protocol">Sincronizza Protocollo</span>
                 <span
                     class="material-symbols-outlined relative z-10 group-hover:translate-x-1 transition-transform">send</span>
             </button>
         </div>
 
-        <!-- 5. FOOTER PLACEHOLDER (Hidden visually by action bar, but keeps logic) -->
-        <div id="footer-placeholder" class="opacity-0 pointer-events-none"></div>
+        <!-- FOOTER PROTOCOL V3.0 -->
+        <div id="footer-placeholder"></div>
 
-        <!-- TOAST CONTAINER -->
-        <div id="toast-container"
-            class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-6 py-4 bg-[#0a0f1e]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-500 pointer-events-none">
-            <span id="toast-icon" class="material-symbols-outlined"></span>
-            <span id="toast-message" class="text-xs font-bold uppercase tracking-widest text-white"></span>
-        </div>
 
     </div>
 
     <!-- SCRIPTS MODULARI -->
-    <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/aggiungi_account_privato.js"></script>
+    <script type="module" src="assets/js/main.js?v=3.5"></script>
+    <script type="module" src="assets/js/aggiungi_account_privato.js?v=3.5"></script>
 </body>
 
 </html>

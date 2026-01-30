@@ -20,7 +20,7 @@
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.5"></script>
     <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script src="assets/js/ui-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> <!-- CDN Fix -->
 </head>
 
@@ -33,7 +33,11 @@
         <header class="titanium-header">
             <div class="header-balanced-container">
                 <!-- ZONA SINISTRA: Vuota (placeholder per simmetria) -->
-                <div class="header-left"></div>
+                <div class="header-left">
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
+                </div>
 
                 <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
                 <div class="header-center">
@@ -111,7 +115,8 @@
                             </div>
                             <div class="settings-text">
                                 <span class="settings-label" data-t="change_password">Cambio Password</span>
-                                <span class="settings-desc">Aggiorna la tua chiave d'accesso</span>
+                                <span class="settings-desc" data-t="change_password_desc">Aggiorna la tua chiave
+                                    d'accesso</span>
                             </div>
                         </div>
                     </div>
@@ -125,7 +130,8 @@
                             </div>
                             <div class="settings-text">
                                 <span class="settings-label" data-t="two_factor_auth">Autenticazione 2FA</span>
-                                <span class="settings-desc">Doppio livello di protezione</span>
+                                <span class="settings-desc" data-t="two_factor_auth_desc">Doppio livello di
+                                    protezione</span>
                             </div>
                         </div>
                         <input type="checkbox" id="2fa-toggle" class="titanium-toggle">
@@ -140,7 +146,7 @@
                             </div>
                             <div class="settings-text">
                                 <span class="settings-label" data-t="face_id">Face ID / Biometrico</span>
-                                <span class="settings-desc">Accesso rapido sicuro</span>
+                                <span class="settings-desc" data-t="face_id_desc">Accesso rapido sicuro</span>
                             </div>
                         </div>
                         <input type="checkbox" id="face-id-toggle" class="titanium-toggle">
@@ -173,7 +179,8 @@
                             </div>
                             <div class="settings-text">
                                 <span class="settings-label" data-t="lock_inactivity">Tempo di Inattività</span>
-                                <span class="settings-desc">Blocco automatico schermo</span>
+                                <span class="settings-desc" data-t="lock_inactivity_desc">Blocco automatico
+                                    schermo</span>
                             </div>
                         </div>
                     </div>
@@ -202,7 +209,8 @@
                             <div class="settings-text">
                                 <span class="settings-label" data-t="expiry_rules_title_page">Regole invio
                                     scadenze</span>
-                                <span class="settings-desc">Configura notifiche e avvisi</span>
+                                <span class="settings-desc" data-t="expiry_rules_desc">Configura notifiche e
+                                    avvisi</span>
                             </div>
                         </div>
                     </div>
@@ -252,7 +260,7 @@
                             </div>
                             <div class="settings-text">
                                 <span class="settings-label" data-t="theme_title">Tema App</span>
-                                <span class="settings-desc">Personalizza il look</span>
+                                <span class="settings-desc" data-t="theme_desc">Personalizza il look</span>
                             </div>
                         </div>
                     </div>
@@ -278,7 +286,7 @@
                             </div>
                             <div class="settings-text">
                                 <span class="settings-label" data-t="app_info_title">Informazioni sull'App</span>
-                                <span class="settings-desc">Versione e crediti</span>
+                                <span class="settings-desc" data-t="app_info_desc">Versione e crediti</span>
                             </div>
                         </div>
                     </div>
@@ -325,14 +333,7 @@
         </main>
 
         <!-- FOOTER PREMIUM -->
-        <footer class="titanium-footer">
-            <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
-                <span
-                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: white; text-transform: uppercase;">
-                    Titanium Security Protocol V3.5
-                </span>
-            </div>
-        </footer>
+        <div id="footer-placeholder"></div>
     </div>
 
 

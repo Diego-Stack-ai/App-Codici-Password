@@ -1,4 +1,1634 @@
 /* 
+ * TITANIUM DESIGN SYSTEM - Impostazioni Variation V2.0 (Dual Mode)
+ * File: auth_impostazioni.css
+ * Mode: Adaptive (Light/Dark)
+ */
+
+/* ==========================================================================
+   0. TOKEN DI BASE (Dual Theme System)
+   ========================================================================== */
+:root {
+    /* Default (Dark Mode Foundation) */
+    --bg-primary: #0a0f1e;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.5);
+
+    /* Surface Colors (Dark) */
+    --surface-glass: rgba(15, 25, 50, 0.4);
+    --surface-vault: rgba(10, 15, 30, 0.5);
+    --surface-sub: rgba(0, 0, 0, 0.2);
+    /* Sfondo interno per accordions/box */
+    --surface-hover: rgba(20, 30, 60, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+
+    /* Brand Colors */
+    --primary-blue: #2563eb;
+    --primary-light: #60a5fa;
+
+    /* Glow Gradients */
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
+    --titanium-box-gradient: linear-gradient(to left, #030712, #162e6e);
+
+    /* Premium Border Utils */
+    --premium-border-width: 1.5px;
+    --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
+
+    --sidebar-width: 280px;
+    --header-height: 80px;
+
+    /* Accent Colors (Solid - Official Protocol V3) */
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --accent-purple: #8b5cf6;
+    --accent-gold: #eab308;
+}
+
+/* LIGHT MODE OVERRIDES */
+html:not(.dark) {
+    --bg-primary: #e2e8f0;
+    /* Slate 200 */
+    --text-primary: #0f172a;
+    /* Slate 900 */
+    --text-secondary: #64748b;
+    /* Slate 500 */
+
+    /* Surface Colors (Light) */
+    --surface-glass: rgba(255, 255, 255, 0.7);
+    --surface-vault: rgba(255, 255, 255, 0.6);
+    --surface-sub: rgba(255, 255, 255, 0.5);
+    /* Bianco meno trasparente per contrasto */
+    --surface-hover: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.1);
+
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
+    --titanium-box-gradient: linear-gradient(to bottom right, #f8fafc, #bfdbfe);
+}
+
+/* ==========================================================================
+   1. BASE & UTILS
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Manrope', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Scrollbar Premium */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   2. TRUTHS & ANIMATIONS
+   ========================================================================== */
+@keyframes shimmer-master {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.98) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* TITANIUM BOX (ROOT CONTAINER) */
+.titanium-box {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0 auto;
+    overflow: hidden;
+    background: var(--titanium-box-gradient);
+    z-index: 10;
+}
+
+/* ==========================================================================
+   3. HEADER & FOOTER PREMIUM (FUSION STYLE)
+   ========================================================================== */
+.titanium-header,
+.titanium-footer {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+}
+
+.titanium-header {
+    top: 0;
+    height: var(--header-height);
+}
+
+.titanium-footer {
+    bottom: 0;
+    height: 80px;
+    justify-content: center;
+}
+
+.titanium-header::before,
+.titanium-footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: none;
+}
+
+/* Effetto Sfocatura Sfumata (Maschera) */
+.titanium-header::before {
+    background: var(--surface-glass);
+    -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+}
+
+.titanium-footer::before {
+    background: var(--surface-glass);
+    -webkit-mask-image: linear-gradient(to top, black 30%, transparent 100%);
+    mask-image: linear-gradient(to top, black 30%, transparent 100%);
+}
+
+.header-stack {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.header-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.btn-icon-header {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--surface-sub);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: all 0.2s;
+    /* position: absolute; REMOVED */
+    /* right: 0; REMOVED */
+    text-decoration: none;
+    /* Rimuove sottolineatura */
+}
+
+.btn-icon-header:hover {
+    background: var(--surface-hover);
+    transform: scale(1.05);
+}
+
+/* ==========================================================================
+   3.1 HEADER BALANCED LAYOUT PROTOCOL V1.0
+   Gestione titoli lunghi e distribuzione icone bilanciata
+   ========================================================================== */
+
+/* Container principale: Flexbox bilanciato */
+.header-balanced-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 1rem;
+    gap: 0.5rem;
+}
+
+/* ZONA SINISTRA: Icone primarie (navigazione) */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    /* NON si restringe mai */
+    min-width: 44px;
+    /* Spazio minimo per 1 icona */
+}
+
+/* ZONA CENTRO: Titolo flessibile con wrap intelligente */
+.header-center {
+    flex: 1;
+    /* Occupa tutto lo spazio disponibile */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 0.5rem;
+    /* Margine di sicurezza */
+    min-width: 0;
+    /* Permette shrinking se necessario */
+}
+
+/* Override .header-title per wrap intelligente */
+.header-balanced-container .header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: 0.1em;
+
+    /* WRAP INTELLIGENTE - Regola Chiave */
+    white-space: normal;
+    /* Permette a capo */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+
+    /* Limita a 2 righe max */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+
+    /* Line-height compatto per evitare header troppo alto */
+    line-height: 1.2;
+}
+
+/* ZONA DESTRA: Icone secondarie (azioni) */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    /* NON si restringe mai */
+    min-width: 44px;
+    /* Spazio minimo per 1 icona */
+}
+
+/* Responsive: Mobile */
+@media (max-width: 400px) {
+    .header-balanced-container {
+        padding: 0 0.75rem;
+        gap: 0.25rem;
+    }
+
+    .header-balanced-container .header-title {
+        font-size: 1rem;
+        line-height: 1.1;
+        letter-spacing: 0.05em;
+    }
+
+    .header-left,
+    .header-right {
+        gap: 0.25rem;
+    }
+}
+
+
+/* ==========================================================================
+   4. TITANIUM VAULT & BORDER GLOW
+   ========================================================================== */
+.titanium-vault {
+    position: relative;
+    background: var(--surface-vault);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.titanium-vault::before {
+    content: none;
+}
+
+.border-glow {
+    position: relative;
+    border: none !important;
+}
+
+.border-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--premium-border-width);
+    background: var(--premium-border-gradient);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* GLASS GLOW (FARO) */
+.glass-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 150%;
+    height: 300%;
+    filter: blur(80px);
+    z-index: 5;
+    pointer-events: none;
+    animation: glowFloat 5s ease-in-out infinite;
+    transform: translateX(-50%);
+    background: var(--glow-gradient);
+}
+
+@keyframes glowFloat {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(-150px) scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(100px) scale(1.4);
+        opacity: 0.9;
+    }
+}
+
+/* ==========================================================================
+   5. SELETTORE LINGUA (Sincronizzato Premium)
+   ========================================================================== */
+.lang-selector-container {
+    position: relative;
+    z-index: 100;
+    width: 100%;
+    /* Larghezza piena */
+}
+
+.lang-btn-float {
+    position: relative;
+    width: 100%;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-primary);
+    padding: 1.25rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.lang-btn-float::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    animation: shimmer-master 6s infinite linear;
+}
+
+.lang-btn-float:hover {
+    transform: translateY(-3px);
+    background: rgba(20, 30, 60, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.lang-dropdown {
+    position: relative;
+    /* Cambiato da absolute per far scendere i contenuti */
+    width: 100%;
+    background: var(--surface-vault);
+    /* Leggermente più trasparente per integrarsi */
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    /* Adattato raggio */
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: none;
+    /* Rimosso ombra pesante dropdown */
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    /* Z-index basso basta se non è absolute */
+    margin-top: 1rem;
+    /* Spazio dall'header */
+}
+
+.lang-dropdown.show {
+    display: flex;
+    animation: fadeInScale 0.2s ease-out;
+}
+
+.lang-option:hover {
+    background: var(--surface-hover) !important;
+    transform: translateX(5px);
+}
+
+/* ==========================================================================
+   6. SPECIFICI ACCOUNT
+   ========================================================================== */
+/* Container principale */
+.settings-container {
+    max-width: 1000px;
+    /* Aumentato da 800px per più spazio */
+    width: 95%;
+    margin: 0 auto;
+    padding: calc(var(--header-height) + 1.5rem) 1.25rem 5rem 1.25rem;
+    animation: fadeInScale 0.6s ease-out forwards;
+    position: relative;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+
+
+/* Vault Wrapper (Svuotato per lasciare spazio alle singole card) */
+.settings-vault {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.settings-group {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.settings-group:last-child {
+    margin-bottom: 0;
+}
+
+.settings-group-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-left: 0.5rem;
+}
+
+.settings-item {
+    position: relative;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    /* Cambiato a colonna per ospitare selettori interni */
+    gap: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    /* Fix angoli visibili */
+}
+
+.settings-item-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Rimosso effetto shimmer continuo dalle card secondarie per pulizia visuale */
+.settings-item::after {
+    content: none;
+}
+
+/* Assicuro che il contenuto stia sopra */
+.settings-item-header,
+.settings-item-info,
+.accordion-content {
+    position: relative;
+    z-index: 2;
+}
+
+.accordion-content {
+    background: var(--surface-sub);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 0.75rem !important;
+    /* Ridotto per compattezza */
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+    display: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: fadeInScale 0.3s ease-out;
+}
+
+/* COMPACT TABLES FOR CONFIGURATION (Premium V3) */
+.accordion-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px;
+    /* Distanza tra le righe per effetto card */
+}
+
+.accordion-content tr {
+    background: var(--surface-vault) !important;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.accordion-content tr:hover {
+    background: var(--surface-hover) !important;
+    transform: translateX(2px);
+}
+
+.accordion-content td {
+    font-size: 0.72rem !important;
+    padding: 0.6rem 0.5rem !important;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.accordion-content td:first-child {
+    border-left: 3px solid var(--primary-light);
+    /* Accento Titanium */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.accordion-content td:last-child {
+    border-right: 1px solid var(--border-color);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    text-align: right;
+}
+
+/* Action Buttons Styled */
+.accordion-content .flex.items-center.gap-1 {
+    opacity: 0.9 !important;
+    /* Sempre visibili */
+    justify-content: flex-end;
+}
+
+.accordion-content button.w-6.h-6 {
+    width: 26px !important;
+    height: 26px !important;
+    background: var(--surface-sub) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary) !important;
+}
+
+.accordion-content button.hover\:bg-teal-500\/20:hover {
+    background: rgba(45, 212, 191, 0.2) !important;
+    border-color: #2dd4bf !important;
+    color: #2dd4bf !important;
+}
+
+.accordion-content button.hover\:bg-red-500\/20:hover {
+    background: rgba(248, 113, 113, 0.2) !important;
+    border-color: #f87171 !important;
+    color: #f87171 !important;
+}
+
+.accordion-content .material-symbols-outlined {
+    font-size: 14px !important;
+}
+
+.accordion-content.show {
+    display: block;
+}
+
+.settings-item:hover {
+    transform: translateY(-3px);
+    background: var(--surface-hover);
+    border-color: var(--primary-light);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.settings-item-info {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.settings-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.settings-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.settings-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* AVATAR BOX */
+.profile-card {
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    /* Centratura verticale */
+    align-items: center;
+    gap: 1.5rem;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    /* Necessario per after */
+    /* Fix angoli visibili */
+}
+
+/* EFFETTO SAETTA / SHIMMER */
+.profile-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.08) 50%, transparent 65%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    animation: shimmer-master 4s infinite linear;
+    z-index: 1;
+    /* Sopra background, sotto content */
+    border-radius: inherit;
+    /* Segue il bordo della card */
+}
+
+/* Assicuro che il contenuto stia sopra la luce */
+.profile-info,
+.avatar-wrapper {
+    position: relative;
+    z-index: 2;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Centra il pulsante rispetto al nome */
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+    overflow: hidden;
+    /* Fix angoli visibili */
+}
+
+.avatar-main {
+    width: 100%;
+    height: 100%;
+    border-radius: 27px;
+    object-fit: cover;
+    /* Fix per tag IMG */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: var(--bg-dark);
+}
+
+/* BOTTONI PREMIUM (STANDALONE CARD STYLE) */
+.auth-btn {
+    position: relative;
+    width: 100%;
+    min-height: 4.5rem;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-primary);
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.auth-btn::after {
+    content: none;
+}
+
+.auth-btn:hover {
+    transform: translateY(-4px);
+    background: rgba(20, 30, 60, 0.5);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.auth-btn:active {
+    transform: translateY(-1px);
+}
+
+.auth-btn-danger {
+    background-image: linear-gradient(rgba(244, 63, 94, 0.05), rgba(244, 63, 94, 0.05)),
+        linear-gradient(135deg, rgba(244, 63, 94, 0.3) 0%, rgba(244, 63, 94, 0.1) 50%, rgba(244, 63, 94, 0.3) 100%);
+    color: #fb7185;
+}
+
+.auth-btn-danger:hover {
+    box-shadow: 0 15px 40px rgba(244, 63, 94, 0.2);
+}
+
+/* TOGGLE SWITCH */
+.titanium-toggle {
+    position: relative;
+    width: 48px;
+    height: 24px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--border-color);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    outline: none !important;
+    overflow: hidden;
+    display: block;
+}
+
+.titanium-toggle:checked {
+    background: var(--primary-blue);
+}
+
+.titanium-toggle::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    background: white;
+    transition: 0.3s;
+}
+
+.titanium-toggle:checked::before {
+    left: 27px;
+}
+
+/* VARIANTI COLORI ICONE */
+.bg-blue-glass {
+    background: rgba(37, 99, 235, 0.15);
+    color: #60a5fa;
+}
+
+.bg-purple-glass {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+}
+
+.bg-amber-glass {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.bg-emerald-glass {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.bg-rose-glass {
+    background: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
+}
+
+.bg-red-glass {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+.bg-teal-glass {
+    background: rgba(20, 184, 166, 0.15);
+    color: #2dd4bf;
+}
+
+.bg-green-glass {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+}
+
+.bg-cyan-glass {
+    background: rgba(6, 182, 212, 0.15);
+    color: #22d3ee;
+}
+
+/* TIMER SELECTOR */
+.timer-selector {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.timer-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--surface-glass);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+    /* Garantisce che l'effetto click non esca dai bordi */
+}
+
+.timer-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-white);
+    transform: translateY(-2px);
+}
+
+.timer-btn:active {
+    transform: scale(0.96);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.timer-btn.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* ==========================================================================
+   7. TITANIUM DATA DISPLAY (PROFILE & DETAIL)
+   ========================================================================== */
+.glass-field-titanium {
+    width: 100%;
+    position: relative;
+    /* Per posizionamento label */
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 3rem;
+    transition: all 0.2s;
+    /* Reset per fieldset */
+    margin: 0;
+    min-inline-size: min-content;
+}
+
+/* Stile specifico se è un FIELDSET */
+fieldset.glass-field-titanium {
+    display: block;
+    /* Flex su fieldset è buggato */
+    padding: 0.5rem 1rem 0.8rem 1rem;
+    padding-top: 0.6rem;
+}
+
+.glass-field-titanium .field-label {
+    /* Base style */
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 6px;
+    line-height: 1;
+}
+
+/* OLD DIV STYLE */
+div.glass-field-titanium .field-label {
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    background: transparent;
+}
+
+/* NEW FIELDSET STYLE */
+legend.field-label {
+    width: auto;
+    margin-left: 4px;
+    color: inherit;
+    float: none;
+    display: table;
+}
+
+.glass-field-titanium .field-value {
+    display: block;
+    /* Importante per fieldset */
+    margin-top: 0.2rem;
+}
+
+.field-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    word-break: break-all;
+}
+
+/* Color Variants for Glass Fields */
+.glass-field-blue {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.glass-field-blue .field-label {
+    color: #60a5fa;
+}
+
+.glass-field-emerald {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.glass-field-emerald .field-label {
+    color: #34d399;
+}
+
+.glass-field-amber {
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.glass-field-amber .field-label {
+    color: #fbbf24;
+}
+
+.glass-field-violet {
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.glass-field-violet .field-label {
+    color: #a78bfa;
+}
+
+.glass-field-rose {
+    border-color: rgba(244, 63, 94, 0.3);
+}
+
+.glass-field-rose .field-label {
+    color: #fb7185;
+}
+
+.glass-field-cyan {
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.glass-field-cyan .field-label {
+    color: #22d3ee;
+}
+
+.glass-field-cyan .field-value {
+    font-size: 0.8rem;
+    /* Riduzione font per email lunghe */
+    word-break: break-all;
+}
+
+/* ACCORDION REFINEMENT */
+.accordion-header {
+    cursor: pointer;
+}
+
+.accordion-header:hover {
+    background: var(--surface-hover);
+}
+
+.settings-chevron {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-secondary);
+}
+
+/* INFO CONTENT ADAPTIVE (App Info & Privacy) */
+.info-content {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.info-content h3 {
+    color: var(--text-primary);
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.info-content h4 {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+}
+
+.info-content strong {
+    color: var(--text-primary);
+}
+
+.info-content .info-card {
+    background: var(--surface-sub);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.info-content .subtitle-caps {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.info-content .highlight-box {
+    font-style: italic;
+    background: var(--surface-sub);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.info-content .section-divider {
+    border-left: 3px solid var(--primary-light);
+    padding-left: 10px;
+    margin: 1.5rem 0 1rem 0;
+}
+
+/* TITANIUM BUTTONS */
+.titanium-btn-primary {
+    background: var(--primary-blue);
+    background-image: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+.titanium-btn-primary:hover {
+    transform: translateY(-2px);
+    background-image: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+}
+
+.titanium-btn-secondary {
+    background: var(--surface-sub);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.titanium-btn-secondary:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-secondary);
+}
+
+.syntax-row {
+    margin-bottom: 1.25rem;
+}
+
+.syntax-row:last-child {
+    margin-bottom: 0;
+}
+
+.syntax-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.syntax-code {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.75rem !important;
+    /* Testo più piccolo come richiesto */
+    color: var(--text-primary);
+    display: flex;
+    flex-wrap: wrap;
+    /* Permette l'andata a capo */
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    line-height: 1.5;
+}
+
+html:not(.dark) .syntax-code {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+.syntax-token {
+    font-weight: 700;
+}
+
+.syntax-token.blue {
+    color: #60a5fa;
+}
+
+.syntax-token.emerald {
+    color: #34d399;
+}
+
+.syntax-token.amber {
+    color: #fbbf24;
+}
+
+.syntax-token.muted {
+    opacity: 0.5;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .profile-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .settings-item {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+}
+
+/* FIX DROPDOWN VISIBILITY */
+#lang-btn {
+    overflow: visible !important;
+    position: relative;
+    /* Ensure positioning context */
+}
+
+/* Ensure dropdown is on top */
+.lang-dropdown {
+    z-index: 9999 !important;
+}
+
+/* TITANIUM CUSTOM DROPDOWN */
+.titanium-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.titanium-dropdown-trigger {
+    width: 100%;
+    background: var(--surface-sub);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.titanium-dropdown-trigger:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-light);
+}
+
+.titanium-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--surface-vault);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 1000;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.titanium-dropdown-menu.show {
+    display: flex;
+    animation: fadeInScale 0.2s ease-out;
+}
+
+.titanium-dropdown-item {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.titanium-dropdown-item:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.titanium-dropdown-item.active {
+    background: var(--primary-blue);
+    color: white;
+}
+
+/* PREMIUM NATIVE SELECT IMPROVEMENT */
+select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+}
+
+/* Rimuovi freccia nativa IE/Edge */
+select::-ms-expand {
+    display: none;
+}
+
+select option {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   7. TITANIUM MATRIX V3.0 (ULTRA-COMPACT STANDARDS)
+   ========================================================================== */
+
+/* Card Master: Solid, Compact & Clickable */
+.matrix-card-compact {
+    position: relative;
+    background: white;
+    border: 1px solid #e2e8f0;
+    /* Slate 200 */
+    border-radius: 18px;
+    padding: 0.75rem;
+    /* p-3 */
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+}
+
+.dark .matrix-card-compact {
+    background: #0a0f1e;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.matrix-card-compact:hover {
+    transform: translateY(-4px);
+}
+
+/* Compact Data Fields (Ultra-Slim Standard) */
+.matrix-field-compact {
+    height: 1.625rem;
+    /* ~26px */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.5rem;
+    /* px-2 */
+    background: rgba(241, 245, 249, 0.5);
+    /* Slate 100/50 */
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0f172a;
+    /* Slate 900 */
+    position: relative;
+    overflow: hidden;
+}
+
+.dark .matrix-field-compact {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+/* Rimuove la parentesi (C-Blade) ereditata sui campi interni */
+.matrix-field-compact::before {
+    display: none !important;
+}
+
+/* Highlight Search Bar */
+.search-bar-solid {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #cbd5e1 !important;
+    /* Slate 300 */
+    color: #0f172a !important;
+}
+
+.dark .search-bar-solid {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+/* Header Action (Clean Icon Style) */
+.header-action-clean {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #3b82f6;
+    /* Blue 500 */
+    background: transparent !important;
+    border: none !important;
+    transition: color 0.2s;
+}
+
+.header-action-clean:hover {
+    color: #60a5fa;
+}
+
+/* ==========================================================================
+   HOME PAGE EFFECTS (Imported from titanium.css for standalone support)
+   ========================================================================== */
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* Matrix Color Variants */
+.matrix-blue {
+    --accent: var(--accent-blue);
+    --grad-from: rgba(37, 99, 235, 0.2);
+    --grad-to: rgba(59, 130, 246, 0.05);
+}
+
+.matrix-green {
+    --accent: var(--accent-green);
+    --grad-from: rgba(16, 185, 129, 0.2);
+    --grad-to: rgba(16, 185, 129, 0.05);
+}
+
+.matrix-orange {
+    --accent: var(--accent-amber);
+    --grad-from: rgba(245, 158, 11, 0.2);
+    --grad-to: rgba(245, 158, 11, 0.05);
+}
+
+.matrix-red {
+    --accent: var(--accent-rose);
+    --grad-from: rgba(244, 63, 94, 0.2);
+    --grad-to: rgba(244, 63, 94, 0.05);
+}
+
+/* Matrix Light Theme (Glass Clean + C-Blade) */
+html:not(.dark) [class*="matrix-"] {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #1e293b;
+}
+
+/* C-Blade (Concave Parenthesis) */
+[class*="matrix-"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    border-radius: inherit;
+    border-left: 10px solid var(--accent);
+    border-top: 12px solid var(--accent);
+    border-bottom: 12px solid var(--accent);
+    -webkit-clip-path: polygon(0% 0%, 35px 0%, 22px 2px, 18px 5px, 13px 9px, 10px 15px, 10px calc(100% - 15px), 13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px), 35px 100%, 0% 100%);
+    clip-path: polygon(0% 0%, 35px 0%, 22px 2px, 18px 5px, 13px 9px, 10px 15px, 10px calc(100% - 15px), 13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px), 35px 100%, 0% 100%);
+}
+
+/* Matrix Dark Theme (Gradient Matrix) */
+html.dark [class*="matrix-"] {
+    background: linear-gradient(135deg, var(--grad-from), var(--grad-to));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+/* Matrix Typography */
+[class*="matrix-"]:not(.dynamic-card) h3 {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    margin: 0;
+    z-index: 10;
+}
+
+[class*="matrix-"]:not(.dynamic-card) p {
+    font-size: 0.8rem !important;
+    opacity: 0.7 !important;
+    font-weight: 500;
+    z-index: 10;
+}
+
+html.dark [class*="matrix-"]:not(.dynamic-card) h3,
+html.dark [class*="matrix-"]:not(.dynamic-card) p {
+    color: #ffffff !important;
+}
+
+/* Glass Shine Effect (Riflesso Vetroso) */
+.glass-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            transparent 51%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 5;
+    border-radius: inherit;
+}
+
+[class*="matrix-"]:hover .glass-shine {
+    opacity: 1;
+}
+
+html.dark .glass-shine {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.25) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            transparent 51%);
+}
+
+/* Background Icon Container (Watermark Icons) */
+.bg-icon-container {
+    position: absolute;
+    right: 5px;
+    bottom: -5px;
+    opacity: 0.15;
+    transform: scale(1.1) rotate(12deg);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icon Gradient (Light Mode) */
+html:not(.dark) .bg-icon-container span {
+    background: linear-gradient(135deg, var(--accent), transparent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Icon White (Dark Mode) */
+html.dark .bg-icon-container span {
+    background: none !important;
+    -webkit-text-fill-color: white !important;
+    color: white !important;
+    opacity: 0.4;
+}
+
+/* Hover Animation for Icon */
+[class*="matrix-"]:hover .bg-icon-container {
+    transform: scale(1.4) rotate(15deg) translate(-10px, -10px);
+    opacity: 0.4;
+}
+
+
+/* ========================================================================== */
+/* TITANIUM.CSS CONTENT MERGED BELOW */
+/* ========================================================================== */
+
+/* 
  * TITANIUM DESIGN SYSTEM - V2.0 (Refactored)
  * Progetto: Codici & Password
  * Stile: Pure CSS (Consolidated & DRY)
@@ -18,11 +1648,13 @@
     --btn-neutral-bg: #ffffff;
     --btn-neutral-text: #0f172a;
 
-    /* Core Accent Colors */
-    --accent-blue: #2196F3;
-    --accent-green: #00C853;
-    --accent-orange: #FF9800;
-    --accent-red: #9b1c1c;
+    /* Core Accent Colors (Official Protocol V3) */
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --accent-purple: #8b5cf6;
+    --accent-gold: #eab308;
 
     /* Gradient Tokens (Light Defaults - usually unused or specific) */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
@@ -208,9 +1840,17 @@ html.dark .titanium-box {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Rimosso shimmer automatico (Saetta) per maggiore pulizia visiva nelle dashboard */
+/* INTEGRAZIONE AUTOMATICA SAETTA (MASTER GRADE - VERSIONE SOBRIA 15%) */
 .titanium-vault::before {
-    content: none !important;
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Configurazione Vault: Opacità ridotta al 15% per massima eleganza */
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 999;
+    animation: shimmer-master 6s infinite linear;
 }
 
 .titanium-vault:hover {
@@ -964,9 +2604,21 @@ html.dark .glass-shine {
    Descrizione: UNICA definizione ufficiale del riflesso metallico.
    Potenza: Master Grade (Z-Index 999, Opacità 50%, Animazione 6s).
    ========================================================================== */
-/* Classe .saetta DISATTIVATA per pulizia visiva (Baseline V3.0) */
 .saetta {
-    display: none !important;
+    position: absolute;
+    inset: 0;
+    /* Configurazione Master Grade */
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+    background-size: 200% 100%;
+    /* Più larga per evitare tagli davanti */
+    pointer-events: none;
+    z-index: 999 !important;
+    animation: shimmer-master 6s infinite linear !important;
+    display: block !important;
+}
+
+html.dark .saetta {
+    mix-blend-mode: overlay;
 }
 
 /* ==========================================================================
@@ -1012,13 +2664,13 @@ html.dark .glass-shine {
 }
 
 .matrix-orange {
-    --accent: var(--accent-orange);
+    --accent: var(--accent-amber);
     --grad-from: var(--matrix-orange-from);
     --grad-to: var(--matrix-orange-to);
 }
 
 .matrix-red {
-    --accent: var(--accent-red);
+    --accent: var(--accent-rose);
     --grad-from: var(--matrix-red-from);
     --grad-to: var(--matrix-red-to);
 }
@@ -1030,7 +2682,7 @@ html:not(.dark) [class*="matrix-"] {
     color: var(--btn-neutral-text);
 }
 
-html:not(.dark) [class*="matrix-"]::before {
+[class*="matrix-"]::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -1772,4 +3424,89 @@ html:not(.dark) .lang-name {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+/* ==========================================================================
+   10. MATRIX COMPACT SYSTEM (High Density UI)
+   ========================================================================== */
+.matrix-card-compact {
+    position: relative;
+    padding: 0.75rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+html.dark .matrix-card-compact {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.8));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+/* Specific background for matrix colored cards in compact mode */
+html.dark .matrix-card-compact[class*="matrix-"] {
+    background: linear-gradient(135deg, var(--grad-from), var(--grad-to));
+}
+
+/* Custom Border Glow for Matrix Components - Ensure "Azzurro" or other accent colors */
+[class*="matrix-"].border-glow::after {
+    background: linear-gradient(120deg, var(--accent, #3b82f6) 0%, rgba(255, 255, 255, 0.5) 50%, var(--accent, #3b82f6) 100%);
+    opacity: 0.8;
+}
+
+.matrix-card-compact:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+html.dark .matrix-card-compact:hover {
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.matrix-field-compact {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    height: 26px;
+    padding: 0 0.6rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    gap: 0.3rem;
+    transition: all 0.2s;
+}
+
+html.dark .matrix-field-compact {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.matrix-field-compact span {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-light);
+}
+
+html.dark .matrix-field-compact span {
+    color: white;
+}
+
+.matrix-field-compact .material-symbols-outlined {
+    font-size: 11px;
+    opacity: 0.5;
+}
+
+.matrix-field-compact:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+html.dark .matrix-field-compact:hover {
+    background: rgba(255, 255, 255, 0.05);
 }

@@ -21,7 +21,7 @@
     <!-- TITANIUM AUTH SYSTEM V6.0 (Pure CSS) -->
     <link rel="stylesheet" href="assets/css/auth_accesso.css?v=6.0">
     <!-- Core UI per Toast (Protocollo V3) -->
-    <script src="assets/js/ui-core.js?v=2.2"></script>
+    <script type="module" src="assets/js/ui-core.js?v=2.2"></script>
 </head>
 
 <body>
@@ -58,12 +58,12 @@
             <p class="auth-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
 
             <!-- Form -->
-            <form id="login-form">
+            <form id="login-form" action="javascript:void(0)">
 
                 <!-- Email -->
                 <div class="auth-form-group">
                     <label class="auth-label" data-t="username_label">Username</label>
-                    <input id="email" name="username" type="email" autocomplete="username" required class="auth-input"
+                    <input id="email" name="username" type="text" autocomplete="username" required class="auth-input"
                         data-t="username_placeholder" placeholder="Email o Username">
                 </div>
 
@@ -105,7 +105,6 @@
     <div id="toast-container"></div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=2.2"></script>
     <script type="module" src="assets/js/login.js?v=2.2"></script>
 
 </body>

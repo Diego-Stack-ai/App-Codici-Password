@@ -1,5 +1,6 @@
-import { auth, db, storage } from './firebase-config.js'; // Assuming storage is exported, if not I'll just skip or use getStorage
+import { auth, db, storage } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { showToast } from './ui-core.js';
 import { collection, addDoc, getDocs, updateDoc, doc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
@@ -152,9 +153,9 @@ function renderBankAccounts() {
 
         ibanDiv.innerHTML = `
             <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Conto #${ibanIdx + 1}</span>
+                <span class="text-[10px] font-bold text-primary uppercase tracking-widest" data-t="account_counter">Conto #${ibanIdx + 1}</span>
                 ${bankAccounts.length > 1 ? `
-                    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" onclick="removeIban(${ibanIdx})">
+                    <button type="button" class="text-white/20 hover:text-red-500 transition-colors" onclick="removeIban(${ibanIdx})">
                         <span class="material-symbols-outlined text-sm">delete</span>
                     </button>
                 ` : ''}
@@ -325,8 +326,14 @@ window.removeCard = (ibanIdx, cardIdx) => {
     renderBankAccounts();
 };
 
-window.removeIban = (ibanIdx) => {
-    if (confirm("Eliminare interamente questo IBAN e tutte le carte collegate?")) {
+async function removeIban(ibanIdx) {
+    const confirmed = await window.showConfirmModal(
+        window.t('delete_iban_title') || "ELIMINA IBAN",
+        window.t('delete_iban_confirm') || "Eliminare interamente questo IBAN e tutte le carte collegate?",
+        window.t('delete') || "ELIMINA",
+        window.t('cancel') || "ANNULLA"
+    );
+    if (confirmed) {
         bankAccounts.splice(ibanIdx, 1);
         renderBankAccounts();
     }
@@ -456,7 +463,7 @@ function setupSave() {
             };
 
             if (!newAccount.nomeAccount) {
-                alert("Inserisci almeno il nome dell'account");
+                if (window.showToast) window.showToast(window.t("account_name_required") || "Inserisci almeno il nome dell'account", "error");
                 throw new Error("Missing Name");
             }
 
@@ -500,7 +507,7 @@ function setupSave() {
 
         } catch (e) {
             console.error(e);
-            alert("Errore durante il salvataggio: " + e.message);
+            if (window.showToast) window.showToast((window.t("save_error") || "Errore salvataggio: ") + e.message, "error");
             btn.disabled = false;
             icon.textContent = originalIcon;
             icon.classList.remove('animate-spin');

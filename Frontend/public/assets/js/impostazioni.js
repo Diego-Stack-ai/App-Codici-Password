@@ -14,7 +14,12 @@ const initImpostazioni = () => {
     const updateTranslations = () => {
         document.querySelectorAll('[data-t]').forEach(el => {
             const key = el.getAttribute('data-t');
-            el.textContent = t(key);
+            const translation = t(key);
+            if (translation && translation !== key) {
+                // Se l'elemento ha Material Icons (span con classe material-symbols-outlined), non sovrascrivere tutto
+                // In questo caso data-t è solitamente su span che contengono solo testo
+                el.textContent = translation;
+            }
         });
     };
     updateTranslations();
@@ -242,7 +247,7 @@ onAuthStateChanged(auth, async (user) => {
             // Logout
             if (logoutBtn) {
                 logoutBtn.onclick = async () => {
-                    const confirmed = await window.showConfirmModal(t('logout_confirm') || "Vuoi davvero uscire?");
+                    const confirmed = await window.showConfirmModal(t('section_security'), t('logout_confirm') || "Vuoi davvero uscire?");
                     if (confirmed) {
                         await signOut(auth);
                         window.location.href = 'index.html';

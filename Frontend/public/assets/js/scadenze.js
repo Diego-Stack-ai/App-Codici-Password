@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scadenzeContainer.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-20 opacity-30">
                     <span class="material-symbols-outlined text-6xl mb-4">event_busy</span>
-                    <p class="font-bold uppercase tracking-widest text-xs">Nessuna scadenza trovata</p>
+                    <p class="font-bold uppercase tracking-widest text-xs" data-t="no_deadlines_found">${t('no_deadlines_found')}</p>
                 </div>`;
             const countEl = document.getElementById('deadline-count');
             if (countEl) countEl.textContent = '0';
@@ -257,24 +257,16 @@ export async function loadUrgentDeadlinesCount(user) {
             else {
                 list.innerHTML = items.map(deadline => {
                     const daysUntil = Math.ceil((deadline.due - today) / (1000 * 60 * 60 * 24));
-                    const matrixClass = daysUntil < 0 ? 'matrix-red' : 'matrix-orange';
                     const badgeText = daysUntil < 0 ? 'Scaduto' : (daysUntil === 0 ? 'Oggi' : (daysUntil === 1 ? 'Domani' : `${daysUntil}g`));
 
                     return `
-                    <a href="scadenze.html" class="titanium-interactive border-glow dynamic-card ${matrixClass}">
-                        <div class="card-shine"></div>
-                        <div class="card-content">
-                            <div class="icon-circle">
-                                <span class="material-symbols-outlined" style="font-size: 20px;">${deadline.icon || 'event'}</span>
-                            </div>
-                            <div class="card-text">
-                                <div class="card-title" style="font-size: 0.85rem; color: inherit;">${deadline.title}</div>
-                            </div>
-                            <div class="flex flex-col items-end shrink-0">
-                                <span class="font-bold" style="font-size: 0.7rem;">${badgeText}</span>
-                            </div>
+                    <div class="micro-list-item">
+                        <div class="item-content">
+                            <span class="material-symbols-outlined">${deadline.icon || 'event'}</span>
+                            <span class="item-title">${deadline.title}</span>
                         </div>
-                    </a>`;
+                        <span class="item-badge">${badgeText}</span>
+                    </div>`;
                 }).join('');
             }
         }

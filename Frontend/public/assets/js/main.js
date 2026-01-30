@@ -29,10 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Policy UX (Lockdown menu/selezione)
     initLockedUX();
 
-    // 2. Componenti Universali (Toggles, Copy, Call)
-    setupPasswordToggles();
-    setupCopyButtons();
-    setupCallButtons();
+    // 2. Componenti Universali (Toggles, Copy, Call) - SALTA SU PAGINE AUTH
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
+    const isAuthPage = authPages.includes(currentPage);
+
+    if (!isAuthPage) {
+        setupPasswordToggles();
+        setupCopyButtons();
+        setupCallButtons();
+    }
 
     // 3. Logiche specifiche di pagina (Attivate solo se gli elementi esistono)
     setupAccountCards();
@@ -42,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. GLOBAL SECURITY CHECK
     onAuthStateChanged(auth, async (user) => {
+        if (isAuthPage) return; // Non eseguire logiche app-wide su index/registrati
+
         if (user) {
             const currentPage = window.location.pathname.split('/').pop();
             // Evitiamo il modal nelle pagine di login/registrazione

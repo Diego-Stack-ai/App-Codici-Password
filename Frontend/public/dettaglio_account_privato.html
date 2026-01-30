@@ -1,178 +1,53 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
+
     <title>Dettaglio Account Privato</title>
     <!-- Fonts and Icons -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <!-- Tailwind CSS -->
-    <script src="assets/js/tailwind-config.js"></script>
+    <!-- Design System Master (Titanium Gold v3.5) -->
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <link rel="stylesheet" href="assets/css/titanium.css?v=3.5">
+
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <style>
-        <style>.material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
         .filled {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        body {
-            background-color: #0a0f1e;
-        }
-
-        /* --- METODO TITANIUM EFFECT SYSTEM --- */
-
-        /* 3) FARO ANIMATO (GLASS GLOW) */
-        .glass-glow {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 150%;
-            height: 120%;
-            background: radial-gradient(ellipse at 50% 0%,
-                    rgba(80, 150, 255, 0.6) 0%,
-                    rgba(80, 150, 255, 0.2) 25%,
-                    rgba(80, 150, 255, 0.05) 50%,
-                    transparent 75%);
-            filter: blur(80px);
-            z-index: 0;
-            animation: glowFloat 4s ease-in-out infinite;
-            pointer-events: none;
-        }
-
-        @keyframes glowFloat {
-
-            0%,
-            100% {
-                transform: translate(-50%, -10%) scale(1);
-                opacity: 0.7;
-            }
-
-            50% {
-                transform: translate(-50%, 5%) scale(1.1);
-                opacity: 1;
-            }
-        }
-
-        /* 9) BORDER GLOW RIFLETTENTE */
-        .border-glow {
-            position: relative;
-        }
-
-        .border-glow::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            padding: 1.5px;
-            background: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0.6) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        /* SAETTA ANIMATA (Metallic Shimmer) Scorrevole a DX */
-        .saetta {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .saetta::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
-            background-size: 200% 100%;
-            animation: shimmer 4s infinite linear;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-
-            100% {
-                background-position: 200% 0;
-            }
-        }
-
-        /* NO SCROLLBAR */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* VIEW LABELS (Standardized) */
-        .view-label {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Hide scrollbar */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            font-variation-settings: 'FILL' 1;
         }
     </style>
 </head>
 
-<body class="bg-[#0a0f1e] text-white font-display antialiased overflow-x-hidden">
-    <div
-        class="relative flex h-full min-h-screen w-full flex-col w-full md:max-w-3xl lg:max-w-5xl mx-auto bg-gradient-to-l from-[#030712] to-[#162e6e] shadow-2xl overflow-hidden">
+<body class="titanium-bg antialiased overflow-x-hidden">
+    <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
+    <div class="titanium-box">
 
-        <!-- GLOW LAYER -->
-        <div class="glass-glow"></div>
+        <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
+        <div class="glass-glow pointer-events-none"></div>
 
-        <!-- 4) HEADER FUSION -->
-        <header
-            class="fixed top-0 left-0 right-0 mx-auto w-full md:max-max-3xl lg:max-w-5xl bg-gradient-to-b from-[#0a0f1e] to-transparent backdrop-blur-md z-50">
-            <div class="flex items-center px-6 h-20 relative">
-                <div class="flex items-center gap-2 z-10">
-                    <a href="account_privati.html"
-                        class="group relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                        <span
-                            class="material-symbols-outlined text-[24px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-                    </a>
-                    <button id="btn-edit-page"
-                        class="group relative flex size-10 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                        <span class="material-symbols-outlined text-[22px]">edit</span>
+        <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
+        <header class="titanium-header">
+            <div class="header-balanced-container">
+                <div class="header-left">
+                    <button onclick="history.back()" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
                     </button>
                 </div>
-
-                <h1
-                    class="absolute inset-0 flex items-center justify-center text-xl font-bold leading-tight tracking-tight text-center text-white opacity-90 pointer-events-none px-24">
-                    Dettaglio Account
-                </h1>
-
-                <div class="ml-auto z-10">
-                    <a href="home_page.html"
-                        class="group relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border-glow transition-all duration-300 active:scale-95 text-white">
-                        <span class="material-symbols-outlined text-[24px]">home</span>
+                <div class="header-center">
+                    <h2 id="header-nome-account" class="header-title" data-t="account_detail">Dettaglio Account</h2>
+                </div>
+                <div class="header-right">
+                    <button id="btn-edit-page" class="btn-icon-header">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
                     </a>
                 </div>
             </div>
@@ -183,21 +58,26 @@
 
         <main class="titanium-main">
             <!-- Hero Profile Header -->
-            <div class="flex flex-col items-center justify-center pt-6 pb-6 px-4">
+            <div class="flex flex-col items-center justify-center pt-8 pb-6 px-4 relative">
+                <!-- Top Accent Bar (Dynamic) -->
+                <div id="hero-accent-bar"
+                    class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500/40 to-transparent">
+                </div>
+
                 <div class="relative group">
                     <div id="detail-avatar"
-                        class="bg-center bg-no-repeat bg-cover rounded-2xl h-28 w-28 shadow-lg shadow-black/20 border-4 border-white/10 bg-black/20 backdrop-blur-sm"
+                        class="bg-center bg-no-repeat bg-cover rounded-3xl h-28 w-28 shadow-2xl shadow-black/40 border-4 border-white/5 bg-slate-500/5 backdrop-blur-xl border-glow"
                         style='background-image: url("assets/images/google-avatar.png");'>
                     </div>
-                    <div
-                        class="absolute -bottom-2 -right-2 bg-primary text-white p-1.5 rounded-full border-4 border-[#0a0f1e] flex items-center justify-center shadow-lg">
-                        <span class="material-symbols-outlined text-sm font-bold">lock</span>
+                    <div id="hero-status-dot"
+                        class="absolute -bottom-2 -right-2 bg-blue-500 text-white p-2 rounded-full border-4 border-[#0a0f1e] flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <span class="material-symbols-outlined text-sm font-black text-white">lock</span>
                     </div>
                 </div>
-                <div class="flex flex-col items-center justify-center mt-4">
-                    <h1 id="header-nome-account"
-                        class="selectable text-white text-2xl font-bold leading-tight tracking-tight text-center drop-shadow-md">
-                        Caricamento...</h1>
+                <div class="flex flex-col items-center justify-center mt-6">
+                    <h1 id="hero-title"
+                        class="selectable text-white text-2xl font-black leading-tight tracking-tight text-center drop-shadow-md">
+                        -</h1>
                 </div>
             </div>
 
@@ -207,19 +87,18 @@
                 <!-- Credenziali Principali -->
                 <section>
                     <div class="flex items-center gap-2 mb-4 px-2">
-                        <span class="material-symbols-outlined text-primary text-xl">key</span>
-                        <h3 class="text-white/80 text-lg font-bold">Credenziali Accesso</h3>
+                        <span class="material-symbols-outlined text-blue-500 text-xl">key</span>
+                        <h3 class="text-white/80 text-lg font-bold" data-t="access_credentials">Credenziali Accesso</h3>
                     </div>
                     <div class="space-y-4">
 
                         <!-- Nome Account -->
                         <div class="flex flex-col gap-1.5">
-                            <span class="view-label text-white/40 ml-1">Nome Account</span>
+                            <span class="view-label text-white/40 ml-1" data-t="account_name">Nome Account</span>
                             <div
                                 class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input id="detail-nomeAccount" readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold text-white focus:ring-0 placeholder-white/20"
-                                    value="">
+                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold text-white focus:ring-0">
                                 <button
                                     class="copy-btn p-3 text-white/40 hover:text-white transition-colors border-l border-white/5">
                                     <span class="material-symbols-outlined text-base">content_copy</span>
@@ -229,11 +108,11 @@
 
                         <!-- Utente -->
                         <div class="flex flex-col gap-1.5">
-                            <span class="view-label text-white/40 ml-1">Utente</span>
+                            <span class="view-label text-white/40 ml-1" data-t="username">Utente</span>
                             <div
                                 class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input id="detail-username" type="text" readonly
-                                    class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-white focus:ring-0 placeholder-white/20">
+                                    class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-white focus:ring-0">
                                 <button
                                     class="copy-btn p-3 text-white/40 hover:text-white transition-colors border-l border-white/5">
                                     <span class="material-symbols-outlined text-base">content_copy</span>
@@ -243,11 +122,11 @@
 
                         <!-- Account -->
                         <div class="flex flex-col gap-1.5">
-                            <span class="view-label text-white/40 ml-1">Account / Codice</span>
+                            <span class="view-label text-white/40 ml-1" data-t="account_code">Account / Codice</span>
                             <div
                                 class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input id="detail-account" type="text" readonly
-                                    class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-white focus:ring-0 placeholder-white/20">
+                                    class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-white focus:ring-0">
                                 <button
                                     class="copy-btn p-3 text-white/40 hover:text-white transition-colors border-l border-white/5">
                                     <span class="material-symbols-outlined text-base">content_copy</span>
@@ -257,11 +136,11 @@
 
                         <!-- Password -->
                         <div class="flex flex-col gap-1.5">
-                            <span class="view-label text-white/40 ml-1">Password</span>
+                            <span class="view-label text-white/40 ml-1" data-t="password">Password</span>
                             <div
                                 class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input id="detail-password" type="text" readonly
-                                    class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-mono tracking-wider text-white focus:ring-0 placeholder-white/20 uppercase">
+                                    class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-mono tracking-wider text-white focus:ring-0 uppercase">
                                 <button id="toggle-password"
                                     class="p-3 text-white/40 hover:text-white border-l border-white/5">
                                     <span class="material-symbols-outlined text-base">visibility</span>
@@ -275,12 +154,11 @@
 
                         <!-- Sito Web -->
                         <div class="flex flex-col gap-1.5">
-                            <span class="view-label text-white/40 ml-1">Sito Web</span>
+                            <span class="view-label text-white/40 ml-1" data-t="website">Sito Web</span>
                             <div
                                 class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input id="detail-website" readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-blue-400 underline focus:ring-0 placeholder-white/20"
-                                    value="">
+                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-blue-400 underline focus:ring-0">
                                 <button id="open-website"
                                     class="p-3 text-white/40 hover:text-white border-l border-white/5">
                                     <span class="material-symbols-outlined text-base">open_in_new</span>
@@ -296,11 +174,11 @@
 
                 <!-- SECTION: BANCARIO -->
                 <section id="section-banking" class="hidden">
-                    <button onclick="toggleBanking()"
+                    <button onclick="window.toggleBanking()"
                         class="w-full flex items-center justify-between pb-3 border-b border-white/5 mb-4 group px-2">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-emerald-400 text-xl">payments</span>
-                            <h3 class="text-white/90 text-lg font-bold">IBAN & Carte</h3>
+                            <h3 class="text-white/90 text-lg font-bold" data-t="banking_title">IBAN & Carte</h3>
                         </div>
                         <span id="banking-chevron"
                             class="material-symbols-outlined text-white/20 group-hover:text-white transition-transform duration-300">expand_more</span>
@@ -313,11 +191,11 @@
 
                 <!-- Referente -->
                 <section>
-                    <button onclick="toggleReferente()"
+                    <button onclick="window.toggleReferente()"
                         class="w-full flex items-center justify-between pb-3 border-b border-white/5 mb-4 group px-2">
                         <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-blue-400 text-xl">person_pin</span>
-                            <h3 class="text-white/90 text-lg font-bold">Referente</h3>
+                            <span class="material-symbols-outlined text-blue-500 text-xl">person_pin</span>
+                            <h3 class="text-white/90 text-lg font-bold" data-t="referent_title">Referente</h3>
                         </div>
                         <span id="referente-chevron"
                             class="material-symbols-outlined text-white/20 group-hover:text-white transition-transform duration-300">expand_more</span>
@@ -325,11 +203,11 @@
                     <div id="referente-content"
                         class="hidden space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div class="flex flex-col gap-1.5">
-                            <span class="view-label text-white/40 ml-1">Nome e Cognome</span>
+                            <span class="view-label text-white/40 ml-1" data-t="full_name">Nome e Cognome</span>
                             <div
                                 class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input id="detail-referenteNome" readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0 text-white placeholder-white/20"
+                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0 text-white"
                                     value="">
                                 <button class="copy-btn p-3 text-white/40 hover:text-white border-l border-white/5">
                                     <span class="material-symbols-outlined text-base">content_copy</span>
@@ -338,11 +216,11 @@
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="flex flex-col gap-1.5">
-                                <span class="view-label text-white/40 ml-1">Telefono</span>
+                                <span class="view-label text-white/40 ml-1" data-t="phone">Telefono</span>
                                 <div
                                     class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                     <input id="detail-referenteTelefono" readonly
-                                        class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0 text-white placeholder-white/20"
+                                        class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0 text-white"
                                         value="">
                                     <button
                                         class="call-btn p-3 text-blue-400 hover:text-blue-300 border-l border-white/5">
@@ -355,11 +233,11 @@
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1.5">
-                                <span class="view-label text-white/40 ml-1">Cellulare</span>
+                                <span class="view-label text-white/40 ml-1" data-t="mobile">Cellulare</span>
                                 <div
                                     class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                     <input id="detail-referenteCellulare" readonly
-                                        class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0 text-white placeholder-white/20"
+                                        class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0 text-white"
                                         value="">
                                     <button
                                         class="call-btn p-3 text-blue-400 hover:text-blue-300 border-l border-white/5">
@@ -378,8 +256,8 @@
                 <!-- Note -->
                 <section>
                     <div class="flex items-center gap-2 mb-4 px-2">
-                        <span class="material-symbols-outlined text-amber-400 text-xl">sticky_note_2</span>
-                        <h3 class="text-white/80 text-lg font-bold">Note</h3>
+                        <span class="material-symbols-outlined text-amber-500 text-xl">sticky_note_2</span>
+                        <h3 class="text-white/80 text-lg font-bold" data-t="notes">Note</h3>
                     </div>
                     <div
                         class="bg-slate-500/5 p-4 rounded-xl border border-white/5 shadow-sm min-h-[100px] relative group backdrop-blur-sm border-glow">
@@ -395,8 +273,8 @@
                 <!-- Allegati -->
                 <section>
                     <div class="flex items-center gap-2 mb-4 px-2">
-                        <span class="material-symbols-outlined text-primary text-xl">attach_file</span>
-                        <h3 class="text-white/80 text-lg font-bold">Allegati</h3>
+                        <span class="material-symbols-outlined text-blue-500 text-xl">attach_file</span>
+                        <h3 class="text-white/80 text-lg font-bold" data-t="attachments">Allegati</h3>
                     </div>
                     <div class="bg-slate-500/5 p-4 rounded-2xl border border-white/5 shadow-lg flex items-center justify-between group cursor-pointer hover:bg-white/5 transition-all backdrop-blur-md border-glow"
                         onclick="openAttachments()">
@@ -405,12 +283,14 @@
                                 <span class="material-symbols-outlined">folder_open</span>
                             </div>
                             <div>
-                                <h4 class="text-[14px] font-bold text-white flex items-center gap-2">
+                                <h4 class="text-[14px] font-bold text-white flex items-center gap-2"
+                                    data-t="manage_attachments">
                                     Gestisci Allegati
                                     <span id="attachment-count"
                                         class="view-label bg-white/10 text-white/60 px-2 py-0.5 rounded-md hidden">0</span>
                                 </h4>
-                                <p class="text-[12px] text-white/40">Visualizza e carica file</p>
+                                <p class="text-[12px] text-white/40" data-t="view_upload_files">Visualizza e carica file
+                                </p>
                             </div>
                         </div>
                         <span
@@ -421,8 +301,9 @@
                 <!-- Opzioni (Shared / Memo) -->
                 <section class="pb-10">
                     <div class="flex items-center gap-2 mb-4 px-2">
-                        <span class="material-symbols-outlined text-purple-400 text-xl">visibility</span>
-                        <h3 class="text-white/80 text-lg font-bold">Opzioni e Visibilità</h3>
+                        <span class="material-symbols-outlined text-purple-500 text-xl">visibility</span>
+                        <h3 class="text-white/80 text-lg font-bold" data-t="options_visibility">Opzioni e Visibilità
+                        </h3>
                     </div>
                     <div class="space-y-3">
                         <label
@@ -431,8 +312,10 @@
                                 <span
                                     class="material-symbols-outlined text-blue-400 bg-blue-400/10 p-2 rounded-lg">group</span>
                                 <div>
-                                    <p class="text-sm font-bold text-white">Account Condiviso</p>
-                                    <p class="text-[11px] text-white/40">Rendi questo account visibile agli altri</p>
+                                    <p class="text-sm font-bold text-white" data-t="shared_account">Account Condiviso
+                                    </p>
+                                    <p class="text-[11px] text-white/40" data-t="share_desc">Rendi questo account
+                                        visibile agli altri</p>
                                 </div>
                             </div>
                             <input type="checkbox" id="detail-shared"
@@ -445,8 +328,9 @@
                                 <span
                                     class="material-symbols-outlined text-amber-400 bg-amber-400/10 p-2 rounded-lg">description</span>
                                 <div>
-                                    <p class="text-sm font-bold text-white">Memorandum</p>
-                                    <p class="text-[11px] text-white/40">Segna come promemoria importante</p>
+                                    <p class="text-sm font-bold text-white" data-t="memorandum">Memorandum</p>
+                                    <p class="text-[11px] text-white/40" data-t="memo_desc">Segna come promemoria
+                                        importante</p>
                                 </div>
                             </div>
                             <input type="checkbox" id="detail-hasMemo"
@@ -459,8 +343,10 @@
                                 <span
                                     class="material-symbols-outlined text-emerald-400 bg-emerald-400/10 p-2 rounded-lg">share_reviews</span>
                                 <div>
-                                    <p class="text-sm font-bold text-white">Memorandum Condiviso</p>
-                                    <p class="text-[11px] text-white/40">Promemoria visibile a tutti</p>
+                                    <p class="text-sm font-bold text-white" data-t="shared_memo">Memorandum Condiviso
+                                    </p>
+                                    <p class="text-[11px] text-white/40" data-t="shared_memo_desc">Promemoria visibile a
+                                        tutti</p>
                                 </div>
                             </div>
                             <input type="checkbox" id="detail-isMemoShared"
@@ -470,11 +356,11 @@
 
                     <!-- Gestione Accessi -->
                     <div id="shared-management" class="hidden mt-6">
-                        <button onclick="toggleAccessi()"
+                        <button onclick="window.toggleAccessi()"
                             class="w-full flex items-center justify-between py-2 px-1 group">
                             <h4 class="view-label text-white/40 flex items-center gap-2">
                                 <span class="material-symbols-outlined text-sm">group</span>
-                                Persone con accesso
+                                <span data-t="people_with_access">Persone con accesso</span>
                             </h4>
                             <span id="accessi-chevron"
                                 class="material-symbols-outlined text-white/40 transition-transform duration-300">expand_more</span>
@@ -486,13 +372,15 @@
                             <div id="guests-list" class="space-y-2"></div>
                             <!-- Input -->
                             <div class="space-y-2">
-                                <span class="view-label text-white/40 ml-1">Seleziona contatto</span>
+                                <span class="view-label text-white/40 ml-1" data-t="select_contact">Seleziona
+                                    contatto</span>
                                 <div class="relative">
                                     <div
                                         class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden shadow-sm h-12 border-glow">
-                                        <select id="invite-select"
+                                        <select id="invite-select" data-t-placeholder="select_contact_placeholder"
                                             class="flex-1 bg-transparent border-none h-full px-4 text-sm focus:ring-0 text-white cursor-pointer [&>option]:text-black">
-                                            <option value="" disabled selected>Seleziona un contatto...</option>
+                                            <option value="" disabled selected data-t="select_contact_opt">Seleziona un
+                                                contatto...</option>
                                         </select>
                                     </div>
                                 </div>
@@ -503,10 +391,9 @@
             </div>
         </main>
 
-        <!-- 5) FOOTER FUSION -->
-        <div
-            class="fixed bottom-0 left-0 right-0 w-full md:max-w-3xl lg:max-w-5xl mx-auto h-24 pointer-events-none z-50 bg-gradient-to-t from-[#0a0f1e] to-transparent backdrop-blur-md">
-        </div>
+        <!-- FOOTER PROTOCOL V3.0 -->
+        <div id="footer-placeholder"></div>
+
 
     </div>
 
@@ -547,8 +434,8 @@
         Copiato!
     </div>
 
-    <script src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/dettaglio_account_privato.js"></script>
+    <script type="module" src="assets/js/main.js?v=3.5"></script>
+    <script type="module" src="assets/js/dettaglio_account_privato.js?v=3.5"></script>
 </body>
 
 </html>

@@ -127,9 +127,13 @@ async function login(email, password) {
             showToast("Login effettuato con successo!", "success");
         }
 
+        // Il redirect verrà gestito da onAuthStateChanged in checkAuthState, 
+        // ma mettiamo un fallback di sicurezza più rapido.
         setTimeout(() => {
-            window.location.href = "home_page.html";
-        }, 1000);
+            if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
+                window.location.href = "home_page.html";
+            }
+        }, 100);
     } catch (error) {
         logError("Auth Login", error);
         let message = "Credenziali non valide.";
@@ -184,48 +188,24 @@ async function resetPassword(email) {
  * Checks the user's authentication state and redirects if necessary.
  */
 function checkAuthState() {
-    let authChecked = false;
+    let initialCheckDone = false;
     onAuthStateChanged(auth, async (user) => {
-        if (authChecked) return;
-        authChecked = true;
-
-        const currentPage = window.location.pathname.split('/').pop();
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
         const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
-        const isAuthPage = authPages.includes(currentPage) || currentPage === '';
+        const isAuthPage = authPages.includes(currentPage);
+
+        console.log(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Page: ${currentPage}`);
 
         if (user) {
             // User is signed in.
-
-            // GLOBAL SAFETY CHECK: Verify Firestore Profile Exists
-            try {
-                const userDocRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userDocRef);
-
-                if (!userDoc.exists()) {
-                    console.warn("Global Auth Check: User authenticated but no Firestore profile. Auto-recovering...");
-                    // Auto-Recover Profile instead of kicking out
-                    await setDoc(userDocRef, {
-                        email: user.email,
-                        nome: "Utente",
-                        cognome: "Ripristinato",
-                        createdAt: new Date(),
-                        photoURL: user.photoURL || "",
-                        recreatedAfterDeletion: true
-                    });
-                    // Allow to proceed
-                }
-            } catch (error) {
-                logError("Auth State ProfileVerify", error);
-                // Optional: Handle connectivity errors gracefully instead of blocking
-            }
-
             if (isAuthPage) {
-                // Rimosso blocco email verificata per fluidità Diego
+                console.log("[AUTH] Redirecting to home: user already logged in.");
                 window.location.href = 'home_page.html';
             }
         } else {
             // No user is signed in.
             if (!isAuthPage) {
+                console.log("[AUTH] Redirecting to login: no user session.");
                 window.location.href = 'index.html';
             }
         }

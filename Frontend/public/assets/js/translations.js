@@ -50,7 +50,6 @@ export const translations = {
         reset_page_title: "Recupero",
         reset_hint: "Inserisci l'indirizzo email associato al tuo account. Ti invieremo un collegamento sicuro per impostare una nuova chiave d'accesso.",
         email_address_label: "Indirizzo Email",
-        send_instructions_btn: "Invia email",
         send_instructions_btn: "Invia email istruzioni",
         remembered_password_text: "Hai ricordato la password?",
         back_to_login_link: "Torna all'accesso",
@@ -83,6 +82,13 @@ export const translations = {
         two_factor_auth: "Autenticazione a due fattori",
         face_id: "Face ID",
         auto_lock: "Blocco Automatico",
+        change_password_desc: "Aggiorna la tua chiave d'accesso",
+        two_factor_auth_desc: "Doppio livello di protezione",
+        face_id_desc: "Accesso rapido sicuro",
+        lock_inactivity_desc: "Blocco automatico schermo",
+        expiry_rules_desc: "Configura notifiche e avvisi",
+        theme_desc: "Personalizza il look",
+        app_info_desc: "Versione e crediti",
         auto_lock_subtitle: "Sblocco con username e password o attiva face id dell'app",
         lock_inactivity: "Tempo di Inattività",
         lock_immediately: "Subito",
@@ -101,6 +107,9 @@ export const translations = {
         account_archive_desc: "Gestisci gli account archiviati",
 
         expiry_rules_title_page: "Regole Scadenze",
+        page_title_profile: "Profilo Utente",
+        manage_account_data: "Gestisci Account",
+        info_anagrafica: "Informazioni Anagrafiche",
         card_vehicles_title: "Automezzi",
         card_vehicles_desc: "Configura oggetti, periodi e frequenze email per veicoli",
         card_documents_title: "Documenti",
@@ -110,7 +119,26 @@ export const translations = {
         future_roadmap_title: "APPUNTI SVILUPPO FUTURO",
         future_memo_placeholder: "Scrivi qui i tuoi appunti per il futuro...",
         save_memo_btn: "SALVA APPUNTO",
+        profile_personal: "Dati Personali",
+        profile_personal_desc: "Nome, CF, Nascita",
+        profile_addresses: "Residenza",
+        profile_addresses_desc: "Indirizzo e locazione",
+        profile_phones: "Contatti Telefonici",
+        profile_phones_desc: "Recapiti telefonici",
+        profile_docs: "Documenti",
+        profile_docs_desc: "CI, Patente, Passaporto",
+        profile_emails: "Email",
+        profile_emails_desc: "Account e password",
+        profile_utilities: "Utenze",
+        profile_utilities_desc: "Luce, Gas, Acqua",
         expiry_help_text: "Seleziona una categoria per configurare le regole di invio automatico.",
+
+        // ARCHIVE PAGE
+        archive_all: "Tutti gli archiviati",
+        archive_private_only: "Solo Archivio Privato",
+        archive_search_placeholder: "Cerca nell'archivio...",
+        restore: "Ripristina",
+        delete: "Elimina",
 
         // SETTINGS - INFO APP
         app_info_title: "Informazioni sull'App",
@@ -153,6 +181,10 @@ export const translations = {
         privacy_update_text: "Ultimo aggiornamento: Gennaio 2026",
 
         privacy_update_text: "Ultimo aggiornamento: Gennaio 2026",
+        section_notifications_logic: "Logica Notifiche",
+        logout_confirm: "Vuoi davvero uscire dal sistema?",
+        no_notifications: "Nessuna notifica",
+        no_notifications_desc: "Non hai ancora ricevuto avvisi recenti.",
 
         // CONFIG AUTOMEZZI
         header_config_vehicles: "Config. Automezzi",
@@ -164,6 +196,7 @@ export const translations = {
         section_vehicle_model: "Modello & Targa",
         section_vehicle_desc: "Formato standard: Modello - Targa (Es. \"Fiat Panda - AB123CD\")",
         section_email_template: "Template Email",
+        section_email_template_desc: "Testo personalizzato per l'invio",
         section_syntax_title: "Sintassi Automatica",
         syntax_subject_generated: "Oggetto Email Generato",
         syntax_body_generated: "Corpo Email Generato",
@@ -214,6 +247,24 @@ export const translations = {
         prompt_new_general_type: "Nuovo Tipo Scadenza:",
         syntax_note_dynamic: "Le istruzioni sono caricate dinamicamente in base alla tipologia scelta.",
 
+        // AREA PRIVATA
+        area_privata_title: "Area Privata",
+        section_personal_accounts: "Account Personali",
+        section_shared_accounts: "Account Condivisi",
+        section_note: "Note",
+        section_shared_note: "Note Condivise",
+        top_used_access: "Accessi Più Usati",
+        rubrica_title: "Rubrica Contatti",
+        rubrica_subtitle: "Gestione identità condivise",
+        new_contact: "Nuovo Contatto",
+        save_protocol: "SALVA PROTOCOLLO",
+        save_contact: "SALVA CONTATTO",
+        no_active_data: "Nessun dato attivo",
+        loading_companies: "Caricamento aziende...",
+        empty_contacts: "Protocollo rubrica vuoto",
+        contact_removed: "Contatto rimosso",
+        identity_registered: "Identità registrata",
+
         // HOME PAGE
         home_page_title: "Home Page",
         section_private_title: "Privato",
@@ -230,7 +281,13 @@ export const translations = {
         aria_urgencies: "Avviso Urgenze",
         greeting_morning: "Buon giorno,",
         greeting_afternoon: "Buon pomeriggio,",
+        greeting_afternoon: "Buon pomeriggio,",
         greeting_evening: "Buona sera,",
+        no_deadlines_found: "Nessuna scadenza trovata",
+        analyzing_data: "Analisi dati...",
+        expired: "Scaduto",
+        today: "Oggi",
+        tomorrow: "Domani",
 
         // GENERAL SECTION
         notifications: "Notifiche",
@@ -389,6 +446,13 @@ export const translations = {
         two_factor_auth: "Two-Factor Authentication",
         face_id: "Face ID",
         auto_lock: "Auto Lock",
+        change_password_desc: "Update your access key",
+        two_factor_auth_desc: "Double layer of protection",
+        face_id_desc: "Secure quick access",
+        lock_inactivity_desc: "Automatic screen lock",
+        expiry_rules_desc: "Configure notifications and alerts",
+        theme_desc: "Customize the look",
+        app_info_desc: "Version and credits",
         auto_lock_subtitle: "Unlock with username and password or enable app Face ID",
         lock_inactivity: "Inactivity Timeout",
         lock_immediately: "Immediately",
@@ -412,10 +476,31 @@ export const translations = {
         card_documents_desc: "Manage alerts for Documents and Various Deadlines",
         card_general_title: "General Rules",
         card_general_desc: "Configure subjects and texts for generic deadlines",
+        page_title_profile: "User Profile",
+        info_anagrafica: "Personal Information",
         future_roadmap_title: "FUTURE DEVELOPMENT NOTES",
         future_memo_placeholder: "Write your notes for the future here...",
         save_memo_btn: "SAVE NOTE",
+        profile_personal: "Personal Data",
+        profile_personal_desc: "Name, CF, Birth",
+        profile_addresses: "Residence",
+        profile_addresses_desc: "Address and location",
+        profile_phones: "Phone Contacts",
+        profile_phones_desc: "Phone numbers",
+        profile_docs: "Documents",
+        profile_docs_desc: "ID, License, Passport",
+        profile_emails: "Email",
+        profile_emails_desc: "Account and password",
+        profile_utilities: "Utilities",
+        profile_utilities_desc: "Electricity, Gas, Water",
         expiry_help_text: "Select a category to configure automatic sending rules.",
+
+        // ARCHIVE PAGE
+        archive_all: "All archived",
+        archive_private_only: "Private Archive only",
+        archive_search_placeholder: "Search archive...",
+        restore: "Restore",
+        delete: "Delete",
 
         // SETTINGS - INFO APP
         app_info_title: "App Info",
@@ -457,6 +542,10 @@ export const translations = {
         privacy_update_text: "Last update: January 2026",
 
         privacy_update_text: "Last update: January 2026",
+        section_notifications_logic: "Notification Logic",
+        logout_confirm: "Are you sure you want to log out?",
+        no_notifications: "No notifications",
+        no_notifications_desc: "You haven't received any recent alerts yet.",
 
         // CONFIG AUTOMEZZI
         header_config_vehicles: "Config. Vehicles",
@@ -468,6 +557,7 @@ export const translations = {
         section_vehicle_model: "Model & Plate",
         section_vehicle_desc: "Standard format: Model - Plate (e.g., \"Fiat Panda - AB123CD\")",
         section_email_template: "Email Template",
+        section_email_template_desc: "Custom text for sending",
         section_syntax_title: "Automatic Syntax",
         syntax_subject_generated: "Generated Email Subject",
         syntax_body_generated: "Generated Email Body",
@@ -516,6 +606,20 @@ export const translations = {
         prompt_edit_general_name: "Edit Deadline Name:",
         prompt_new_general_type: "New Deadline Type:",
         syntax_note_dynamic: "Instructions are loaded dynamically based on the chosen type.",
+
+        // AREA PRIVATA
+        area_privata_title: "Private Area",
+        section_personal_accounts: "Personal Accounts",
+        section_shared_accounts: "Shared Accounts",
+        section_note: "Notes",
+        section_shared_note: "Shared Notes",
+        top_used_access: "Most Used Accesses",
+        rubrica_title: "Contact Book",
+        rubrica_subtitle: "Manage shared identities",
+        new_contact: "New Contact",
+        save_protocol: "SAVE PROTOCOL",
+        save_contact: "SAVE CONTACT",
+        no_active_data: "No active data",
 
         // HOME PAGE
         home_page_title: "Home Page",
@@ -650,6 +754,13 @@ export const translations = {
         two_factor_auth: "Autenticación de dos factores",
         face_id: "Desbloqueo con Face ID",
         auto_lock: "Bloqueo Automático",
+        change_password_desc: "Actualice su clave de acceso",
+        two_factor_auth_desc: "Doble nivel de protección",
+        face_id_desc: "Acceso rápido seguro",
+        lock_inactivity_desc: "Bloqueo automático de pantalla",
+        expiry_rules_desc: "Configurar notificaciones y alertas",
+        theme_desc: "Personalizar apariencia",
+        app_info_desc: "Versión y créditos",
         auto_lock_subtitle: "Desbloqueo con credenciales o mediante Face ID de la app",
         lock_inactivity: "Tiempo de Inactividad",
         lock_immediately: "Inmediatamente",
@@ -720,7 +831,26 @@ export const translations = {
         future_roadmap_title: "NOTAS DE DESARROLLO FUTURO",
         future_memo_placeholder: "Escriba aquí sus notas para el futuro...",
         save_memo_btn: "GUARDAR NOTA",
+        profile_personal: "Datos Personales",
+        profile_personal_desc: "Nombre, CF, Nacimiento",
+        profile_addresses: "Residencia",
+        profile_addresses_desc: "Dirección y ubicación",
+        profile_phones: "Contactos Telefónicos",
+        profile_phones_desc: "Números de teléfono",
+        profile_docs: "Documentos",
+        profile_docs_desc: "DNI, Licencia, Pasaporte",
+        profile_emails: "Correo",
+        profile_emails_desc: "Cuenta y contraseña",
+        profile_utilities: "Servicios",
+        profile_utilities_desc: "Luz, Gas, Agua",
         expiry_help_text: "Seleccione una categoría para configurar reglas de envío automático.",
+
+        // ARCHIVE PAGE
+        archive_all: "Todos los archivados",
+        archive_private_only: "Solo Archivo Privado",
+        archive_search_placeholder: "Buscar en el archivo...",
+        restore: "Restaurar",
+        delete: "Eliminar",
 
         // SETTINGS - INFO APP & RULES (Spanish)
         app_info_title: "Información de la App",
@@ -760,6 +890,10 @@ export const translations = {
         privacy_5_li2: "Derecho a la eliminación ('Olvido') borrando la cuenta.",
         privacy_5_li3: "Derecho de rectificación de la información.",
         privacy_update_text: "Última actualización: Enero 2026",
+        section_notifications_logic: "Lógica de Notificaciones",
+        logout_confirm: "¿Estás seguro de que quieres cerrar la sesión?",
+        no_notifications: "No hay notificaciones",
+        no_notifications_desc: "Aún no has recibido alertas recientes.",
 
         // CONFIG AUTOMEZZI
         header_config_vehicles: "Config. Vehículos",
@@ -771,6 +905,7 @@ export const translations = {
         section_vehicle_model: "Modelo y Placa",
         section_vehicle_desc: "Formato estándar: Modelo - Placa (Ej. \"Fiat Panda - AB123CD\")",
         section_email_template: "Plantilla de Correo",
+        section_email_template_desc: "Texto personalizado para el envío",
         section_syntax_title: "Sintaxis Automática",
         syntax_subject_generated: "Asunto Generado",
         syntax_body_generated: "Cuerpo Generado",
@@ -814,6 +949,20 @@ export const translations = {
         prompt_edit_general_name: "Editar Nombre Vencimiento:",
         prompt_new_general_type: "Nuevo Tipo Vencimiento:",
         syntax_note_dynamic: "Las instrucciones se cargan dinámicamente según el tipo elegido.",
+
+        // AREA PRIVATA
+        area_privata_title: "Área Privada",
+        section_personal_accounts: "Cuentas Personales",
+        section_shared_accounts: "Cuentas Compartidas",
+        section_note: "Notas",
+        section_shared_note: "Notas Compartidas",
+        top_used_access: "Accesos Más Usados",
+        rubrica_title: "Libreta de Contactos",
+        rubrica_subtitle: "Gestión de identidades compartidas",
+        new_contact: "Nuevo Contacto",
+        save_protocol: "GUARDAR PROTOCOLO",
+        save_contact: "GUARDAR CONTACTO",
+        no_active_data: "Sin datos activos",
 
         // HOME PAGE
         home_page_title: "Inicio",
@@ -1031,6 +1180,20 @@ export const translations = {
         prompt_new_general_type: "Nouveau Type Échéance :",
         syntax_note_dynamic: "Les instructions sont chargées dynamiquement selon le type choisi.",
 
+        // AREA PRIVATA
+        area_privata_title: "Espace Privé",
+        section_personal_accounts: "Comptes Personnels",
+        section_shared_accounts: "Comptes Partagés",
+        section_note: "Notes",
+        section_shared_note: "Notes Partagées",
+        top_used_access: "Accès les plus utilisés",
+        rubrica_title: "Carnet de Contacts",
+        rubrica_subtitle: "Gestion des identités partagées",
+        new_contact: "Nouveau Contact",
+        save_protocol: "ENREGISTRER LE PROTOCOLE",
+        save_contact: "ENREGISTRER LE CONTACT",
+        no_active_data: "Aucune donnée active",
+
         // HOME PAGE
         home_page_title: "Accueil",
         section_private_title: "Privé",
@@ -1240,6 +1403,20 @@ export const translations = {
         prompt_edit_general_name: "Fälligkeitsname bearbeiten:",
         prompt_new_general_type: "Neuer Fälligkeitstyp:",
         syntax_note_dynamic: "Die Anweisungen werden je nach gewähltem Typ dynamisch geladen.",
+
+        // AREA PRIVATA
+        area_privata_title: "Privater Bereich",
+        section_personal_accounts: "Persönliche Konten",
+        section_shared_accounts: "Geteilte Konten",
+        section_note: "Notizen",
+        section_shared_note: "Geteilte Notizen",
+        top_used_access: "Meistgenutzte Zugriffe",
+        rubrica_title: "Kontaktbuch",
+        rubrica_subtitle: "Verwaltung geteilter Identitäten",
+        new_contact: "Neuer Kontakt",
+        save_protocol: "PROTOKOLL SPEICHERN",
+        save_contact: "KONTAKT SPEICHERN",
+        no_active_data: "Keine aktiven Daten",
 
         // HOME PAGE
         home_page_title: "Startseite",
@@ -1451,6 +1628,20 @@ export const translations = {
         prompt_new_general_type: "新截止类型：",
         syntax_note_dynamic: "说明将根据所选类型动态加载。",
 
+        // AREA PRIVATA
+        area_privata_title: "私人区域",
+        section_personal_accounts: "个人账户",
+        section_shared_accounts: "共享账户",
+        section_note: "笔记",
+        section_shared_note: "共享笔记",
+        top_used_access: "最常使用的访问",
+        rubrica_title: "联系人簿",
+        rubrica_subtitle: "管理共享身份",
+        new_contact: "新联系人",
+        save_protocol: "保存协议",
+        save_contact: "保存联系人",
+        no_active_data: "无活动数据",
+
         // HOME PAGE
         home_page_title: "主页",
         section_private_title: "私人",
@@ -1661,6 +1852,20 @@ export const translations = {
         prompt_new_general_type: "नई समय सीमा प्रकार:",
         syntax_note_dynamic: "निर्देश चुने गए प्रकार के आधार पर गतिशील रूप से लोड होते हैं।",
 
+        // AREA PRIVATA
+        area_privata_title: "निजी क्षेत्र",
+        section_personal_accounts: "व्यक्तिगत खाते",
+        section_shared_accounts: "साझा खाते",
+        section_note: "नोट्स",
+        section_shared_note: "साझा नोट्स",
+        top_used_access: "सबसे अधिक उपयोग किए जाने वाले एक्सेस",
+        rubrica_title: "संपर्क पुस्तिका",
+        rubrica_subtitle: "साझा पहचान प्रबंधित करें",
+        new_contact: "नया संपर्क",
+        save_protocol: "प्रोटोकॉल सहेजें",
+        save_contact: "संपर्क सहेजें",
+        no_active_data: "कोई सक्रिय डेटा नहीं",
+
         // HOME PAGE
         home_page_title: "होम पेज",
         section_private_title: "निजी",
@@ -1868,6 +2073,20 @@ export const translations = {
         prompt_edit_general_name: "Editar Nome do Prazo:",
         prompt_new_general_type: "Novo Tipo de Prazo:",
         syntax_note_dynamic: "As instruções são carregadas dinamicamente com base no tipo escolhido.",
+
+        // AREA PRIVATA
+        area_privata_title: "Área Privada",
+        section_personal_accounts: "Contas Pessoais",
+        section_shared_accounts: "Contas Compartilhadas",
+        section_note: "Notas",
+        section_shared_note: "Notas Compartilhadas",
+        top_used_access: "Acessos Mais Usados",
+        rubrica_title: "Caderno de Contatos",
+        rubrica_subtitle: "Gerenciar identidades compartilhadas",
+        new_contact: "Novo Contato",
+        save_protocol: "SALVAR PROTOCOLO",
+        save_contact: "SALVAR CONTATO",
+        no_active_data: "Nenhum dado ativo",
 
         // HOME PAGE
         home_page_title: "Início",

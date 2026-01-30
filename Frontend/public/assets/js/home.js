@@ -36,7 +36,11 @@ async function renderHeaderUser(user) {
     // 1. Basic Auth Info (Immediato)
     let displayName = toFriendlyName(user.displayName || user.email.split('@')[0]);
     if (uName) uName.textContent = displayName;
-    if (user.photoURL && uAvatar) uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
+    if (user.photoURL && uAvatar) {
+        uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
+        const icon = uAvatar.querySelector('span');
+        if (icon) icon.style.display = 'none';
+    }
 
     // 2. Saluto Temporale
     if (greeting) {
@@ -55,7 +59,11 @@ async function renderHeaderUser(user) {
             const fullName = toFriendlyName(`${data.nome || ''} ${data.cognome || ''}`.trim());
             if (fullName) uName.textContent = fullName; // Sovrascrivi con nome completo DB
             const photo = data.photoURL || data.avatar;
-            if (photo && uAvatar) uAvatar.style.backgroundImage = `url("${photo}")`;
+            if (photo && uAvatar) {
+                uAvatar.style.backgroundImage = `url("${photo}")`;
+                const icon = uAvatar.querySelector('span');
+                if (icon) icon.style.display = 'none';
+            }
         }
     } catch (e) {
         console.warn("Firestore Profile fetch warning", e);
@@ -67,49 +75,51 @@ async function renderHeaderUser(user) {
 initComponents().then(() => {
     isDomReady = true;
 
-    // Header Injection Custom Logic (per Home Page diversa dalle altre pagine)
-    // Sostituiamo il contenuto generico dell'header con quello specifico della Home
+    // Header Injection - Balanced Layout (3-Zone Protocol)
     const headerStack = document.getElementById('header-content');
     if (headerStack) {
-        // Forza il layout a riga singola senza a capo
-        headerStack.style.display = 'flex';
-        headerStack.style.flexDirection = 'row';
-        headerStack.style.alignItems = 'flex-start';
-        headerStack.style.justifyContent = 'space-between';
-        headerStack.style.flexWrap = 'nowrap';
-        headerStack.style.width = '100%';
-
         headerStack.innerHTML = `
-            <a href="profilo_privato.html" class="user-profile-group group" style="text-decoration:none;">
-                <div id="user-avatar" class="avatar-circle border-glow shrink-0" style="width: 42px; height: 42px;"></div>
-                <div class="user-info-text">
-                    <span id="greeting-text" class="greeting-text">...</span>
-                    <span id="user-name" class="user-name">Caricamento...</span>
+            <div class="header-balanced-container">
+                <!-- ZONA SINISTRA: Profilo Utente -->
+                <div class="header-left">
+                    <a href="profilo_privato.html" class="btn-icon-header" style="width: auto; padding: 0 4px; border:none; background:transparent;">
+                        <div id="user-avatar" class="avatar-circle border-glow" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined !text-lg opacity-20">person</span>
+                        </div>
+                    </a>
                 </div>
-            </a>
-            <button id="logout-button" class="btn-icon-header self-start" style="border: none; background: transparent; padding: 0; outline: none;">
-                <span class="material-symbols-outlined !text-xl">logout</span>
-            </button>
+
+                <!-- ZONA CENTRO: Saluto e Nome -->
+                <div class="header-center">
+                    <div class="user-info-text" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                        <span id="greeting-text" class="greeting-text" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6;">...</span>
+                        <span id="user-name" class="header-title" style="font-size: 1rem;">Caricamento...</span>
+                    </div>
+                </div>
+
+                <!-- ZONA DESTRA: Logout -->
+                <div class="header-right">
+                    <button id="logout-button" class="btn-icon-header">
+                        <span class="material-symbols-outlined !text-xl">logout</span>
+                    </button>
+                </div>
+            </div>
         `;
     }
 
-    // Footer Injection
+    // Footer Injection - Balanced Layout
     const footerStack = document.getElementById('footer-content');
     if (footerStack) {
-        footerStack.style.display = 'flex';
-        footerStack.style.alignItems = 'center';
-        footerStack.style.justifyContent = 'space-between';
-        footerStack.style.width = '100%';
-
         footerStack.innerHTML = `
-            <div style="flex: 1;"></div> 
-            <div class="flex items-center gap-4 opacity-40" style="flex: 2; justify-content: center;">
-                <span class="text-[9px] font-bold uppercase tracking-[0.3em]">${t('version')}</span>
-            </div>
-            <div style="flex: 1; display: flex; justify-content: flex-end;">
-                <a href="impostazioni.html" class="btn-icon-header opacity-30 hover:opacity-100 transition-opacity group/settings">
-                    <span class="material-symbols-outlined !text-xl transform group-hover/settings:rotate-90 transition-transform duration-500" style="font-variation-settings: 'wght' 200;">tune</span>
-                </a>
+            <div class="header-balanced-container" style="justify-content: center;">
+                <div class="flex items-center gap-4 opacity-40">
+                    <span class="text-[9px] font-bold uppercase tracking-[0.3em]">${t('version')}</span>
+                </div>
+                <div style="position: absolute; right: 1.5rem;">
+                    <a href="impostazioni.html" class="btn-icon-header opacity-30 hover:opacity-100 transition-opacity group/settings">
+                        <span class="material-symbols-outlined !text-xl transform group-hover/settings:rotate-90 transition-transform duration-500" style="font-variation-settings: 'wght' 200;">tune</span>
+                    </a>
+                </div>
             </div>
         `;
     }

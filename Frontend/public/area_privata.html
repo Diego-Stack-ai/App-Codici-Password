@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html class="titanium-forced-dark dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
+
     <title>Area Privata - Protocollo Titanium</title>
 
     <!-- PWA / Mobile Capable -->
@@ -23,8 +22,15 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Standard v2.0 -->
-    <link rel="stylesheet" href="assets/css/titanium.css">
+    <!-- Design System Master (Titanium Gold v3.5) -->
+    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <link rel="stylesheet" href="assets/css/titanium.css?v=3.5">
+
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.5"></script>
+    <script src="assets/js/titanium-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 </head>
 
@@ -35,75 +41,84 @@
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
         <div class="glass-glow pointer-events-none"></div>
 
-        <!-- 4. HEADER PLACEHOLDER -->
-        <div id="header-placeholder"></div>
+        <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
+        <header class="titanium-header">
+            <div id="header-content" class="header-balanced-container">
+                <!-- Popolated by area_privata_titanium.js -->
+            </div>
+        </header>
 
         <!-- MAIN CONTENT (Titanium Main Strategy) -->
-        <main class="titanium-main no-select">
+        <main class="titanium-main">
 
             <!-- 6. SAETTA MASTER (Riflesso Metallico Totale) -->
             <div class="saetta-master pointer-events-none"></div>
 
             <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
-            <div class="grid grid-cols-2 gap-4 px-2 mb-8">
+            <div class="grid grid-cols-2 gap-4 px-2 mb-8 relative z-50">
 
                 <!-- Account Standard -->
                 <a href="account_privati.html?type=standard"
-                    class="matrix-blue border-glow saetta group relative block w-full h-full overflow-hidden">
-                    <div class="glass-shine pointer-events-none"></div>
-                    <div class="bg-icon-container pointer-events-none">
+                    class="matrix-blue border-glow group block relative overflow-hidden rounded-[24px]">
+                    <div class="glass-shine"></div>
+                    <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">account_balance_wallet</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
-                        <span id="count-standard"
-                            class="text-[9px] font-bold uppercase tracking-widest text-white/40">Account (0)</span>
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">
-                            Personale</h3>
+                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
+                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
+                            data-t="section_personal_accounts">
+                            Account Personali</h3>
+                        <span id="count-standard" class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                            data-t="loading">Caricamento...</span>
                     </div>
                 </a>
 
                 <!-- Condivisi -->
                 <a href="account_privati.html?type=shared"
-                    class="matrix-red border-glow saetta group relative block w-full h-full overflow-hidden">
-                    <div class="glass-shine pointer-events-none"></div>
-                    <div class="bg-icon-container pointer-events-none">
+                    class="matrix-red border-glow group block relative overflow-hidden rounded-[24px]">
+                    <div class="glass-shine"></div>
+                    <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">group</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
-                        <span id="count-shared"
-                            class="text-[9px] font-bold uppercase tracking-widest text-white/40">Invitati (0)</span>
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">
-                            Invitati</h3>
+                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
+                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
+                            data-t="section_shared_accounts">
+                            Account Condivisi</h3>
+                        <span id="count-shared" class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                            data-t="loading">Caricamento...</span>
                     </div>
                 </a>
 
                 <!-- Memorandum -->
                 <a href="account_privati.html?type=memo"
-                    class="matrix-orange border-glow saetta group relative block w-full h-full overflow-hidden">
-                    <div class="glass-shine pointer-events-none"></div>
-                    <div class="bg-icon-container pointer-events-none">
+                    class="matrix-orange border-glow group block relative overflow-hidden rounded-[24px]">
+                    <div class="glass-shine"></div>
+                    <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">sticky_note_2</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
-                        <span id="count-memo" class="text-[9px] font-bold uppercase tracking-widest text-white/40">Memo
-                            (0)</span>
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">Note
+                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
+                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
+                            data-t="section_note">Note
                         </h3>
+                        <span id="count-memo" class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                            data-t="loading">Caricamento...</span>
                     </div>
                 </a>
 
                 <!-- Memo Condivisi -->
                 <a href="account_privati.html?type=shared_memo"
-                    class="matrix-green border-glow saetta group relative block w-full h-full overflow-hidden">
-                    <div class="glass-shine pointer-events-none"></div>
-                    <div class="bg-icon-container pointer-events-none">
+                    class="matrix-green border-glow group block relative overflow-hidden rounded-[24px]">
+                    <div class="glass-shine"></div>
+                    <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">folder_shared</span>
                     </div>
-                    <div class="relative z-10 flex flex-col h-full justify-between pointer-events-none">
+                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
+                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
+                            data-t="section_shared_note">
+                            Note Condivise</h3>
                         <span id="count-shared-memo"
-                            class="text-[9px] font-bold uppercase tracking-widest text-white/40">Memo Team (0)</span>
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform">
-                            Condivise</h3>
+                            class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                            data-t="loading">Caricamento...</span>
                     </div>
                 </a>
 
@@ -111,12 +126,12 @@
 
             <!-- TOP 10 WIDGET (Glass Style) -->
             <div class="px-2 mb-8 relative z-40">
-                <div
-                    class="bg-[#0a0f1e]/40 backdrop-blur-2xl rounded-[32px] border border-white/5 border-glow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                <div class="bg-white rounded-[32px] border border-white/20 border-glow overflow-hidden">
+                    <div class="px-6 py-4 border-b border-white/5 bg-slate-900/5 flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-amber-400 text-sm">star</span>
-                            <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Accessi Più Usati
+                            <span class="material-symbols-outlined text-amber-500 text-sm">star</span>
+                            <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-800"
+                                data-t="top_used_access">Accessi Più Usati
                             </h3>
                         </div>
                     </div>
@@ -131,46 +146,48 @@
 
             <!-- RUBRICA (Accordion Glass) -->
             <div class="px-2 mb-24 relative z-40">
-                <div
-                    class="bg-[#0a0f1e]/40 backdrop-blur-2xl rounded-[32px] border border-white/5 border-glow overflow-hidden">
+                <div class="bg-white rounded-[32px] border border-white/20 border-glow overflow-hidden">
                     <button id="rubrica-toggle-btn"
-                        class="w-full px-6 py-5 flex items-center justify-between group hover:bg-white/5 transition-colors">
+                        class="w-full px-6 py-5 flex items-center justify-between group hover:bg-slate-900/5 transition-colors">
                         <div class="flex items-center gap-4">
                             <div
-                                class="size-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-purple-400 text-xl">contacts</span>
+                                class="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-purple-600 text-xl">contacts</span>
                             </div>
                             <div class="text-left">
-                                <h3 class="text-sm font-black text-white">Rubrica Contatti</h3>
-                                <p class="text-[9px] font-bold uppercase tracking-widest text-white/20">Gestione
-                                    identità condivise <span id="rubrica-counter">(0)</span></p>
+                                <h3 class="text-sm font-black text-slate-900" data-t="rubrica_title">Rubrica Contatti
+                                </h3>
+                                <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                                    <span data-t="rubrica_subtitle">Gestione identità condivise</span> <span
+                                        id="rubrica-counter" class="text-slate-900">(0)</span>
+                                </p>
                             </div>
                         </div>
                         <span id="rubrica-chevron"
-                            class="material-symbols-outlined text-white/20 group-hover:text-white transition-all">expand_more</span>
+                            class="material-symbols-outlined text-slate-400 group-hover:text-slate-900 transition-all">expand_more</span>
                     </button>
 
                     <div id="rubrica-content" class="hidden border-t border-white/5">
                         <!-- Action Bar -->
-                        <div class="p-4 bg-white/5 flex gap-2">
+                        <div class="p-4 bg-slate-100 flex gap-2">
                             <button id="add-contact-btn"
-                                class="flex-1 h-10 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all">Nuovo
-                                Contatto</button>
+                                class="flex-1 h-10 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/10"
+                                data-t="new_contact">Nuovo Contatto</button>
                         </div>
 
                         <!-- Form (Hidden by default) -->
-                        <div id="add-contact-form" class="hidden p-6 space-y-4 bg-black/40 border-b border-white/5">
+                        <div id="add-contact-form" class="hidden p-6 space-y-4 bg-slate-50 border-b border-slate-200">
                             <div class="grid grid-cols-2 gap-3">
                                 <input type="text" id="contact-nome" placeholder="Nome"
-                                    class="h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:ring-1 focus:ring-blue-500">
+                                    class="h-12 px-4 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-blue-500">
                                 <input type="text" id="contact-cognome" placeholder="Cognome"
-                                    class="h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:ring-1 focus:ring-blue-500">
+                                    class="h-12 px-4 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-blue-500">
                             </div>
                             <input type="email" id="contact-email" placeholder="Email (Unica per sharing)"
-                                class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:ring-1 focus:ring-blue-500">
+                                class="w-full h-12 px-4 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-blue-500">
                             <button id="btn-add-contact"
-                                class="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-500/20">SALVA
-                                PROTOCOLLO</button>
+                                class="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                                data-t="save_contact">SALVA CONTATTO</button>
                         </div>
 
                         <!-- Contacts List -->
@@ -183,21 +200,14 @@
 
         </main>
 
-        <!-- 5. FOOTER PLACEHOLDER -->
+        <!-- FOOTER PROTOCOL V3.0 -->
         <div id="footer-placeholder"></div>
-
-        <!-- TOAST CONTAINER -->
-        <div id="toast-container"
-            class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-6 py-4 bg-[#0a0f1e]/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-500 pointer-events-none">
-            <span id="toast-icon" class="material-symbols-outlined"></span>
-            <span id="toast-message" class="text-xs font-bold uppercase tracking-widest text-white"></span>
-        </div>
 
     </div>
 
     <!-- SCRIPTS MODULARI -->
-    <script type="module" src="assets/js/main.js?v=3.0"></script>
-    <script type="module" src="assets/js/area_privata_titanium.js?v=3.0"></script>
+    <script type="module" src="assets/js/main.js?v=3.5"></script>
+    <script type="module" src="assets/js/area_privata_titanium.js?v=3.5"></script>
 </body>
 
 </html>

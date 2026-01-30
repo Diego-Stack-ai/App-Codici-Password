@@ -117,7 +117,7 @@ function renderScadenza(scadenza) {
     const veicoloInput = document.getElementById('display-veicolo');
     const veicoloSection = document.getElementById('section-vehicle');
     if (veicoloInput) {
-        veicoloInput.value = scadenza.veicolo_modello || 'Nessun veicolo specificato';
+        veicoloInput.textContent = scadenza.veicolo_modello || 'Nessun veicolo specificato';
         if (!scadenza.veicolo_modello && veicoloSection) veicoloSection.classList.add('hidden');
     }
 

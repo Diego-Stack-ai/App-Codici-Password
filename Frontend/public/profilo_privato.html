@@ -20,7 +20,7 @@
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.5"></script>
     <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script src="assets/js/ui-core.js?v=3.5"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
 <body class="antialiased">
@@ -239,7 +239,7 @@
                 <div id="view-mode-container">
                     <!-- GRUPPO ANAGRAFICA -->
                     <div class="settings-group">
-                        <h4 class="settings-group-title">Informazioni Anagrafiche</h4>
+                        <h4 class="settings-group-title" data-t="info_anagrafica">Informazioni Anagrafiche</h4>
 
                         <!-- DATI PERSONALI -->
                         <div class="settings-item accordion-header" data-target="dati-personali">
@@ -249,8 +249,9 @@
                                         <span class="material-symbols-outlined">person</span>
                                     </div>
                                     <div class="settings-text">
-                                        <span class="settings-label">Dati Personali</span>
-                                        <span class="settings-desc">Nome, CF, Nascita</span>
+                                        <span class="settings-label" data-t="profile_personal">Dati Personali</span>
+                                        <span class="settings-desc" data-t="profile_personal_desc">Nome, CF,
+                                            Nascita</span>
                                     </div>
                                 </div>
                                 <div class="settings-actions" style="display:flex; gap:0.75rem; align-items:center;">
@@ -299,8 +300,9 @@
                                         <span class="material-symbols-outlined">home</span>
                                     </div>
                                     <div class="settings-text">
-                                        <span class="settings-label">Residenza</span>
-                                        <span class="settings-desc">Indirizzo e locazione</span>
+                                        <span class="settings-label" data-t="profile_addresses">Residenza</span>
+                                        <span class="settings-desc" data-t="profile_addresses_desc">Indirizzo e
+                                            locazione</span>
                                     </div>
                                 </div>
                                 <div class="settings-actions">
@@ -321,8 +323,9 @@
                                         <span class="material-symbols-outlined">call</span>
                                     </div>
                                     <div class="settings-text">
-                                        <span class="settings-label">Contatti Telefonici</span>
-                                        <span class="settings-desc">Recapiti telefonici</span>
+                                        <span class="settings-label" data-t="profile_phones">Contatti Telefonici</span>
+                                        <span class="settings-desc" data-t="profile_phones_desc">Recapiti
+                                            telefonici</span>
                                     </div>
                                 </div>
                                 <div class="settings-actions">
@@ -348,8 +351,8 @@
                                     <span class="material-symbols-outlined">bolt</span>
                                 </div>
                                 <div class="settings-text">
-                                    <span class="settings-label" data-t="utenze_title">Utenze</span>
-                                    <span class="settings-desc">Luce, Gas, Acqua</span>
+                                    <span class="settings-label" data-t="profile_utilities">Utenze</span>
+                                    <span class="settings-desc" data-t="profile_utilities_desc">Luce, Gas, Acqua</span>
                                 </div>
                             </div>
                             <div class="settings-actions">
@@ -368,8 +371,9 @@
                                     <span class="material-symbols-outlined">description</span>
                                 </div>
                                 <div class="settings-text">
-                                    <span class="settings-label">Documenti</span>
-                                    <span class="settings-desc">CI, Patente, Passaporto</span>
+                                    <span class="settings-label" data-t="profile_docs">Documenti</span>
+                                    <span class="settings-desc" data-t="profile_docs_desc">CI, Patente,
+                                        Passaporto</span>
                                 </div>
                             </div>
                             <div class="settings-actions">
@@ -389,8 +393,8 @@
                                     <span class="material-symbols-outlined">email</span>
                                 </div>
                                 <div class="settings-text">
-                                    <span class="settings-label">Email</span>
-                                    <span class="settings-desc">Account e password</span>
+                                    <span class="settings-label" data-t="profile_emails">Email</span>
+                                    <span class="settings-desc" data-t="profile_emails_desc">Account e password</span>
                                 </div>
                             </div>
                             <div class="settings-actions">
@@ -429,19 +433,12 @@
         </main>
 
         <!-- FOOTER PREMIUM -->
-        <footer class="titanium-footer">
-            <div id="footer-placeholder" style="opacity: 0.3; text-align: center;">
-                <span
-                    style="font-size: 8px; font-weight: 800; letter-spacing: 0.3em; color: var(--text-secondary); text-transform: uppercase;">
-                    Titanium Security Protocol V3.5
-                </span>
-            </div>
-        </footer>
+        <div id="footer-placeholder"></div>
     </div>
 
     <!-- Scripts con Cache Busting (Protocollo V3.0) -->
     <!-- Scripts -->
-    <script src="assets/js/main.js?v=3.5"></script>
+    <script src="assets/js/main.js?v=3.5" type="module"></script>
     <script src="assets/js/profilo_privato.js?v=3.5" type="module"></script>
 </body>
 

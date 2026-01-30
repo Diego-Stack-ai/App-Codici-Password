@@ -1,6 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, arrayUnion, arrayRemove, increment } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { makeCall } from './utils.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -12,23 +13,14 @@ let myContacts = [];
 
 // --- HELPERS ---
 // --- HELPERS (Global versions in main.js are used where possible) ---
-function showToast(msg) {
-    const toast = document.getElementById('toast');
-    if (toast) {
-        toast.textContent = msg;
-        toast.style.opacity = '1';
-        setTimeout(() => toast.style.opacity = '0', 2000);
-    }
-}
+import { showToast } from './ui-core.js';
+// (deleteDoc is already imported below in original file, keeping it there)
 // Local override to handle specific excluded strings
 window.copyText = function (text) {
     if (!text || text === '-' || text === 'Nessuna nota presente.') return;
-    if (typeof window.copyTextGlobal === 'function') {
-        window.copyTextGlobal(text);
-    } else {
-        // Fallback if main.js not loaded or names differ
-        navigator.clipboard.writeText(text).then(() => showToast("Copiato!"));
-    }
+    navigator.clipboard.writeText(text).then(() => {
+        if (window.showToast) window.showToast(window.t("copied_to_clipboard") || "Copiato nel protocollo", "success");
+    });
 };
 // Note: window.makeCall is already defined globally in main.js
 
@@ -43,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!currentId || currentId === 'undefined') {
-        alert("ID mancante");
+        if (window.showToast) window.showToast(window.t("missing_id") || "ID mancante", "error");
         window.location.href = 'account_privati.html';
         return;
     }
@@ -79,12 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- CORE FUNCTIONS ---
 
 function enableReadOnlyMode() {
-    // Banner
     const banner = document.createElement('div');
-    banner.className = "bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 mb-4 rounded shadow-sm";
+    banner.className = "bg-blue-500/10 border-l-4 border-blue-500 text-blue-400 p-4 mb-4 rounded-xl shadow-sm backdrop-blur-sm";
     banner.innerHTML = `
-        <p class="font-bold">Modalità Visualizzazione</p>
-        <p class="text-sm">Questo elemento è condiviso con te in sola lettura.</p>
+        <p class="font-bold text-sm" data-t="read_only_mode">Modalità Visualizzazione</p>
+        <p class="text-[11px]" data-t="read_only_desc">Questo elemento è condiviso con te in sola lettura.</p>
     `;
     const hero = document.querySelector('.px-4.space-y-6');
     if (hero) hero.insertBefore(banner, hero.firstChild);
@@ -107,7 +98,13 @@ function enableReadOnlyMode() {
 }
 
 async function removeSharedLink() {
-    if (!confirm("Vuoi rimuovere questo account dalla tua lista?")) return;
+    const confirmed = await window.showConfirmModal(
+        "RINUNCIA CONDIVISIONE",
+        "Vuoi rimuovere definitivamente questo account dalla tua lista?",
+        "RIMUOVI",
+        "ANNULLA"
+    );
+    if (!confirmed) return;
 
     try {
         // 1. Find invite doc to delete
@@ -117,18 +114,8 @@ async function removeSharedLink() {
         );
         const snapshot = await getDocs(q);
 
-        const promises = snapshot.docs.map(d => deleteDoc(d.ref)); // Wait? deleteDoc needs import from firestore
-        // Wait, I didn't import deleteDoc. Let's fix imports later or assume implementation.
-        // Actually, I should import deleteDoc.
-
-        // Re-import dynamically or use what I have. I imported updateDoc, addDoc...
-        // I need to update the import statement at the top. I'll do that in 'CodeContent'.
-
-        // ... Assuming deleteDoc is available ...
-        // (I will fix imports in the actual tool call string below).
-
-        // Actually I can't easily modify the imports in the function body.
-        // I'll ensure deleteDoc is imported in the main file write.
+        const deletePromises = snapshot.docs.map(d => deleteDoc(d.ref));
+        await Promise.all(deletePromises);
 
         // 2. Notify Owner
         if (ownerId && ownerId !== currentUid) {
@@ -142,18 +129,11 @@ async function removeSharedLink() {
             });
         }
 
-        // Actually perform deletes
-        // NOTE: snapshot.docs.map(d => deleteDoc(d.ref)) returns promises
-        // I need to await them. But deleteDoc takes a Reference.
-        // In Modular SDK: deleteDoc(docRef).
-        const deletePromises = snapshot.docs.map(d => deleteDoc(d.ref));
-        await Promise.all(deletePromises);
-
-        alert("Rimosso con successo.");
+        if (window.showToast) window.showToast(window.t("revoked_success") || "Rimosso con successo.", "success");
         window.location.href = 'home_page.html';
     } catch (e) {
         console.error("Error removing link", e);
-        alert("Errore durante la rimozione.");
+        if (window.showToast) window.showToast(window.t("revoked_error") || "Errore durante la rimozione.", "error");
     }
 }
 // Needed for removeSharedLink
@@ -171,8 +151,7 @@ async function loadAccount(uid, id) {
             const qSnap = await getDocs(q);
 
             if (qSnap.empty) {
-                alert("Ops! Account non trovato.");
-                // history.back(); // Can be annoying in dev
+                if (window.showToast) window.showToast(window.t("account_not_found") || "Ops! Account non trovato.", "error");
                 return;
             }
             originalData = qSnap.docs[0].data();
@@ -192,16 +171,46 @@ async function loadAccount(uid, id) {
         render(originalData);
     } catch (e) {
         console.error(e);
-        alert("Errore caricamento dati: " + e.message);
+        if (window.showToast) window.showToast(window.t("error_loading") || "Errore caricamento dati.", "error");
     }
 }
+
+const getAccentColors = (acc) => {
+    // Determine type from flags
+    const isBanking = (Array.isArray(acc.banking) && acc.banking.length > 0) || (acc.banking && acc.banking.iban);
+    const isMemo = acc.hasMemo || acc._isMemo;
+    const isShared = acc.shared || acc.isMemoShared || acc._isShared;
+
+    if (isBanking) return { key: 'emerald', via: 'via-emerald-500/40', bg: 'bg-emerald-500', hex: '#10b981' };
+    if (isMemo) return { key: 'amber', via: 'via-amber-500/40', bg: 'bg-amber-500', hex: '#f59e0b' };
+    if (isShared) return { key: 'rose', via: 'via-rose-500/40', bg: 'bg-rose-500', hex: '#f43f5e' };
+    return { key: 'blue', via: 'via-blue-500/40', bg: 'bg-blue-500', hex: '#3b82f6' };
+};
 
 function render(acc) {
     document.title = acc.nomeAccount || 'Dettaglio';
 
-    // Header
+    // 1. DYNAMIC ACCENT COLORS
+    const colors = getAccentColors(acc);
+    const heroBar = document.getElementById('hero-accent-bar');
+    if (heroBar) {
+        // Remove old gradients (standardized as via-*)
+        heroBar.className = heroBar.className.replace(/via-\w+-\d+\/\d+/, '').trim();
+        heroBar.classList.add(colors.via);
+    }
+    const statusDot = document.getElementById('hero-status-dot');
+    if (statusDot) {
+        statusDot.className = statusDot.className.replace(/bg-\w+-\d+/, '').replace(/shadow-\w+-\d+\/\d+/, '').trim();
+        statusDot.classList.add(colors.bg);
+        statusDot.classList.add(`shadow-${colors.key}-500/20`);
+    }
+
+    // Header & Hero
     const hNome = document.getElementById('header-nome-account');
-    if (hNome) hNome.textContent = acc.nomeAccount || 'Senza Nome';
+    if (hNome) hNome.textContent = acc.nomeAccount || window.t('unnamed') || 'Senza Nome';
+
+    const heroTitle = document.getElementById('hero-title');
+    if (heroTitle) heroTitle.textContent = acc.nomeAccount || '-';
 
     const avatar = document.getElementById('detail-avatar');
     const logoUrl = acc.logo || acc.avatar;
@@ -214,7 +223,7 @@ function render(acc) {
         } else {
             avatar.style.backgroundImage = 'none';
             if (window.getAccountIcon) {
-                avatar.innerHTML = window.getAccountIcon(acc.nomeAccount, 'w-full h-full');
+                avatar.innerHTML = window.getAccountIcon(acc.nomeAccount, 'w-full h-full p-6 text-white');
                 avatar.classList.add('bg-transparent');
                 avatar.classList.remove('bg-white/20');
             }
@@ -253,19 +262,19 @@ function render(acc) {
         const bankingContent = document.getElementById('banking-content');
         if (bankingContent) {
             bankingContent.innerHTML = bankingArr.map((bank, idx) => `
-                <div class="space-y-4 p-4 bg-white/50 dark:bg-slate-800/20 rounded-2xl border border-black/5 dark:border-white/5">
-                    <div class="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-2">
-                        <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Conto #${idx + 1}</span>
+                <div class="space-y-4 p-4 bg-slate-500/5 rounded-2xl border border-white/5 border-glow">
+                    <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                        <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">${window.t('account') || 'Conto'} #${idx + 1}</span>
                     </div>
 
                     <!-- IBAN -->
                     <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">IBAN</span>
-                        <div class="flex items-center bg-white dark:bg-slate-900/50 rounded-xl border border-black/5 dark:border-white/10 overflow-hidden">
+                        <span class="text-[11px] font-bold text-white/40 uppercase ml-1" data-t="iban">IBAN</span>
+                        <div class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                             <input readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold focus:ring-0 text-[#0A162A] dark:text-white uppercase font-mono"
+                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold focus:ring-0 text-white uppercase font-mono"
                                 value="${bank.iban || ''}">
-                            <button onclick="copyText('${bank.iban}')" class="p-3 text-gray-400 hover:text-primary border-l border-black/5 dark:border-white/10">
+                            <button onclick="window.copyText('${bank.iban}')" class="p-3 text-white/40 hover:text-white border-l border-white/5">
                                 <span class="material-symbols-outlined text-base">content_copy</span>
                             </button>
                         </div>
@@ -274,50 +283,49 @@ function render(acc) {
                     <!-- PASSWORD & NOTA -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Pass. Dispositiva</span>
-                            <div class="flex items-center bg-white dark:bg-slate-900/50 rounded-xl border border-black/5 dark:border-white/10 overflow-hidden">
+                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="dispositive_pass">Pass. Dispositiva</span>
+                            <div class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input readonly type="text"
-                                    class="titanium-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-[#0A162A] dark:text-white"
+                                    class="titanium-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-white"
                                     value="${bank.passwordDispositiva || ''}">
-                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
                                     <span class="material-symbols-outlined text-sm">visibility</span>
                                 </button>
-                                <button onclick="copyText(this.parentElement.querySelector('input').value)" class="p-2 text-gray-400 hover:text-primary border-l border-black/5 dark:border-white/10">
+                                <button onclick="window.copyText(this.parentElement.querySelector('input').value)" class="p-2 text-white/40 hover:text-white border-l border-white/5">
                                     <span class="material-symbols-outlined text-sm">content_copy</span>
                                 </button>
                             </div>
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Nota IBAN</span>
-                            <div class="selectable bg-blue-50/50 dark:bg-blue-900/10 p-2.5 rounded-xl text-xs text-blue-800 dark:text-blue-300 border border-blue-100 dark:border-blue-900/20 min-h-[40px] flex items-center">
+                        </div>                        <div class="flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="iban_note">Nota IBAN</span>
+                            <div class="selectable bg-white/5 p-2.5 rounded-xl text-xs text-white/60 border border-white/5 min-h-[40px] flex items-center italic">
                                 ${bank.nota || '-'}
                             </div>
                         </div>
                     </div>
 
                     <!-- SEZIONE REFERENTE BANCA -->
-                    <div class="bg-primary/5 dark:bg-primary/5 p-4 rounded-2xl border border-primary/10 space-y-3">
-                        <div class="flex items-center gap-2 text-primary">
+                    <div class="bg-blue-500/5 p-4 rounded-2xl border border-white/5 space-y-3">
+                        <div class="flex items-center gap-2 text-blue-500">
                             <span class="material-symbols-outlined text-sm">contact_phone</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest">Referente Banca</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest" data-t="bank_referent">Referente Banca</span>
                         </div>
                         <div class="flex flex-col gap-1">
-                            <span class="text-[9px] font-bold text-gray-400 uppercase ml-1">Nome e Cognome</span>
-                            <p class="text-sm font-bold text-slate-900 dark:text-white ml-1">${bank.referenteNome || ''} ${bank.referenteCognome || ''}</p>
+                            <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="full_name">Nome e Cognome</span>
+                            <p class="text-sm font-bold text-white ml-1">${bank.referenteNome || ''} ${bank.referenteCognome || ''}</p>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="flex flex-col gap-1">
-                                <span class="text-[9px] font-bold text-gray-400 uppercase ml-1">Telefono</span>
-                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors" onclick="makeCall('${bank.referenteTelefono}')" title="Chiama">
-                                    <span class="material-symbols-outlined text-[16px] text-primary">call</span>
-                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${bank.referenteTelefono || '-'}</span>
+                                <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="phone">Telefono</span>
+                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteTelefono}')">
+                                    <span class="material-symbols-outlined text-[16px] text-blue-500">call</span>
+                                    <span class="text-xs font-bold text-white/70">${bank.referenteTelefono || '-'}</span>
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1">
-                                <span class="text-[9px] font-bold text-gray-400 uppercase ml-1">Cellulare</span>
-                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors" onclick="makeCall('${bank.referenteCellulare}')" title="Chiama">
-                                    <span class="material-symbols-outlined text-[16px] text-primary">smartphone</span>
-                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${bank.referenteCellulare || '-'}</span>
+                                <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="mobile">Cellulare</span>
+                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteCellulare}')">
+                                    <span class="material-symbols-outlined text-[16px] text-blue-500">smartphone</span>
+                                    <span class="text-xs font-bold text-white/70">${bank.referenteCellulare || '-'}</span>
                                 </div>
                             </div>
                         </div>
@@ -326,41 +334,41 @@ function render(acc) {
                     <!-- Carte collegate -->
                     ${(bank.cards || []).length > 0 ? `
                         <div class="space-y-4 pt-2">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Strumenti collegati</span>
+                            <span class="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1" data-t="linked_tools">Strumenti collegati</span>
                             ${bank.cards.map((card, cIdx) => `
-                                <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/5 shadow-sm space-y-4">
                                      <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-primary text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
-                                            <span class="text-xs font-bold text-primary uppercase">${card.type === 'Debit' ? 'Bancomat' : 'Carta di Credito'}</span>
+                                            <span class="material-symbols-outlined text-blue-500 text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
+                                            <span class="text-xs font-black text-blue-500 uppercase">${card.type === 'Debit' ? (window.t('bancomat') || 'Bancomat') : (window.t('credit_card') || 'Carta di Credito')}</span>
                                         </div>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Titolare</span>
-                                            <div class="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
-                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-[#0A162A] dark:text-white" value="${card.titolare || ''}">
-                                                <button onclick="copyText('${card.titolare}')" class="p-2 text-gray-400 hover:text-primary">
+                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="holder">Titolare</span>
+                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.titolare || ''}">
+                                                <button onclick="window.copyText('${card.titolare}')" class="p-2 text-white/40 hover:text-white">
                                                     <span class="material-symbols-outlined text-base">content_copy</span>
                                                 </button>
                                             </div>
                                         </div>
                                         ${card.type !== 'Debit' ? `
                                         <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Tipo Carta</span>
-                                            <div class="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
-                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-[#0A162A] dark:text-white" value="${card.cardType || ''}">
+                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="card_type">Tipo Carta</span>
+                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.cardType || ''}">
                                             </div>
                                         </div>
                                         ` : ''}
                                     </div>
 
                                     <div class="flex flex-col gap-1.5">
-                                        <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Numero</span>
-                                        <div class="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
-                                            <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-[#0A162A] dark:text-white" value="${card.cardNumber || ''}">
-                                            <button onclick="copyText('${card.cardNumber}')" class="p-2 text-gray-400 hover:text-primary">
+                                        <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="number">Numero</span>
+                                        <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                            <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" value="${card.cardNumber || ''}">
+                                            <button onclick="window.copyText('${card.cardNumber}')" class="p-2 text-white/40 hover:text-white">
                                                 <span class="material-symbols-outlined text-base">content_copy</span>
                                             </button>
                                         </div>
@@ -368,26 +376,26 @@ function render(acc) {
 
                                     <div class="grid grid-cols-3 gap-3">
                                         <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Scadenza</span>
-                                            <div class="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg h-10 px-3 text-sm text-[#0A162A] dark:text-white border border-black/5 dark:border-white/5">
+                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="expiry">Scadenza</span>
+                                            <div class="flex items-center bg-white/5 rounded-lg h-10 px-3 text-sm text-white border border-white/5">
                                                 ${card.expiry || '-'}
                                             </div>
                                         </div>
                                         <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">CCV</span>
-                                            <div class="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
-                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-[#0A162A] dark:text-white" value="${card.ccv || ''}">
-                                                <button onclick="copyText('${card.ccv}')" class="p-2 text-gray-400 hover:text-primary">
+                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="ccv">CCV</span>
+                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.ccv || ''}">
+                                                <button onclick="window.copyText('${card.ccv}')" class="p-2 text-white/40 hover:text-white">
                                                     <span class="material-symbols-outlined text-sm">content_copy</span>
                                                 </button>
                                             </div>
                                         </div>
                                         <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">PIN</span>
-                                            <div class="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
-                                                <input readonly type="text" class="titanium-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-[#0A162A] dark:text-white" 
+                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="pin">PIN</span>
+                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                <input readonly type="text" class="titanium-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" 
                                                     value="${card.pin || ''}">
-                                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
                                                     <span class="material-symbols-outlined text-sm">visibility</span>
                                                 </button>
                                             </div>
@@ -396,8 +404,8 @@ function render(acc) {
 
                                     ${card.note ? `
                                         <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Note Strumento</span>
-                                            <div class="selectable bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-xs text-gray-600 dark:text-gray-400 italic border border-black/5 dark:border-white/5">
+                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="tool_note">Note Strumento</span>
+                                            <div class="selectable bg-white/5 p-3 rounded-lg text-xs text-white/60 italic border border-white/5">
                                                 ${card.note}
                                             </div>
                                         </div>
@@ -412,7 +420,7 @@ function render(acc) {
     }
 
     const elNote = document.getElementById('detail-note');
-    if (elNote) elNote.textContent = acc.note || 'Nessuna nota presente.';
+    if (elNote) elNote.textContent = acc.note || window.t('no_notes') || 'Nessuna nota presente.';
 
     // Checkboxes
     const chkShared = document.getElementById('detail-shared');
@@ -439,7 +447,7 @@ async function renderGuests(listItems) {
     list.innerHTML = '';
 
     if (!listItems || listItems.length === 0) {
-        list.innerHTML = '<p class="text-xs text-gray-400 italic ml-1">Nessun accesso attivo.</p>';
+        list.innerHTML = `<p class="text-xs text-white/40 italic ml-1">${window.t('no_active_access') || 'Nessun accesso attivo.'}</p>`;
         return;
     }
 
@@ -449,7 +457,7 @@ async function renderGuests(listItems) {
     });
 
     if (activeList.length === 0) {
-        list.innerHTML = '<p class="text-xs text-gray-400 italic ml-1">Nessun accesso attivo.</p>';
+        list.innerHTML = `<p class="text-xs text-white/40 italic ml-1">${window.t('no_active_access') || 'Nessun accesso attivo.'}</p>`;
         // Auto-uncheck if we are owner
         if (!isReadOnly && currentUid) {
             const chkShared = document.getElementById('detail-shared');
@@ -492,15 +500,15 @@ async function renderGuests(listItems) {
         }
 
         const div = document.createElement('div');
-        div.className = "flex items-center justify-between p-3 bg-gray-50/50 dark:bg-gray-700/30 rounded-xl border border-gray-100 dark:border-gray-800";
+        div.className = "flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5";
         div.innerHTML = `
             <div class="flex items-center gap-3 min-w-0">
                 <div class="h-8 w-8 rounded-full bg-cover bg-center border border-primary/20 shrink-0" style="background-image: url('${avatarUrl}')"></div>
                 <div class="min-w-0">
                     <p class="text-xs font-bold truncate">${displayName}</p>
-                    <p class="text-[10px] text-gray-400 truncate flex items-center gap-1">
+                    <p class="text-[10px] text-white/40 truncate flex items-center gap-1">
                         ${displayEmail} 
-                        <span class="bg-gray-200 dark:bg-gray-600 px-1 rounded text-[9px] text-gray-600 dark:text-gray-300">${statusLabel}</span>
+                        <span class="bg-white/10 px-1 rounded text-[9px] text-white/60">${statusLabel}</span>
                     </p>
                 </div>
             </div>
@@ -526,12 +534,12 @@ async function loadMyRubrica(uid) {
 function populateInviteSelect() {
     const sel = document.getElementById('invite-select');
     if (!sel) return;
-    sel.innerHTML = '<option value="" disabled selected>Seleziona un contatto...</option>';
+    sel.innerHTML = `<option value="" disabled selected>${window.t('select_contact_opt') || 'Seleziona un contatto...'}</option>`;
 
     if (!myContacts || myContacts.length === 0) {
         const opt = document.createElement('option');
         opt.disabled = true;
-        opt.textContent = "Nessun contatto in rubrica";
+        opt.textContent = window.t('no_contacts_rubrica') || "Nessun contatto in rubrica";
         sel.appendChild(opt);
         return;
     }
@@ -561,8 +569,8 @@ function showSaveModal(isSharingActive) {
     const btnParams = document.getElementById('btn-save-modal');
     if (btnParams) {
         btnParams.innerHTML = isSharingActive ?
-            '<span class="material-symbols-outlined text-lg">save</span> Salva Modifiche e invia l\'invito' :
-            '<span class="material-symbols-outlined text-lg">save</span> Salva Modifiche';
+            `<span class="material-symbols-outlined text-lg">save</span> ${window.t('save_and_invite') || 'Salva e invia invito'}` :
+            `<span class="material-symbols-outlined text-lg">save</span> ${window.t('save_changes') || 'Salva Modifiche'}`;
     }
 
     modal.classList.remove('hidden');
@@ -681,7 +689,7 @@ function setupListeners() {
             const hasGuests = guestsContainer && guestsContainer.children.length > 0 && !guestsContainer.textContent.includes('Nessun accesso attivo');
 
             if (isShared && !hasGuests && !newGuestEmail) {
-                alert("Per attivare la condivisione, devi selezionare un utente dalla rubrica (o averne già invitato uno).");
+                if (window.showToast) window.showToast(window.t("select_user_error") || "Seleziona un utente.", "error");
                 window.closeSaveModal(); // Close modal to let user interact
                 toggleSharingUI(true);
                 const content = document.getElementById('accessi-content');
@@ -691,7 +699,7 @@ function setupListeners() {
             }
 
             btnSave.disabled = true;
-            btnSave.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Elaborazione...';
+            btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> ${window.t('processing') || 'Elaborazione...'}`;
 
             try {
                 // 1. New Invite
@@ -748,7 +756,7 @@ function setupListeners() {
                     renderGuests([]);
                 }
 
-                showToast("Modifiche salvate e invito inviato!");
+                if (window.showToast) window.showToast(window.t("changes_saved_invite_sent") || "Modifiche salvate e invito inviato!", "success");
                 window.closeSaveModal(); // Close Modal
 
                 // Reload
@@ -757,7 +765,7 @@ function setupListeners() {
 
             } catch (e) {
                 console.error(e);
-                alert("Errore salvataggio: " + e.message);
+                if (window.showToast) window.showToast(window.t("error_saving") || "Errore salvataggio.", "error");
             } finally {
                 btnSave.disabled = false;
                 // Text reset handled by showSaveModal next time
@@ -809,7 +817,13 @@ window.openAttachments = () => {
 }
 
 window.handleRevoke = async (guestUid, guestEmail) => {
-    if (!confirm("Revocare l'accesso a questo utente?")) return;
+    const confirmed = await window.showConfirmModal(
+        window.t('revoke_access_title') || "REVOCA ACCESSO",
+        window.t('revoke_access_confirm') || "Vuoi revocare l'accesso a questo utente?",
+        window.t('revoke') || "REVOCA",
+        window.t('cancel') || "ANNULLA"
+    );
+    if (!confirmed) return;
     try {
         await updateDoc(doc(db, "users", currentUid, "accounts", originalData.docId), {
             sharedWith: arrayRemove(guestUid) // This works for legacy scalar UIDs
@@ -836,9 +850,12 @@ window.handleRevoke = async (guestUid, guestEmail) => {
         const snap1 = await getDocs(q1);
         snap1.forEach(async d => await deleteDoc(d.ref));
 
-        showToast("Accesso revocato.");
+        if (window.showToast) window.showToast(window.t("access_revoked") || "Accesso revocato.", "success");
         await loadAccount(currentUid, currentId);
-    } catch (e) { alert("Errore revoca: " + e.message); }
+    } catch (e) {
+        console.error(e);
+        if (window.showToast) window.showToast(window.t("error_revoking") || "Errore revoca.", "error");
+    }
 }
 
 async function updateAttachmentCount(uid, docId) {

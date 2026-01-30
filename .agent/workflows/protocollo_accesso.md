@@ -5,7 +5,7 @@ description: Protocollo Standard Titanium Accesso V3.0 (Security, Versioning & U
 # Titanium Accesso V3.0 (The Secure Standard)
 > **Baseline Ufficiale**: Questo protocollo, insieme agli altri presenti in `.agent/workflows/`, costituisce l'unica fonte di istruzioni da seguire per lo sviluppo dell'app, salvo la creazione di nuovi protocolli o l'insorgere di conflitti tecnici attualmente non noti.
 
-## 2. Standard Design Titanium Gold
+## 0. Standard Design Titanium Gold
 Ogni pagina di accesso deve rispettare i seguenti pilastri estetici:
 *   **Matrix Palette**: Colori semantici Blue/Indigo per la sicurezza.
 *   **Titanium Vault [#21]**: Contenitore centrale perimetrale con `border-glow`.
@@ -18,6 +18,17 @@ Questo protocollo governa le pagine pubbliche di ingresso (entry-points):
 2.  `registrati.html` (Registrazione)
 3.  `reset_password.html` (Richiesta Reset)
 4.  `imposta_nuova_password.html` (Set New Password)
+
+### 1.1 CSS di Riferimento Unico
+**L'unico e solo file CSS** per gestire tutte le pagine sopra elencate è:
+- **`assets/css/auth_accesso.css`**
+
+Questo file è **completamente autonomo** e contiene tutti gli effetti, componenti e stili necessari per le pagine di autenticazione. 
+
+**NON** deve essere utilizzato `titanium.css` o altri file CSS nelle pagine di accesso. Questa separazione garantisce:
+- Performance ottimali (caricamento rapido)
+- Indipendenza dal resto dell'applicazione
+- Manutenibilità e isolamento del codice critico di sicurezza
 
 ---
 

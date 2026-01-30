@@ -1,6 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, arrayRemove, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { showToast } from './ui-core.js';
 
 // STATE
 let currentUid = null;
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentDocId = id;
 
     if (!id) {
-        alert("ID mancante");
+        if (window.showToast) window.showToast(window.t("missing_id") || "ID mancante", "error");
         window.location.href = 'account_privati.html';
         return;
     }
@@ -49,7 +50,7 @@ async function loadData(id) {
             const q = query(collection(db, "users", currentUid, "accounts"), where("id", "==", id));
             const querySnap = await getDocs(q);
             if (querySnap.empty) {
-                alert("Account non trovato");
+                if (window.showToast) window.showToast(window.t("account_not_found") || "Account non trovato", "error");
                 window.location.href = 'account_privati.html';
                 return;
             }
@@ -131,7 +132,7 @@ async function loadData(id) {
 
     } catch (e) {
         console.error("Error loading account:", e);
-        alert("Errore caricamento dati: " + e.message);
+        if (window.showToast) window.showToast((window.t("error_loading") || "Errore caricamento dati: ") + e.message, "error");
     } finally {
         const overlay = document.getElementById('loading-overlay');
         if (overlay) overlay.classList.add('hidden');
@@ -275,7 +276,7 @@ async function renderGuests(listItems) {
     list.innerHTML = '';
 
     if (!listItems || listItems.length === 0) {
-        list.innerHTML = '<p class="text-xs text-gray-400 italic ml-1">Nessun accesso attivo.</p>';
+        list.innerHTML = `<p class="text-xs text-white/40 italic ml-1">${window.t('no_active_access') || 'Nessun accesso attivo.'}</p>`;
         return;
     }
 
@@ -323,7 +324,13 @@ async function renderGuests(listItems) {
 }
 
 async function handleRevoke(guestEmail) {
-    if (!confirm(`Revocare l'accesso a ${guestEmail}?`)) return;
+    const confirmed = await window.showConfirmModal(
+        window.t('revoke_access_title') || "REVOCA ACCESSO",
+        (window.t('revoke_access_confirm_to') || "Vuoi revocare definitivamente l'accesso a ") + guestEmail + "?",
+        window.t('revoke') || "REVOCA",
+        window.t('cancel') || "ANNULLA"
+    );
+    if (!confirmed) return;
     try {
         const accountRef = doc(db, "users", currentUid, "accounts", currentDocId);
         const snap = await getDoc(accountRef);
@@ -345,13 +352,13 @@ async function handleRevoke(guestEmail) {
                 const snapInv = await getDocs(qInv);
                 snapInv.forEach(async d => await deleteDoc(d.ref));
 
-                alert("Accesso revocato.");
+                if (window.showToast) window.showToast(window.t("access_revoked") || "Accesso revocato.", "success");
                 loadData(currentDocId); // Refresh UI
             }
         }
     } catch (e) {
         console.error("Revoke error:", e);
-        alert("Errore durante la revoca: " + e.message);
+        if (window.showToast) window.showToast((window.t("revoke_error") || "Errore durante la revoca: ") + e.message, "error");
     }
 }
 
@@ -371,10 +378,10 @@ async function sendInvite() {
             type: 'privato',
             createdAt: new Date().toISOString()
         });
-        alert("Invito inviato!");
+        if (window.showToast) window.showToast(window.t("invite_sent") || "Invito inviato!", "success");
         inviteInput.value = '';
     } catch (e) {
-        alert(e.message);
+        if (window.showToast) window.showToast(e.message, "error");
     } finally {
         btnInvite.disabled = false;
     }
@@ -415,7 +422,7 @@ async function saveChanges() {
             updatedAt: new Date().toISOString()
         };
 
-        if (!updateObj.nomeAccount) throw new Error("Nome Account è obbligatorio");
+        if (!updateObj.nomeAccount) throw new Error(window.t("account_name_required") || "Nome Account è obbligatorio");
 
         await updateDoc(doc(db, "users", currentUid, "accounts", currentDocId), updateObj);
 
@@ -428,7 +435,7 @@ async function saveChanges() {
 
     } catch (e) {
         console.error(e);
-        alert("Errore salvataggio: " + e.message);
+        if (window.showToast) window.showToast((window.t("save_error") || "Errore salvataggio: ") + e.message, "error");
         btn.disabled = false;
         icon.textContent = originalIcon;
         icon.classList.remove('animate-spin');
@@ -436,7 +443,13 @@ async function saveChanges() {
 }
 
 async function deleteAccount() {
-    if (!confirm("Sei sicuro di voler ELIMINARE definitivamente questo account? L'operazione non è reversibile.")) return;
+    const confirmed = await window.showConfirmModal(
+        "ELIMINAZIONE ACCOUNT",
+        "Sei sicuro di voler ELIMINARE definitivamente questo account? L'operazione non è reversibile.",
+        "ELIMINA",
+        "ANNULLA"
+    );
+    if (!confirmed) return;
 
     const btn = document.getElementById('delete-btn');
     const originalText = btn.innerHTML;
@@ -445,11 +458,11 @@ async function deleteAccount() {
 
     try {
         await deleteDoc(doc(db, "users", currentUid, "accounts", currentDocId));
-        alert("Account eliminato correttamente.");
+        if (window.showToast) window.showToast(window.t("account_deleted") || "Account eliminato correttamente.", "success");
         window.location.href = 'account_privati.html';
     } catch (e) {
         console.error(e);
-        alert("Errore eliminazione: " + e.message);
+        if (window.showToast) window.showToast((window.t("delete_error") || "Errore eliminazione: ") + e.message, "error");
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
@@ -656,8 +669,14 @@ window.removeCard = (ibanIdx, cardIdx) => {
     renderBankAccounts();
 };
 
-window.removeIban = (ibanIdx) => {
-    if (confirm("Eliminare interamente questo IBAN e tutte le carte collegate?")) {
+window.removeIban = async (ibanIdx) => {
+    const confirmed = await window.showConfirmModal(
+        "ELIMINA IBAN",
+        "Eliminare interamente questo IBAN e tutte le carte collegate?",
+        "ELIMINA",
+        "ANNULLA"
+    );
+    if (confirmed) {
         bankAccounts.splice(ibanIdx, 1);
         renderBankAccounts();
     }

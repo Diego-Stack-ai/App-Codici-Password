@@ -190,8 +190,10 @@ window.saveConfig = async (newConfig) => {
         const docRef = doc(db, "users", currentUser.uid, "settings", "generalConfig");
         await setDoc(docRef, newConfig);
         currentConfig = JSON.parse(JSON.stringify(newConfig));
+        if (window.showToast) window.showToast(t('success_save') || "Configurazione salvata!", 'success');
     } catch (e) {
         log("Firestore Save ERROR: " + e.message);
+        if (window.showToast) window.showToast(t('error_saving') || "Errore salvataggio", 'error');
     }
 };
 
@@ -244,7 +246,8 @@ window.editItem = async (listKey, index) => {
 };
 
 window.deleteItem = async (listKey, index) => {
-    if (!confirm(t('confirm_delete_item'))) return;
+    const confirmed = await window.showConfirmModal(t('confirm_delete_item'));
+    if (!confirmed) return;
     currentConfig[listKey].splice(index, 1);
     window.renderAllTables();
     await window.saveConfig(currentConfig);
