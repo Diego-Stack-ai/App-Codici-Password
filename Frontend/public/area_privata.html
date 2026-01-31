@@ -22,13 +22,11 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Gold v3.5) -->
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
-    <link rel="stylesheet" href="assets/css/titanium.css?v=3.5">
+    <!-- Design System Master (Titanium Account Protocol V3.0) -->
+    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.5">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.5"></script>
-    <script src="assets/js/titanium-core.js?v=3.5"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -44,15 +42,14 @@
         <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
         <header class="titanium-header">
             <div id="header-content" class="header-balanced-container">
-                <!-- Popolated by area_privata_titanium.js -->
+                <div id="header-left" class="header-left"></div>
+                <div id="header-center" class="header-center"></div>
+                <div id="header-right" class="header-right"></div>
             </div>
         </header>
 
         <!-- MAIN CONTENT (Titanium Main Strategy) -->
         <main class="titanium-main">
-
-            <!-- 6. SAETTA MASTER (Riflesso Metallico Totale) -->
-            <div class="saetta-master pointer-events-none"></div>
 
             <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
             <div class="grid grid-cols-2 gap-4 px-2 mb-8 relative z-50">
@@ -64,11 +61,10 @@
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">account_balance_wallet</span>
                     </div>
-                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
-                            data-t="section_personal_accounts">
+                    <div class="card-text-block flex flex-col justify-between card-compact-height">
+                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_personal_accounts">
                             Account Personali</h3>
-                        <span id="count-standard" class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                        <span id="count-standard" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
@@ -80,11 +76,10 @@
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">group</span>
                     </div>
-                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
-                            data-t="section_shared_accounts">
+                    <div class="card-text-block flex flex-col justify-between card-compact-height">
+                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_shared_accounts">
                             Account Condivisi</h3>
-                        <span id="count-shared" class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                        <span id="count-shared" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
@@ -96,11 +91,10 @@
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">sticky_note_2</span>
                     </div>
-                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
-                            data-t="section_note">Note
+                    <div class="card-text-block flex flex-col justify-between card-compact-height">
+                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_note">Note
                         </h3>
-                        <span id="count-memo" class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                        <span id="count-memo" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
@@ -112,12 +106,10 @@
                     <div class="bg-icon-container">
                         <span class="material-symbols-outlined text-[40px] opacity-20">folder_shared</span>
                     </div>
-                    <div class="p-6 relative z-10 flex flex-col justify-between min-h-[140px]">
-                        <h3 class="text-white font-black text-sm group-hover:translate-x-1 transition-transform"
-                            data-t="section_shared_note">
+                    <div class="card-text-block flex flex-col justify-between card-compact-height">
+                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_shared_note">
                             Note Condivise</h3>
-                        <span id="count-shared-memo"
-                            class="text-[9px] font-bold uppercase tracking-widest text-white/40"
+                        <span id="count-shared-memo" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
@@ -126,12 +118,12 @@
 
             <!-- TOP 10 WIDGET (Glass Style) -->
             <div class="px-2 mb-8 relative z-40">
-                <div class="bg-white rounded-[32px] border border-white/20 border-glow overflow-hidden">
+                <div class="titanium-card border-glow">
                     <div class="px-6 py-4 border-b border-white/5 bg-slate-900/5 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-amber-500 text-sm">star</span>
-                            <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-800"
-                                data-t="top_used_access">Accessi Più Usati
+                            <h3 class="text-[10px] font-bold uppercase tracking-[0.2em]" data-t="top_used_access">
+                                Accessi Più Usati
                             </h3>
                         </div>
                     </div>
@@ -146,7 +138,7 @@
 
             <!-- RUBRICA (Accordion Glass) -->
             <div class="px-2 mb-24 relative z-40">
-                <div class="bg-white rounded-[32px] border border-white/20 border-glow overflow-hidden">
+                <div class="titanium-card border-glow">
                     <button id="rubrica-toggle-btn"
                         class="w-full px-6 py-5 flex items-center justify-between group hover:bg-slate-900/5 transition-colors">
                         <div class="flex items-center gap-4">
@@ -155,16 +147,16 @@
                                 <span class="material-symbols-outlined text-purple-600 text-xl">contacts</span>
                             </div>
                             <div class="text-left">
-                                <h3 class="text-sm font-black text-slate-900" data-t="rubrica_title">Rubrica Contatti
+                                <h3 class="text-sm font-black" data-t="rubrica_title">Rubrica Contatti
                                 </h3>
-                                <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                                <p class="text-[9px] font-bold uppercase tracking-widest opacity-60">
                                     <span data-t="rubrica_subtitle">Gestione identità condivise</span> <span
-                                        id="rubrica-counter" class="text-slate-900">(0)</span>
+                                        id="rubrica-counter" class="opacity-100">(0)</span>
                                 </p>
                             </div>
                         </div>
                         <span id="rubrica-chevron"
-                            class="material-symbols-outlined text-slate-400 group-hover:text-slate-900 transition-all">expand_more</span>
+                            class="material-symbols-outlined opacity-40 group-hover:opacity-100 transition-all">expand_more</span>
                     </button>
 
                     <div id="rubrica-content" class="hidden border-t border-white/5">

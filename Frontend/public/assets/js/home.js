@@ -76,34 +76,34 @@ initComponents().then(() => {
     isDomReady = true;
 
     // Header Injection - Balanced Layout (3-Zone Protocol)
-    const headerStack = document.getElementById('header-content');
-    if (headerStack) {
-        headerStack.innerHTML = `
-            <div class="header-balanced-container">
-                <!-- ZONA SINISTRA: Profilo Utente -->
-                <div class="header-left">
-                    <a href="profilo_privato.html" class="btn-icon-header" style="width: auto; padding: 0 4px; border:none; background:transparent;">
-                        <div id="user-avatar" class="avatar-circle border-glow" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
-                            <span class="material-symbols-outlined !text-lg opacity-20">person</span>
-                        </div>
-                    </a>
-                </div>
+    const hLeft = document.getElementById('header-left');
+    const hCenter = document.getElementById('header-center');
+    const hRight = document.getElementById('header-right');
 
-                <!-- ZONA CENTRO: Saluto e Nome -->
-                <div class="header-center">
-                    <div class="user-info-text" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-                        <span id="greeting-text" class="greeting-text" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6;">...</span>
-                        <span id="user-name" class="header-title" style="font-size: 1rem;">Caricamento...</span>
-                    </div>
+    if (hLeft) {
+        hLeft.innerHTML = `
+            <a href="profilo_privato.html" class="btn-icon-header" style="width: auto; padding: 0 4px; border:none; background:transparent;">
+                <div id="user-avatar" class="avatar-circle border-glow" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined !text-lg opacity-20">person</span>
                 </div>
+            </a>
+        `;
+    }
 
-                <!-- ZONA DESTRA: Logout -->
-                <div class="header-right">
-                    <button id="logout-button" class="btn-icon-header">
-                        <span class="material-symbols-outlined !text-xl">logout</span>
-                    </button>
-                </div>
+    if (hCenter) {
+        hCenter.innerHTML = `
+            <div class="user-info-text" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <span id="greeting-text" class="greeting-text" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6;">...</span>
+                <span id="user-name" class="header-title" style="font-size: 1rem;">Caricamento...</span>
             </div>
+        `;
+    }
+
+    if (hRight) {
+        hRight.innerHTML = `
+            <button id="logout-button" class="btn-icon-header">
+                <span class="material-symbols-outlined !text-xl">logout</span>
+            </button>
         `;
     }
 

@@ -249,7 +249,10 @@ export async function loadUrgentDeadlinesCount(user) {
         const badge = document.getElementById('urgent-count-badge');
         const count = document.getElementById('urgent-count');
         if (count) count.textContent = items.length;
-        if (badge) badge.style.opacity = items.length > 0 ? "" : "0";
+        if (badge) {
+            badge.classList.remove('loading-pulse');
+            badge.style.opacity = items.length > 0 ? "1" : "0";
+        }
 
         const list = document.getElementById('deadline-list-container');
         if (list) {
@@ -262,7 +265,9 @@ export async function loadUrgentDeadlinesCount(user) {
                     return `
                     <div class="micro-list-item">
                         <div class="item-content">
-                            <span class="material-symbols-outlined">${deadline.icon || 'event'}</span>
+                            <div class="item-icon-box">
+                                <span class="material-symbols-outlined">${deadline.icon || 'event'}</span>
+                            </div>
                             <span class="item-title">${deadline.title}</span>
                         </div>
                         <span class="item-badge">${badgeText}</span>

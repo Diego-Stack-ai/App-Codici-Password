@@ -23,12 +23,11 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Gold v3.5) -->
-    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.5">
+    <!-- Design System Master (Titanium Gold v3.8) -->
+    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.8">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.5"></script>
-    <script src="assets/js/titanium-core.js?v=3.5"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
@@ -39,41 +38,30 @@
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
         <div class="glass-glow"></div>
 
-        <!-- HEADER FISSO (Protocollo v3.5) -->
+        <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
         <header class="titanium-header">
             <div id="header-content" class="header-balanced-container">
-                <div class="header-left">
-                    <button onclick="history.back()" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                </div>
-                <div class="header-center">
-                    <h2 id="page-title" class="header-title" data-t="section_personal_accounts">Account Personali</h2>
-                </div>
-                <div class="header-right">
-                    <a href="aggiungi_account_privato.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">add</span>
-                    </a>
-                </div>
+                <div id="header-left" class="header-left"></div>
+                <div id="header-center" class="header-center"></div>
+                <div id="header-right" class="header-right"></div>
             </div>
         </header>
 
         <main class="titanium-main">
 
-            <!-- SEARCH BAR (Titanium Matrix) -->
+            <!-- SEARCH BAR (Standard Titanium) -->
             <div class="px-2 mb-6 relative z-40">
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <span class="material-symbols-outlined opacity-30">search</span>
                     </div>
                     <input type="search" id="account-search" data-t-placeholder="search_placeholder"
-                        placeholder="Cerca account o credenziali..."
-                        class="w-full h-14 pl-12 pr-6 rounded-2xl border bg-black/5 dark:bg-white/5 border-white/10 dark:border-white/5 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500/50 transition-all">
+                        placeholder="Cerca account o credenziali..." class="titanium-search-input">
                 </div>
             </div>
 
             <!-- ACCOUNTS CONTAINER -->
-            <div id="accounts-container" class="grid-2-cols pb-24 px-2 relative z-30">
+            <div id="accounts-container" class="dashboard-grid pb-24 relative z-30">
                 <!-- Data loading placeholder -->
                 <div class="col-span-full py-20 flex flex-col items-center justify-center space-y-4 opacity-40">
                     <span class="material-symbols-outlined animate-spin text-4xl text-blue-400">sync</span>

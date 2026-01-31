@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            updateDynamicTitles();
+            initTitaniumUI();
             await loadAccounts();
         } else {
             window.location.href = 'index.html';
@@ -165,19 +165,54 @@ async function loadAccounts() {
 }
 
 /**
- * Update Titles based on URL Type
+ * Protocol UI Initialization (Fixed 3-Zone Header)
  */
-function updateDynamicTitles() {
+function initTitaniumUI() {
     const urlParams = new URLSearchParams(window.location.search);
     const type = urlParams.get('type') || 'standard';
-    const titleEl = document.getElementById('page-title');
 
-    if (titleEl) {
+    // 1. Header Population
+    const hLeft = document.getElementById('header-left');
+    const hCenter = document.getElementById('header-center');
+    const hRight = document.getElementById('header-right');
+
+    if (hLeft) {
+        hLeft.innerHTML = `
+            <button onclick="history.back()" class="btn-icon-header">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+        `;
+    }
+
+    if (hCenter) {
         let key = 'section_personal_accounts';
         if (type === 'shared') key = 'section_shared_accounts';
         if (type === 'memo') key = 'section_note';
         if (type === 'shared_memo') key = 'section_shared_note';
-        titleEl.textContent = t(key);
+
+        hCenter.innerHTML = `
+            <h2 class="header-title" data-t="${key}">${t(key)}</h2>
+        `;
+    }
+
+    if (hRight) {
+        hRight.innerHTML = `
+            <a href="aggiungi_account_privato.html" class="btn-icon-header">
+                <span class="material-symbols-outlined">add</span>
+            </a>
+        `;
+    }
+
+    // 2. Footer Placeholder
+    const footerStack = document.getElementById('footer-placeholder');
+    if (footerStack) {
+        footerStack.innerHTML = `
+            <footer class="titanium-footer">
+                <div class="header-balanced-container" style="justify-content: center; width: 100%;">
+                    <span class="text-[9px] font-bold uppercase tracking-[0.4em] opacity-30">${t('version') || 'Titanium V3.5'}</span>
+                </div>
+            </footer>
+        `;
     }
 }
 
@@ -264,11 +299,6 @@ function renderList(list) {
                     <div onclick="window.location.href='dettaglio_account_privato.html?id=${acc.id}${acc.isOwner ? '' : '&owner=' + acc.ownerId}'" 
                          class="swipe-content matrix-card-compact matrix-${colors.key} border-glow transition-all duration-300">
                         
-                        <!-- Parentesi (C-Blade) dinamica Shape: Concave Parenthesis -->
-                        <div class="absolute inset-y-0 left-0 w-6 pointer-events-none z-0 opacity-15 dark:opacity-30" 
-                             style="background: linear-gradient(to right, ${colors.hex}, transparent); clip-path: polygon(0% 0%, 100% 0%, 20% 50%, 100% 100%, 0% 100%);">
-                        </div>
-
                         <!-- Top Matrix Accent -->
                         <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent ${colors.via} to-transparent"></div>
     
@@ -280,7 +310,7 @@ function renderList(list) {
                                         <div class="absolute -bottom-0.5 -right-0.5 size-1.5 rounded-full ${colors.bg} border border-white dark:border-[#0a0f1e]"></div>
                                     </div>
                                     <div class="flex flex-col min-w-0">
-                                        <h3 class="text-slate-900 dark:text-white font-black text-[12px] leading-tight truncate max-w-[140px]">${acc.nomeAccount || t('account')}</h3>
+                                        <h3 class="font-black text-[12px] leading-tight truncate max-w-[140px]">${acc.nomeAccount || t('account')}</h3>
                                     </div>
                                 </div>
     

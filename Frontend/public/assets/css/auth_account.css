@@ -1,7 +1,19 @@
 /* 
- * TITANIUM DESIGN SYSTEM - Account Variation V3.5 (Dual Mode)
+ * TITANIUM DESIGN SYSTEM - Account Variation V3.7 (Dual Mode + Deep Responsive)
  * File: auth_account.css
  * Mode: CORE STANDARD (Shell + Matrix + Grid + Utils)
+ * 
+ * V3.7 Changelog (2026-01-31):
+ * - Rimosso effetto C-Blade (Lama) per design più pulito e minimalista
+ * - Padding uniformato a 1.5rem (large) e 0.75rem (compact)
+ * - Padding mobile semplificato a 1rem (large) e 0.5rem (compact)
+ * 
+ * V3.6 Changelog (2026-01-31):
+ * - Implementazione completa Standard Accesso V3.0 per responsive mobile
+ * - Media queries @768px (tablet) e @480px (mobile)
+ * - Wrapping forzato per titoli e campi (overflow-wrap, word-break)
+ * - Ottimizzazione C-Blade per schermi stretti
+ * - Font-size adattivi per massima leggibilità
  */
 
 /* ==========================================================================
@@ -83,6 +95,59 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
+/* 2.1 UX OPTIMIZATION: REMOVE TAP HIGHLIGHT (Fixed Square Click bug) */
+.titanium-bg,
+body {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+/* 2.2 GLOBAL INTERACTIVE FEEDBACK */
+a,
+button,
+[role="button"],
+[class*="matrix-"] {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+a:active,
+button:active,
+[role="button"]:active,
+[class*="matrix-"]:active {
+    transform: scale(0.96);
+}
+
+/* 2.4 ANIMAZIONI CORE */
+@keyframes shimmer-master {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* 2.3 TITANIUM SHIELD: Custom Asterisk Masking for inputs */
+.titanium-shield {
+    -webkit-text-security: asterisk !important;
+}
+
+/* BLOCCO INTERAZIONI NON DESIDERATE (UX NATIVA) */
+.no-select {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+/* ma NON sugli input e aree di testo editabili */
+.no-select input,
+.no-select textarea,
+.no-select [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -95,6 +160,41 @@ body {
     }
 }
 
+@keyframes pulse-gentle {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton-text {
+    height: 10px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.loading-pulse {
+    animation: pulse-gentle 1.5s ease-in-out infinite;
+}
+
 /* ==========================================================================
    2. CONTENITORE & FONDO (Titanium Box)
    ========================================================================== */
@@ -103,12 +203,22 @@ body {
     display: flex;
     min-height: 100vh;
     width: 100%;
+    max-width: 48rem;
+    /* Standard Titanium Scocca */
+    margin: 0 auto;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     background: var(--titanium-box-gradient);
     z-index: 10;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+.titanium-bg {
+    background-color: var(--bg-primary);
 }
 
 /* ==========================================================================
@@ -248,11 +358,35 @@ body {
    4. DASHBOARD & MATRIX (Titanium Standard)
    ========================================================================== */
 .titanium-main {
+    flex: 1;
     width: 100%;
     max-width: 1200px;
-    padding: calc(var(--header-height) + 1rem) 1.5rem 100px 1.5rem;
+    padding: calc(var(--header-height) + 1.5rem) 1.5rem 100px 1.5rem;
     z-index: 20;
     animation: fadeInScale 0.6s ease-out;
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    /* Effetto Vanishing (Svanimento bordi) - Solo verticale */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+}
+
+/* Standard Titanium Card (Widget) */
+.titanium-card {
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    color: var(--text-primary);
+}
+
+html:not(.dark) .titanium-card {
+    background: #ffffff;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
 .dashboard-grid {
@@ -279,13 +413,15 @@ body {
     text-decoration: none;
 }
 
-/* Layout Hub/Dashboard (Grandi) */
 [class*="matrix-"]:not(.dynamic-card):not(.matrix-card-compact) {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    min-height: 140px;
+    min-height: 84px;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: relative;
 }
 
 /* Layout Liste / Compact (Piccoli) */
@@ -295,6 +431,8 @@ body {
     display: block;
     min-height: auto;
     border-radius: 18px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .matrix-blue {
@@ -341,18 +479,7 @@ html:not(.dark) .matrix-card-compact {
     backdrop-filter: blur(10px);
 }
 
-html:not(.dark) [class*="matrix-"]::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 5;
-    pointer-events: none;
-    border-left: 10px solid var(--accent);
-    border-top: 12px solid var(--accent);
-    border-bottom: 12px solid var(--accent);
-    -webkit-clip-path: polygon(0% 0%, 35px 0%, 22px 2px, 18px 5px, 13px 9px, 10px 15px, 10px calc(100% - 15px), 13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px), 35px 100%, 0% 100%);
-    clip-path: polygon(0% 0%, 35px 0%, 22px 2px, 18px 5px, 13px 9px, 10px 15px, 10px calc(100% - 15px), 13px calc(100% - 9px), 18px calc(100% - 5px), 22px calc(100% - 2px), 35px 100%, 0% 100%);
-}
+
 
 [class*="matrix-"]:hover {
     transform: translateY(-5px);
@@ -409,6 +536,10 @@ html.dark .matrix-field-compact {
     font-size: 10px;
     font-weight: 700;
     color: var(--text-primary);
+    word-break: break-all;
+    /* Forza il wrap per stringhe lunghe (email/pwd) */
+    line-height: 1.1;
+    overflow-wrap: break-word;
 }
 
 /* Icons & Text */
@@ -416,8 +547,9 @@ html.dark .matrix-field-compact {
     position: absolute;
     bottom: -10px;
     right: -10px;
-    opacity: 0.15;
+    opacity: 0.5;
     z-index: 1;
+    mix-blend-mode: overlay;
 }
 
 .titanium-icon-lg {
@@ -432,24 +564,20 @@ html.dark .matrix-field-compact {
     font-size: 180px !important;
 }
 
+
 /* Dashboard Micro List (Scadenze/Urgenze) */
-.box-content-main {
-    display: flex;
-    flex-direction: column;
+.box-content-main,
+.card-text-block {
+    position: relative;
+    z-index: 10;
+    /* Sempre sopra la lama */
     width: 100%;
 }
 
-.box-header-flex {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 0.5rem;
-}
-
 [data-ui="hint"] {
-    font-size: 0.95rem;
-    /* ~15px */
+    font-size: 0.85rem;
     font-weight: 600;
-    opacity: 0.6;
+    opacity: 0.7;
     margin-top: -2px;
 }
 
@@ -461,16 +589,55 @@ html.dark .matrix-field-compact {
     height: 20px;
     padding: 0 4px;
     border-radius: 99px;
-    background: #ffffff;
-    color: #000000;
+    color: #ffffff;
     font-size: 11px;
     font-weight: 950;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     flex-shrink: 0;
+    transition: all 0.3s;
 }
 
-html.dark .urgent-badge {
-    background: rgba(255, 255, 255, 0.9);
+/* Badge & Icon coloring based on box type */
+.matrix-blue .urgent-badge {
+    background: rgba(33, 150, 243, 0.5) !important;
+}
+
+.matrix-blue .bg-icon-container span {
+    color: #2196F3 !important;
+    opacity: 0.5;
+}
+
+.matrix-green .urgent-badge {
+    background: rgba(0, 200, 83, 0.5) !important;
+}
+
+.matrix-green .bg-icon-container span {
+    color: #00C853 !important;
+    opacity: 0.5;
+}
+
+.matrix-orange .urgent-badge {
+    background: rgba(255, 152, 0, 0.5) !important;
+}
+
+.matrix-orange .bg-icon-container span {
+    color: #FF9800 !important;
+    opacity: 0.5;
+}
+
+.matrix-red .urgent-badge {
+    background: rgba(155, 28, 28, 0.5) !important;
+}
+
+.matrix-red .bg-icon-container span {
+    color: #FF5252 !important;
+    opacity: 0.5;
+}
+
+/* Light Mode Overrides for Badge (if needed for readability) */
+html:not(.dark) .urgent-badge {
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-dynamic-list {
@@ -485,47 +652,113 @@ html.dark .urgent-badge {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    opacity: 0.6;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--accent), transparent 85%);
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.micro-list-item:last-child {
+    margin-bottom: 0;
+}
+
+.micro-list-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    border-color: color-mix(in srgb, var(--accent), transparent 50%);
 }
 
 .micro-list-item .item-content {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 0.6rem;
     min-width: 0;
+}
+
+.micro-list-item .item-icon-box {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--accent), transparent 90%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid color-mix(in srgb, var(--accent), transparent 80%);
+}
+
+.micro-list-item .material-symbols-outlined {
+    font-size: 16px !important;
+    color: var(--accent);
+    opacity: 1;
 }
 
 .micro-list-item .item-title {
     font-size: 11px !important;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: inherit;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .micro-list-item .item-badge {
-    font-size: 9px !important;
-    font-weight: 900;
+    font-size: 8px !important;
+    font-weight: 950;
     text-transform: uppercase;
-    opacity: 0.5;
+    padding: 2px 6px;
+    background: color-mix(in srgb, var(--accent), transparent 90%);
+    border-radius: 5px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    border: 1px solid color-mix(in srgb, var(--accent), transparent 80%);
 }
 
-.micro-list-item .material-symbols-outlined {
-    font-size: 13px !important;
-    opacity: 0.4;
+/* Light Mode Overrides for Micro Items */
+html:not(.dark) .micro-list-item {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.05);
 }
 
-.card-text-block h3 {
-    font-size: 1.25rem;
+html:not(.dark) .micro-list-item .item-title {
+    color: var(--text-primary);
+}
+
+html:not(.dark) .micro-list-item .item-badge {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary);
+}
+
+.card-text-block {
+    position: relative;
+    z-index: 10;
+}
+
+.card-text-block h3,
+[class*="matrix-"] h3 {
+    font-size: 1.1rem;
+    /* Dimensione unificata V3.0 */
     font-weight: 800;
     margin-bottom: 0.25rem;
+    line-height: 1.2;
+    white-space: normal;
+    /* Obbligo Wrap da Protocollo Accesso V3.0 */
+    overflow-wrap: break-word;
 }
 
 .card-text-block p {
     font-size: 0.8rem;
     opacity: 0.7;
     font-weight: 600;
+    white-space: normal;
+    /* Obbligo Wrap da Protocollo Accesso V3.0 */
+    overflow-wrap: break-word;
 }
 
 /* ==========================================================================
@@ -557,6 +790,44 @@ html.dark .urgent-badge {
         transform: translateX(-50%) translateY(100px) scale(1.4);
         opacity: 0.9;
     }
+}
+
+/* 5.2 GLASS SHINE (Riflesso Dinamico) */
+.glass-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            transparent 51%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 5;
+    border-radius: inherit;
+}
+
+[class*="matrix-"]:hover .glass-shine {
+    opacity: 1;
+}
+
+html.dark .glass-shine {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.25) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            transparent 51%);
+}
+
+/* 5.3 SAETTA MASTER (Riflesso Metallico) */
+.saetta-master {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 2;
+    animation: shimmer-master 6s infinite linear;
+    opacity: 0.3;
 }
 
 /* ==========================================================================
@@ -707,4 +978,105 @@ html.dark .urgent-badge {
         padding-left: 1rem;
         padding-right: 1rem;
     }
+}
+
+/* 7. ADATTAMENTO MOBILE PROFONDO (Standard Accesso V3.0) */
+@media (max-width: 480px) {
+    .titanium-main {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    [class*="matrix-"]:not(.matrix-field-compact) {
+        padding: 1rem;
+    }
+
+    .matrix-card-compact {
+        padding: 0.5rem;
+    }
+
+    .card-text-block h3,
+    [class*="matrix-"] h3 {
+        font-size: 1rem;
+        line-height: 1.15;
+    }
+
+    .matrix-field-compact {
+        padding: 0 0.5rem;
+        height: 24px;
+    }
+
+    .matrix-field-compact span {
+        font-size: 9px;
+    }
+
+    .titanium-header {
+        padding: 0.6rem 0.75rem;
+    }
+
+    .btn-icon-header {
+        width: 36px;
+        height: 36px;
+    }
+
+    .header-title {
+        font-size: 0.95rem;
+        line-height: 1.1;
+    }
+
+    /* FIX ASIMMETRIA: Forza padding uguale su entrambi i lati */
+    .titanium-main {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .dashboard-grid,
+    #accounts-container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    [class*="matrix-"] {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+
+/* Dashboard Grid (Single Column - Account Lists) */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* Dashboard Grid 2 Columns (Responsive) */
+.dashboard-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-grid {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-grid {
+        gap: 0.5rem;
+    }
+}
+
+/* Card Compact Height (Area Privata Grid) */
+.card-compact-height {
+    min-height: 70px;
 }

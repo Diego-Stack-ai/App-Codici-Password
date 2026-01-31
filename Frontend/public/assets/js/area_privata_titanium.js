@@ -32,22 +32,29 @@ async function initProtocolUI() {
     await initComponents();
 
     // Iniezione Header Balanced (3 Zone)
-    const headerStack = document.getElementById('header-content');
-    if (headerStack) {
-        headerStack.innerHTML = `
-            <div class="header-left">
-                <button onclick="history.back()" class="btn-icon-header">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </button>
-            </div>
-            <div class="header-center">
-                <h2 class="header-title" data-t="area_privata_title">${t('area_privata_title')}</h2>
-            </div>
-            <div class="header-right">
-                <a href="home_page.html" class="btn-icon-header">
-                    <span class="material-symbols-outlined">home</span>
-                </a>
-            </div>
+    const hLeft = document.getElementById('header-left');
+    const hCenter = document.getElementById('header-center');
+    const hRight = document.getElementById('header-right');
+
+    if (hLeft) {
+        hLeft.innerHTML = `
+            <button onclick="history.back()" class="btn-icon-header">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+        `;
+    }
+
+    if (hCenter) {
+        hCenter.innerHTML = `
+            <h2 class="header-title" data-t="area_privata_title">${t('area_privata_title')}</h2>
+        `;
+    }
+
+    if (hRight) {
+        hRight.innerHTML = `
+            <a href="home_page.html" class="btn-icon-header">
+                <span class="material-symbols-outlined">home</span>
+            </a>
         `;
     }
 
