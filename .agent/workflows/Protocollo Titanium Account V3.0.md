@@ -26,6 +26,8 @@ area_privata.html
 
 aggiungi_account_privato.html
 
+modifica_account_privato.html
+
 dettaglio_account_privato.html
 
 lista_aziende.html
@@ -34,7 +36,17 @@ account_azienda.html
 
 aggiungi_account_azienda.html
 
+modifica_account_azienda.html
+
 dettaglio_account_azienda.html
+
+aggiungi_nuova_azienda.html
+
+modifica_azienda.html
+
+dati_azienda.html
+
+gestione_allegati.html
 
 1.1 CSS di riferimento
 

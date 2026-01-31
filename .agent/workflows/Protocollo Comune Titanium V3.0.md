@@ -1,3 +1,7 @@
+---
+description: 
+---
+
 Protocollo Comune Titanium V3.0 (Core) – Baseline Ufficiale
 
 Scopo: Questo protocollo costituisce la base comune per tutte le pagine gestite dai protocolli Impostazioni, Accesso e Account. Stabilisce le regole generali di architettura, layout, componenti e internazionalizzazione (multilingua).
@@ -5,13 +9,15 @@ Nota: Per le caratteristiche specifiche di ciascuna pagina satellite, fare rifer
 
 1. Ambito di Applicazione
 
-Il Protocollo Comune definisce regole valide per tutte le pagine satellite, indipendentemente dal tipo:
+Il Protocollo Comune definisce regole valide per tutte le pagine presenti nella cartella public del progetto, indipendentemente dal tipo:
 
 Gestione dati utente: profilo, configurazioni, credenziali, scadenze, documenti, notifiche, flotta
 
 Dashboard principali o secondarie
 
 Pagine di inserimento e dettaglio (form e modali)
+
+Eccezione: Le 4 pagine del Protocollo Accesso (Login, Registrazione, Reset_password, Imposta_nuova_password) operano esclusivamente in Dark Mode forzata.
 
 Importante: Specifiche aggiuntive di layout, palette, effetti e componenti sensibili devono seguire i protocolli dedicati Impostazioni, Accesso o Account.
 

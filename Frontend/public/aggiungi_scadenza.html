@@ -14,7 +14,8 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master -->
+    <!-- Design System Master (Protocollo V3.0) -->
+    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
     <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
 
     <!-- CSS specifico per input dinamici -->
@@ -76,39 +77,6 @@
             background-color: #1e293b;
             color: white;
             padding: 10px;
-        }
-
-        /* Pulsante Azione Fisso Bottom */
-        .fixed-action-container {
-            position: fixed;
-            bottom: 1.5rem;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            pointer-events: none;
-            /* Container non interferisce con click sotto */
-            padding: 0 1.5rem;
-        }
-
-        #save-button {
-            pointer-events: auto;
-            /* Riattiva click solo sul bottone */
-            width: 100%;
-            max-width: 450px;
-            height: 60px;
-            border-radius: 18px;
-            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .footer-spacer {
-            height: 120px;
         }
 
         /* Align labels and inputs */
@@ -532,7 +500,7 @@
                 </div>
             </div>
 
-            <div class="footer-spacer"></div>
+            <div class="spacer-footer"></div>
 
         </main>
 

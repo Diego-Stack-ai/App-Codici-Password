@@ -40,6 +40,8 @@ scadenze.html
 
 aggiungi_scadenza.html
 
+modifica_scadenza.html
+
 dettaglio_scadenza.html
 
 1.1 CSS di riferimento
