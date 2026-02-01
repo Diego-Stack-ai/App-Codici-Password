@@ -1,97 +1,149 @@
 import { resetPassword } from './auth.js';
-import { t } from './translations.js';
+import { t, supportedLanguages } from './translations.js';
 
 /**
- * RESET_PASSWORD.JS - Protocollo Titanium
- * Gestione logica del recupero credenziali
+ * [RESET PASSWORD] MODULE V3.1
+ * Gestisce l'invio delle istruzioni di recupero credenziali.
  */
 
-// Traduzione statica immediata
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-t]').forEach(el => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("[RESET] Application Boot V3.1...");
+
+    try {
+        // 1. AppState base
+        window.AppState = window.AppState || {
+            user: null,
+            theme: 'dark',
+            language: localStorage.getItem('app_language') || 'it'
+        };
+
+        // 2. TRADUZIONI 
+        applyLocalTranslations();
+
+        // 3. SETUP 
+        setupResetForm();
+        setupLanguageSelector();
+
+        console.log("[RESET] System Ready.");
+    } catch (err) {
+        console.error("[RESET] Critical Init Error:", err);
+    }
+});
+
+/**
+ * Traduzioni locali
+ */
+function applyLocalTranslations() {
+    document.querySelectorAll('[data-t], [data-t-placeholder]').forEach(el => {
         const key = el.getAttribute('data-t');
-        if (el.hasAttribute('placeholder')) {
-            el.setAttribute('placeholder', t(key));
-        } else {
-            el.textContent = t(key);
+        const placeholderKey = el.getAttribute('data-t-placeholder');
+
+        if (key) {
+            const translated = t(key);
+            if (translated && translated !== key) {
+                const icon = el.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
+                    if (textNode) textNode.textContent = translated;
+                    else el.appendChild(document.createTextNode(translated));
+                } else {
+                    el.textContent = translated;
+                }
+            }
+        }
+
+        if (placeholderKey) {
+            const translated = t(placeholderKey);
+            if (translated && translated !== placeholderKey) {
+                el.setAttribute('placeholder', translated);
+            }
         }
     });
-});
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    const resetForm = document.getElementById('reset-form');
+/**
+ * Gestione Form Recupero
+ */
+function setupResetForm() {
+    const form = document.getElementById('reset-form');
+    const submitBtn = document.getElementById('reset-submit-btn');
+    if (!form || !submitBtn) return;
 
-    if (resetForm) {
-        resetForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            const emailInput = document.getElementById('email');
-            const submitBtn = resetForm.querySelector('button[type="submit"]');
+        const emailEl = document.getElementById('email');
+        const email = emailEl.value.trim();
 
-            if (!emailInput || !submitBtn) return;
+        // 1. Validazione base
+        if (!email || !email.includes('@')) {
+            if (window.showToast) window.showToast(t('error_invalid_email') || "Inserisci un'email valida.", "error");
+            return;
+        }
 
-            const email = emailInput.value.trim();
-            const originalContent = submitBtn.innerHTML;
+        // 2. UI Feedback
+        const originalContent = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+        document.body.classList.add('is-auth-progress');
 
-            // UI Loading State
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-                <div class="flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined animate-spin">refresh</span>
-                    <span class="tracking-widest uppercase text-[10px]">Invio in corso...</span>
-                </div>
-            `;
+        try {
+            console.log("[RESET] Sending recovery email to:", email);
+            await resetPassword(email);
 
-            try {
-                // Esecuzione reset password tramite Firebase
-                await resetPassword(email);
+            if (window.showToast) window.showToast(t('success_reset_sent') || "Istruzioni inviate! Controlla la tua email.", "success");
 
-                // Feedback visivo è già gestito da resetPassword in auth.js via Toast
-                // ma possiamo aggiungere una pulizia campo qui
-                emailInput.value = '';
+            emailEl.value = '';
 
-            } catch (err) {
-                console.error("Reset Error:", err);
-                if (window.showToast) window.showToast("Impossibile inviare email (Verifica l'indirizzo)", "error");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalContent;
+            // Redirect opzionale al login dopo successo
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 5000);
+
+        } catch (err) {
+            console.error("[RESET] Failure:", err);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
+            document.body.classList.remove('is-auth-progress');
+
+            let errorMsg = t('error_auth_failed') || "Impossibile inviare l'email di recupero.";
+            if (err.code === 'auth/user-not-found') {
+                errorMsg = "Nessun account associato a questa email.";
             }
-        });
-    }
 
-    // Setup Language Selector
-    setupLanguageSelector();
-});
+            if (window.showToast) window.showToast(errorMsg, "error");
+        }
+    });
+}
 
-import { supportedLanguages } from './translations.js';
-
+/**
+ * Selettore Lingua
+ */
 function setupLanguageSelector() {
     const btn = document.getElementById('lang-toggle-btn');
     const dropdown = document.getElementById('lang-dropdown');
-
     if (!btn || !dropdown) return;
 
     dropdown.innerHTML = supportedLanguages.map(lang => `
-        <button class="lang-option" data-code="${lang.code}" style="display:flex; align-items:center;">
-            <span class="flag" style="margin-right:8px;">${lang.flag}</span> ${lang.name}
+        <button class="lang-option" data-code="${lang.code}">
+            <span class="flag">${lang.flag}</span> ${lang.name}
         </button>
     `).join('');
 
-    btn.addEventListener('click', (e) => {
+    btn.onclick = (e) => {
         e.stopPropagation();
         dropdown.classList.toggle('show');
-    });
+    };
 
-    document.addEventListener('click', () => {
-        dropdown.classList.remove('show');
-    });
+    document.addEventListener('click', () => dropdown.classList.remove('show'));
 
     dropdown.querySelectorAll('.lang-option').forEach(opt => {
-        opt.addEventListener('click', () => {
+        opt.onclick = () => {
             const code = opt.getAttribute('data-code');
             localStorage.setItem('app_language', code);
-            window.location.reload();
-        });
+            window.AppState.language = code;
+            applyLocalTranslations();
+        };
     });
 }
+

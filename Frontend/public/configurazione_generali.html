@@ -46,8 +46,12 @@
     <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
-<body class="antialiased">
-    <div class="titanium-box">
+<body
+    style="font-family: 'Manrope', sans-serif; background-color: #0a0f1e; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden;"
+    class="antialiased">
+    <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
+    <div
+        style="position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100vh; max-width: 48rem; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; background-color: #0a0f1e; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05);">
         <!-- Faro Estetico -->
         <div class="glass-glow"></div>
 
@@ -104,7 +108,7 @@
                     </div>
                 </div>
                 <div id="container_types" class="accordion-content">
-                    <table class="w-full text-xs">
+                    <table style="width: 100%; font-size: 0.75rem;">
                         <tbody id="tbody_types"></tbody>
                     </table>
                 </div>
@@ -135,7 +139,7 @@
                     </div>
                 </div>
                 <div id="container_templates" class="accordion-content">
-                    <table class="w-full text-xs">
+                    <table style="width: 100%; font-size: 0.75rem;">
                         <tbody id="tbody_templates" class="divide-y"></tbody>
                     </table>
                 </div>

@@ -1,0 +1,542 @@
+/* 
+ * TITANIUM DESIGN SYSTEM - V4.6 (Auth Final Pure CSS - No Tailwind)
+ * File: auth_accesso.css
+ * Mode: TRUE DARK ONLY
+ */
+
+/* ==========================================================================
+   0. TOKEN DI BASE
+   ========================================================================== */
+:root {
+    --bg-dark: #0a0f1e;
+    --primary-blue: #2563eb;
+    --primary-light: #60a5fa;
+    --text-white: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.5);
+
+    /* Glow Gradients (Solo versione Dark) */
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
+
+    /* Z-Index Architecture */
+    --z-bg: 0;
+    --z-glow: 5;
+
+    /* Premium Border Utils */
+    --premium-border-width: 1.5px;
+    --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
+}
+
+/* ==========================================================================
+   1. GLOBAL RESET & BASE
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    font-family: 'Manrope', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    color-scheme: dark;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* ==========================================================================
+   2. TITANIUM BOX (CENTERED LAYOUT)
+   ========================================================================== */
+.titanium-box {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    overflow: hidden;
+    background: linear-gradient(to left, #030712, #162e6e);
+    z-index: 10;
+}
+
+/* ==========================================================================
+   3. GLASS GLOW (FARO)
+   ========================================================================== */
+.glass-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 150%;
+    height: 300%;
+    filter: blur(80px);
+    z-index: var(--z-glow);
+    pointer-events: none;
+    animation: glowFloat 5s ease-in-out infinite;
+    transform: translateX(-50%);
+    background: var(--glow-gradient);
+}
+
+@keyframes glowFloat {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(-150px) scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(100px) scale(1.4);
+        opacity: 0.9;
+    }
+}
+
+/* ==========================================================================
+   4. TITANIUM VAULT (CARD)
+   ========================================================================== */
+.titanium-vault {
+    width: 100%;
+    max-width: 28rem;
+    padding: 2.5rem 2rem;
+    background: rgba(10, 15, 30, 0.5);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+    position: relative;
+    z-index: 15;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* SAETTA MAIN CARD */
+.titanium-vault::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 2;
+    animation: shimmer-master 6s infinite linear;
+}
+
+@keyframes shimmer-master {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.titanium-vault:hover {
+    transform: translateY(-4px);
+}
+
+/* ==========================================================================
+   5. COMPONENTI INTERNI
+   ========================================================================== */
+
+/* ICON BOX */
+.security-icon-box {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem auto;
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.5s;
+}
+
+.titanium-vault:hover .security-icon-box {
+    transform: scale(1.1);
+}
+
+.security-icon-box span {
+    font-size: 36px;
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* TITOLI */
+.auth-title {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    color: white;
+    margin: 0 0 0.25rem 0;
+    letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+    font-size: 0.875rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 2rem;
+}
+
+/* INPUT SECTION */
+.auth-form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.auth-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    padding-left: 0.25rem;
+}
+
+.auth-input {
+    width: 100%;
+    height: 3.5rem;
+    padding: 0 1.25rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.auth-input:focus {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+/* TOGGLE PASSWORD */
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 2.3rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+    font-size: 20px;
+}
+
+.toggle-password:hover {
+    color: white;
+}
+
+/* BOTTONE */
+.auth-btn {
+    width: 100%;
+    height: 3.5rem;
+    background: linear-gradient(to right, #2563eb, #3b82f6);
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 1rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.auth-btn:hover {
+    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+    transform: translateY(-2px);
+}
+
+.auth-btn:active {
+    transform: scale(0.98);
+}
+
+/* LINK UTILI */
+.link-forgot {
+    display: block;
+    text-align: right;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.link-register {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 2rem;
+    padding: 0.8rem 0;
+    font-size: 0.8rem;
+    color: var(--primary-light);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 1rem;
+    transition: all 0.2s;
+    background: transparent;
+    text-decoration: none;
+}
+
+.link-register:hover {
+    background: rgba(96, 165, 250, 0.1);
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    opacity: 1;
+}
+
+/* FOOTER LEGALE */
+.legal-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================================
+   6. BORDER GLOW (PREMIUM)
+   ========================================================================== */
+.border-glow {
+    position: relative;
+    border: none !important;
+}
+
+.border-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--premium-border-width);
+    background: var(--premium-border-gradient);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 20;
+}
+
+/* ==========================================================================
+   7. FASCE ESTETICHE (PREMIUM FUSION UPGRADE)
+   ========================================================================== */
+.auth-header,
+.auth-footer {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    /* Leggermente più alte per un effetto fumo migliore */
+    z-index: 1;
+    /* Sotto la card (15) ma sopra lo sfondo */
+    pointer-events: none;
+    background: transparent !important;
+}
+
+.auth-header {
+    top: 0;
+}
+
+.auth-footer {
+    bottom: 0;
+}
+
+.auth-header::before,
+.auth-footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Sfumatura Fusion con Maschera */
+.auth-header::before {
+    background: rgba(10, 15, 30, 0.9);
+    -webkit-mask-image: linear-gradient(to bottom, black 25%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 25%, transparent 100%);
+}
+
+.auth-footer::before {
+    background: rgba(10, 15, 30, 0.9);
+    -webkit-mask-image: linear-gradient(to top, black 25%, transparent 100%);
+    mask-image: linear-gradient(to top, black 25%, transparent 100%);
+}
+
+/* ==========================================================================
+   2b. LANGUAGE SELECTOR (Floating Mini-Card)
+   ========================================================================== */
+.lang-selector-container {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 100;
+}
+
+.lang-btn-float {
+    position: relative;
+    background: rgba(10, 15, 30, 0.6);
+    /* Premium Gradient Border Trick */
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background-image: linear-gradient(rgba(10, 15, 30, 0.7), rgba(10, 15, 30, 0.7)),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.4) 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+
+    color: var(--text-muted);
+    padding: 0.6rem 1rem;
+    /* 12px 16px roughly */
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* SHIMMER EFFECT BUTTON (Clone Esatto della Card) */
+.lang-btn-float::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    /* 110deg ESATTO come Card */
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+    background-size: 200% 100%;
+
+    pointer-events: none;
+
+    /* STESSA ANIMAZIONE DELLA CARD */
+    animation: shimmer-master 6s infinite linear;
+}
+
+.lang-btn-float:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+    color: white;
+    background-image: linear-gradient(rgba(10, 15, 30, 0.6), rgba(10, 15, 30, 0.6)),
+        linear-gradient(135deg, #2563eb 0%, rgba(255, 255, 255, 0.5) 50%, #2563eb 100%);
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: 125%;
+    right: 0;
+    width: 180px;
+    background: rgba(10, 15, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.lang-dropdown.show {
+    display: flex;
+    animation: fadeInDropdown 0.2s ease-out;
+}
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.lang-option {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s;
+}
+
+.lang-option:hover {
+    background: rgba(37, 99, 235, 0.2);
+    color: white;
+}
+
+.lang-option .flag {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* ==========================================================================
+   8. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 640px) {
+    .titanium-box {
+        max-width: 100%;
+    }
+
+    .titanium-vault {
+        width: 90%;
+        padding: 1.5rem;
+        border-radius: 20px;
+    }
+
+    .glass-glow {
+        width: 200%;
+        filter: blur(60px);
+    }
+
+    .auth-title {
+        font-size: 1.75rem;
+    }
+}

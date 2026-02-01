@@ -2,169 +2,229 @@
 description: 
 ---
 
-Protocollo Comune Titanium V3.0 (Core) – Baseline Ufficiale
+🔹 Protocollo Comune Titanium V3.1 – Core + Performance & Sicurezza
 
-Scopo: Questo protocollo costituisce la base comune per tutte le pagine gestite dai protocolli Impostazioni, Accesso e Account. Stabilisce le regole generali di architettura, layout, componenti e internazionalizzazione (multilingua).
-Nota: Per le caratteristiche specifiche di ciascuna pagina satellite, fare riferimento ai rispettivi protocolli dedicati.
+Nota importante per sviluppatori e agenti AI:
+
+Questa base costituisce il cuore di tutte le pagine. Una volta creata, non deve essere modificata se non tramite richieste formali documentate (eccezioni).
 
 1. Ambito di Applicazione
 
-Il Protocollo Comune definisce regole valide per tutte le pagine presenti nella cartella public del progetto, indipendentemente dal tipo:
+Copre tutte le pagine della cartella public/
 
-Gestione dati utente: profilo, configurazioni, credenziali, scadenze, documenti, notifiche, flotta
+Gestione dati utente, dashboard, inserimento/modali
 
-Dashboard principali o secondarie
+Eccezioni: 4 pagine Accesso (Login, Registrazione, Reset_password, Imposta_nuova_password) → sempre Dark Mode
 
-Pagine di inserimento e dettaglio (form e modali)
-
-Eccezione: Le 4 pagine del Protocollo Accesso (Login, Registrazione, Reset_password, Imposta_nuova_password) operano esclusivamente in Dark Mode forzata.
-
-Importante: Specifiche aggiuntive di layout, palette, effetti e componenti sensibili devono seguire i protocolli dedicati Impostazioni, Accesso o Account.
-
-1.1 CSS di riferimento
-
-assets/css/auth_comune.css
-
-Garantisce performance, indipendenza dal resto dell’app e coerenza visiva.
-
+CSS comune: assets/css/comune.css
 
 2. Regole di Architettura (System Core)
 2.1 Cache Busting
-
-Obbligatorio: tutti i file JS e CSS devono includere un parametro di versione:
-
 <script src="assets/js/miofile.js?v=X.Y"></script>
 <link rel="stylesheet" href="assets/css/miofile.css?v=X.Y">
 
 
-Vietato:
+Obbligatorio su tutti i file JS/CSS
 
-File senza versioning
+Vietato: alert(), confirm(), prompt()
 
-Uso di native alerts (alert(), confirm(), prompt())
-
-2.2 Componenti UI Centralizzati
-
-Tutte le interazioni utente devono passare dai componenti centralizzati:
-
+2.2 Componenti UI centralizzati
 await window.showInputModal("Titolo", "ValoreDefault");
 await window.showConfirmModal("Messaggio");
 window.showToast("Messaggio", "success/error");
 
-2.3 Standard Multilingua (i18n)
+2.3 Multilingua (i18n)
 
-Concetto di lingua:
+Testi statici → data-t / data-t-placeholder
 
-Questo protocollo definisce il supporto multilingua di base per tutte le pagine
+Traduzioni → applyTranslations()
 
-Testi statici: attributi data-t e data-t-placeholder
+Vietato testo hardcoded
 
-Traduzioni applicate tramite applyTranslations() in JS
+2.4 Layout Dinamico & Temi
 
-Nessun testo hardcoded nelle pagine o nei modali gestiti da questo protocollo
+Dual-mode Light/Dark tramite CSS/classi
 
-I protocolli specifici di pagina possono integrare traduzioni aggiuntive, ma sempre compatibili con il sistema definito qui
+Colori, ombre e bordi → classi/variabili CSS
 
-2.4 Layout Dinamico e Temi
+Modali centrati e scrollabili
 
-Layout dinamici via JS; vietato usare rgba/hex inline
+2.5 Header & Footer (aggiornato)
 
-Supporto dual-mode (light/dark) tramite variabili CSS o classi condizionali
+Header:
 
-Tutti i colori, ombre e bordi devono usare classi o variabili predefinite
+Layout a 3 zone:
 
-CSS dedicato: common.css per gestire layout, temi, tipografia e componenti base
+Sinistra: sempre freccia “torna indietro” che riporta alla pagina precedente o alla Home se non c’è storia di navigazione.
 
-2.5 Header & Footer
+Centro: nome della pagina, sempre visibile e centrato.
 
-Header: layout bilanciato a 3 zone (Left, Center, Right). Titoli max 2 righe con wrap intelligente; priorità icone definite
+Destra: icone standard di navigazione base (Home), eventuali altre azioni aggiuntive non previste di default devono stare nel footer.
 
-Footer: <div id="footer-placeholder"></div>; vietato usare <footer> statico
+Titoli massimo 2 righe, con word-break corretto su mobile.
 
-2.6 Responsive Design (unificato)
+Footer:
 
-Obiettivo: garantire che tutte le pagine satellite siano pienamente adattive su desktop, tablet e mobile, con layout flessibile, tipografia leggibile e touch target ottimizzati
+Tutte le icone secondarie o aggiuntive (aggiungi, impostazioni, info) devono essere centralizzate nel footer.
 
-2.6.1 Breakpoints Standard
+Footer responsive, visibile su tutti i dispositivi, non sovrapporre il contenuto principale.
 
-Desktop: >768px
+2.6 Responsive Design (aggiornato)
 
-Tablet: ≤768px
+Breakpoints:
 
-Mobile: ≤480px
+Desktop > 768px
 
-Small Mobile: ≤400px
+Tablet ≤ 768px
 
-2.6.2 Layout e Griglie
+Mobile ≤ 480px
 
-Layout Flex/Grid per tutte le pagine, modali e card
+Small Mobile ≤ 400px
 
-Strutture centrali e sidebars adattive in base alla larghezza del device
+Layout: Flex/Grid per adattamento automatico header e footer
 
-Padding e gap adattivi per garantire simmetria e coerenza
+Touch target minimo ≥36x36px
 
-Modali centrate, ridotte e scrollabili su mobile
+Icone e immagini scalabili e responsive, non distorcere proporzioni
 
-2.6.3 Tipografia
+2.7 Checklist di Validazione
 
-Testi e titoli adattivi, wrap titoli fino a max 2 righe
+CSS unico collegato
 
-Font size ridotto per dispositivi mobili mantenendo leggibilità
+Versioning corretto
 
-Line-height proporzionata per evitare overlapping in schede e tabelle
-
-2.6.4 Card e Data Fields
-
-Altezza fissa o minima per campi dati sensibili e card
-
-Riduzione dimensioni card su tablet e mobile senza compromettere leggibilità
-
-Touch targets minimi: 36x36px per tutti i pulsanti e elementi cliccabili
-
-2.6.5 Immagini e Elementi Multimediali
-
-Immagini responsive con max-width 100%, height auto
-
-Icone e pulsanti scalabili con classi CSS o variabili
-
-Evitare overflow orizzontale
-
-2.7 Checklist di Validazione Comune
-
-Per ogni pagina satellite:
-
-CSS unico collegato (common.css)
-
-Versioning corretto di JS e CSS
-
-No native alerts
-
-Console pulita (senza errori o warning)
+Console pulita
 
 Header bilanciato
 
 Titoli mobile a capo corretto
 
-Layout responsive rispettato (come da 2.6)
+Layout responsive rispettato
 
-Modali centrate e scrollabili
+Modali centrate/scrollabili
 
-Card e matrix field ridotti ma leggibili
+Card leggibili
 
-Touch targets ≥36x36px
+Traduzioni applicate
 
-Traduzioni applicate correttamente
+2.8 Coordinamento con protocolli satellite
 
-2.8 Coordinamento con altri protocolli
+Impostazioni → Configurazioni
 
-Questo protocollo gestisce solo le regole comuni
+Accesso → Login/Logout
 
-Per gestire l’intera pagina, fare riferimento ai protocolli specifici:
+Account → Dati personali, flotta, documenti, notifiche
 
-Impostazioni → gestione configurazioni e preferenze utente
+CSS aggiuntivo ammesso ma compatibile con regole comuni
 
-Accesso → gestione login, logout e sessione
+2.9 Performance, Cache e Sicurezza (NUOVO)
+2.9.1 AppState Centrale
+window.AppState = {
+  user: null,
+  role: null,
+  permissions: [],
+  theme: "light",
+  language: "it",
+  lastSync: null
+};
 
-Account → gestione dati personali, flotta, documenti, notifiche
 
-Ogni protocollo satellite può usare CSS specifici aggiuntivi, ma deve rispettare le regole comuni di layout, temi, multilingua e responsive definite qui
+Obbligatorio usare AppState per ogni pagina
+
+Vietato ricalcolare lingua, tema, ruolo ad ogni pagina
+
+Firebase → solo per refresh dati
+
+2.9.2 Cache Locale Dati (IndexedDB)
+
+Salvare: scadenze, dashboard, documenti consultivi, configurazioni non sensibili
+
+Ogni dataset → timestamp e TTL max 15 minuti
+
+Refresh silenzioso quando TTL scaduto
+
+2.9.3 Strategia Firebase
+
+Evitare fetch automatici all’apertura pagina
+
+Sync in background con confronto hash/versione
+
+Pattern: Cache → Render → Firebase Sync → Update UI
+
+2.9.4 Service Worker
+
+Cache: CSS, JS, font, icone
+
+Cache richieste GET Firebase
+
+Fornire fallback offline
+
+Vietato logica utente o permessi
+
+2.9.5 Sicurezza Dati Locali
+
+Consentito salvare: dati UI, liste, scadenze
+
+Vietato salvare: token permanenti, permessi senza scadenza
+
+Dati locali → TTL + invalidazione al logout
+
+2.9.6 Logout & Invalidazione
+
+Pulizia IndexedDB
+
+Reset AppState
+
+Rimozione cache sensibili
+
+Forzare nuova validazione accesso
+
+🔹 Protocollo per Agente AI (Prompt “Blind Control”)
+
+Scopo: L’agente AI deve generare codice per le pagine senza mai modificare la base del Protocollo Comune, salvo eccezioni formalmente richieste.
+
+Istruzioni per l’Agente AI
+
+Base intoccabile
+
+Il Protocollo Comune Titanium V3.1 è la base per tutte le pagine
+
+Non modificare regole di layout, cache, sicurezza, AppState, multilingua o responsive
+
+Modifiche consentite
+
+Solo protocolli satellite (Impostazioni, Accesso, Account)
+
+Solo con richiesta chiara e documentata
+
+Generazione pagine
+
+Creare solo codice compatibile con il V3.1
+
+Utilizzare AppState centrale
+
+Non ricalcolare dati già presenti
+
+IndexedDB → solo per cache consultiva
+
+Evitare fetch Firebase ridondanti
+
+UI → solo tramite componenti centralizzati
+
+Validazione
+
+Ogni pagina generata deve rispettare checklist 2.7
+
+Non usare alert/confirm/prompt
+
+Tutti i testi → i18n
+
+Console pulita, modali centrate, touch target ≥36x36px
+
+Offline/Cache
+
+Non scrivere logica di permessi sul Service Worker
+
+Solo caching statici + GET
+
+Sincronizzazione Firebase in background

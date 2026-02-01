@@ -1,168 +1,210 @@
 import { auth } from './firebase-config.js';
-import { updatePassword, confirmPasswordReset, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { showToast } from './ui-core.js';
-import { t } from './translations.js';
+import { updatePassword, confirmPasswordReset } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { t, supportedLanguages } from './translations.js';
 
 /**
- * IMPOSTA_NUOVA_PASSWORD.JS - Protocollo Titanium
- * Gestione della fase finale del reset password (inserimento nuova password)
+ * [SET NEW PASSWORD] MODULE V3.1
+ * Gestione finale del reset password o cambio password interno.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 0. Traduzione DOM
-    document.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        if (el.hasAttribute('placeholder')) {
-            el.setAttribute('placeholder', t(key));
-        } else {
-            el.textContent = t(key);
-        }
-    });
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("[NEW-PASS] Application Boot V3.1...");
 
-    const updateForm = document.getElementById('new-password-form');
-    const cancelBtn = document.getElementById('cancel-password-update');
-    const newPasswordInput = document.getElementById('new-password');
-    const confirmPasswordInput = document.getElementById('confirm-password');
+    try {
+        // 1. AppState base
+        window.AppState = window.AppState || {
+            user: auth.currentUser,
+            theme: 'dark',
+            language: localStorage.getItem('app_language') || 'it'
+        };
 
-    // --- TOGGLE PASSWORD LOGIC ---
-    const toggleBtn = document.querySelector('.toggle-password');
-    if (toggleBtn && newPasswordInput) {
-        toggleBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            newPasswordInput.setAttribute('type', type);
-            const icon = toggleBtn.querySelector('.material-symbols-outlined');
-            if (icon) icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
-        });
+        // 2. TRADUZIONI 
+        applyLocalTranslations();
+
+        // 3. SETUP 
+        setupNewPasswordForm();
+        setupLanguageSelector();
+        setupPasswordToggle();
+        setupCancelLogic();
+
+        console.log("[NEW-PASS] System Ready.");
+    } catch (err) {
+        console.error("[NEW-PASS] Critical Init Error:", err);
     }
-
-    // --- LOGICA ANNULLA ---
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const isReset = urlParams.has('oobCode');
-            // Se è loggato e non è un reset -> torna a impostazioni
-            // Se è un reset o non è loggato -> torna a login
-            if (auth.currentUser && !isReset) {
-                window.location.href = 'impostazioni.html';
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
-    }
-
-    if (updateForm) {
-        updateForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const newPassword = newPasswordInput.value;
-            const confirmPassword = confirmPasswordInput.value;
-            const submitBtn = updateForm.querySelector('button[type="submit"]');
-
-            // 1. Validazione Protocollo 12-3-3
-            if (newPassword.length < 12) {
-                window.showToast?.("Minimo 12 caratteri!", "error");
-                return;
-            }
-
-            const upperCount = (newPassword.match(/[A-Z]/g) || []).length;
-            if (upperCount < 3) {
-                window.showToast?.("Servono almeno 3 MAIUSCOLE!", "error");
-                return;
-            }
-
-            const symbolCount = (newPassword.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length;
-            if (symbolCount < 3) {
-                window.showToast?.("Servono almeno 3 Simboli!", "error");
-                return;
-            }
-
-            // 2. Controllo Corrispondenza
-            if (newPassword !== confirmPassword) {
-                window.showToast?.("Le password non coincidono!", "error");
-                return;
-            }
-
-            // UI Loading State
-            const originalContent = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-                <div class="flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined animate-spin">refresh</span>
-                    <span class="tracking-widest uppercase text-[10px]">Aggiornamento...</span>
-                </div>
-            `;
-
-            try {
-                // 3. DETERMINA IL TIPO DI AZIONE (Reset esterno vs Cambio interno)
-                const urlParams = new URLSearchParams(window.location.search);
-                const oobCode = urlParams.get('oobCode');
-
-                if (oobCode) {
-                    // CASO A: RESET ESTERNO (Da Email)
-                    await confirmPasswordReset(auth, oobCode, newPassword);
-                    showToast("Password ripristinata! Ora puoi accedere.", "success");
-                } else if (auth.currentUser) {
-                    // CASO B: CAMBIO INTERNO (Da Impostazioni)
-                    await updatePassword(auth.currentUser, newPassword);
-                    showToast("Password aggiornata con successo!", "success");
-                } else {
-                    throw new Error("Nessuna sessione attiva e nessun codice di reset trovato.");
-                }
-
-                setTimeout(() => {
-                    window.location.href = auth.currentUser ? 'home_page.html' : 'index.html';
-                }, 2000);
-
-            } catch (err) {
-                console.error("Errore password update:", err);
-                if (err.code === 'auth/requires-recent-login') {
-                    showToast("Per sicurezza, devi rieffettuare il login per cambiare la password.", "warning");
-                    setTimeout(() => window.location.href = 'index.html', 3000);
-                } else if (err.code === 'auth/expired-action-code') {
-                    showToast("Il link di recupero è scaduto.", "error");
-                } else {
-                    showToast("Errore: " + (err.message || "Operazione non riuscita"), "error");
-                }
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalContent;
-            }
-        });
-    }
-
-    // Setup Language Selector
-    setupLanguageSelector();
 });
 
-import { supportedLanguages } from './translations.js';
+/**
+ * Traduzioni locali
+ */
+function applyLocalTranslations() {
+    document.querySelectorAll('[data-t], [data-t-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        const placeholderKey = el.getAttribute('data-t-placeholder');
 
+        if (key) {
+            const translated = t(key);
+            if (translated && translated !== key) {
+                const icon = el.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
+                    if (textNode) textNode.textContent = translated;
+                    else el.appendChild(document.createTextNode(translated));
+                } else {
+                    el.textContent = translated;
+                }
+            }
+        }
+
+        if (placeholderKey) {
+            const translated = t(placeholderKey);
+            if (translated && translated !== placeholderKey) {
+                el.setAttribute('placeholder', translated);
+            }
+        }
+    });
+}
+
+/**
+ * Form Salvataggio Password
+ */
+function setupNewPasswordForm() {
+    const form = document.getElementById('new-password-form');
+    const submitBtn = document.getElementById('new-pass-submit-btn');
+    if (!form || !submitBtn) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const passInput = document.getElementById('new-password');
+        const confirmInput = document.getElementById('confirm-password');
+        const newPassword = passInput.value;
+        const confirmPassword = confirmInput.value;
+
+        // 1. Validazione Protocollo 12-3-3 (Regola Sicurezza)
+        if (newPassword.length < 12) {
+            if (window.showToast) window.showToast("Minimo 12 caratteri richiesti!", "error");
+            return;
+        }
+
+        const upperCount = (newPassword.match(/[A-Z]/g) || []).length;
+        const symbolCount = (newPassword.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length;
+
+        if (upperCount < 3 || symbolCount < 3) {
+            if (window.showToast) window.showToast("Servono almeno 3 MAIUSCOLE e 3 Simboli!", "warning");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            if (window.showToast) window.showToast("Le password non coincidono!", "error");
+            return;
+        }
+
+        // 2. Feedback UI
+        const originalContent = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+        document.body.classList.add('is-auth-progress');
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const oobCode = urlParams.get('oobCode');
+
+            if (oobCode) {
+                // CASO RESET ESTERNO
+                await confirmPasswordReset(auth, oobCode, newPassword);
+                if (window.showToast) window.showToast("Password ripristinata! Ora puoi accedere.", "success");
+            } else if (auth.currentUser) {
+                // CASO CAMBIO INTERNO
+                await updatePassword(auth.currentUser, newPassword);
+                if (window.showToast) window.showToast("Password aggiornata con successo.", "success");
+            } else {
+                throw new Error("Sessione non valida o link scaduto.");
+            }
+
+            // Redirect differenziato
+            setTimeout(() => {
+                window.location.href = auth.currentUser ? 'home_page.html' : 'index.html';
+            }, 2500);
+
+        } catch (err) {
+            console.error("[NEW-PASS] Failure:", err);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
+            document.body.classList.remove('is-auth-progress');
+
+            let msg = "Impossibile aggiornare la password.";
+            if (err.code === 'auth/requires-recent-login') {
+                msg = "Rieffettua il login per motivi di sicurezza.";
+            } else if (err.code === 'auth/expired-action-code') {
+                msg = "Il link di recupero è scaduto.";
+            }
+
+            if (window.showToast) window.showToast(msg, "error");
+        }
+    });
+}
+
+/**
+ * Toggle Visibilità
+ */
+function setupPasswordToggle() {
+    const btn = document.getElementById('btn-toggle-password');
+    const input = document.getElementById('new-password');
+    if (!btn || !input) return;
+
+    btn.onclick = (e) => {
+        e.preventDefault();
+        const isSecret = input.type === 'password';
+        input.type = isSecret ? 'text' : 'password';
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (icon) icon.textContent = isSecret ? 'visibility_off' : 'visibility';
+    };
+}
+
+/**
+ * Logica Annulla
+ */
+function setupCancelLogic() {
+    const cancelBtn = document.getElementById('cancel-password-update');
+    if (!cancelBtn) return;
+
+    cancelBtn.onclick = (e) => {
+        e.preventDefault();
+        const urlParams = new URLSearchParams(window.location.search);
+        const isReset = urlParams.has('oobCode');
+
+        window.location.href = (auth.currentUser && !isReset) ? 'impostazioni.html' : 'index.html';
+    };
+}
+
+/**
+ * Selettore Lingua
+ */
 function setupLanguageSelector() {
     const btn = document.getElementById('lang-toggle-btn');
     const dropdown = document.getElementById('lang-dropdown');
-
     if (!btn || !dropdown) return;
 
     dropdown.innerHTML = supportedLanguages.map(lang => `
-        <button class="lang-option" data-code="${lang.code}" style="display:flex; align-items:center;">
-            <span class="flag" style="margin-right:8px;">${lang.flag}</span> ${lang.name}
+        <button class="lang-option" data-code="${lang.code}">
+            <span class="flag">${lang.flag}</span> ${lang.name}
         </button>
     `).join('');
 
-    btn.addEventListener('click', (e) => {
+    btn.onclick = (e) => {
         e.stopPropagation();
         dropdown.classList.toggle('show');
-    });
+    };
 
-    document.addEventListener('click', () => {
-        dropdown.classList.remove('show');
-    });
+    document.addEventListener('click', () => dropdown.classList.remove('show'));
 
     dropdown.querySelectorAll('.lang-option').forEach(opt => {
-        opt.addEventListener('click', () => {
+        opt.onclick = () => {
             const code = opt.getAttribute('data-code');
             localStorage.setItem('app_language', code);
-            window.location.reload();
-        });
+            window.AppState.language = code;
+            applyLocalTranslations();
+        };
     });
 }
+

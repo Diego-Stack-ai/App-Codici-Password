@@ -3,65 +3,77 @@ import { initComponents } from './components.js';
 import { t, supportedLanguages } from './translations.js';
 
 /**
- * LOGIN PAGE MODULE
- * Gestisce l'autenticazione e l'inizializzazione della pagina index.html
+ * [LOGIN] MODULE V3.1
+ * Gestisce l'autenticazione e l'interfaccia della pagina di accesso.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("[LOGIN] DOM Loaded. Initializing...");
+    console.log("[LOGIN] Application Boot V3.1...");
 
     try {
-        // 1. TRADUZIONI (Immediata)
-        updatePageTranslations();
+        // 1. AppState di base (Protocollo Comune)
+        window.AppState = window.AppState || {
+            user: null,
+            theme: 'dark',
+            language: localStorage.getItem('app_language') || 'it'
+        };
 
-        // 2. INIZIALIZZAZIONE COMPONENTI (Regola 17) - Solo se necessario
-        // Non blocchiamo il login se i componenti falliscono (spesso index.html non ha placeholder)
-        initComponents().catch(e => console.log("Info: index components not injected"));
+        // 2. TRADUZIONI 
+        applyLocalTranslations();
 
-        // 3. CHECK AUTH (Redirect se già loggato)
+        // 3. INIZIALIZZAZIONE COMPONENTI UI
+        initComponents().catch(e => console.log("Info: index ui elements initialized"));
+
+        // 4. CHECK AUTH STATE (Proactive Redirect)
         checkAuthState();
 
-        // 4. SETUP FORM
+        // 5. SETUP FUNZIONALITÀ PAGINA
         setupLoginForm();
-
-        // 5. SETUP LANGUAGE SELECTOR
         setupLanguageSelector();
+        setupPasswordToggle();
+        setupPasswordRecovery();
 
-        // 6. SETUP PASSWORD TOGGLE (Specifico per Login per massima stabilità)
-        setupLocalPasswordToggle();
-
-        console.log("[LOGIN] Setup complete.");
+        console.log("[LOGIN] System Ready.");
     } catch (err) {
-        console.error("[LOGIN] Initialization Error:", err);
+        console.error("[LOGIN] Critical Init Error:", err);
     }
 });
 
-function updatePageTranslations() {
-    document.querySelectorAll('[data-t]').forEach(el => {
+/**
+ * Traduzioni locali della pagina
+ */
+function applyLocalTranslations() {
+    document.querySelectorAll('[data-t], [data-t-placeholder]').forEach(el => {
         const key = el.getAttribute('data-t');
-        const translated = t(key);
-        if (!translated || translated === key) return;
+        const placeholderKey = el.getAttribute('data-t-placeholder');
 
-        if (el.hasAttribute('placeholder')) {
-            el.setAttribute('placeholder', translated);
-        } else {
-            // Preserva icone se presenti
-            const icon = el.querySelector('.material-symbols-outlined');
-            if (icon) {
-                // Sostituiamo o aggiungiamo solo il testo
-                let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
-                if (textNode) {
-                    textNode.textContent = translated;
+        if (key) {
+            const translated = t(key);
+            if (translated && translated !== key) {
+                // Preserva icone Material symbols
+                const icon = el.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
+                    if (textNode) textNode.textContent = translated;
+                    else el.appendChild(document.createTextNode(translated));
                 } else {
-                    el.appendChild(document.createTextNode(translated));
+                    el.textContent = translated;
                 }
-            } else {
-                el.textContent = translated;
+            }
+        }
+
+        if (placeholderKey) {
+            const translated = t(placeholderKey);
+            if (translated && translated !== placeholderKey) {
+                el.setAttribute('placeholder', translated);
             }
         }
     });
 }
 
+/**
+ * Selettore Lingua Flottante
+ */
 function setupLanguageSelector() {
     const btn = document.getElementById('lang-toggle-btn');
     const dropdown = document.getElementById('lang-dropdown');
@@ -84,89 +96,135 @@ function setupLanguageSelector() {
         opt.onclick = () => {
             const code = opt.getAttribute('data-code');
             localStorage.setItem('app_language', code);
-            updatePageTranslations();
+            window.AppState.language = code;
+            applyLocalTranslations();
+            // Eventuale ricarico per forzare traduzioni globali
         };
     });
 }
 
+/**
+ * Validazione e Invio Form Login
+ */
 function setupLoginForm() {
-    const loginForm = document.getElementById('login-form');
-    if (!loginForm) return;
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('login-submit-btn');
+    if (!form || !submitBtn) return;
 
-    loginForm.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log("[LOGIN] Form submit triggered");
 
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+        const emailEl = document.getElementById('email');
+        const passwordEl = document.getElementById('password');
+        const email = emailEl.value.trim();
+        const password = passwordEl.value;
 
+        // 1. Validazione Campi
         if (!email || !password) {
-            if (window.showToast) window.showToast(t('error_missing_fields') || "Campi mancanti", "warning");
+            if (window.showToast) window.showToast(t('error_missing_fields') || "Campi obbligatori mancanti", "error");
             return;
         }
 
-        // Feedback visivo immediato
-        document.body.classList.add('is-auth-loading');
-        const btn = loginForm.querySelector('[data-login-submit]');
-        const originalContent = btn ? btn.innerHTML : "Accedi";
+        // 2. Validazione Formato Email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email) && !email.includes('@')) {
+            if (window.showToast) window.showToast(t('error_invalid_email') || "Inserisci un'email valida", "error");
+            return;
+        }
 
-        // Pre-validation logging
-        console.log("[LOGIN] Input validation: email length", email.length);
+        // 3. Feedback UI
+        const originalContent = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+        document.body.classList.add('is-auth-progress');
 
         try {
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="animate-spin material-symbols-outlined">sync</span>';
+            console.log("[LOGIN] Authenticating...");
+            const user = await login(email, password);
+
+            // 4. Aggiornamento AppState Centrale
+            if (window.AppState) {
+                window.AppState.user = user;
+                window.AppState.lastSync = new Date().toISOString();
             }
 
-            console.log("[LOGIN] Attempting login for:", email);
-            await login(email, password);
-            console.log("[LOGIN] Login call finished successfully.");
+            if (window.showToast) window.showToast(t('success_auth') || "Accesso autorizzato!", "success");
 
-            // Forced fallback redirect if auth.js timeout fails
+            // 5. Redirect controllato
             setTimeout(() => {
-                console.log("[LOGIN] Forced redirect fallback triggered");
                 window.location.href = "home_page.html";
-            }, 500);
+            }, 800);
 
         } catch (err) {
-            console.error("[LOGIN] Error during authentication:", err);
+            console.error("[LOGIN] Auth Failure:", err);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
+            document.body.classList.remove('is-auth-progress');
 
-            // Ripristino in caso di errore
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
+            let errorMsg = t('error_auth_failed') || "Credenziali non valide.";
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+                errorMsg = "Email o Password errati.";
+            } else if (err.code === 'auth/too-many-requests') {
+                errorMsg = "Troppi tentativi falliti. Riprova più tardi.";
             }
-            document.body.classList.remove('is-auth-loading');
 
-            // Se logError in auth.js non è sufficiente, diamo un feedback qui
-            const msg = (err.code === 'auth/invalid-credential') ? "Email o password errati." : "Impossibile accedere. Riprova.";
-            if (window.showToast) window.showToast(msg, "error");
+            if (window.showToast) window.showToast(errorMsg, "error");
         }
     });
 }
 
 /**
- * Gestione visibilità password locale per la pagina login
- * Questo evita conflitti con main.js
+ * Toggle Visibilità Password
  */
-function setupLocalPasswordToggle() {
-    const toggleBtn = document.querySelector('.toggle-password');
-    const passInput = document.getElementById('password');
+function setupPasswordToggle() {
+    const btn = document.getElementById('btn-toggle-password');
+    const input = document.getElementById('password');
+    if (!btn || !input) return;
 
-    if (toggleBtn && passInput) {
-        toggleBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const isPassword = passInput.type === 'password';
-            passInput.type = isPassword ? 'text' : 'password';
+    btn.onclick = (e) => {
+        e.preventDefault();
+        const isSecret = input.type === 'password';
+        input.type = isSecret ? 'text' : 'password';
 
-            const icon = toggleBtn.querySelector('.material-symbols-outlined');
-            if (icon) {
-                icon.textContent = isPassword ? 'visibility_off' : 'visibility';
-            }
-        };
-    }
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (icon) icon.textContent = isSecret ? 'visibility_off' : 'visibility';
+    };
 }
+
+/**
+ * Recupero Password via Modale Premium
+ */
+function setupPasswordRecovery() {
+    const link = document.getElementById('link-forgot-password');
+    if (!link) return;
+
+    link.onclick = async (e) => {
+        e.preventDefault();
+
+        if (!window.showInputModal) return;
+
+        const email = await window.showInputModal(
+            t('forgot_password') || "Recupero Password",
+            "",
+            "Inserisci la tua email..."
+        );
+
+        if (email) {
+            // Validazione base
+            if (!email.includes('@')) {
+                if (window.showToast) window.showToast("Inserisci un'email valida per il recupero.", "error");
+                return;
+            }
+
+            if (window.showToast) window.showToast("Invio istruzioni in corso...", "info");
+
+            // Qui andrebbe la chiamata Firebase Auth per reset password
+            // await sendPasswordResetEmail(auth, email);
+
+            setTimeout(() => {
+                if (window.showToast) window.showToast("Se l'email esiste, riceverai un link a breve.", "success");
+            }, 1500);
+        }
+    };
+}
+

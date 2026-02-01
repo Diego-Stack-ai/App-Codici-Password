@@ -62,9 +62,9 @@
             <!-- Extra padding for fixed header if needed, managed by CSS usually but safe to add -->
 
             <!-- Loading State -->
-            <div id="loading-indicator" class="flex flex-col items-center justify-center py-20"
+            <div id="loading-indicator"
                 style="display: flex; flex-direction: column; align-items: center; padding: 3rem 0; gap: 1rem;">
-                <!-- Spinner Custom (CSS based in auth_impostazioni usually or fallback) -->
+                <!-- Spinner Custom -->
                 <div
                     style="width: 2rem; height: 2rem; border: 3px solid rgba(255,255,255,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;">
                 </div>
@@ -73,17 +73,17 @@
             </div>
 
             <!-- List Container -->
-            <div id="notifications-list" class="space-y-3" style="min-height: 200px;">
+            <div id="notifications-list"
+                style="display: flex; flex-direction: column; gap: 0.75rem; min-height: 200px;">
                 <!-- JS Inject Here -->
             </div>
 
             <!-- Empty State -->
-            <div id="empty-state" class="hidden"
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1rem; text-align: center;">
-                <div class="settings-icon-box bg-slate-glass"
-                    style="width: 60px; height: 60px; margin-bottom: 1rem; background: var(--surface-sub);">
-                    <span class="material-symbols-outlined"
-                        style="font-size: 2rem; color: var(--text-secondary);">notifications_off</span>
+            <div id="empty-state"
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1rem; text-align: center; display: none;">
+                <div class="settings-icon-box"
+                    style="width: 60px; height: 60px; margin-bottom: 1rem; background: var(--surface-sub); color: var(--text-secondary);">
+                    <span class="material-symbols-outlined" style="font-size: 2rem;">notifications_off</span>
                 </div>
                 <h3 style="color: var(--text-primary); font-weight: 700; margin-bottom: 0.5rem;"
                     data-t="no_notifications">Nessuna notifica</h3>

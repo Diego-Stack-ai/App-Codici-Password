@@ -32,9 +32,12 @@
 
 </head>
 
-<body class="titanium-bg antialiased">
+<body
+    style="font-family: 'Manrope', sans-serif; background-color: #0a0f1e; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden;"
+    class="antialiased">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="titanium-box">
+    <div
+        style="position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100vh; max-width: 48rem; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; background-color: #0a0f1e; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05);">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
         <div class="glass-glow pointer-events-none"></div>
@@ -52,138 +55,159 @@
         <main class="titanium-main">
 
             <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
-            <div class="grid grid-cols-2 gap-4 px-2 mb-8 relative z-50">
+            <div class="dashboard-grid-2"
+                style="padding-left: 0.5rem; padding-right: 0.5rem; padding-bottom: 2rem; position: relative; z-index: 50; gap: 1rem;">
 
                 <!-- Account Standard -->
-                <a href="account_privati.html?type=standard"
-                    class="matrix-blue border-glow group block relative overflow-hidden rounded-[24px]">
+                <a href="account_privati.html?type=standard" class="matrix-blue border-glow"
+                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
                     <div class="glass-shine"></div>
                     <div class="bg-icon-container">
-                        <span class="material-symbols-outlined text-[40px] opacity-20">account_balance_wallet</span>
+                        <span class="material-symbols-outlined"
+                            style="font-size: 40px; opacity: 0.2;">account_balance_wallet</span>
                     </div>
-                    <div class="card-text-block flex flex-col justify-between card-compact-height">
-                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_personal_accounts">
+                    <div
+                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
+                        <h3 data-t="section_personal_accounts" style="font-weight: 700; margin: 0; color: white;">
                             Account Personali</h3>
-                        <span id="count-standard" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
+                        <span id="count-standard"
+                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
 
                 <!-- Condivisi -->
-                <a href="account_privati.html?type=shared"
-                    class="matrix-red border-glow group block relative overflow-hidden rounded-[24px]">
+                <a href="account_privati.html?type=shared" class="matrix-red border-glow"
+                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
                     <div class="glass-shine"></div>
                     <div class="bg-icon-container">
-                        <span class="material-symbols-outlined text-[40px] opacity-20">group</span>
+                        <span class="material-symbols-outlined" style="font-size: 40px; opacity: 0.2;">group</span>
                     </div>
-                    <div class="card-text-block flex flex-col justify-between card-compact-height">
-                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_shared_accounts">
-                            Account Condivisi</h3>
-                        <span id="count-shared" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
+                    <div
+                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
+                        <h3 data-t="section_shared_accounts" style="font-weight: 700; margin: 0; color: white;">Account
+                            Condivisi</h3>
+                        <span id="count-shared"
+                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
 
                 <!-- Memorandum -->
-                <a href="account_privati.html?type=memo"
-                    class="matrix-orange border-glow group block relative overflow-hidden rounded-[24px]">
+                <a href="account_privati.html?type=memo" class="matrix-orange border-glow"
+                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
                     <div class="glass-shine"></div>
                     <div class="bg-icon-container">
-                        <span class="material-symbols-outlined text-[40px] opacity-20">sticky_note_2</span>
+                        <span class="material-symbols-outlined"
+                            style="font-size: 40px; opacity: 0.2;">sticky_note_2</span>
                     </div>
-                    <div class="card-text-block flex flex-col justify-between card-compact-height">
-                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_note">Note
-                        </h3>
-                        <span id="count-memo" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
+                    <div
+                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
+                        <h3 data-t="section_note" style="font-weight: 700; margin: 0; color: white;">Note</h3>
+                        <span id="count-memo"
+                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
 
                 <!-- Memo Condivisi -->
-                <a href="account_privati.html?type=shared_memo"
-                    class="matrix-green border-glow group block relative overflow-hidden rounded-[24px]">
+                <a href="account_privati.html?type=shared_memo" class="matrix-green border-glow"
+                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
                     <div class="glass-shine"></div>
                     <div class="bg-icon-container">
-                        <span class="material-symbols-outlined text-[40px] opacity-20">folder_shared</span>
+                        <span class="material-symbols-outlined"
+                            style="font-size: 40px; opacity: 0.2;">folder_shared</span>
                     </div>
-                    <div class="card-text-block flex flex-col justify-between card-compact-height">
-                        <h3 class="group-hover:translate-x-1 transition-transform" data-t="section_shared_note">
-                            Note Condivise</h3>
-                        <span id="count-shared-memo" class="text-[9px] font-bold uppercase tracking-widest opacity-40"
+                    <div
+                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
+                        <h3 data-t="section_shared_note" style="font-weight: 700; margin: 0; color: white;">Note
+                            Condivise</h3>
+                        <span id="count-shared-memo"
+                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
                             data-t="loading">Caricamento...</span>
                     </div>
                 </a>
-
             </div>
 
-            <!-- TOP 10 WIDGET (Glass Style) -->
-            <div class="px-2 mb-8 relative z-40">
-                <div class="titanium-card border-glow">
-                    <div class="px-6 py-4 border-b border-white/5 bg-slate-900/5 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-amber-500 text-sm">star</span>
-                            <h3 class="text-[10px] font-bold uppercase tracking-[0.2em]" data-t="top_used_access">
-                                Accessi Più Usati
-                            </h3>
+            <!-- TOP 10 WIDGET -->
+            <div
+                style="padding-left: 0.5rem; padding-right: 0.5rem; margin-bottom: 2rem; position: relative; z-index: 40;">
+                <div class="titanium-card">
+                    <div
+                        style="padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.02);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="material-symbols-outlined"
+                                style="color: var(--accent-orange); font-size: 14px;">star</span>
+                            <h3 style="font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: white;"
+                                data-t="top_used_access">Accessi Più Usati</h3>
                         </div>
                     </div>
-                    <div id="top-accounts-list" class="p-4 flex flex-col gap-2">
+                    <div id="top-accounts-list"
+                        style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         <!-- Loading -->
-                        <div class="py-10 flex justify-center opacity-20">
-                            <span class="material-symbols-outlined animate-spin">sync</span>
+                        <div style="padding: 2.5rem 0; display: flex; justify-content: center; opacity: 0.2;">
+                            <span class="material-symbols-outlined"
+                                style="animation: spin 2s linear infinite;">sync</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- RUBRICA (Accordion Glass) -->
-            <div class="px-2 mb-24 relative z-40">
-                <div class="titanium-card border-glow">
+            <!-- RUBRICA (Accordion) -->
+            <div
+                style="padding-left: 0.5rem; padding-right: 0.5rem; margin-bottom: 6rem; position: relative; z-index: 40;">
+                <div class="titanium-card">
                     <button id="rubrica-toggle-btn"
-                        class="w-full px-6 py-5 flex items-center justify-between group hover:bg-slate-900/5 transition-colors">
-                        <div class="flex items-center gap-4">
+                        style="width: 100%; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s; background: transparent; border: none; cursor: pointer;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
                             <div
-                                class="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-purple-600 text-xl">contacts</span>
+                                style="width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; background: rgba(156, 39, 176, 0.1); border: 1px solid rgba(156, 39, 176, 0.2);">
+                                <span class="material-symbols-outlined"
+                                    style="color: #9c27b0; font-size: 20px;">contacts</span>
                             </div>
-                            <div class="text-left">
-                                <h3 class="text-sm font-black" data-t="rubrica_title">Rubrica Contatti
-                                </h3>
-                                <p class="text-[9px] font-bold uppercase tracking-widest opacity-60">
+                            <div style="text-align: left;">
+                                <h3 style="font-size: 0.875rem; font-weight: 900; margin: 0; color: white;"
+                                    data-t="rubrica_title">Rubrica
+                                    Contatti</h3>
+                                <p
+                                    style="opacity: 0.6; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase; margin: 0; color: white;">
                                     <span data-t="rubrica_subtitle">Gestione identità condivise</span> <span
-                                        id="rubrica-counter" class="opacity-100">(0)</span>
+                                        id="rubrica-counter">(0)</span>
                                 </p>
                             </div>
                         </div>
-                        <span id="rubrica-chevron"
-                            class="material-symbols-outlined opacity-40 group-hover:opacity-100 transition-all">expand_more</span>
+                        <span id="rubrica-chevron" class="material-symbols-outlined"
+                            style="opacity: 0.4; color: white;">expand_more</span>
                     </button>
 
-                    <div id="rubrica-content" class="hidden border-t border-white/5">
+                    <div id="rubrica-content" style="display: none; border-top: 1px solid var(--border-color);">
                         <!-- Action Bar -->
-                        <div class="p-4 bg-slate-100 flex gap-2">
-                            <button id="add-contact-btn"
-                                class="flex-1 h-10 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/10"
-                                data-t="new_contact">Nuovo Contatto</button>
+                        <div style="padding: 1rem; display: flex; gap: 0.5rem; background: var(--surface-sub);">
+                            <button id="add-contact-btn" class="titanium-btn-primary"
+                                style="flex: 1; height: 2.5rem; font-size: 10px; letter-spacing: 1px;"
+                                data-t="new_contact">Nuovo
+                                Contatto</button>
                         </div>
 
-                        <!-- Form (Hidden by default) -->
-                        <div id="add-contact-form" class="hidden p-6 space-y-4 bg-slate-50 border-b border-slate-200">
-                            <div class="grid grid-cols-2 gap-3">
+                        <!-- Form -->
+                        <div id="add-contact-form"
+                            style="display: none; padding: 1.5rem; flex-direction: column; gap: 1rem; background: var(--surface-vault); border-bottom: 1px solid var(--border-color);">
+                            <div class="dashboard-grid-2" style="gap: 1rem;">
                                 <input type="text" id="contact-nome" placeholder="Nome"
-                                    class="h-12 px-4 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-blue-500">
+                                    style="height: 3rem; padding-left: 1rem; padding-right: 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.875rem; outline: none;">
                                 <input type="text" id="contact-cognome" placeholder="Cognome"
-                                    class="h-12 px-4 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-blue-500">
+                                    style="height: 3rem; padding-left: 1rem; padding-right: 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.875rem; outline: none;">
                             </div>
                             <input type="email" id="contact-email" placeholder="Email (Unica per sharing)"
-                                class="w-full h-12 px-4 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-blue-500">
-                            <button id="btn-add-contact"
-                                class="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-500/20"
-                                data-t="save_contact">SALVA CONTATTO</button>
+                                style="width: 100%; height: 3rem; padding-left: 1rem; padding-right: 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 0.875rem; outline: none;">
+                            <button id="btn-add-contact" class="titanium-btn-primary"
+                                style="width: 100%; height: 3rem; font-weight: 800;" data-t="save_contact">SALVA
+                                CONTATTO</button>
                         </div>
 
                         <!-- Contacts List -->
-                        <div id="contacts-list" class="p-4 flex flex-col gap-2">
+                        <div id="contacts-list"
+                            style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                             <!-- JS Generated -->
                         </div>
                     </div>

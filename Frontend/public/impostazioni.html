@@ -14,8 +14,7 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Protocollo V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
+    <!-- Design System Master (Solo Account) -->
     <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
 
     <!-- Core Engine -->
@@ -91,27 +90,130 @@
                 <div class="profile-info" style="width: 100%;">
                     <h3 id="user-name-settings" class="auth-title" data-t="loading">Caricamento...</h3>
                     <button onclick="window.location.href='profilo_privato.html'" class="auth-btn"
-                        style="margin-top: 1.5rem;">
+                        style="margin-top: 1.5rem; border: 1px solid var(--border-color); background: var(--surface-sub);">
                         <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div class="settings-icon-box bg-blue-glass"
-                                style="width: 32px; height: 32px; border-radius: 8px;">
+                            <div class="settings-icon-box"
+                                style="width: 32px; height: 32px; border-radius: 8px; background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
                                 <span class="material-symbols-outlined" style="font-size: 1.1rem;">account_circle</span>
                             </div>
-                            <span data-t="manage_account_data">Gestisci Account</span>
+                            <span data-t="manage_account_data" style="color: var(--text-primary);">Gestisci
+                                Account</span>
                         </div>
+                        <span class="material-symbols-outlined"
+                            style="color: var(--text-secondary);">chevron_right</span>
                     </button>
+                </div>
+            </div>
+
+            <!-- MENU IMPOSTAZIONI -->
+            <div class="settings-group">
+                <h4 class="settings-group-label" data-t="general_settings">Impostazioni Generali</h4>
+
+                <!-- Lingua -->
+                <div class="settings-item">
+                    <div class="settings-item-header" onclick="settingsHelper.toggleDropdown('lang-dropdown')">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box" style="background: rgba(156, 39, 176, 0.1); color: #9c27b0;">
+                                <span class="material-symbols-outlined">translate</span>
+                            </div>
+                            <div>
+                                <h3 data-t="language_title">Lingua App</h3>
+                                <p id="current-lang-label">Italiano</p>
+                            </div>
+                        </div>
+                        <span id="lang-chevron" class="material-symbols-outlined"
+                            style="color: var(--text-secondary);">expand_more</span>
+                    </div>
+
+                    <div id="lang-dropdown" class="accordion-content">
+                        <div class="lang-option" onclick="changeLanguage('it')">
+                            <span>🇮🇹 Italiano</span>
+                        </div>
+                        <div class="lang-option" onclick="changeLanguage('en')">
+                            <span>🇺🇸 English</span>
+                        </div>
+                        <div class="lang-option" onclick="changeLanguage('ro')">
+                            <span>🇷🇴 Română</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TEMA (Selector Inglobato) -->
+                <div class="settings-item">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box"
+                                style="background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
+                                <span class="material-symbols-outlined">palette</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="theme_title">Tema App</span>
+                                <span class="settings-desc" data-t="theme_desc">Personalizza il look</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timer-selector" id="theme-selector"
+                        style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                        <button class="timer-btn theme-btn" data-theme="light" data-t="theme_light">Chiaro</button>
+                        <button class="timer-btn theme-btn" data-theme="auto" data-t="theme_auto">Auto</button>
+                        <button class="timer-btn theme-btn" data-theme="dark" data-t="theme_dark">Scuro</button>
+                    </div>
+                </div>
+
+                <!-- Regole Scadenze -->
+                <div class="settings-item" onclick="window.location.href='regole_scadenze.html'"
+                    style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box"
+                                style="background: rgba(255, 193, 7, 0.1); color: var(--accent-amber);">
+                                <span class="material-symbols-outlined">calendar_month</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="expiry_rules_title_page">Regole invio
+                                    scadenze</span>
+                                <span class="settings-desc" data-t="expiry_rules_desc">Configura notifiche e
+                                    avvisi</span>
+                            </div>
+                        </div>
+                        <div class="settings-item-arrow">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archivio Account -->
+                <div class="settings-item" onclick="window.location.href='archivio_account.html'"
+                    style="cursor: pointer;">
+                    <div class="settings-item-header">
+                        <div class="settings-item-info">
+                            <div class="settings-icon-box"
+                                style="background: rgba(156, 39, 176, 0.1); color: var(--accent-purple);">
+                                <span class="material-symbols-outlined">archive</span>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label" data-t="account_archive">Archivio Account</span>
+                                <span class="settings-desc" data-t="account_archive_desc">Gestisci gli account
+                                    archiviati</span>
+                            </div>
+                        </div>
+                        <div class="settings-item-arrow">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- SICUREZZA -->
             <div class="settings-group">
-                <h4 class="settings-group-title" data-t="section_security">Sicurezza</h4>
+                <h4 class="settings-group-label" data-t="section_security">Sicurezza</h4>
 
                 <div class="settings-item" id="row-password" style="cursor: pointer;"
                     onclick="window.location.href='imposta_nuova_password.html'">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box bg-amber-glass">
+                            <div class="settings-icon-box"
+                                style="background: rgba(255, 193, 7, 0.1); color: var(--accent-amber);">
                                 <span class="material-symbols-outlined">lock</span>
                             </div>
                             <div class="settings-text">
@@ -120,13 +222,17 @@
                                     d'accesso</span>
                             </div>
                         </div>
+                        <div class="settings-item-arrow">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="settings-item" id="row-2fa" style="cursor: pointer;">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box bg-emerald-glass">
+                            <div class="settings-icon-box"
+                                style="background: rgba(76, 175, 80, 0.1); color: var(--accent-emerald);">
                                 <span class="material-symbols-outlined">verified_user</span>
                             </div>
                             <div class="settings-text">
@@ -142,7 +248,8 @@
                 <div class="settings-item" id="row-faceid" style="cursor: pointer;">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass">
+                            <div class="settings-icon-box"
+                                style="background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
                                 <span class="material-symbols-outlined">face</span>
                             </div>
                             <div class="settings-text">
@@ -159,7 +266,8 @@
                     onclick="window.location.href='notifiche_storia.html'">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass">
+                            <div class="settings-icon-box"
+                                style="background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
                                 <span class="material-symbols-outlined">history</span>
                             </div>
                             <div class="settings-text">
@@ -168,14 +276,18 @@
                                     passati</span>
                             </div>
                         </div>
+                        <div class="settings-item-arrow">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Tempo di Inattività (Selector Inglobato) -->
+                <!-- Tempo di Inattività -->
                 <div class="settings-item">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box bg-purple-glass">
+                            <div class="settings-icon-box"
+                                style="background: rgba(156, 39, 176, 0.1); color: var(--accent-purple);">
                                 <span class="material-symbols-outlined">timer</span>
                             </div>
                             <div class="settings-text">
@@ -195,94 +307,16 @@
                 </div>
             </div>
 
-            <!-- GENERALE -->
-            <div class="settings-group">
-                <h4 class="settings-group-title" data-t="section_general">Generale</h4>
-
-                <!-- Regole Scadenze -->
-                <div class="settings-item" onclick="window.location.href='regole_scadenze.html'"
-                    style="cursor: pointer;">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-amber-glass">
-                                <span class="material-symbols-outlined">calendar_month</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="expiry_rules_title_page">Regole invio
-                                    scadenze</span>
-                                <span class="settings-desc" data-t="expiry_rules_desc">Configura notifiche e
-                                    avvisi</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Archivio Account -->
-                <div class="settings-item" onclick="window.location.href='archivio_account.html'"
-                    style="cursor: pointer;">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-purple-glass">
-                                <span class="material-symbols-outlined">archive</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="account_archive">Archivio Account</span>
-                                <span class="settings-desc" data-t="account_archive_desc">Gestisci gli account
-                                    archiviati</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- LINGUA -->
-                <div class="settings-item" id="lang-btn" style="cursor: pointer; position: relative;">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-emerald-glass">
-                                <span class="material-symbols-outlined">language</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="language">Lingua Applicazione</span>
-                                <span class="settings-desc" id="current-lang-display-full">Italiano</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="lang-dropdown" class="lang-dropdown">
-                        <!-- Popolato da JS -->
-                    </div>
-                </div>
-
-                <!-- TEMA (Selector Inglobato) -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass">
-                                <span class="material-symbols-outlined">palette</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="theme_title">Tema App</span>
-                                <span class="settings-desc" data-t="theme_desc">Personalizza il look</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="timer-selector" id="theme-selector"
-                        style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                        <button class="timer-btn theme-btn" data-theme="light" data-t="theme_light">Chiaro</button>
-                        <button class="timer-btn theme-btn" data-theme="auto" data-t="theme_auto">Auto</button>
-                        <button class="timer-btn theme-btn" data-theme="dark" data-t="theme_dark">Scuro</button>
-                    </div>
-                </div>
-            </div>
-
             <!-- INFORMAZIONI -->
             <div class="settings-group">
-                <h4 class="settings-group-title" data-t="section_support">Informazioni</h4>
+                <h4 class="settings-group-label" data-t="section_support">Informazioni</h4>
 
                 <!-- App Info -->
                 <div class="settings-item accordion-header" data-target="info-app" style="cursor: pointer;">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass">
+                            <div class="settings-icon-box"
+                                style="background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
                                 <span class="material-symbols-outlined">info</span>
                             </div>
                             <div class="settings-text">
@@ -290,9 +324,11 @@
                                 <span class="settings-desc" data-t="app_info_desc">Versione e crediti</span>
                             </div>
                         </div>
+                        <span id="info-chevron" class="material-symbols-outlined"
+                            style="color: var(--text-secondary); transition: transform 0.3s;">expand_more</span>
                     </div>
                 </div>
-                <div id="info-app" class="accordion-content" style="display: none;">
+                <div id="info-app" class="accordion-content">
                     <div id="info-app-text-placeholder"></div>
                 </div>
 
@@ -300,7 +336,8 @@
                 <div class="settings-item" onclick="window.location.href='privacy.html'" style="cursor: pointer;">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box bg-emerald-glass">
+                            <div class="settings-icon-box"
+                                style="background: rgba(76, 175, 80, 1e-1); color: var(--accent-emerald);">
                                 <span class="material-symbols-outlined">shield</span>
                             </div>
                             <div class="settings-text">
@@ -310,8 +347,7 @@
                                     diritti</span>
                             </div>
                         </div>
-                        <div
-                            style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; opacity: 0.5;">
+                        <div class="settings-item-arrow">
                             <span class="material-symbols-outlined">chevron_right</span>
                         </div>
                     </div>
@@ -320,13 +356,14 @@
 
             <!-- Logout -->
             <div style="margin-top: 2rem; padding-bottom: 5rem;">
-                <button id="logout-btn-settings" class="auth-btn auth-btn-danger">
+                <button id="logout-btn-settings" class="auth-btn"
+                    style="background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.2); color: #f44336;">
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div class="settings-icon-box bg-rose-glass"
-                            style="width: 32px; height: 32px; border-radius: 8px;">
+                        <div class="settings-icon-box"
+                            style="width: 32px; height: 32px; border-radius: 8px; background: #f44336; color: white;">
                             <span class="material-symbols-outlined" style="font-size: 1.1rem;">logout</span>
                         </div>
-                        <span data-t="logout">Esci dall'account</span>
+                        <span data-t="logout" style="font-weight: 700;">Esci dall'account</span>
                     </div>
                 </button>
             </div>

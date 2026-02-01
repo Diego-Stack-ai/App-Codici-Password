@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Codici & Password - Accedi</title>
 
-    <link rel="manifest" href="manifest.json?v=3.1" />
+    <link rel="manifest" href="manifest.json?v=5.7" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
 
     <!-- Fonts -->
@@ -18,12 +18,10 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
 
-    <!-- TITANIUM CORE & ACCESS SYSTEM (Protocollo V3.1) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/accesso.css?v=3.1">
-
-    <!-- Core UI (Protocollo V3.1) -->
-    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+    <!-- TITANIUM AUTH SYSTEM V6.0 (Pure CSS) -->
+    <link rel="stylesheet" href="assets/css/auth_accesso.css?v=6.0">
+    <!-- Core UI per Toast (Protocollo V3) -->
+    <script src="assets/js/ui-core.js?v=2.2"></script>
 </head>
 
 <body>
@@ -38,74 +36,77 @@
                 <span class="material-symbols-outlined" style="font-size: 16px;">expand_more</span>
             </button>
             <div class="lang-dropdown" id="lang-dropdown">
-                <!-- JS popola questo -->
+                <!-- JS will populate this -->
             </div>
         </div>
 
-        <!-- Scenografia Protocollo V3.1 -->
+        <!-- Scenografia -->
         <div class="glass-glow"></div>
-        <div class="accesso-header"></div>
-        <div class="accesso-footer"></div>
+        <div class="auth-header"></div>
+        <div class="auth-footer"></div>
 
         <!-- Card Login -->
         <div class="titanium-vault border-glow">
 
-            <!-- Icona Centrale -->
+            <!-- Icona -->
             <div class="security-icon-box">
                 <span class="material-symbols-outlined">security</span>
             </div>
 
             <!-- Titoli -->
-            <h1 class="accesso-title" data-t="login_title">Accedi</h1>
-            <p class="accesso-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
+            <h1 class="auth-title" data-t="login_title">Accedi</h1>
+            <p class="auth-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
 
-            <!-- Form Autenticazione -->
+            <!-- Form -->
             <form id="login-form">
 
-                <!-- Email / Username -->
-                <div class="accesso-form-group">
-                    <label class="accesso-label" data-t="username_label">Username</label>
-                    <input id="email" name="username" type="text" autocomplete="username" required class="accesso-input"
-                        data-t-placeholder="username_placeholder" placeholder="Email o Username">
+                <!-- Email -->
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="username_label">Username</label>
+                    <input id="email" name="username" type="email" autocomplete="username" required class="auth-input"
+                        data-t="username_placeholder" placeholder="Email o Username">
                 </div>
 
                 <!-- Password -->
-                <div class="accesso-form-group">
-                    <label class="accesso-label" data-t="password_label">Password</label>
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="password_label">Password</label>
                     <input id="password" name="password" type="password" autocomplete="current-password" required
-                        class="accesso-input" placeholder="********">
+                        class="auth-input" placeholder="********">
 
-                    <button type="button" class="toggle-password" id="btn-toggle-password" aria-label="Mostra Password">
+                    <button type="button" class="toggle-password">
                         <span class="material-symbols-outlined">visibility</span>
                     </button>
 
-                    <a href="javascript:void(0)" id="link-forgot-password" class="link-forgot"
-                        data-t="forgot_password">Password dimenticata?</a>
+                    <a href="reset_password.html" class="link-forgot" data-t="forgot_password">Password dimenticata?</a>
                 </div>
 
-                <!-- Submit Button -->
-                <button type="submit" id="login-submit-btn" class="accesso-btn" data-t="auth_button">
+                <!-- Submit -->
+                <button type="submit" data-login-submit class="auth-btn" data-t="auth_button">
                     <span class="material-symbols-outlined" style="font-size: 20px;">login</span>
                     Accedi
                 </button>
 
             </form>
 
-            <!-- Registrazione Link -->
+            <!-- Register Link -->
             <a href="registrati.html" class="link-register" data-t="register_link">
                 Registrazione nuovo utente
             </a>
 
             <!-- Footer Legale -->
             <div class="legal-footer">
-                © 2026 BM Service S.R.L. - <span data-t="version">Titanium V3.1</span>
+                © 2026 BM Service S.R.L. - <span data-t="version">Titanium V6.0</span>
             </div>
 
         </div>
     </div>
 
-    <!-- Scripts (In fondo per performance) -->
-    <script type="module" src="assets/js/login.js?v=3.1"></script>
+    <!-- Toast Container (Se non generato dinamicamente da ui-core) -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="assets/js/main.js?v=2.2"></script>
+    <script type="module" src="assets/js/login.js?v=2.2"></script>
 
 </body>
 

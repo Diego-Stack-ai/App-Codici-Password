@@ -1,20 +1,19 @@
-Protocollo Accesso Titanium V3.0 (Specifico Auth)
+🔹 Protocollo Accesso Titanium V3.1 – Specifico Accesso
 
-Estensione del Protocollo Comune: applicabile solo alle pagine di Login, Registrazione e Reset Password. Tutti gli elementi condivisi (CSS core, validazione base, responsive, gestione componenti via JS, multilingua di base) sono ereditati dal Protocollo Comune.
-⚠️ ATTENZIONE: Estensione del Protocollo Comune
+Estensione del Protocollo Comune Titanium V3.1
 
-Questo protocollo è un'estensione del Protocollo Comune Titanium V3.0 (Core). 
-Tutte le regole definite nel Protocollo Comune sono obbligatorie e **non possono essere sovrascritte o modificate** dai protocolli specifici. 
+Applicabile solo alle pagine Login, Registrazione e Reset Password. Tutti gli elementi condivisi (CSS core, validazione base, responsive, gestione componenti via JS, multilingua) sono ereditati dal Protocollo Comune (comune.css).
 
-Il protocollo specifico può solo:
-- Aggiungere regole supplementari relative alla pagina o funzionalità specifica.
-- Personalizzare componenti, layout o effetti consentiti nel proprio ambito senza violare le regole comuni.
+⚠️ Nota Importante:
+Tutte le regole del Protocollo Comune sono obbligatorie e intoccabili.
 
-È vietato:
-- Modificare header, footer, cache busting, multilingua, layout dinamico o responsive definiti dal Protocollo Comune.
-- Sovrascrivere classi, variabili CSS o comportamenti JS core.
-- Ignorare le checklist di validazione o le regole base di sicurezza, leggibilità e compatibilità dispositivi.
+Questo protocollo è un’estensione operativa del Protocollo Comune Titanium V3.1.
+Definisce le regole complete per progettare, strutturare e implementare le pagine del suo ambito funzionale.
 
+Il Protocollo Comune fornisce il core intoccabile.
+Questo protocollo governa la scrittura del codice delle pagine del dominio Accesso.
+
+È consentito aggiungere strutture, layout, logiche UI e comportamenti specifici del dominio, purché pienamente compatibili con il core.
 
 1. Pagine Coinvolte
 
@@ -27,10 +26,14 @@ reset_password.html (Richiesta Reset)
 imposta_nuova_password.html (Set New Password)
 
 1.1 CSS di riferimento
+assets/css/accesso.css
 
-assets/css/auth_accesso.css
 
-Garantisce performance, indipendenza dal resto dell’app e coerenza visiva.
+File separato per gli stili specifici Accesso, compatibile con comune.css
+
+Non sovrascrivere layout, classi o variabili del core
+
+Solo stili extra specifici della pagina e dark mode
 
 2. Layout & Scenografia Specifica
 
@@ -38,33 +41,35 @@ Dark Mode forzata: <html class="titanium-forced-dark">
 
 Struttura centrata: .titanium-box → .titanium-vault
 
-Elementi scenografici unici Auth:
+Elementi scenografici Accesso:
 
-.glass-glow (Faro ambientale)
+.glass-glow (faro ambientale)
 
-.auth-header e .auth-footer (fasce estetiche)
+.accesso-header e .accesso-footer (fasce estetiche)
 
 .border-glow e effetto saetta sulla card
 
 Icona principale: .security-icon-box
 
-Titoli & sottotitoli: .auth-title e .auth-subtitle (inclusi attributi data-t per traduzioni)
+Titoli & sottotitoli: .accesso-title, .accesso-subtitle (con data-t per traduzioni)
 
-Form e bottoni: .auth-form-group e .auth-btn
+Form e bottoni: .accesso-form-group e .accesso-btn
 
 3. Scripting Specifico
 
-Ogni pagina Auth mantiene il suo JS dedicato (login.js, registrati.js, ecc.)
+Ogni pagina Accesso mantiene il proprio JS dedicato (login.js, registrati.js, ecc.)
 
 Gestisce logica del form e traduzioni locali per i testi specifici della pagina
 
-VIETATO modificare tema o layout condiviso
+VIETATO:
 
-VIETATO usare framework pesanti o librerie UI esterne non necessarie
+Modificare tema o layout condiviso
 
-4. Gestione Lingua Floating (Specifico Auth)
+Usare framework pesanti o librerie esterne non necessarie
 
-Modulo flottante in alto a destra per la selezione lingua della UI Auth
+4. Gestione Lingua Floating
+
+Modulo flottante in alto a destra per selezione lingua UI
 
 Classi: .lang-selector-container, .lang-btn-float, .lang-dropdown
 
@@ -72,11 +77,11 @@ Effetti animati sincronizzati con la saetta (fadeInScale)
 
 Popolato dinamicamente da translations.js
 
-Nota: la logica di traduzione base (attributi data-t, data-t-placeholder, applyTranslations()) è ereditata dal Protocollo Comune. Questa sezione si limita alla gestione visuale flottante della lingua nelle pagine Auth.
+Nota: logica di traduzione base (data-t, data-t-placeholder, applyTranslations()) è ereditata dal Protocollo Comune; qui si gestisce solo la parte visuale flottante
 
-5. Standard Password & Autofill (Specifico Auth)
+5. Standard Password & Autofill
 
-Password mascherate con pallini standard del browser
+Password mascherate con pallini standard browser
 
 Attributi autocomplete obbligatori:
 
@@ -86,14 +91,24 @@ Nuova Password: new-password
 
 Compatibile con FaceID, Keychain e gestori password
 
-VIETATO forzare asterischi personalizzati
+VIETATO: forzare asterischi personalizzati
 
 6. Navigazione Specifica
 
-Verifica collegamenti tra pagine Auth:
+Collegamenti tra pagine Accesso:
 
 Login ↔ Registrazione / Reset
 
 Reset → Login
 
 Nuova Password → Login o Impostazioni
+
+7. Collegamento con Agente AI
+
+CSS/JS: usare solo accesso.css e JS dedicati
+
+Componenti UI: solo quelli centralizzati dal core
+
+Traduzioni: usare sistema i18n del Protocollo Comune
+
+Check: layout, dark mode, touch target ≥36px, modali, responsive

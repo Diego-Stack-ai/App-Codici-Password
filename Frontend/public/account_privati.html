@@ -32,9 +32,12 @@
     <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
 </head>
 
-<body class="titanium-bg antialiased">
+<body
+    style="font-family: 'Manrope', sans-serif; background-color: #0a0f1e; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden;"
+    class="antialiased">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="titanium-box">
+    <div
+        style="position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100vh; max-width: 48rem; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; background-color: #0a0f1e; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05);">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
         <div class="glass-glow"></div>
@@ -51,10 +54,11 @@
         <main class="titanium-main">
 
             <!-- SEARCH BAR (Standard Titanium) -->
-            <div class="px-2 mb-6 relative z-40">
-                <div class="relative group">
-                    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                        <span class="material-symbols-outlined opacity-30">search</span>
+            <div style="padding: 0 0.5rem; margin-bottom: 1.5rem; position: relative; z-index: 40;">
+                <div style="position: relative;">
+                    <div
+                        style="position: absolute; top: 0; bottom: 0; left: 1rem; display: flex; align-items: center; pointer-events: none;">
+                        <span class="material-symbols-outlined" style="opacity: 0.3;">search</span>
                     </div>
                     <input type="search" id="account-search" data-t-placeholder="search_placeholder"
                         placeholder="Cerca account o credenziali..." class="titanium-search-input">
@@ -62,12 +66,16 @@
             </div>
 
             <!-- ACCOUNTS CONTAINER -->
-            <div id="accounts-container" class="dashboard-grid pb-24 relative z-30">
+            <div id="accounts-container" class="dashboard-grid"
+                style="padding-bottom: 6rem; position: relative; z-index: 30;">
                 <!-- Data loading placeholder -->
-                <div class="col-span-full py-20 flex flex-col items-center justify-center space-y-4 opacity-40">
-                    <span class="material-symbols-outlined animate-spin text-4xl text-blue-400">sync</span>
-                    <p class="text-[10px] font-bold uppercase tracking-[0.3em]" data-t="analyzing_data">Analisi dati...
-                    </p>
+                <div
+                    style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 0; gap: 1rem; opacity: 0.4;">
+                    <span class="material-symbols-outlined"
+                        style="font-size: 40px; color: var(--accent-blue); animation: spin 2s linear infinite;">sync</span>
+                    <p style="font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 3px;"
+                        data-t="analyzing_data">Analisi
+                        dati...</p>
                 </div>
             </div>
 

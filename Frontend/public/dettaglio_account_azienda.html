@@ -20,431 +20,445 @@
     <!-- Design System Master (Titanium Protocol V3.0) -->
     <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
     <link rel="stylesheet" href="assets/css/auth_account.css?v=3.5">
-    <style>
-        :root {
-            --primary-color: #10b981;
-            /* Default Green */
-        }
-
-        body {
-            font-family: 'Manrope', sans-serif;
-            min-height: 100dvh;
-            background-color: #e2e8f0;
-            color: #0A162A;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
 </head>
 
-<body class="text-[#0A162A] font-display overflow-x-hidden antialiased">
+<body
+    style="font-family: 'Manrope', sans-serif; background-color: #0a0f1e; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden;"
+    class="antialiased">
     <div
-        class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-[#e2e8f0] shadow-2xl overflow-hidden">
+        style="position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100vh; max-width: 48rem; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; background-color: #0a0f1e; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05);">
+        <div class="glass-glow"></div>
 
-        <!-- Top Navigation (Fixed Glass) -->
-        <div
-            class="fixed top-0 left-0 right-0 mx-auto w-full max-w-md flex items-center p-4 h-16 z-50 backdrop-blur-sm border-b bg-[#e2e8f0]/20 border-black/5 transition-colors">
-            <button id="btn-back"
-                class="text-[#0A162A] flex size-10 shrink-0 items-center justify-center cursor-pointer rounded-full hover:bg-black/5 transition-colors">
-                <span class="material-symbols-outlined text-[24px]">arrow_back</span>
-            </button>
-            <div class="flex-1"></div>
-            <div class="flex items-center gap-1">
-                <button id="btn-edit-header"
-                    class="text-[#0A162A] flex size-10 items-center justify-center cursor-pointer rounded-full hover:bg-black/5 transition-colors"
-                    title="Modifica">
-                    <span class="material-symbols-outlined text-2xl">edit</span>
-                </button>
-                <a id="btn-home" href="home_page.html"
-                    class="text-[#0A162A] flex size-10 shrink-0 items-center justify-center cursor-pointer rounded-full hover:bg-black/5 transition-colors"
-                    title="Home">
-                    <span class="material-symbols-outlined text-2xl">home</span>
-                </a>
+        <!-- Standard Titanium Header -->
+        <header class="titanium-header">
+            <div class="header-balanced-container">
+                <div class="header-left">
+                    <button id="btn-back" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                </div>
+                <div class="header-center">
+                    <h2 class="header-title">Dettaglio Account</h2>
+                </div>
+                <div class="header-right">
+                    <button id="btn-edit-header" class="btn-icon-header">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <a id="btn-home" href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                </div>
             </div>
-        </div>
+        </header>
 
         <!-- Header Spacer -->
-        <div class="h-16 w-full shrink-0"></div>
+        <div class="spacer-header"></div>
 
-        <!-- Hero Profile Header -->
-        <div class="flex flex-col items-center justify-center pt-6 pb-6 px-4">
-            <div class="relative group">
-                <div id="detail-avatar"
-                    class="bg-center bg-no-repeat bg-cover rounded-2xl h-28 w-28 shadow-lg shadow-primary/20 border-4 border-white flex items-center justify-center bg-primary/10 text-primary text-4xl font-bold">
-                    <!-- Populated by JS -->
+        <main class="titanium-main">
+            <!-- Hero Profile Header -->
+            <div
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem 1rem;">
+                <div style="position: relative;">
+                    <div id="detail-avatar"
+                        style="border-radius: 1rem; width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 2.25rem; font-weight: bold; background: rgba(255, 255, 255, 0.05); border: 4px solid white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div
+                        style="position: absolute; bottom: -0.5rem; right: -0.5rem; padding: 0.375rem; border-radius: 9999px; border: 4px solid #0a0f1e; display: flex; align-items: center; justify-content: center; background: #3b82f6; color: white;">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">domain</span>
+                    </div>
                 </div>
                 <div
-                    class="absolute -bottom-2 -right-2 bg-primary text-white p-1.5 rounded-full border-4 border-[#e2e8f0] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-sm font-bold">domain</span>
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 1rem;">
+                    <h1 id="header-nome-account"
+                        style="font-size: 1.5rem; font-weight: bold; text-align: center; color: white; margin: 0;">
+                        Caricamento...</h1>
+                    <p id="header-categoria"
+                        style="font-size: 0.875rem; font-weight: 500; text-align: center; margin-top: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(33, 150, 243, 0.1); color: #60a5fa;">
+                        Account Azienda</p>
                 </div>
             </div>
-            <div class="flex flex-col items-center justify-center mt-4">
-                <h1 id="header-nome-account"
-                    class="text-[#0A162A] text-2xl font-bold leading-tight tracking-tight text-center">
-                    Caricamento...</h1>
-                <p id="header-categoria"
-                    class="text-primary text-sm font-medium leading-normal text-center mt-1 bg-primary/10 px-3 py-1 rounded-full">
-                    Account Azienda</p>
-            </div>
-        </div>
 
-        <!-- Main Content -->
-        <div class="px-4 space-y-6 mb-24">
+            <!-- Main Content -->
+            <div style="padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 6rem;">
 
 
 
-            <!-- Credenziali Principali -->
-            <section>
-                <h3 class="text-[#0A162A] text-lg font-bold pb-3 border-b border-gray-100 mb-4">
-                    Credenziali Accesso</h3>
-                <div class="space-y-4">
+                <!-- Credenziali Principali -->
+                <section>
+                    <h3
+                        style="color: white; font-size: 1.125rem; font-weight: bold; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1rem;">
+                        Credenziali Accesso</h3>
+                    <!-- Main Content Area -->
+                    <div style="padding: 1rem; display: flex; flex-direction: column; gap: 1.5rem;">
 
-                    <!-- Nome Account -->
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Nome Account</span>
-                        <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden">
-                            <input id="detail-nomeAccount" readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0"
-                                value="">
-                            <button
-                                class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100"><span
-                                    class="material-symbols-outlined text-base">content_copy</span></button>
-                        </div>
-                    </div>
+                        <!-- SECTION: DATI ACCESSO -->
+                        <section style="display: flex; flex-direction: column; gap: 1rem;">
+                            <h3
+                                style="font-size: 0.75rem; font-weight: bold; text-transform: uppercase; color: #60a5fa; opacity: 0.8; padding: 0 0.25rem;">
+                                Dati Accesso</h3>
 
-                    <!-- Utente -->
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Utente</span>
-                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                            <input id="detail-username" type="text" readonly
-                                class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0">
-                            <button
-                                class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
-                                    class="material-symbols-outlined text-base">content_copy</span></button>
-                        </div>
-                    </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- Utente -->
+                                <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                    <span
+                                        style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Utente</span>
+                                    <div
+                                        style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                        <input id="detail-username" type="text" readonly
+                                            style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;">
+                                        <button class="copy-btn"
+                                            style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 1rem;">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
 
-                    <!-- Account / Codice -->
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Account / Codice</span>
-                        <div class="flex items-center bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                            <input id="detail-account" type="text" readonly
-                                class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0">
-                            <button
-                                class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100"><span
-                                    class="material-symbols-outlined text-base">content_copy</span></button>
-                        </div>
-                    </div>
+                                <!-- Account / Codice -->
+                                <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                    <span
+                                        style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Account
+                                        / Codice</span>
+                                    <div
+                                        style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                        <input id="detail-account" type="text" readonly
+                                            style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;">
+                                        <button class="copy-btn"
+                                            style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 1rem;">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
 
-                    <!-- Extra Company Fields: Codice Societa & N. Iscrizione -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-1.5">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Cod. Società</span>
-                            <div
-                                class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                                <input id="detail-codiceSocieta" readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0"
-                                    value="">
-                                <button
-                                    class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
-                                        class="material-symbols-outlined text-base">content_copy</span></button>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">N.
-                                Iscrizione</span>
-                            <div
-                                class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                                <input id="detail-numeroIscrizione" readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium focus:ring-0"
-                                    value="">
-                                <button
-                                    class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
-                                        class="material-symbols-outlined text-base">content_copy</span></button>
-                            </div>
-                        </div>
-                    </div>
+                                <!-- Extra Company Fields -->
+                                <div class="dashboard-grid-2" style="gap: 0.75rem;">
+                                    <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                        <span
+                                            style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Cod.
+                                            Società</span>
+                                        <div
+                                            style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                            <input id="detail-codiceSocieta" readonly
+                                                style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;">
+                                            <button class="copy-btn"
+                                                style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 1rem;">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                        <span
+                                            style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">N.
+                                            Iscrizione</span>
+                                        <div
+                                            style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                            <input id="detail-numeroIscrizione" readonly
+                                                style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;">
+                                            <button class="copy-btn"
+                                                style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 1rem;">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <!-- Password -->
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Password</span>
-                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                            <input id="detail-password" type="text" readonly
-                                class="titanium-shield flex-1 bg-transparent border-none h-12 px-4 text-sm font-mono tracking-wider focus:ring-0 uppercase">
-                            <button id="toggle-password"
-                                class="p-3 text-gray-400 hover:text-primary border-l border-gray-100 "><span
-                                    class="material-symbols-outlined text-base">visibility</span></button>
-                            <button
-                                class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
-                                    class="material-symbols-outlined text-base">content_copy</span></button>
-                        </div>
-                    </div>
+                                <!-- Password -->
+                                <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                    <span
+                                        style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Password</span>
+                                    <div
+                                        style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                        <input id="detail-password" type="text" readonly
+                                            style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-family: monospace; letter-spacing: 0.05em; text-transform: uppercase; color: white; outline: none;">
+                                        <button id="toggle-password"
+                                            style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 1rem;">visibility</span>
+                                        </button>
+                                        <button class="copy-btn"
+                                            style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 1rem;">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
 
-                    <!-- Sito Web -->
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Sito Web</span>
-                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                            <input id="detail-website" readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-medium text-primary underline focus:ring-0"
-                                value="">
-                            <button id="open-website"
-                                class="p-3 text-gray-400 hover:text-primary border-l border-gray-100 "><span
-                                    class="material-symbols-outlined text-base">open_in_new</span></button>
-                            <button
-                                class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
-                                    class="material-symbols-outlined text-base">content_copy</span></button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECTION: BANCARIO (IBAN & CARTE) -->
-            <section id="section-banking" class="hidden">
-                <button onclick="toggleBanking()"
-                    class="w-full flex items-center justify-between pb-3 border-b border-gray-100  mb-4 group">
-                    <h3 class="text-[#0A162A]  text-lg font-bold">IBAN & Carte</h3>
-                    <span id="banking-chevron"
-                        class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-transform duration-300">expand_more</span>
-                </button>
-                <div id="banking-content" class="hidden space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <!-- Rendered by JS -->
-                </div>
-            </section>
-
-            <!-- Referente -->
-            <section>
-                <button onclick="toggleReferente()"
-                    class="w-full flex items-center justify-between pb-3 border-b border-gray-100  mb-4 group">
-                    <h3 class="text-[#0A162A]  text-lg font-bold">Referente</h3>
-                    <span id="referente-chevron"
-                        class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-transform duration-300">expand_more</span>
-                </button>
-                <div id="referente-content"
-                    class="hidden space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Nome e Cognome</span>
-                        <div class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                            <input id="detail-referenteNome" readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0" value="">
-                            <button
-                                class="copy-btn p-3 text-gray-400 hover:text-primary border-l border-gray-100 "><span
-                                    class="material-symbols-outlined text-base">content_copy</span></button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-1.5">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Telefono</span>
-                            <div
-                                class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                                <input id="detail-referenteTelefono" readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0" value="">
-                                <button
-                                    class="call-btn p-3 text-primary hover:text-green-600 border-l border-gray-100 "><span
-                                        class="material-symbols-outlined text-base">call</span></button>
-                                <button
-                                    class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
-                                        class="material-symbols-outlined text-base">content_copy</span></button>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Cellulare</span>
-                            <div
-                                class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden">
-                                <input id="detail-referenteCellulare" readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm focus:ring-0" value="">
-                                <button
-                                    class="call-btn p-3 text-primary hover:text-green-600 border-l border-gray-100 "><span
-                                        class="material-symbols-outlined text-base">call</span></button>
-                                <button
-                                    class="copy-btn p-3 text-gray-400 hover:text-primary transition-colors border-l border-gray-100 "><span
-                                        class="material-symbols-outlined text-base">content_copy</span></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Note -->
-            <section>
-                <h3 class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
-                    Note</h3>
-                <div class="bg-gray-50  p-4 rounded-xl border border-gray-200  shadow-sm min-h-[100px] relative group">
-                    <p id="detail-note" class="text-sm leading-relaxed whitespace-pre-wrap text-gray-600 ">-
-                    </p>
-                    <button id="copy-note"
-                        class="absolute top-2 right-2 p-2 text-gray-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"><span
-                            class="material-symbols-outlined text-sm">content_copy</span></button>
-                </div>
-            </section>
-
-            <!-- Allegati (Active!) -->
-            <section>
-                <h3 class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
-                    Allegati</h3>
-                <div id="attachments-section"
-                    class="bg-gray-50  p-4 rounded-xl border border-gray-200  shadow-sm flex items-center justify-between group cursor-pointer hover:bg-gray-100  transition-colors"
-                    onclick="openAttachments()">
-                    <div class="flex items-center gap-4">
-                        <div class="bg-primary/10 p-3 rounded-full text-primary">
-                            <span class="material-symbols-outlined">folder_open</span>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-bold text-[#0A162A]  flex items-center gap-2">
-                                Gestisci Allegati
-                                <span id="attachment-count"
-                                    class="text-[10px] bg-gray-200  text-gray-600  px-2 py-0.5 rounded-full hidden">0</span>
-                            </h4>
-                            <p class="text-xs text-gray-500 ">Visualizza e carica file</p>
-                        </div>
-                    </div>
-                    <span
-                        class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_forward_ios</span>
-                </div>
-            </section>
-
-
-            <!-- Opzioni e Visibilità (MATCHING PRIVATE ACCOUNT) -->
-            <section class="pb-10">
-                <h3 class="text-[#0A162A]  text-lg font-bold pb-3 border-b border-gray-100  mb-4">
-                    Opzioni e Visibilità</h3>
-                <div class="space-y-3">
-                    <label
-                        class="flex items-center justify-between p-4 bg-gray-50  rounded-xl border border-gray-200  cursor-pointer active:scale-[0.99] transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary">group</span>
-                            <div>
-                                <p class="text-sm font-bold">Account Condiviso</p>
-                                <p class="text-[11px] text-gray-400">Rendi questo account visibile agli altri
-                                </p>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="detail-shared"
-                            class="w-6 h-6 rounded-lg border-gray-300 text-primary focus:ring-primary transition-all">
-                    </label>
-
-                    <label
-                        class="flex items-center justify-between p-4 bg-gray-50  rounded-xl border border-gray-200  cursor-pointer active:scale-[0.99] transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary">description</span>
-                            <div>
-                                <p class="text-sm font-bold">Memorandum</p>
-                                <p class="text-[11px] text-gray-400">Segna come promemoria importante</p>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="detail-hasMemo"
-                            class="w-6 h-6 rounded-lg border-gray-300 text-primary focus:ring-primary transition-all">
-                    </label>
-
-                    <label
-                        class="flex items-center justify-between p-4 bg-gray-50  rounded-xl border border-gray-200  cursor-pointer active:scale-[0.99] transition-all">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary">share_reviews</span>
-                            <div>
-                                <p class="text-sm font-bold">Memorandum Condiviso</p>
-                                <p class="text-[11px] text-gray-400">Promemoria visibile a tutti</p>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="detail-isMemoShared"
-                            class="w-6 h-6 rounded-lg border-gray-300 text-primary focus:ring-primary transition-all">
-                    </label>
-                </div>
-
-                <div id="shared-management" class="hidden mt-6">
-                    <button onclick="toggleAccessi()" class="w-full flex items-center justify-between py-2 px-1 group">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                            <span class="material-symbols-outlined text-sm">group</span>
-                            Persone con accesso
-                        </h4>
-                        <span id="accessi-chevron"
-                            class="material-symbols-outlined text-gray-400 transition-transform duration-300">expand_more</span>
-                    </button>
-
-                    <div id="accessi-content"
-                        class="hidden mt-3 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <!-- Lista Utenti Condivisi -->
-                        <div id="guests-list" class="space-y-2">
-                            <!-- Popolato via JS -->
-                        </div>
-
-                        <!-- Input per invio invito -->
-                        <div class="space-y-2">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">Seleziona contatto da
-                                invitare</span>
-                            <div class="relative">
-                                <div
-                                    class="flex items-center bg-gray-50  rounded-xl border border-gray-200  overflow-hidden shadow-inner h-12">
-                                    <select id="invite-select"
-                                        class="flex-1 bg-transparent border-none h-full px-4 text-sm focus:ring-0 text-gray-700  cursor-pointer">
-                                        <option value="" disabled selected>Seleziona un contatto...</option>
-                                        <!-- Popolato via JS -->
-                                    </select>
-                                    <!-- Button Removed: Share-on-Save Logic -->
+                                <!-- Sito Web -->
+                                <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                    <span
+                                        style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Sito
+                                        Web</span>
+                                    <div
+                                        style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                        <input id="detail-website" readonly
+                                            style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: #60a5fa; text-decoration: underline; outline: none;">
+                                        <button id="open-website"
+                                            style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 1rem;">open_in_new</span>
+                                        </button>
+                                        <button class="copy-btn"
+                                            style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 1rem;">content_copy</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
+
+                        <!-- SECTION: BANCARIO -->
+                        <section id="section-banking" style="display: none;">
+                            <button onclick="toggleBanking()"
+                                style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent; cursor: pointer;">
+                                <h3 style="font-size: 1.125rem; font-weight: bold; color: white; margin: 0;">IBAN &
+                                    Carte</h3>
+                                <span id="banking-chevron" class="material-symbols-outlined"
+                                    style="color: #9ca3af; transition: transform 0.3s;">expand_more</span>
+                            </button>
+                            <div id="banking-content" style="display: none; margin-top: 1rem;">
+                                <!-- Rendered by JS -->
+                            </div>
+                        </section>
+
+                        <!-- SECTION: REFERENTE -->
+                        <section id="section-referente" style="display: none;">
+                            <button onclick="toggleReferente()"
+                                style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent; cursor: pointer;">
+                                <h3 style="font-size: 1.125rem; font-weight: bold; color: white; margin: 0;">Referente
+                                </h3>
+                                <span id="referente-chevron" class="material-symbols-outlined"
+                                    style="color: #9ca3af; transition: transform 0.3s;">expand_more</span>
+                            </button>
+                            <div id="referente-content"
+                                style="display: none; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                                <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                    <span
+                                        style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Nome
+                                        e Cognome</span>
+                                    <div
+                                        style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                        <input id="detail-referenteNome" readonly
+                                            style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;">
+                                        <button class="copy-btn"
+                                            style="padding: 0.75rem; transition: background 0.2s; color: #9ca3af; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                            <span class="material-symbols-outlined"
+                                                style="font-size: 1rem;">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="dashboard-grid-2" style="gap: 0.75rem;">
+                                    <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                        <span
+                                            style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Telefono</span>
+                                        <div
+                                            style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                            <input id="detail-referenteTelefono" readonly
+                                                style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;">
+                                            <button
+                                                style="padding: 0.75rem; color: #60a5fa; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 1rem;">call</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.375rem;">
+                                        <span
+                                            style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Cellulare</span>
+                                        <div
+                                            style="display: flex; align-items: center; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03);">
+                                            <input id="detail-referenteCellulare" readonly
+                                                style="flex: 1; background: transparent; border: none; height: 3rem; padding: 0 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;">
+                                            <button
+                                                style="padding: 0.75rem; color: #60a5fa; border: none; background: transparent; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
+                                                <span class="material-symbols-outlined"
+                                                    style="font-size: 1rem;">call</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- SECTION: NOTE -->
+                        <section>
+                            <h3
+                                style="font-size: 1.125rem; font-weight: bold; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: white; margin: 0;">
+                                Note</h3>
+                            <div
+                                style="padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); position: relative; min-height: 80px; margin-top: 1rem; background: rgba(255, 255, 255, 0.03);">
+                                <p id="detail-note"
+                                    style="font-size: 0.875rem; line-height: 1.625; color: white; opacity: 0.8; white-space: pre-wrap; margin: 0;">
+                                    -</p>
+                                <button id="copy-note"
+                                    style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.5rem; color: #9ca3af; border: none; background: transparent; cursor: pointer;">
+                                    <span class="material-symbols-outlined"
+                                        style="font-size: 0.875rem;">content_copy</span>
+                                </button>
+                            </div>
+                        </section>
+
+                        <!-- SECTION: ALLEGATI -->
+                        <section>
+                            <h3
+                                style="font-size: 1.125rem; font-weight: bold; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: white; margin: 0;">
+                                Allegati</h3>
+                            <div id="attachments-section"
+                                style="padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-top: 1rem; background: rgba(255, 255, 255, 0.03);"
+                                onclick="openAttachments()">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div
+                                        style="padding: 0.75rem; border-radius: 9999px; background: rgba(33, 150, 243, 0.1); color: #60a5fa; display: flex; align-items: center; justify-content: center;">
+                                        <span class="material-symbols-outlined">folder_open</span>
+                                    </div>
+                                    <div>
+                                        <h4
+                                            style="font-size: 0.875rem; font-weight: bold; display: flex; align-items: center; gap: 0.5rem; color: white; margin: 0;">
+                                            Gestisci Allegati
+                                            <span id="attachment-count"
+                                                style="display: none; font-size: 0.75rem; padding: 0 0.5rem; border-radius: 9999px; background: rgba(255, 255, 255, 0.1); color: #9ca3af;">0</span>
+                                        </h4>
+                                        <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">Visualizza e carica
+                                            file</p>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined"
+                                    style="color: #9ca3af; font-size: 1.125rem;">arrow_forward_ios</span>
+                            </div>
+                        </section>
+
+                        <!-- SECTION: OPZIONI E VISIBILITA -->
+                        <section style="padding-bottom: 2.5rem;">
+                            <h3
+                                style="font-size: 1.125rem; font-weight: bold; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: white; margin: 0;">
+                                Opzioni e
+                                Visibilità</h3>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+                                <label
+                                    style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; background: rgba(255, 255, 255, 0.03);">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <span class="material-symbols-outlined" style="color: #60a5fa;">group</span>
+                                        <div style="display: flex; flex-direction: column;">
+                                            <p style="font-size: 0.875rem; font-weight: bold; color: white; margin: 0;">
+                                                Account
+                                                Condiviso</p>
+                                            <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">Rendi questo
+                                                account visibile agli altri</p>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" id="detail-shared"
+                                        style="width: 1.5rem; height: 1.5rem; border-radius: 0.375rem;">
+                                </label>
+
+                                <label
+                                    style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; background: rgba(255, 255, 255, 0.03);">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <span class="material-symbols-outlined"
+                                            style="color: #60a5fa;">description</span>
+                                        <div style="display: flex; flex-direction: column;">
+                                            <p style="font-size: 0.875rem; font-weight: bold; color: white; margin: 0;">
+                                                Memorandum
+                                            </p>
+                                            <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">Segna come
+                                                promemoria importante</p>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" id="detail-hasMemo"
+                                        style="width: 1.5rem; height: 1.5rem; border-radius: 0.375rem;">
+                                </label>
+
+                                <label
+                                    style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; background: rgba(255, 255, 255, 0.03);">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <span class="material-symbols-outlined"
+                                            style="color: #60a5fa;">share_reviews</span>
+                                        <div style="display: flex; flex-direction: column;">
+                                            <p style="font-size: 0.875rem; font-weight: bold; color: white; margin: 0;">
+                                                Memorandum
+                                                Condiviso</p>
+                                            <p style="font-size: 0.75rem; color: #9ca3af; margin: 0;">Promemoria
+                                                visibile
+                                                a tutti</p>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" id="detail-isMemoShared"
+                                        style="width: 1.5rem; height: 1.5rem; border-radius: 0.375rem;">
+                                </label>
+                            </div>
+
+                            <div id="shared-management" style="display: none; margin-top: 1.5rem;">
+                                <button onclick="toggleAccessi()"
+                                    style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.25rem; border: none; background: transparent; cursor: pointer;">
+                                    <h4
+                                        style="font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem; color: #9ca3af; letter-spacing: 0.05em; margin: 0;">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">group</span>
+                                        Persone con accesso
+                                    </h4>
+                                    <span id="accessi-chevron" class="material-symbols-outlined"
+                                        style="color: #9ca3af; transition: transform 0.3s;">expand_more</span>
+                                </button>
+                                <div id="accessi-content" style="display: none; margin-top: 1rem;">
+                                    <!-- Lista Utenti Condivisi -->
+                                    <div id="guests-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    </div>
+                                    <!-- Invitare -->
+                                    <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <span
+                                            style="font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 0.25rem; color: #9ca3af;">Seleziona
+                                            contatto</span>
+                                        <div
+                                            style="border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; background: rgba(255, 255, 255, 0.03); height: 3rem;">
+                                            <select id="invite-select"
+                                                style="width: 100%; height: 100%; background: transparent; border: none; padding: 0 1rem; font-size: 0.875rem; color: white; outline: none;">
+                                                <option value="" disabled selected>Caricamento contatti...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
-                </div>
+        </main>
 
-                <!-- Edit Button Moved Up -->
-            </section>
+        <!-- FOOTER PLACEHOLDER -->
+        <footer id="footer-placeholder"></footer>
 
-        </div>
-
-        <!-- Bottom Glass Frame (Fixed) -->
-        <div
-            class="fixed bottom-0 left-0 right-0 max-w-md mx-auto h-16 pointer-events-none z-50 backdrop-blur-sm border-t transition-colors bg-[#e2e8f0]/20 border-black/5">
-        </div>
-
-        <!-- Save Changes Modal (Replaces Bottom Bar) -->
-        <div id="save-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <!-- Backdrop -->
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeSaveModal()">
-            </div>
-
-            <!-- Modal Content -->
+        <!-- Save Changes Modal -->
+        <div id="save-modal"
+            style="display: none; position: fixed; inset: 0; align-items: center; justify-content: center; padding: 1rem; z-index: 10000;">
+            <div style="position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);"
+                onclick="closeSaveModal()"></div>
             <div
-                class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100 border border-gray-100">
-                <div class="text-center mb-6">
+                style="position: relative; padding: 1.5rem; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; max-width: 24rem; background-color: #1e293b; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
                     <div
-                        class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 text-primary">
-                        <span class="material-symbols-outlined text-2xl">save</span>
+                        style="width: 3rem; height: 3rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; margin-left: auto; margin-right: auto; margin-bottom: 0.75rem; background: rgba(0, 200, 83, 0.1); color: #00c853;">
+                        <span class="material-symbols-outlined" style="font-size: 1.5rem;">save</span>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1">Modifiche in attesa</h3>
-                    <p class="text-sm text-gray-500">Vuoi salvare le nuove impostazioni di
+                    <h3 style="font-size: 1.125rem; font-weight: bold; color: white; margin: 0;">Modifiche in attesa
+                    </h3>
+                    <p style="font-size: 0.875rem; color: #9ca3af; margin: 0.25rem 0 0 0;">Vuoi salvare le nuove
+                        impostazioni di
                         visibilità?</p>
                 </div>
-
-                <div class="flex flex-col gap-3">
-                    <button id="btn-save-modal"
-                        class="w-full h-12 bg-primary hover:bg-green-600 text-white font-bold rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
-                        Salva Modifiche
-                    </button>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <button id="btn-save-modal" class="titanium-btn-primary">Salva Modifiche</button>
                     <button onclick="closeSaveModal()"
-                        class="w-full h-12 text-gray-500 hover:bg-gray-100  font-bold rounded-xl transition-colors">
-                        Annulla
-                    </button>
+                        style="width: 100%; height: 3rem; font-size: 0.875rem; font-weight: bold; border-radius: 0.75rem; color: #9ca3af; background: transparent; border: none; cursor: pointer;">Annulla</button>
                 </div>
             </div>
         </div>
 
-        <!-- TOAST NOTIFICATION -->
-        <div id="toast"
-            class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-bold shadow-2xl opacity-0 transition-opacity pointer-events-none z-[100]">
-            Copiato!</div>
+        <!-- TOAST (Standard) -->
+        <div id="toast" style="display: none;">Copiato!</div>
 
-        <!-- Module Script -->
         <script src="assets/js/main.js"></script>
         <script type="module" src="assets/js/dettaglio_account_azienda.js"></script>
-
-
-    </div> <!-- End Main Container -->
+    </div>
 </body>
 
 </html>
