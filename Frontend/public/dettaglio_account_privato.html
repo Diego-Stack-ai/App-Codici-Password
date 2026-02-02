@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>Dettaglio Account Privato</title>
 
@@ -14,173 +14,117 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Account V3.6) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.6">
+    <!-- Design System Master (Titanium Account V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/dashboard_common.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/account.css?v=3.7">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.6"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body
-    style="font-family: 'Manrope', sans-serif; background-color: #0a0f1e; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden;"
-    class="antialiased">
+<body class="titanium-bg">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div
-        style="position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100vh; max-width: 48rem; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; background-color: #0a0f1e; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05);">
+    <div class="titanium-container">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="glass-glow pointer-events-none"></div>
+        <div class="titanium-glow pointer-events-none"></div>
 
         <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
-        <header class="titanium-header">
-            <div class="header-balanced-container">
-                <div class="header-left">
-                    <button onclick="history.back()" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                </div>
-                <div class="header-center">
-                    <h2 id="header-nome-account" class="header-title" data-t="account_detail">Dettaglio Account</h2>
-                </div>
-                <div class="header-right">
-                    <button id="btn-edit-page" class="btn-icon-header">
-                        <span class="material-symbols-outlined">edit</span>
-                    </button>
-                    <a href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <!-- Automated Titanium Header -->
+        <header id="header-placeholder" class="titanium-header"></header>
 
         <!-- Header Spacer -->
-        <div style="height: 5rem; width: 100%; flex-shrink: 0;"></div>
+        <div class="spacer-header"></div>
 
         <main class="titanium-main">
             <!-- Hero Profile Header -->
-            <div
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 2rem; padding-bottom: 1.5rem; padding-left: 1rem; padding-right: 1rem; position: relative;">
+            <div class="hero-profile-header">
                 <!-- Top Accent Bar (Dynamic) -->
-                <div id="hero-accent-bar"
-                    style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.4), transparent);">
-                </div>
+                <div id="hero-accent-bar" class="hero-accent-bar"></div>
 
-                <div style="position: relative;">
-                    <div id="detail-avatar" class="border-glow"
-                        style='background-position: center; background-repeat: no-repeat; background-size: cover; border-radius: 1.5rem; height: 7rem; width: 7rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); border: 4px solid rgba(255, 255, 255, 0.05); background-color: rgba(71, 85, 105, 0.05); backdrop-filter: blur(24px); background-image: url("assets/images/google-avatar.png");'>
-                    </div>
-                    <div id="hero-status-dot"
-                        style="position: absolute; bottom: -0.5rem; right: -0.5rem; background: #3b82f6; color: white; padding: 0.5rem; border-radius: 50%; border: 4px solid #0a0f1e; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);">
-                        <span class="material-symbols-outlined"
-                            style="font-size: 0.875rem; font-weight: 900; color: white;">lock</span>
+                <div class="detail-avatar-container">
+                    <div id="detail-avatar" class="detail-avatar border-glow"></div>
+                    <div id="hero-status-dot" class="hero-status-dot">
+                        <span class="material-symbols-outlined">lock</span>
                     </div>
                 </div>
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 1.5rem;">
-                    <h1 id="hero-title" class="selectable"
-                        style="color: white; font-size: 1.5rem; font-weight: 900; line-height: 1.25; letter-spacing: -0.025em; text-align: center; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));">
-                        -</h1>
-                </div>
+                <h1 id="hero-title" class="hero-title selectable">-</h1>
             </div>
 
             <!-- Main Content -->
-            <div
-                style="padding-left: 1rem; padding-right: 1rem; display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 6rem;">
+            <div class="detail-content-wrap">
 
                 <!-- Credenziali Principali -->
                 <section>
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding-left: 0.5rem; padding-right: 0.5rem;">
-                        <span class="material-symbols-outlined" style="color: #3b82f6; font-size: 1.25rem;">key</span>
-                        <h3 style="color: rgba(255, 255, 255, 0.8); font-size: 1.125rem; font-weight: bold; margin: 0;"
-                            data-t="access_credentials">Credenziali Accesso</h3>
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon"
+                            style="color: var(--accent-blue);">key</span>
+                        <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 1rem;">
 
                         <!-- Nome Account -->
-                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                            <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                data-t="account_name">Nome Account</span>
-                            <div class="border-glow"
-                                style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
-                                <input id="detail-nomeAccount" readonly
-                                    style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; font-weight: bold; color: white; outline: none;">
-                                <button class="copy-btn"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); transition: color 0.2s; cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="account_name">Nome Account</span>
+                            <div class="glass-field border-glow">
+                                <input id="detail-nomeAccount" readonly>
+                                <button class="glass-field-btn copy-btn">
+                                    <span class="material-symbols-outlined">content_copy</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Utente -->
-                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                            <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                data-t="username">Utente</span>
-                            <div class="border-glow"
-                                style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
-                                <input id="detail-username" type="text" readonly
-                                    style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;"
-                                    class="titanium-shield">
-                                <button class="copy-btn"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); transition: color 0.2s; cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="username">Utente</span>
+                            <div class="glass-field border-glow">
+                                <input id="detail-username" type="text" readonly class="titanium-shield">
+                                <button class="glass-field-btn copy-btn">
+                                    <span class="material-symbols-outlined">content_copy</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Account -->
-                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                            <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                data-t="account_code">Account / Codice</span>
-                            <div class="border-glow"
-                                style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
-                                <input id="detail-account" type="text" readonly
-                                    style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; font-weight: 500; color: white; outline: none;"
-                                    class="titanium-shield">
-                                <button class="copy-btn"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); transition: color 0.2s; cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="account_code">Account / Codice</span>
+                            <div class="glass-field border-glow">
+                                <input id="detail-account" type="text" readonly class="titanium-shield">
+                                <button class="glass-field-btn copy-btn">
+                                    <span class="material-symbols-outlined">content_copy</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Password -->
-                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                            <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                data-t="password">Password</span>
-                            <div class="border-glow"
-                                style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
-                                <input id="detail-password" type="text" readonly
-                                    style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; font-family: monospace; letter-spacing: 0.05em; color: white; outline: none; text-transform: uppercase;"
-                                    class="titanium-shield">
-                                <button id="toggle-password"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); transition: color 0.2s; cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">visibility</span>
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="password">Password</span>
+                            <div class="glass-field border-glow">
+                                <input id="detail-password" type="text" readonly class="titanium-shield"
+                                    style="font-family: monospace; letter-spacing: 0.05em; text-transform: uppercase;">
+                                <button id="toggle-password" class="glass-field-btn">
+                                    <span class="material-symbols-outlined">visibility</span>
                                 </button>
-                                <button class="copy-btn"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); transition: color 0.2s; cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+                                <button class="glass-field-btn copy-btn">
+                                    <span class="material-symbols-outlined">content_copy</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Sito Web -->
-                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                            <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                data-t="website">Sito Web</span>
-                            <div class="border-glow"
-                                style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="website">Sito Web</span>
+                            <div class="glass-field border-glow">
                                 <input id="detail-website" readonly
-                                    style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; font-weight: 500; color: #60a5fa; text-decoration: underline; outline: none;">
-                                <button id="open-website"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); transition: color 0.2s; cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">open_in_new</span>
+                                    style="color: var(--primary-light); text-decoration: underline;">
+                                <button id="open-website" class="glass-field-btn">
+                                    <span class="material-symbols-outlined">open_in_new</span>
                                 </button>
-                                <button class="copy-btn"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); transition: color 0.2s; cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+                                <button class="glass-field-btn copy-btn">
+                                    <span class="material-symbols-outlined">content_copy</span>
                                 </button>
                             </div>
                         </div>
@@ -188,84 +132,62 @@
                 </section>
 
                 <!-- SECTION: BANCARIO -->
-                <section id="section-banking" style="display: none;">
-                    <button onclick="window.toggleBanking()"
-                        style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.75rem; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: none; margin-bottom: 1rem; cursor: pointer; padding-left: 0.5rem; padding-right: 0.5rem;">
+                <section id="section-banking" class="hidden">
+                    <button onclick="window.toggleBanking()" class="collapsible-trigger">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="material-symbols-outlined"
-                                style="color: #10b981; font-size: 1.25rem;">payments</span>
-                            <h3 style="color: rgba(255, 255, 255, 0.9); font-size: 1.125rem; font-weight: bold; margin: 0;"
-                                data-t="banking_title">IBAN & Carte</h3>
+                            <span class="material-symbols-outlined detail-section-icon"
+                                style="color: var(--accent-green);">payments</span>
+                            <h3 class="detail-section-title" data-t="banking_title">IBAN & Carte</h3>
                         </div>
-                        <span id="banking-chevron" class="material-symbols-outlined"
-                            style="color: rgba(255, 255, 255, 0.2); transition: transform 0.3s;">expand_more</span>
+                        <span id="banking-chevron" class="material-symbols-outlined chevron">expand_more</span>
                     </button>
-                    <div id="banking-content" style="display: none; flex-direction: column; gap: 1.5rem;">
+                    <div id="banking-content" class="hidden" style="flex-direction: column; gap: 1.5rem;">
                         <!-- Rendered by JS -->
                     </div>
                 </section>
 
                 <!-- Referente -->
                 <section>
-                    <button onclick="window.toggleReferente()"
-                        style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.75rem; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: none; margin-bottom: 1rem; cursor: pointer; padding-left: 0.5rem; padding-right: 0.5rem;">
+                    <button onclick="window.toggleReferente()" class="collapsible-trigger">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="material-symbols-outlined"
-                                style="color: #3b82f6; font-size: 1.25rem;">person_pin</span>
-                            <h3 style="color: rgba(255, 255, 255, 0.9); font-size: 1.125rem; font-weight: bold; margin: 0;"
-                                data-t="referent_title">Referente</h3>
+                            <span class="material-symbols-outlined detail-section-icon"
+                                style="color: var(--accent-blue);">person_pin</span>
+                            <h3 class="detail-section-title" data-t="referent_title">Referente</h3>
                         </div>
-                        <span id="referente-chevron" class="material-symbols-outlined"
-                            style="color: rgba(255, 255, 255, 0.2); transition: transform 0.3s;">expand_more</span>
+                        <span id="referente-chevron" class="material-symbols-outlined chevron">expand_more</span>
                     </button>
-                    <div id="referente-content" style="display: none; flex-direction: column; gap: 1rem;">
-                        <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                            <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                data-t="full_name">Nome e Cognome</span>
-                            <div class="border-glow"
-                                style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
-                                <input id="detail-referenteNome" readonly
-                                    style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; color: white; outline: none;">
-                                <button class="copy-btn"
-                                    style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
-                                    <span class="material-symbols-outlined" style="font-size: 1rem;">content_copy</span>
+                    <div id="referente-content" class="hidden" style="flex-direction: column; gap: 1rem;">
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="full_name">Nome e Cognome</span>
+                            <div class="glass-field border-glow">
+                                <input id="detail-referenteNome" readonly>
+                                <button class="glass-field-btn copy-btn">
+                                    <span class="material-symbols-outlined">content_copy</span>
                                 </button>
                             </div>
                         </div>
                         <div class="dashboard-grid-2" style="gap: 1rem;">
-                            <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                                <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                    data-t="phone">Telefono</span>
-                                <div class="border-glow"
-                                    style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
-                                    <input id="detail-referenteTelefono" readonly
-                                        style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; color: white; outline: none;">
-                                    <button class="call-btn"
-                                        style="padding: 0.75rem; color: #60a5fa; border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
-                                        <span class="material-symbols-outlined" style="font-size: 1rem;">call</span>
+                            <div class="glass-field-container">
+                                <span class="view-label" data-t="phone">Telefono</span>
+                                <div class="glass-field border-glow">
+                                    <input id="detail-referenteTelefono" readonly>
+                                    <button class="glass-field-btn call-btn" style="color: var(--primary-light);">
+                                        <span class="material-symbols-outlined">call</span>
                                     </button>
-                                    <button class="copy-btn"
-                                        style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
-                                        <span class="material-symbols-outlined"
-                                            style="font-size: 1rem;">content_copy</span>
+                                    <button class="glass-field-btn copy-btn">
+                                        <span class="material-symbols-outlined">content_copy</span>
                                     </button>
                                 </div>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 0.375rem;">
-                                <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                    data-t="mobile">Cellulare</span>
-                                <div class="border-glow"
-                                    style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; backdrop-filter: blur(4px);">
-                                    <input id="detail-referenteCellulare" readonly
-                                        style="flex: 1; background: transparent; border: none; height: 3rem; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; color: white; outline: none;">
-                                    <button class="call-btn"
-                                        style="padding: 0.75rem; color: #60a5fa; border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
-                                        <span class="material-symbols-outlined" style="font-size: 1rem;">call</span>
+                            <div class="glass-field-container">
+                                <span class="view-label" data-t="mobile">Cellulare</span>
+                                <div class="glass-field border-glow">
+                                    <input id="detail-referenteCellulare" readonly>
+                                    <button class="glass-field-btn call-btn" style="color: var(--primary-light);">
+                                        <span class="material-symbols-outlined">call</span>
                                     </button>
-                                    <button class="copy-btn"
-                                        style="padding: 0.75rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; border-left: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
-                                        <span class="material-symbols-outlined"
-                                            style="font-size: 1rem;">content_copy</span>
+                                    <button class="glass-field-btn copy-btn">
+                                        <span class="material-symbols-outlined">content_copy</span>
                                     </button>
                                 </div>
                             </div>
@@ -275,20 +197,15 @@
 
                 <!-- Note -->
                 <section>
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding-left: 0.5rem; padding-right: 0.5rem;">
-                        <span class="material-symbols-outlined"
-                            style="color: #f59e0b; font-size: 1.25rem;">sticky_note_2</span>
-                        <h3 style="color: rgba(255, 255, 255, 0.8); font-size: 1.125rem; font-weight: bold; margin: 0;"
-                            data-t="notes">Note</h3>
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon"
+                            style="color: var(--accent-orange);">sticky_note_2</span>
+                        <h3 class="detail-section-title" data-t="notes">Note</h3>
                     </div>
-                    <div class="border-glow"
-                        style="background-color: rgba(71, 85, 105, 0.05); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); min-height: 100px; position: relative; backdrop-filter: blur(4px);">
-                        <p id="detail-note"
-                            style="font-size: 0.875rem; line-height: 1.625; white-space: pre-wrap; color: rgba(255, 255, 255, 0.7); font-style: italic; margin: 0;">
-                            -</p>
-                        <button id="copy-note"
-                            style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.5rem; color: rgba(255, 255, 255, 0.4); border: none; background: none; cursor: pointer; transition: color 0.2s;">
+                    <div class="note-display-box border-glow">
+                        <p id="detail-note" class="note-text">-</p>
+                        <button id="copy-note" class="glass-field-btn"
+                            style="position: absolute; top: 0.5rem; right: 0.5rem; border:none;">
                             <span class="material-symbols-outlined" style="font-size: 0.875rem;">content_copy</span>
                         </button>
                     </div>
@@ -296,19 +213,14 @@
 
                 <!-- Allegati -->
                 <section>
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding-left: 0.5rem; padding-right: 0.5rem;">
-                        <span class="material-symbols-outlined"
-                            style="color: #3b82f6; font-size: 1.25rem;">attach_file</span>
-                        <h3 style="color: rgba(255, 255, 255, 0.8); font-size: 1.125rem; font-weight: bold; margin: 0;"
-                            data-t="attachments">Allegati</h3>
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon"
+                            style="color: var(--accent-blue);">attach_file</span>
+                        <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
                     </div>
-                    <div class="border-glow"
-                        style="background-color: rgba(71, 85, 105, 0.05); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(12px);"
-                        onclick="openAttachments()">
+                    <div class="attachment-card-row border-glow" onclick="openAttachments()">
                         <div style="display: flex; align-items: center; gap: 1rem;">
-                            <div
-                                style="background-color: rgba(37, 99, 235, 0.2); padding: 0.75rem; border-radius: 0.75rem; color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);">
+                            <div class="attachment-icon-box">
                                 <span class="material-symbols-outlined">folder_open</span>
                             </div>
                             <div>
@@ -316,32 +228,30 @@
                                     data-t="manage_attachments">
                                     Gestisci Allegati
                                     <span id="attachment-count"
-                                        style="background-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); padding: 0.125rem 0.5rem; border-radius: 0.375rem; display: none;">0</span>
+                                        style="background-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); padding: 0.125rem 0.5rem; border-radius: 0.375rem;"
+                                        class="hidden">0</span>
                                 </h4>
                                 <p style="font-size: 12px; color: rgba(255, 255, 255, 0.4); margin: 0.25rem 0 0 0;"
                                     data-t="view_upload_files">Visualizza e carica file</p>
                             </div>
                         </div>
                         <span class="material-symbols-outlined"
-                            style="color: rgba(255, 255, 255, 0.2); transition: color 0.2s;">arrow_forward_ios</span>
+                            style="color: rgba(255, 255, 255, 0.2);">arrow_forward_ios</span>
                     </div>
                 </section>
 
                 <!-- Opzioni (Shared / Memo) -->
                 <section style="padding-bottom: 2.5rem;">
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding-left: 0.5rem; padding-right: 0.5rem;">
-                        <span class="material-symbols-outlined"
-                            style="color: #a855f7; font-size: 1.25rem;">visibility</span>
-                        <h3 style="color: rgba(255, 255, 255, 0.8); font-size: 1.125rem; font-weight: bold; margin: 0;"
-                            data-t="options_visibility">Opzioni e Visibilità</h3>
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon"
+                            style="color: #a855f7;">visibility</span>
+                        <h3 class="detail-section-title" data-t="options_visibility">Opzioni e Visibilità</h3>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <label class="border-glow"
-                            style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; transition: all 0.2s;">
+                        <label class="visibility-option-card border-glow">
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <span class="material-symbols-outlined"
-                                    style="color: #60a5fa; background-color: rgba(96, 165, 250, 0.1); padding: 0.5rem; border-radius: 0.5rem;">group</span>
+                                    style="color: var(--accent-blue); background-color: rgba(96, 165, 250, 0.1); padding: 0.5rem; border-radius: 0.5rem;">group</span>
                                 <div>
                                     <p style="font-size: 0.875rem; font-weight: bold; color: white; margin: 0;"
                                         data-t="shared_account">Account Condiviso</p>
@@ -349,15 +259,14 @@
                                         data-t="share_desc">Rendi questo account visibile agli altri</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="detail-shared"
-                                style="width: 1.5rem; height: 1.5rem; border-radius: 0.5rem; border-color: rgba(255, 255, 255, 0.2); background-color: rgba(255, 255, 255, 0.05);">
+                            <input type="checkbox" id="detail-shared" style="display: none;">
+                            <div class="titanium-switch"></div>
                         </label>
 
-                        <label class="border-glow"
-                            style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; transition: all 0.2s;">
+                        <label class="visibility-option-card border-glow">
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <span class="material-symbols-outlined"
-                                    style="color: #fbbf24; background-color: rgba(251, 191, 36, 0.1); padding: 0.5rem; border-radius: 0.5rem;">description</span>
+                                    style="color: var(--accent-orange); background-color: rgba(251, 191, 36, 0.1); padding: 0.5rem; border-radius: 0.5rem;">description</span>
                                 <div>
                                     <p style="font-size: 0.875rem; font-weight: bold; color: white; margin: 0;"
                                         data-t="memorandum">Memorandum</p>
@@ -365,15 +274,14 @@
                                         data-t="memo_desc">Segna come promemoria importante</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="detail-hasMemo"
-                                style="width: 1.5rem; height: 1.5rem; border-radius: 0.5rem; border-color: rgba(255, 255, 255, 0.2); background-color: rgba(255, 255, 255, 0.05);">
+                            <input type="checkbox" id="detail-hasMemo" style="display: none;">
+                            <div class="titanium-switch"></div>
                         </label>
 
-                        <label class="border-glow"
-                            style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer; transition: all 0.2s;">
+                        <label class="visibility-option-card border-glow">
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <span class="material-symbols-outlined"
-                                    style="color: #10b981; background-color: rgba(16, 185, 129, 0.1); padding: 0.5rem; border-radius: 0.5rem;">share_reviews</span>
+                                    style="color: var(--accent-green); background-color: rgba(16, 185, 129, 0.1); padding: 0.5rem; border-radius: 0.5rem;">share_reviews</span>
                                 <div>
                                     <p style="font-size: 0.875rem; font-weight: bold; color: white; margin: 0;"
                                         data-t="shared_memo">Memorandum Condiviso</p>
@@ -381,41 +289,34 @@
                                         data-t="shared_memo_desc">Promemoria visibile a tutti</p>
                                 </div>
                             </div>
-                            <input type="checkbox" id="detail-isMemoShared"
-                                style="width: 1.5rem; height: 1.5rem; border-radius: 0.5rem; border-color: rgba(255, 255, 255, 0.2); background-color: rgba(255, 255, 255, 0.05);">
+                            <input type="checkbox" id="detail-isMemoShared" style="display: none;">
+                            <div class="titanium-switch"></div>
                         </label>
                     </div>
 
                     <!-- Gestione Accessi -->
-                    <div id="shared-management" style="display: none; margin-top: 1.5rem;">
-                        <button onclick="window.toggleAccessi()"
-                            style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.25rem; border: none; background: none; cursor: pointer;">
-                            <h4 class="view-label"
-                                style="color: rgba(255, 255, 255, 0.4); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <div id="shared-management" class="hidden" style="margin-top: 1.5rem;">
+                        <button onclick="window.toggleAccessi()" class="collapsible-trigger">
+                            <h4 class="view-label" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
                                 <span class="material-symbols-outlined" style="font-size: 0.875rem;">group</span>
                                 <span data-t="people_with_access">Persone con accesso</span>
                             </h4>
-                            <span id="accessi-chevron" class="material-symbols-outlined"
-                                style="color: rgba(255, 255, 255, 0.4); transition: transform 0.3s;">expand_more</span>
+                            <span id="accessi-chevron" class="material-symbols-outlined chevron">expand_more</span>
                         </button>
 
-                        <div id="accessi-content"
-                            style="display: none; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem;">
+                        <div id="accessi-content" class="hidden"
+                            style="flex-direction: column; gap: 0.75rem; margin-top: 0.75rem;">
                             <!-- Lista Utenti -->
                             <div id="guests-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
                             <!-- Input -->
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <span class="view-label" style="color: rgba(255, 255, 255, 0.4); margin-left: 0.25rem;"
-                                    data-t="select_contact">Seleziona contatto</span>
-                                <div style="position: relative;">
-                                    <div class="border-glow"
-                                        style="display: flex; align-items: center; background-color: rgba(71, 85, 105, 0.05); border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); height: 3rem;">
-                                        <select id="invite-select" data-t-placeholder="select_contact_placeholder"
-                                            style="flex: 1; background: transparent; border: none; height: 100%; padding-left: 1rem; padding-right: 1rem; font-size: 0.875rem; color: white; cursor: pointer; outline: none;">
-                                            <option value="" disabled selected data-t="select_contact_opt">Seleziona un
-                                                contatto...</option>
-                                        </select>
-                                    </div>
+                            <div class="glass-field-container">
+                                <span class="view-label" data-t="select_contact">Seleziona contatto</span>
+                                <div class="glass-field border-glow">
+                                    <select id="invite-select" data-t-placeholder="select_contact_placeholder"
+                                        style="flex: 1; background: transparent; border: none; height: 100%; padding: 0 1rem; font-size: 0.875rem; color: white; cursor: pointer; outline: none;">
+                                        <option value="" disabled selected data-t="select_contact_opt">Seleziona un
+                                            contatto...</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -424,55 +325,16 @@
             </div>
         </main>
 
-        <!-- FOOTER PROTOCOL V3.0 -->
-        <div id="footer-placeholder"></div>
+        <div class="spacer-footer"></div>
 
+        <!-- FOOTER PLACEHOLDER -->
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
 
     </div>
 
-    <!-- Save Changes Modal -->
-    <div id="save-modal"
-        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; align-items: center; justify-content: center; padding: 1rem;">
-        <!-- Backdrop -->
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); transition: opacity 0.2s;"
-            onclick="closeSaveModal()"></div>
-
-        <!-- Modal Content -->
-        <div class="border-glow"
-            style="position: relative; z-index: 10; background-color: #0f172a; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 100%; max-width: 24rem; padding: 1.5rem; text-align: center; color: white; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
-            <div style="position: relative; z-index: 20; text-align: center; margin-bottom: 1.5rem;">
-                <div
-                    style="width: 3rem; height: 3rem; background-color: rgba(37, 99, 235, 0.2); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-left: auto; margin-right: auto; margin-bottom: 0.75rem; color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);">
-                    <span class="material-symbols-outlined" style="font-size: 1.5rem;">save</span>
-                </div>
-                <h3 style="font-size: 1.25rem; font-weight: bold; color: white; margin: 0 0 0.25rem 0;">Modifiche in
-                    attesa</h3>
-                <p
-                    style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.4); line-height: 1.625; margin: 0; padding: 0 1rem;">
-                    Vuoi salvare le nuove impostazioni di visibilità?</p>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <button id="btn-save-modal"
-                    style="width: 100%; height: 3rem; background-color: #2563eb; color: white; font-weight: bold; border-radius: 0.75rem; border: none; box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                    Salva Modifiche
-                </button>
-                <button onclick="closeSaveModal()"
-                    style="width: 100%; height: 3rem; color: rgba(255, 255, 255, 0.5); background: none; border: none; font-weight: bold; border-radius: 0.75rem; cursor: pointer; transition: background 0.2s;">
-                    Annulla
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast"
-        style="position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); background-color: white; color: #0a0f1e; padding: 0.625rem 1.5rem; border-radius: 9999px; font-size: 0.875rem; font-weight: bold; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 110;">
-        Copiato!
-    </div>
-
-    <script type="module" src="assets/js/main.js?v=3.6"></script>
-    <script type="module" src="assets/js/dettaglio_account_privato.js?v=3.6"></script>
+    <!-- Scripts -->
+    <script type="module" src="assets/js/main.js?v=3.1"></script>
+    <script type="module" src="assets/js/dettaglio_account_privato.js?v=3.1"></script>
 </body>
 
 </html>

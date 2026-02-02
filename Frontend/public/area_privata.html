@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>Area Privata - Protocollo Titanium</title>
 
@@ -22,128 +22,123 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Account Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.5">
+    <!-- Design System Master (Titanium Account Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/dashboard_common.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/account.css?v=3.7">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.5"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 
 </head>
 
-<body
-    style="font-family: 'Manrope', sans-serif; background-color: #0a0f1e; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden;"
-    class="antialiased">
+<body class="titanium-bg">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div
-        style="position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100vh; max-width: 48rem; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; background-color: #0a0f1e; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05);">
+    <div class="titanium-container">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="glass-glow pointer-events-none"></div>
+        <div class="titanium-glow"></div>
 
-        <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
-        <header class="titanium-header">
-            <div id="header-content" class="header-balanced-container">
-                <div id="header-left" class="header-left"></div>
-                <div id="header-center" class="header-center"></div>
-                <div id="header-right" class="header-right"></div>
-            </div>
-        </header>
+        <!-- HEADER FISSO (Protocollo v3.1) -->
+        <header id="header-placeholder" class="titanium-header"></header>
+        <div class="spacer-header"></div>
 
         <!-- MAIN CONTENT (Titanium Main Strategy) -->
         <main class="titanium-main">
 
             <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
-            <div class="dashboard-grid-2"
-                style="padding-left: 0.5rem; padding-right: 0.5rem; padding-bottom: 2rem; position: relative; z-index: 50; gap: 1rem;">
+            <div class="matrix-grid" style="margin-bottom: 2rem; position: relative; z-index: 50;">
 
                 <!-- Account Standard -->
-                <a href="account_privati.html?type=standard" class="matrix-blue border-glow"
-                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
+                <a href="account_privati.html?type=standard" class="matrix-card card-blue border-glow adaptive-shadow">
                     <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
-                        <span class="material-symbols-outlined"
-                            style="font-size: 40px; opacity: 0.2;">account_balance_wallet</span>
+                    <div class="saetta-master"></div>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">account_balance_wallet</span>
+                        </div>
+                        <span id="count-standard" class="badge-count loading-pulse">
+                            <span data-t="loading">...</span>
+                        </span>
                     </div>
-                    <div
-                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
-                        <h3 data-t="section_personal_accounts" style="font-weight: 700; margin: 0; color: white;">
-                            Account Personali</h3>
-                        <span id="count-standard"
-                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
-                            data-t="loading">Caricamento...</span>
+                    <div class="card-text-block">
+                        <h3 data-t="section_personal_accounts">Account Personali</h3>
+                        <p data-t="section_personal_desc" style="font-size: 0.75rem;">Cassaforte privata</p>
                     </div>
                 </a>
 
                 <!-- Condivisi -->
-                <a href="account_privati.html?type=shared" class="matrix-red border-glow"
-                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
+                <a href="account_privati.html?type=shared" class="matrix-card card-red border-glow adaptive-shadow">
                     <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
-                        <span class="material-symbols-outlined" style="font-size: 40px; opacity: 0.2;">group</span>
+                    <div class="saetta-master"></div>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">group</span>
+                        </div>
+                        <span id="count-shared" class="badge-count loading-pulse">
+                            <span data-t="loading">...</span>
+                        </span>
                     </div>
-                    <div
-                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
-                        <h3 data-t="section_shared_accounts" style="font-weight: 700; margin: 0; color: white;">Account
-                            Condivisi</h3>
-                        <span id="count-shared"
-                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
-                            data-t="loading">Caricamento...</span>
+                    <div class="card-text-block">
+                        <h3 data-t="section_shared_accounts">Account Condivisi</h3>
+                        <p data-t="section_shared_desc" style="font-size: 0.75rem;">Collaborazione</p>
                     </div>
                 </a>
 
                 <!-- Memorandum -->
-                <a href="account_privati.html?type=memo" class="matrix-orange border-glow"
-                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
+                <a href="account_privati.html?type=memo" class="matrix-card card-orange border-glow adaptive-shadow">
                     <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
-                        <span class="material-symbols-outlined"
-                            style="font-size: 40px; opacity: 0.2;">sticky_note_2</span>
+                    <div class="saetta-master"></div>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">sticky_note_2</span>
+                        </div>
+                        <span id="count-memo" class="badge-count loading-pulse">
+                            <span data-t="loading">...</span>
+                        </span>
                     </div>
-                    <div
-                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
-                        <h3 data-t="section_note" style="font-weight: 700; margin: 0; color: white;">Note</h3>
-                        <span id="count-memo"
-                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
-                            data-t="loading">Caricamento...</span>
+                    <div class="card-text-block">
+                        <h3 data-t="section_note">Note</h3>
+                        <p data-t="section_note_desc" style="font-size: 0.75rem;">Appunti personali</p>
                     </div>
                 </a>
 
                 <!-- Memo Condivisi -->
-                <a href="account_privati.html?type=shared_memo" class="matrix-green border-glow"
-                    style="border-radius: 24px; display: block; position: relative; overflow: hidden; text-decoration: none;">
+                <a href="account_privati.html?type=shared_memo"
+                    class="matrix-card card-green border-glow adaptive-shadow">
                     <div class="glass-shine"></div>
-                    <div class="bg-icon-container">
-                        <span class="material-symbols-outlined"
-                            style="font-size: 40px; opacity: 0.2;">folder_shared</span>
+                    <div class="saetta-master"></div>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">folder_shared</span>
+                        </div>
+                        <span id="count-shared-memo" class="badge-count loading-pulse">
+                            <span data-t="loading">...</span>
+                        </span>
                     </div>
-                    <div
-                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; position: relative; z-index: 2;">
-                        <h3 data-t="section_shared_note" style="font-weight: 700; margin: 0; color: white;">Note
-                            Condivise</h3>
-                        <span id="count-shared-memo"
-                            style="opacity: 0.4; font-size: 9px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;"
-                            data-t="loading">Caricamento...</span>
+                    <div class="card-text-block">
+                        <h3 data-t="section_shared_note">Note Condivise</h3>
+                        <p data-t="section_shared_note_desc" style="font-size: 0.75rem;">Appunti team</p>
                     </div>
                 </a>
             </div>
 
             <!-- TOP 10 WIDGET -->
-            <div
-                style="padding-left: 0.5rem; padding-right: 0.5rem; margin-bottom: 2rem; position: relative; z-index: 40;">
+            <div style="margin-bottom: 2rem; position: relative; z-index: 40;">
                 <div class="titanium-card">
-                    <div
-                        style="padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.02);">
+                    <div class="glass-field-titanium"
+                        style="border:none; border-bottom: 1px solid var(--border-color); border-radius: 0; background: rgba(0,0,0,0.02); padding: 1rem 1.5rem;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span class="material-symbols-outlined"
-                                style="color: var(--accent-orange); font-size: 14px;">star</span>
-                            <h3 style="font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: white;"
+                                style="color: var(--accent-orange); font-size: 18px;">star</span>
+                            <h3 style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0; color: var(--text-primary);"
                                 data-t="top_used_access">Accessi Più Usati</h3>
                         </div>
                     </div>
-                    <div id="top-accounts-list"
-                        style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div id="top-accounts-list" class="dashboard-list" style="padding: 1rem;">
+
                         <!-- Loading -->
                         <div style="padding: 2.5rem 0; display: flex; justify-content: center; opacity: 0.2;">
                             <span class="material-symbols-outlined"
@@ -216,14 +211,14 @@
 
         </main>
 
-        <!-- FOOTER PROTOCOL V3.0 -->
-        <div id="footer-placeholder"></div>
-
+        <div class="spacer-footer"></div>
+        <!-- FOOTER PROTOCOL V3.1 -->
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
 
     <!-- SCRIPTS MODULARI -->
-    <script type="module" src="assets/js/main.js?v=3.5"></script>
-    <script type="module" src="assets/js/area_privata_titanium.js?v=3.5"></script>
+    <script type="module" src="assets/js/main.js?v=3.1"></script>
+    <script type="module" src="assets/js/area_privata_titanium.js?v=3.1"></script>
 </body>
 
 </html>

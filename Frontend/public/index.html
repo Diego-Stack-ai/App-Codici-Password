@@ -19,16 +19,18 @@
         rel="stylesheet" />
 
     <!-- TITANIUM CORE & ACCESS SYSTEM (Protocollo V3.1) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
     <link rel="stylesheet" href="assets/css/accesso.css?v=3.1">
 
-    <!-- Core UI (Protocollo V3.1) -->
+    <!-- Core UI & Engine (Protocollo V3.1) -->
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body>
+<body class="titanium-bg">
 
-    <div class="titanium-box">
+    <div class="titanium-container">
 
         <!-- LANGUAGE SELECTOR -->
         <div class="lang-selector-container">
@@ -43,12 +45,15 @@
         </div>
 
         <!-- Scenografia Protocollo V3.1 -->
+        <div class="titanium-glow"></div>
         <div class="glass-glow"></div>
         <div class="accesso-header"></div>
         <div class="accesso-footer"></div>
 
         <!-- Card Login -->
         <div class="titanium-vault border-glow">
+            <!-- SAETTA MASTER ANIMATION -->
+            <div class="saetta-master"></div>
 
             <!-- Icona Centrale -->
             <div class="security-icon-box">
@@ -79,7 +84,7 @@
                         <span class="material-symbols-outlined">visibility</span>
                     </button>
 
-                    <a href="javascript:void(0)" id="link-forgot-password" class="link-forgot"
+                    <a href="reset_password.html" id="link-forgot-password" class="link-forgot"
                         data-t="forgot_password">Password dimenticata?</a>
                 </div>
 
@@ -98,7 +103,7 @@
 
             <!-- Footer Legale -->
             <div class="legal-footer">
-                © 2026 BM Service S.R.L. - <span data-t="version">Titanium V3.1</span>
+                <span style="opacity: 0.5;">Titanium Protocol V3.1</span>
             </div>
 
         </div>

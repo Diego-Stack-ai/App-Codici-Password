@@ -25,10 +25,117 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // --- PROTOCOLLO: INIEZIONE ROBUSTA (BULLETPROOF) ---
+    function initTitaniumUI() {
+        const hPlaceholder = document.getElementById('header-placeholder');
+        if (!hPlaceholder) return;
+
+        // Internal function to apply Header UI
+        const applyHeader = () => {
+            // 1. Ensure Header Structure if missing or empty
+            const content = document.getElementById('header-content');
+            if (!content) {
+                hPlaceholder.innerHTML = `
+                    <div id="header-content" class="header-balanced-container">
+                        <div id="header-left" class="header-left"></div>
+                        <div id="header-center" class="header-center"></div>
+                        <div id="header-right" class="header-right"></div>
+                    </div>
+                `;
+                hPlaceholder.setAttribute('data-titanium-init', 'true');
+            }
+
+            // 3. Inject Content ONLY if containers are empty
+            const hLeft = document.getElementById('header-left');
+            const hCenter = document.getElementById('header-center');
+            const hRight = document.getElementById('header-right');
+
+            if (hLeft && hLeft.innerHTML.trim() === '') {
+                hLeft.innerHTML = `
+                    <button onclick="history.back()" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                `;
+            }
+
+            if (hCenter && hCenter.innerHTML.trim() === '') {
+                const titleText = (window.t && window.t('edit_account')) || 'Modifica Account';
+                hCenter.innerHTML = `<h1 class="header-title" id="header-title-page" data-t="edit_account">${titleText}</h1>`;
+            }
+
+            if (hRight && hRight.innerHTML.trim() === '') {
+                hRight.innerHTML = `
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                `;
+            }
+        };
+
+        // Internal function to apply Footer Buttons
+        const applyFooter = () => {
+            const fLeft = document.getElementById('footer-actions-left');
+            const fRight = document.getElementById('footer-actions-right');
+
+            // LEFT: Delete Button
+            if (fLeft && !document.getElementById('delete-btn')) {
+                const btnDel = document.createElement('button');
+                btnDel.id = 'delete-btn';
+                btnDel.className = 'btn-icon-header';
+                btnDel.title = (window.t && window.t('delete_account')) || 'Elimina Account';
+                btnDel.style.color = '#ef4444';
+                btnDel.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                btnDel.innerHTML = '<span class="material-symbols-outlined">delete</span>';
+                btnDel.onclick = deleteAccount;
+                fLeft.appendChild(btnDel);
+            }
+
+            // RIGHT: Save Button
+            if (fRight && !document.getElementById('save-btn')) {
+                const btnSave = document.createElement('button');
+                btnSave.id = 'save-btn';
+                btnSave.className = 'btn-icon-header';
+                btnSave.title = (window.t && window.t('save_changes')) || 'Salva Modifiche';
+                btnSave.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                btnSave.style.color = '#3b82f6';
+                btnSave.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                btnSave.innerHTML = '<span class="material-symbols-outlined">save</span>';
+                btnSave.onclick = saveChanges;
+
+                // Prepend to be on the left of settings
+                fRight.prepend(btnSave);
+            }
+        };
+
+        // Run immediately
+        applyHeader();
+        applyFooter();
+
+        // RETRY LOOP: Check every 100ms for 3 seconds
+        let attempts = 0;
+        const interval = setInterval(() => {
+            const hLeft = document.getElementById('header-left');
+            // Re-apply Header
+            if (!hLeft || hLeft.innerHTML.trim() === '') {
+                applyHeader();
+            }
+
+            // Re-apply Footer (both Save and Delete)
+            if (!document.getElementById('save-btn') || !document.getElementById('delete-btn')) {
+                applyFooter();
+            }
+
+            attempts++;
+            if (attempts > 30) clearInterval(interval);
+        }, 100);
+    }
+
+    initTitaniumUI();
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUid = user.uid;
-            loadData(id);
+            loadData(currentDocId);
             loadRubrica(user.uid);
         } else {
             window.location.href = 'index.html';
@@ -167,12 +274,6 @@ function setupUI() {
         });
     }
 
-    // Save Button
-    const saveBtn = document.getElementById('save-btn');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', saveChanges);
-    }
-
     // Banking UI Logic
     const btnAddIban = document.getElementById('btn-add-iban');
     if (btnAddIban) {
@@ -189,12 +290,6 @@ function setupUI() {
             });
             renderBankAccounts();
         });
-    }
-
-    // Delete Button
-    const deleteBtn = document.getElementById('delete-btn');
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', deleteAccount);
     }
 
     // Invites Autocomplete
@@ -389,11 +484,12 @@ async function sendInvite() {
 
 async function saveChanges() {
     const btn = document.getElementById('save-btn');
+    if (!btn) return;
     const icon = btn.querySelector('span');
-    const originalIcon = icon.textContent;
 
     btn.disabled = true;
-    icon.textContent = "sync"; // Show sync icon during saving
+    const originalIcon = icon.textContent;
+    icon.textContent = "progress_activity";
     icon.classList.add('animate-spin');
 
     try {
@@ -403,7 +499,6 @@ async function saveChanges() {
         const updateObj = {
             nomeAccount: document.getElementById('account-name').value,
             username: document.getElementById('account-username').value,
-            codice: document.getElementById('account-code').value,
             codice: document.getElementById('account-code').value,
             account: document.getElementById('account-code').value,
             password: document.getElementById('account-password').value,
@@ -426,7 +521,7 @@ async function saveChanges() {
 
         await updateDoc(doc(db, "users", currentUid, "accounts", currentDocId), updateObj);
 
-        icon.textContent = "check_circle"; // Flash success
+        icon.textContent = "check_circle";
         icon.classList.remove('animate-spin');
 
         setTimeout(() => {
@@ -452,9 +547,13 @@ async function deleteAccount() {
     if (!confirmed) return;
 
     const btn = document.getElementById('delete-btn');
-    const originalText = btn.innerHTML;
+    if (!btn) return;
+    const icon = btn.querySelector('span');
+    const originalIcon = icon.textContent;
+
     btn.disabled = true;
-    btn.textContent = "Eliminazione...";
+    icon.textContent = "progress_activity";
+    icon.classList.add('animate-spin');
 
     try {
         await deleteDoc(doc(db, "users", currentUid, "accounts", currentDocId));
@@ -464,7 +563,8 @@ async function deleteAccount() {
         console.error(e);
         if (window.showToast) window.showToast((window.t("delete_error") || "Errore eliminazione: ") + e.message, "error");
         btn.disabled = false;
-        btn.innerHTML = originalText;
+        icon.textContent = originalIcon;
+        icon.classList.remove('animate-spin');
     }
 }
 
@@ -489,84 +589,97 @@ function renderBankAccounts() {
 
     bankAccounts.forEach((account, ibanIdx) => {
         const ibanDiv = document.createElement('div');
-        ibanDiv.className = "bg-white/50 dark:bg-slate-800/20 p-4 rounded-2xl border border-black/5 dark:border-white/5 space-y-4 relative animate-in fade-in slide-in-from-top-4 duration-500";
+        ibanDiv.className = "bg-slate-500/5 backdrop-blur-sm p-5 rounded-[2rem] border border-white/5 relative animate-in fade-in slide-in-from-top-4 duration-500 space-y-5 border-glow";
 
         ibanDiv.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Conto #${ibanIdx + 1}</span>
+            <div class="flex items-center justify-between px-2">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[var(--accent-blue)]" style="font-size: 20px;">account_balance</span>
+                    <span class="text-[10px] font-900 text-white/40 uppercase tracking-[0.2em]">Conto Protocollo #${ibanIdx + 1}</span>
+                </div>
                 ${bankAccounts.length > 1 ? `
-                    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" onclick="removeIban(${ibanIdx})">
-                        <span class="material-symbols-outlined text-sm">delete</span>
+                    <button type="button" class="btn-icon-header" style="width: 32px; height: 32px; color: var(--accent-red); border-color: rgba(155, 28, 28, 0.2);" onclick="removeIban(${ibanIdx})">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
                     </button>
                 ` : ''}
             </div>
             
-            <div class="flex flex-col gap-2">
-                <label class="text-[#0A162A] dark:text-white text-xs font-bold uppercase tracking-wide opacity-50 pl-1">IBAN</label>
-                <div class="flex w-full items-center rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-slate-900/50 overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all shadow-sm">
-                    <div class="pl-4 text-gray-400 flex items-center justify-center">
-                        <span class="material-symbols-outlined">account_balance</span>
-                    </div>
-                    <input type="text" class="iban-input w-full bg-transparent border-none h-14 px-4 text-base text-[#0A162A] dark:text-white font-mono focus:ring-0 uppercase font-bold" 
-                        data-iban-idx="${ibanIdx}" value="${account.iban}" placeholder="IT00..." />
+            <div class="glass-field-container">
+                <label class="view-label" data-t="finance_iban">IBAN</label>
+                <div class="glass-field border-glow">
+                    <span class="material-symbols-outlined" style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">account_balance</span>
+                    <input type="text" class="iban-input" 
+                        data-iban-idx="${ibanIdx}" value="${account.iban}" placeholder="IT00..." 
+                        style="font-family: monospace; font-weight: bold; text-transform: uppercase; color: var(--text-primary);" />
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Pass. Dispositiva</label>
-                    <div class="flex items-center bg-white dark:bg-slate-900/50 rounded-xl border border-black/5 dark:border-white/10 overflow-hidden focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                        <input type="text" class="dispositiva-input titanium-shield w-full bg-transparent border-none h-11 px-4 text-sm focus:ring-0 dark:text-white" 
-                            data-iban-idx="${ibanIdx}" value="${account.passwordDispositiva || ''}" placeholder="Password..." />
-                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
-                            <span class="material-symbols-outlined text-sm">visibility</span>
+            <div class="dashboard-grid-2" style="gap: 1.5rem;">
+                <div class="glass-field-container">
+                    <label class="view-label" data-t="dispositive_password">Pass. Dispositiva</label>
+                    <div class="glass-field border-glow">
+                        <span class="material-symbols-outlined" style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">lock</span>
+                        <input type="text" class="dispositiva-input titanium-shield" 
+                            data-iban-idx="${ibanIdx}" value="${account.passwordDispositiva || ''}" 
+                            style="font-family: monospace;" />
+                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="glass-field-btn">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
                         </button>
                     </div>
                 </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Nota IBAN</label>
-                    <textarea class="iban-nota-input w-full bg-white dark:bg-slate-900/50 rounded-xl border border-black/5 dark:border-white/10 px-4 py-2.5 text-sm focus:ring-1 focus:ring-primary/20 resize-none dark:text-white" 
-                        data-iban-idx="${ibanIdx}" rows="1" placeholder="Note per questo IBAN...">${account.nota || ''}</textarea>
-                </div>
-            </div>
-
-            <!-- SEZIONE REFERENTE -->
-            <div class="bg-primary/5 dark:bg-primary/5 p-4 rounded-2xl border border-primary/10 space-y-3">
-                <div class="flex items-center gap-2 text-primary">
-                    <span class="material-symbols-outlined text-sm">contact_phone</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest">Referente Banca</span>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Nome</label>
-                        <input type="text" class="ref-nome-input w-full bg-white dark:bg-slate-900/50 rounded-lg border border-black/5 dark:border-white/10 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20 dark:text-white" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteNome || ''}" placeholder="Nome" />
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Cognome</label>
-                        <input type="text" class="ref-cognome-input w-full bg-white dark:bg-slate-900/50 rounded-lg border border-black/5 dark:border-white/10 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20 dark:text-white" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteCognome || ''}" placeholder="Cognome" />
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Telefono</label>
-                        <input type="text" class="ref-tel-input w-full bg-white dark:bg-slate-900/50 rounded-lg border border-black/5 dark:border-white/10 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20 dark:text-white" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteTelefono || ''}" placeholder="Tel." />
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Cellulare</label>
-                        <input type="text" class="ref-cell-input w-full bg-white dark:bg-slate-900/50 rounded-lg border border-black/5 dark:border-white/10 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20 dark:text-white" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteCellulare || ''}" placeholder="Cell." />
+                <div class="glass-field-container">
+                    <label class="view-label" data-t="iban_notes">Nota IBAN</label>
+                    <div class="glass-field border-glow">
+                        <textarea class="iban-nota-input w-full bg-transparent border-none px-4 py-2.5 text-sm focus:ring-0 resize-none text-white/80" 
+                            data-iban-idx="${ibanIdx}" rows="1" placeholder="Note per questo IBAN...">${account.nota || ''}</textarea>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-3 pl-4 border-l-2 border-primary/10 py-1">
+            <!-- SEZIONE REFERENTE BANCA -->
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-4">
+                <div class="flex items-center gap-2 text-white/40">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">contact_phone</span>
+                    <span class="text-[9px] font-900 uppercase tracking-widest" data-t="bank_referent">Referente di Filiale</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="first_name">Nome</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="ref-nome-input" data-iban-idx="${ibanIdx}" value="${account.referenteNome || ''}" />
+                        </div>
+                    </div>
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="last_name">Cognome</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="ref-cognome-input" data-iban-idx="${ibanIdx}" value="${account.referenteCognome || ''}" />
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="phone">Telefono</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="ref-tel-input" data-iban-idx="${ibanIdx}" value="${account.referenteTelefono || ''}" />
+                        </div>
+                    </div>
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="mobile">Cellulare</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="ref-cell-input" data-iban-idx="${ibanIdx}" value="${account.referenteCellulare || ''}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4 pl-4 border-l border-white/10 py-1">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Carte collegate</span>
-                    <button type="button" class="text-primary text-[10px] font-bold hover:underline flex items-center gap-0.5" onclick="addCard(${ibanIdx})">
-                        <span class="material-symbols-outlined text-sm">add</span> Aggiungi carta
+                    <div class="flex items-center gap-2">
+                         <span class="material-symbols-outlined text-[var(--accent-purple)]" style="font-size: 18px;">credit_card</span>
+                         <span class="text-[9px] font-900 text-white/40 uppercase tracking-widest" data-t="linked_instruments">Strumenti di Pagamento</span>
+                    </div>
+                    <button type="button" class="btn-icon-header" style="width: 32px; height: 32px; color: var(--accent-blue); border-color: rgba(33, 150, 243, 0.2);" onclick="addCard(${ibanIdx})">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
                     </button>
                 </div>
                 <div class="card-list-container space-y-4">
@@ -585,73 +698,89 @@ function renderBankAccounts() {
 
 function renderCardEntry(ibanIdx, cardIdx, card) {
     return `
-        <div class="bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-black/5 dark:border-white/5 shadow-sm space-y-4 relative">
+        <div class="bg-white/5 p-5 rounded-[1.5rem] border border-white/5 space-y-4 relative border-glow">
              <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-gray-400 text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase">Strumento #${cardIdx + 1}</span>
+                    <span class="material-symbols-outlined text-white/40" style="font-size: 18px;">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
+                    <span class="text-[9px] font-900 text-white/40 uppercase tracking-wider">Strumento #${cardIdx + 1}</span>
                 </div>
-                <button type="button" class="text-gray-300 hover:text-red-500 transition-colors" onclick="removeCard(${ibanIdx}, ${cardIdx})">
-                    <span class="material-symbols-outlined text-sm">close</span>
+                <button type="button" class="btn-icon-header" style="width: 28px; height: 28px; color: var(--accent-red); border-color: transparent;" onclick="removeCard(${ibanIdx}, ${cardIdx})">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Tipo Strumento</label>
-                    <select class="type-input w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg h-10 px-3 text-sm text-[#0A162A] dark:text-white focus:ring-1 focus:ring-primary/20" 
-                        data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}">
-                        <option value="Credit" ${card.type === 'Credit' ? 'selected' : ''}>Carta di credito (Credit)</option>
-                        <option value="Debit" ${card.type === 'Debit' ? 'selected' : ''}>Bancomat (Debit)</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Titolare</label>
-                        <input type="text" class="titolare-input w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg h-10 px-3 text-sm text-[#0A162A] dark:text-white focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.titolare || ''}" placeholder="Titolare..." />
-                    </div>
-                    <div class="flex flex-col gap-1.5 ${card.type === 'Debit' ? 'hidden' : ''}">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Tipo Carta</label>
-                        <input type="text" class="cardtype-input w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg h-10 px-3 text-sm text-[#0A162A] dark:text-white focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardType || ''}" placeholder="Visa, MC..." />
+            <div class="space-y-4">
+                <div class="glass-field-container">
+                    <label class="view-label" data-t="instrument_type">Tipo Strumento</label>
+                    <div class="glass-field border-glow" style="height: 3rem; background: rgba(0,0,0,0.2) !important;">
+                        <select class="type-input w-full bg-transparent border-none px-4 text-sm text-white font-bold h-full focus:ring-0" 
+                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}">
+                            <option value="Credit" ${card.type === 'Credit' ? 'selected' : ''} class="bg-slate-900">Carta di Credito</option>
+                            <option value="Debit" ${card.type === 'Debit' ? 'selected' : ''} class="bg-slate-900">Bancomat / Debit</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Numero</label>
-                    <input type="text" class="number-input w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg h-10 px-3 text-sm text-[#0A162A] dark:text-white font-mono focus:ring-1 focus:ring-primary/20" 
-                        data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardNumber || ''}" placeholder="**** **** **** ****" />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="holder">Titolare</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="titolare-input" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.titolare || ''}" />
+                        </div>
+                    </div>
+                    <div class="glass-field-container ${card.type === 'Debit' ? 'hidden' : ''}">
+                        <label class="view-label" data-t="card_brand">Circuito</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="cardtype-input" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardType || ''}" placeholder="Visa, MC..." />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-field-container">
+                    <label class="view-label" data-t="card_number">Numero Carta</label>
+                    <div class="glass-field border-glow" style="height: 3.5rem;">
+                         <span class="material-symbols-outlined" style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">pin</span>
+                        <input type="text" class="number-input" 
+                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardNumber || ''}" placeholder="**** **** **** ****" 
+                            style="font-family: monospace; font-weight: bold; font-size: 1rem; color: var(--text-primary);" />
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Scadenza</label>
-                        <input type="text" class="expiry-input w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg h-10 px-3 text-sm text-[#0A162A] dark:text-white focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.expiry || ''}" placeholder="MM/AA" />
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="expiry">Scadenza</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="expiry-input" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.expiry || ''}" placeholder="MM/AA" style="text-align: center;" />
+                        </div>
                     </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">CCV</label>
-                        <input type="text" class="ccv-input w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg h-10 px-3 text-sm text-[#0A162A] dark:text-white focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.ccv || ''}" placeholder="123" />
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="cvv">CVV</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="ccv-input" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.ccv || ''}" placeholder="000" style="text-align: center;" />
+                        </div>
                     </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">PIN</label>
-                        <div class="flex items-center bg-slate-50 dark:bg-slate-800 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
-                            <input type="text" class="pin-input titanium-shield w-full bg-transparent border-none h-10 px-3 text-sm text-[#0A162A] dark:text-white focus:ring-1 focus:ring-primary/20" 
-                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" placeholder="****" />
-                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
-                                <span class="material-symbols-outlined text-sm">visibility</span>
+                    <div class="glass-field-container">
+                        <label class="view-label" data-t="pin">PIN</label>
+                        <div class="glass-field border-glow" style="height: 3rem;">
+                            <input type="text" class="pin-input titanium-shield" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" style="text-align: center; font-family: monospace;" />
+                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="glass-field-btn">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Note</label>
-                    <textarea class="note-input w-full bg-slate-50 dark:bg-slate-800 border-none rounded-lg p-3 text-sm text-[#0A162A] dark:text-white focus:ring-1 focus:ring-primary/20 resize-none" 
-                        data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" rows="2" placeholder="Note sulla carta...">${card.note || ''}</textarea>
+                <div class="glass-field-container">
+                    <label class="view-label" data-t="notes">Note Strumento</label>
+                    <div class="glass-field border-glow" style="height: auto;">
+                        <textarea class="note-input w-full bg-transparent border-none p-3 text-sm text-white/80 focus:ring-0 resize-none" 
+                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" rows="2" placeholder="Note sulla carta...">${card.note || ''}</textarea>
+                    </div>
                 </div>
             </div>
         </div>

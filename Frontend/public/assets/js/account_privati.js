@@ -352,29 +352,31 @@ function renderList(list) {
         const isMemo = acc._isMemo;
         const isShared = acc._isShared || acc.isSharedWithMe || sharedAccountIds.has(acc.id);
 
-        let accentColor = 'rgba(80, 150, 255, 0.6)'; // Default Blue
+        let accentColor = 'rgba(80, 150, 255, 0.6)'; // Blue
         if (isShared && isMemo) accentColor = 'rgba(16, 185, 129, 0.6)'; // Emerald
         else if (isShared) accentColor = 'rgba(147, 51, 234, 0.6)'; // Purple
         else if (isMemo) accentColor = 'rgba(245, 158, 11, 0.6)'; // Amber
 
         const isPinned = !!acc.isPinned;
-        const pinIcon = isPinned ? 'push_pin' : 'push_pin';
-        const pinClass = isPinned ? 'text-white' : 'text-white/40 group-hover:text-white/80';
-        const pinTitle = isPinned ? 'Rimuovi dai fissati' : 'Fissa in alto';
+        const pinIcon = 'push_pin';
+        // Pin Button Style using CSS Variables
+        const pinStyle = isPinned
+            ? 'color: var(--text-primary); opacity: 1;'
+            : 'color: var(--text-secondary); opacity: 0.5;';
 
         const dots = '********';
 
         return `
-            <div class="relative overflow-hidden select-none swipe-row rounded-2xl h-full shadow-lg border-glow saetta transition-all duration-300 hover:-translate-y-1 group" 
-                 style="touch-action: pan-y;"
+            <div class="relative overflow-hidden select-none swipe-row h-full shadow-lg border-glow saetta transition-all duration-300 hover:-translate-y-1 group" 
+                 style="touch-action: pan-y; border-radius: 24px;"
                  id="acc-${acc.id}" 
                  data-id="${acc.id}"
                  data-owner="${acc.isOwner}"
                  data-owner-id="${acc.ownerId || ''}">
               
               <!-- BACKGROUND ACTIONS -->
-              <div class="absolute inset-y-0 left-0 flex w-full swipe-bg-left opacity-0 transition-opacity z-0">
-                 <div class="w-full h-full bg-red-600/80 flex items-center justify-start pl-8 rounded-2xl">
+              <div class="absolute inset-y-0 left-0 flex w-full swipe-bg-left opacity-0 transition-opacity z-0" style="border-radius: 24px;">
+                 <div class="w-full h-full bg-red-600/90 flex items-center justify-start pl-8" style="border-radius: 24px;">
                     <div class="flex flex-col items-center">
                         <span class="material-symbols-outlined text-white text-2xl">delete</span>
                         <span class="view-label text-white mt-1">Elimina</span>
@@ -382,8 +384,8 @@ function renderList(list) {
                  </div>
               </div>
 
-              <div class="absolute inset-y-0 right-0 flex w-full swipe-bg-right opacity-0 transition-opacity z-0">
-                 <div class="w-full h-full bg-amber-600/80 flex items-center justify-end pr-8 rounded-2xl">
+              <div class="absolute inset-y-0 right-0 flex w-full swipe-bg-right opacity-0 transition-opacity z-0" style="border-radius: 24px;">
+                 <div class="w-full h-full bg-amber-600/90 flex items-center justify-end pr-8" style="border-radius: 24px;">
                     <div class="flex flex-col items-center">
                         <span class="material-symbols-outlined text-white text-2xl">archive</span>
                         <span class="view-label text-white mt-1">Archivia</span>
@@ -392,7 +394,8 @@ function renderList(list) {
               </div>
 
               <!-- FOREGROUND CONTENT: Titanium Glass Card -->
-              <div class="relative z-10 bg-slate-500/5 backdrop-blur-sm rounded-2xl swipe-content h-full overflow-hidden border border-white/5">
+              <div class="relative z-10 h-full overflow-hidden border swipe-content"
+                   style="border-radius: 24px; background: var(--surface-glass); backdrop-filter: blur(12px); border-color: var(--border-color);">
                 
                 <!-- INTERNAL BEACON GLOW -->
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 blur-md rounded-full"></div>
@@ -400,26 +403,30 @@ function renderList(list) {
 
                 <a href="dettaglio_account_privato.html?id=${idSafe}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}" 
                    draggable="false"
-                   class="block p-5 active:scale-[0.98] transition-all duration-300 h-full flex flex-col relative">
+                   class="block p-5 active:scale-[0.98] transition-all duration-300 h-full flex flex-col relative text-decoration-none">
                     
                     <div class="flex items-start space-x-4">
                         <div class="relative shrink-0">
-                            <img class="w-12 h-12 rounded-xl object-cover bg-white/5 border border-white/10 shadow-sm pointer-events-none" src="${avatar}">
-                            <div class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-[#0a0f1e]" style="background: ${accentColor}"></div>
+                            <img class="w-12 h-12 rounded-xl object-cover shadow-sm pointer-events-none" 
+                                 style="background: var(--surface-sub); border: 1px solid var(--border-color);"
+                                 src="${avatar}">
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-[var(--bg-primary)]" style="background: ${accentColor}"></div>
                         </div>
                         
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between mb-3">
-                                <h3 class="font-bold text-white text-base truncate leading-tight">${acc.nomeAccount || 'Senza Nome'}</h3>
+                                <h3 class="font-bold text-base truncate leading-tight" style="color: var(--text-primary);">${acc.nomeAccount || 'Senza Nome'}</h3>
                             </div>
 
                             <div class="space-y-3">
                                 ${acc.username ? `
                                 <div class="relative">
-                                    <div class="view-label text-white/40 mb-1">Utente</div>
-                                    <div class="flex items-center justify-between bg-black/20 rounded-lg px-3 h-9 border border-white/5">
-                                        <span id="user-text-${acc.id}" class="text-white text-sm truncate pr-8">${dots}</span>
-                                        <button class="copy-btn-dynamic absolute right-1 p-1.5 rounded-md hover:bg-white/10 text-white/30 hover:text-white transition-colors" 
+                                    <div class="view-label mb-1" style="color: var(--text-secondary);">Utente</div>
+                                    <div class="flex items-center justify-between rounded-lg px-3 h-9 border relative"
+                                         style="background: var(--surface-sub); border-color: var(--border-color);">
+                                        <span id="user-text-${acc.id}" class="text-sm truncate pr-10" style="color: var(--text-primary);">${dots}</span>
+                                        <button class="copy-btn-dynamic absolute right-0 top-0 h-full w-[36px] flex items-center justify-center rounded-r-lg hover:bg-white/10 transition-colors" 
+                                                style="color: ${accentColor};"
                                                 data-copy="${acc.username.replace(/"/g, '&quot;')}" title="Copia Username">
                                             <span class="material-symbols-outlined text-[18px]">content_copy</span>
                                         </button>
@@ -428,10 +435,12 @@ function renderList(list) {
 
                                 ${acc.account ? `
                                 <div class="relative">
-                                    <div class="view-label text-white/40 mb-1">Account</div>
-                                    <div class="flex items-center justify-between bg-black/20 rounded-lg px-3 h-9 border border-white/5">
-                                        <span id="acc-text-${acc.id}" class="text-white text-sm truncate pr-8">${dots}</span>
-                                        <button class="copy-btn-dynamic absolute right-1 p-1.5 rounded-md hover:bg-white/10 text-white/30 hover:text-white transition-colors" 
+                                    <div class="view-label mb-1" style="color: var(--text-secondary);">Account</div>
+                                    <div class="flex items-center justify-between rounded-lg px-3 h-9 border relative"
+                                         style="background: var(--surface-sub); border-color: var(--border-color);">
+                                        <span id="acc-text-${acc.id}" class="text-sm truncate pr-10" style="color: var(--text-primary);">${dots}</span>
+                                        <button class="copy-btn-dynamic absolute right-0 top-0 h-full w-[36px] flex items-center justify-center rounded-r-lg hover:bg-white/10 transition-colors" 
+                                                style="color: ${accentColor};"
                                                 data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account">
                                             <span class="material-symbols-outlined text-[18px]">content_copy</span>
                                         </button>
@@ -440,10 +449,12 @@ function renderList(list) {
 
                                 ${acc.password ? `
                                 <div class="relative">
-                                    <div class="view-label text-white/40 mb-1">Password</div>
-                                    <div class="flex items-center justify-between bg-black/20 rounded-lg px-3 h-9 border border-white/5">
-                                        <span id="pass-text-${acc.id}" class="text-white text-sm truncate pr-8 font-mono tracking-wider">${dots}</span>
-                                        <button class="copy-btn-dynamic absolute right-1 p-1.5 rounded-md hover:bg-white/10 text-white/30 hover:text-white transition-colors" 
+                                    <div class="view-label mb-1" style="color: var(--text-secondary);">Password</div>
+                                    <div class="flex items-center justify-between rounded-lg px-3 h-9 border relative"
+                                         style="background: var(--surface-sub); border-color: var(--border-color);">
+                                        <span id="pass-text-${acc.id}" class="text-sm truncate pr-10 font-mono tracking-wider" style="color: var(--text-primary);">${dots}</span>
+                                        <button class="copy-btn-dynamic absolute right-0 top-0 h-full w-[36px] flex items-center justify-center rounded-r-lg hover:bg-white/10 transition-colors" 
+                                                style="color: ${accentColor};"
                                                 data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password">
                                             <span class="material-symbols-outlined text-[18px]">content_copy</span>
                                         </button>
@@ -454,16 +465,18 @@ function renderList(list) {
                     </div>
                 </a>
 
-                <!-- UTILITY BUTTONS -->
-                <div class="absolute top-4 right-4 z-20 flex items-center gap-1.5">
+                <!-- UTILITY BUTTONS (Pin/Eye) -->
+                <div class="absolute top-4 right-4 z-20 flex flex-col gap-2">
                     <button onclick="event.stopPropagation(); window.togglePin('${acc.id}', ${acc.isOwner}, '${acc.ownerId}')" 
-                            class="flex size-8 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all active:scale-90 ${pinClass}" 
-                            title="${pinTitle}">
-                        <span class="material-symbols-outlined text-[16px] ${isPinned ? 'filled' : ''}">${pinIcon}</span>
+                            class="flex items-center justify-center transition-all active:scale-90" 
+                            style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); ${pinStyle}"
+                            title="${isPinned ? 'Rimuovi dai fissati' : 'Fissa in alto'}">
+                        <span class="material-symbols-outlined text-[18px] ${isPinned ? 'filled' : ''}">${pinIcon}</span>
                     </button>
                     ${acc.password ? `
                     <button onclick="event.stopPropagation(); window.toggleTripleVisibility('${acc.id}')" 
-                            class="flex size-8 items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white transition-all active:scale-90" 
+                            class="flex items-center justify-center transition-all active:scale-90" 
+                            style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); color: ${accentColor};"
                             title="Mostra/Nascondi Dati">
                         <span id="pass-eye-${acc.id}" class="material-symbols-outlined text-[18px]">visibility</span>
                     </button>` : ''}

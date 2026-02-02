@@ -58,17 +58,6 @@ async function initProtocolUI() {
         `;
     }
 
-    // Iniezione Footer Protocol
-    const footerStack = document.getElementById('footer-placeholder');
-    if (footerStack) {
-        footerStack.innerHTML = `
-            <footer class="titanium-footer">
-                <div class="header-balanced-container" style="justify-content: center; width: 100%;">
-                    <span class="text-[9px] font-bold uppercase tracking-[0.4em] opacity-30">${t('version')}</span>
-                </div>
-            </footer>
-        `;
-    }
 }
 
 /**

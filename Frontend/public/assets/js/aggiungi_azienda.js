@@ -52,9 +52,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const btnSave = document.getElementById('btn-save-azienda');
-    let currentUser = null;
+    // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
+    const injectFooterActions = () => {
+        const footerRight = document.getElementById('footer-actions-right');
+        if (footerRight) {
+            footerRight.innerHTML = `
+                <button id="btn-save-azienda" class="btn-icon-header" title="Salva Azienda">
+                    <span class="material-symbols-outlined">save</span>
+                </button>
+            `;
+            // Ri-assegna il listener dopo l'iniezione
+            const newBtnSave = document.getElementById('btn-save-azienda');
+            if (newBtnSave) {
+                setupSaveListener(newBtnSave);
+            }
+        }
+    };
 
+    setTimeout(injectFooterActions, 500);
+
+    let currentUser = null;
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
@@ -141,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnSave) {
+    function setupSaveListener(btnSave) {
         btnSave.addEventListener('click', async () => {
             if (!currentUser) {
                 showToast("Devi essere loggato per salvare.", "error");
@@ -280,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 btnSave.disabled = true;
-                btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin text-xl mr-2">progress_activity</span> Salvataggio...`;
+                btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin text-xl mr-2">progress_activity</span>`;
 
                 // Modular SDK: addDoc(collection(...), data)
                 const colRef = collection(db, "users", currentUser.uid, "aziende");
@@ -293,10 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Salvataggio fallito:", error);
                 showToast("Errore salvataggio: " + error.message, "error");
                 btnSave.disabled = false;
-                btnSave.innerText = "Salva Azienda";
+                btnSave.innerHTML = `<span class="material-symbols-outlined">save</span>`;
             }
         });
-    } else {
-        alert("CRITICAL: Save button not found!");
     }
 });

@@ -7,12 +7,13 @@ import { doc, getDoc, collection, getDocs, updateDoc, deleteDoc } from "https://
 let allAccounts = [];
 let currentUser = null;
 let currentAziendaId = null;
+let currentCompanyName = '';
 let sortOrder = 'asc';
-let currentTheme = { from: '#10b981', to: '#047857', name: 'Green' }; // Default
+let currentTheme = { from: '#047857', to: '#064e3b', name: 'Green' }; // Default
 let currentSwipeList = null;
 
 const companyPalettes = [
-    { from: '#10b981', to: '#047857', name: 'Green' },   // Green (Default)
+    { from: '#047857', to: '#064e3b', name: 'Green' },   // Green (Darker Emerald 700)
     { from: '#3b82f6', to: '#1d4ed8', name: 'Blue' },    // Blue
     { from: '#8b5cf6', to: '#6d28d9', name: 'Purple' },  // Purple
     { from: '#f59e0b', to: '#b45309', name: 'Orange' },  // Orange
@@ -63,31 +64,77 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const btnAdd = document.getElementById('btn-add-account');
-    if (btnAdd) {
-        btnAdd.href = `aggiungi_account_azienda.html?aziendaId=${currentAziendaId}`;
-    }
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            await loadCompanyInfo(); // Questo setta currentCompanyName
+            await loadAccounts();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
 
     const searchInput = document.querySelector('input[type="search"]');
     if (searchInput) {
         searchInput.addEventListener('input', filterAndRender);
     }
 
-    // Sort Button
-    const sortBtn = document.getElementById('sort-btn');
-    if (sortBtn) {
-        sortBtn.onclick = toggleSort;
+    // --- FIX: ROBUST HEADER INJECTION (Titanium V3.1) ---
+    // Gestisce il caso di race condition dove main.js sovrascrive l'header
+    function injectHeader() {
+        const left = document.getElementById('header-left');
+        const center = document.getElementById('header-center');
+        const right = document.getElementById('header-right');
+
+        // Se la struttura base non c'è ancora, esci e attendi il prossimo tick/mutation
+        if (!left || !center || !right) return;
+
+        // INJECTION IDEMPOTENTE: Esegui solo se i pulsanti non esistono già
+        if (!left.querySelector('#btn-back')) {
+            left.innerHTML = `
+                <button id="btn-back" class="btn-icon-header" onclick="window.history.back()">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+            `;
+        }
+
+        if (!center.querySelector('#page-title')) {
+            center.innerHTML = `<h1 id="page-title" class="header-title">${currentCompanyName || 'Caricamento...'}</h1>`;
+        }
+
+        if (!right.querySelector('#sort-btn')) {
+            right.innerHTML = `
+                <div class="flex items-center gap-1">
+                    <button id="sort-btn" class="btn-icon-header" onclick="toggleSort()">
+                        <span class="material-symbols-outlined">sort_by_alpha</span>
+                    </button>
+                    <a id="btn-home" href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                </div>
+            `;
+            window.toggleSort = toggleSort;
+        }
+
+        // Re-apply theme se necessario
+        if (currentTheme) applyTheme(currentTheme);
     }
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            await loadCompanyInfo();
-            await loadAccounts();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
+    // 1. Esegui subito (se pronto)
+    injectHeader();
+
+    // 2. Osserva cambiamenti nel placeholder (es. caricamento asincrono di main.js/ui-core.js)
+    const headerPh = document.getElementById('header-placeholder');
+    if (headerPh) {
+        const observer = new MutationObserver(() => {
+            // Ad ogni cambiamento (es. sovrascrittura innerHTML), tentiamo il ripristino
+            injectHeader();
+        });
+        observer.observe(headerPh, { childList: true, subtree: true });
+    } else {
+        // Fallback intervallo se il placeholder non è ancora nel DOM (raro)
+        setInterval(injectHeader, 500);
+    }
 
     // Copy Button Delegation
     const container = document.getElementById('accounts-container');
@@ -118,12 +165,15 @@ async function loadCompanyInfo() {
         if (docSnap.exists()) {
             const data = docSnap.data();
             const name = data.ragioneSociale || "Azienda";
+            currentCompanyName = name; // Update global state
+
             if (pageTitle) pageTitle.textContent = name;
 
             currentTheme = getCompanyColor(name, data.colorIndex);
             applyTheme(currentTheme);
         } else {
-            if (pageTitle) pageTitle.textContent = "Azienda non trovata";
+            currentCompanyName = "Azienda non trovata";
+            if (pageTitle) pageTitle.textContent = currentCompanyName;
         }
     } catch (e) {
         console.error("Errore caricamento azienda", e);
@@ -142,30 +192,47 @@ function applyTheme(theme) {
     }
 
     // Dynamic Header Background (Hex Alpha)
+    // Dynamic Header Background (Hex Alpha)
     const header = document.getElementById('company-header');
     if (header) {
-        // bg-primary/10 equivalent -> opacity ~10% -> 1A
-        header.style.backgroundColor = `${theme.from}1a`;
-        // border-primary/20 equivalent -> opacity ~20% -> 33
-        header.style.borderColor = `${theme.from}33`;
+        // Light Mode Override: Keep it White/Glass
+        if (document.body.classList.contains('titanium-light-bg')) {
+            header.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
+            header.style.borderColor = 'rgba(0,0,0,0.05)';
+        } else {
+            // Default Dark Mode Tint
+            header.style.backgroundColor = `${theme.from}1a`;
+            header.style.borderColor = `${theme.from}33`;
+        }
     }
 
     // Dynamic Footer Background (Hex Alpha)
-    const footer = document.getElementById('company-footer');
+    const footer = document.querySelector('.titanium-footer');
     if (footer) {
-        footer.style.backgroundColor = `${theme.from}1a`;
-        footer.style.borderColor = `${theme.from}33`;
+        if (document.body.classList.contains('titanium-light-bg')) {
+            footer.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
+            footer.style.borderColor = 'rgba(0,0,0,0.05)';
+        } else {
+            footer.style.backgroundColor = `${theme.from}1a`;
+            footer.style.borderColor = `${theme.from}33`;
+        }
     }
 
-    // Colorize Header Icons and Title
-    const icons = ['btn-back', 'sort-btn', 'btn-add-account', 'btn-home', 'page-title'];
-    icons.forEach(id => {
+    // Colorize Header & Footer Icons
+    // 1. Header Specific IDs
+    const headerIds = ['btn-back', 'sort-btn', 'btn-add-account', 'btn-home', 'page-title'];
+    headerIds.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            el.style.color = theme.from;
-            // Ensure hover state is also themed via CSS variables or just let it darken naturally?
-            // Tailwind hover:bg-black/5 handles background. Text stays theme color.
-        }
+        if (el) el.style.color = theme.from;
+    });
+
+    // 2. Footer Generic Classes (Settings, Theme Switchers)
+    // Target buttons in footer that are standard icons or theme switchers
+    const footerIcons = document.querySelectorAll('.titanium-footer .btn-icon-header, .titanium-footer .theme-switch-btn');
+    footerIcons.forEach(el => {
+        el.style.color = theme.from;
+        // Optional: Add subtle border color to match
+        // el.style.borderColor = `${theme.from}40`; 
     });
 }
 
@@ -230,79 +297,100 @@ function renderList(list) {
 
     container.innerHTML = list.map(acc => {
         const isPinned = !!acc.isPinned;
-        const pinClass = isPinned ? 'text-white rotate-45 opacity-100' : 'text-white/40 hover:text-white';
-        const gradientStyle = `background: linear-gradient(to right, ${currentTheme.from}, ${currentTheme.to})`;
-        const themeHex = currentTheme.to;
+        // Pin Style: If pinned, colored and rotated. Else faint.
+        const pinStyle = isPinned
+            ? `color: white; opacity: 1; transform: rotate(-45deg); background-color: ${currentTheme.from};`
+            : `color: var(--text-secondary); opacity: 0.3; background-color: rgba(0,0,0,0.05);`;
+
+        // DYNAMIC GRADIENT BACKGROUND
+        // Dark Mode: Gradient based on theme color (from -> to)
+        // Light Mode: Lighter gradient based on theme color
+        let gradientStyle;
+        // FIX: Correct detection of Light Mode (Check if NO dark class on HTML, or explicit light class presence)
+        const isLightMode = !document.documentElement.classList.contains('dark') || document.body.classList.contains('titanium-light-bg');
+
+        if (isLightMode) {
+            // Light Mode: Very soft gradient from theme color
+            gradientStyle = `background: linear-gradient(135deg, ${currentTheme.from}15 0%, ${currentTheme.to}05 100%); border-color: ${currentTheme.from}20;`;
+        } else {
+            // Dark Mode: Ultra subtle (almost transparent) to maintain dark aesthetics
+            gradientStyle = `background: linear-gradient(135deg, ${currentTheme.from}08 0%, ${currentTheme.to}00 100%); border-color: ${currentTheme.from}15;`;
+        }
+        const themeColor = currentTheme.from;
 
         return `
-             <div class="relative overflow-hidden mb-3 select-none swipe-row rounded-xl" 
-                 style="touch-action: pan-y;"
-                 id="acc-${acc.id}" 
-                 data-id="${acc.id}">
+            <div class="swipe-row" id="acc-${acc.id}" data-id="${acc.id}">
               
               <!-- BACKGROUND ACTIONS -->
-              <!-- RIGHT SWIPE reveals LEFT BG: DELETE -->
-              <div class="absolute inset-y-0 left-0 flex w-full swipe-bg-left opacity-0 transition-opacity z-0">
-                 <div class="w-full h-full bg-red-600 flex items-center justify-start pl-6 rounded-xl">
-                    <div class="flex flex-col items-center">
-                        <span class="material-symbols-outlined text-white text-2xl">delete</span>
-                        <span class="text-white text-[10px] font-bold uppercase mt-1">Elimina</span>
-                    </div>
+              <div class="swipe-bg-left group-swipe-left">
+                 <div style="display: flex; flex-direction: column; align-items: flex-start; color: white;">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">delete</span>
+                    <span style="font-size: 10px; font-weight: bold;">Elimina</span>
                  </div>
               </div>
 
-              <!-- LEFT SWIPE reveals RIGHT BG: ARCHIVE -->
-              <div class="absolute inset-y-0 right-0 flex w-full swipe-bg-right opacity-0 transition-opacity z-0">
-                 <div class="w-full h-full bg-yellow-500 flex items-center justify-end pr-6 rounded-xl">
-                    <div class="flex flex-col items-center">
-                        <span class="material-symbols-outlined text-white text-2xl">archive</span>
-                        <span class="text-white text-[10px] font-bold uppercase mt-1">Archivia</span>
-                    </div>
+              <div class="swipe-bg-right group-swipe-right">
+                 <div style="display: flex; flex-direction: column; align-items: flex-end; color: white;">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">archive</span>
+                    <span style="font-size: 10px; font-weight: bold;">Archivia</span>
                  </div>
               </div>
 
-              <!-- FOREGROUND CONTENT: Premium Card -->
-              <div class="relative z-10 bg-white rounded-xl transition-transform swipe-content shadow-sm">
+              <!-- FOREGROUND CONTENT: Card with Dynamic Gradient -->
+              <div class="titanium-card-light swipe-content p-0 overflow-hidden border-none bg-transparent">
                 <a href="dettaglio_account_azienda.html?id=${acc.id}&aziendaId=${currentAziendaId}" 
                    draggable="false"
-                   class="block mr-8 rounded-xl p-3 shadow-lg active:scale-[0.98] transition-all border border-white/10 overflow-visible"
-                   style="${gradientStyle}">
-                    <div class="flex items-start space-x-3 text-left">
-                        <img class="w-10 h-10 rounded-full object-cover bg-white/20 shadow-sm pointer-events-none" src="${acc.logo || 'assets/images/google-avatar.png'}">
-                        <div class="flex-1 min-w-0 pr-0">
-                            <div class="flex items-center justify-between mb-0.5">
-                                <h3 class="font-bold text-white text-sm whitespace-normal break-words">${acc.nomeAccount || 'Senza Nome'}</h3>
+                   style="display: block; padding: 0.75rem; text-decoration: none; position: relative; border-radius: 20px; border: 1px solid; ${gradientStyle}">
+                    
+                    <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                        <!-- Logo -->
+                        <img src="${acc.logo || 'assets/images/google-avatar.png'}" 
+                             style="width: 2.5rem; height: 2.5rem; border-radius: 9999px; object-fit: cover; border: 1px solid rgba(0,0,0,0.05); flex-shrink: 0;">
+                        
+                        <!-- Text Content -->
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
+                                <h3 style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 80%;">
+                                    ${acc.nomeAccount || 'Senza Nome'}
+                                </h3>
                             </div>
-                            <div class="space-y-0.5 text-[12px]">
+
+                            <!-- Details Lines -->
+                            <div style="display: flex; flex-direction: column; gap: 0.125rem; font-size: 0.75rem; color: var(--text-secondary);">
                                  ${acc.utente ? `
-                                    <div class="flex justify-between items-center text-left relative pr-5">
-                                        <span class="text-white/60">Utente:</span>
-                                        <div class="flex items-center min-w-0">
-                                            <span id="user-text-${acc.id}" class="text-white truncate mr-2">********</span>
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="opacity: 0.7;">Utente:</span>
+                                        <div style="display: flex; align-items: center;">
+                                            <span id="user-text-${acc.id}" style="font-weight: 500; margin-right: 0.5rem; color: var(--text-primary);">********</span>
+                                            <button class="copy-btn-dynamic" data-copy="${acc.utente.replace(/"/g, '&quot;')}" title="Copia Utente"
+                                                    onclick="event.preventDefault(); event.stopPropagation(); copyText(this, '${acc.utente.replace(/'/g, "\\'")}')">
+                                                <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                                            </button>
                                         </div>
-                                        <button class="copy-btn-dynamic absolute right-[-5px] p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors" data-copy="${acc.utente.replace(/"/g, '&quot;')}" title="Copia Username">
-                                            <span class="material-symbols-outlined text-[19px]">content_copy</span>
-                                        </button>
                                     </div>` : ''}
+                                
                                 ${acc.account ? `
-                                    <div class="flex justify-between items-center text-left relative pr-5">
-                                        <span class="text-white/60">Account:</span>
-                                        <div class="flex items-center min-w-0">
-                                            <span id="acc-text-${acc.id}" class="text-white truncate mr-2">********</span>
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="opacity: 0.7;">Account:</span>
+                                        <div style="display: flex; align-items: center;">
+                                            <span id="acc-text-${acc.id}" style="font-weight: 500; margin-right: 0.5rem; color: var(--text-primary);">********</span>
+                                            <button class="copy-btn-dynamic" data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account"
+                                                onclick="event.preventDefault(); event.stopPropagation(); copyText(this, '${acc.account.replace(/'/g, "\\'")}')">
+                                                <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                                            </button>
                                         </div>
-                                        <button class="copy-btn-dynamic absolute right-[-5px] p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors" data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account">
-                                            <span class="material-symbols-outlined text-[19px]">content_copy</span>
-                                        </button>
                                     </div>` : ''}
+                                
                                 ${acc.password ? `
-                                    <div class="flex justify-between items-center text-left relative pr-5">
-                                        <span class="text-white/60">Pass:</span>
-                                        <div class="flex items-center min-w-0">
-                                            <span id="pass-text-${acc.id}" class="text-white truncate mr-2 font-mono">********</span>
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="opacity: 0.7;">Pass:</span>
+                                        <div style="display: flex; align-items: center;">
+                                            <span id="pass-text-${acc.id}" style="font-family: monospace; font-weight: 500; margin-right: 0.5rem; color: ${isLightMode ? '#334155' : '#e2e8f0'};">********</span>
+                                            <button class="copy-btn-dynamic" data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password"
+                                                onclick="event.preventDefault(); event.stopPropagation(); copyText(this, '${acc.password.replace(/'/g, "\\'")}')">
+                                                <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                                            </button>
                                         </div>
-                                        <button class="copy-btn-dynamic absolute right-[-5px] p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors" data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password">
-                                            <span class="material-symbols-outlined text-[19px]">content_copy</span>
-                                        </button>
                                     </div>` : ''}
                             </div>
                         </div>
@@ -310,19 +398,15 @@ function renderList(list) {
                 </a>
                 
                 <!-- Helper Buttons Overlay (Pin/Eye) -->
-                <div class="absolute top-1.5 right-1.5 z-20 flex flex-col gap-1">
+                <div style="position: absolute; top: 0.5rem; right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
                     <button onclick="event.stopPropagation(); window.togglePin('${acc.id}')" 
-                            class="p-0.5 rounded-full backdrop-blur-md border border-white/10 transition-colors shadow-sm ${pinClass}" 
-                            style="background-color: ${themeHex}80"
-                            title="Fissa in alto">
-                        <span class="material-symbols-outlined text-[12px] filled">push_pin</span>
+                            style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: all 0.2s; color: ${currentTheme.from}; ${pinStyle} ${!isPinned ? 'background: rgba(255,255,255,0.25);' : ''}">
+                        <span class="material-symbols-outlined ${isPinned ? 'filled' : ''}" style="font-size: 18px;">push_pin</span>
                     </button>
                     ${acc.password ? `
                     <button onclick="event.stopPropagation(); window.toggleTripleVisibility('${acc.id}')" 
-                            class="p-0.5 rounded-full backdrop-blur-md border border-white/10 transition-colors shadow-sm text-white/90" 
-                            style="background-color: ${themeHex}80"
-                            title="Mostra/Nascondi Dati">
-                        <span id="pass-eye-${acc.id}" class="material-symbols-outlined text-[12px]">visibility</span>
+                            style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.2); color: ${currentTheme.from}; cursor: pointer;">
+                        <span id="pass-eye-${acc.id}" class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
                     </button>` : ''}
                 </div>
 
@@ -331,9 +415,26 @@ function renderList(list) {
         `;
     }).join('');
 
+    // Global copy handler helper (attach to window if not exists)
+    if (!window.copyText) {
+        window.copyText = (btn, text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = btn.querySelector('span');
+                const old = icon.textContent;
+                icon.textContent = 'check';
+                icon.style.color = '#10b981';
+                showToast("Copiato!", "success");
+                setTimeout(() => {
+                    icon.textContent = old;
+                    icon.style.color = '';
+                }, 1500);
+            });
+        };
+    }
+
     if (currentSwipeList) currentSwipeList = null;
     currentSwipeList = new SwipeList('.swipe-row', {
-        threshold: 0.15, // Lower threshold for mobile/desktop
+        threshold: 0.15,
         onSwipeLeft: (item) => handleArchive(item),
         onSwipeRight: (item) => handleDelete(item)
     });

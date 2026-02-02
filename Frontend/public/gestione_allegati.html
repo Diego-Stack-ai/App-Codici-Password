@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html class="light" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="color-scheme" content="light only">
-    <meta name="theme-color" content="#e2e8f0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark only">
+    <meta name="theme-color" content="#0a0f1e">
     <title>Gestione Allegati</title>
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,14 +14,15 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
-    <style>
-        body {
-            background-color: #e2e8f0;
-        }
+    <!-- Design System Master (Titanium Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
 
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+    <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
@@ -31,59 +32,60 @@
         }
     </style>
 
-<body class="bg-[#e2e8f0] text-[#0A162A] font-display antialiased">
-    <div
-        class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-[#e2e8f0] shadow-2xl overflow-hidden">
+<body class="titanium-bg">
+    <div class="titanium-container">
+        <div class="titanium-glow"></div>
 
-        <!-- Header (Fixed Glass) -->
-        <header
-            class="fixed top-0 left-0 right-0 mx-auto w-full max-w-md bg-[#e2e8f0]/20 backdrop-blur-sm border-b border-black/5 z-50 transition-colors">
-            <div class="flex items-center p-4 h-16">
-                <button onclick="history.back()"
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 transition-colors text-gray-900">
-                    <span class="material-symbols-outlined text-2xl">arrow_back</span>
-                </button>
-                <h2 class="text-gray-900 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
-                    Allegati</h2>
-                <a href="home_page.html"
-                    class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 transition-colors text-gray-900">
-                    <span class="material-symbols-outlined text-2xl">home</span>
-                </a>
+        <!-- Header -->
+        <header class="titanium-header">
+            <div class="header-balanced-container">
+                <div class="header-left">
+                    <button onclick="history.back()" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                </div>
+                <div class="header-center">
+                    <h2 class="header-title">Allegati</h2>
+                </div>
+                <div class="header-right">
+                    <a href="home_page.html" class="btn-icon-header">
+                        <span class="material-symbols-outlined">home</span>
+                    </a>
+                </div>
             </div>
         </header>
 
-        <!-- Header Spacer -->
-        <div class="h-16 w-full shrink-0"></div>
+        <div class="spacer-header"></div>
 
-        <main class="flex-1 overflow-y-auto no-scrollbar pb-24">
+        <main class="titanium-main">
             <!-- Search Bar -->
             <div class="px-4 py-4">
                 <div
-                    class="flex w-full items-center rounded-xl border border-black/5 bg-white overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all shadow-sm">
+                    class="flex w-full items-center rounded-xl border border-white/5 bg-black/20 overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all shadow-sm">
                     <div class="pl-4 text-slate-400 flex items-center justify-center">
                         <span class="material-symbols-outlined text-[20px]">search</span>
                     </div>
                     <input id="search-input"
-                        class="w-full bg-transparent border-none text-slate-900 placeholder:text-slate-400 h-14 px-4 text-base focus:ring-0"
+                        class="w-full bg-transparent border-none text-white placeholder:text-slate-500 h-14 px-4 text-base focus:ring-0"
                         placeholder="Cerca tra i file..." value="" />
                 </div>
             </div>
             <!-- Unified Action Button -->
             <div class="px-4 mb-6">
                 <button type="button" onclick="document.getElementById('file-upload').click()"
-                    class="w-full flex flex-col items-center justify-center gap-3 p-6 bg-primary/5 rounded-3xl border-2 border-dashed border-primary/20 hover:border-primary/40 hover:bg-primary/10 transition-all active:scale-[0.98] group">
+                    class="w-full flex flex-col items-center justify-center gap-3 p-6 bg-blue-500/5 rounded-3xl border-2 border-dashed border-blue-500/20 hover:border-blue-500/40 hover:bg-blue-500/10 transition-all active:scale-[0.98] group">
                     <div class="flex items-center gap-6">
                         <div
-                            class="size-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm border border-primary/10 transition-transform group-hover:scale-110">
+                            class="size-12 rounded-2xl bg-black/20 flex items-center justify-center text-blue-400 shadow-sm border border-blue-500/10 transition-transform group-hover:scale-110">
                             <span class="material-symbols-outlined text-2xl">photo_camera</span>
                         </div>
                         <div
-                            class="size-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm border border-primary/10 transition-transform group-hover:scale-110">
+                            class="size-12 rounded-2xl bg-black/20 flex items-center justify-center text-blue-400 shadow-sm border border-blue-500/10 transition-transform group-hover:scale-110">
                             <span class="material-symbols-outlined text-2xl">attach_file</span>
                         </div>
                     </div>
                     <div class="text-center">
-                        <p class="text-xs font-bold text-primary uppercase tracking-wider">Aggiungi Allegato</p>
+                        <p class="text-xs font-bold text-blue-400 uppercase tracking-wider">Aggiungi Allegato</p>
                         <p class="text-[10px] text-gray-400 font-medium mt-0.5">Scatta foto, scegli foto o scegli file
                         </p>
                     </div>
@@ -92,40 +94,38 @@
             <!-- Chips -->
             <div class="flex gap-3 px-4 pb-2 overflow-x-auto no-scrollbar snap-x" id="filter-chips">
                 <button onclick="filterAttachments('all', this)"
-                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/10 border border-primary px-5 transition-transform active:scale-95 filter-chip active">
-                    <p class="text-primary text-sm font-bold leading-normal">Tutti</p>
+                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-blue-500/10 border border-blue-500 px-5 transition-transform active:scale-95 filter-chip active">
+                    <p class="text-blue-400 text-sm font-bold leading-normal">Tutti</p>
                 </button>
                 <button onclick="filterAttachments('pdf', this)"
-                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white border border-black/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
-                    <p class="text-gray-600 text-sm font-medium leading-normal">PDF</p>
+                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-black/20 border border-white/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
+                    <p class="text-gray-400 text-sm font-medium leading-normal">PDF</p>
                 </button>
                 <button onclick="filterAttachments('image', this)"
-                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white border border-black/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
-                    <p class="text-gray-600 text-sm font-medium leading-normal">Immagini</p>
+                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-black/20 border border-white/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
+                    <p class="text-gray-400 text-sm font-medium leading-normal">Immagini</p>
                 </button>
                 <button onclick="filterAttachments('video', this)"
-                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white border border-black/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
-                    <p class="text-gray-600 text-sm font-medium leading-normal">Video</p>
+                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-black/20 border border-white/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
+                    <p class="text-gray-400 text-sm font-medium leading-normal">Video</p>
                 </button>
                 <button onclick="filterAttachments('file', this)"
-                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white border border-black/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
-                    <p class="text-gray-600 text-sm font-medium leading-normal">File</p>
+                    class="snap-start flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-black/20 border border-white/5 px-5 transition-transform active:scale-95 filter-chip shadow-sm">
+                    <p class="text-gray-400 text-sm font-medium leading-normal">File</p>
                 </button>
             </div>
             <!-- Section Title -->
             <div class="px-4 py-4">
-                <h3 class="text-gray-900 text-base font-bold">Recenti</h3>
+                <h3 class="text-white text-base font-bold">Recenti</h3>
             </div>
             <!-- List Items -->
             <div class="flex flex-col gap-3 px-4">
                 <!-- Will be populated by JS -->
             </div>
     </div>
-    </main>
-
-    <!-- Bottom Glass Frame (Fixed) -->
-    <div
-        class="fixed bottom-0 left-0 right-0 max-w-md mx-auto h-16 pointer-events-none z-50 backdrop-blur-sm border-t transition-colors bg-[#e2e8f0]/20 border-black/5">
+    <div class="spacer-footer"></div>
+    <!-- FOOTER PREMIUM -->
+    <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
     <!-- Document Details Modal -->
     <div id="upload-modal"
@@ -180,8 +180,8 @@
     <input type="file" id="file-upload" class="hidden" onchange="handleFileUpload(this)"
         accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,image/*">
 
-    <!-- External JS Module -->
-    <script type="module" src="assets/js/gestione_allegati.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="assets/js/gestione_allegati.js?v=3.1"></script>
 
     <!-- TOAST NOTIFICATION -->
     <div id="toast"

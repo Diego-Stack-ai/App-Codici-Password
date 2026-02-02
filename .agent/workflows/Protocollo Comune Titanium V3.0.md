@@ -18,6 +18,79 @@ Eccezioni: 4 pagine Accesso (Login, Registrazione, Reset_password, Imposta_nuova
 
 CSS comune: assets/css/comune.css
 
+2.X Effetti Globali Base (V3.1 – Consolidati)
+
+Obiettivo
+Definire l’involucro estetico e strutturale obbligatorio, ereditato da tutte le pagine satellite, garantendo coerenza visiva, gerarchia UI e supporto Dual-Mode (Light/Dark).
+
+Queste regole sono core intoccabile.
+
+● Sfondo Adaptive – .titanium-bg
+
+Applicazione: obbligatoria sul <body> di ogni pagina
+
+Logica: utilizza la variabile --bg-primary gestita dal tema
+
+Comportamento:
+background-color con transition: 0.3s per cambio tema
+
+Note:
+Le pagine di Accesso forzano Dark Mode ma ereditano comunque questa classe
+
+● Contenitore Master – .titanium-container
+
+Dimensioni: max-width: 48rem (768px) – centrato orizzontalmente
+
+Estetica:
+background tramite --titanium-box-gradient
+
+Dark: Blu profondo
+
+Light: Slate / Blue
+
+Z-index: base 10 per garantire corretta gerarchia visiva
+
+Applicazione: obbligatoria su tutte le pagine applicative e di accesso
+
+● Faro Ambientale – .titanium-glow
+
+Effetto: luce ambientale fluttuante
+
+Animazione: glowFloat
+
+Sorgente: gradiente radiale definito in --glow-gradient
+
+Posizionamento:
+primo elemento interno a .titanium-container
+
+Nota:
+Effetto sempre presente, eventuali variazioni cromatiche dipendono dal tema
+
+● Fasce Vetrose – Header & Footer
+
+Classi: .titanium-header, .titanium-footer
+
+Stile:
+
+backdrop-filter: blur(12px)
+
+sfondo --surface-glass
+
+Comportamento: elementi fixed, sempre visibili
+
+● Spaziatori Tecnici
+
+.spacer-header
+
+Altezza fissa: --header-height (80px)
+
+.spacer-footer
+
+Altezza fissa: 100px
+
+Scopo:
+prevenire sovrapposizioni tra contenuto e header/footer fissi
+
 2. Regole di Architettura (System Core)
 2.1 Cache Busting
 <script src="assets/js/miofile.js?v=X.Y"></script>
@@ -49,25 +122,98 @@ Colori, ombre e bordi → classi/variabili CSS
 
 Modali centrati e scrollabili
 
-2.5 Header & Footer (aggiornato)
+2.5 Header & Footer (V3.1 – Regole Definitive)
+Header – Regole Generali
 
-Header:
+Applicazione:
 
-Layout a 3 zone:
+Presente su tutte le pagine
 
-Sinistra: sempre freccia “torna indietro” che riporta alla pagina precedente o alla Home se non c’è storia di navigazione.
+Nelle pagine di Accesso → header minimale
 
-Centro: nome della pagina, sempre visibile e centrato.
+Nelle pagine applicative → header completo
 
-Destra: icone standard di navigazione base (Home), eventuali altre azioni aggiuntive non previste di default devono stare nel footer.
+Layout Header (3 zone fisse)
+Sinistra
 
-Titoli massimo 2 righe, con word-break corretto su mobile.
+Sempre presente
+
+Unica icona consentita:
+freccia “torna indietro”
+
+Azione: navigazione alla pagina precedente
+
+Centro
+
+Sempre presente
+
+Nome della pagina
+
+Centrato orizzontalmente
+
+Massimo 2 righe
+
+word-break corretto su mobile
+
+Destra
+
+Icona Home (sempre tranne le pagine di accesso e la pagina home page)
+
+Pulsante Ordinamento (se presente):
+
+Posizione: tra titolo pagina e Home
+
+Consentito solo in pagine con liste o dati ordinabili
+
+Vietate altre icone o azioni nel header
+
+Footer – Regole Generali
+
+Applicazione:
+
+Presente solo nelle pagine applicative
+
+Le pagine di Accesso hanno footer minimale senza azioni
+
+Contenuto Footer:
+
+Tutte le azioni secondarie:
+
+aggiungi
+
+impostazioni
+
+info
+
+modifica
+
+azioni contestuali
+
+Icone centralizzate
+
+Cerca
 
 Footer:
 
-Tutte le icone secondarie o aggiuntive (aggiungi, impostazioni, info) devono essere centralizzate nel footer.
+responsive
 
-Footer responsive, visibile su tutti i dispositivi, non sovrapporre il contenuto principale.
+sempre visibile
+
+non deve sovrapporre il contenuto
+
+Regola Chiave di Sistema (non negoziabile)
+
+Nessuna icona di azione nel header, eccetto:
+
+torna indietro
+
+home
+
+ordinamento (se previsto)
+
+Tutte le altre azioni vanno nel footer
+
+Le pagine di Accesso non mostrano azioni applicative
 
 2.6 Responsive Design (aggiornato)
 
@@ -86,6 +232,121 @@ Layout: Flex/Grid per adattamento automatico header e footer
 Touch target minimo ≥36x36px
 
 Icone e immagini scalabili e responsive, non distorcere proporzioni
+
+2.6.1 Adattamento UI Form e Dati su Mobile (V3.1 – Obbligatorio)
+
+Obiettivo
+Garantire leggibilità, usabilità e stabilità dei form e delle viste dati su dispositivi mobili, evitando sovrapposizioni, tagli o compressioni visive, senza duplicare logica o dati.
+
+Questa regola si applica a:
+
+pagine di dettaglio
+
+pagine di modifica
+
+form di inserimento
+
+viste dati strutturate
+
+Principio Fondamentale (non negoziabile)
+
+I dati sono unici, la UI è adattiva.
+La logica applicativa non cambia tra desktop e mobile.
+Cambia solo la disposizione visiva.
+
+Regole di Comportamento UI
+
+Desktop (>768px)
+
+Layout libero (grid, colonne affiancate)
+
+Campi possono essere affiancati
+
+Tablet (≤768px)
+
+Layout semplificato
+
+Massimo 2 colonne
+
+Spaziature aumentate
+
+Mobile (≤480px)
+
+Layout a colonna singola obbligatorio
+
+Nessun campo affiancato
+
+Label sempre sopra il campo
+
+Input, select, textarea: width 100%
+
+Spazio verticale minimo tra campi: 12–16px
+
+Nessun contenuto deve essere:
+
+tagliato
+
+sovrapposto
+
+compresso orizzontalmente
+
+Small Mobile (≤400px)
+
+Colonna singola
+
+Spaziature ulteriormente aumentate
+
+Priorità a scroll verticale naturale
+
+Implementazione Tecnica
+
+L’adattamento deve avvenire solo via CSS
+
+Consentito:
+
+media queries
+
+flex-direction: column
+
+grid a 1 colonna
+
+classi di supporto (.mobile-only / .desktop-only)
+
+Vietato:
+
+duplicare campi o dati
+
+usare JS per forzare layout
+
+creare logiche dati separate per mobile
+
+CSS
+
+Le regole di adattamento vanno inserite:
+
+nel CSS satellite di riferimento della pagina
+
+È vietato modificare:
+
+comune.css
+
+Vietati nuovi inline-style per risolvere problemi di layout mobile
+
+Validazione Obbligatoria
+
+Ogni pagina con form o dati deve garantire su mobile:
+
+Nessun campo tagliato
+
+Nessuna sovrapposizione
+
+Scroll verticale fluido
+
+Tastiera mobile non copre i campi attivi
+
+Touch target ≥36x36px
+
+UX coerente con Titanium Mobile
 
 2.7 Checklist di Validazione
 

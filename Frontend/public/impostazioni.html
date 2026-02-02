@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Impostazioni - Titanium Account</title>
 
     <!-- Google Fonts -->
@@ -14,20 +14,21 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Solo Account) -->
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css">
+    <!-- Design System Master (Titanium V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.5"></script>
-    <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> <!-- CDN Fix -->
 </head>
 
-<body class="antialiased">
-    <div class="titanium-box">
+<body class="titanium-bg">
+    <div class="titanium-container">
         <!-- Faro Estetico -->
-        <div class="glass-glow"></div>
+        <div class="titanium-glow"></div>
 
         <!-- HEADER FISSO -->
         <header class="titanium-header">
@@ -54,13 +55,14 @@
                 </div>
             </div>
         </header>
+        <div class="spacer-header"></div>
 
         <main class="settings-container no-select">
 
             <!-- SEZIONE PROFILO -->
             <div class="titanium-vault border-glow profile-card">
                 <!-- Wrapper Orizzontale Avatar + QR -->
-                <div style="display: flex; gap: 1.5rem; align-items: center; justify-content: center; width: 100%;">
+                <div class="profile-header-top">
 
                     <!-- Avatar -->
                     <div class="avatar-wrapper">
@@ -87,10 +89,9 @@
 
                 </div>
 
-                <div class="profile-info" style="width: 100%;">
+                <div class="profile-info">
                     <h3 id="user-name-settings" class="auth-title" data-t="loading">Caricamento...</h3>
-                    <button onclick="window.location.href='profilo_privato.html'" class="auth-btn"
-                        style="margin-top: 1.5rem; border: 1px solid var(--border-color); background: var(--surface-sub);">
+                    <button onclick="window.location.href='profilo_privato.html'" class="auth-btn profile-manage-btn">
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <div class="settings-icon-box"
                                 style="width: 32px; height: 32px; border-radius: 8px; background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
@@ -368,17 +369,14 @@
                 </button>
             </div>
 
-        </main>
-
-        <!-- FOOTER PREMIUM -->
-        <div id="footer-placeholder"></div>
+            <div class="spacer-footer"></div>
+            <!-- FOOTER PREMIUM -->
+            <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
 
-
-
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.5"></script>
-    <script type="module" src="assets/js/impostazioni.js?v=3.5"></script>
+    <script type="module" src="assets/js/main.js?v=3.1"></script>
+    <script type="module" src="assets/js/impostazioni.js?v=3.1"></script>
 </body>
 
 </html>

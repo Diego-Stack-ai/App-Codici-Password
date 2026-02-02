@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>Dati Azienda</title>
     <!-- Fonts and Icons -->
@@ -14,10 +14,15 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <!-- Design System Master (Titanium Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -34,11 +39,11 @@
     </style>
 </head>
 
-<body class="titanium-bg antialiased">
-    <div class="titanium-box">
+<body class="titanium-bg">
+    <div class="titanium-container">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="glass-glow"></div>
+        <div class="titanium-glow"></div>
 
         <!-- Header (Standard Titanium) -->
         <header class="titanium-header">
@@ -362,10 +367,11 @@
         </main>
 
         <!-- FOOTER PLACEHOLDER -->
-        <footer id="footer-placeholder"></footer>
+        <div class="spacer-footer"></div>
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
 
-        <script src="assets/js/main.js"></script>
-        <script type="module" src="assets/js/dati_azienda.js"></script>
+        <script src="assets/js/main.js?v=3.1"></script>
+        <script type="module" src="assets/js/dati_azienda.js?v=3.1"></script>
     </div>
 </body>
 

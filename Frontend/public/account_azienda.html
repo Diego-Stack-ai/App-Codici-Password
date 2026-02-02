@@ -1,101 +1,89 @@
 <!DOCTYPE html>
-<html class="light" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="color-scheme" content="light only">
-    <meta name="theme-color" content="#e2e8f0">
-    <title>Account Azienda</title>
-    <!-- PWA / Mobile Capable -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Protocollo V3.1: Supporto Dual Theme -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#0a0f1e">
+    <title data-t="account_company">Account Azienda</title>
+
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json" />
     <link rel="apple-touch-icon" sizes="192x192" href="/assets/images/app-icon.png?v=2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="App Codici">
-    <!-- Fonts & Icons -->
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.5">
+    <!-- Design System (Titanium Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/dashboard_common.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/account.css?v=3.8">
+
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <!-- UI Core: Gestione Header/Footer/Modal -->
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body style="background-color: var(--bg-primary); margin: 0; padding: 0; overflow-x: hidden;">
-    <div class="titanium-box">
-        <div class="glass-glow"></div>
+<body class="titanium-bg">
+    <div class="titanium-container">
+        <!-- 1. Ambient Glow -->
+        <div class="titanium-glow"></div>
 
-        <!-- Standard Titanium Header -->
-        <header class="titanium-header">
-            <div class="header-balanced-container">
-                <div class="header-left">
-                    <a id="btn-back" href="lista_aziende.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </a>
-                </div>
-                <div class="header-center">
-                    <h1 id="page-title" class="header-title">Caricamento...</h1>
-                </div>
-                <div class="header-right">
-                    <button id="sort-btn" onclick="toggleSort()" class="btn-icon-header">
-                        <span class="material-symbols-outlined">sort_by_alpha</span>
-                    </button>
-                    <a id="btn-add-account" href="#" class="btn-icon-header">
-                        <span class="material-symbols-outlined">add</span>
-                    </a>
-                    <a id="btn-home" href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
-
-        <!-- Header Spacer -->
+        <!-- 2. Header Centralizzato -->
+        <header id="header-placeholder" class="titanium-header"></header>
         <div class="spacer-header"></div>
 
+        <!-- 3. Main Content -->
         <main class="titanium-main">
-            <!-- Search Bar -->
-            <div style="padding: 1rem;">
-                <div style="position: relative;">
-                    <span class="material-symbols-outlined"
-                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 20px;">search</span>
-                    <input type="search" placeholder="Cerca account..."
-                        style="width: 100%; padding-left: 2.5rem; padding-right: 1rem; padding-top: 0.75rem; padding-bottom: 0.75rem; border-radius: 0.75rem; border: 1px solid var(--border-color); background: var(--surface-sub); color: var(--text-primary); outline: none;">
+
+            <!-- Search Bar (Clean Style Auto-Search) -->
+            <!-- Search Bar (Titanium Glass Style) -->
+            <div class="search-container mb-20">
+                <div class="glass-field border-glow"
+                    style="border-radius: 12px; height: 50px; padding: 0 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="material-symbols-outlined" style="opacity: 0.5;">search</span>
+                    <input type="search" placeholder="Cerca account..." id="search-input"
+                        style="width: 100%; background: transparent; border: none; outline: none; height: 100%; font-size: 1rem; color: var(--text-primary);">
                 </div>
             </div>
 
-            <!-- Accounts Container -->
-            <div id="accounts-container"
-                style="padding-left: 1rem; padding-right: 1rem; padding-bottom: 3rem; display: flex; flex-direction: column; gap: 0.75rem;">
-                <!-- Loading Spinner -->
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 3rem; padding-bottom: 3rem;">
+            <div class="h-8"></div>
+
+            <!-- ACCOUNTS CONTAINER -->
+            <div id="accounts-container" class="space-y-4">
+                <!-- Loading Spinner per stato iniziale -->
+                <div class="loading-full flex flex-col items-center justify-center py-12 text-gray-500/70">
                     <div
-                        style="height: 3rem; width: 3rem; border-radius: 50%; border-bottom-width: 2px; border-style: solid; border-color: var(--accent-blue); animation: spin 2s linear infinite;">
+                        class="titanium-spinner w-10 h-10 border-4 border-blue-500 border-b-transparent rounded-full animate-spin mb-4">
                     </div>
+                    <p class="text-sm font-medium animate-pulse" data-t="loading_accounts">Caricamento account...</p>
                 </div>
             </div>
+
+            <!-- Spacer per Footer -->
+            <div class="spacer-footer"></div>
 
             <!-- Toast Container -->
-            <div id="toast-container"
-                style="position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none;">
-            </div>
+            <div id="toast-container" class="titanium-toast-wrap"></div>
         </main>
 
-        <!-- FOOTER PLACEHOLDER -->
-        <footer id="footer-placeholder"></footer>
+        <!-- 4. Footer Centralizzato -->
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
 
-
-
-    <!-- FIREBASE COMPAT LIBRARIES -->
-    <!-- Module Script -->
-    <script src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/account_azienda.js?v=6"></script>
+    <!-- SCRIPTS -->
+    <script type="module" src="assets/js/main.js?v=3.1"></script>
+    <script type="module" src="assets/js/account_azienda.js?v=3.8"></script>
 </body>
 
 </html>

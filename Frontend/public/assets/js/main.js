@@ -84,37 +84,39 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- HELPER: COMPONENT LOADER ---
 async function loadSharedComponents() {
     const headerPh = document.getElementById('header-placeholder');
-    if (headerPh) {
+    if (headerPh && headerPh.children.length === 0) {
         try {
             const res = await fetch('assets/components/header.html');
             if (res.ok) {
+                // SECURITY CHECK: If header was populated while fetching, ABORT overwrite
+                if (headerPh.children.length > 0) return;
+
                 headerPh.innerHTML = await res.text();
 
-                // AUTO-POPULATE HEADER if empty
+                // AUTO-POPULATE HEADER if empty (Protocollo Balanced 3-Zone)
                 const headerContent = document.getElementById('header-content');
                 if (headerContent && !headerContent.hasChildNodes()) {
-                    const pageTitle = document.title.replace(' - App', '') || 'Titanium';
+                    const pageTitle = document.title.split(' - ')[0] || 'Titanium';
+                    const path = window.location.pathname;
+                    const isAuth = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
+
                     headerContent.innerHTML = `
-                        <div class="flex items-center justify-between w-full h-16 px-4 relative">
-                            <!-- Sinistra: Back -->
-                            <div class="z-10">
-                                <button onclick="window.history.back()" 
-                                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white shadow-sm">
-                                    <span class="material-symbols-outlined">arrow_back</span>
-                                </button>
-                            </div>
+                        <div class="header-left">
+                            ${!(path.endsWith('index.html') || path.endsWith('/')) ? `
+                            <button onclick="window.history.back()" class="btn-icon-header">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                            </button>` : ''}
+                        </div>
 
-                            <!-- Centro: Titolo -->
-                            <h1 class="absolute inset-0 flex items-center justify-center text-lg font-bold text-white tracking-wide pointer-events-none px-20 text-center truncate">
-                                ${pageTitle}
-                            </h1>
+                        <div class="header-center">
+                            <h1 class="header-title">${pageTitle}</h1>
+                        </div>
 
-                            <!-- Destra: Home -->
-                            <div class="z-10">
-                                <a href="home_page.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/10 text-white shadow-sm">
-                                    <span class="material-symbols-outlined">home</span>
-                                </a>
-                            </div>
+                        <div class="header-right" id="header-right">
+                             ${!isAuth ? `
+                             <a href="home_page.html" class="btn-icon-header">
+                                <span class="material-symbols-outlined">home</span>
+                             </a>` : ''}
                         </div>
                     `;
                 }
@@ -126,7 +128,15 @@ async function loadSharedComponents() {
     if (footerPh) {
         try {
             const res = await fetch('assets/components/footer.html');
-            if (res.ok) footerPh.innerHTML = await res.text();
+            if (res.ok) {
+                footerPh.innerHTML = await res.text();
+
+                // HIDE settings button if already on settings page
+                if (window.location.pathname.includes('impostazioni.html')) {
+                    const settingsBtn = document.getElementById('footer-settings-link');
+                    if (settingsBtn) settingsBtn.style.display = 'none';
+                }
+            }
         } catch (e) { console.warn("Footer load error", e); }
     }
 }

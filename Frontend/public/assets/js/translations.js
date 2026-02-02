@@ -14,7 +14,7 @@ export const translations = {
         success_save: "Dati salvati con successo!",
         error_generic: "Si è verificato un errore.",
         logout: "Esci dall'account",
-        version: "Titanium Protocol v5.7",
+        version: "",
 
         // LOGIN PAGE
         login_title: "Accedi",
@@ -389,7 +389,7 @@ export const translations = {
         success_save: "Data saved successfully!",
         error_generic: "An error occurred.",
         logout: "Log out",
-        version: "Titanium Protocol v5.7",
+        version: "",
         login_title: "Login",
         login_subtitle: "Titanium Protocol",
         login_hint: "Enter your authorized credentials to unlock system access.",
@@ -737,7 +737,7 @@ export const translations = {
         success_save: "¡Datos guardados con éxito!",
         error_generic: "Ocurrió un error.",
         logout: "Cerrar Sesión",
-        version: "Titanium Protocol v5.7",
+        version: "",
 
         language_current: "Español",
         select_language: "Seleccionar Idioma",

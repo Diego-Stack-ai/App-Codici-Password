@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>Modifica Account Privato</title>
+    <title>Modifica Account Privato - Titanium Gold</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,72 +14,34 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <!-- Design System Master (Titanium Gold V3.6) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/dashboard_common.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/account.css?v=3.7">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.5"></script>
-    <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+    <script src="assets/js/titanium-config.js?v=3.6"></script>
+    <script src="assets/js/titanium-core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
 
     <style>
-        /* Form Controls Overrides per stile Legacy-to-V3 */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="tel"],
-        input[type="url"],
-        textarea {
-            background-color: rgba(255, 255, 255, 0.03) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 1px #3b82f6 !important;
-            background-color: rgba(255, 255, 255, 0.05) !important;
-        }
-
         .filled {
             font-variation-settings: 'FILL' 1;
         }
     </style>
 </head>
 
-<body
-    style="font-family: 'Manrope', sans-serif; background-color: #0a0f1e; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden;"
-    class="antialiased">
+<body class="titanium-bg">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div
-        style="position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100vh; max-width: 48rem; margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; background-color: #0a0f1e; border-left: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05);">
+    <div class="titanium-container">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="glass-glow"></div>
+        <div class="titanium-glow"></div>
 
-        <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
-        <header class="titanium-header">
-            <div class="header-balanced-container">
-                <div class="header-left">
-                    <button onclick="history.back()" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                </div>
-                <div class="header-center">
-                    <h2 class="header-title" data-t="edit_account">Modifica Account</h2>
-                </div>
-                <div class="header-right">
-                    <a href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <!-- Automated Titanium Header -->
+        <header id="header-placeholder" class="titanium-header"></header>
 
-        <!-- Header Spacer -->
-        <div style="height: 5rem; width: 100%; flex-shrink: 0;"></div>
+        <div class="spacer-header"></div>
 
         <!-- Main Content -->
         <main class="titanium-main">
@@ -94,96 +56,76 @@
                 </div>
             </div>
 
-            <div
-                style="width: 100%; max-width: 42rem; margin: 0 auto; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 2rem;">
+            <div class="detail-content-wrap">
 
                 <!-- Logo Uploader -->
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-                    <div style="position: relative; cursor: pointer;"
-                        onclick="document.getElementById('logo-input').click()">
-                        <div class="border-glow"
-                            style="width: 7rem; height: 7rem; border-radius: 2rem; background: rgba(10, 15, 30, 0.4); backdrop-filter: blur(24px); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transition: all 0.2s;">
+                <div class="hero-profile-header">
+                    <div class="detail-avatar-container" onclick="document.getElementById('logo-input').click()">
+                        <div id="logo-preview-container" class="detail-avatar border-glow">
                             <img id="account-logo-preview" alt="Logo"
                                 style="width: 100%; height: 100%; object-fit: cover; display: none;" src="" />
                             <div id="logo-placeholder"
-                                style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.2); transition: color 0.2s;">
+                                style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-secondary); opacity: 0.4;">
                                 <span class="material-symbols-outlined"
-                                    style="font-size: 2.25rem;">add_photo_alternate</span>
-                            </div>
-                            <!-- Hover Overlay -->
-                            <div
-                                style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
-                                <span class="material-symbols-outlined"
-                                    style="color: white; font-size: 1.5rem;">edit</span>
+                                    style="font-size: 2.25rem; margin-bottom: 0.25rem;">add_photo_alternate</span>
+                                <span
+                                    style="font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;"
+                                    data-t="visual_identity">Identità Visiva</span>
                             </div>
                         </div>
                     </div>
                     <input type="file" id="logo-input" accept="image/*" style="display: none;" />
-                    <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin-top: 0.75rem;"
-                        data-t="change_logo">
-                        Cambia Logo</p>
                 </div>
 
                 <!-- 1. Dati Principali -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0 0.25rem;">
-                        <div style="width: 0.5rem; height: 0.5rem; background: #3b82f6; border-radius: 50%;"></div>
-                        <h3 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin: 0;"
-                            data-t="account_data">Dati Account</h3>
+                <section>
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon"
+                            style="color: var(--accent-blue);">key</span>
+                        <h3 class="detail-section-title" data-t="access_protocol_data">Dati Protocollo Accesso</h3>
                     </div>
 
-                    <div class="border-glow"
-                        style="background: rgba(10, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); backdrop-filter: blur(20px);">
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                         <!-- Nome Account -->
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <label
-                                style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                data-t="account_name">Nome Account</label>
-                            <div style="position: relative;">
-                                <input id="account-name" type="text" data-t-placeholder="account_name_placeholder"
-                                    style="width: 100%; height: 3.5rem; padding-left: 1rem; padding-right: 1rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: white; transition: all 0.2s;" />
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="account_name">Nome Account</label>
+                            <div class="glass-field border-glow">
+                                <span class="material-symbols-outlined"
+                                    style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">badge</span>
+                                <input id="account-name" type="text" data-t-placeholder="account_name_placeholder" />
                             </div>
                         </div>
 
                         <!-- Username -->
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <label
-                                style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                data-t="username_email">Username / Email</label>
-                            <div style="position: relative;">
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="username_email">Username / Email</label>
+                            <div class="glass-field border-glow">
                                 <span class="material-symbols-outlined"
-                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.2); font-size: 20px; pointer-events: none;">person</span>
-                                <input id="account-username" type="text" data-t-placeholder="username_placeholder"
-                                    style="width: 100%; height: 3.5rem; padding-left: 3rem; padding-right: 1rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: white; transition: all 0.2s;" />
+                                    style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">person</span>
+                                <input id="account-username" type="text" data-t-placeholder="username_placeholder" />
                             </div>
                         </div>
 
                         <!-- Account & Password -->
                         <div class="dashboard-grid-2" style="gap: 1.5rem;">
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <label
-                                    style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                    data-t="customer_code">Codice Cliente</label>
-                                <div style="position: relative;">
+                            <div class="glass-field-container">
+                                <label class="view-label" data-t="customer_code">Codice Cliente</label>
+                                <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined"
-                                        style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.2); font-size: 20px; pointer-events: none;">pin</span>
-                                    <input id="account-code" type="text"
-                                        style="width: 100%; height: 3.5rem; padding-left: 3rem; padding-right: 1rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: white; transition: all 0.2s;" />
+                                        style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">pin</span>
+                                    <input id="account-code" type="text" />
                                 </div>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <label
-                                    style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                    data-t="password">Password</label>
-                                <div style="position: relative;">
+                            <div class="glass-field-container">
+                                <label class="view-label" data-t="password">Password</label>
+                                <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined"
-                                        style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.2); font-size: 20px; pointer-events: none;">key</span>
+                                        style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">key</span>
                                     <input id="account-password" type="text" class="titanium-shield"
-                                        style="width: 100%; height: 3.5rem; padding-left: 3rem; padding-right: 3rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: white; transition: all 0.2s; font-family: monospace; letter-spacing: 0.1em;" />
+                                        style="font-family: monospace; letter-spacing: 0.1em;" />
                                     <button type="button"
                                         onclick="const i = document.getElementById('account-password'); i.classList.toggle('titanium-shield'); this.querySelector('span').textContent = i.classList.contains('titanium-shield')?'visibility':'visibility_off';"
-                                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 0.375rem; color: rgba(255, 255, 255, 0.2); cursor: pointer; transition: color 0.2s;">
+                                        class="glass-field-btn">
                                         <span class="material-symbols-outlined"
                                             style="font-size: 20px;">visibility</span>
                                     </button>
@@ -192,234 +134,180 @@
                         </div>
 
                         <!-- Sito Web -->
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <label
-                                style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                data-t="website">Sito Web</label>
-                            <div style="position: relative;">
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="website">Sito Web</label>
+                            <div class="glass-field border-glow">
                                 <span class="material-symbols-outlined"
-                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.2); font-size: 20px; pointer-events: none;">language</span>
-                                <input id="account-url" type="url"
-                                    style="width: 100%; height: 3.5rem; padding-left: 3rem; padding-right: 1rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: #60a5fa; transition: all 0.2s;"
-                                    placeholder="https://" />
+                                    style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">language</span>
+                                <input id="account-url" type="url" placeholder="https://"
+                                    style="color: var(--accent-blue);" />
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- 2. Coordinate Bancarie -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;" id="banking-section">
-                    <div
-                        style="display: flex; align-items: center; justify-content: space-between; padding: 0 0.25rem;">
+                <section>
+                    <div class="detail-section-header">
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <div style="width: 0.5rem; height: 0.5rem; background: #a855f7; border-radius: 50%;"></div>
-                            <h3 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin: 0;"
-                                data-t="finance_iban">Coordinate Bancarie</h3>
+                            <span class="material-symbols-outlined detail-section-icon"
+                                style="color: var(--accent-purple);">account_balance</span>
+                            <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
                         </div>
-                        <button type="button" id="btn-add-iban"
-                            style="padding: 0.375rem 0.75rem; background: rgba(168, 85, 247, 0.1); color: #c084fc; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;">
+                        <button type="button" id="btn-add-iban" class="glass-field-btn"
+                            style="width: auto; padding: 0 1rem; color: var(--accent-purple);">
                             + IBAN
                         </button>
                     </div>
 
-                    <div id="iban-list-container" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <!-- IBANs will be injected here -->
+                    <div id="iban-list-container" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- IBANs will be injected here via JS -->
                     </div>
-                </div>
+                </section>
 
                 <!-- 3. Referente -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0 0.25rem;">
-                        <div style="width: 0.5rem; height: 0.5rem; background: #f97316; border-radius: 50%;"></div>
-                        <h3 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin: 0;"
-                            data-t="referent">
-                            Referente</h3>
+                <section>
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon"
+                            style="color: var(--accent-orange);">assignment_ind</span>
+                        <h3 class="detail-section-title" data-t="referent_info">Informazioni Referente</h3>
                     </div>
 
-                    <div class="border-glow"
-                        style="background: rgba(10, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); backdrop-filter: blur(20px);">
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                         <!-- Nome -->
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <label
-                                style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                data-t="full_name">Nome e Cognome</label>
-                            <div style="position: relative;">
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="full_name">Nome e Cognome</label>
+                            <div class="glass-field border-glow">
                                 <span class="material-symbols-outlined"
-                                    style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.2); font-size: 20px; pointer-events: none;">badge</span>
-                                <input id="ref-name" type="text"
-                                    style="width: 100%; height: 3.5rem; padding-left: 3rem; padding-right: 1rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: white; transition: all 0.2s;" />
+                                    style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">badge</span>
+                                <input id="ref-name" type="text" />
                             </div>
                         </div>
 
                         <!-- Contatti -->
                         <div class="dashboard-grid-2" style="gap: 1.5rem;">
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <label
-                                    style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                    data-t="phone">Telefono</label>
-                                <div style="position: relative;">
+                            <div class="glass-field-container">
+                                <label class="view-label" data-t="phone">Telefono</label>
+                                <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined"
-                                        style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.2); font-size: 20px; pointer-events: none;">call</span>
-                                    <input id="ref-phone" type="tel"
-                                        style="width: 100%; height: 3.5rem; padding-left: 3rem; padding-right: 1rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: white; transition: all 0.2s;" />
+                                        style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">call</span>
+                                    <input id="ref-phone" type="tel" />
                                 </div>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <label
-                                    style="display: block; font-size: 9px; font-weight: 900; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem;"
-                                    data-t="mobile">Cellulare</label>
-                                <div style="position: relative;">
+                            <div class="glass-field-container">
+                                <label class="view-label" data-t="mobile">Cellulare</label>
+                                <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined"
-                                        style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.2); font-size: 20px; pointer-events: none;">smartphone</span>
-                                    <input id="ref-mobile" type="tel"
-                                        style="width: 100%; height: 3.5rem; padding-left: 3rem; padding-right: 1rem; border-radius: 1rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.875rem; font-weight: bold; color: white; transition: all 0.2s;" />
+                                        style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">smartphone</span>
+                                    <input id="ref-mobile" type="tel" />
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- 4. Note & Condivisione -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0 0.25rem;">
-                        <div style="width: 0.5rem; height: 0.5rem; background: #10b981; border-radius: 50%;"></div>
-                        <h3 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); margin: 0;"
-                            data-t="notes_options">Note & Opzioni</h3>
+                <section>
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon"
+                            style="color: var(--accent-green);">sticky_note_2</span>
+                        <h3 class="detail-section-title" data-t="notes_and_sharing">Note e Condivisione</h3>
                     </div>
 
-                    <!-- Note -->
-                    <div class="border-glow"
-                        style="background: rgba(10, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2rem; overflow: hidden; padding: 0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); margin-bottom: 1rem; backdrop-filter: blur(20px);">
-                        <textarea id="account-note" data-t-placeholder="notes_placeholder"
-                            style="width: 100%; min-height: 140px; background: transparent; border: none; padding: 1.5rem; font-size: 0.875rem; line-height: 1.6; color: rgba(255, 255, 255, 0.8); resize: none; outline: none;"></textarea>
-                    </div>
-
-                    <!-- Opzioni Flags -->
-                    <div class="border-glow"
-                        style="background: rgba(10, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); backdrop-filter: blur(20px);">
-                        <!-- Condiviso Toggle -->
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <div
-                                    style="background: rgba(59, 130, 246, 0.1); padding: 0.5rem; border-radius: 0.5rem; color: #60a5fa; display: flex; align-items: center; justify-content: center;">
-                                    <span class="material-symbols-outlined filled" style="font-size: 20px;">share</span>
-                                </div>
-                                <div>
-                                    <span
-                                        style="display: block; color: white; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;"
-                                        data-t="shared_account">Account Condiviso</span>
-                                    <span
-                                        style="display: block; font-size: 9px; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; font-weight: bold;"
-                                        data-t="share_desc">Permetti l'accesso ad altri utenti</span>
-                                </div>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- Note -->
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="notes">Note</label>
+                            <div class="glass-field border-glow" style="height: auto;">
+                                <textarea id="account-note" data-t-placeholder="notes_placeholder"
+                                    style="width: 100%; min-height: 120px; background: transparent; border: none; padding: 1rem; font-size: 0.875rem; line-height: 1.6; color: var(--text-primary); resize: none; outline: none;"></textarea>
                             </div>
-                            <label style="position: relative; cursor: pointer; display: flex; align-items: center;">
-                                <input style="position: absolute; width: 0; height: 0; opacity: 0;" type="checkbox"
-                                    id="flag-shared" />
-                                <div class="titanium-switch"></div>
-                            </label>
                         </div>
 
-                        <!-- Condivisione Panel -->
-                        <div id="shared-management"
-                            style="display: none; padding-left: 1rem; border-left: 2px solid rgba(255, 255, 255, 0.05); margin-left: 1rem; display: flex; flex-direction: column; gap: 1rem;">
-                            <!-- Lista Invitati -->
-                            <div id="guests-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                <!-- Popolato via JS -->
+                        <!-- Opzioni Flags -->
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <!-- Condiviso Toggle -->
+                            <div class="glass-field border-glow"
+                                style="justify-content: space-between; padding: 0 1.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <span class="material-symbols-outlined filled"
+                                        style="color: var(--accent-blue); font-size: 20px;">share</span>
+                                    <span
+                                        style="color: var(--text-primary); font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;"
+                                        data-t="shared_account">Account Condiviso</span>
+                                </div>
+                                <label style="position: relative; cursor: pointer; display: flex; align-items: center;">
+                                    <input style="position: absolute; width: 0; height: 0; opacity: 0;" type="checkbox"
+                                        id="flag-shared" />
+                                    <div class="titanium-switch"></div>
+                                </label>
                             </div>
 
-                            <!-- Input Invito -->
-                            <div style="position: relative;">
-                                <div
-                                    style="display: flex; align-items: center; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; height: 3.5rem; transition: border-color 0.2s; border-radius: 1rem;">
+                            <!-- Condivisione Panel -->
+                            <div id="shared-management"
+                                style="display: none; padding-left: 1rem; border-left: 2px solid var(--border-color); margin-left: 1rem; flex-direction: column; gap: 1rem;">
+                                <div id="guests-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                                <div class="glass-field border-glow" style="padding-right: 0;">
                                     <input id="invite-email" type="email" data-t-placeholder="invite_email_placeholder"
-                                        style="flex: 1; background: transparent; border: none; height: 100%; padding: 0 1rem; font-size: 0.75rem; font-weight: bold; color: white; outline: none;" />
+                                        style="flex: 1; padding-left: 1rem; font-size: 0.75rem; font-weight: bold;" />
                                     <button id="btn-send-invite" type="button" data-t="invite"
-                                        style="padding: 0 1.5rem; height: 100%; color: #60a5fa; background: rgba(59, 130, 246, 0.1); border: none; border-left: 1px solid rgba(255, 255, 255, 0.05); font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer; transition: all 0.2s;">
+                                        style="padding: 0 1.5rem; height: 100%; color: var(--accent-blue); background: rgba(33, 150, 243, 0.1); border: none; border-left: 1px solid var(--border-color); font-weight: 900; font-size: 10px; text-transform: uppercase;">
                                         INVITA
                                     </button>
                                 </div>
                                 <div id="rubrica-suggestions"
-                                    style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 0.5rem; background: #0a0f1e; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); z-index: 50; max-height: 12rem; overflow-y: auto; backdrop-filter: blur(24px);">
-                                    <!-- Popolato via JS -->
+                                    style="display: none; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 1rem; max-height: 12rem; overflow-y: auto; backdrop-filter: blur(24px); z-index: 50;">
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Memorandum Toggle -->
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <div
-                                    style="background: rgba(245, 158, 11, 0.1); padding: 0.5rem; border-radius: 0.5rem; color: #fbbf24; display: flex; align-items: center; justify-content: center;">
+                            <!-- Memorandum Toggle -->
+                            <div class="glass-field border-glow"
+                                style="justify-content: space-between; padding: 0 1.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
                                     <span class="material-symbols-outlined filled"
-                                        style="font-size: 20px;">lightbulb</span>
-                                </div>
-                                <div>
+                                        style="color: var(--accent-orange); font-size: 20px;">lightbulb</span>
                                     <span
-                                        style="display: block; color: white; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;"
+                                        style="color: var(--text-primary); font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;"
                                         data-t="memorandum">Memorandum</span>
-                                    <span
-                                        style="display: block; font-size: 9px; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; font-weight: bold;"
-                                        data-t="highlight_account">Metti in evidenza questo account</span>
                                 </div>
+                                <label style="position: relative; cursor: pointer; display: flex; align-items: center;">
+                                    <input style="position: absolute; width: 0; height: 0; opacity: 0;" type="checkbox"
+                                        id="flag-memo" />
+                                    <div class="titanium-switch titanium-switch-orange"></div>
+                                </label>
                             </div>
-                            <label style="position: relative; cursor: pointer; display: flex; align-items: center;">
-                                <input style="position: absolute; width: 0; height: 0; opacity: 0;" type="checkbox"
-                                    id="flag-memo" />
-                                <div class="titanium-switch titanium-switch-orange"></div>
-                            </label>
-                        </div>
 
-                        <!-- Memo Condiviso Toggle -->
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <div
-                                    style="background: rgba(16, 185, 129, 0.1); padding: 0.5rem; border-radius: 0.5rem; color: #34d399; display: flex; align-items: center; justify-content: center;">
+                            <!-- Memo Condiviso Toggle -->
+                            <div class="glass-field border-glow"
+                                style="justify-content: space-between; padding: 0 1.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
                                     <span class="material-symbols-outlined filled"
-                                        style="font-size: 20px;">share_reviews</span>
-                                </div>
-                                <div>
+                                        style="color: var(--accent-green); font-size: 20px;">share_reviews</span>
                                     <span
-                                        style="display: block; color: white; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;"
+                                        style="color: var(--text-primary); font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;"
                                         data-t="shared_memo">Memorandum Condiviso</span>
-                                    <span
-                                        style="display: block; font-size: 9px; color: rgba(255, 255, 255, 0.2); text-transform: uppercase; font-weight: bold;"
-                                        data-t="highlight_for_guests">Evidenzia anche per gli invitati</span>
                                 </div>
+                                <label style="position: relative; cursor: pointer; display: flex; align-items: center;">
+                                    <input style="position: absolute; width: 0; height: 0; opacity: 0;" type="checkbox"
+                                        id="flag-memo-shared" />
+                                    <div class="titanium-switch titanium-switch-green"></div>
+                                </label>
                             </div>
-                            <label style="position: relative; cursor: pointer; display: flex; align-items: center;">
-                                <input style="position: absolute; width: 0; height: 0; opacity: 0;" type="checkbox"
-                                    id="flag-memo-shared" />
-                                <div class="titanium-switch titanium-switch-green"></div>
-                            </label>
                         </div>
                     </div>
-                </div>
+                </section>
 
             </div>
         </main>
 
-        <!-- FIXED BOTTOM ACTION -->
-        <div
-            style="position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 48rem; padding: 1.5rem; z-index: 100;">
-            <button id="save-btn" class="border-glow"
-                style="width: 100%; height: 4rem; background: linear-gradient(to right, #2563eb, #3b82f6); color: white; border-radius: 1rem; border: none; box-shadow: 0 20px 40px rgba(37, 99, 235, 0.3); font-weight: 900; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.3em; display: flex; align-items: center; justify-content: center; gap: 0.75rem; transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden;">
-                <div class="saetta"></div>
-                <span style="position: relative; z-index: 10;" data-t="save_changes">Salva Modifiche</span>
-                <span class="material-symbols-outlined"
-                    style="position: relative; z-index: 10; font-size: 20px;">save</span>
-            </button>
-        </div>
-
+        <div class="spacer-footer"></div>
+        <!-- FOOTER PREMIUM -->
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
 
-    <!-- Script -->
-    <!-- FOOTER PROTOCOL V3.0 -->
-    <div id="footer-placeholder"></div>
 
-
-    <script type="module" src="assets/js/main.js?v=3.5"></script>
-    <script type="module" src="assets/js/modifica_account_privato.js?v=3.5"></script>
+    <script type="module" src="assets/js/main.js?v=3.6"></script>
+    <script type="module" src="assets/js/modifica_account_privato.js?v=3.6"></script>
 </body>
 
 </html>

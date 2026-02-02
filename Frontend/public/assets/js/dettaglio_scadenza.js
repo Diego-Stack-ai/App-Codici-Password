@@ -409,3 +409,23 @@ function renderScadenza(scadenza) {
         };
     }
 }
+
+// Helper globale per copia
+window.copyToClipboardText = (id) => {
+    const el = document.getElementById(id);
+    const val = el ? (el.innerText || el.textContent) : "";
+    if (val) {
+        navigator.clipboard.writeText(val).then(() => {
+            // Usa showToast se importata o globale
+            if (typeof showToast === 'function') {
+                showToast("Copiato!", "success");
+            } else if (window.showToast) {
+                window.showToast("Copiato!", "success");
+            } else {
+                console.log("Copiato!");
+            }
+        }).catch(err => {
+            console.error("Errore copia appunti", err);
+        });
+    }
+};

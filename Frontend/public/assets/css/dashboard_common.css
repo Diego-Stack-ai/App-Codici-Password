@@ -1,0 +1,969 @@
+/* 
+ * TITANIUM SATELLITE CORE V3.1 (Dashboard & Matrix System)
+ * File: dashboard_common.css
+ * Extracted from impostazioni.css & account.css to allow code sharing without full dependency
+ */
+
+:root {
+    --matrix-blue-from: rgba(33, 150, 243, 0.45);
+    --matrix-blue-to: rgba(33, 150, 243, 0.1);
+    --matrix-green-from: rgba(0, 200, 83, 0.45);
+    --matrix-green-to: rgba(0, 200, 83, 0.1);
+    --matrix-orange-from: rgba(255, 152, 0, 0.45);
+    --matrix-orange-to: rgba(255, 152, 0, 0.1);
+    --matrix-red-from: rgba(155, 28, 28, 0.45);
+    --matrix-red-to: rgba(155, 28, 28, 0.1);
+}
+
+/* 1. SCENOGRAFIA SATELLITE */
+.adaptive-shadow {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.adaptive-shadow:hover {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+}
+
+/* 2. MATRIX SYSTEM (Dashboard Cards) */
+.matrix-grid,
+.accounts-grid-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+
+    .matrix-grid,
+    .dashboard-grid-2,
+    .accounts-grid-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.matrix-card {
+    --accent-rgb: 255, 255, 255;
+    background: linear-gradient(135deg, var(--grad-from, var(--surface-glass)), var(--grad-to, transparent));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    min-height: 140px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.matrix-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(var(--accent-rgb), 0.4);
+}
+
+/* Effects */
+.glass-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            transparent 51%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 5;
+    border-radius: inherit;
+}
+
+.matrix-card:hover .glass-shine {
+    opacity: 1;
+}
+
+.saetta-master {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 2;
+    animation: shimmer-master 6s infinite linear;
+    opacity: 0.2;
+}
+
+/* Matrix Contexts */
+.card-blue {
+    --accent-rgb: 33, 150, 243;
+    --accent-color: #2196F3;
+    --grad-from: var(--matrix-blue-from);
+    --grad-to: var(--matrix-blue-to);
+}
+
+.card-green {
+    --accent-rgb: 0, 200, 83;
+    --accent-color: #00C853;
+    --grad-from: var(--matrix-green-from);
+    --grad-to: var(--matrix-green-to);
+}
+
+.card-orange {
+    --accent-rgb: 255, 152, 0;
+    --accent-color: #FF9800;
+    --grad-from: var(--matrix-orange-from);
+    --grad-to: var(--matrix-orange-to);
+}
+
+.card-red {
+    --accent-rgb: 155, 28, 28;
+    --accent-color: #9b1c1c;
+    --grad-from: var(--matrix-red-from);
+    --grad-to: var(--matrix-red-to);
+}
+
+/* Icon Box Dashboard */
+.matrix-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(var(--accent-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    color: var(--accent-color);
+    border: 1.5px solid rgba(var(--accent-rgb), 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+}
+
+.matrix-card:hover .matrix-icon-box {
+    background: var(--accent-color);
+    color: white;
+    transform: rotate(10deg);
+}
+
+/* Dashboard Light Lists */
+.dashboard-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 10;
+}
+
+.micro-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.micro-list-item:hover {
+    background: rgba(var(--accent-rgb), 0.15);
+    transform: translateX(5px);
+}
+
+/* Text Blocks */
+.card-text-block {
+    position: relative;
+    z-index: 10;
+}
+
+.card-text-block h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.card-text-block p {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: 600;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   4. DASHBOARD & MATRIX (Titanium Standard)
+   ========================================================================== */
+.titanium-main {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    padding: calc(var(--header-height) + 1.5rem) 1.5rem 100px 1.5rem;
+    z-index: 20;
+    animation: fadeInScale 0.6s ease-out;
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    /* Effetto Vanishing (Svanimento bordi) - Solo verticale */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+}
+
+/* Standard Titanium Card (Widget) */
+.titanium-card {
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    color: var(--text-primary);
+}
+
+html:not(.dark) .titanium-card {
+    background: #ffffff;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* Matrix Base Style */
+
+/* Matrix Base Style */
+[class*="matrix-"] {
+    --accent: var(--text-primary);
+    position: relative;
+    z-index: 1;
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+[class*="matrix-"]:not(.dynamic-card):not(.matrix-card-compact) {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 84px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Layout Liste / Compact (Piccoli) */
+.dynamic-card,
+.matrix-card-compact {
+    padding: 0.75rem;
+    display: block;
+    min-height: auto;
+    border-radius: 18px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.matrix-blue {
+    --accent: var(--accent-blue);
+    --grad-from: var(--matrix-blue-from);
+    --grad-to: var(--matrix-blue-to);
+}
+
+.matrix-green {
+    --accent: var(--accent-green);
+    --grad-from: var(--matrix-green-from);
+    --grad-to: var(--matrix-green-to);
+}
+
+.matrix-orange {
+    --accent: var(--accent-orange);
+    --grad-from: var(--matrix-orange-from);
+    --grad-to: var(--matrix-orange-to);
+}
+
+.matrix-red {
+    --accent: var(--accent-red);
+    --grad-from: var(--matrix-red-from);
+    --grad-to: var(--matrix-red-to);
+}
+
+/* Dark Mode Appearance */
+html.dark [class*="matrix-"] {
+    background: linear-gradient(135deg, var(--grad-from), var(--grad-to));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+/* Light Mode Appearance (C-Blade) */
+html:not(.dark) [class*="matrix-"] {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
+}
+
+html:not(.dark) .matrix-card-compact {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+}
+
+
+
+[class*="matrix-"]:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.matrix-card-compact:hover {
+    transform: translateY(-2px);
+}
+
+/* Matrix Field Compact */
+
+/* Matrix Field Compact */
+.matrix-field-compact {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    height: 28px;
+    padding: 0 0.6rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    gap: 0.3rem;
+    transition: all 0.2s;
+    margin-top: 2px;
+}
+
+html.dark .matrix-field-compact {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.matrix-field-compact span {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-primary);
+    word-break: break-all;
+    /* Forza il wrap per stringhe lunghe (email/pwd) */
+    line-height: 1.1;
+    overflow-wrap: break-word;
+}
+
+/* Icons & Text */
+.bg-icon-container {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    opacity: 0.5;
+    z-index: 1;
+    mix-blend-mode: overlay;
+}
+
+.titanium-icon-lg {
+    font-size: 80px !important;
+}
+
+.titanium-icon-xl {
+    font-size: 140px !important;
+}
+
+.titanium-icon-xxl {
+    font-size: 180px !important;
+}
+
+
+/* Dashboard Micro List (Scadenze/Urgenze) */
+.box-content-main,
+.card-text-block {
+    position: relative;
+    z-index: 10;
+    /* Sempre sopra la lama */
+    width: 100%;
+}
+
+[data-ui="hint"] {
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.7;
+    margin-top: -2px;
+}
+
+.urgent-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    border-radius: 99px;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 950;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+
+/* Badge & Icon coloring based on box type */
+.matrix-blue .urgent-badge {
+    background: rgba(33, 150, 243, 0.5) !important;
+}
+
+.matrix-blue .bg-icon-container span {
+    color: #2196F3 !important;
+    opacity: 0.5;
+}
+
+.matrix-green .urgent-badge {
+    background: rgba(0, 200, 83, 0.5) !important;
+}
+
+.matrix-green .bg-icon-container span {
+    color: #00C853 !important;
+    opacity: 0.5;
+}
+
+.matrix-orange .urgent-badge {
+    background: rgba(255, 152, 0, 0.5) !important;
+}
+
+.matrix-orange .bg-icon-container span {
+    color: #FF9800 !important;
+    opacity: 0.5;
+}
+
+.matrix-red .urgent-badge {
+    background: rgba(155, 28, 28, 0.5) !important;
+}
+
+.matrix-red .bg-icon-container span {
+    color: #FF5252 !important;
+    opacity: 0.5;
+}
+
+/* Light Mode Overrides for Badge (if needed for readability) */
+html:not(.dark) .urgent-badge {
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-dynamic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    width: 100%;
+    margin-top: 0.3rem;
+}
+
+.micro-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--accent), transparent 85%);
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.micro-list-item:last-child {
+    margin-bottom: 0;
+}
+
+.micro-list-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    border-color: color-mix(in srgb, var(--accent), transparent 50%);
+}
+
+.micro-list-item .item-content {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.micro-list-item .item-icon-box {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--accent), transparent 90%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid color-mix(in srgb, var(--accent), transparent 80%);
+}
+
+.micro-list-item .material-symbols-outlined {
+    font-size: 16px !important;
+    color: var(--accent);
+    opacity: 1;
+}
+
+.micro-list-item .item-title {
+    font-size: 11px !important;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.micro-list-item .item-badge {
+    font-size: 8px !important;
+    font-weight: 950;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    background: color-mix(in srgb, var(--accent), transparent 90%);
+    border-radius: 5px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    border: 1px solid color-mix(in srgb, var(--accent), transparent 80%);
+}
+
+/* Light Mode Overrides for Micro Items */
+html:not(.dark) .micro-list-item {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+html:not(.dark) .micro-list-item .item-title {
+    color: var(--text-primary);
+}
+
+html:not(.dark) .micro-list-item .item-badge {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary);
+}
+
+.card-text-block {
+    position: relative;
+    z-index: 10;
+}
+
+.card-text-block h3,
+[class*="matrix-"] h3 {
+    font-size: 1.1rem;
+    /* Dimensione unificata V3.0 */
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+    white-space: normal;
+    /* Obbligo Wrap da Protocollo Accesso V3.0 */
+    overflow-wrap: break-word;
+}
+
+.card-text-block p {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: 600;
+    white-space: normal;
+    /* Obbligo Wrap da Protocollo Accesso V3.0 */
+    overflow-wrap: break-word;
+}
+
+/* ==========================================================================
+   5. GLASS SHINE (Riflesso Dinamico)
+   ========================================================================== */
+.glass-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            transparent 51%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 5;
+    border-radius: inherit;
+}
+
+[class*="matrix-"]:hover .glass-shine {
+    opacity: 1;
+}
+
+html.dark .glass-shine {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.25) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            transparent 51%);
+}
+
+/* 5.3 SAETTA MASTER (Riflesso Metallico) */
+.saetta-master {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 2;
+    animation: shimmer-master 6s infinite linear;
+    opacity: 0.3;
+}
+
+/* RESPONSIVE MOBILE ADAPTATION (Protocollo Titanium V3.1) */
+@media (max-width: 768px) {
+    .titanium-main {
+        padding: calc(var(--header-height) + 1rem) 1rem 80px 1rem;
+    }
+
+    .dashboard-grid-2,
+    .matrix-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Vertical Layout Mandatory */
+    .titanium-card,
+    .matrix-card-compact {
+        border-radius: 20px !important;
+        padding: 1.25rem !important;
+    }
+
+    /* Force all flex containers with side-by-side inputs to stack */
+    div[style*="display: flex"][style*="flex-direction: row"],
+    div[style*="display:flex"][style*="flex-direction:row"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    /* Force all grid containers to single column */
+    div[style*="display: grid"],
+    div[style*="display:grid"],
+    .dashboard-grid-2,
+    .matrix-grid,
+    .accounts-grid-list {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+    }
+
+    /* Input and Label Alignment */
+    label[style*="display: block"] {
+        margin-left: 0 !important;
+        margin-bottom: 0.4rem !important;
+        font-size: 0.7rem !important;
+    }
+
+    input,
+    select,
+    textarea {
+        min-height: 44px !important;
+        width: 100% !important;
+    }
+
+    /* Touch targets for buttons */
+    button,
+    .titanium-action-btn {
+        min-height: 36px;
+        min-width: 36px;
+    }
+}
+
+@media (max-width: 400px) {
+    .titanium-main {
+        padding: calc(var(--header-height) + 0.5rem) 0.75rem 60px 0.75rem;
+    }
+
+    .titanium-card {
+        padding: 1rem !important;
+    }
+}
+
+/* ==========================================================================
+   6. TITANIUM GOLD DETAIL CLASSES (Pure CSS Implementation)
+   ========================================================================== */
+
+.hero-profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem 1.5rem 1rem;
+    position: relative;
+}
+
+.hero-accent-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.4), transparent);
+}
+
+.detail-avatar-container {
+    position: relative;
+}
+
+.detail-avatar {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 1.5rem;
+    height: 7rem;
+    width: 7rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    border: 4px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--surface-sub);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+.hero-status-dot {
+    position: absolute;
+    bottom: -0.5rem;
+    right: -0.5rem;
+    background: var(--accent-blue);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 50%;
+    border: 4px solid var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+}
+
+.hero-title {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    text-align: center;
+    filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
+    margin-top: 1.5rem;
+}
+
+.detail-content-wrap {
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 6rem;
+}
+
+/* Glass Field System */
+.glass-field-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.view-label {
+    color: var(--text-secondary);
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.glass-field {
+    display: flex;
+    align-items: center;
+    background-color: var(--surface-sub);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.glass-field input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    height: 3rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.glass-field-btn {
+    padding: 0.75rem;
+    color: var(--text-secondary);
+    border: none;
+    background: none;
+    border-left: 1px solid var(--border-color);
+    transition: all 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.glass-field-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.glass-field-btn .material-symbols-outlined {
+    font-size: 1.1rem;
+}
+
+/* Sections */
+.detail-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+}
+
+.detail-section-title {
+    color: var(--text-primary);
+    opacity: 0.9;
+    font-size: 1.125rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.detail-section-icon {
+    font-size: 1.25rem;
+}
+
+.collapsible-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    background: none;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.collapsible-trigger .chevron {
+    color: var(--text-secondary);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Note Display */
+.note-display-box {
+    background-color: var(--surface-sub);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    min-height: 100px;
+    position: relative;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.note-text {
+    font-size: 0.875rem;
+    line-height: 1.625;
+    white-space: pre-wrap;
+    color: var(--text-primary);
+    opacity: 0.7;
+    font-style: italic;
+    margin: 0;
+}
+
+/* Attachment Row */
+.attachment-card-row {
+    background-color: var(--surface-sub);
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.attachment-card-row:hover {
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+}
+
+.attachment-icon-box {
+    background-color: rgba(37, 99, 235, 0.2);
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    color: var(--accent-blue);
+}
+
+/* Visibility Options */
+.visibility-option-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: var(--surface-sub);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.visibility-option-card:hover {
+    background: var(--surface-hover);
+}
+
+/* Standard Switch (per riuso) */
+.titanium-switch {
+    width: 36px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    position: relative;
+    transition: all 0.3s;
+}
+
+input:checked+.titanium-switch {
+    background: var(--accent-blue);
+}
+
+.titanium-switch::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 3px;
+    left: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+input:checked+.titanium-switch::after {
+    left: 19px;
+}
+
+/* FINE CSS ACCOUNT */

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dettaglio Scadenza - Titanium</title>
 
     <!-- Google Fonts -->
@@ -14,20 +14,20 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <!-- Design System Master (Titanium Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.5"></script>
-    <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body class="antialiased">
-    <div class="titanium-box">
+<body class="titanium-bg">
+    <div class="titanium-container">
         <!-- GLOW LAYER -->
-        <div class="glass-glow"></div>
+        <div class="titanium-glow"></div>
 
         <!-- Header (Fixed Glass) -->
         <header class="titanium-header">
@@ -54,6 +54,8 @@
                 </div>
             </div>
         </header>
+
+        <div class="spacer-header"></div>
 
         <main class="settings-container no-select">
 
@@ -233,23 +235,13 @@
             <div class="footer-spacer" style="height: 40px;"></div>
         </main>
 
+        <div class="spacer-footer"></div>
         <!-- FOOTER PREMIUM -->
-        <div id="footer-placeholder"></div>
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/dettaglio_scadenza.js?v=3.5"></script>
-    <script>
-        window.copyToClipboardText = (id) => {
-            const el = document.getElementById(id);
-            const val = el.innerText || el.textContent;
-            navigator.clipboard.writeText(val);
-            if (window.showToast) {
-                // Cerchiamo di usare la traduzione se disponibile, o fallback
-                window.showToast("Copiato!", "success");
-            }
-        }
-    </script>
+    <script type="module" src="assets/js/dettaglio_scadenza.js?v=3.1"></script>
 </body>
 
 </html>

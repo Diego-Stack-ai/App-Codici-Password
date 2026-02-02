@@ -47,30 +47,76 @@ function showToast(message, type = 'info') {
 document.addEventListener('DOMContentLoaded', () => {
     // UPDATED SELECTOR (Match ID added in HTML)
     const listContainer = document.getElementById('aziende-list-container') || document.querySelector('main .flex.flex-col.gap-4');
-    const sortBtn = document.getElementById('sort-btn');
+    // --- UI SETUP (Header & Footer Injection) ---
+    const setupSharedComponents = () => {
+        const checkInterval = setInterval(() => {
+            const hCenter = document.getElementById('header-center');
+            const hLeft = document.getElementById('header-left');
+            const hRight = document.getElementById('header-right');
+            const fRight = document.getElementById('footer-actions-right');
 
-    // TIMEOUT SAFEGUARD
-    setTimeout(() => {
-        if (allAziende.length === 0 && listContainer && listContainer.querySelector('.animate-spin')) {
-            console.warn("Loading timeout reached.");
-            listContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-10 text-center">
-                    <p class="text-orange-500 mb-2">Il caricamento sta impiegando più del previsto.</p>
-                    <button onclick="location.reload()" class="text-primary font-bold hover:underline">Ricarica pagina</button>
-                </div>`;
-        }
-    }, 8000); // 8 seconds timeout
+            if (hCenter && hLeft && hRight && fRight) {
+                clearInterval(checkInterval);
 
-    // SORT HANDLER
-    if (sortBtn) {
-        sortBtn.addEventListener('click', () => {
-            sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-            sortBtn.classList.toggle('bg-primary/10', sortOrder === 'desc');
-            sortBtn.title = sortOrder === 'asc' ? 'Ordina A-Z' : 'Ordina Z-A';
-            showToast(`Ordinamento: ${sortOrder === 'asc' ? 'A-Z' : 'Z-A'}`);
-            renderAziende();
-        });
-    }
+                // --- HEADER ---
+
+                // 1. Title
+                hCenter.innerHTML = '<h1 class="header-title">Aziende</h1>';
+
+                // 2. Back Button
+                hLeft.innerHTML = `
+                    <button onclick="window.location.href='home_page.html'" class="btn-icon-header">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                `;
+
+                // 3. Header Actions (Sort + Home)
+                hRight.innerHTML = '';
+
+                // Sort Button (View Action -> Header)
+                const sortBtn = document.createElement('button');
+                sortBtn.className = 'btn-icon-header';
+                sortBtn.innerHTML = '<span class="material-symbols-outlined">sort_by_alpha</span>';
+                sortBtn.onclick = () => {
+                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                    showToast(`Ordinamento: ${sortOrder === 'asc' ? 'A-Z' : 'Z-A'}`);
+                    renderAziende();
+                };
+                hRight.appendChild(sortBtn);
+
+                // Home Button (Protocol Requirement)
+                const homeBtn = document.createElement('a');
+                homeBtn.href = 'home_page.html';
+                homeBtn.className = 'btn-icon-header';
+                homeBtn.style.marginLeft = '0.5rem';
+                homeBtn.innerHTML = '<span class="material-symbols-outlined">home</span>';
+                hRight.appendChild(homeBtn);
+
+                // --- FOOTER ---
+
+                // Add Button (Primary Action -> Footer)
+                // Check if already added to avoid duplicates
+                if (!document.getElementById('add-company-btn')) {
+                    const addBtn = document.createElement('a');
+                    addBtn.id = 'add-company-btn';
+                    addBtn.href = 'aggiungi_nuova_azienda.html';
+                    addBtn.className = 'btn-icon-header';
+                    addBtn.style.marginRight = '1rem'; // Space from Settings
+                    addBtn.innerHTML = '<span class="material-symbols-outlined" style="color: var(--accent-blue); font-size: 28px;">add_circle</span>';
+
+                    // Prepend to Footer Right (Before Settings)
+                    fRight.prepend(addBtn);
+                }
+
+                console.log("UI Setup Complete [Header & Footer Compliance]");
+            }
+        }, 100);
+
+        // Safety timeout
+        setTimeout(() => clearInterval(checkInterval), 5000);
+    };
+
+    setupSharedComponents();
 
     // AUTH & LOAD
     onAuthStateChanged(auth, async (user) => {
@@ -219,71 +265,88 @@ document.addEventListener('DOMContentLoaded', () => {
             const div = document.createElement('div');
             // Stagger animation
             div.style.animationDelay = `${index * 50}ms`;
-            div.className = "animate-fade-in-up bg-white p-4 rounded-2xl shadow-sm border border-slate-200 active:scale-[0.99] transition-all duration-200 relative overflow-hidden group hover:shadow-md hover:border-slate-300";
+            div.className = "titanium-card border-glow adaptive-shadow animate-fade-in-up relative overflow-hidden group transition-all duration-200 cursor-pointer";
+            div.style.padding = "1.5rem";
 
             // Dynamic Color
             const theme = getCompanyColor(azienda.ragioneSociale, azienda.colorIndex);
 
-            // Card Style: Border colored with theme (30% opacity), subtle background tint (5%)
-            div.style.borderColor = `${theme.from}4d`; // 30%
-            div.style.backgroundColor = `${theme.from}08`; // ~3% tint
+            // Card Style & Visibility Logic
+            const isLightMode = !document.documentElement.classList.contains('dark') || document.body.classList.contains('titanium-light-bg');
+
+            if (isLightMode) {
+                // LIGHT MODE: White background, visible colored border (solid)
+                // "delimitare le card con un piccolo margine del colore della ditta"
+                div.style.backgroundColor = '#ffffff';
+                div.style.border = `1px solid ${theme.from}`;
+                div.style.boxShadow = `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`;
+            } else {
+                // DARK MODE (Titanium Standard): Transparent/Tinted background, subtle border
+                div.style.borderColor = `${theme.from}4d`; // 30%
+                div.style.backgroundColor = `${theme.from}08`; // ~3% tint
+            }
 
             // Gradient Badge Style
             const gradientStyle = `background: linear-gradient(135deg, ${theme.from}, ${theme.to}); box-shadow: 0 4px 12px ${theme.from}40;`;
 
             div.innerHTML = `
-                <div class="flex flex-col gap-3 relative z-10 w-full">
+                <div style="display: flex; flex-direction: column; gap: 1.25rem; position: relative; z-index: 10; width: 100%;">
+                    
                     <!-- TOP ROW: Icon + Name + Pin -->
-                    <div class="flex items-center gap-4">
-                        <!-- Icon / Logo with Gradient Bg -->
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-xl shadow-lg transform transition-transform group-hover:scale-105"
-                             style="${gradientStyle}">
+                    <div style="display: flex; align-items: flex-start; gap: 1rem; position: relative;">
+                        
+                        <!-- Icon / Logo (Fixed 56px) -->
+                        <div style="width: 3.5rem; height: 3.5rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 1.5rem; color: white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); ${gradientStyle}">
                             ${azienda.logo
-                    ? `<img src="${azienda.logo}" class="w-full h-full object-cover rounded-xl" />`
+                    ? `<img src="${azienda.logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 1rem;" />`
                     : (azienda.ragioneSociale ? azienda.ragioneSociale.charAt(0).toUpperCase() : 'A')}
                         </div>
                         
-                        <div class="flex-1 min-w-0 pr-8"> <!-- pr-8 for pin space -->
-                            <h3 class="text-slate-900 font-bold text-base leading-tight truncate mb-0.5">
+                        <!-- Text Content -->
+                        <div style="flex: 1; min-width: 0; padding-top: 0.125rem;">
+                            <h3 style="font-weight: 700; font-size: 1.125rem; line-height: 1.25; margin-bottom: 0.375rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary);">
                                 ${azienda.ragioneSociale || 'Senza Nome'}
                             </h3>
-                            <div class="flex items-center gap-2 text-xs text-slate-500">
-                                <span class="flex items-center gap-1 bg-white/50 px-2 py-0.5 rounded-full border border-gray-100">
-                                    <span class="material-symbols-outlined text-[14px]">tag</span>
-                                    ${azienda.partitaIva || '-'}
+                            <div style="display: flex; align-items: center;">
+                                <span style="display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.625rem; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.05); background-color: rgba(0,0,0,0.2);">
+                                    <span style="font-size: 0.65rem; opacity: 0.7; color: var(--text-secondary);">#</span>
+                                    <span style="font-size: 0.75rem; font-family: monospace; letter-spacing: 0.025em; opacity: 0.9; color: var(--text-secondary);">
+                                        ${azienda.partitaIva || '00000000000'}
+                                    </span>
                                 </span>
                             </div>
                         </div>
 
-                         <!-- PIN BUTTON (Neutral) -->
-                        <button class="btn-pin absolute top-0 right-0 p-2 hover:scale-110 transition-transform ${azienda.isPinned ? 'text-slate-700' : 'text-gray-400 hover:text-slate-600'}" 
+                         <!-- PIN BUTTON (Absolute Top Right) -->
+                        <button class="btn-pin"
+                            style="position: absolute; top: -0.5rem; right: -0.5rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%; border: none; cursor: pointer; color: ${azienda.isPinned ? theme.from : 'var(--text-secondary)'}; opacity: ${azienda.isPinned ? '1' : '0.5'}; transition: all 0.2s;"
+                            onclick="event.stopPropagation(); window.togglePin('${azienda.id}')"
                             data-id="${azienda.id}">
-                            <span class="material-symbols-outlined text-[20px] ${azienda.isPinned ? 'fill-current' : ''}">push_pin</span>
+                            <span class="material-symbols-outlined" style="font-size: 20px; ${azienda.isPinned ? 'transform: rotate(-45deg);' : ''} ${azienda.isPinned ? 'font-variation-settings: \'FILL\' 1;' : ''}">push_pin</span>
                         </button>
                     </div>
 
                     <!-- BOTTOM ROW: ACTIONS -->
-                    <div class="flex items-center gap-2 mt-1">
-                        <!-- Button: Dettagli (Light Tint of Theme) -->
+                    <div style="display: flex; align-items: center; gap: 0.75rem; width: 100%;">
+                        
+                        <!-- Button: Dettagli -->
                          <button onclick="event.stopPropagation(); window.location.href='dati_azienda.html?id=${azienda.id}'"
-                            class="flex-1 flex items-center justify-center gap-2 h-10 rounded-lg transition-colors text-sm font-bold shadow-sm"
-                            style="background-color: ${theme.from}20; color: ${theme.from}; border: 1px solid ${theme.from}30;">
-                            <span class="material-symbols-outlined text-[18px]">business</span>
+                            style="flex: 1; height: 48px; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background-color: rgba(255,255,255,0.03); border: 1px solid ${theme.from}40; color: ${theme.from};">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">domain</span>
                             Dettagli
                         </button>
 
-                        <!-- Button: Account (Solid Gradient of Theme) -->
+                        <!-- Button: Account -->
                         <button onclick="event.stopPropagation(); window.location.href='account_azienda.html?id=${azienda.id}'"
-                            class="flex-1 flex items-center justify-center gap-2 h-10 rounded-lg text-white shadow-md transition-transform active:scale-[0.98] text-sm font-bold"
-                            style="background: linear-gradient(to right, ${theme.from}, ${theme.to});">
-                            <span class="material-symbols-outlined text-[18px]">folder_shared</span>
+                            style="flex: 1; height: 48px; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: all 0.2s; color: white; background: linear-gradient(135deg, ${theme.from}, ${theme.to}); box-shadow: 0 4px 12px ${theme.from}40; border: none;">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">folder_shared</span>
                             Account
                         </button>
                     </div>
                 </div>
                 
-                <!-- Decorative bg wash (Stronger on hover) -->
-                <div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/40 opacity-0 group-hover:opacity-100 transition-opacity z-0 pointer-events-none"></div>
+                <!-- Decorative bg wash -->
+                <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent); opacity: 0; transition: opacity 0.3s; pointer-events: none;" class="group-hover:opacity-100"></div>
             `;
 
             div.onclick = (e) => {

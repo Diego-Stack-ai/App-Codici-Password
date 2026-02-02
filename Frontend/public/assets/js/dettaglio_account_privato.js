@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    initTitaniumUI();
+
     // Auth Listener
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -52,10 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // UI Hiding for ReadOnly
                 const actions = document.getElementById('save-bar');
                 if (actions) actions.classList.add('hidden');
-                const editBtn = document.getElementById('btn-edit-page');
-                if (editBtn) editBtn.classList.add('hidden');
                 const sharedMgmt = document.getElementById('shared-management-section');
                 if (sharedMgmt) sharedMgmt.classList.add('hidden');
+
+                // Remove edit icon if read-only
+                const btnEdit = document.getElementById('btn-edit-footer');
+                if (btnEdit) btnEdit.remove();
             }
 
             await loadAccount(ownerId, currentId);
@@ -68,17 +72,126 @@ document.addEventListener('DOMContentLoaded', () => {
     setupListeners();
 });
 
+/**
+ * Protocol UI Initialization (Fixed 3-Zone Header + Footer)
+ */
+/**
+ * Protocol UI Initialization (Fixed 3-Zone Header + Footer)
+ */
+/**
+ * Protocol UI Initialization (Fixed 3-Zone Header + Footer)
+ */
+function initTitaniumUI() {
+    const hPlaceholder = document.getElementById('header-placeholder');
+    if (!hPlaceholder) return;
+
+    // Internal function to apply Header UI
+    const applyHeader = () => {
+        // 1. Ensure Header Structure if missing or empty
+        const content = document.getElementById('header-content');
+        if (!content) {
+            hPlaceholder.innerHTML = `
+                <div id="header-content" class="header-balanced-container">
+                    <div id="header-left" class="header-left"></div>
+                    <div id="header-center" class="header-center"></div>
+                    <div id="header-right" class="header-right"></div>
+                </div>
+            `;
+            hPlaceholder.setAttribute('data-titanium-init', 'true');
+        }
+
+        // 3. Inject Content ONLY if containers are empty (prevents duplicates, fixes overwritten)
+        const hLeft = document.getElementById('header-left');
+        const hCenter = document.getElementById('header-center');
+        const hRight = document.getElementById('header-right');
+
+        if (hLeft && hLeft.innerHTML.trim() === '') {
+            hLeft.innerHTML = `
+                <button onclick="history.back()" class="btn-icon-header">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+            `;
+        }
+
+        if (hCenter && hCenter.innerHTML.trim() === '') {
+            const titleText = (window.t && window.t('account_detail')) || 'Dettaglio Account';
+            hCenter.innerHTML = `<h1 class="header-title" id="header-nome-account" data-t="account_detail">${titleText}</h1>`;
+        }
+
+        if (hRight && hRight.innerHTML.trim() === '') {
+            hRight.innerHTML = `
+                <a href="home_page.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
+            `;
+        }
+    };
+
+    // Internal function to apply Footer Button
+    const applyFooter = () => {
+        const fRight = document.getElementById('footer-actions-right');
+        // Only proceed if footer container exists
+        if (fRight) {
+            // Check if button already exists to avoid duplicates
+            if (!document.getElementById('btn-edit-footer')) {
+                const btnEdit = document.createElement('button');
+                btnEdit.id = 'btn-edit-footer';
+                btnEdit.className = 'btn-icon-header';
+                btnEdit.title = (window.t && window.t('edit_account')) || 'Modifica Account';
+                btnEdit.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+
+                // Robust ID retrieval on click
+                btnEdit.onclick = () => {
+                    const params = new URLSearchParams(window.location.search);
+                    const idToEdit = currentId || params.get('id');
+                    if (idToEdit) {
+                        window.location.href = `modifica_account_privato.html?id=${encodeURIComponent(idToEdit)}`;
+                    } else {
+                        console.error("ID mancante per modifica");
+                    }
+                };
+
+                // Prepend to ensure it appears before settings icon if possible, or append.
+                // Using prepend to put it to the left of settings
+                fRight.prepend(btnEdit);
+            }
+        }
+    };
+
+    // Run immediately
+    applyHeader();
+    applyFooter();
+
+    // RETRY LOOP: Check every 100ms for 2 seconds to fix race conditions with main.js
+    let attempts = 0;
+    const interval = setInterval(() => {
+        const hLeft = document.getElementById('header-left');
+        // RE-APPLY HEADER if missing
+        if (!hLeft || hLeft.innerHTML.trim() === '') {
+            applyHeader();
+        }
+
+        // RE-APPLY FOOTER if missing (main.js loads footer async, so we must retry until it appears)
+        if (!document.getElementById('btn-edit-footer')) {
+            applyFooter();
+        }
+
+        attempts++;
+        if (attempts > 30) clearInterval(interval); // Extended to 3s for slower fetch
+    }, 100);
+}
+
 // --- CORE FUNCTIONS ---
 
 function enableReadOnlyMode() {
     const banner = document.createElement('div');
-    banner.className = "bg-blue-500/10 border-l-4 border-blue-500 text-blue-400 p-4 mb-4 rounded-xl shadow-sm backdrop-blur-sm";
+    banner.className = "read-only-banner";
     banner.innerHTML = `
-        <p class="font-bold text-sm" data-t="read_only_mode">Modalità Visualizzazione</p>
-        <p class="text-[11px]" data-t="read_only_desc">Questo elemento è condiviso con te in sola lettura.</p>
+        <p class="read-only-title" data-t="read_only_mode">Modalità Visualizzazione</p>
+        <p class="read-only-desc" data-t="read_only_desc">Questo elemento è condiviso con te in sola lettura.</p>
     `;
-    const hero = document.querySelector('.px-4.space-y-6');
-    if (hero) hero.insertBefore(banner, hero.firstChild);
+    const container = document.querySelector('.detail-content-wrap');
+    if (container) container.insertBefore(banner, container.firstChild);
 
     // Disable checkboxes
     ['detail-shared', 'detail-hasMemo', 'detail-isMemoShared'].forEach(id => {
@@ -87,10 +200,10 @@ function enableReadOnlyMode() {
     });
 
     // Add Rinuncia Button
-    const bottomSection = document.querySelector('section.pb-10');
+    const bottomSection = document.querySelector('.detail-content-wrap section:last-child');
     if (bottomSection) {
         const btnRinuncia = document.createElement('button');
-        btnRinuncia.className = "w-full mt-4 h-12 bg-red-50 text-red-600 border border-red-200 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-red-100 transition-colors";
+        btnRinuncia.className = "btn-rinuncia-condivisione";
         btnRinuncia.innerHTML = `<span class="material-symbols-outlined">person_remove</span> Rinuncia alla condivisione`;
         btnRinuncia.onclick = removeSharedLink;
         bottomSection.appendChild(btnRinuncia);
@@ -181,10 +294,10 @@ const getAccentColors = (acc) => {
     const isMemo = acc.hasMemo || acc._isMemo;
     const isShared = acc.shared || acc.isMemoShared || acc._isShared;
 
-    if (isBanking) return { key: 'emerald', via: 'via-emerald-500/40', bg: 'bg-emerald-500', hex: '#10b981' };
-    if (isMemo) return { key: 'amber', via: 'via-amber-500/40', bg: 'bg-amber-500', hex: '#f59e0b' };
-    if (isShared) return { key: 'rose', via: 'via-rose-500/40', bg: 'bg-rose-500', hex: '#f43f5e' };
-    return { key: 'blue', via: 'via-blue-500/40', bg: 'bg-blue-500', hex: '#3b82f6' };
+    if (isBanking) return { key: 'emerald', via: 'via-emerald-500/40', bg: 'bg-emerald-500', hex: '#10b981', rgb: '16, 185, 129' };
+    if (isMemo) return { key: 'amber', via: 'via-amber-500/40', bg: 'bg-amber-500', hex: '#f59e0b', rgb: '245, 158, 11' };
+    if (isShared) return { key: 'rose', via: 'via-rose-500/40', bg: 'bg-rose-500', hex: '#f43f5e', rgb: '244, 63, 94' };
+    return { key: 'blue', via: 'via-blue-500/40', bg: 'bg-blue-500', hex: '#3b82f6', rgb: '59, 130, 246' };
 };
 
 function render(acc) {
@@ -192,17 +305,23 @@ function render(acc) {
 
     // 1. DYNAMIC ACCENT COLORS
     const colors = getAccentColors(acc);
+
+    // Set CSS variable on container for Titanium Glow and badges
+    const container = document.querySelector('.titanium-container');
+    if (container) {
+        container.style.setProperty('--accent-rgb', colors.rgb);
+        container.style.setProperty('--accent-hex', colors.hex);
+    }
+
     const heroBar = document.getElementById('hero-accent-bar');
     if (heroBar) {
-        // Remove old gradients (standardized as via-*)
-        heroBar.className = heroBar.className.replace(/via-\w+-\d+\/\d+/, '').trim();
-        heroBar.classList.add(colors.via);
+        heroBar.style.backgroundColor = colors.hex;
+        heroBar.style.boxShadow = `0 0 15px ${colors.hex}66`;
     }
     const statusDot = document.getElementById('hero-status-dot');
     if (statusDot) {
-        statusDot.className = statusDot.className.replace(/bg-\w+-\d+/, '').replace(/shadow-\w+-\d+\/\d+/, '').trim();
-        statusDot.classList.add(colors.bg);
-        statusDot.classList.add(`shadow-${colors.key}-500/20`);
+        statusDot.style.backgroundColor = colors.hex;
+        statusDot.style.boxShadow = `0 0 15px ${colors.hex}66`;
     }
 
     // Header & Hero
@@ -628,13 +747,6 @@ function setupListeners() {
         };
     });
 
-    // Edit Redirect
-    const btnEditPage = document.getElementById('btn-edit-page');
-    if (btnEditPage) {
-        btnEditPage.onclick = () => {
-            window.location.href = `modifica_account_privato.html?id=${encodeURIComponent(currentId)}`;
-        };
-    }
 
     // Flags & Modal Trigger
     const checkShared = document.getElementById('detail-shared');

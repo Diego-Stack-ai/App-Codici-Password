@@ -74,13 +74,15 @@ function renderTable(tbodyId, dataArray, listKey) {
              <td class="px-3 py-2 flex justify-between items-center text-gray-700 dark:text-gray-300 text-xs">
                 <span class="font-medium">${item}</span>
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-amber-500/20 text-amber-600 dark:text-amber-500 transition-colors"
+                    <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
+                        style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
                         onclick="window.editItem('${safeListKey}', ${index})">
-                        <span class="material-symbols-outlined text-[14px]">edit</span>
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
                     </button>
-                    <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
+                    <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
+                        style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
                         onclick="window.deleteItem('${safeListKey}', ${index})">
-                        <span class="material-symbols-outlined text-[14px]">delete</span>
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
                     </button>
                 </div>
             </td>
@@ -123,14 +125,16 @@ window.renderAllTables = () => {
                             </div>
                         </td>
                         <td class="px-2 py-2 text-right">
-                             <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-amber-500/20 text-amber-600 dark:text-amber-500 transition-colors"
+                            <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
+                                    style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
                                     onclick="window.editType(${index})">
-                                    <span class="material-symbols-outlined text-[14px]">edit</span>
+                                    <span class="material-symbols-outlined text-[16px]">edit</span>
                                 </button>
-                                <button class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
+                                <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
+                                    style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
                                     onclick="window.deleteItem('deadlineTypes', ${index})">
-                                    <span class="material-symbols-outlined text-[14px]">delete</span>
+                                    <span class="material-symbols-outlined text-[16px]">delete</span>
                                 </button>
                             </div>
                         </td>

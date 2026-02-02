@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="dark" lang="it">
+<html lang="it">
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>Lista Aziende</title>
     <!-- PWA / Mobile Capable -->
@@ -24,61 +24,47 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_account.css?v=3.7">
+    <!-- Design System Master (Titanium Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/dashboard_common.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/account.css?v=3.7">
 
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body class="titanium-bg antialiased">
-    <div class="titanium-box">
-        <div class="glass-glow"></div>
+<body class="titanium-bg">
+    <div class="titanium-container">
+        <div class="titanium-glow"></div>
 
-        <!-- Standard Titanium Header -->
-        <header class="titanium-header">
-            <div class="header-balanced-container">
-                <div class="header-left">
-                    <a href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </a>
-                    <button id="sort-btn" class="btn-icon-header">
-                        <span class="material-symbols-outlined">sort_by_alpha</span>
-                    </button>
-                </div>
-                <div class="header-center">
-                    <h1 class="header-title">Aziende</h1>
-                </div>
-                <div class="header-right">
-                    <a href="aggiungi_nuova_azienda.html" class="btn-icon-header" style="color: var(--accent-blue);">
-                        <span class="material-symbols-outlined">add</span>
-                    </a>
-                    <a href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <!-- Automated Titanium Header -->
+        <div id="header-placeholder"></div>
 
         <!-- Header Spacer -->
         <div class="spacer-header"></div>
 
         <main class="titanium-main">
             <!-- Companies List Container -->
-            <div id="aziende-list-container" class="flex flex-col gap-4 p-4 pb-24">
+            <div id="aziende-list-container" class="matrix-grid">
                 <!-- Loading Spinner -->
-                <div class="flex flex-col items-center justify-center py-12">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2"
-                        style="border-color: var(--accent-blue);"></div>
+                <div class="loading-full">
+                    <div class="titanium-spinner"></div>
+                    <p data-t="loading_data">Caricamento...</p>
                 </div>
             </div>
         </main>
 
+        <div class="spacer-footer"></div>
+
         <!-- FOOTER PLACEHOLDER -->
-        <footer id="footer-placeholder"></footer>
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
 
-    <script src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/lista_aziende.js?v=2.0"></script>
+    <!-- Scripts -->
+    <script src="assets/js/main.js?v=3.1"></script>
+    <script type="module" src="assets/js/lista_aziende.js?v=3.1"></script>
 </body>
 
 </html>

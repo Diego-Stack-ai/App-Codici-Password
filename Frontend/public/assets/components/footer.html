@@ -1,4 +1,30 @@
 <footer class="titanium-footer">
-    <!-- Contenitore Puro: Il contenuto viene iniettato dalla singola pagina -->
-    <div id="footer-content" class="w-full flex items-center justify-center gap-6"></div>
+    <div id="footer-content" class="header-balanced-container">
+        <!-- ZONA SINISTRA: Azioni Dinamiche (Simmetria Protocollo) -->
+        <div class="header-left" id="footer-actions-left"></div>
+
+        <!-- ZONA CENTRO: Switcher Tema (Eccezione al Protocollo) -->
+        <div class="header-center">
+            <div class="flex items-center gap-6">
+                <button onclick="TitaniumTheme.setMode('light')" class="theme-switch-btn" title="Tema Chiaro">
+                    <span class="material-symbols-outlined">light_mode</span>
+                </button>
+                <button onclick="TitaniumTheme.setMode('dark')" class="theme-switch-btn" title="Tema Scuro">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ZONA DESTRA: Azioni Footer (Impostazioni + Page Actions) -->
+        <div class="header-right" id="footer-actions-right">
+            <div id="footer-settings-link">
+                <a href="impostazioni.html"
+                    class="btn-icon-header opacity-60 hover:opacity-100 transition-opacity group/settings">
+                    <span
+                        class="material-symbols-outlined !text-xl transform group-hover/settings:rotate-90 transition-transform duration-500"
+                        style="font-variation-settings: 'wght' 200;">tune</span>
+                </a>
+            </div>
+        </div>
+    </div>
 </footer>

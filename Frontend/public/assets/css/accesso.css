@@ -37,6 +37,20 @@
     background: linear-gradient(to top, var(--accesso-primary), transparent);
 }
 
+/* Glass Glow (Faro Ambientale) - Protocollo V3.1 */
+.glass-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 30%, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+
 /* Card Vault centrata */
 .titanium-vault {
     width: 100%;
@@ -112,7 +126,23 @@
 @media (max-width: 480px) {
     .accesso-form-row {
         flex-direction: column;
-        gap: 0;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .accesso-label {
+        font-size: 0.75rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .accesso-input {
+        height: 3.2rem;
+        font-size: 0.95rem;
+    }
+
+    .accesso-form-group {
+        margin-bottom: 1.25rem;
     }
 }
 
@@ -251,6 +281,22 @@
     transform: translateY(-2px);
 }
 
+/* Navigazione Footer Accesso */
+.accesso-nav-footer {
+    text-align: center;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.accesso-nav-footer span {
+    font-size: 0.8rem;
+    color: var(--accesso-text-muted);
+}
+
+
 /* LANGUAGE SELECTOR FLOATING */
 .lang-selector-container {
     position: fixed;
@@ -364,28 +410,52 @@
 /* RESPONSIVE */
 @media (max-width: 480px) {
     .titanium-vault {
-        padding: 2rem 1.5rem;
-        border-radius: 0;
-        min-height: 100vh;
-        max-width: none;
-        background: transparent;
-        box-shadow: none;
-        backdrop-filter: none;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .titanium-vault::after {
-        display: none;
+        padding: 2.5rem 1.5rem;
+        border-radius: 28px;
+        min-height: auto;
+        max-width: 92%;
+        margin: 2rem auto;
+        background: var(--surface-vault);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
 
     .accesso-title {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .lang-selector-container {
         top: 1rem;
         right: 1rem;
     }
+}
+
+@media (max-width: 400px) {
+    .titanium-vault {
+        padding: 2rem 1rem;
+        max-width: 95%;
+    }
+}
+
+/* ==========================================================================
+   5. SAETTA MASTER (Riflesso Metallico - Porting da Account)
+   ========================================================================== */
+.saetta-master {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 0;
+    /* Base layer inside card */
+    animation: shimmer-master 6s infinite linear;
+    opacity: 0.4;
+    border-radius: inherit;
+    /* Segue i bordi della card se presenti */
+}
+
+/* Assicura che il contenuto stia sopra la saetta */
+.titanium-vault>*:not(.saetta-master) {
+    position: relative;
+    z-index: 2;
 }

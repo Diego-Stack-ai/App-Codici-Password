@@ -1,0 +1,675 @@
+/* 
+ * TITANIUM DESIGN SYSTEM - Account Variation V3.7 (Dual Mode + Deep Responsive)
+ * File: auth_account.css
+ * Mode: CORE STANDARD (Shell + Matrix + Grid + Utils)
+ * 
+ * V3.7 Changelog (2026-01-31):
+ * - Rimosso effetto C-Blade (Lama) per design più pulito e minimalista
+ * - Padding uniformato a 1.5rem (large) e 0.75rem (compact)
+ * - Padding mobile semplificato a 1rem (large) e 0.5rem (compact)
+ * 
+ * V3.6 Changelog (2026-01-31):
+ * - Implementazione completa Standard Accesso V3.0 per responsive mobile
+ * - Media queries @768px (tablet) e @480px (mobile)
+ * - Wrapping forzato per titoli e campi (overflow-wrap, word-break)
+ * - Ottimizzazione C-Blade per schermi stretti
+ * - Font-size adattivi per massima leggibilità
+ */
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   4. DASHBOARD & MATRIX -> MOVED TO dashboard_common.css
+   (Titanium Main & Utilities kept for compatibility)
+   ========================================================================== */
+.titanium-main {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    padding: calc(var(--header-height) + 1.5rem) 1.5rem 100px 1.5rem;
+    z-index: 20;
+    animation: fadeInScale 0.6s ease-out;
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    /* Effetto Vanishing (Svanimento bordi) - Solo verticale */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+}
+
+/* Standard Titanium Card (Widget) */
+.titanium-card {
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    color: var(--text-primary);
+}
+
+html:not(.dark) .titanium-card {
+    background: #ffffff;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* 5. GLASS SHINE & SAETTA (Riflesso Dinamico) - Kept/Aliased or Specific Override */
+.glass-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.15) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            transparent 51%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 5;
+    border-radius: inherit;
+}
+
+[class*="matrix-"]:hover .glass-shine {
+    opacity: 1;
+}
+
+html.dark .glass-shine {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.25) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            transparent 51%);
+}
+
+/* 5.3 SAETTA MASTER (Riflesso Metallico) */
+.saetta-master {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 2;
+    animation: shimmer-master 6s infinite linear;
+    opacity: 0.3;
+}
+
+/* RESPONSIVE MOBILE ADAPTATION (Protocollo Titanium V3.1) */
+@media (max-width: 768px) {
+    .titanium-main {
+        padding: calc(var(--header-height) + 1rem) 1rem 80px 1rem;
+    }
+
+    .dashboard-grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Vertical Layout Mandatory */
+    .titanium-card,
+    .matrix-card-compact {
+        border-radius: 20px !important;
+        padding: 1.25rem !important;
+    }
+
+    /* Force all flex containers with side-by-side inputs to stack */
+    div[style*="display: flex"][style*="flex-direction: row"],
+    div[style*="display:flex"][style*="flex-direction:row"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    /* Force all grid containers to single column */
+    div[style*="display: grid"],
+    div[style*="display:grid"],
+    .dashboard-grid-2,
+    .grid,
+    .grid-cols-2,
+    .md\:grid-cols-2,
+    .grid-cols-3,
+    .md\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+    }
+
+    /* Tailwind Flex Rows to Column (Targeting Input Groups) */
+    .titanium-main .flex.gap-3,
+    .titanium-main .flex.gap-4 {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    /* Undo specific flex widths when stacked */
+    .titanium-main .flex-\[3\],
+    .titanium-main .flex-1 {
+        width: 100% !important;
+        flex: none !important;
+    }
+
+    /* Input and Label Alignment */
+    label[style*="display: block"] {
+        margin-left: 0 !important;
+        margin-bottom: 0.5rem !important;
+        font-size: 0.8rem !important;
+        display: block !important;
+    }
+
+    input,
+    select,
+    textarea,
+    .glass-field {
+        min-height: 44px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-top: 0.25rem !important;
+    }
+
+    /* Touch targets for buttons */
+    button,
+    .titanium-action-btn {
+        min-height: 36px;
+        min-width: 36px;
+    }
+
+    /* Titanium Gold Detail Response */
+    .hero-profile-header {
+        padding: 1rem 0.5rem 1rem 0.5rem !important;
+    }
+
+    .hero-title {
+        font-size: 1.25rem !important;
+        margin-top: 1rem !important;
+    }
+
+    .detail-avatar {
+        width: 5rem !important;
+        height: 5rem !important;
+    }
+
+    .detail-content-wrap {
+        padding: 0 0.5rem !important;
+        gap: 1rem !important;
+    }
+
+    .attachment-card-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+    }
+
+    .attachment-card-row>div {
+        width: 100% !important;
+    }
+
+    .glass-field {
+        min-height: 48px !important;
+    }
+
+    .glass-field input {
+        font-size: 16px !important;
+        /* Prevent zoom on iOS */
+    }
+}
+
+@media (max-width: 400px) {
+    .titanium-main {
+        padding: calc(var(--header-height) + 0.5rem) 0.75rem 60px 0.75rem;
+    }
+
+    .titanium-card {
+        padding: 1rem !important;
+    }
+
+    /* Spacing increased for small mobile (Spacing Aumentato) */
+    div[style*="display: grid"],
+    div[style*="display:grid"],
+    .dashboard-grid-2,
+    .grid,
+    .grid-cols-2,
+    .md\:grid-cols-2,
+    .titanium-main .flex.flex-col {
+        gap: 1.5rem !important;
+    }
+}
+
+/* ==========================================================================
+   6. TITANIUM GOLD DETAIL CLASSES (Pure CSS Implementation)
+   ========================================================================== */
+
+.hero-profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem 1.5rem 1rem;
+    position: relative;
+}
+
+.hero-accent-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.4), transparent);
+}
+
+.detail-avatar-container {
+    position: relative;
+}
+
+.detail-avatar {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 1.5rem;
+    height: 7rem;
+    width: 7rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    border: 4px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--surface-sub);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+.hero-status-dot {
+    position: absolute;
+    bottom: -0.5rem;
+    right: -0.5rem;
+    background: var(--accent-blue);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 50%;
+    border: 4px solid var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+}
+
+.hero-title {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    text-align: center;
+    filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
+    margin-top: 1.5rem;
+}
+
+.detail-content-wrap {
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 6rem;
+}
+
+/* Glass Field System */
+.glass-field-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.view-label {
+    color: var(--text-secondary);
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.glass-field {
+    display: flex;
+    align-items: center;
+    background-color: var(--surface-sub);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.glass-field input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    height: 3rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.glass-field-btn {
+    padding: 0.75rem;
+    color: var(--text-secondary);
+    border: none;
+    background: none;
+    border-left: 1px solid var(--border-color);
+    transition: all 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.glass-field-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.glass-field-btn .material-symbols-outlined {
+    font-size: 1.1rem;
+}
+
+/* Sections */
+.detail-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+}
+
+.detail-section-title {
+    color: var(--text-primary);
+    opacity: 0.9;
+    font-size: 1.125rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.detail-section-icon {
+    font-size: 1.25rem;
+}
+
+.collapsible-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    background: none;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.collapsible-trigger .chevron {
+    color: var(--text-secondary);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Note Display */
+.note-display-box {
+    background-color: var(--surface-sub);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    min-height: 100px;
+    position: relative;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.note-text {
+    font-size: 0.875rem;
+    line-height: 1.625;
+    white-space: pre-wrap;
+    color: var(--text-primary);
+    opacity: 0.7;
+    font-style: italic;
+    margin: 0;
+}
+
+/* Attachment Row */
+.attachment-card-row {
+    background-color: var(--surface-sub);
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.attachment-card-row:hover {
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+}
+
+.attachment-icon-box {
+    background-color: rgba(37, 99, 235, 0.2);
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    color: var(--accent-blue);
+}
+
+/* Visibility Options */
+.visibility-option-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: var(--surface-sub);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.visibility-option-card:hover {
+    background: var(--surface-hover);
+}
+
+/* Standard Switch (per riuso) */
+.titanium-switch {
+    width: 36px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    position: relative;
+    transition: all 0.3s;
+}
+
+input:checked+.titanium-switch {
+    background: var(--accent-blue);
+}
+
+.titanium-switch::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 3px;
+    left: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+input:checked+.titanium-switch::after {
+    left: 19px;
+}
+
+
+/* ==========================================================================
+   7. TITANIUM LIGHT MODE VARIATION (Reference Standard)
+   Scope: Applied via body.titanium-light-bg
+   Target: Clean, Defined, Reusable Layout
+   ========================================================================== */
+
+/* Page Background & Typography */
+body.titanium-light-bg {
+    background-color: #f1f5f9 !important;
+    /* Slate-100 (Lighter for contrast) */
+    color: #0f172a !important;
+    /* Slate-900 */
+}
+
+/* Light Container Structure */
+.titanium-light-mode-page .titanium-header {
+    background-color: rgba(255, 255, 255, 0.85);
+    /* Frost White */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    justify-content: space-between;
+    padding: 0 1rem;
+    height: var(--header-height);
+}
+
+.titanium-light-mode-page .titanium-footer {
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* Header Utilities (Clean HTML Reference) */
+.header-light-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.header-light-title {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a !important;
+    letter-spacing: -0.01em;
+}
+
+.header-light-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Icons Override */
+.titanium-light-mode-page .btn-icon-header span {
+    color: #1e293b !important;
+    /* Slate-800 */
+}
+
+/* Light Card System (High Definition) */
+.titanium-card-light {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    /* Definition via Shadow Ring + Soft Shadow */
+    box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.04),
+        0 4px 6px -1px rgba(15, 23, 42, 0.06),
+        0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    color: #334155;
+    position: relative;
+    z-index: 10;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+    /* GPU Boost */
+}
+
+.titanium-card-light:active {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Swipe Interaction Classes */
+.swipe-row {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    border-radius: 1rem;
+    user-select: none;
+    touch-action: pan-y;
+}
+
+.swipe-bg-left,
+.swipe-bg-right {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    border-radius: 1rem;
+    padding: 0 1.5rem;
+    z-index: 0;
+    transition: opacity 0.2s;
+    height: 100%;
+}
+
+.swipe-bg-left {
+    background-color: #ef4444;
+    /* red-500 */
+    justify-content: flex-start;
+    left: 0;
+}
+
+.swipe-bg-right {
+    background-color: #f59e0b;
+    /* amber-500 */
+    justify-content: flex-end;
+    right: 0;
+}
+
+/* Search Input Light Override */
+.titanium-light-mode-page .search-container {
+    margin-bottom: 1.5rem;
+}
+
+.titanium-light-mode-page .search-box-wrap {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02) !important;
+    border-radius: 0.75rem;
+}
+
+.titanium-light-mode-page .search-container input {
+    color: #0f172a !important;
+    background: transparent !important;
+}
+
+.titanium-light-mode-page .search-container .search-icon {
+    color: #94a3b8 !important;
+}
+
+/* Text & Utils */
+.copy-btn-dynamic {
+    min-height: 36px;
+    min-width: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    /* Adaptive color for both modes */
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.copy-btn-dynamic:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--primary-dark);
+}

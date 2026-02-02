@@ -29,7 +29,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupUI();
     setupLogoUpload();
-    setupSave();
+
+    // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
+    const injectFooterActions = () => {
+        const footerCenter = document.getElementById('footer-actions-center');
+        if (footerCenter) {
+            footerCenter.innerHTML = `
+                <button id="save-btn" class="btn-action-footer primary" title="Sincronizza Protocollo">
+                    <span class="material-symbols-outlined">send</span>
+                    <span data-t="sync_protocol">Sincronizza Protocollo</span>
+                </button>
+            `;
+            setupSave(); // Call setupSave after injection
+        }
+    };
+    setTimeout(injectFooterActions, 500);
 });
 
 // FUNCTIONS

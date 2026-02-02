@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Storico Notifiche - Titanium</title>
 
     <!-- Google Fonts -->
@@ -14,20 +14,20 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <!-- Design System Master (Titanium Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.5"></script>
-    <script src="assets/js/titanium-core.js?v=3.5"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.5"></script>
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body class="antialiased">
-    <div class="titanium-box">
+<body class="titanium-bg">
+    <div class="titanium-container">
         <!-- Faro Estetico -->
-        <div class="glass-glow"></div>
+        <div class="titanium-glow"></div>
 
         <!-- HEADER FISSO -->
         <header class="titanium-header">
@@ -46,11 +46,8 @@
                     </h2>
                 </div>
 
-                <!-- ZONA DESTRA: Delete + Home (2 icone - dispari, extra a dx) -->
+                <!-- ZONA DESTRA: Home (1 icona) -->
                 <div class="header-right">
-                    <button onclick="window.clearHistory()" class="btn-icon-header" style="color: #f87171;">
-                        <span class="material-symbols-outlined">delete_sweep</span>
-                    </button>
                     <a href="home_page.html" class="btn-icon-header">
                         <span class="material-symbols-outlined">home</span>
                     </a>
@@ -58,8 +55,15 @@
             </div>
         </header>
 
-        <main class="settings-container no-select" style="padding-top: 5rem;">
-            <!-- Extra padding for fixed header if needed, managed by CSS usually but safe to add -->
+        <main class="settings-container no-select">
+            <!-- Action Bar -->
+            <div style="display: flex; justify-content: flex-end; padding-bottom: 1rem;">
+                <button onclick="window.clearHistory()" class="auth-btn"
+                    style="width: auto; padding: 0.5rem 1rem; background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.3); color: #f44336; font-size: 0.75rem; display: flex; align-items: center; gap: 0.5rem; border-radius: 8px;">
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete_sweep</span>
+                    <span data-t="clear_history">Cancella Tutto</span>
+                </button>
+            </div>
 
             <!-- Loading State -->
             <div id="loading-indicator"
@@ -93,11 +97,12 @@
 
         </main>
 
-        <div id="footer-placeholder"></div>
+        <div class="spacer-footer"></div>
+        <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/notifiche_storia.js?v=3.5"></script>
+    <script type="module" src="assets/js/notifiche_storia.js?v=3.1"></script>
 </body>
 
 </html>

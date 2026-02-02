@@ -27,23 +27,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const scadenzeContainer = document.querySelector('#scadenze-list');
     if (!scadenzeContainer) return;
 
-    const searchInput = document.getElementById('deadline-search');
-    const filterChips = document.querySelectorAll('.filter-chip');
-    const toggleSearchBtn = document.getElementById('toggle-search');
     const searchBarContainer = document.getElementById('search-bar-container');
-
+    const searchInput = document.getElementById('deadline-search');
     let activeFilter = 'Tutte';
     let searchQuery = '';
     let sortType = 'date-asc';
+    const filterChips = document.querySelectorAll('.filter-chip');
 
-    if (toggleSearchBtn && searchBarContainer) {
-        toggleSearchBtn.onclick = () => {
-            searchBarContainer.classList.toggle('active');
-            if (searchBarContainer.classList.contains('active')) {
-                if (searchInput) searchInput.focus();
+    // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
+    const injectFooterActions = () => {
+        const footerLeft = document.getElementById('footer-actions-left');
+        const footerRight = document.getElementById('footer-actions-right');
+
+        if (footerLeft) {
+            footerLeft.innerHTML = `
+                <button id="toggle-search" class="btn-icon-header">
+                    <span class="material-symbols-outlined" id="search-icon">search</span>
+                </button>
+            `;
+            // Re-bind search toggle
+            const newToggle = document.getElementById('toggle-search');
+            if (newToggle && searchBarContainer) {
+                newToggle.onclick = () => {
+                    searchBarContainer.classList.toggle('active');
+                    if (searchBarContainer.classList.contains('active')) {
+                        if (searchInput) searchInput.focus();
+                    }
+                };
             }
-        };
-    }
+        }
+
+        if (footerRight) {
+            const addBtn = document.createElement('a');
+            addBtn.href = 'aggiungi_scadenza.html';
+            addBtn.className = 'btn-icon-header';
+            addBtn.innerHTML = '<span class="material-symbols-outlined">add</span>';
+            footerRight.prepend(addBtn);
+        }
+    };
+
+    // Attendiamo che main.js carichi il footer
+    setTimeout(injectFooterActions, 500);
 
     // Filter Chips logic update for Titanium
     filterChips.forEach(chip => {

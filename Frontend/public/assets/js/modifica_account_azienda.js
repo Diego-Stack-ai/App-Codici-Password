@@ -86,10 +86,35 @@ document.addEventListener('DOMContentLoaded', () => {
     currentAziendaId = aziendaId;
     currentAccountId = accountId;
 
-    document.getElementById('btn-back').onclick = () => {
-        if (aziendaId) window.location.href = `dettaglio_account_azienda.html?id=${accountId}&aziendaId=${aziendaId}`;
-        else history.back();
+    // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
+    const injectFooterActions = () => {
+        const footerLeft = document.getElementById('footer-actions-left');
+        const footerRight = document.getElementById('footer-actions-right');
+
+        if (footerLeft) {
+            footerLeft.innerHTML = `
+                <button id="btn-delete" class="btn-icon-header" title="Elimina Account" style="color: #ef4444;">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            `;
+        }
+
+        if (footerRight) {
+            footerRight.innerHTML = `
+                <button id="btn-save" class="btn-icon-header" title="Salva Modifiche">
+                    <span class="material-symbols-outlined">save</span>
+                </button>
+            `;
+        }
+
+        // Re-setup buttons after injection
+        setupButtons(currentUid, currentAziendaId, currentAccountId);
+        if (accountData.nomeAccount) {
+            applyTheme(accountData.ragioneSociale || accountData.nomeAccount, accountData.colorIndex);
+        }
     };
+
+    setTimeout(injectFooterActions, 500);
 
     if (!aziendaId || !accountId) {
         showToast("Parametri mancanti", 'error');
@@ -99,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUid = user.uid;
-            loadAccount(user.uid, aziendaId, accountId);
+            await loadAccount(user.uid, aziendaId, accountId);
             loadRubrica(user.uid);
             setupImageUploader();
             setupUI();
@@ -367,7 +392,7 @@ function setupButtons(uid, aziendaId, accountId) {
 
             try {
                 btnSave.disabled = true;
-                btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin mr-2">progress_activity</span> Salvataggio...`;
+                btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin">progress_activity</span>`;
 
                 const docRef = doc(db, "users", uid, "aziende", aziendaId, "accounts", accountId);
                 await updateDoc(docRef, data);
@@ -381,7 +406,7 @@ function setupButtons(uid, aziendaId, accountId) {
                 console.error(e);
                 showToast("Errore: " + e.message, 'error');
                 btnSave.disabled = false;
-                btnSave.innerText = "Salva Modifiche";
+                btnSave.innerHTML = `<span class="material-symbols-outlined">save</span>`;
             }
         };
     }
@@ -392,7 +417,7 @@ function setupButtons(uid, aziendaId, accountId) {
 
             try {
                 btnDelete.disabled = true;
-                btnDelete.innerHTML = "Eliminazione...";
+                btnDelete.innerHTML = `<span class="material-symbols-outlined animate-spin">progress_activity</span>`;
 
                 const docRef = doc(db, "users", uid, "aziende", aziendaId, "accounts", accountId);
                 await deleteDoc(docRef);
@@ -405,7 +430,7 @@ function setupButtons(uid, aziendaId, accountId) {
                 console.error(e);
                 showToast("Errore: " + e.message, 'error');
                 btnDelete.disabled = false;
-                btnDelete.innerText = "Elimina Account";
+                btnDelete.innerHTML = `<span class="material-symbols-outlined">delete</span>`;
             }
         };
     }

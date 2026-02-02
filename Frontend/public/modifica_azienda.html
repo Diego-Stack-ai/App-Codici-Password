@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <title>Modifica Azienda</title>
 
@@ -15,9 +15,14 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.0) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.0">
-    <link rel="stylesheet" href="assets/css/auth_impostazioni.css?v=3.5">
+    <!-- Design System Master (Titanium Protocol V3.1) -->
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
+
+    <!-- Core Engine -->
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 
     <style>
         /* Form Controls Overrides per stile Legacy-to-V3 */
@@ -50,34 +55,14 @@
     </style>
 </head>
 
-<body class="font-sans antialiased bg-[#0a0f1e] text-slate-50 selection:bg-blue-500/30">
-
-    <div
-        class="relative flex h-full min-h-screen w-full flex-col md:max-w-3xl lg:max-w-5xl mx-auto shadow-2xl overflow-hidden bg-[#0a0f1e]">
+<body class="titanium-bg">
+    <div class="titanium-container">
+        <div class="titanium-glow"></div>
 
         <!-- Header -->
-        <header class="fixed top-0 left-0 right-0 md:max-w-3xl lg:max-w-5xl mx-auto glass-header z-50 px-4 py-3">
-            <div class="flex items-center justify-between w-full h-10 relative">
-                <div class="z-10">
-                    <button id="btn-back" onclick="history.back()"
-                        class="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
-                        <span class="material-symbols-outlined text-[24px]">arrow_back</span>
-                    </button>
-                </div>
+        <header id="header-placeholder" class="titanium-header"></header>
 
-                <h2
-                    class="text-white text-lg font-bold tracking-tight text-center absolute inset-0 flex items-center justify-center pointer-events-none">
-                    Modifica Azienda
-                </h2>
-
-                <div class="z-10">
-                    <a href="home_page.html"
-                        class="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
-                        <span class="material-symbols-outlined text-[24px]">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <div class="spacer-header"></div>
 
         <!-- Spacer -->
         <div class="h-16 w-full shrink-0"></div>
@@ -820,6 +805,8 @@
                     Salvataggio in corso...
                 </div>
 
+                <div class="spacer-footer"></div>
+                <footer id="footer-placeholder" class="titanium-footer"></footer>
             </div>
         </main>
     </div>
@@ -891,7 +878,7 @@
         }
     </script>
 
-    <script src="assets/js/modifica_azienda.js" type="module"></script>
+    <script src="assets/js/modifica_azienda.js?v=3.1" type="module"></script>
 </body>
 
 </html>

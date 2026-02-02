@@ -167,11 +167,35 @@ async function loadAccounts() {
 /**
  * Protocol UI Initialization (Fixed 3-Zone Header)
  */
+/**
+ * Protocol UI Initialization (Fixed 3-Zone Header + Footer)
+ */
+/**
+ * Protocol UI Initialization (Fixed 3-Zone Header + Footer)
+ */
+/**
+ * Protocol UI Initialization (Fixed 3-Zone Header + Footer)
+ */
 function initTitaniumUI() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const type = urlParams.get('type') || 'standard';
+    const hPlaceholder = document.getElementById('header-placeholder');
+    if (!hPlaceholder) return; // Should exist in HTML
 
-    // 1. Header Population
+    // 1. Ensure Header Structure (Dynamic Creation if missing)
+    if (!document.getElementById('header-content')) {
+        hPlaceholder.innerHTML = `
+            <div id="header-content" class="header-balanced-container">
+                <div id="header-left" class="header-left"></div>
+                <div id="header-center" class="header-center"></div>
+                <div id="header-right" class="header-right"></div>
+            </div>
+        `;
+    }
+
+    // 2. Prevent Double Injection
+    if (hPlaceholder.hasAttribute('data-titanium-init')) return;
+    hPlaceholder.setAttribute('data-titanium-init', 'true');
+
+    // 3. Header Population
     const hLeft = document.getElementById('header-left');
     const hCenter = document.getElementById('header-center');
     const hRight = document.getElementById('header-right');
@@ -185,6 +209,8 @@ function initTitaniumUI() {
     }
 
     if (hCenter) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type') || 'standard';
         let key = 'section_personal_accounts';
         if (type === 'shared') key = 'section_shared_accounts';
         if (type === 'memo') key = 'section_note';
@@ -197,23 +223,41 @@ function initTitaniumUI() {
 
     if (hRight) {
         hRight.innerHTML = `
-            <a href="aggiungi_account_privato.html" class="btn-icon-header">
-                <span class="material-symbols-outlined">add</span>
+            <button id="sort-btn" class="btn-icon-header" style="margin-right: 8px;">
+                <span class="material-symbols-outlined">sort_by_alpha</span>
+            </button>
+            <a href="home_page.html" class="btn-icon-header">
+                <span class="material-symbols-outlined">home</span>
             </a>
         `;
+
+        const sortBtn = document.getElementById('sort-btn');
+        if (sortBtn) {
+            sortBtn.onclick = () => {
+                sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                showToast(`Ordinamento: ${sortOrder === 'asc' ? 'A-Z' : 'Z-A'}`);
+                filterAndRender();
+            };
+        }
     }
 
-    // 2. Footer Placeholder
-    const footerStack = document.getElementById('footer-placeholder');
-    if (footerStack) {
-        footerStack.innerHTML = `
-            <footer class="titanium-footer">
-                <div class="header-balanced-container" style="justify-content: center; width: 100%;">
-                    <span class="text-[9px] font-bold uppercase tracking-[0.4em] opacity-30">${t('version') || 'Titanium V3.5'}</span>
-                </div>
-            </footer>
-        `;
-    }
+    // 4. Footer Actions (Wait loop for Footer)
+    const injectFooter = () => {
+        const fRight = document.getElementById('footer-actions-right');
+        if (fRight) {
+            if (!fRight.querySelector('a[href="aggiungi_account_privato.html"]')) {
+                const addBtn = document.createElement('a');
+                addBtn.href = 'aggiungi_account_privato.html';
+                addBtn.className = 'btn-icon-header';
+                addBtn.innerHTML = '<span class="material-symbols-outlined" style="color: var(--accent-blue);">add</span>';
+                fRight.prepend(addBtn);
+            }
+        } else {
+            // Footer not ready (loaded by main.js), retry
+            setTimeout(injectFooter, 100);
+        }
+    };
+    injectFooter();
 }
 
 /**
@@ -242,7 +286,13 @@ function filterAndRender() {
     filtered.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
-        return (a.nomeAccount || '').toLowerCase().localeCompare((b.nomeAccount || '').toLowerCase());
+
+        const nameA = (a.nomeAccount || '').toLowerCase();
+        const nameB = (b.nomeAccount || '').toLowerCase();
+
+        return sortOrder === 'asc'
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
     });
 
     renderList(filtered);

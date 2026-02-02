@@ -13,21 +13,129 @@ import { setTheme, applyTheme } from './theme.js';
  * Gestisce l'integrazione dati e l'interfaccia della dashboard principale.
  */
 
+/**
+ * HOME PAGE MODULE (Titanium V3.1)
+ * Gestisce l'integrazione dati e l'interfaccia della dashboard principale.
+ */
+
 let cachedUser = null;
 let isDomReady = false;
+
+// 1. Inizializzazione AppState (Core Pattern V3.1)
+document.addEventListener('DOMContentLoaded', () => {
+    window.AppState = window.AppState || {
+        user: null,
+        theme: localStorage.getItem('app_theme') || 'dark',
+        language: localStorage.getItem('app_language') || 'it'
+    };
+
+    isDomReady = true;
+
+    // Inizializzazione Componenti (Header/Footer Puri)
+    initComponents().then(() => {
+        setupUILayout();
+        if (cachedUser) renderHeaderUser(cachedUser);
+    });
+
+    // Logout Helper
+    document.addEventListener('click', async (e) => {
+        if (e.target.closest('#logout-button')) {
+            const confirmed = await window.showConfirmModal(
+                t('logout'),
+                t('logout_confirm'),
+                t('logout'),
+                t('cancel')
+            );
+            if (confirmed) {
+                await signOut(auth).catch(err => console.error("SignOut Error:", err));
+                window.location.href = 'index.html';
+            }
+        }
+    });
+
+    initNavigation();
+});
+
+/**
+ * Setup UI Elements (Header/Footer Injected Content)
+ */
+function setupUILayout() {
+    const hLeft = document.getElementById('header-left');
+    const hCenter = document.getElementById('header-center');
+    const hRight = document.getElementById('header-right');
+
+    if (hLeft) {
+        hLeft.innerHTML = `
+            <a href="profilo_privato.html" class="btn-icon-header" style="width: auto; padding: 0 4px; border:none; background:transparent;">
+                <div id="user-avatar" class="avatar-circle border-glow" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%;">
+                    <span class="material-symbols-outlined !text-lg opacity-20">person</span>
+                </div>
+            </a>
+        `;
+    }
+
+    if (hCenter) {
+        hCenter.innerHTML = `
+            <div class="user-info-text" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <span id="greeting-text" class="greeting-text" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6;">...</span>
+                <a href="profilo_privato.html" style="text-decoration: none; color: inherit; display: block;">
+                    <span id="user-name" class="header-title" style="font-size: 1rem;">Caricamento...</span>
+                </a>
+            </div>
+        `;
+    }
+
+    if (hRight) {
+        hRight.innerHTML = `
+            <button id="logout-button" class="btn-icon-header">
+                <span class="material-symbols-outlined !text-xl">logout</span>
+            </button>
+        `;
+    }
+
+    const footerStack = document.getElementById('footer-content');
+    if (footerStack) {
+        footerStack.innerHTML = `
+            <div class="header-balanced-container" style="justify-content: center; position: relative; width: 100%;">
+                <div class="flex items-center gap-6">
+                    <button onclick="TitaniumTheme.setMode('light')" class="theme-switch-btn" title="Tema Chiaro">
+                        <span class="material-symbols-outlined">light_mode</span>
+                    </button>
+                    <button onclick="TitaniumTheme.setMode('dark')" class="theme-switch-btn" title="Tema Scuro">
+                        <span class="material-symbols-outlined">dark_mode</span>
+                    </button>
+                </div>
+                <div style="position: absolute; right: 0;">
+                    <a href="impostazioni.html" class="btn-icon-header opacity-60 hover:opacity-100 transition-opacity group/settings">
+                        <span class="material-symbols-outlined !text-xl transform group-hover/settings:rotate-90 transition-transform duration-500" style="font-variation-settings: 'wght' 200;">tune</span>
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    // Traduzioni Statiche
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        if (el.hasAttribute('placeholder')) el.setAttribute('placeholder', t(key));
+        else el.textContent = t(key);
+    });
+}
 
 // Funzione Helper per Rendering Utente con Retry
 async function renderHeaderUser(user) {
     if (!user) return;
 
+    // Update AppState
+    if (window.AppState) window.AppState.user = user;
+
     const uAvatar = document.getElementById('user-avatar');
     const uName = document.getElementById('user-name');
     const greeting = document.getElementById('greeting-text');
 
-    // Se il DOM header non è ancora stato iniettato, aspettiamo.
     if (!uAvatar || !uName) return;
 
-    // Format Name
+    // Helper: Friendly Name
     const toFriendlyName = (name) => {
         if (!name) return "";
         return name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -35,9 +143,10 @@ async function renderHeaderUser(user) {
 
     // 1. Basic Auth Info (Immediato)
     let displayName = toFriendlyName(user.displayName || user.email.split('@')[0]);
-    if (uName) uName.textContent = displayName;
-    if (user.photoURL && uAvatar) {
+    uName.textContent = displayName;
+    if (user.photoURL) {
         uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
+        uAvatar.style.backgroundSize = 'cover';
         const icon = uAvatar.querySelector('span');
         if (icon) icon.style.display = 'none';
     }
@@ -57,10 +166,11 @@ async function renderHeaderUser(user) {
         if (docSnap.exists()) {
             const data = docSnap.data();
             const fullName = toFriendlyName(`${data.nome || ''} ${data.cognome || ''}`.trim());
-            if (fullName) uName.textContent = fullName; // Sovrascrivi con nome completo DB
+            if (fullName) uName.textContent = fullName;
             const photo = data.photoURL || data.avatar;
-            if (photo && uAvatar) {
+            if (photo) {
                 uAvatar.style.backgroundImage = `url("${photo}")`;
+                uAvatar.style.backgroundSize = 'cover';
                 const icon = uAvatar.querySelector('span');
                 if (icon) icon.style.display = 'none';
             }
@@ -70,94 +180,14 @@ async function renderHeaderUser(user) {
     }
 }
 
-
-// 1. Inizializzazione Componenti (Header/Footer Puri)
-initComponents().then(() => {
-    isDomReady = true;
-
-    // Header Injection - Balanced Layout (3-Zone Protocol)
-    const hLeft = document.getElementById('header-left');
-    const hCenter = document.getElementById('header-center');
-    const hRight = document.getElementById('header-right');
-
-    if (hLeft) {
-        hLeft.innerHTML = `
-            <a href="profilo_privato.html" class="btn-icon-header" style="width: auto; padding: 0 4px; border:none; background:transparent;">
-                <div id="user-avatar" class="avatar-circle border-glow" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-outlined !text-lg opacity-20">person</span>
-                </div>
-            </a>
-        `;
-    }
-
-    if (hCenter) {
-        hCenter.innerHTML = `
-            <div class="user-info-text" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-                <span id="greeting-text" class="greeting-text" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6;">...</span>
-                <span id="user-name" class="header-title" style="font-size: 1rem;">Caricamento...</span>
-            </div>
-        `;
-    }
-
-    if (hRight) {
-        hRight.innerHTML = `
-            <button id="logout-button" class="btn-icon-header">
-                <span class="material-symbols-outlined !text-xl">logout</span>
-            </button>
-        `;
-    }
-
-    // Footer Injection - Balanced Layout
-    const footerStack = document.getElementById('footer-content');
-    if (footerStack) {
-        footerStack.innerHTML = `
-            <div class="header-balanced-container" style="justify-content: center;">
-                <div class="flex items-center gap-4 opacity-40">
-                    <span class="text-[9px] font-bold uppercase tracking-[0.3em]">${t('version')}</span>
-                </div>
-                <div style="position: absolute; right: 1.5rem;">
-                    <a href="impostazioni.html" class="btn-icon-header opacity-30 hover:opacity-100 transition-opacity group/settings">
-                        <span class="material-symbols-outlined !text-xl transform group-hover/settings:rotate-90 transition-transform duration-500" style="font-variation-settings: 'wght' 200;">tune</span>
-                    </a>
-                </div>
-            </div>
-        `;
-    }
-
-    // Traduzioni Statiche
-    document.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        if (el.hasAttribute('placeholder')) el.setAttribute('placeholder', t(key));
-        else el.textContent = t(key);
-    });
-
-    // Logout Helper
-    const logoutBtn = document.getElementById('logout-button');
-    if (logoutBtn) {
-        logoutBtn.onclick = async () => {
-            await signOut(auth);
-            window.location.href = 'index.html';
-        };
-    }
-
-    // Se avevamo già l'utente (Auth più veloce di DOM), renderizziamo ora
-    if (cachedUser) renderHeaderUser(cachedUser);
-});
-
-// 1b. Esposizione Temi
-window.setTheme = setTheme;
-applyTheme();
-
 /**
- * GESTORE NAVIGAZIONE SEMANTICA (Solo per i DIV cliccabili, non per gli Anchor)
+ * GESTORE NAVIGAZIONE SEMANTICA
  */
 function initNavigation() {
     document.querySelectorAll('[data-href]').forEach(el => {
-        // Rimuovi event listener precedenti se necessario, o usa {once:true} se fosse one-shot.
-        // Qui assumiamo init una volta sola.
         const nav = () => window.location.href = el.dataset.href;
         el.addEventListener('click', nav);
-        el.style.cursor = 'pointer'; // Ensure pointer cursor
+        el.style.cursor = 'pointer';
         el.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -168,7 +198,7 @@ function initNavigation() {
 }
 
 /**
- * INIZIALIZZAZIONE DATI UTENTE E FIREBASE
+ * FIREBASE AUTH OBSERVER
  */
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -176,16 +206,10 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    // Cache User Globalmente
     cachedUser = user;
+    if (isDomReady) renderHeaderUser(user);
 
-    // Widgets immediati
-    initNavigation();
-
-    // Renderizza Header (Se il DOM è pronto, lo fa subito. Se no, aspetta initComponents)
-    await renderHeaderUser(user);
-
-    // Carica Widget Dinamici ASYNC (non bloccanti)
+    // Carica Widget Dinamici ASYNC
     loadUrgentDeadlinesCount(user).catch(e => console.warn("Deadlines count error", e));
     loadExpiredDeadlines(user).catch(e => console.warn("Urgencies list error", e));
 });

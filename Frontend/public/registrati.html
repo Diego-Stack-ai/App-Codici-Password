@@ -19,16 +19,18 @@
         rel="stylesheet" />
 
     <!-- TITANIUM CORE & ACCESS SYSTEM (Protocollo V3.1) -->
-    <link rel="stylesheet" href="assets/css/auth_comune.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
     <link rel="stylesheet" href="assets/css/accesso.css?v=3.1">
 
-    <!-- Core UI & Context (Protocollo V3.1) -->
+    <!-- Core UI & Engine (Protocollo V3.1) -->
+    <script src="assets/js/titanium-config.js?v=3.1"></script>
+    <script src="assets/js/titanium-core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body>
+<body class="titanium-bg">
 
-    <div class="titanium-box">
+    <div class="titanium-container">
 
         <!-- LANGUAGE SELECTOR -->
         <div class="lang-selector-container">
@@ -43,12 +45,15 @@
         </div>
 
         <!-- Scenografia Protocollo V3.1 -->
+        <div class="titanium-glow"></div>
         <div class="glass-glow"></div>
         <div class="accesso-header"></div>
         <div class="accesso-footer"></div>
 
         <!-- Card Registrazione -->
         <div class="titanium-vault border-glow">
+            <!-- SAETTA MASTER ANIMATION -->
+            <div class="saetta-master"></div>
 
             <!-- Icona Centrale -->
             <div class="security-icon-box">
@@ -109,10 +114,8 @@
             </form>
 
             <!-- Login Link -->
-            <div
-                style="text-align: center; margin-top: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 0.8rem; color: rgba(255,255,255,0.4);" data-t="have_account_text">Hai già un
-                    account?</span>
+            <div class="accesso-nav-footer">
+                <span data-t="have_account_text">Hai già un account?</span>
                 <a href="index.html" class="link-register" data-t="login_now_link">
                     Accedi ora
                 </a>
@@ -120,7 +123,7 @@
 
             <!-- Footer Legale -->
             <div class="legal-footer">
-                © 2026 BM Service S.R.L. - <span data-t="version">Titanium V3.1</span>
+                <span style="opacity: 0.5;">Titanium Protocol V3.1</span>
             </div>
 
         </div>

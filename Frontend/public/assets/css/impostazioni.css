@@ -1,0 +1,875 @@
+/* 
+ * TITANIUM DESIGN SYSTEM - Impostazioni Specific CSS V3.1
+ * File: assets/css/impostazioni.css
+ * Focus: Home Page & Settings Scenic Effects (RECOVERED GRADIENTS) + Settings Layout
+ */
+
+:root {
+    --matrix-blue-from: rgba(33, 150, 243, 0.45);
+    --matrix-blue-to: rgba(33, 150, 243, 0.1);
+    --matrix-green-from: rgba(0, 200, 83, 0.45);
+    --matrix-green-to: rgba(0, 200, 83, 0.1);
+    --matrix-orange-from: rgba(255, 152, 0, 0.45);
+    --matrix-orange-to: rgba(255, 152, 0, 0.1);
+    --matrix-red-from: rgba(155, 28, 28, 0.45);
+    --matrix-red-to: rgba(155, 28, 28, 0.1);
+}
+
+/* 1. SCENOGRAFIA (Protocollo V3.1) */
+.scenografia-premium {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Glass Glow (Faro 3) as per Protocol */
+.glass-glow-3 {
+    position: absolute;
+    top: -10%;
+    left: 10%;
+    width: 80%;
+    height: 60%;
+    background: radial-gradient(circle at center, var(--accent-blue) 0%, transparent 70%);
+    filter: blur(120px);
+    opacity: 0.15;
+    animation: pulse-glow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+    from {
+        transform: scale(1) translate(0, 0);
+        opacity: 0.1;
+    }
+
+    to {
+        transform: scale(1.2) translate(5%, 5%);
+        opacity: 0.2;
+    }
+}
+
+/* 2. MATRIX CARDS -> MOVED TO dashboard_common.css */
+/* 3. LISTS IN CARDS -> MOVED TO dashboard_common.css */
+/* 4. RESPONSIVE REFINEMENTS -> MOVED TO dashboard_common.css (Base matrix/cards) */
+
+/* 5. PROFILE CARD & SHIMMER EFFECT (Saetta) */
+.profile-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2rem;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.profile-card .profile-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.profile-card .auth-btn {
+    width: auto !important;
+    min-width: 250px;
+    max-width: 320px;
+    margin-top: 1.25rem !important;
+    margin-bottom: 0.5rem;
+}
+
+.profile-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.08) 50%, transparent 65%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    animation: shimmer-master 4s infinite linear;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+.profile-manage-btn {
+    border: 1px solid var(--border-color) !important;
+    background: var(--surface-sub) !important;
+}
+
+.profile-header-top {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Ensure content stays above shimmer */
+.profile-info,
+.avatar-wrapper,
+.profile-header-top,
+.titanium-action-grid {
+    position: relative;
+    z-index: 2;
+}
+
+/* ==========================================================================
+   6. SPECIFICI ACCOUNT & SETTINGS LAYOUT (Merged from auth_impostazioni.css)
+   ========================================================================== */
+/* Container principale */
+.settings-container {
+    max-width: 1000px;
+    width: 95%;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 5rem 1.25rem;
+    animation: fadeInScale 0.6s ease-out forwards;
+    position: relative;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.settings-group {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.settings-group:last-child {
+    margin-bottom: 0;
+}
+
+.settings-group-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-left: 0.5rem;
+}
+
+.settings-item {
+    position: relative;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.settings-item-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.settings-item:hover {
+    transform: translateY(-3px);
+    background: var(--surface-hover);
+    border-color: var(--primary-light);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.settings-item-info {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    position: relative;
+    z-index: 2;
+}
+
+.settings-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.settings-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: block;
+}
+
+.settings-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: block;
+}
+
+/* Accordion Content */
+.accordion-content {
+    background: var(--surface-sub);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 0.75rem !important;
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+    display: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 2;
+    animation: fadeInScale 0.3s ease-out;
+}
+
+.accordion-content.show {
+    display: block;
+}
+
+/* Avatar Styling */
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+    overflow: hidden;
+}
+
+.avatar-main {
+    width: 100%;
+    height: 100%;
+    border-radius: 27px;
+    object-fit: cover;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: var(--bg-dark);
+}
+
+/* Auth/Action Buttons */
+.auth-btn {
+    position: relative;
+    width: 100%;
+    min-height: 4.5rem;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-primary);
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.auth-btn:hover {
+    transform: translateY(-4px);
+    background: rgba(20, 30, 60, 0.5);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Standard Titanium Buttons */
+.titanium-btn-primary {
+    background: linear-gradient(135deg, var(--primary-blue, #2563eb), var(--primary-light, #60a5fa));
+    color: white !important;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 14px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.titanium-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+    filter: brightness(1.1);
+}
+
+.titanium-btn-primary:active {
+    transform: translateY(0);
+}
+
+.titanium-btn-secondary {
+    background: var(--surface-sub);
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color);
+    padding: 0.8rem 1.5rem;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.titanium-btn-secondary:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-secondary);
+    transform: translateY(-2px);
+}
+
+/* Modal Specific Adjustments */
+.titanium-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 14, 26, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Standard Titanium Input Fields */
+.titanium-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none !important;
+}
+
+.titanium-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.4;
+}
+
+.titanium-input option {
+    background: var(--surface-vault);
+    color: var(--text-primary);
+}
+
+.dark .titanium-input option {
+    background: #1a2230;
+    color: white;
+}
+
+/* Glass Fields (Titanium Data Display) */
+.glass-field-titanium {
+    width: 100%;
+    position: relative;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 3rem;
+    transition: all 0.2s;
+    margin: 0;
+}
+
+.glass-field-titanium .field-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 6px;
+    line-height: 1;
+}
+
+.glass-field-titanium .field-value {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    word-break: break-all;
+}
+
+/* Contextual Glass Themes */
+.glass-field-cyan {
+    --accent-rgb: 34, 211, 238;
+}
+
+.glass-field-rose {
+    --accent-rgb: 244, 63, 94;
+}
+
+.glass-field-amber {
+    --accent-rgb: 251, 191, 36;
+}
+
+.glass-field-emerald {
+    --accent-rgb: 16, 185, 129;
+}
+
+.glass-field-violet {
+    --accent-rgb: 167, 139, 250;
+}
+
+.glass-field-titanium.glass-field-cyan .field-label,
+.glass-field-titanium.glass-field-cyan legend {
+    color: #22d3ee;
+}
+
+.glass-field-titanium.glass-field-rose .field-label,
+.glass-field-titanium.glass-field-rose legend {
+    color: #f43f5e;
+}
+
+.glass-field-titanium.glass-field-amber .field-label,
+.glass-field-titanium.glass-field-amber legend {
+    color: #fbbf24;
+}
+
+.glass-field-titanium.glass-field-emerald .field-label,
+.glass-field-titanium.glass-field-emerald legend {
+    color: #10b981;
+}
+
+.glass-field-titanium.glass-field-violet .field-label,
+.glass-field-titanium.glass-field-violet legend {
+    color: #a78bfa;
+}
+
+.glass-field-titanium[class*="glass-field-"] {
+    border-color: rgba(var(--accent-rgb), 0.2);
+}
+
+.glass-field-titanium[class*="glass-field-"]:hover {
+    border-color: rgba(var(--accent-rgb), 0.4);
+    box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.1);
+}
+
+/* TITANIUM ACTION BUTTONS (Clean Style) */
+.titanium-action-btn,
+.btn-icon-header,
+.btn-copy-inline {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.titanium-action-btn:hover,
+.btn-icon-header:hover,
+.btn-copy-inline:hover {
+    transform: scale(1.1);
+    opacity: 0.7;
+}
+
+.btn-edit {
+    color: #60a5fa !important;
+}
+
+.btn-delete {
+    color: #f87171 !important;
+}
+
+.btn-copy,
+.btn-copy-inline {
+    color: #94a3b8 !important;
+}
+
+.btn-view {
+    color: #22d3ee !important;
+}
+
+/* Grid for actions (2x2 Fixed) */
+.titanium-action-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 32px) !important;
+    grid-template-rows: repeat(2, 32px) !important;
+    gap: 4px !important;
+    width: 68px !important;
+    /* (32*2) + 4 */
+    flex-shrink: 0;
+    justify-content: end;
+    align-content: start;
+    margin-left: 0.5rem;
+}
+
+/* Lang Selector (Floating) */
+.lang-selector-container {
+    position: relative;
+    z-index: 100;
+    width: 100%;
+}
+
+.lang-btn-float {
+    position: relative;
+    width: 100%;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-primary);
+    padding: 1.25rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.lang-btn-float:hover {
+    transform: translateY(-3px);
+    background: rgba(20, 30, 60, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.lang-dropdown {
+    position: relative;
+    width: 100%;
+    background: var(--surface-vault);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    margin-top: 1rem;
+}
+
+.lang-dropdown.show {
+    display: flex;
+    animation: fadeInScale 0.2s ease-out;
+}
+
+.lang-option {
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    border: none;
+    background: transparent;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    text-align: left;
+    border-radius: 12px;
+}
+
+.lang-option:hover {
+    background: var(--surface-hover);
+    transform: translateX(5px);
+}
+
+/* Timer Selector */
+.timer-selector {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.timer-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--surface-glass);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.timer-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-light);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.timer-btn.active {
+    background: var(--primary-blue);
+    color: #ffffff !important;
+    /* Force white text on primary background */
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Light mode overrides for selected buttons if needed */
+html:not(.dark) .timer-btn:not(.active) {
+    color: var(--text-secondary);
+}
+
+html:not(.dark) .timer-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Titanium Toggle */
+.titanium-toggle {
+    position: relative;
+    width: 48px;
+    height: 24px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--border-color);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    outline: none !important;
+    overflow: hidden;
+    display: block;
+}
+
+.titanium-toggle:checked {
+    background: var(--primary-blue);
+}
+
+.titanium-toggle::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    background: white;
+    transition: 0.3s;
+}
+
+.titanium-toggle:checked::before {
+    left: 27px;
+}
+
+/* Responsive Mobile Adaptation (Protocollo Titanium V3.1) */
+@media (max-width: 768px) {
+    .profile-card {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding: 1.5rem !important;
+    }
+
+    .profile-card .profile-info {
+        align-items: center !important;
+        text-align: center !important;
+        width: 100% !important;
+    }
+
+    .profile-card .auth-btn {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+    }
+
+    .settings-item {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    /* Force columns in forms */
+    .titanium-responsive-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Vertical Layout Mandatory */
+    .glass-field-titanium {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 1rem !important;
+        gap: 0.5rem !important;
+        min-height: auto !important;
+    }
+
+    .glass-field-titanium .field-label,
+    .glass-field-titanium label {
+        padding: 0 !important;
+        margin-bottom: 4px !important;
+        opacity: 0.8 !important;
+        display: block !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+
+    .glass-field-titanium .titanium-input,
+    .glass-field-titanium select,
+    .glass-field-titanium input,
+    .glass-field-titanium .field-value {
+        width: 100% !important;
+        text-align: left !important;
+        flex: none !important;
+    }
+
+    /* Standardized padding and gaps */
+    .settings-vault {
+        padding: 1.5rem 1rem !important;
+        width: 100% !important;
+        max-width: none !important;
+        border-radius: 20px !important;
+    }
+
+    .titanium-action-grid {
+        gap: 0.5rem !important;
+    }
+
+    /* Buttons touch target */
+    .titanium-btn-primary,
+    .titanium-btn-secondary {
+        min-height: 44px !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Force all grid containers inside vaults to stack */
+    div[style*="display: grid"],
+    div[style*="display:grid"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Prevent text wrapping issues */
+    .field-value {
+        font-size: 0.9rem !important;
+    }
+}
+
+@media (max-width: 400px) {
+
+    /* Extra spacing for small screens */
+    .settings-vault {
+        padding: 2rem 1rem !important;
+    }
+
+    .glass-field-titanium {
+        margin-bottom: 12px !important;
+    }
+}
+
+/* 7. SECTION ICON COLORS (Missing Fix) */
+.bg-teal-glass {
+    background: rgba(20, 184, 166, 0.1);
+    color: #14b8a6;
+    /* Teal 500 */
+    border: 1px solid rgba(20, 184, 166, 0.2);
+}
+
+.bg-blue-glass {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    /* Blue 500 */
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.bg-purple-glass {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+    /* Purple 500 */
+    border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.bg-amber-glass {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    /* Amber 500 */
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.bg-red-glass {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    /* Red 500 */
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.dark .bg-teal-glass {
+    color: #2dd4bf;
+    border-color: rgba(45, 212, 191, 0.3);
+}
+
+.dark .bg-blue-glass {
+    color: #60a5fa;
+    border-color: rgba(96, 165, 250, 0.3);
+}
+
+.dark .bg-purple-glass {
+    color: #c084fc;
+    border-color: rgba(192, 132, 252, 0.3);
+}
+
+.dark .bg-amber-glass {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.dark .bg-red-glass {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+}

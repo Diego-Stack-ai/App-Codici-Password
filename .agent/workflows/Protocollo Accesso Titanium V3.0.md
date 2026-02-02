@@ -39,7 +39,7 @@ Solo stili extra specifici della pagina e dark mode
 
 Dark Mode forzata: <html class="titanium-forced-dark">
 
-Struttura centrata: .titanium-box → .titanium-vault
+Struttura centrata: .titanium-box → .titanium-vault (Adaptive)
 
 Elementi scenografici Accesso:
 
@@ -47,7 +47,7 @@ Elementi scenografici Accesso:
 
 .accesso-header e .accesso-footer (fasce estetiche)
 
-.border-glow e effetto saetta sulla card
+.border-glow e effetto .saetta-master sulla card
 
 Icona principale: .security-icon-box
 

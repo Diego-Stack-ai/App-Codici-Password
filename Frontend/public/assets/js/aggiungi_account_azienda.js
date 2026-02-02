@@ -47,7 +47,7 @@ function applyTheme(companyName, colorIndex) {
     document.documentElement.style.setProperty('--primary-color', theme.from);
 
     // Update Save Button Gradient
-    const btnSave = document.getElementById('btn-save');
+    const btnSave = document.getElementById('save-btn');
     if (btnSave) {
         btnSave.style.background = `linear-gradient(to right, ${theme.from}, ${theme.to})`;
         btnSave.style.boxShadow = `0 10px 15px -3px ${theme.from}4d`;
@@ -137,56 +137,76 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     renderBankAccounts();
 
-    const btnSave = document.getElementById('btn-save');
-    if (btnSave) {
-        btnSave.onclick = async function () {
-            if (!auth.currentUser) return;
-
-            const nome = document.getElementById('nome-account').value.trim();
-            const utente = document.getElementById('utente').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            if (!nome) return showToast("Inserisci Nome Account", "error");
-            if (!utente) return showToast("Inserisci Utente", "error");
-            if (!password) return showToast("Inserisci Password", "error");
-
-            const data = {
-                nomeAccount: nome,
-                sitoWeb: document.getElementById('sito-web').value.trim(),
-                codiceSocieta: document.getElementById('codice-societa').value.trim(),
-                numeroIscrizione: document.getElementById('numero-iscrizione').value.trim(),
-                utente: utente,
-                account: document.getElementById('account').value.trim(),
-                password: password,
-                referenteNome: document.getElementById('referente-nome').value.trim(),
-                referenteTelefono: document.getElementById('referente-telefono').value.trim(),
-                referenteCellulare: document.getElementById('referente-cellulare').value.trim(),
-                note: document.getElementById('note').value.trim(),
-                banking: bankAccounts.filter(b => b.iban.length > 5),
-                createdAt: serverTimestamp()
-            };
-
-            try {
-                btnSave.disabled = true;
-                btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin mr-2">progress_activity</span> Salvataggio...`;
-
-                const colRef = collection(db, "users", auth.currentUser.uid, "aziende", aziendaId, "accounts");
-                await addDoc(colRef, data);
-
-                showToast("Account salvato!", 'success');
-                setTimeout(() => {
-                    window.location.href = `account_azienda.html?id=${aziendaId}`;
-                }, 1000);
-
-            } catch (e) {
-                console.error(e);
-                showToast("Errore: " + e.message, 'error');
-                btnSave.disabled = false;
-                btnSave.innerText = "Salva Account";
-            }
-        };
-    }
+    // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
+    const injectFooterActions = () => {
+        const footerCenter = document.getElementById('footer-actions-center');
+        if (footerCenter) {
+            footerCenter.innerHTML = `
+                <button id="save-btn" class="btn-action-footer primary" title="Salva Account">
+                    <span class="material-symbols-outlined">save</span>
+                    <span>Salva Account</span>
+                </button>
+            `;
+            setupSaveLogic();
+        }
+    };
+    setTimeout(injectFooterActions, 500);
 });
+
+function setupSaveLogic() {
+    const btnSave = document.getElementById('save-btn');
+    if (!btnSave) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const aziendaId = urlParams.get('aziendaId');
+
+    btnSave.onclick = async function () {
+        if (!auth.currentUser) return;
+
+        const nome = document.getElementById('nome-account').value.trim();
+        const utente = document.getElementById('utente').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!nome) return showToast("Inserisci Nome Account", "error");
+        if (!utente) return showToast("Inserisci Utente", "error");
+        if (!password) return showToast("Inserisci Password", "error");
+
+        const data = {
+            nomeAccount: nome,
+            sitoWeb: document.getElementById('sito-web').value.trim(),
+            codiceSocieta: document.getElementById('codice-societa').value.trim(),
+            numeroIscrizione: document.getElementById('numero-iscrizione').value.trim(),
+            utente: utente,
+            account: document.getElementById('account').value.trim(),
+            password: password,
+            referenteNome: document.getElementById('referente-nome').value.trim(),
+            referenteTelefono: document.getElementById('referente-telefono').value.trim(),
+            referenteCellulare: document.getElementById('referente-cellulare').value.trim(),
+            note: document.getElementById('note').value.trim(),
+            banking: bankAccounts.filter(b => b.iban.length > 5),
+            createdAt: serverTimestamp()
+        };
+
+        try {
+            btnSave.disabled = true;
+            btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin mr-2">progress_activity</span> Salvataggio...`;
+
+            const colRef = collection(db, "users", auth.currentUser.uid, "aziende", aziendaId, "accounts");
+            await addDoc(colRef, data);
+
+            showToast("Account salvato!", 'success');
+            setTimeout(() => {
+                window.location.href = `account_azienda.html?id=${aziendaId}`;
+            }, 1000);
+
+        } catch (e) {
+            console.error(e);
+            showToast("Errore: " + e.message, 'error');
+            btnSave.disabled = false;
+            btnSave.innerHTML = `<span class="material-symbols-outlined">save</span> Salva Account`;
+        }
+    };
+}
 // --- BANKING FUNCTIONS ---
 function renderBankAccounts() {
     const container = document.getElementById('iban-list-container');

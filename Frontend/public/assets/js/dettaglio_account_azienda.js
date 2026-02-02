@@ -5,14 +5,7 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, collection, addDoc, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-// --- UI TOAST HELPER ---
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.textContent = message;
-    toast.className = `fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-sm font-bold shadow-2xl opacity-100 transition-opacity pointer-events-none z-[100] ${type === 'error' ? 'bg-red-600 text-white' : 'bg-gray-900 text-white'}`;
-    setTimeout(() => toast.classList.remove('opacity-100'), 3000);
-}
+import { showToast } from './ui-core.js';
 
 // --- THEME LOGIC ---
 const companyPalettes = [
@@ -43,8 +36,32 @@ function getCompanyColor(companyName, colorIndex) {
 
 function applyTheme(companyName, colorIndex) {
     const theme = getCompanyColor(companyName, colorIndex);
+    const container = document.querySelector('.titanium-container');
+    if (container) {
+        // Convert hex to rgb for CSS variables
+        const hex = theme.from;
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+
+        container.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
+        container.style.setProperty('--accent-hex', hex);
+    }
+
+    // Legacy support
     document.documentElement.style.setProperty('--primary-color', theme.from);
     document.documentElement.style.setProperty('--primary-dark', theme.to);
+
+    const heroBar = document.getElementById('hero-accent-bar');
+    if (heroBar) {
+        heroBar.style.backgroundColor = theme.from;
+        heroBar.style.boxShadow = `0 0 15px ${theme.from}66`;
+    }
+    const statusDot = document.getElementById('hero-status-dot');
+    if (statusDot) {
+        statusDot.style.backgroundColor = theme.from;
+        statusDot.style.boxShadow = `0 0 15px ${theme.from}66`;
+    }
 }
 
 // --- GLOBAL HELPERS (Local aliases for backwards compatibility or specialized overrides) ---
@@ -123,12 +140,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Back Button
-    const btnBack = document.getElementById('btn-back');
-    if (btnBack) btnBack.onclick = () => window.history.back(); // Use history.back() for better UX
-
     let currentUser = null;
     let originalData = {};
+
+    // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
+    const injectFooterActions = () => {
+        const footerRight = document.getElementById('footer-actions-right');
+        if (footerRight) {
+            footerRight.innerHTML = `
+                <button id="btn-edit-footer" class="btn-icon-header" title="Modifica Account">
+                    <span class="material-symbols-outlined">edit</span>
+                </button>
+            `;
+            const btnEdit = document.getElementById('btn-edit-footer');
+            if (btnEdit) {
+                btnEdit.onclick = () => {
+                    window.location.href = `modifica_account_azienda.html?id=${encodeURIComponent(accountId)}&aziendaId=${encodeURIComponent(aziendaId)}`;
+                };
+            }
+        }
+        // Re-apply theme to footer actions
+        if (originalData.nomeAccount) {
+            applyTheme(originalData.ragioneSociale || originalData.nomeAccount, originalData.colorIndex);
+        }
+    };
+
+    setTimeout(injectFooterActions, 500);
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -142,6 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Back Button (Automated by header, but we keep this for legacy if header fails)
+    const btnBack = document.getElementById('btn-back');
+    if (btnBack) btnBack.onclick = () => window.history.back();
     async function loadAccountDetails(uid, azId, accId) {
         try {
             // Get Company Data (Theme)
@@ -230,19 +270,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const bankingContent = document.getElementById('banking-content');
             if (bankingContent) {
                 bankingContent.innerHTML = bankingArr.map((bank, idx) => `
-                    <div class="space-y-4 p-4 bg-white/50 rounded-2xl border border-black/5">
-                        <div class="flex items-center justify-between border-b border-black/5 pb-2">
-                            <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Conto #${idx + 1}</span>
+                    <div class="space-y-4 p-4 bg-slate-500/5 rounded-2xl border border-white/5 border-glow">
+                        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                            <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Conto #${idx + 1}</span>
                         </div>
 
                         <!-- IBAN -->
                         <div class="flex flex-col gap-1.5">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase ml-1">IBAN</span>
-                            <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden">
+                            <span class="text-[11px] font-bold text-white/40 uppercase ml-1" data-t="iban">IBAN</span>
+                            <div class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input readonly
-                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold focus:ring-0 text-[#0A162A] uppercase font-mono"
+                                    class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold focus:ring-0 text-white uppercase font-mono"
                                     value="${bank.iban || ''}">
-                                <button onclick="copyText('${bank.iban}')" class="p-3 text-gray-400 hover:text-primary border-l border-black/5">
+                                <button onclick="window.copyText('${bank.iban}')" class="p-3 text-white/40 hover:text-white border-l border-white/5">
                                     <span class="material-symbols-outlined text-base">content_copy</span>
                                 </button>
                             </div>
@@ -251,50 +291,50 @@ document.addEventListener('DOMContentLoaded', () => {
                         <!-- PASSWORD & NOTA -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div class="flex flex-col gap-1.5">
-                                 <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Pass. Dispositiva</span>
-                                 <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden">
+                                 <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="dispositive_pass">Pass. Dispositiva</span>
+                                 <div class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                      <input readonly type="text"
-                                         class="titanium-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-[#0A162A]"
+                                         class="titanium-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-white"
                                          value="${bank.passwordDispositiva || ''}">
-                                     <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                                     <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
                                          <span class="material-symbols-outlined text-sm">visibility</span>
                                      </button>
-                                     <button onclick="copyText(this.parentElement.querySelector('input').value)" class="p-2 text-gray-400 hover:text-primary border-l border-black/5">
+                                     <button onclick="window.copyText(this.parentElement.querySelector('input').value)" class="p-2 text-white/40 hover:text-white border-l border-white/5">
                                          <span class="material-symbols-outlined text-sm">content_copy</span>
                                      </button>
                                  </div>
                              </div>
                             <div class="flex flex-col gap-1.5">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Nota IBAN</span>
-                                <div class="selectable bg-blue-50/50 p-2.5 rounded-xl text-xs text-blue-800 border border-blue-100 min-h-[40px] flex items-center">
+                                <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="iban_note">Nota IBAN</span>
+                                <div class="selectable bg-white/5 p-2.5 rounded-xl text-xs text-white/60 border border-white/5 min-h-[40px] flex items-center italic">
                                     ${bank.nota || '-'}
                                 </div>
                             </div>
                         </div>
 
                         <!-- SEZIONE REFERENTE BANCA -->
-                        <div class="bg-primary/5 p-4 rounded-2xl border border-primary/10 space-y-3">
-                            <div class="flex items-center gap-2 text-primary">
+                        <div class="bg-blue-500/5 p-4 rounded-2xl border border-white/5 space-y-3">
+                            <div class="flex items-center gap-2 text-blue-500">
                                 <span class="material-symbols-outlined text-sm">contact_phone</span>
-                                <span class="text-[10px] font-bold uppercase tracking-widest">Referente Banca</span>
+                                <span class="text-[10px] font-black uppercase tracking-widest" data-t="bank_referent">Referente Banca</span>
                             </div>
                             <div class="flex flex-col gap-1">
-                                <span class="text-[9px] font-bold text-gray-400 uppercase ml-1">Nome e Cognome</span>
-                                <p class="text-sm font-bold text-slate-900 ml-1">${bank.referenteNome || ''} ${bank.referenteCognome || ''}</p>
+                                <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="full_name">Nome e Cognome</span>
+                                <p class="text-sm font-bold text-white ml-1">${bank.referenteNome || ''} ${bank.referenteCognome || ''}</p>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="flex flex-col gap-1">
-                                    <span class="text-[9px] font-bold text-gray-400 uppercase ml-1">Telefono</span>
-                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white border border-black/5 cursor-pointer hover:bg-gray-50 transition-colors" onclick="makeCall('${bank.referenteTelefono}')" title="Chiama">
-                                        <span class="material-symbols-outlined text-[16px] text-primary">call</span>
-                                        <span class="text-xs font-bold text-slate-700">${bank.referenteTelefono || '-'}</span>
+                                    <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="phone">Telefono</span>
+                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteTelefono}')" title="Chiama">
+                                        <span class="material-symbols-outlined text-[16px] text-blue-500">call</span>
+                                        <span class="text-xs font-bold text-white/70">${bank.referenteTelefono || '-'}</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <span class="text-[9px] font-bold text-gray-400 uppercase ml-1">Cellulare</span>
-                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white border border-black/5 cursor-pointer hover:bg-gray-50 transition-colors" onclick="makeCall('${bank.referenteCellulare}')" title="Chiama">
-                                        <span class="material-symbols-outlined text-[16px] text-primary">smartphone</span>
-                                        <span class="text-xs font-bold text-slate-700">${bank.referenteCellulare || '-'}</span>
+                                    <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="mobile">Cellulare</span>
+                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteCellulare}')" title="Chiama">
+                                        <span class="material-symbols-outlined text-[16px] text-blue-500">smartphone</span>
+                                        <span class="text-xs font-bold text-white/70">${bank.referenteCellulare || '-'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -303,41 +343,41 @@ document.addEventListener('DOMContentLoaded', () => {
                         <!-- Carte collegate -->
                         ${(bank.cards || []).length > 0 ? `
                             <div class="space-y-4 pt-2">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Strumenti collegati</span>
+                                <span class="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1" data-t="linked_tools">Strumenti collegati</span>
                                 ${bank.cards.map((card, cIdx) => `
-                                    <div class="bg-white p-4 rounded-xl border border-black/5 shadow-sm space-y-4">
+                                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 shadow-sm space-y-4">
                                          <div class="flex items-center justify-between">
                                             <div class="flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-primary text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
-                                                <span class="text-xs font-bold text-primary uppercase">${card.type === 'Debit' ? 'Bancomat' : 'Carta di Credito'}</span>
+                                                <span class="material-symbols-outlined text-blue-500 text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
+                                                <span class="text-xs font-black text-blue-500 uppercase">${card.type === 'Debit' ? (window.t('bancomat') || 'Bancomat') : (window.t('credit_card') || 'Carta di Credito')}</span>
                                             </div>
                                         </div>
 
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div class="flex flex-col gap-1.5">
-                                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Titolare</span>
-                                                <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
-                                                    <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-[#0A162A]" value="${card.titolare || ''}">
-                                                    <button onclick="copyText('${card.titolare}')" class="p-2 text-gray-400 hover:text-primary">
+                                                <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="holder">Titolare</span>
+                                                <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                    <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.titolare || ''}">
+                                                    <button onclick="window.copyText('${card.titolare}')" class="p-2 text-white/40 hover:text-white">
                                                         <span class="material-symbols-outlined text-base">content_copy</span>
                                                     </button>
                                                 </div>
                                             </div>
                                             ${card.type !== 'Debit' ? `
                                             <div class="flex flex-col gap-1.5">
-                                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Tipo Carta</span>
-                                                <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
-                                                    <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-[#0A162A]" value="${card.cardType || ''}">
+                                                <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="card_type">Tipo Carta</span>
+                                                <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                    <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.cardType || ''}">
                                                 </div>
                                             </div>
                                             ` : ''}
                                         </div>
 
                                         <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Numero</span>
-                                            <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
-                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-[#0A162A]" value="${card.cardNumber || ''}">
-                                                <button onclick="copyText('${card.cardNumber}')" class="p-2 text-gray-400 hover:text-primary">
+                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="number">Numero</span>
+                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" value="${card.cardNumber || ''}">
+                                                <button onclick="window.copyText('${card.cardNumber}')" class="p-2 text-white/40 hover:text-white">
                                                     <span class="material-symbols-outlined text-base">content_copy</span>
                                                 </button>
                                             </div>
@@ -345,26 +385,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                         <div class="grid grid-cols-3 gap-3">
                                             <div class="flex flex-col gap-1.5">
-                                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Scadenza</span>
-                                                <div class="flex items-center bg-slate-50 rounded-lg h-10 px-3 text-sm text-[#0A162A] border border-black/5">
+                                                <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="expiry">Scadenza</span>
+                                                <div class="flex items-center bg-white/5 rounded-lg h-10 px-3 text-sm text-white border border-white/5">
                                                     ${card.expiry || '-'}
                                                 </div>
                                             </div>
                                             <div class="flex flex-col gap-1.5">
-                                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">CCV</span>
-                                                <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
-                                                    <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-[#0A162A]" value="${card.ccv || ''}">
-                                                    <button onclick="copyText('${card.ccv}')" class="p-2 text-gray-400 hover:text-primary">
+                                                <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="ccv">CCV</span>
+                                                <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                    <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.ccv || ''}">
+                                                    <button onclick="window.copyText('${card.ccv}')" class="p-2 text-white/40 hover:text-white">
                                                         <span class="material-symbols-outlined text-sm">content_copy</span>
                                                     </button>
                                                 </div>
                                             </div>
                                              <div class="flex flex-col gap-1.5">
-                                                 <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">PIN</span>
-                                                  <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
-                                                      <input readonly type="text" class="titanium-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-[#0A162A]" 
+                                                 <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="pin">PIN</span>
+                                                  <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
+                                                      <input readonly type="text" class="titanium-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" 
                                                          value="${card.pin || ''}">
-                                                      <button onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                                                      <button onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
                                                           <span class="material-symbols-outlined text-sm">visibility</span>
                                                       </button>
                                                   </div>
@@ -373,8 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                         ${card.note ? `
                                             <div class="flex flex-col gap-1.5">
-                                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">Note Strumento</span>
-                                                <div class="selectable bg-slate-50 p-3 rounded-lg text-xs text-gray-600 italic border border-black/5">
+                                                <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="tool_note">Note Strumento</span>
+                                                <div class="selectable bg-white/5 p-3 rounded-lg text-xs text-white/60 italic border border-white/5">
                                                     ${card.note}
                                                 </div>
                                             </div>
@@ -582,14 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
         });
-
-        // Edit Redirect
-        const btnEditHeader = document.getElementById('btn-edit-header');
-        if (btnEditHeader) {
-            btnEditHeader.onclick = () => {
-                window.location.href = `modifica_account_azienda.html?id=${encodeURIComponent(accountId)}&aziendaId=${encodeURIComponent(aziendaId)}`;
-            };
-        }
 
         // Flags
         const checkShared = document.getElementById('detail-shared');
