@@ -990,7 +990,7 @@ function loadFromCache() {
 
     try {
         const data = JSON.parse(cached);
-        console.log("Lettura cache...");
+        window.LOG("Lettura cache...");
 
         if (data.photoURL && avatarImg) avatarImg.src = data.photoURL;
         if (data.displayName && userNameEl) userNameEl.textContent = data.displayName;
@@ -1046,11 +1046,11 @@ loadFromCache();
 // --- MAIN AUTH SUBSCRIPTION ---
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
-        console.log("No user session.");
+        window.LOG("No user session.");
         return;
     }
 
-    console.log("Login: " + user.email);
+    window.LOG("Login: " + user.email);
 
     let displayName = user.displayName;
     let photoURL = user.photoURL;
@@ -1065,7 +1065,7 @@ onAuthStateChanged(auth, async (user) => {
     // Fetch Firestore
     try {
         const docRef = doc(db, "users", user.uid);
-        console.log("Download dati DB...");
+        window.LOG("Download dati DB...");
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -1171,7 +1171,7 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         saveToCache(cacheUpdate);
-        console.log("Dati sincronizzati.");
+        window.LOG("Dati sincronizzati.");
 
         if (window.loadTopAccounts) window.loadTopAccounts(user.uid);
         if (window.loadCounters) window.loadCounters(user.uid);
@@ -1198,7 +1198,7 @@ if (avatarInput) {
         try {
             isUploading = true;
             loadingOverlay.classList.remove('hidden');
-            console.log("Upload immagine...");
+            window.LOG("Upload immagine...");
 
             if (user.photoURL && user.photoURL.includes('firebase')) {
                 try {
@@ -1217,7 +1217,7 @@ if (avatarInput) {
 
             avatarImg.src = url;
             saveToCache({ photoURL: url });
-            console.log("Avatar salvato!");
+            window.LOG("Avatar salvato!");
             showToast("Foto aggiornata su tutti i dispositivi!");
 
         } catch (error) {
@@ -1241,7 +1241,7 @@ realSaveButton.addEventListener('click', async () => {
     icon.textContent = "sync";
     icon.classList.add('animate-spin');
     realSaveButton.disabled = true;
-    console.log("Salvataggio dati...");
+    window.LOG("Salvataggio dati...");
 
     try {
         const updateData = {};
@@ -1828,7 +1828,7 @@ if (btnAddContact) {
 window.loadCounters = async function (uid) {
     if (!uid) return;
     try {
-        console.log("Calcolo contatori...");
+        window.LOG("Calcolo contatori...");
         const accountsRef = collection(db, "users", uid, "accounts");
 
         // 1. Standard & Memo (Owned by user)
@@ -1951,7 +1951,7 @@ window.loadCounters = async function (uid) {
 window.loadContacts = async function (uid) {
     if (!uid) return;
     try {
-        console.log("Caricamento rubrica...", uid);
+        window.LOG("Caricamento rubrica...", uid);
         const contacts = await getContacts(uid);
         renderContacts(contacts);
     } catch (e) {
@@ -2097,4 +2097,4 @@ function updateSectionBadge(id, count) {
 
 
 
-
+

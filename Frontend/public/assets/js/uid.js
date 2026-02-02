@@ -10,7 +10,7 @@ function getUserUID() {
   if (user) {
     return user.uid;
   } else {
-    console.log("No user is currently signed in.");
+    window.LOG("No user is currently signed in.");
     return null;
   }
 }
@@ -31,10 +31,10 @@ async function getUserData(uid) {
     const userDocSnap = await getDoc(userDocRef);
 
     if (userDocSnap.exists()) {
-      console.log("User data retrieved:", userDocSnap.data());
+      window.LOG("User data retrieved:", userDocSnap.data());
       return userDocSnap.data();
     } else {
-      console.log("No such document for UID:", uid);
+      window.LOG("No such document for UID:", uid);
       return null;
     }
   } catch (error) {

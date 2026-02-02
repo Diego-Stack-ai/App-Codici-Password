@@ -3,7 +3,7 @@ import { auth } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("[Privato] Caricamento v1.2...");
+    window.LOG("[Privato] Caricamento v1.2...");
     // alert("[DEBUG] Script Account caricato con successo (v1.2)");
     const accountsContainer = document.getElementById('accounts-container');
     const searchInput = document.querySelector('input[type="search"]');
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await loadAccounts();
         } else {
-            console.log("No user logged in, redirecting...");
+            window.LOG("No user logged in, redirecting...");
             // Optionally redirect to index.html, but main.js or auth.js
             // window.location.href = 'index.html'; 
         }
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    console.log("[Privato] Version: 1.2 - Fix Navigation & Quotes - Time:", new Date().toLocaleTimeString());
+    window.LOG("[Privato] Version: 1.2 - Fix Navigation & Quotes - Time:", new Date().toLocaleTimeString());
 
     // FILTER LOGIC
     function filterAndRender() {
@@ -52,15 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
         const pageTitle = document.querySelector('h1');
 
-        console.log(`[Filter] Type: ${type}, Search: "${searchTerm}"`);
-        console.log(`[Filter] Total Accounts Fetched: ${allAccounts.length}`);
+        window.LOG(`[Filter] Type: ${type}, Search: "${searchTerm}"`);
+        window.LOG(`[Filter] Total Accounts Fetched: ${allAccounts.length}`);
 
         if (pageTitle) pageTitle.textContent = `Account (${allAccounts.length})`;
 
         // Debug first account structure if exists
         if (allAccounts.length > 0) {
-            console.log('[Filter] Sample Account:', allAccounts[0]);
-            console.log(`[Filter] Sample Shared: ${allAccounts[0].shared}, Memo: ${allAccounts[0].hasMemo}`);
+            window.LOG('[Filter] Sample Account:', allAccounts[0]);
+            window.LOG(`[Filter] Sample Shared: ${allAccounts[0].shared}, Memo: ${allAccounts[0].hasMemo}`);
         }
 
         // Update Title (User requested fixed "Account" title)
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        console.log(`[Filter] After Type Filter: ${filtered.length}`);
+        window.LOG(`[Filter] After Type Filter: ${filtered.length}`);
 
         // 2. Filter by Search
         if (searchTerm) {
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
 
-        console.log(`[Filter] Final Render Count: ${filtered.length}`);
+        window.LOG(`[Filter] Final Render Count: ${filtered.length}`);
         renderAccounts(filtered);
     }
 
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return '';
         }
 
-        console.log(`[Card] Creating card for ${account.nomeAccount} with ID: ${accountId}`);
+        window.LOG(`[Card] Creating card for ${account.nomeAccount} with ID: ${accountId}`);
 
         return `
             <a href="dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}" 

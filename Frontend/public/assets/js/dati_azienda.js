@@ -4,13 +4,13 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/fi
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { logError } from './utils.js';
 
-console.log("Script Dati Azienda Caricato (Modular Mode)");
+window.LOG("Script Dati Azienda Caricato (Modular Mode)");
 
 document.addEventListener('DOMContentLoaded', () => {
     // Check Auth State
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            console.log("Logged in:", user.uid);
+            window.LOG("Logged in:", user.uid);
             const urlParams = new URLSearchParams(window.location.search);
             const aziendaId = urlParams.get('id');
 
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'lista_aziende.html';
             }
         } else {
-            console.log("Utente non loggato, reindirizzamento...");
+            window.LOG("Utente non loggato, reindirizzamento...");
             window.location.href = 'index.html'; // Or login page
         }
     });
@@ -88,7 +88,7 @@ async function loadAziendaData(uid, aziendaId) {
 
         if (docSnap.exists()) {
             const data = docSnap.data();
-            console.log("Dati azienda caricati:", data);
+            window.LOG("Dati azienda caricati:", data);
 
             // APPLY THEME
             if (data.ragioneSociale || typeof data.colorIndex === 'number') {

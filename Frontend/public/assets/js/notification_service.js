@@ -62,10 +62,10 @@ export async function checkDeadlines(userId) {
 
                     if (neverSent && diffDays < primoAvviso) {
                         shouldSend = true;
-                        console.log(`[Urgency] Sending first alert for ${doc.id} (Late Start)`);
+                            window.LOG(`[Urgency] Sending first alert for ${doc.id} (Late Start)`);
                     } else if (diffDays === 0) {
                         shouldSend = true;
-                        console.log(`[Deadline] Sending final alert for ${doc.id}`);
+                            window.LOG(`[Deadline] Sending final alert for ${doc.id}`);
                     } else {
                         // Math Check
                         // Example: Primo 56, Rec 6. Today Diff 50. 
@@ -131,10 +131,10 @@ export async function sendNotificationBatch(notifications, userId) {
     const todayStr = new Date().toISOString().split('T')[0];
 
     for (const n of notifications) {
-        console.log(`--- EMAIL TO: [${n.to.join(', ')}] ---`);
-        console.log(`OGGETTO: ${n.subject}`);
-        console.log(`CORPO: ${n.body}`);
-        console.log(`-----------------------------------`);
+        window.LOG(`--- EMAIL TO: [${n.to.join(', ')}] ---`);
+        window.LOG(`OGGETTO: ${n.subject}`);
+        window.LOG(`CORPO: ${n.body}`);
+        window.LOG(`-----------------------------------`);
 
         // Update Firestore to mark as sent
         if (userId) {

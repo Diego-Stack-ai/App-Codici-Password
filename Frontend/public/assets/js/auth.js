@@ -54,7 +54,7 @@ async function register(nome, cognome, email, password) {
 
         // Send email verification (optional but recommended)
         await sendEmailVerification(user);
-        console.log('Verification email sent to', user.email);
+        window.LOG('Verification email sent to', user.email);
         showToast("Email di verifica inviata! Controlla la tua casella.", "success");
 
         showToast("Registrazione avvenuta con successo!", "success");
@@ -89,10 +89,10 @@ async function register(nome, cognome, email, password) {
  */
 async function login(email, password) {
     try {
-        console.log("LOGIN START: ", email);
+        window.LOG("LOGIN START: ", email);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        console.log("AUTH SUCCESS: ", user.uid);
+        window.LOG("AUTH SUCCESS: ", user.uid);
 
         // FORZA REFRESH: Controlla lo stato reale su Firebase (evita cache vecchia)
         await user.reload();
@@ -100,9 +100,9 @@ async function login(email, password) {
 
         // CHECK IF USER EXISTS IN FIRESTORE
         const userDocRef = doc(db, "users", updatedUser.uid);
-        console.log("FETCHING DOC...");
+        window.LOG("FETCHING DOC...");
         const userDoc = await getDoc(userDocRef);
-        console.log("DOC FETCHED: ", userDoc.exists());
+        window.LOG("DOC FETCHED: ", userDoc.exists());
 
         if (!updatedUser.emailVerified) {
             console.warn("Email non ancora verificata, ma procedo come da richiesta utente.");
@@ -194,18 +194,18 @@ function checkAuthState() {
         const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.includes(currentPage);
 
-        console.log(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Page: ${currentPage}`);
+        window.LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Page: ${currentPage}`);
 
         if (user) {
             // User is signed in.
             if (isAuthPage) {
-                console.log("[AUTH] Redirecting to home: user already logged in.");
+                window.LOG("[AUTH] Redirecting to home: user already logged in.");
                 window.location.href = 'home_page.html';
             }
         } else {
             // No user is signed in.
             if (!isAuthPage) {
-                console.log("[AUTH] Redirecting to login: no user session.");
+                window.LOG("[AUTH] Redirecting to login: no user session.");
                 window.location.href = 'index.html';
             }
         }

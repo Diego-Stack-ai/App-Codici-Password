@@ -2,6 +2,38 @@
  * TITANIUM MAIN ENTRY POINT
  * Coordina l'inizializzazione dei moduli UI dell'applicazione.
  */
+// Conditional console override: disable logs in production environments.
+// Uses `window.NODE_ENV` or `document.documentElement.dataset.env` as source.
+(function(){
+        try {
+        const env = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV) || window.NODE_ENV || document.documentElement.dataset.env || 'production';
+        const originalConsoleLog = console.log && console.log.bind(console) || function(){};
+
+        if (env === 'production') {
+            // No-op logger in production
+            window.LOG = function(){};
+        } else {
+            // In non-production, forward to original console
+            window.LOG = (...args) => originalConsoleLog(...args);
+        }
+
+        // Route all console.log calls through window.LOG so existing calls don't need edits
+        console.log = (...args) => {
+            try { window.LOG(...args); } catch (e) {}
+        };
+        // Also route group/info/debug/trace to avoid leaking in prod
+        console.info = (...args) => { try { window.LOG(...args); } catch (e) {} };
+        console.debug = (...args) => { try { window.LOG(...args); } catch (e) {} };
+        console.trace = (...args) => { try { window.LOG(...args); } catch (e) {} };
+        console.group = (...args) => { try { window.LOG(...args); } catch (e) {} };
+        console.groupEnd = (...args) => { try { window.LOG(...args); } catch (e) {} };
+
+        // Expose env for other scripts if needed
+        window.__APP_ENV = env;
+    } catch (e) {
+        window.LOG = function(){};
+    }
+})();
 
 import { initLockedUX } from './ui-core.js';
 import { setupPasswordToggles, setupCopyButtons, setupCallButtons } from './ui-components.js';

@@ -3,7 +3,7 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-console.log("Script Lista Aziende Caricato (Modular)");
+window.LOG("Script Lista Aziende Caricato (Modular)");
 
 // STATE
 let allAziende = [];
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fRight.prepend(addBtn);
                 }
 
-                console.log("UI Setup Complete [Header & Footer Compliance]");
+                window.LOG("UI Setup Complete [Header & Footer Compliance]");
             }
         }, 100);
 
@@ -122,10 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            console.log("Logged in:", user.uid);
+            window.LOG("Logged in:", user.uid);
             await loadAziende();
         } else {
-            console.log("User not logged in");
+            window.LOG("User not logged in");
             if (listContainer) {
                 listContainer.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-12 text-center">
@@ -139,17 +139,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadAziende() {
         if (!currentUser || !listContainer) return;
 
-        try {
-            console.log("Fetching collection: users/" + currentUser.uid + "/aziende");
+            try {
+            window.LOG("Fetching collection: users/" + currentUser.uid + "/aziende");
             // Modular SDK: collection(db, path...)
             const colRef = collection(db, "users", currentUser.uid, "aziende");
             const snapshot = await getDocs(colRef);
 
             if (snapshot.empty) {
-                console.log("Snapshot empty");
+                window.LOG("Snapshot empty");
                 allAziende = [];
             } else {
-                console.log("Docs found:", snapshot.size);
+                window.LOG("Docs found:", snapshot.size);
                 allAziende = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
