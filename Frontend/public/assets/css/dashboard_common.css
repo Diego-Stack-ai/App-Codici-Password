@@ -5,26 +5,26 @@
  */
 
 :root {
-    --matrix-blue-from: rgba(33, 150, 243, 0.45);
-    --matrix-blue-to: rgba(33, 150, 243, 0.1);
-    --matrix-green-from: rgba(0, 200, 83, 0.45);
-    --matrix-green-to: rgba(0, 200, 83, 0.1);
-    --matrix-orange-from: rgba(255, 152, 0, 0.45);
-    --matrix-orange-to: rgba(255, 152, 0, 0.1);
-    --matrix-red-from: rgba(155, 28, 28, 0.45);
-    --matrix-red-to: rgba(155, 28, 28, 0.1);
+    --matrix-blue-from: rgb(33 150 243 / 45%);
+    --matrix-blue-to: rgb(33 150 243 / 10%);
+    --matrix-green-from: rgb(0 200 83 / 45%);
+    --matrix-green-to: rgb(0 200 83 / 10%);
+    --matrix-orange-from: rgb(255 152 0 / 45%);
+    --matrix-orange-to: rgb(255 152 0 / 10%);
+    --matrix-red-from: rgb(155 28 28 / 45%);
+    --matrix-red-to: rgb(155 28 28 / 10%);
 }
 
 /* 1. SCENOGRAFIA SATELLITE */
 .adaptive-shadow {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
-        0 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgb(0 0 0 / 30%),
+        0 0 20px rgb(0 0 0 / 10%);
     transition: box-shadow 0.3s ease;
 }
 
 .adaptive-shadow:hover {
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+    box-shadow: 0 30px 60px rgb(0 0 0 / 40%),
+        0 0 30px rgb(var(--accent-rgb, 255, 255, 255), 0.2);
 }
 
 /* 2. MATRIX SYSTEM (Dashboard Cards) */
@@ -36,8 +36,7 @@
     width: 100%;
 }
 
-@media (min-width: 768px) {
-
+@media (width >= 768px) {
     .matrix-grid,
     .dashboard-grid-2,
     .accounts-grid-list {
@@ -47,9 +46,10 @@
 
 .matrix-card {
     --accent-rgb: 255, 255, 255;
+
     background: linear-gradient(135deg, var(--grad-from, var(--surface-glass)), var(--grad-to, transparent));
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
     border-radius: 24px;
     padding: 1.5rem;
@@ -66,7 +66,7 @@
 
 .matrix-card:hover {
     transform: translateY(-8px) scale(1.02);
-    border-color: rgba(var(--accent-rgb), 0.4);
+    border-color: rgb(var(--accent-rgb), 0.4);
 }
 
 /* Effects */
@@ -74,8 +74,8 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.15) 0%,
-            rgba(255, 255, 255, 0.05) 50%,
+            rgb(255 255 255 / 15%) 0%,
+            rgb(255 255 255 / 5%) 50%,
             transparent 51%);
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -91,7 +91,7 @@
 .saetta-master {
     position: absolute;
     inset: 0;
-    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 15%) 50%, transparent 70%);
     background-size: 200% 100%;
     pointer-events: none;
     z-index: 2;
@@ -133,13 +133,13 @@
     width: 52px;
     height: 52px;
     border-radius: 16px;
-    background: rgba(var(--accent-rgb), 0.1);
+    background: rgb(var(--accent-rgb), 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 1.25rem;
     color: var(--accent-color);
-    border: 1.5px solid rgba(var(--accent-rgb), 0.2);
+    border: 1.5px solid rgb(var(--accent-rgb), 0.2);
     transition: all 0.3s ease;
     position: relative;
     z-index: 10;
@@ -166,14 +166,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.6rem 0.8rem;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgb(0 0 0 / 20%);
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgb(255 255 255 / 5%);
     transition: all 0.2s ease;
 }
 
 .micro-list-item:hover {
-    background: rgba(var(--accent-rgb), 0.15);
+    background: rgb(var(--accent-rgb), 0.15);
     transform: translateX(5px);
 }
 
@@ -212,14 +212,15 @@
     flex: 1;
     width: 100%;
     max-width: 1200px;
-    padding: calc(var(--header-height) + 1.5rem) 1.5rem 100px 1.5rem;
+    padding: calc(var(--header-height) + 1.5rem) 1.5rem 100px;
     z-index: 20;
     animation: fadeInScale 0.6s ease-out;
     position: relative;
     isolation: isolate;
     box-sizing: border-box;
+
     /* Effetto Vanishing (Svanimento bordi) - Solo verticale */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
     mask-image: linear-gradient(to bottom, transparent 0%, black 160px, black calc(100% - 160px), transparent 100%);
 }
 
@@ -227,7 +228,7 @@
 .titanium-card {
     background: var(--surface-glass);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
     border-radius: 32px;
     overflow: hidden;
@@ -236,8 +237,8 @@
 }
 
 html:not(.dark) .titanium-card {
-    background: #ffffff;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    background: #fff;
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 5%);
 }
 
 /* Matrix Base Style */
@@ -245,6 +246,7 @@ html:not(.dark) .titanium-card {
 /* Matrix Base Style */
 [class*="matrix-"] {
     --accent: var(--text-primary);
+
     position: relative;
     z-index: 1;
     border-radius: 24px;
@@ -254,7 +256,7 @@ html:not(.dark) .titanium-card {
     text-decoration: none;
 }
 
-[class*="matrix-"]:not(.dynamic-card):not(.matrix-card-compact) {
+[class*="matrix-"]:not(.dynamic-card, .matrix-card-compact) {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
@@ -303,20 +305,20 @@ html:not(.dark) .titanium-card {
 /* Dark Mode Appearance */
 html.dark [class*="matrix-"] {
     background: linear-gradient(135deg, var(--grad-from), var(--grad-to));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgb(255 255 255 / 10%);
+    color: #fff;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 30%);
 }
 
 /* Light Mode Appearance (C-Blade) */
 html:not(.dark) [class*="matrix-"] {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #fff;
+    border: 1px solid rgb(0 0 0 / 10%);
     color: var(--text-primary);
 }
 
 html:not(.dark) .matrix-card-compact {
-    background: rgba(255, 255, 255, 0.6);
+    background: rgb(255 255 255 / 60%);
     backdrop-filter: blur(10px);
 }
 
@@ -324,7 +326,7 @@ html:not(.dark) .matrix-card-compact {
 
 [class*="matrix-"]:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 15px 30px rgb(0 0 0 / 20%);
 }
 
 .matrix-card-compact:hover {
@@ -341,8 +343,8 @@ html:not(.dark) .matrix-card-compact {
     justify-content: space-between;
     height: 28px;
     padding: 0 0.6rem;
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgb(0 0 0 / 3%);
+    border: 1px solid rgb(0 0 0 / 5%);
     border-radius: 8px;
     gap: 0.3rem;
     transition: all 0.2s;
@@ -350,8 +352,8 @@ html:not(.dark) .matrix-card-compact {
 }
 
 html.dark .matrix-field-compact {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgb(255 255 255 / 3%);
+    border: 1px solid rgb(255 255 255 / 5%);
 }
 
 .matrix-field-compact span {
@@ -359,6 +361,7 @@ html.dark .matrix-field-compact {
     font-weight: 700;
     color: var(--text-primary);
     word-break: break-all;
+
     /* Forza il wrap per stringhe lunghe (email/pwd) */
     line-height: 1.1;
     overflow-wrap: break-word;
@@ -392,6 +395,7 @@ html.dark .matrix-field-compact {
 .card-text-block {
     position: relative;
     z-index: 10;
+
     /* Sempre sopra la lama */
     width: 100%;
 }
@@ -411,17 +415,17 @@ html.dark .matrix-field-compact {
     height: 20px;
     padding: 0 4px;
     border-radius: 99px;
-    color: #ffffff;
+    color: #fff;
     font-size: 11px;
     font-weight: 950;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 5px rgb(0 0 0 / 20%);
     flex-shrink: 0;
     transition: all 0.3s;
 }
 
 /* Badge & Icon coloring based on box type */
 .matrix-blue .urgent-badge {
-    background: rgba(33, 150, 243, 0.5) !important;
+    background: rgb(33 150 243 / 50%) !important;
 }
 
 .matrix-blue .bg-icon-container span {
@@ -430,7 +434,7 @@ html.dark .matrix-field-compact {
 }
 
 .matrix-green .urgent-badge {
-    background: rgba(0, 200, 83, 0.5) !important;
+    background: rgb(0 200 83 / 50%) !important;
 }
 
 .matrix-green .bg-icon-container span {
@@ -439,7 +443,7 @@ html.dark .matrix-field-compact {
 }
 
 .matrix-orange .urgent-badge {
-    background: rgba(255, 152, 0, 0.5) !important;
+    background: rgb(255 152 0 / 50%) !important;
 }
 
 .matrix-orange .bg-icon-container span {
@@ -448,7 +452,7 @@ html.dark .matrix-field-compact {
 }
 
 .matrix-red .urgent-badge {
-    background: rgba(155, 28, 28, 0.5) !important;
+    background: rgb(155 28 28 / 50%) !important;
 }
 
 .matrix-red .bg-icon-container span {
@@ -458,14 +462,14 @@ html.dark .matrix-field-compact {
 
 /* Light Mode Overrides for Badge (if needed for readability) */
 html:not(.dark) .urgent-badge {
-    color: #ffffff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
 }
 
 .dashboard-dynamic-list {
     display: flex;
     flex-direction: column;
-    gap: 0px;
+    gap: 0;
     width: 100%;
     margin-top: 0.3rem;
 }
@@ -475,13 +479,13 @@ html:not(.dark) .urgent-badge {
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 0.75rem;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgb(255 255 255 / 8%);
     border: 1px solid color-mix(in srgb, var(--accent), transparent 85%);
     border-radius: 12px;
     margin-bottom: 4px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
 }
 
 .micro-list-item:last-child {
@@ -489,7 +493,7 @@ html:not(.dark) .urgent-badge {
 }
 
 .micro-list-item:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgb(255 255 255 / 15%);
     transform: translateX(4px);
     border-color: color-mix(in srgb, var(--accent), transparent 50%);
 }
@@ -523,7 +527,7 @@ html:not(.dark) .urgent-badge {
     font-size: 11px !important;
     font-weight: 800;
     letter-spacing: 0.01em;
-    color: #ffffff;
+    color: #fff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -544,8 +548,8 @@ html:not(.dark) .urgent-badge {
 
 /* Light Mode Overrides for Micro Items */
 html:not(.dark) .micro-list-item {
-    background: rgba(0, 0, 0, 0.04);
-    border-color: rgba(0, 0, 0, 0.05);
+    background: rgb(0 0 0 / 4%);
+    border-color: rgb(0 0 0 / 5%);
 }
 
 html:not(.dark) .micro-list-item .item-title {
@@ -553,7 +557,7 @@ html:not(.dark) .micro-list-item .item-title {
 }
 
 html:not(.dark) .micro-list-item .item-badge {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgb(0 0 0 / 5%);
     color: var(--text-secondary);
 }
 
@@ -565,11 +569,13 @@ html:not(.dark) .micro-list-item .item-badge {
 .card-text-block h3,
 [class*="matrix-"] h3 {
     font-size: 1.1rem;
+
     /* Dimensione unificata V3.0 */
     font-weight: 800;
     margin-bottom: 0.25rem;
     line-height: 1.2;
     white-space: normal;
+
     /* Obbligo Wrap da Protocollo Accesso V3.0 */
     overflow-wrap: break-word;
 }
@@ -579,6 +585,7 @@ html:not(.dark) .micro-list-item .item-badge {
     opacity: 0.7;
     font-weight: 600;
     white-space: normal;
+
     /* Obbligo Wrap da Protocollo Accesso V3.0 */
     overflow-wrap: break-word;
 }
@@ -590,8 +597,8 @@ html:not(.dark) .micro-list-item .item-badge {
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.15) 0%,
-            rgba(255, 255, 255, 0.05) 50%,
+            rgb(255 255 255 / 15%) 0%,
+            rgb(255 255 255 / 5%) 50%,
             transparent 51%);
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -606,8 +613,8 @@ html:not(.dark) .micro-list-item .item-badge {
 
 html.dark .glass-shine {
     background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.25) 0%,
-            rgba(255, 255, 255, 0.08) 50%,
+            rgb(255 255 255 / 25%) 0%,
+            rgb(255 255 255 / 8%) 50%,
             transparent 51%);
 }
 
@@ -615,7 +622,7 @@ html.dark .glass-shine {
 .saetta-master {
     position: absolute;
     inset: 0;
-    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 20%) 50%, transparent 70%);
     background-size: 200% 100%;
     pointer-events: none;
     z-index: 2;
@@ -624,9 +631,9 @@ html.dark .glass-shine {
 }
 
 /* RESPONSIVE MOBILE ADAPTATION (Protocollo Titanium V3.1) */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .titanium-main {
-        padding: calc(var(--header-height) + 1rem) 1rem 80px 1rem;
+        padding: calc(var(--header-height) + 1rem) 1rem 80px;
     }
 
     .dashboard-grid-2,
@@ -636,8 +643,7 @@ html.dark .glass-shine {
     }
 }
 
-@media (max-width: 480px) {
-
+@media (width <= 480px) {
     /* Vertical Layout Mandatory */
     .titanium-card,
     .matrix-card-compact {
@@ -684,9 +690,9 @@ html.dark .glass-shine {
     }
 }
 
-@media (max-width: 400px) {
+@media (width <= 400px) {
     .titanium-main {
-        padding: calc(var(--header-height) + 0.5rem) 0.75rem 60px 0.75rem;
+        padding: calc(var(--header-height) + 0.5rem) 0.75rem 60px;
     }
 
     .titanium-card {
@@ -703,7 +709,7 @@ html.dark .glass-shine {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem 1.5rem 1rem;
+    padding: 2rem 1rem 1.5rem;
     position: relative;
 }
 
@@ -713,7 +719,7 @@ html.dark .glass-shine {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.4), transparent);
+    background: linear-gradient(to right, transparent, rgb(59 130 246 / 40%), transparent);
 }
 
 .detail-avatar-container {
@@ -727,11 +733,11 @@ html.dark .glass-shine {
     border-radius: 1.5rem;
     height: 7rem;
     width: 7rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-    border: 4px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 40%);
+    border: 4px solid rgb(255 255 255 / 5%);
     background-color: var(--surface-sub);
     backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
 }
 
 .hero-status-dot {
@@ -746,7 +752,7 @@ html.dark .glass-shine {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 10px 15px -3px rgb(59 130 246 / 20%);
 }
 
 .hero-title {
@@ -756,7 +762,7 @@ html.dark .glass-shine {
     line-height: 1.25;
     letter-spacing: -0.025em;
     text-align: center;
-    filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
+    filter: drop-shadow(0 4px 3px rgb(0 0 0 / 7%)) drop-shadow(0 2px 2px rgb(0 0 0 / 6%));
     margin-top: 1.5rem;
 }
 
@@ -792,7 +798,7 @@ html.dark .glass-shine {
     border: 1px solid var(--border-color);
     overflow: hidden;
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
 }
 
 .glass-field input {
@@ -879,7 +885,7 @@ html.dark .glass-shine {
     min-height: 100px;
     position: relative;
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
 }
 
 .note-text {
@@ -904,7 +910,7 @@ html.dark .glass-shine {
     cursor: pointer;
     transition: all 0.2s;
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
 }
 
 .attachment-card-row:hover {
@@ -913,7 +919,7 @@ html.dark .glass-shine {
 }
 
 .attachment-icon-box {
-    background-color: rgba(37, 99, 235, 0.2);
+    background-color: rgb(37 99 235 / 20%);
     padding: 0.75rem;
     border-radius: 0.75rem;
     color: var(--accent-blue);
@@ -940,7 +946,7 @@ html.dark .glass-shine {
 .titanium-switch {
     width: 36px;
     height: 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 10%);
     border-radius: 20px;
     position: relative;
     transition: all 0.3s;
