@@ -15,8 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/Protocollo.css">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.1"></script>
@@ -60,19 +59,18 @@
         <main class="settings-container no-select">
 
             <!-- AZIONI (Toolbar) -->
-            <div class="settings-group" style="padding: 0; background: transparent; border: none; box-shadow: none;">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button id="complete-btn" class="btn-icon-header" style="width: 32px; height: 32px;"
-                        title="Archivia">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">archive</span>
+            <div class="settings-group p-0 bg-transparent border-none shadow-none">
+                <div class="flex-center-gap-10">
+                    <button id="complete-btn" class="btn-icon-header w-8 h-8" title="Archivia">
+                        <span class="material-symbols-outlined icon-18">archive</span>
                     </button>
 
-                    <button id="edit-btn" class="btn-icon-header" style="width: 32px; height: 32px;" title="Modifica">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                    <button id="edit-btn" class="btn-icon-header w-8 h-8" title="Modifica">
+                        <span class="material-symbols-outlined icon-18">edit</span>
                     </button>
 
-                    <button id="delete-btn" class="btn-icon-header" style="width: 32px; height: 32px;" title="Elimina">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                    <button id="delete-btn" class="btn-icon-header w-8 h-8" title="Elimina">
+                        <span class="material-symbols-outlined icon-18">delete</span>
                     </button>
                 </div>
             </div>
@@ -89,13 +87,12 @@
                             </div>
                             <div class="settings-text w-full">
                                 <span class="settings-label" data-t="detail_object">Oggetto</span>
-                                <span id="detail-title" class="font-bold text-lg leading-tight block mt-1"
-                                    style="color: var(--text-primary);">Caricamento...</span>
+                                <span id="detail-title"
+                                    class="font-bold text-lg leading-tight block mt-1 text-primary">Caricamento...</span>
                             </div>
                         </div>
                         <span id="status-label"
-                            class="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border"
-                            style="background: var(--surface-sub); border-color: var(--border-color); color: var(--text-secondary);">
+                            class="text-xs font-black all-caps tracking-widest px-3 py-1 rounded-full border bg-sub border-sub text-secondary">
                             ...
                         </span>
                     </div>
@@ -110,8 +107,8 @@
                             </div>
                             <div class="settings-text w-full">
                                 <span class="settings-label" data-t="holder_label">Intestatario</span>
-                                <span id="detail-intestatario" class="font-bold text-base block mt-1"
-                                    style="color: var(--text-primary);">...</span>
+                                <span id="detail-intestatario"
+                                    class="font-bold text-base block mt-1 text-primary">...</span>
                             </div>
                         </div>
                     </div>
@@ -128,7 +125,7 @@
                                 </div>
                                 <div class="settings-text">
                                     <span class="settings-label" data-t="label_expiry">Scadenza</span>
-                                    <div class="flex items-baseline gap-1 mt-1" style="color: var(--text-primary);">
+                                    <div class="flex items-baseline gap-1 mt-1 text-primary">
                                         <span id="detail-date-day" class="text-xl font-bold">--</span>
                                         <span id="detail-date-year" class="text-sm font-medium opacity-60">----</span>
                                     </div>
@@ -146,8 +143,8 @@
                                 </div>
                                 <div class="settings-text">
                                     <span class="settings-label" data-t="category_label">Categoria</span>
-                                    <span id="detail-category" class="text-base font-medium mt-1"
-                                        style="color: var(--text-primary);">...</span>
+                                    <span id="detail-category"
+                                        class="text-base font-medium mt-1 text-primary">...</span>
                                 </div>
                             </div>
                         </div>
@@ -169,13 +166,13 @@
                                 </div>
                                 <div class="settings-text w-full">
                                     <span class="settings-label" data-t="section_vehicle">Veicolo</span>
-                                    <span id="display-veicolo" class="font-bold text-sm block mt-1"
-                                        style="color: var(--text-primary); word-break: break-all;">...</span>
+                                    <span id="display-veicolo"
+                                        class="font-bold text-sm block mt-1 text-primary break-all">...</span>
                                 </div>
                             </div>
                             <button onclick="copyToClipboardText('display-veicolo')"
-                                class="size-10 flex items-center justify-center rounded-xl bg-white/5 text-gray-500 hover:text-white transition-colors">
-                                <span class="material-symbols-outlined text-[20px]">content_copy</span>
+                                class="size-10 flex items-center justify-center rounded-xl bg-white-5 text-gray-500 hover-text-white transition-colors">
+                                <span class="material-symbols-outlined text-20">content_copy</span>
                             </button>
                         </div>
                     </div>
@@ -191,12 +188,12 @@
                                 <div class="settings-icon-box bg-purple-glass scale-75">
                                     <span class="material-symbols-outlined">mail</span>
                                 </div>
-                                <span class="text-[10px] font-black text-white/40 uppercase tracking-widest"
+                                <span class="text-xs font-black text-white-40 all-caps tracking-widest"
                                     data-t="email_preview">Anteprima Messaggio</span>
                             </div>
-                            <div class="bg-black/20 p-4 rounded-xl border border-white/5">
+                            <div class="bg-black-20 p-4 rounded-xl border border-white-5">
                                 <p id="display-testo-email"
-                                    class="text-sm text-gray-300 leading-relaxed font-medium whitespace-pre-wrap">...
+                                    class="text-sm text-gray-300 lh-relaxed font-medium text-pre">...
                                 </p>
                             </div>
                         </div>
@@ -204,7 +201,7 @@
 
                     <div id="display-destinatari-wrapper" class="settings-item">
                         <div class="flex flex-col gap-3 p-4">
-                            <span class="text-[10px] font-black text-white/40 uppercase tracking-widest"
+                            <span class="text-xs font-black text-white-40 all-caps tracking-widest"
                                 data-t="recipients_title">Destinatari</span>
                             <div id="display-destinatari" class="grid grid-cols-1 gap-2">
                                 <!-- Injected via JS -->
@@ -226,13 +223,13 @@
                     <h4 class="settings-group-title" data-t="section_notes">Note</h4>
                     <div class="settings-item">
                         <div class="p-4">
-                            <p id="detail-note-body" class="text-sm text-gray-400 leading-relaxed italic">...</p>
+                            <p id="detail-note-body" class="text-sm text-gray-400 lh-relaxed italic">...</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="footer-spacer" style="height: 40px;"></div>
+            <div class="footer-spacer h-10"></div>
         </main>
 
         <div class="spacer-footer"></div>

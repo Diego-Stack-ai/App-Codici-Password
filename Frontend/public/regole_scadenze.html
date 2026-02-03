@@ -15,8 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/Protocollo.css">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.1"></script>
@@ -41,9 +40,9 @@
 
                 <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
                 <div class="header-center">
-                    <h2 class="header-title" data-t="expiry_rules_title_page">
+                    <h1 class="header-title" data-t="expiry_rules_title_page">
                         Regole Scadenze
-                    </h2>
+                    </h1>
                 </div>
 
                 <!-- ZONA DESTRA: Home (1 icona) -->
@@ -60,12 +59,11 @@
 
             <div class="settings-group">
                 <!-- 1. AUTOMEZZI -->
-                <div class="settings-item" onclick="window.location.href='configurazione_automezzi.html'"
-                    style="cursor: pointer;">
+                <div class="settings-item cursor-pointer"
+                    onclick="window.location.href='configurazione_automezzi.html'">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box"
-                                style="background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
+                            <div class="settings-icon-box bg-blue-glass-10 icon-accent-blue">
                                 <span class="material-symbols-outlined">directions_car</span>
                             </div>
                             <div class="settings-text">
@@ -74,17 +72,16 @@
                                     frequenze email per veicoli</span>
                             </div>
                         </div>
-                        <span class="material-symbols-outlined" style="opacity: 0.3;">chevron_right</span>
+                        <span class="material-symbols-outlined opacity-30">chevron_right</span>
                     </div>
                 </div>
 
                 <!-- 2. DOCUMENTI -->
-                <div class="settings-item" onclick="window.location.href='configurazione_documenti.html'"
-                    style="cursor: pointer;">
+                <div class="settings-item cursor-pointer"
+                    onclick="window.location.href='configurazione_documenti.html'">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box"
-                                style="background: rgba(76, 175, 80, 0.1); color: var(--accent-emerald);">
+                            <div class="settings-icon-box bg-emerald-glass-10 icon-accent-emerald">
                                 <span class="material-symbols-outlined">description</span>
                             </div>
                             <div class="settings-text">
@@ -93,17 +90,15 @@
                                     Scadenze Varie</span>
                             </div>
                         </div>
-                        <span class="material-symbols-outlined" style="opacity: 0.3;">chevron_right</span>
+                        <span class="material-symbols-outlined opacity-30">chevron_right</span>
                     </div>
                 </div>
 
                 <!-- 3. GENERICHE -->
-                <div class="settings-item" onclick="window.location.href='configurazione_generali.html'"
-                    style="cursor: pointer;">
+                <div class="settings-item cursor-pointer" onclick="window.location.href='configurazione_generali.html'">
                     <div class="settings-item-header">
                         <div class="settings-item-info">
-                            <div class="settings-icon-box"
-                                style="background: rgba(255, 193, 7, 0.1); color: var(--accent-amber);">
+                            <div class="settings-icon-box bg-amber-glass-10 icon-accent-amber">
                                 <span class="material-symbols-outlined">settings_applications</span>
                             </div>
                             <div class="settings-text">
@@ -112,19 +107,16 @@
                                     scadenze generiche</span>
                             </div>
                         </div>
-                        <span class="material-symbols-outlined" style="opacity: 0.3;">chevron_right</span>
+                        <span class="material-symbols-outlined opacity-30">chevron_right</span>
                     </div>
                 </div>
             </div>
 
         </main>
-
         <div class="spacer-footer"></div>
         <!-- FOOTER PREMIUM -->
         <footer id="footer-placeholder" class="titanium-footer"></footer>
-
     </div>
-
     <!-- Script di traduzione rapido -->
     <script type="module">
         import { t } from './assets/js/translations.js';

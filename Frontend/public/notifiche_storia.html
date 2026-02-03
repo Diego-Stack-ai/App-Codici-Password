@@ -15,8 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/Protocollo.css">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.1"></script>
@@ -41,9 +40,9 @@
 
                 <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
                 <div class="header-center">
-                    <h2 class="header-title" data-t="notifications_history">
+                    <h1 class="header-title" data-t="notifications_history">
                         Storico Notifiche
-                    </h2>
+                    </h1>
                 </div>
 
                 <!-- ZONA DESTRA: Home (1 icona) -->
@@ -55,52 +54,43 @@
             </div>
         </header>
 
-        <main class="settings-container no-select">
+        <main class="settings-container no-select pt-20">
             <!-- Action Bar -->
-            <div style="display: flex; justify-content: flex-end; padding-bottom: 1rem;">
-                <button onclick="window.clearHistory()" class="auth-btn"
-                    style="width: auto; padding: 0.5rem 1rem; background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.3); color: #f44336; font-size: 0.75rem; display: flex; align-items: center; gap: 0.5rem; border-radius: 8px;">
-                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">delete_sweep</span>
+            <div class="flex justify-end pb-4">
+                <button onclick="window.clearHistory()"
+                    class="auth-btn w-auto py-2 px-4 bg-red-glass-10 border-red-30 text-red-500 text-sm flex items-center gap-2 rounded-lg">
+                    <span class="material-symbols-outlined text-lg">delete_sweep</span>
                     <span data-t="clear_history">Cancella Tutto</span>
                 </button>
             </div>
 
             <!-- Loading State -->
-            <div id="loading-indicator"
-                style="display: flex; flex-direction: column; align-items: center; padding: 3rem 0; gap: 1rem;">
+            <div id="loading-indicator" class="flex flex-col items-center py-12 gap-4">
                 <!-- Spinner Custom -->
-                <div
-                    style="width: 2rem; height: 2rem; border: 3px solid rgba(255,255,255,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;">
+                <div class="size-8 border-3 border-white-10 border-t-blue-500 rounded-full animate-spin">
                 </div>
-                <p style="font-size: 0.8rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; color: white;"
-                    data-t="loading">Caricamento...</p>
+                <p class="text-sm opacity-50 all-caps tracked-wide text-white" data-t="loading">Caricamento...</p>
             </div>
 
             <!-- List Container -->
-            <div id="notifications-list"
-                style="display: flex; flex-direction: column; gap: 0.75rem; min-height: 200px;">
+            <div id="notifications-list" class="flex flex-col gap-3 min-h-200">
                 <!-- JS Inject Here -->
             </div>
 
             <!-- Empty State -->
-            <div id="empty-state"
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 1rem; text-align: center; display: none;">
-                <div class="settings-icon-box"
-                    style="width: 60px; height: 60px; margin-bottom: 1rem; background: var(--surface-sub); color: var(--text-secondary);">
-                    <span class="material-symbols-outlined" style="font-size: 2rem;">notifications_off</span>
+            <div id="empty-state" class="flex flex-col items-center justify-center py-16 px-4 text-center hidden">
+                <div class="settings-icon-box size-15 mb-4 bg-surface-sub text-secondary">
+                    <span class="material-symbols-outlined text-2xl">notifications_off</span>
                 </div>
-                <h3 style="color: var(--text-primary); font-weight: 700; margin-bottom: 0.5rem;"
-                    data-t="no_notifications">Nessuna notifica</h3>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;" data-t="no_notifications_desc">Non hai
+                <h3 class="text-primary font-bold mb-2" data-t="no_notifications">Nessuna notifica</h3>
+                <p class="text-secondary text-sm" data-t="no_notifications_desc">Non hai
                     ancora ricevuto avvisi recenti.</p>
             </div>
 
         </main>
-
         <div class="spacer-footer"></div>
         <footer id="footer-placeholder" class="titanium-footer"></footer>
     </div>
-
     <!-- Scripts -->
     <script type="module" src="assets/js/notifiche_storia.js?v=3.1"></script>
 </body>

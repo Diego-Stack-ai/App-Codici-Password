@@ -64,48 +64,42 @@
 
             <!-- PANE: GUIDA RAPIDA (Regola 3.4) -->
             <div id="guida-pane" class="accordion-content">
-                <div class="settings-group"
-                    style="margin-top: 0; border: 1px solid var(--accent-blue); background: var(--surface-sub);">
-                    <div style="padding: 1.5rem;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                            <div class="settings-icon-box"
-                                style="background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
+                <div class="settings-group settings-group-guida">
+                    <div class="p-6">
+                        <div class="flex-center-gap-3 mb-4">
+                            <div class="settings-icon-box icon-box-blue">
                                 <span class="material-symbols-outlined">lightbulb</span>
                             </div>
-                            <h3
-                                style="color:var(--text-primary); font-weight:900; letter-spacing:0.1em; font-size:0.875rem; text-transform:uppercase; margin: 0;">
+                            <h3 class="text-primary heavy tracked-wide text-sm all-caps m-0">
                                 Guida Profilo</h3>
                         </div>
 
-                        <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <div style="display: flex; gap: 0.75rem;">
-                                <span
-                                    style="width: 1.5rem; height: 1.5rem; background: rgba(33, 150, 243, 0.2); color: #64b5f6; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; flex-shrink: 0;">1</span>
-                                <p style="font-size:11px; color:var(--text-secondary); line-height:1.6; margin: 0;">Puoi
-                                    gestire ogni voce della pagina (<span
-                                        style="color:var(--text-primary); font-weight:bold;">Dati Personali, Residenza,
+                        <div class="flex-col-gap-4">
+                            <div class="flex-center-gap-3">
+                                <span class="guida-step-num">1</span>
+                                <p class="text-tiny text-secondary lh-relaxed m-0">Puoi
+                                    gestire ogni voce della pagina (<span class="text-primary bold">Dati Personali,
+                                        Residenza,
                                         Utilità, Documenti, Contatti, Note</span>) utilizzando i tasti "+" o "edit"
                                     dedicati.</p>
                             </div>
-                            <div style="display: flex; gap: 0.75rem;">
-                                <span
-                                    style="width: 1.5rem; height: 1.5rem; background: rgba(33, 150, 243, 0.2); color: #64b5f6; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; flex-shrink: 0;">2</span>
-                                <p style="font-size:11px; color:var(--text-secondary); line-height:1.6; margin: 0;">Usa
-                                    i pulsanti <span class="material-symbols-outlined"
-                                        style="font-size: 14px; vertical-align: middle;">edit</span> per modificare i
+                            <div class="flex-center-gap-3">
+                                <span class="guida-step-num">2</span>
+                                <p class="text-tiny text-secondary lh-relaxed m-0">Usa
+                                    i pulsanti <span class="material-symbols-outlined icon-14 align-middle">edit</span>
+                                    per modificare i
                                     dati in modo rapido tramite modali di sistema.</p>
                             </div>
-                            <div style="display: flex; gap: 0.75rem;">
-                                <span
-                                    style="width: 1.5rem; height: 1.5rem; background: rgba(33, 150, 243, 0.2); color: #64b5f6; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; flex-shrink: 0;">3</span>
-                                <p style="font-size:11px; color:var(--text-secondary); line-height:1.6; margin: 0;">
-                                    Seleziona la <span style="color:var(--text-primary); font-weight:bold;">spunta
+                            <div class="flex-center-gap-3">
+                                <span class="guida-step-num">3</span>
+                                <p class="text-tiny text-secondary lh-relaxed m-0">
+                                    Seleziona la <span class="text-primary bold">spunta
                                         QR</span> per scegliere quali dati mostrare quando condividi il tuo profilo.</p>
                             </div>
                         </div>
 
-                        <button type="button" class="titanium-btn-primary w-full accordion-header"
-                            style="margin-top: 1.5rem; padding: 0.75rem 0; font-size: 10px;" data-target="guida-pane">
+                        <button type="button" class="titanium-btn-primary w-full accordion-header mt-6 p-small text-xs"
+                            data-target="guida-pane">
                             HO CAPITO, CHIUDI GUIDA
                         </button>
                     </div>
@@ -125,8 +119,7 @@
                         <div class="settings-item accordion-header" data-target="dati-personali">
                             <div class="settings-item-header">
                                 <div class="settings-item-info">
-                                    <div class="settings-icon-box"
-                                        style="background: rgba(33, 150, 243, 0.1); color: var(--accent-blue);">
+                                    <div class="settings-icon-box icon-box-blue">
                                         <span class="material-symbols-outlined">person</span>
                                     </div>
                                     <div class="settings-text">
@@ -135,17 +128,17 @@
                                             Nascita</span>
                                     </div>
                                 </div>
-                                <div class="settings-actions" style="display:flex; gap:0.5rem; align-items:center;">
+                                <div class="settings-actions flex-center-gap">
                                     <button class="btn-icon-header"
                                         onclick="event.stopPropagation(); window.editSection('dati-personali')">
-                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                                        <span class="material-symbols-outlined icon-18">edit</span>
                                     </button>
                                     <span class="material-symbols-outlined settings-chevron">expand_more</span>
                                 </div>
                             </div>
                         </div>
                         <div id="dati-personali" class="accordion-content">
-                            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <div class="flex-col-gap-6">
                                 <fieldset class="glass-field-titanium glass-field-blue">
                                     <legend class="field-label">Nome</legend>
                                     <span id="nome-view" class="field-value">-</span>
@@ -156,10 +149,9 @@
                                 </fieldset>
                                 <fieldset class="glass-field-titanium glass-field-blue">
                                     <legend class="field-label">Codice Fiscale</legend>
-                                    <span id="cf-view" class="field-value"
-                                        style="font-family: monospace; letter-spacing: 0.1em;">-</span>
+                                    <span id="cf-view" class="field-value text-mono-wide">-</span>
                                 </fieldset>
-                                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                                <div class="flex-col-gap-6">
                                     <fieldset class="glass-field-titanium glass-field-blue">
                                         <legend class="field-label">Nascita</legend>
                                         <span id="birth_date-view" class="field-value">-</span>
@@ -176,8 +168,7 @@
                         <div class="settings-item accordion-header" data-target="residenza-box">
                             <div class="settings-item-header">
                                 <div class="settings-item-info">
-                                    <div class="settings-icon-box"
-                                        style="background: rgba(76, 175, 80, 0.1); color: var(--accent-emerald);">
+                                    <div class="settings-icon-box icon-box-emerald">
                                         <span class="material-symbols-outlined">home</span>
                                     </div>
                                     <div class="settings-text">
@@ -192,16 +183,14 @@
                             </div>
                         </div>
                         <div id="residenza-box" class="accordion-content">
-                            <div id="indirizzi-view-container"
-                                style="display: flex; flex-direction: column; gap: 1rem;"></div>
+                            <div id="indirizzi-view-container" class="flex-col-gap-4"></div>
                         </div>
 
                         <!-- CONTATTI -->
                         <div class="settings-item accordion-header" data-target="contatti-box">
                             <div class="settings-item-header">
                                 <div class="settings-item-info">
-                                    <div class="settings-icon-box"
-                                        style="background: rgba(244, 67, 54, 0.1); color: var(--accent-red);">
+                                    <div class="settings-icon-box icon-box-red">
                                         <span class="material-symbols-outlined">call</span>
                                     </div>
                                     <div class="settings-text">
@@ -216,7 +205,7 @@
                             </div>
                         </div>
                         <div id="contatti-box" class="accordion-content">
-                            <div id="telefoni-view-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div id="telefoni-view-container" class="flex-col-gap-4">
                             </div>
                         </div>
                     </div>
@@ -229,8 +218,7 @@
                     <div class="settings-item accordion-header" data-target="utenze-box">
                         <div class="settings-item-header">
                             <div class="settings-item-info">
-                                <div class="settings-icon-box"
-                                    style="background: rgba(255, 193, 7, 0.1); color: var(--accent-amber);">
+                                <div class="settings-icon-box icon-box-amber">
                                     <span class="material-symbols-outlined">bolt</span>
                                 </div>
                                 <div class="settings-text">
@@ -244,14 +232,13 @@
                         </div>
                     </div>
                     <div id="utenze-box" class="accordion-content">
-                        <div id="utenze-view-container" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+                        <div id="utenze-view-container" class="flex-col-gap-4"></div>
                     </div>
 
                     <div class="settings-item accordion-header" data-target="documenti-box">
                         <div class="settings-item-header">
                             <div class="settings-item-info">
-                                <div class="settings-icon-box"
-                                    style="background: rgba(156, 39, 176, 0.1); color: var(--accent-purple);">
+                                <div class="settings-icon-box icon-box-purple">
                                     <span class="material-symbols-outlined">description</span>
                                 </div>
                                 <div class="settings-text">
@@ -266,15 +253,14 @@
                         </div>
                     </div>
                     <div id="documenti-box" class="accordion-content">
-                        <div id="documenti-view-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div id="documenti-view-container" class="flex-col-gap-4">
                         </div>
                     </div>
 
                     <div class="settings-item accordion-header" data-target="emails-box">
                         <div class="settings-item-header">
                             <div class="settings-item-info">
-                                <div class="settings-icon-box"
-                                    style="background: rgba(0, 188, 212, 0.1); color: var(--accent-cyan);">
+                                <div class="settings-icon-box icon-box-cyan">
                                     <span class="material-symbols-outlined">email</span>
                                 </div>
                                 <div class="settings-text">
@@ -288,23 +274,20 @@
                         </div>
                     </div>
                     <div id="emails-box" class="accordion-content">
-                        <div id="email-view-container" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+                        <div id="email-view-container" class="flex-col-gap-4"></div>
                     </div>
                 </div>
 
                 <!-- GRUPPO NOTE -->
                 <div class="settings-group">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h4 class="settings-group-title" style="margin: 0;">Note Anagrafica</h4>
+                    <div class="justify-between mb-4">
+                        <h4 class="settings-group-title m-0">Note Anagrafica</h4>
                         <button class="btn-icon-header" onclick="window.editSection('note')">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                            <span class="material-symbols-outlined icon-18">edit</span>
                         </button>
                     </div>
-                    <div class="titanium-vault"
-                        style="padding: 1.5rem; background: var(--surface-sub); border-radius: 16px;">
-                        <div id="note-view"
-                            style="font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap;">
+                    <div class="titanium-vault vault-card-sub">
+                        <div id="note-view" class="text-sm lh-relaxed text-primary text-pre">
                             -</div>
                     </div>
                 </div>

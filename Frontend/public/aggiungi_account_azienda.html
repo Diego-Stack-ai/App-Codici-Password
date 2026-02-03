@@ -17,35 +17,14 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/dashboard_common.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/account.css?v=3.7">
+    <link rel="stylesheet" href="assets/css/Protocollo.css">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.1"></script>
     <script src="assets/js/titanium-core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 
-    <style>
-        /* Form Controls Overrides per stile Legacy-to-V3 */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="tel"],
-        input[type="url"],
-        textarea {
-            background-color: rgba(255, 255, 255, 0.03) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
-        }
 
-        input:focus,
-        textarea:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 1px #3b82f6 !important;
-            background-color: rgba(255, 255, 255, 0.05) !important;
-        }
-    </style>
 </head>
 
 <body class="titanium-bg">
@@ -59,32 +38,28 @@
 
         <!-- Main Content -->
         <main class="titanium-main">
-            <div
-                style="width: 100%; max-width: 42rem; margin-left: auto; margin-right: auto; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 2rem;">
+            <div class="w-full max-w-3xl mx-auto py-8 px-6 flex-col gap-8">
 
                 <!-- 1. Identificazione -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-left: 0.25rem;">
-                        <span class="material-symbols-outlined" style="color: #3b82f6;">domain_verification</span>
-                        <h3
-                            style="color: white; font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                <div class="flex-col gap-4">
+                    <div class="flex items-center gap-2 mb-2 pl-1">
+                        <span class="material-symbols-outlined icon-accent-blue">domain_verification</span>
+                        <h3 class="text-white text-sm font-bold all-caps tracking-tight-wide m-0">
                             Identificazione</h3>
                     </div>
 
                     <div
-                        style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); backdrop-filter: blur(4px);">
+                        class="bg-slate-900-50 border border-white-5 rounded-3xl p-5 flex-col gap-4 shadow-lg backdrop-blur-sm">
                         <!-- Nome Account -->
                         <div>
                             <label
-                                style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Nome
+                                class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Nome
                                 Account</label>
-                            <div style="position: relative;">
+                            <div class="relative">
                                 <span
-                                    style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                    class="material-symbols-outlined">domain</span>
+                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">domain</span>
                                 <input id="nome-account" type="text"
-                                    style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none;"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
                                     placeholder="Es. Portale Fornitore X" />
                             </div>
                         </div>
@@ -92,43 +67,40 @@
                         <!-- Sito Web -->
                         <div>
                             <label
-                                style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Sito
+                                class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Sito
                                 Web</label>
-                            <div style="position: relative;">
+                            <div class="relative">
                                 <span
-                                    style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                    class="material-symbols-outlined">language</span>
+                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">language</span>
                                 <input id="sito-web" type="url"
-                                    style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none; color: #93c5fd;"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none text-blue-300"
                                     placeholder="https://" />
                             </div>
                         </div>
 
                         <!-- Codice Società & N. Iscrizione -->
-                        <div class="dashboard-grid-2" style="gap: 1rem;">
+                        <div class="dashboard-grid-2 gap-4">
                             <div>
                                 <label
-                                    style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Cod.
+                                    class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Cod.
                                     Società</label>
-                                <div style="position: relative;">
+                                <div class="relative">
                                     <span
-                                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                        class="material-symbols-outlined">pin</span>
+                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">pin</span>
                                     <input id="codice-societa" type="text"
-                                        style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none;"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
                                         placeholder="Cod. 123" />
                                 </div>
                             </div>
                             <div>
                                 <label
-                                    style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">N.
+                                    class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">N.
                                     Iscrizione</label>
-                                <div style="position: relative;">
+                                <div class="relative">
                                     <span
-                                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                        class="material-symbols-outlined">confirmation_number</span>
+                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">confirmation_number</span>
                                     <input id="numero-iscrizione" type="text"
-                                        style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none;"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
                                         placeholder="Iscr. 456" />
                                 </div>
                             </div>
@@ -137,28 +109,25 @@
                 </div>
 
                 <!-- 2. Credenziali -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-left: 0.25rem;">
-                        <span class="material-symbols-outlined" style="color: #10b981;">lock_person</span>
-                        <h3
-                            style="color: white; font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                <div class="flex-col gap-4">
+                    <div class="flex items-center gap-2 mb-2 pl-1">
+                        <span class="material-symbols-outlined icon-accent-emerald">lock_person</span>
+                        <h3 class="text-white text-sm font-bold all-caps tracking-tight-wide m-0">
                             Credenziali</h3>
                     </div>
 
                     <div
-                        style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); backdrop-filter: blur(4px);">
+                        class="bg-slate-900-50 border border-white-5 rounded-3xl p-5 flex-col gap-4 shadow-lg backdrop-blur-sm">
                         <!-- Utente -->
                         <div>
                             <label
-                                style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Username
+                                class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Username
                                 / Email</label>
-                            <div style="position: relative;">
+                            <div class="relative">
                                 <span
-                                    style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                    class="material-symbols-outlined">person</span>
+                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">person</span>
                                 <input id="utente" type="text"
-                                    style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none;"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
                                     placeholder="user@example.com" />
                             </div>
                         </div>
@@ -166,14 +135,13 @@
                         <!-- Account -->
                         <div>
                             <label
-                                style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Account
+                                class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Account
                                 ID</label>
-                            <div style="position: relative;">
+                            <div class="relative">
                                 <span
-                                    style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                    class="material-symbols-outlined">folder_shared</span>
+                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">folder_shared</span>
                                 <input id="account" type="text"
-                                    style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none; color: #d1d5db;"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none text-gray-300"
                                     placeholder="Codice cliente / Sottoconto" />
                             </div>
                         </div>
@@ -181,30 +149,26 @@
                         <!-- Password -->
                         <div>
                             <label
-                                style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Password</label>
-                            <div style="position: relative;">
+                                class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Password</label>
+                            <div class="relative">
                                 <span
-                                    style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                    class="material-symbols-outlined">key</span>
-                                <input id="password" type="text" class="titanium-shield"
-                                    style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 6rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none; font-family: monospace; letter-spacing: 0.05em;"
+                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">key</span>
+                                <input id="password" type="text"
+                                    class="titanium-shield w-full h-12 pl-10 pr-20 rounded-xl text-sm font-medium outline-none text-mono-wide tracking-tight-wide"
                                     placeholder="********" />
 
                                 <div
-                                    style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 0.25rem; background-color: rgba(255, 255, 255, 0.05); border-radius: 0.5rem; padding: 0.25rem; border: 1px solid rgba(255, 255, 255, 0.05);">
+                                    class="absolute-right-2-center-y flex items-center gap-1 bg-white-5 rounded-lg p-1 border border-white-5">
                                     <button type="button"
                                         onclick="const i = document.getElementById('password'); i.classList.toggle('titanium-shield'); this.querySelector('span').textContent = i.classList.contains('titanium-shield')?'visibility':'visibility_off';"
-                                        style="padding: 0.375rem; background-color: transparent; border: none; border-radius: 0.375rem; color: #9ca3af; cursor: pointer; transition: all 0.2s; display: flex; align-items: center;">
-                                        <span class="material-symbols-outlined"
-                                            style="font-size: 18px;">visibility</span>
+                                        class="p-1-5 bg-transparent border-none rounded-md text-gray-400 cursor-pointer transition-all flex items-center">
+                                        <span class="material-symbols-outlined text-18">visibility</span>
                                     </button>
-                                    <div
-                                        style="width: 1px; height: 1rem; background-color: rgba(255, 255, 255, 0.1); margin: 0 0.125rem;">
+                                    <div class="w-px h-4 bg-white-10 mx-px">
                                     </div>
                                     <button type="button" onclick="copyToClipboard('password')"
-                                        style="padding: 0.375rem; background-color: transparent; border: none; border-radius: 0.375rem; color: #9ca3af; cursor: pointer; transition: all 0.2s; display: flex; align-items: center;">
-                                        <span class="material-symbols-outlined"
-                                            style="font-size: 18px;">content_copy</span>
+                                        class="p-1-5 bg-transparent border-none rounded-md text-gray-400 cursor-pointer transition-all flex items-center">
+                                        <span class="material-symbols-outlined text-18">content_copy</span>
                                     </button>
                                 </div>
                             </div>
@@ -213,77 +177,71 @@
                 </div>
 
                 <!-- 3. Coordinate Bancarie -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;" id="banking-section">
-                    <div
-                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding-left: 0.25rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="material-symbols-outlined" style="color: #a855f7;">account_balance</span>
-                            <h3
-                                style="color: white; font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                <div class="flex-col gap-4" id="banking-section">
+                    <div class="flex items-center justify-between mb-2 pl-1">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined icon-accent-purple">account_balance</span>
+                            <h3 class="text-white text-sm font-bold all-caps tracking-tight-wide m-0">
                                 Coordinate Bancarie</h3>
                         </div>
                         <button type="button" id="btn-add-iban"
-                            style="color: #60a5fa; background-color: transparent; border: 1px solid transparent; border-radius: 0.5rem; padding: 0.375rem 0.75rem; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; gap: 0.25rem; cursor: pointer; transition: all 0.2s;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">add_circle</span> Aggiungi
+                            class="text-blue-400 bg-transparent border-none rounded-lg py-1-5 px-3 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all">
+                            <span class="material-symbols-outlined text-16">add_circle</span> Aggiungi
                             IBAN
                         </button>
                     </div>
 
-                    <div id="iban-list-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div id="iban-list-container" class="flex-col gap-4">
                         <!-- IBANs will be injected here -->
                     </div>
                 </div>
 
                 <!-- 4. Referente -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-left: 0.25rem;">
-                        <span class="material-symbols-outlined" style="color: #f97316;">assignment_ind</span>
+                <div class="flex-col gap-4">
+                    <div class="flex items-center gap-2 mb-2 pl-1">
+                        <span class="material-symbols-outlined icon-accent-orange">assignment_ind</span>
                         <h3
                             style="color: white; font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
                             Referente Aziendale</h3>
                     </div>
 
                     <div
-                        style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); backdrop-filter: blur(4px);">
+                        class="bg-slate-900-50 border border-white-5 rounded-3xl p-5 flex-col gap-4 shadow-lg backdrop-blur-sm">
                         <!-- Nome -->
                         <div>
                             <label
-                                style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Nome
+                                class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Nome
                                 e Cognome</label>
-                            <div style="position: relative;">
+                            <div class="relative">
                                 <span
-                                    style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                    class="material-symbols-outlined">badge</span>
+                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">badge</span>
                                 <input id="referente-nome" type="text"
-                                    style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none;"
+                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
                                     placeholder="Es. Mario Rossi" />
                             </div>
                         </div>
 
                         <!-- Contatti -->
-                        <div class="dashboard-grid-2" style="gap: 1rem;">
+                        <div class="dashboard-grid-2 gap-4">
                             <div>
                                 <label
-                                    style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Telefono</label>
-                                <div style="position: relative;">
+                                    class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Telefono</label>
+                                <div class="relative">
                                     <span
-                                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                        class="material-symbols-outlined">call</span>
+                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">call</span>
                                     <input id="referente-telefono" type="tel"
-                                        style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none;"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
                                         placeholder="02..." />
                                 </div>
                             </div>
                             <div>
                                 <label
-                                    style="display: block; font-size: 0.75rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Cellulare</label>
-                                <div style="position: relative;">
+                                    class="block text-xs font-semibold text-gray-400 all-caps tracking-tight-wide mb-2">Cellulare</label>
+                                <div class="relative">
                                     <span
-                                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 20px;"
-                                        class="material-symbols-outlined">smartphone</span>
+                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">smartphone</span>
                                     <input id="referente-cellulare" type="tel"
-                                        style="width: 100%; height: 3rem; padding-left: 2.5rem; padding-right: 1rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; outline: none;"
+                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
                                         placeholder="333..." />
                                 </div>
                             </div>
@@ -292,18 +250,15 @@
                 </div>
 
                 <!-- 5. Note -->
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div
-                        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; padding-left: 0.25rem;">
-                        <span class="material-symbols-outlined" style="color: #14b8a6;">sticky_note_2</span>
-                        <h3
-                            style="color: white; font-size: 0.875rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                <div class="flex-col gap-4">
+                    <div class="flex items-center gap-2 mb-2 pl-1">
+                        <span class="material-symbols-outlined icon-accent-cyan">sticky_note_2</span>
+                        <h3 class="text-white text-sm font-bold all-caps tracking-tight-wide m-0">
                             Note</h3>
                     </div>
-                    <div
-                        style="background-color: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                    <div class="bg-slate-900-50 border border-white-5 rounded-3xl overflow-hidden shadow-lg">
                         <textarea id="note"
-                            style="width: 100%; min-height: 120px; padding: 1.25rem; background: transparent; border: none; font-size: 0.875rem; color: #d1d5db; line-height: 1.625; outline: none; resize: none;"
+                            class="w-full min-h-120 p-5 bg-transparent border-none text-sm text-gray-300 lh-relaxed outline-none resize-none"
                             placeholder="Note aggiuntive..."></textarea>
                     </div>
                 </div>
