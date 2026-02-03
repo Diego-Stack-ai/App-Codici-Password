@@ -114,7 +114,8 @@
                         <div class="glass-field-container">
                             <span class="view-label" data-t="password">Password</span>
                             <div class="glass-field border-glow">
-                                <input id="detail-password" type="text" readonly class="titanium-shield field-value-password">
+                                <input id="detail-password" type="text" readonly
+                                    class="titanium-shield field-value-password">
                                 <button id="toggle-password" class="glass-field-btn">
                                     <span class="material-symbols-outlined">visibility</span>
                                 </button>
@@ -144,7 +145,8 @@
                 <section id="section-banking" class="hidden">
                     <button onclick="window.toggleBanking()" class="collapsible-trigger">
                         <div class="flex-center-gap">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-green">payments</span>
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-green">payments</span>
                             <h3 class="detail-section-title" data-t="banking_title">IBAN & Carte</h3>
                         </div>
                         <span id="banking-chevron" class="material-symbols-outlined chevron">expand_more</span>
@@ -158,7 +160,8 @@
                 <section id="section-referente" class="hidden">
                     <button onclick="window.toggleReferente()" class="collapsible-trigger">
                         <div class="flex-center-gap">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">person_pin</span>
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-blue">person_pin</span>
                             <h3 class="detail-section-title" data-t="referent_title">Referente</h3>
                         </div>
                         <span id="referente-chevron" class="material-symbols-outlined chevron">expand_more</span>
@@ -313,7 +316,7 @@
         <footer id="footer-placeholder" class="titanium-footer"></footer>
 
         <!-- Scripts -->
-        <script src="assets/js/main.js?v=3.1"></script>
+        <script type="module" src="assets/js/main.js?v=3.1"></script>
         <script type="module" src="assets/js/dettaglio_account_azienda.js?v=3.1"></script>
     </div>
 </body>
