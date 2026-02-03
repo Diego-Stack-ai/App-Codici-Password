@@ -1,27 +1,13 @@
-
 import { auth, db } from './firebase-config.js';
 import { getContacts, addContact } from './db.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import {
-    doc,
-    getDoc,
-    collection,
-    getDocs,
-    query,
-    orderBy,
-    limit,
-    where,
-    deleteDoc
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, collection, getDocs, query, orderBy, limit, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { logError } from './utils.js';
+import { showToast } from './ui-core.js';
 
-// --- DOM ELEMENTS ---
-const topAccountsList = document.getElementById('top-accounts-list');
-const rubricaList = document.getElementById('contacts-list');
-const rubricaCounter = document.getElementById('rubrica-counter');
-
-// --- STATE ---
-let editingContactId = null;
+// --- INITIALIZATION ---
+import { initComponents } from './components.js';
+import { t } from './translations.js';
 
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -29,68 +15,69 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    loadCounters(user.uid, user.email);
-    // Inject custom Titanium Metallic Styles
-    function injectMetallicStyles() {
-        if (document.getElementById('metallic-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'metallic-styles';
-        style.innerHTML = `
-            .metallic-card-titanium {
-                position: relative;
-                /* Arrotondamento gestito via Tailwind utility ma forzato qui per coerenza interna */
-                border-radius: 0.75rem; 
-                overflow: hidden;
-                background: 
-                    /* Punto luce centrale (Ridotto spread del 7%) */
-                    radial-gradient(ellipse 55% 95% at 50% 40%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 45%, rgba(255,255,255,0) 75%),
-                    /* Riflesso diagonale (Saetta) */
-                    linear-gradient(110deg, transparent 42%, rgba(255,255,255,0.06) 49%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 51%, transparent 58%),
-                    /* Gradiente base Titanio */
-                    linear-gradient(135deg, #334155 0%, #1e293b 100%);
-            }
-            .metallic-card-titanium::after {
-                content: "";
-                position: absolute;
-                inset: 0;
-                border-radius: inherit;
-                padding: 1px; /* Spessore bordo */
-                background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.3) 100%);
-                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                -webkit-mask-composite: xor;
-                mask-composite: exclude;
-                pointer-events: none;
-                z-index: 20;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    injectMetallicStyles();
+    // 1. Inizializzazione Componenti (Header/Footer Protocol V3.0)
+    await initProtocolUI();
 
+    // 2. Load Data
+    loadCounters(user.uid, user.email);
     loadTopAccounts(user.uid);
     loadRubrica(user.uid);
 });
 
+/**
+ * PROTOCOLLO UI: Gestione Header Balanced e Footer Placeholder
+ */
+async function initProtocolUI() {
+    // Carichiamo i componenti base (se necessario)
+    await initComponents();
+
+    // Iniezione Header Balanced (3 Zone)
+    const hLeft = document.getElementById('header-left');
+    const hCenter = document.getElementById('header-center');
+    const hRight = document.getElementById('header-right');
+
+    if (hLeft) {
+        hLeft.innerHTML = `
+            <button onclick="history.back()" class="btn-icon-header">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+        `;
+    }
+
+    if (hCenter) {
+        hCenter.innerHTML = `
+            <h2 class="header-title" data-t="area_privata_title">${t('area_privata_title')}</h2>
+        `;
+    }
+
+    if (hRight) {
+        hRight.innerHTML = `
+            <a href="home_page.html" class="btn-icon-header">
+                <span class="material-symbols-outlined">home</span>
+            </a>
+        `;
+    }
+
+}
+
+/**
+ * COUNTERS ENGINE: Sincronizza i badge delle card Matrix
+ */
 async function loadCounters(uid, email) {
     try {
-        const accountsRef = collection(db, "users", uid, "accounts");
-        const allSnap = await getDocs(accountsRef);
-
+        // 1. Own Accounts
+        const allSnap = await getDocs(collection(db, "users", uid, "accounts"));
         let counts = { standard: 0, memo: 0, shared: 0, sharedMemo: 0 };
-        let ownSharedStandard = 0;
-        let ownSharedMemo = 0;
 
         allSnap.forEach(doc => {
             const d = doc.data();
             if (d.isArchived) return;
-            if (d.ownerId && d.ownerId !== uid) return; // Ghost copy
-
             const isShared = !!d.shared || !!d.isMemoShared;
-            const isMemo = !!d.hasMemo || !!d.isMemoShared || d.type === 'memorandum' || d.category === 'memorandum';
+            const isMemo = !!d.isMemo || d.type === 'memorandum' || !!d.hasMemo;
 
             if (isShared) {
-                if (isMemo) ownSharedMemo++;
-                else ownSharedStandard++;
+                if (isMemo) counts.sharedMemo++;
+                else counts.shared++;
             } else if (isMemo) {
                 counts.memo++;
             } else {
@@ -98,230 +85,163 @@ async function loadCounters(uid, email) {
             }
         });
 
-        // Load Shared WITH me
-        const invitesSnap = await getDocs(query(
-            collection(db, "invites"),
-            where("recipientEmail", "==", email),
-            where("status", "==", "accepted")
-        ));
-
-        let receivedStandard = 0;
-        let receivedMemo = 0;
-
-        for (const invDoc of invitesSnap.docs) {
-            const inv = invDoc.data();
-            try {
-                let accRef = inv.aziendaId
-                    ? doc(db, "users", inv.ownerId, "aziende", inv.aziendaId, "accounts", inv.accountId)
-                    : doc(db, "users", inv.ownerId, "accounts", inv.accountId);
-
-                const accSnap = await getDoc(accRef);
-                if (accSnap.exists() && !accSnap.data().isArchived) {
-                    const d = accSnap.data();
-                    const isMemo = !!d.hasMemo || !!d.isMemoShared || d.type === 'memorandum' || d.category === 'memorandum';
-                    if (isMemo) receivedMemo++;
-                    else receivedStandard++;
+        // 2. Add counts of accounts shared WITH me (Accepted Invites)
+        try {
+            const invitesQ = query(collection(db, "invites"),
+                where("recipientEmail", "==", email),
+                where("status", "==", "accepted")
+            );
+            const invitesSnap = await getDocs(invitesQ);
+            invitesSnap.forEach(invDoc => {
+                const inv = invDoc.data();
+                if (inv.type === 'privato') {
+                    // Usually shared accounts are either standard shared or memo shared
+                    // For now, let's treat all as 'shared' unless we fetch the account to know
+                    counts.shared++;
                 }
-            } catch (e) { logError("Invite Account Load", e); }
+            });
+        } catch (e) { console.warn("Counters (Invites) error", e); }
+
+        // Update UI (Localized format with requested parentheses)
+        if (document.getElementById('count-standard')) document.getElementById('count-standard').textContent = `Account (${counts.standard})`;
+        if (document.getElementById('count-memo')) document.getElementById('count-memo').textContent = `Note (${counts.memo})`;
+        if (document.getElementById('count-shared')) document.getElementById('count-shared').textContent = `Invitati (${counts.shared})`;
+        if (document.getElementById('count-shared-memo')) document.getElementById('count-shared-memo').textContent = `Memo Team (${counts.sharedMemo})`;
+
+    } catch (e) { logError("Counters", e); }
+}
+
+/**
+ * TOP ACCOUNTS WIDGET: Rendering degli ultimi protocolli usati
+ */
+async function loadTopAccounts(uid) {
+    const list = document.getElementById('top-accounts-list');
+    if (!list) return;
+
+    try {
+        // Try with ordering (needs index)
+        let snap;
+        try {
+            const q = query(collection(db, "users", uid, "accounts"), orderBy("views", "desc"), limit(4));
+            snap = await getDocs(q);
+        } catch (err) {
+            console.warn("Top Accounts: Index for 'views' might be missing, falling back to unordered.", err);
+            const qFallback = query(collection(db, "users", uid, "accounts"), limit(20));
+            snap = await getDocs(qFallback);
         }
 
-        counts.shared = ownSharedStandard + receivedStandard;
-        counts.sharedMemo = ownSharedMemo + receivedMemo;
+        list.innerHTML = '';
 
-        updateBadge('count-standard', counts.standard, 'Account');
-        updateBadge('count-memo', counts.memo, 'Memorandum');
-        updateBadge('count-shared', counts.shared, 'Account condivisi');
-        updateBadge('count-shared-memo', counts.sharedMemo, 'Memo condivisi');
-
-    } catch (e) { logError("LoadCounters", e); }
-}
-
-function updateBadge(id, count, label) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = `${label} (${count})`;
-}
-
-async function loadTopAccounts(uid) {
-    if (!topAccountsList) return;
-    try {
-        const q = query(collection(db, "users", uid, "accounts"), orderBy("views", "desc"), limit(10));
-        const snap = await getDocs(q);
-        topAccountsList.innerHTML = '';
-
-        if (snap.empty) {
-            topAccountsList.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Nessun account recente.</p>';
+        if (!snap || snap.empty) {
+            list.innerHTML = `<p class="text-[10px] text-white/20 text-center py-6 font-bold uppercase tracking-widest">${t('no_active_data')}</p>`;
             return;
         }
 
-        snap.forEach(doc => {
-            const acc = doc.data();
-            const div = document.createElement('a');
-            div.href = `dettaglio_account_privato.html?id=${doc.id}`;
+        // Sort in memory if we used fallback
+        const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        docs.sort((a, b) => (b.views || 0) - (a.views || 0));
+        const top4 = docs.slice(0, 4);
 
-            // Apply Homepage "Urgenze/Scadenze" Button Effect
-            // Base Gradient: Dark Slate (Neutral Premium) - linear-gradient(135deg, #334155 0%, #0f172a 100%)
-            const cardGradient = 'linear-gradient(135deg, #334155 0%, #0f172a 100%)';
+        top4.forEach(acc => {
+            const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
 
-            div.setAttribute('style', `background: ${cardGradient};`);
-
-            div.className = "group flex items-center justify-between p-3 rounded-lg border-glow border-0 backdrop-blur-[10px] relative overflow-hidden shadow-lg shadow-black/20 transition-all hover:scale-[1.02]";
-
-            const logo = acc.logo || acc.avatar;
-            const iconHtml = logo
-                ? `<img class="h-9 w-9 rounded-full object-cover bg-white/10" src="${logo}">`
-                : `<div class="h-9 w-9 rounded-full bg-white/5 text-white flex items-center justify-center font-bold text-xs capitalize border border-white/20 shadow-inner">${(acc.nomeAccount || '?').charAt(0)}</div>`;
-
-            div.innerHTML = `
-                <div class="relative z-10 flex items-center gap-3">
-                    ${iconHtml}
-                    <div>
-                        <p class="text-sm font-bold text-white drop-shadow-sm">${acc.nomeAccount || 'Senza Nome'}</p>
-                        <p class="text-[10px] text-slate-300 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">visibility</span> ${acc.views || 0} visite</p>
+            const card = document.createElement('a');
+            card.href = `dettaglio_account_privato.html?id=${acc.id}`;
+            card.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group shadow-sm mb-1";
+            card.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img src="${avatar}" class="size-9 rounded-lg object-cover bg-slate-900/10 opacity-70 group-hover:opacity-100 transition-opacity">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-slate-800 group-hover:text-slate-900">${acc.nomeAccount || 'Progetto'}</span>
+                        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${acc.views || 0} Visioni</span>
                     </div>
                 </div>
-                <span class="relative z-10 material-symbols-outlined text-slate-400 group-hover:text-white transition-colors text-sm">chevron_right</span>
+                <span class="material-symbols-outlined text-slate-300 group-hover:text-blue-600 text-sm transition-all group-hover:translate-x-1">chevron_right</span>
             `;
-            topAccountsList.appendChild(div);
+            list.appendChild(card);
         });
     } catch (e) {
-        logError("LoadTopAccounts", e);
-        topAccountsList.innerHTML = 'Errore caricamento accounts';
+        logError("Top Accounts", e);
+        list.innerHTML = '<p class="text-[10px] text-red-400/30 text-center py-6">Errore caricamento</p>';
     }
 }
 
-// --- RUBRICA ---
-// --- RUBRICA ---
-const toggleRubrica = () => {
-    const content = document.getElementById('rubrica-content');
-    const chevron = document.getElementById('rubrica-chevron');
-    if (!content) return;
-    content.classList.toggle('hidden');
-    if (chevron) {
-        chevron.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';
-    }
+/**
+ * RUBRICA ENGINE: Accordion, Form, List
+ */
+const rubricaContent = document.getElementById('rubrica-content');
+const rubricaChevron = document.getElementById('rubrica-chevron');
+const rubricaList = document.getElementById('contacts-list');
+
+document.getElementById('rubrica-toggle-btn').onclick = () => {
+    const isHidden = rubricaContent.classList.toggle('hidden');
+    rubricaChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
 };
 
-const toggleAddContactForm = () => {
-    const form = document.getElementById('add-contact-form');
-    if (form) form.classList.toggle('hidden');
+document.getElementById('add-contact-btn').onclick = (e) => {
+    e.stopPropagation();
+    document.getElementById('add-contact-form').classList.toggle('hidden');
 };
-
-// Event Listeners for Rubrica Toggles
-const rubricaToggleBtn = document.getElementById('rubrica-toggle-btn');
-if (rubricaToggleBtn) {
-    rubricaToggleBtn.addEventListener('click', toggleRubrica);
-}
-
-const addContactBtn = document.getElementById('add-contact-btn');
-if (addContactBtn) {
-    addContactBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleAddContactForm();
-    });
-}
 
 async function loadRubrica(uid) {
     if (!rubricaList) return;
     try {
-        const contacts = await getContacts(uid);
-        renderContacts(contacts, uid);
-    } catch (e) { logError("LoadRubrica", e); }
-}
+        const list = await getContacts(uid);
+        document.getElementById('rubrica-counter').textContent = `(${list.length})`;
+        rubricaList.innerHTML = list.length === 0 ? `<p class="text-xs text-white/10 py-10 text-center">${t('empty_contacts')}</p>` : '';
 
-function renderContacts(list, uid) {
-    rubricaCounter.textContent = `(${list.length})`;
-    rubricaList.innerHTML = list.length === 0 ? '<p class="text-xs text-gray-400 text-center py-4">Nessun contatto</p>' : '';
-
-    // Clear previous event listeners? No need, we are replacing innerHTML.
-    // However, we should ensure the container listener is set only once.
-    // It's set outside this function.
-
-    list.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-    list.forEach(c => {
-        const div = document.createElement('div');
-        // Use injected metallic class
-        div.className = "metallic-card-titanium group flex items-center justify-between p-2 shadow-sm transition-all hover:bg-white/5 border-0";
-
-        div.innerHTML = `
-            <div class="relative z-10 flex items-center gap-3 min-w-0">
-                <div class="w-8 h-8 rounded-full bg-white/5 text-white border border-white/10 flex items-center justify-center font-bold text-xs uppercase shrink-0">${(c.nome || '?').charAt(0)}</div>
-                <div class="min-w-0">
-                    <p class="text-sm font-bold text-white truncate">${c.nome} ${c.cognome || ''}</p>
-                    <p class="text-[11px] text-gray-400 truncate">${c.email}</p>
+        list.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        list.forEach(c => {
+            const div = document.createElement('div');
+            div.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group";
+            div.innerHTML = `
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="size-8 rounded-lg bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center justify-center font-black text-xs uppercase shrink-0">${(c.nome || '?').charAt(0)}</div>
+                    <div class="min-w-0">
+                        <p class="text-xs font-black text-slate-800 truncate">${c.nome} ${c.cognome || ''}</p>
+                        <p class="text-[9px] text-slate-400 font-bold truncate">${c.email}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="relative z-10 flex items-center gap-1">
-                <button class="p-1.5 text-primary hover:text-white hover:bg-white/10 rounded-full transition-colors" data-action="email" data-email="${c.email}"><span class="material-symbols-outlined text-lg pointer-events-none">mail</span></button>
-                <button class="p-1.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors" data-action="edit" data-id="${c.id}" data-nome="${c.nome}" data-cognome="${c.cognome || ''}" data-email="${c.email}"><span class="material-symbols-outlined text-lg pointer-events-none">edit</span></button>
-                <button class="p-1.5 text-gray-500 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors" data-action="delete" data-id="${c.id}"><span class="material-symbols-outlined text-lg pointer-events-none">delete</span></button>
-            </div>
-        `;
-        rubricaList.appendChild(div);
-    });
+                <div class="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <button onclick="window.location.href='mailto:${c.email}'" class="p-2 text-slate-400 hover:text-blue-600 transition-colors"><span class="material-symbols-outlined text-lg">mail</span></button>
+                    <button onclick="deleteContact('${uid}', '${c.id}')" class="p-2 text-slate-400 hover:text-red-600 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
+                </div>
+            `;
+            rubricaList.appendChild(div);
+        });
+    } catch (e) { logError("Rubrica Engine", e); }
 }
 
-// Event Delegation for Rubrica List Actions
-if (rubricaList) {
-    rubricaList.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button');
-        if (!btn) return;
+window.deleteContact = async (uid, id) => {
+    // V3.5: Use Premium Confirm
+    const confirmed = await window.showConfirmModal(
+        "ELIMINAZIONE CONTATTO",
+        "Rimuovere definitivamente questo contatto dalla rubrica?",
+        "ELIMINA",
+        "ANNULLA"
+    );
 
-        const action = btn.dataset.action;
-        if (!action) return;
-
-        const user = auth.currentUser;
-        if (!user) return;
-
-        if (action === 'email') {
-            window.location.href = `mailto:${btn.dataset.email}`;
-        } else if (action === 'edit') {
-            openEditContact(btn.dataset.id, btn.dataset.nome, btn.dataset.cognome, btn.dataset.email);
-        } else if (action === 'delete') {
-            removeContact(user.uid, btn.dataset.id);
-        }
-    });
-}
-
-function openEditContact(id, n, c, e) {
-    editingContactId = id;
-    document.getElementById('contact-nome').value = n;
-    document.getElementById('contact-cognome').value = c;
-    document.getElementById('contact-email').value = e;
-    document.getElementById('add-contact-form').classList.remove('hidden');
-    document.getElementById('btn-add-contact').textContent = "Aggiorna";
-}
-
-async function removeContact(uid, id) {
-    if (confirm("Eliminare?")) {
+    if (confirmed) {
         try {
             await deleteDoc(doc(db, "users", uid, "contacts", id));
+            showToast(t('contact_removed'), "success");
             loadRubrica(uid);
-        } catch (err) { logError("Rubrica Delete", err); }
+        } catch (e) { logError("Rubrica Delete", e); }
     }
-}
+};
 
-const btnAdd = document.getElementById('btn-add-contact');
-if (btnAdd) {
-    btnAdd.onclick = async () => {
-        const n = document.getElementById('contact-nome').value.trim();
-        const c = document.getElementById('contact-cognome').value.trim();
-        const e = document.getElementById('contact-email').value.trim();
-        const user = auth.currentUser;
-        if (!user || !e) return;
+document.getElementById('btn-add-contact').onclick = async () => {
+    const nome = document.getElementById('contact-nome').value.trim();
+    const cognome = document.getElementById('contact-cognome').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    const user = auth.currentUser;
+    if (!user || !email) return;
 
-        try {
-            if (editingContactId) {
-                await deleteDoc(doc(db, "users", user.uid, "contacts", editingContactId));
-            }
-            await addContact(user.uid, { nome: n, cognome: c, email: e, createdAt: new Date().toISOString() });
-
-            document.getElementById('contact-nome').value = '';
-            document.getElementById('contact-cognome').value = '';
-            document.getElementById('contact-email').value = '';
-            editingContactId = null;
-            btnAdd.textContent = "Salva";
-            document.getElementById('add-contact-form').classList.add('hidden');
-            loadRubrica(user.uid);
-        } catch (err) { logError("Rubrica Save", err); }
-    };
-}
+    try {
+        await addContact(user.uid, { nome, cognome, email, createdAt: new Date().toISOString() });
+        showToast(t('identity_registered'), "success");
+        document.querySelectorAll('#add-contact-form input').forEach(i => i.value = '');
+        document.getElementById('add-contact-form').classList.add('hidden');
+        loadRubrica(user.uid);
+    } catch (e) { logError("Rubrica Add", e); }
+};

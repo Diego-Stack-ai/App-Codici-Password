@@ -20,8 +20,8 @@
 
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.1"></script>
-    <script src="assets/js/titanium-core.js?v=3.1"></script>
+
+    <script src="assets/js/core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
@@ -384,8 +384,9 @@
                     </div>
 
                     <!-- Input nascosti -->
-                    <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
-                    <input type="file" id="file-input" multiple class="hidden">
+                    <input type="file" id="camera-input" aria-label="Carica foto da fotocamera" accept="image/*"
+                        capture="environment" class="hidden">
+                    <input type="file" id="file-input" aria-label="Carica allegati" multiple class="hidden">
 
                     <!-- Lista Allegati -->
                     <div id="attachments-list" class="flex-col gap-2 px-4">

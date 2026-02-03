@@ -1,5 +1,5 @@
 import { auth, db } from './firebase-config.js';
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 /**
  * Gets the UID of the currently authenticated user.

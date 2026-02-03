@@ -1,18 +1,5 @@
 /**
- * TITANIUM CONFIG
- * Questo file DEVE essere caricato PRIMA del CDN di Tailwind.
- * Serve a forzare la modalità 'class' impedendo a Tailwind di 
- * applicare automaticamente il tema del sistema operativo.
+ * DEPRECATED
+ * La logica di configurazione è stata spostata interamente in titanium-core.js.
+ * Questo file rimane solo come placeholder per evitare errori 404 su client con cache vecchia.
  */
-window.tailwind = {
-    config: {
-        darkMode: 'class', // BLINDATURA: Ignora preferenza sistema, usa solo classi HTML
-        theme: {
-            extend: {
-                colors: {
-                    // Qui potremmo estendere la palette Titanium se necessario
-                }
-            }
-        }
-    }
-};

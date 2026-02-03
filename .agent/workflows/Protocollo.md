@@ -1,21 +1,81 @@
 ---
-
-
-
-\## description: Protocollo Titanium V3.1 Integrale – Versione Unificata con Esempi
-
-
-
-\# Protocollo Titanium V3.1 Integrale – Versione Unificata Dettagliata con Esempi
-
-
-
-Nota: Questo documento integra fedelmente i protocolli Comune, Accesso, Impostazioni e Account senza alterare testi o capitoli, riorganizzandoli e aggiungendo esempi pratici per snippet di codice, layout e componenti UI.
-
-
-
+description: Protocollo – Istruzioni Base Pagine (Titanium V4)
 ---
 
+- Istruzioni per la base delle pagine
+
+1. Il Background (Universale)
+•	Effetto Unico: Tutte le pagine del sito condividono lo stesso sfondo con gradiente e l'effetto "faro".
+2. Le Due Categorie di Pagine
+Pagine "Servizio" (index.html (Login), registrati.html, reset_password.html, imposta_nuova_password.html): Sono fisse in modalità Dark (Nero). Non hanno header/footer standard e non possono cambiare tema.
+Pagine "Contenuto" (index.html (Login), registrati.html
+reset_password.html, 
+imposta_nuova_password.html, 
+
+home_page.html (Dashboard principale), 
+privacy.html, 
+area_privata.html (Hub centrale Privati), 
+profilo_privato.html, 
+account_privati.html (Lista account), 
+aggiungi_account_privato.html, 
+dettaglio_account_privato.html,
+modifica_account_privato.html, 
+archivio_account.html (Forse storico/cestino), 
+lista_aziende.html, 
+dati_azienda.html, 
+account_azienda.html (Lista account aziendali), 
+aggiungi_nuova_azienda.html (Creazione azienda), 
+modifica_azienda.html, 
+aggiungi_account_azienda.html, 
+dettaglio_account_azienda.html, 
+modifica_account_azienda.html, 
+scadenze.html (Dashboard scadenze), 
+aggiungi_scadenza.html, 
+dettaglio_scadenza.html, 
+modifica_scadenza.html, 
+regole_scadenze.html (Gestione regole ricorrenze), 
+impostazioni.html, 
+configurazione_generali.html, 
+configurazione_documenti.html, 
+configurazione_automezzi.html, 
+gestione_allegati.html, 
+notifiche_storia.html): Hanno il layout a fasce e permettono lo switch tra Chiaro e Scuro.
+3. Layout Header (Fascia Alta)
+•	Sinistra: Solo l'icona "Freccia" (back).
+•	Centro: Nome della pagina (va su due righe se è lungo o su mobile). Se la pagina è "a tema", il titolo prende il colore del tema.
+•	Destra: Icona "Home" sempre presente (tranne che nella Home stessa).
+•	Extra: Tra titolo e Home, compare il pulsante di ordinamento (A-Z o Data) dove richiesto.
+4. Layout Footer (Fascia Bassa)
+•	Sinistra: Switch per modalità Chiaro/Scuro.
+•	Destra: Icona "Impostazioni" sempre presente (tranne che nella pagina Impostazioni).
+•	Centro: Tutte le altre icone funzionali alla pagina sono distribuite ("sparse") in questa zona.
+5. Stile delle Icone e Colori
+•	Minimalismo: Le icone non hanno bordi, cerchi o quadrati di sfondo. Sono "nude".
+•	Colore Dinamico: Le icone (e il titolo) diventano bianche o nere in base al tema scelto.
+•	Eccezione Tematica: Se una pagina ha un tema colorato specifico, le icone e il titolo adottano quel colore.
+
+
+
+
+
+6. LE 3 VARIABILI (ECCEZIONI AL PROTOCOLLO)
+Queste tre pagine hanno regole di layout specifiche che derogano dallo standard generale:
+
+*   **Home Page (`home_page.html`)**:
+    *   **Header SX**: Avatar Utente (Link a Profilo Privato). *Deroga: No Back.*
+    *   **Header DX**: Pulsante Logout. *Deroga: No Home.*
+    *   **Footer**: Pulsante Tema (SX), Vuoto (C), Pulsante Settings (DX).
+    *   **Titolo**: "HOME PAGE" (Centrato).
+
+*   **Profilo Privato (`profilo_privato.html`)**:
+    *   **Header**: Standard (Back SX, Titolo C, Home DX).
+    *   **Footer**: Standard (Tema SX, Icone C, Settings DX).
+    *   **Main**: Usa classe `.titanium-main` + `.settings-container`.
+
+*   **Impostazioni (`impostazioni.html`)**:
+    *   **Header**: Standard (Back SX, Titolo C, Home DX).
+    *   **Footer**: Settings a DX è *Presente ma Disabilitato/Opaco* (per indicare "sei qui").
+    *   **Main**: Usa classe `.titanium-main` + `.settings-container`.
 
 
 \## 1. Protocollo Comune Titanium V3.1 – Core + Performance \& Sicurezza
@@ -319,6 +379,3 @@ maskField('codice\_fiscale');
 \* Snippet pratici aggiuntivi: Cache → Render → Sync, autocomplete login, Matrix Card stopPropagation, altezza h-8 campi dati
 
 \* Specifiche Responsive complete: colonna singola Mobile/Small Mobile sotto 480px, spaziature 12–16px, nessun contenuto tagliato o sovrapposto, scroll verticale fluido
-
-
-

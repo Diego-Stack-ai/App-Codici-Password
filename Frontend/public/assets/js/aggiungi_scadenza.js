@@ -11,8 +11,6 @@ import {
 } from './scadenza_templates.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
-console.log("aggiungi_scadenza.js: Inizio caricamento modulo...");
-
 // Referenze DOM globali
 const typeSelect = document.getElementById('tipo_scadenza');
 const emailSubjectInput = document.getElementById('oggetto_email');
@@ -223,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function populateTypeSelect() {
     if (!typeSelect) return;
-    console.log("Popolamento Unificato Oggetto Email...");
     const currentVal = typeSelect.value;
     typeSelect.innerHTML = '<option value="">Seleziona Oggetto...</option>';
 
@@ -267,7 +264,6 @@ function populateTypeSelect() {
  */
 function populateEmailSelect(select) {
     if (!select) return;
-    console.log("Popolamento Email Select:", select.id);
     const currentVal = select.value;
     select.innerHTML = '<option value="">Seleziona Email...</option>';
 
@@ -292,7 +288,6 @@ function populateEmailSelect(select) {
  * Popola i menu dinamici (Veicoli e Testi Email) basati sulla regola selezionata
  */
 function updateDynamicOptions(rule) {
-    console.log("Aggiornamento Opzioni Dinamiche. Regola:", rule ? "Selezionata" : "Nessuna (Fallback Statico)");
     const modelSel = document.getElementById('modello_veicolo');
     const textSel = document.getElementById('testo_email_select');
 
@@ -345,7 +340,6 @@ function populateSimpleSelect(select, options) {
  * Caricamento Statico Immediato (Base App)
  */
 function initialStaticLoad() {
-    console.log("Esecuzione Caricamento Statico (Fallback/Default)...");
     populateTypeSelect();
     populateEmailSelect(emailPrimariaSelect);
     populateEmailSelect(emailSecondariaSelect);
@@ -358,9 +352,6 @@ function initialStaticLoad() {
 async function loadDynamicConfig() {
     if (!currentUser) return;
     try {
-        console.log("Caricamento unificato configurazioni...");
-
-        // Caricamento parallelo delle tre fonti
         const [autoSnap, docSnap, genSnap] = await Promise.all([
             getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig")),
             getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments")),
@@ -700,7 +691,6 @@ saveButton?.addEventListener('click', async () => {
         }
 
         if (editingScadenzaId) {
-            console.log("Aggiornamento scadenza esistente...");
             const docRef = doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId);
             await updateDoc(docRef, data);
 
@@ -712,7 +702,6 @@ saveButton?.addEventListener('click', async () => {
                 window.location.href = 'scadenze.html';
             }, 1000);
         } else {
-            console.log("Creazione nuova scadenza...");
             const docRef = await addDoc(collection(db, "users", currentUser.uid, "scadenze"), data);
 
             // Show Custom Success Modal
@@ -720,7 +709,6 @@ saveButton?.addEventListener('click', async () => {
         }
 
     } catch (error) {
-        console.error(error);
         if (window.showToast) {
             window.showToast("Errore salvataggio: " + error.message, "error");
         }

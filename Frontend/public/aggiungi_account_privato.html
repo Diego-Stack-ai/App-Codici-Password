@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Nuovo Account Privato - Protocollo Titanium</title>
 
@@ -26,8 +26,8 @@
     <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.1"></script>
-    <script src="assets/js/titanium-core.js?v=3.1"></script>
+
+    <script src="assets/js/core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 
 </head>
@@ -65,7 +65,7 @@
                         </div>
                     </div>
                 </div>
-                <input type="file" id="logo-input" accept="image/*" class="hidden" />
+                <input type="file" id="logo-input" aria-label="Carica logo account" accept="image/*" class="hidden" />
             </div>
 
             <!-- FORM SECTIONS -->
@@ -252,7 +252,7 @@
                                 DOCX (Max 10MB)</p>
                         </div>
                     </button>
-                    <input type="file" id="file-input" multiple class="hidden">
+                    <input type="file" id="file-input" aria-label="Carica allegati" multiple class="hidden">
                     <div id="attachments-list" class="flex-col gap-2 mt-4"></div>
                 </section>
 

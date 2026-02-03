@@ -19,8 +19,8 @@
     <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
 
     <!-- Core Engine -->
-    <script src="assets/js/titanium-config.js?v=3.1"></script>
-    <script src="assets/js/titanium-core.js?v=3.1"></script>
+
+    <script src="assets/js/core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 
     <style>
@@ -84,7 +84,8 @@
                             <span class="material-symbols-outlined text-white">edit</span>
                         </div>
                     </div>
-                    <input type="file" id="logo-upload" accept="image/*" class="hidden" onchange="previewLogo(this)">
+                    <input type="file" id="logo-upload" aria-label="Carica logo azienda" accept="image/*" class="hidden"
+                        onchange="previewLogo(this)">
                 </div>
 
                 <!-- 2. Dati Generali -->
@@ -170,8 +171,8 @@
                                     <span id="referente-photo-placeholder"
                                         class="material-symbols-outlined text-2xl text-gray-600 group-hover:text-blue-400 transition-colors">person</span>
                                 </div>
-                                <input type="file" id="referente-photo-upload" accept="image/*" class="hidden"
-                                    onchange="previewReferentePhoto(this)">
+                                <input type="file" id="referente-photo-upload" aria-label="Carica foto referente"
+                                    accept="image/*" class="hidden" onchange="previewReferentePhoto(this)">
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex justify-between items-center mb-1">

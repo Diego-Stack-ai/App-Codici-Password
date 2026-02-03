@@ -7,8 +7,8 @@
     <title data-t="home_page_title">Home Page</title>
 
     <!-- Titanium V3.1 Engine Stack -->
-    <script src="assets/js/titanium-config.js?v=3.1"></script>
-    <script src="assets/js/titanium-core.js?v=3.1"></script>
+
+    <script src="assets/js/core.js?v=3.1"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
@@ -16,7 +16,7 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- CSS Standard & Page Specific (Protocollo V3.1) -->
+    <!-- CSS Standard (Titanium Protocol V4) -->
     <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
 
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
@@ -32,13 +32,41 @@
 
 <body class="titanium-bg">
     <div class="titanium-container">
+        <!-- Faro Estetico -->
         <div class="titanium-glow"></div>
 
-        <!-- HEADER (Balanced 3-Zone) -->
-        <header id="header-placeholder" class="titanium-header"></header>
+        <!-- HEADER FISSO -->
+        <header class="titanium-header">
+            <div class="header-balanced-container">
+                <!-- Left: Foto Utente -->
+                <div class="header-left">
+                    <a href="profilo_privato.html" class="avatar-header-link" style="text-decoration: none;">
+                        <div id="header-user-avatar"
+                            style="width: 38px; height: 38px; background: rgba(255,255,255,0.1); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
+                            <!-- Fallback Icon if no image -->
+                            <span class="material-symbols-outlined" style="font-size: 24px; color: white;">person</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Center: HOME PAGE -->
+                <div class="header-center">
+                    <h1 class="header-title" data-t="home_page_title">HOME PAGE</h1>
+                </div>
+
+                <!-- Right: Logout -->
+                <div class="header-right">
+                    <button id="header-logout-btn" class="btn-icon-header"
+                        onclick="localStorage.removeItem('authToken'); window.location.href='index.html'">
+                        <span class="material-symbols-outlined">logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
         <div class="spacer-header"></div>
 
-        <!-- MAIN (Matrix Architecture V3.1) -->
+        <!-- MAIN -->
         <main class="titanium-main" data-lock-ui>
 
             <div class="matrix-grid">
@@ -123,14 +151,25 @@
         </main>
 
         <div class="spacer-footer"></div>
-    </div>
 
-    <!-- FOOTER (System Standard) -->
-    <footer id="footer-placeholder" class="titanium-footer"></footer>
+        <!-- FOOTER PREMIUM -->
+        <footer class="titanium-footer">
+            <!-- Theme Switcher (Direct JS) -->
+            <button id="theme-toggle-home" class="theme-switch-btn" onclick="
+                const html = document.documentElement;
+                const isDark = html.classList.contains('dark');
+                html.classList.toggle('dark');
+                // Force repaint if needed or saves to storage
+                localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            ">
+                <span class="material-symbols-outlined">contrast</span>
+            </button>
+        </footer>
+    </div>
 
     <!-- Scripts Modulari -->
     <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script type="module" src="assets/js/home.js?v=3.1"></script>
+    <script type="module" src="assets/js/home_page.js?v=3.1"></script>
 </body>
 
 </html>
