@@ -30,16 +30,16 @@
     <meta name="theme-color" content="#0a0f1e">
 </head>
 
-<body class="titanium-bg">
-    <div class="titanium-container">
+<body class="base-bg">
+    <div class="base-container">
         <!-- Faro Estetico -->
-        <div class="titanium-glow"></div>
+        <div class="base-glow"></div>
 
         <!-- HEADER FISSO -->
-        <header class="titanium-header">
+        <header class="base-header">
             <div class="header-balanced-container">
-                <!-- Left: Foto Utente -->
-                <div class="header-left">
+                <!-- Left: Foto Utente + Saluto -->
+                <div class="header-left" style="display: flex; align-items: center; gap: 12px; width: auto;">
                     <a href="profilo_privato.html" class="avatar-header-link" style="text-decoration: none;">
                         <div id="header-user-avatar"
                             style="width: 38px; height: 38px; background: rgba(255,255,255,0.1); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
@@ -47,12 +47,18 @@
                             <span class="material-symbols-outlined" style="font-size: 24px; color: white;">person</span>
                         </div>
                     </a>
+
+                    <!-- Saluto Spostato Qui -->
+                    <div class="flex flex-col items-start justify-center">
+                        <span id="home-greeting-text" class="text-xs font-bold uppercase tracking-widest opacity-70"
+                            style="line-height: 1; text-align: left;">...</span>
+                        <h1 id="home-user-name" class="header-title"
+                            style="margin-top: 2px; font-size: 1.1rem; text-align: left; margin: 0;">Home Page</h1>
+                    </div>
                 </div>
 
-                <!-- Center: HOME PAGE -->
-                <div class="header-center">
-                    <h1 class="header-title" data-t="home_page_title">HOME PAGE</h1>
-                </div>
+                <!-- Center: Vuoto -->
+                <div class="header-center"></div>
 
                 <!-- Right: Logout -->
                 <div class="header-right">
@@ -67,7 +73,7 @@
         <div class="spacer-header"></div>
 
         <!-- MAIN -->
-        <main class="titanium-main" data-lock-ui>
+        <main class="base-main home-main" data-lock-ui>
 
             <div class="matrix-grid">
 
@@ -153,23 +159,30 @@
         <div class="spacer-footer"></div>
 
         <!-- FOOTER PREMIUM -->
-        <footer class="titanium-footer">
-            <!-- Theme Switcher (Direct JS) -->
-            <button id="theme-toggle-home" class="theme-switch-btn" onclick="
+        <footer class="base-footer">
+            <!-- SX: Theme Switcher -->
+            <button id="theme-toggle-home" class="btn-icon-header" onclick="
                 const html = document.documentElement;
                 const isDark = html.classList.contains('dark');
                 html.classList.toggle('dark');
-                // Force repaint if needed or saves to storage
                 localStorage.setItem('theme', isDark ? 'light' : 'dark');
             ">
                 <span class="material-symbols-outlined">contrast</span>
             </button>
+
+            <!-- C: Empty Spacer -->
+            <div style="flex: 1;"></div>
+
+            <!-- DX: Settings Link -->
+            <a href="impostazioni.html" class="btn-icon-header">
+                <span class="material-symbols-outlined">settings</span>
+            </a>
         </footer>
     </div>
 
     <!-- Scripts Modulari -->
     <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script type="module" src="assets/js/home_page.js?v=3.1"></script>
+    <script type="module" src="assets/js/home.js?v=3.1"></script>
 </body>
 
 </html>

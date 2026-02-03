@@ -34,7 +34,7 @@
 
     /* GLOWS */
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgb(80 150 255 / 60%) 0%, rgb(80 150 255 / 20%) 25%, rgb(80 150 255 / 5%) 50%, transparent 75%);
-    --titanium-box-gradient: linear-gradient(to left, #030712, #162e6e);
+    --base-box-gradient: linear-gradient(to left, #030712, #162e6e);
 
     /* MAPPATURA LEGACY (Accesso Compatibility) */
     --accesso-primary: var(--primary-blue);
@@ -44,7 +44,7 @@
 }
 
 /* LIGHT MODE OVERRIDES */
-html:not(.dark, .titanium-forced-dark) {
+html:not(.dark, .base-forced-dark) {
     --bg-primary: #e2e8f0;
     --text-primary: #0f172a;
     --text-secondary: #64748b;
@@ -54,19 +54,19 @@ html:not(.dark, .titanium-forced-dark) {
     --surface-hover: rgb(255 255 255 / 90%);
     --border-color: rgb(0 0 0 / 10%);
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgb(14 165 233 / 45%) 0%, rgb(14 165 233 / 10%) 50%, transparent 70%);
-    --titanium-box-gradient: linear-gradient(to bottom right, #f8fafc, #bfdbfe);
+    --base-box-gradient: linear-gradient(to bottom right, #f8fafc, #bfdbfe);
 }
 
 /* 1. CLASSI GLOBALI (Protocollo V3.1) */
 
-.titanium-bg {
+.base-bg {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
     transition: background-color 0.3s, color 0.3s;
 }
 
-.titanium-container {
+.base-container {
     position: relative;
     display: flex;
     min-height: 100vh;
@@ -77,12 +77,12 @@ html:not(.dark, .titanium-forced-dark) {
     justify-content: flex-start;
     align-items: center;
     overflow: hidden visible;
-    background: var(--titanium-box-gradient);
+    background: var(--base-box-gradient);
     z-index: 10;
     box-shadow: 0 0 50px rgb(0 0 0 / 10%);
 }
 
-.titanium-glow {
+.base-glow {
     position: absolute;
     top: 0;
     left: 50%;
@@ -108,6 +108,24 @@ html:not(.dark, .titanium-forced-dark) {
 body {
     font-family: Manrope, sans-serif;
     overflow-x: hidden;
+}
+
+/* NASCONDI BARRA DI SCORRIMENTO (UI PULITA) */
+html,
+body,
+.base-container,
+.base-main {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
+}
+
+::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari/Webkit */
+    width: 0;
+    background: transparent;
 }
 
 /* 3. CORE ANIMATIONS */
@@ -188,8 +206,25 @@ body {
     z-index: 10;
 }
 
+.base-btn-primary {
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.base-btn-primary:hover {
+    background-color: var(--primary-light);
+}
+
 /* VAULT & BORDER GLOW */
-.titanium-vault {
+.base-card {
     position: relative;
     background: var(--surface-vault);
     backdrop-filter: blur(24px);
@@ -222,8 +257,8 @@ body {
 }
 
 /* 5. HEADER & FOOTER (Protocollo V3.1) */
-.titanium-header,
-.titanium-footer {
+.base-header,
+.base-footer {
     position: fixed;
     left: 0;
     right: 0;
@@ -235,19 +270,20 @@ body {
     pointer-events: auto;
 }
 
-.titanium-header {
+.base-header {
     top: 0;
     height: var(--header-height);
 }
 
-.titanium-footer {
+.base-footer {
     bottom: 0;
     height: 80px;
-    justify-content: center;
+    justify-content: space-between;
+    /* Standard: SX, C, DX */
 }
 
-.titanium-header::before,
-.titanium-footer::before {
+.base-header::before,
+.base-footer::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -258,16 +294,16 @@ body {
     border-radius: 0 0 24px 24px;
 }
 
-.titanium-footer::before {
+.base-footer::before {
     border-radius: 24px 24px 0 0;
 }
 
-.titanium-header::before {
+.base-header::before {
     mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
-.titanium-footer::before {
+.base-footer::before {
     mask-image: linear-gradient(to top, black 40%, transparent 100%);
     -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
 }
@@ -352,7 +388,7 @@ body {
 }
 
 /* 6. COMMON CONTAINERS (Titanium Standard) */
-.titanium-main {
+.base-main {
     flex: 1;
     width: 100%;
     max-width: 1200px;
@@ -363,7 +399,113 @@ body {
     position: relative;
     isolation: isolate;
     box-sizing: border-box;
+    padding-right: env(safe-area-inset-right);
 }
+
+.home-main {
+    padding: 0.8rem !important;
+    /* Padding Ridotto (0.8rem) */
+}
+
+
+
+/* MATRIX GRID SYSTEM (Standard Boxed V3.1) */
+.matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    /* Gap Standard */
+    width: 100%;
+}
+
+.matrix-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0;
+    /* ZERO PADDING (Gestito da Inner) */
+    min-height: 160px;
+    background: var(--surface-vault);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+    height: auto !important;
+    overflow: visible;
+}
+
+/* INNER PADDING CONTAINER (Separazione architetturale) */
+.matrix-card-inner {
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem;
+    /* Padding spostato qui */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: inherit;
+    box-sizing: border-box;
+    z-index: 2;
+    /* Sopra agli effetti di sfondo */
+}
+
+.matrix-card:active {
+    transform: scale(0.98);
+    background: var(--surface-hover);
+}
+
+.matrix-icon-box {
+    margin-bottom: 0.5rem;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* LISTA INTERNA (Scadenze / Urgenze) */
+.dashboard-list {
+    width: 100%;
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow: hidden;
+    /* Taglia se esce */
+}
+
+.dashboard-list>div {
+    /* Stile per gli item della lista (anche skeleton) */
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* Card Colors */
+.card-blue {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), transparent);
+}
+
+.card-green {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), transparent);
+}
+
+.card-orange {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent);
+}
+
+.card-red {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), transparent);
+}
+
 
 .dashboard-grid-2 {
     display: grid;

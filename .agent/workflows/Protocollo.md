@@ -65,7 +65,7 @@ Queste tre pagine hanno regole di layout specifiche che derogano dallo standard 
     *   **Header SX**: Avatar Utente (Link a Profilo Privato). *Deroga: No Back.*
     *   **Header DX**: Pulsante Logout. *Deroga: No Home.*
     *   **Footer**: Pulsante Tema (SX), Vuoto (C), Pulsante Settings (DX).
-    *   **Titolo**: "HOME PAGE" (Centrato).
+    *   **Titolo**: "Home Page" (Title Case, Centrato).
 
 *   **Profilo Privato (`profilo_privato.html`)**:
     *   **Header**: Standard (Back SX, Titolo C, Home DX).

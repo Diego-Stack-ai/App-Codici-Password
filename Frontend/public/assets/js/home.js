@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     isDomReady = true;
 
-    // Inizializzazione Componenti (Header/Footer Puri)
+    // Inizializzazione Componenti (Eventuale logica shared, no injection)
     initComponents().then(() => {
-        setupUILayout();
+        // setupUILayout(); // RIMOSSO: HTML Statico gestisce la struttura
         if (cachedUser) renderHeaderUser(cachedUser);
     });
 
@@ -129,11 +129,9 @@ async function renderHeaderUser(user) {
     // Update AppState
     if (window.AppState) window.AppState.user = user;
 
-    const uAvatar = document.getElementById('user-avatar');
-    const uName = document.getElementById('user-name');
-    const greeting = document.getElementById('greeting-text');
-
-    if (!uAvatar || !uName) return;
+    const uAvatar = document.getElementById('header-user-avatar');
+    const uGreeting = document.getElementById('home-greeting-text'); // Piccolo (Buongiorno)
+    const uName = document.getElementById('home-user-name');         // Grande (Nome)
 
     // Helper: Friendly Name
     const toFriendlyName = (name) => {
@@ -141,38 +139,45 @@ async function renderHeaderUser(user) {
         return name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
-    // 1. Basic Auth Info (Immediato)
+    // 1. Dati Iniziali
     let displayName = toFriendlyName(user.displayName || user.email.split('@')[0]);
-    uName.textContent = displayName;
-    if (user.photoURL) {
+
+    // 2. Calcolo Saluto
+    const h = new Date().getHours();
+    let timeGreeting = "Benvenuto";
+    if (h >= 5 && h < 13) timeGreeting = "Buongiorno";
+    else if (h >= 13 && h < 18) timeGreeting = "Buon pomeriggio";
+    else timeGreeting = "Buonasera";
+
+    // Applica Subito (Auth Data)
+    if (uGreeting) uGreeting.textContent = timeGreeting;
+    if (uName) uName.textContent = displayName;
+
+    if (user.photoURL && uAvatar) {
         uAvatar.style.backgroundImage = `url("${user.photoURL}")`;
         uAvatar.style.backgroundSize = 'cover';
-        const icon = uAvatar.querySelector('span');
-        if (icon) icon.style.display = 'none';
+        uAvatar.innerHTML = ''; // Rimuove icona fallback
     }
 
-    // 2. Saluto Temporale
-    if (greeting) {
-        const h = new Date().getHours();
-        const key = (h >= 5 && h < 13) ? "greeting_morning"
-            : (h >= 13 && h < 17) ? "greeting_afternoon"
-                : "greeting_evening";
-        greeting.textContent = t(key);
-    }
-
-    // 3. Firestore Info (Completo)
+    // 3. Firestore Info (Dati Completi Async)
     try {
         const docSnap = await getDoc(doc(db, "users", user.uid));
         if (docSnap.exists()) {
             const data = docSnap.data();
             const fullName = toFriendlyName(`${data.nome || ''} ${data.cognome || ''}`.trim());
-            if (fullName) uName.textContent = fullName;
+
+            if (fullName) {
+                displayName = fullName;
+                if (uName) uName.textContent = displayName;
+            }
+            // Aggiorna anche il saluto (ridondante ma sicuro)
+            if (uGreeting) uGreeting.textContent = timeGreeting;
+
             const photo = data.photoURL || data.avatar;
-            if (photo) {
+            if (photo && uAvatar) {
                 uAvatar.style.backgroundImage = `url("${photo}")`;
                 uAvatar.style.backgroundSize = 'cover';
-                const icon = uAvatar.querySelector('span');
-                if (icon) icon.style.display = 'none';
+                uAvatar.innerHTML = '';
             }
         }
     } catch (e) {
