@@ -32,7 +32,8 @@ export function initLockedUX() {
 
     // 2. Blocco Menu Contestuale (App Blinda)
     document.addEventListener('contextmenu', (e) => {
-        const tag = e.target.tagName.toLowerCase();
+        const target = e.target;
+        const tag = (target && target.tagName) ? target.tagName.toLowerCase() : '';
         if (tag !== 'input' && tag !== 'textarea') {
             e.preventDefault();
         }
@@ -40,7 +41,8 @@ export function initLockedUX() {
 
     // 3. Blocco Selezione Browser (Backup per vecchi motori)
     document.addEventListener('selectstart', (e) => {
-        const tag = e.target.tagName.toLowerCase();
+        const target = e.target;
+        const tag = (target && target.tagName) ? target.tagName.toLowerCase() : '';
         if (tag !== 'input' && tag !== 'textarea') {
             e.preventDefault();
         }
@@ -56,6 +58,7 @@ export function showToast(message, type = 'success') {
 
     // Auto-creazione o reset se mancante
     if (!toast) {
+        if (!document.body) return; // Protezione se chiamato troppo presto
         toast = document.createElement('div');
         toast.id = 'toast';
         document.body.appendChild(toast);
@@ -158,7 +161,12 @@ export function showWarningModal(title, message, callback = null) {
     `;
 
     modal.appendChild(content);
-    document.body.appendChild(modal);
+
+    if (document.body) {
+        document.body.appendChild(modal);
+    } else {
+        document.addEventListener('DOMContentLoaded', () => document.body.appendChild(modal));
+    }
 
     // Animazione ingresso
     setTimeout(() => {
@@ -235,7 +243,11 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
         `;
 
         modal.appendChild(content);
-        document.body.appendChild(modal);
+        if (document.body) {
+            document.body.appendChild(modal);
+        } else {
+            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(modal));
+        }
 
         // Animazione
         setTimeout(() => {
@@ -316,7 +328,11 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
         `;
 
         modal.appendChild(content);
-        document.body.appendChild(modal);
+        if (document.body) {
+            document.body.appendChild(modal);
+        } else {
+            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(modal));
+        }
 
         const input = content.querySelector('input');
         const cancelBtn = content.querySelector('#modal-cancel-btn');

@@ -12,10 +12,9 @@ import { t } from './translations.js';
 let currentUserUid = null;
 let currentUserData = {};
 let contactEmails = [];
-let userUtilities = [];
-let userDocuments = [];
-let contactPhones = []; // New Dynamic Phones Array
 let userAddresses = []; // New Dynamic Addresses Array
+let contactPhones = []; // New Dynamic Phones Array
+let userDocuments = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     setupAccordions();
@@ -469,11 +468,12 @@ async function saveEmails() {
 
 // --- REFACTORED ATTACHMENT MANAGER (Generic) ---
 let managerTargetType = 'email'; // 'email' | 'document'
-let currentManageIndex = null;
+let currentManageParentIndex = null; // Used for nested items like utilities in addresses
 let currentManageAttachments = [];
 
-window.openAttachmentManager = (index, type = 'email') => {
+window.openAttachmentManager = (index, type = 'email', parentIndex = null) => {
     currentManageIndex = index;
+    currentManageParentIndex = parentIndex;
     managerTargetType = type;
 
     let sourceArr, item, title, sub;
@@ -487,8 +487,9 @@ window.openAttachmentManager = (index, type = 'email') => {
         item = sourceArr[index];
         title = "Gestisci Allegati Documento";
         sub = item?.type || '';
+        sub = item?.type || '';
     } else if (type === 'utility') {
-        sourceArr = userUtilities;
+        sourceArr = userAddresses[parentIndex].utilities;
         item = sourceArr[index];
         title = "Gestisci Allegati Utenza";
         sub = item?.type || '';
@@ -603,8 +604,8 @@ window.saveManagerAttachments = async () => {
         sourceArr = userDocuments;
         fieldName = 'documenti';
     } else if (managerTargetType === 'utility') {
-        sourceArr = userUtilities;
-        fieldName = 'utenze';
+        sourceArr = userAddresses[currentManageParentIndex].utilities;
+        fieldName = 'userAddresses';
     }
 
     // Update local state
@@ -612,9 +613,8 @@ window.saveManagerAttachments = async () => {
 
     // Save to Firestore
     try {
-        await updateDoc(doc(db, "users", currentUserUid), {
-            [fieldName]: sourceArr
-        });
+        const payload = managerTargetType === 'utility' ? { userAddresses } : { [fieldName]: sourceArr };
+        await updateDoc(doc(db, "users", currentUserUid), payload);
         window.location.reload();
     } catch (e) {
         notify("Errore salvataggio: " + e.message, 'error');
@@ -846,25 +846,21 @@ function renderAddressesView() {
                     </div>
                 </div>
                 <div class="titanium-action-grid">
-                    <!-- VIEW BUTTON -->
                     <button class="titanium-action-btn btn-view" 
                             title="Visualizza Dettagli"
                             onclick="event.preventDefault(); window.showAddressDetails(${index})">
                         <span class="material-symbols-outlined" style="font-size:16px;">visibility</span>
                     </button>
-                    <!-- COPY BUTTON -->
                     <button class="titanium-action-btn btn-copy" 
                             title="Copia Indirizzo"
                             onclick="event.preventDefault(); navigator.clipboard.writeText('${(fullAddr + ' ' + cityInfo).replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
                         <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
                     </button>
-                    <!-- EDIT BUTTON -->
                     <button class="titanium-action-btn btn-edit" 
                             title="Modifica"
                             onclick="event.preventDefault(); window.editAddress(${index})">
                         <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
                     </button>
-                    <!-- DELETE BUTTON -->
                     <button class="titanium-action-btn btn-delete" 
                             title="Elimina"
                             onclick="event.preventDefault(); window.deleteAddress(${index})">
@@ -872,8 +868,97 @@ function renderAddressesView() {
                     </button>
                 </div>
             </div>
+            
+            <!-- SEZIONE UTENZE DENTRO L'INDIRIZZO -->
+            <div id="utenze-container-${index}" style="margin-top:1.5rem; padding-top:1.2rem; border-top:1px dashed rgba(255,255,255,0.1);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span class="material-symbols-outlined" style="font-size:18px; color:var(--primary-blue);">bolt</span>
+                        <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-secondary);">Utenze Associate</span>
+                    </div>
+                    <button onclick="event.preventDefault(); window.openAddUtilityPane(${index})" 
+                            style="background:rgba(34, 211, 238, 0.1); border:1px solid rgba(34, 211, 238, 0.2); color:#22d3ee; border-radius:8px; padding:4px 8px; font-size:0.7rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;">
+                        <span class="material-symbols-outlined" style="font-size:14px;">add</span> AGGIUNGI
+                    </button>
+                </div>
+                
+                <div id="pane-add-utility-${index}" class="accordion-content" style="margin-bottom:1rem;">
+                    <div style="background:rgba(0,0,0,0.2); padding:1rem; border-radius:16px; border:1px solid var(--border-color);">
+                        <div style="display:grid; gap:0.75rem;">
+                            <input type="text" id="util-type-${index}" placeholder="Tipo (Luce, Gas...)" class="titanium-input" style="font-size:0.85rem; padding:0.6rem;">
+                            <input type="text" id="util-value-${index}" placeholder="Codice POD/PDR" class="titanium-input" style="font-size:0.85rem; padding:0.6rem; font-family:monospace;">
+                            <div style="display:flex; gap:0.5rem;">
+                                <button onclick="window.closeAddUtilityPane(${index})" class="titanium-btn-secondary" style="flex:1; padding:0.5rem; font-size:0.75rem;">ANNULLA</button>
+                                <button onclick="window.confirmSaveUtility(${index})" class="titanium-btn-primary" style="flex:1; padding:0.5rem; font-size:0.75rem;">SALVA</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="utilities-list-${index}" class="flex-col-gap-3">
+                    <!-- Lista Renderizzata via JS -->
+                </div>
+            </div>
         `;
         container.appendChild(div);
+        renderUtilitiesInAddress(index);
+    });
+}
+
+window.openAddUtilityPane = (index) => {
+    document.getElementById(`pane-add-utility-${index}`).classList.add('show');
+};
+
+window.closeAddUtilityPane = (index) => {
+    document.getElementById(`pane-add-utility-${index}`).classList.remove('show');
+    document.getElementById(`util-type-${index}`).value = '';
+    document.getElementById(`util-value-${index}`).value = '';
+};
+
+function renderUtilitiesInAddress(addrIndex) {
+    const container = document.getElementById(`utilities-list-${addrIndex}`);
+    if (!container) return;
+    container.innerHTML = '';
+
+    const addr = userAddresses[addrIndex];
+    const utils = addr.utilities || [];
+
+    if (utils.length === 0) {
+        container.innerHTML = `<p style="text-align:center; opacity:0.3; font-size:0.7rem; padding:0.5rem;">Nessuna utenza per questo indirizzo</p>`;
+        return;
+    }
+
+    utils.forEach((u, uIdx) => {
+        const item = document.createElement('div');
+        item.style.cssText = "display:flex; flex-direction:column; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:0.8rem; border-radius:12px; gap:0.5rem;";
+
+        let attachmentsHtml = '';
+        if (u.attachments && u.attachments.length > 0) {
+            u.attachments.forEach(att => {
+                attachmentsHtml += `
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.2rem;">
+                        <span class="material-symbols-outlined" style="font-size:14px; opacity:0.6;">attachment</span>
+                        <a href="${att.url}" target="_blank" style="color:#22d3ee; font-size:0.75rem; text-decoration:underline; word-break:break-all;">${att.name}</a>
+                    </div>
+                `;
+            });
+        }
+
+        item.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+                <div style="flex:1; min-width:0;">
+                    <div style="font-size:0.6rem; text-transform:uppercase; font-weight:800; color:var(--text-secondary); margin-bottom:2px;">${u.type}</div>
+                    <div style="font-size:0.85rem; font-weight:600; font-family:monospace; word-break:break-all;">${u.value}</div>
+                </div>
+                <div style="display:flex; gap:0.4rem;">
+                    <button class="titanium-action-btn" onclick="window.openAttachmentManager(${uIdx}, 'utility', ${addrIndex})" style="color:#22d3ee; background:none; border:none; cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">add_circle</span></button>
+                    <button onclick="window.editUtenza(${addrIndex}, ${uIdx})" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:4px;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></button>
+                    <button onclick="window.deleteUtenza(${addrIndex}, ${uIdx})" style="background:none; border:none; color:rgba(239,68,68,0.7); cursor:pointer; padding:4px;"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+                </div>
+            </div>
+            ${attachmentsHtml ? `<div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:0.5rem;">${attachmentsHtml}</div>` : ''}
+        `;
+        container.appendChild(item);
     });
 }
 
@@ -949,19 +1034,9 @@ window.deleteAddress = async (index) => {
     const addr = userAddresses[index];
     if (!addr) return;
 
-    // Generate Label to check usage
-    const labelToCheck = `${addr.address}, ${addr.city} (${addr.type})`;
-
-    // Check if used in utilities
-    const usedIn = userUtilities.filter(u => u.address_label === labelToCheck);
-
-    let msg = "Eliminare questo indirizzo?";
-    if (usedIn.length > 0) {
-        msg = `ATTENZIONE: Questo indirizzo è associato a ${usedIn.length} utenze. Se lo elimini, quelle utenze perderanno il riferimento. Confermi l'eliminazione?`;
-    }
-
-    const confirmed = await window.showConfirmModal(msg);
+    const confirmed = await window.showConfirmModal("Eliminare questo indirizzo?");
     if (!confirmed) return;
+
 
     userAddresses.splice(index, 1);
     saveAddresses();
@@ -1140,197 +1215,51 @@ async function savePhones() {
     }
 }
 
-// --- RENDERING: UTENZE ---
-function renderUtenzeView() {
-    const container = document.getElementById('utenze-view-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    // 1. ADD PANE (Internal Pane V3.0) - ULTRA PREMIUM DESIGN
-    let addrOptions = '<option value="" style="color:black;">Nessun indirizzo collegato</option>';
-    userAddresses.forEach(a => {
-        const val = `${a.address}, ${a.city} (${a.type})`;
-        addrOptions += `<option value="${val}" style="color:black;">${a.type}: ${a.address}, ${a.city}</option>`;
-    });
-
-    const addPane = document.createElement('div');
-    addPane.id = 'pane-add-utility';
-    addPane.className = 'accordion-content';
-    addPane.innerHTML = `
-        <div class="settings-group" style="margin-top:0.5rem; margin-bottom:2rem; padding:0; overflow:hidden; border:1px solid var(--border-color); background:var(--surface-vault); backdrop-filter:blur(20px); border-radius:24px; position:relative;">
-            <div style="position:absolute; top:-20%; right:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%); filter:blur(40px); pointer-events:none;"></div>
-            
-            <div style="padding:1.5rem; position:relative; z-index:1;">
-                <h4 style="color:var(--text-primary); margin-bottom:1.2rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; font-weight:800;">Nuova Utenza</h4>
-                <div style="display:grid; gap:1rem;">
-                    <div class="glass-field-titanium">
-                        <label class="field-label" style="color:var(--text-secondary);">Tipologia Servizio</label>
-                        <input type="text" id="util-type" placeholder="Es. Energia Elettrica, Gas, Fibra" class="titanium-input">
-                    </div>
-                    <div class="glass-field-titanium">
-                        <label class="field-label" style="color:var(--text-secondary);">Codice User / POD</label>
-                        <input type="text" id="util-value" placeholder="Es. IT001E..." class="titanium-input" style="font-family:monospace;">
-                    </div>
-                    <div class="glass-field-titanium">
-                        <label class="field-label" style="color:var(--text-secondary);">Indirizzo Fornitura</label>
-                        <select id="util-address" class="titanium-input">
-                            ${addrOptions}
-                        </select>
-                    </div>
-                </div>
-
-                <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
-                    <button onclick="document.getElementById('pane-add-utility').classList.remove('show')" class="titanium-btn-secondary" style="flex:1;">ANNULLA</button>
-                    <button onclick="window.confirmSaveUtility(null)" class="titanium-btn-primary" style="flex:1;">SALVA</button>
-                </div>
-            </div>
-        </div>
-    `;
-    container.appendChild(addPane);
-
-    // 2. Add Button (Trigger)
-    const addBtn = document.createElement('button');
-    addBtn.className = 'auth-btn accordion-header';
-    addBtn.dataset.target = 'pane-add-utility';
-    addBtn.style.cssText = "text-align:center; justify-content:center; margin-bottom:1rem; min-height:3rem; padding:0.5rem 1rem; font-size:0.9rem; width:100%;";
-    addBtn.innerHTML = `<span class="material-symbols-outlined" style="margin-right:0.5rem;">add_circle</span> Aggiungi Utenza`;
-    container.appendChild(addBtn);
-
-    if (userUtilities.length === 0) {
-        const p = document.createElement('p');
-        p.style.cssText = "text-align:center; opacity:0.5; font-size:0.8rem; padding:1rem;";
-        p.textContent = "Nessuna utenza registrata";
-        container.appendChild(p);
-        window.setupAccordions();
-        return;
-    }
-
-    const validLabels = userAddresses.map(a => `${a.address}, ${a.city} (${a.type})`);
-    userUtilities.forEach((u, index) => {
-        const div = document.createElement('fieldset');
-        div.className = "glass-field-titanium glass-field-amber";
-        div.style.marginBottom = "0.75rem";
-
-        let addrHtml = u.address_label ? `
-            <div style="font-size:0.75rem; opacity:0.8; margin-top:0.3rem; display:flex; align-items:center; gap:0.4rem; color:${validLabels.includes(u.address_label) ? 'inherit' : '#ef4444'};">
-                <span class="material-symbols-outlined" style="font-size:14px;">home</span>
-                ${u.address_label}
-            </div>` : '';
-
-        // Sezione Allegati Utenza
-        let utenteAttachmentsHtml = '<span class="field-value" style="opacity:0.7;">-</span>';
-        if (u.attachments && u.attachments.length > 0) {
-            utenteAttachmentsHtml = `<div style="display:flex; flex-direction:column; gap:0.5rem;">`;
-            u.attachments.forEach((att, attIndex) => {
-                utenteAttachmentsHtml += `
-                    <div style="display:flex; align-items:center; gap:0.5rem; justify-content:space-between;">
-                        <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:0;">
-                             <span class="material-symbols-outlined" style="font-size:16px;">attachment</span>
-                             <a href="${att.url}" target="_blank" style="color:#22d3ee; text-decoration:underline; font-size:0.85rem; word-break:break-all; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${att.name}</a>
-                        </div>
-                    </div>
-                `;
-            });
-            utenteAttachmentsHtml += `</div>`;
-        }
-
-        const attachmentsSection = `
-            <div style="width:100%; margin-top:1rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem;">
-                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                     <span class="field-label" style="opacity:0.7;">Allegati</span>
-                     <button onclick="event.preventDefault(); window.openAttachmentManager(${index}, 'utility')" 
-                             style="background:none; border:none; color:#22d3ee; cursor:pointer; display:flex; align-items:center;">
-                        <span class="material-symbols-outlined">add_circle</span>
-                     </button>
-                 </div>
-                 ${utenteAttachmentsHtml}
-            </div>
-        `;
-
-        div.innerHTML = `
-            <legend class="field-label">${u.type || 'Utenza'}</legend>
-            <div style="display:flex; flex-direction:column; width:100%;">
-                <div style="display:flex; justify-content:space-between; align-items:start; width:100%; gap:0.5rem;">
-                    <div style="flex:1; min-width:0;">
-                        <span class="field-value" style="word-break:break-all;">${u.value || '-'}</span>
-                        ${addrHtml}
-                    </div>
-                    <div class="titanium-action-grid">
-                        <button class="titanium-action-btn btn-edit" onclick="window.editUtenza(${index})">
-                            <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
-                        </button>
-                        <button class="titanium-action-btn btn-delete" onclick="window.deleteUtenza(${index})">
-                            <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
-                        </button>
-                        <button class="titanium-action-btn btn-copy" onclick="navigator.clipboard.writeText(\`${u.value?.replace(/`/g, '\\`') || ''}\`).then(() => window.showToast('Copiato!'))">
-                            <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
-                        </button>
-                    </div>
-                </div>
-                ${attachmentsSection}
-            </div>
-        `;
-        container.appendChild(div);
-    });
-}
-
-// Unified Utility Logic
-window.editUtenza = async (index) => {
-    const u = userUtilities[index];
-    if (!u) return;
-
-    const result = await window.showFormModal("Modifica Utenza", [
-        { id: 'type', label: 'Gestore / Tipo', value: u.type || '', type: 'text' },
-        { id: 'value', label: 'Valore (POD/PDR/Codice)', value: u.value || '', type: 'text' },
-        { id: 'address', label: 'Indirizzo Associato', value: u.address || '', type: 'text' }
-    ]);
-
-    if (result) {
-        u.type = result.type.trim();
-        u.value = result.value.trim();
-        u.address = result.address.trim();
-        saveUtenze();
-    }
-};
-
-window.confirmSaveUtility = (editIndex) => {
-    const typeEl = document.getElementById('util-type');
-    const valEl = document.getElementById('util-value');
-    const addrEl = document.getElementById('util-address');
+// --- RENDERING: UTENZE REMOVED (NOW NESTED IN ADDRESSES) ---
+window.confirmSaveUtility = (addrIndex) => {
+    const typeEl = document.getElementById(`util-type-${addrIndex}`);
+    const valEl = document.getElementById(`util-value-${addrIndex}`);
 
     if (!typeEl || !valEl) return;
 
     const type = typeEl.value.trim();
     const val = valEl.value.trim();
-    const addr = addrEl ? addrEl.value : '';
 
     if (!type || !val) {
         notify("Inserisci Tipo e Valore", 'error');
         return;
     }
 
-    const newUtil = { type, value: val, address_label: addr };
-    if (editIndex !== null) userUtilities[editIndex] = newUtil;
-    else userUtilities.push(newUtil);
+    if (!userAddresses[addrIndex].utilities) userAddresses[addrIndex].utilities = [];
+    userAddresses[addrIndex].utilities.push({ type, value: val, attachments: [] });
 
-    saveUtenze();
+    saveAddresses();
 };
 
-window.deleteUtenza = async (index) => {
+window.editUtenza = async (addrIndex, uIdx) => {
+    const addr = userAddresses[addrIndex];
+    const u = addr.utilities[uIdx];
+    if (!u) return;
+
+    const result = await window.showFormModal("Modifica Utenza", [
+        { id: 'type', label: 'Gestore / Tipo', value: u.type || '', type: 'text' },
+        { id: 'value', label: 'Valore (POD/PDR/Codice)', value: u.value || '', type: 'text' }
+    ]);
+
+    if (result) {
+        u.type = result.type.trim();
+        u.value = result.value.trim();
+        saveAddresses();
+    }
+};
+
+window.deleteUtenza = async (addrIndex, uIdx) => {
     const confirmed = await window.showConfirmModal("Eliminare questa utenza?");
     if (!confirmed) return;
 
-    userUtilities.splice(index, 1);
-    saveUtenze();
+    userAddresses[addrIndex].utilities.splice(uIdx, 1);
+    saveAddresses();
 };
-
-function saveUtenze() {
-    updateDoc(doc(db, "users", currentUserUid), {
-        utenze: userUtilities
-    }).then(() => {
-        renderUtenzeView();
-    }).catch(e => notify("Errore salvataggio: " + e.message, 'error'));
-}
 
 // --- RENDERING: DOCUMENTI ---
 function renderDocumentiView() {
@@ -1817,7 +1746,7 @@ onAuthStateChanged(auth, async (user) => {
             // Render QR Flags
             renderPersonalDataFlags();
 
-            // Residenza (Dynamic Migration)
+            // Residenza & Utenze (Dynamic Migration)
             userAddresses = currentUserData.userAddresses || [];
             if (userAddresses.length === 0 && currentUserData.residence_address) {
                 userAddresses.push({
@@ -1826,13 +1755,26 @@ onAuthStateChanged(auth, async (user) => {
                     civic: currentUserData.residence_civic || '',
                     cap: currentUserData.residence_cap || '',
                     city: currentUserData.residence_city || '',
-                    province: currentUserData.residence_province || ''
+                    province: currentUserData.residence_province || '',
+                    utilities: []
                 });
+            }
+
+            // AUTO MIGRATION: Se ci sono utenze globali, spostale nella prima residenza
+            const globalUtils = currentUserData.utenze || [];
+            if (globalUtils.length > 0 && userAddresses.length > 0) {
+                if (!userAddresses[0].utilities || userAddresses[0].utilities.length === 0) {
+                    userAddresses[0].utilities = globalUtils;
+                    // Reset global utenze to avoid loop or duplication
+                    await updateDoc(doc(db, "users", user.uid), {
+                        userAddresses: userAddresses,
+                        utenze: []
+                    });
+                }
             }
             renderAddressesView();
 
             // Contatti
-            // Contatti (Dynamic Migration)
             contactPhones = currentUserData.contactPhones || [];
             if (contactPhones.length === 0) {
                 if (currentUserData.mobile_private) contactPhones.push({ type: 'Cellulare', number: currentUserData.mobile_private });
@@ -1849,9 +1791,6 @@ onAuthStateChanged(auth, async (user) => {
                 contactEmails.push({ address: currentUserData.email || user.email, visible: true, attachments: [] });
             }
             renderEmailsView();
-
-            userUtilities = currentUserData.utenze || [];
-            renderUtenzeView();
 
             userDocuments = currentUserData.documenti || [];
             renderDocumentiView();

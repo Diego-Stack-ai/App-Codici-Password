@@ -15,8 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/comune.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
 
     <!-- Core Engine -->
     <script src="assets/js/titanium-config.js?v=3.1"></script>
@@ -79,8 +78,8 @@
                                 <span class="guida-step-num">1</span>
                                 <p class="text-tiny text-secondary lh-relaxed m-0">Puoi
                                     gestire ogni voce della pagina (<span class="text-primary bold">Dati Personali,
-                                        Residenza,
-                                        Utilità, Documenti, Contatti, Note</span>) utilizzando i tasti "+" o "edit"
+                                        Residenza / Utenze, Email, Documenti, Contatti, Note</span>) utilizzando i tasti
+                                    "+" o "edit"
                                     dedicati.</p>
                             </div>
                             <div class="flex-center-gap-3">
@@ -172,9 +171,10 @@
                                         <span class="material-symbols-outlined">home</span>
                                     </div>
                                     <div class="settings-text">
-                                        <span class="settings-label" data-t="profile_addresses">Residenza</span>
-                                        <span class="settings-desc" data-t="profile_addresses_desc">Indirizzo e
-                                            locazione</span>
+                                        <span class="settings-label" data-t="profile_addresses">Residenza /
+                                            Utenze</span>
+                                        <span class="settings-desc" data-t="profile_addresses_desc">Gestisci indirizzi e
+                                            utenze associate</span>
                                     </div>
                                 </div>
                                 <div class="settings-actions">
@@ -215,25 +215,7 @@
                 <div class="settings-group">
                     <h4 class="settings-group-title">Servizi & Documenti</h4>
 
-                    <div class="settings-item accordion-header" data-target="utenze-box">
-                        <div class="settings-item-header">
-                            <div class="settings-item-info">
-                                <div class="settings-icon-box icon-box-amber">
-                                    <span class="material-symbols-outlined">bolt</span>
-                                </div>
-                                <div class="settings-text">
-                                    <span class="settings-label" data-t="profile_utilities">Utenze</span>
-                                    <span class="settings-desc" data-t="profile_utilities_desc">Luce, Gas, Acqua</span>
-                                </div>
-                            </div>
-                            <div class="settings-actions">
-                                <span class="material-symbols-outlined settings-chevron">expand_more</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="utenze-box" class="accordion-content">
-                        <div id="utenze-view-container" class="flex-col-gap-4"></div>
-                    </div>
+                    <!-- UTENZE RIMOSSE DA QUI (SPOSTATE SOTTO GLI INDIRIZZI) -->
 
                     <div class="settings-item accordion-header" data-target="documenti-box">
                         <div class="settings-item-header">
