@@ -1,6 +1,6 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 /**
  * HOME PAGE MODULE (Nuova Versione - Protocollo.1)
@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Renderizza Info Utente (Header)
         await renderHeaderUser(user);
+
+        // Renderizza Scadenze e Urgenze
+        await renderDashboardDeadlines(user);
     });
 
     // Logout Handler (Delegato se il bottone esiste staticamente)
@@ -121,6 +124,97 @@ function setAvatarImage(element, url) {
         element.style.backgroundImage = `url("${url}")`;
         element.style.backgroundSize = 'cover';
     }
+}
+
+/**
+ * Carica e renderizza i badge e le mini-liste di Scadenze e Urgenze
+ */
+async function renderDashboardDeadlines(user) {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const thirtyDaysLater = new Date(today);
+        thirtyDaysLater.setDate(today.getDate() + 30);
+
+        const scadenzeRef = collection(db, "users", user.uid, "scadenze");
+        const snap = await getDocs(scadenzeRef);
+
+        const expired = [];
+        const upcoming = [];
+
+        snap.forEach(d => {
+            const data = d.data();
+            if (data.completed) return;
+
+            const dueDateValue = data.dueDate || data.date;
+            if (!dueDateValue) return;
+
+            const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
+            dueDate.setHours(0, 0, 0, 0);
+
+            if (dueDate < today) {
+                expired.push({ ...data, id: d.id, dateObj: dueDate });
+            } else if (dueDate >= today && dueDate <= thirtyDaysLater) {
+                upcoming.push({ ...data, id: d.id, dateObj: dueDate });
+            }
+        });
+
+        // Ordinamento
+        expired.sort((a, b) => a.dateObj - b.dateObj);
+        upcoming.sort((a, b) => a.dateObj - b.dateObj);
+
+        // Update UI Badge Scadenze (Prossime)
+        const upBadge = document.getElementById('upcoming-count-badge');
+        const upCount = document.getElementById('upcoming-count');
+        const upList = document.getElementById('upcoming-list-container');
+
+        if (upCount) upCount.textContent = upcoming.length;
+        if (upBadge) {
+            upBadge.style.opacity = upcoming.length > 0 ? "1" : "0.3";
+        }
+        if (upList) {
+            upList.innerHTML = upcoming.slice(0, 3).map(item => renderMiniItem(item, today)).join('');
+        }
+
+        // Update UI Badge Urgenze (Scadute)
+        const exBadge = document.getElementById('expired-count-badge');
+        const exCount = document.getElementById('expired-count');
+        const exList = document.getElementById('expired-list-container');
+
+        if (exCount) exCount.textContent = expired.length;
+        if (exBadge) {
+            exBadge.style.opacity = expired.length > 0 ? "1" : "0.3";
+        }
+        if (exList) {
+            exList.innerHTML = expired.slice(0, 3).map(item => renderMiniItem(item, today)).join('');
+        }
+
+    } catch (e) {
+        console.error("Errore caricamento dashboard:", e);
+    }
+}
+
+function renderMiniItem(item, today) {
+    const diffTime = item.dateObj - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    let label = "";
+    if (diffDays < 0) label = "Scaduto";
+    else if (diffDays === 0) label = "Oggi";
+    else if (diffDays === 1) label = "Domani";
+    else label = `${diffDays}g`;
+
+    return `
+        <div class="micro-list-item">
+            <div class="item-content">
+                <div class="item-icon-box">
+                    <span class="material-symbols-outlined">${item.icon || 'event'}</span>
+                </div>
+                <span class="item-title">${item.title}</span>
+            </div>
+            <span class="item-badge">${label}</span>
+        </div>`;
 }
 
 

@@ -1,12 +1,20 @@
-/* ==================== PROTOCOLLO BASE (Struttura Core) ==================== */
+/* ==========================================================================
+   PROTOCOLLO 1 - CORE & DESIGN SYSTEM
+   ========================================================================== */
 
-/* -------------------- VARIABILI -------------------- */
+/* 
+   --------------------------------------------------------------------------
+   SEZIONE 1: PROTOCOLLO BASE (Universale per tutte le pagine)
+   --------------------------------------------------------------------------
+*/
+
+/* --- 1.1 VARIABILI & TEMI --- */
 :root {
     --bg-primary: #0a0f1e;
     --text-primary: #fff;
     --text-secondary: rgba(255, 255, 255, 0.5);
     --surface-glass: rgba(15, 25, 50, 0.4);
-    --surface-vault: rgba(10, 15, 30, 0.5);
+    --surface-core: rgba(10, 15, 30, 0.5);
     --surface-hover: rgba(20, 30, 60, 0.6);
     --border-color: rgba(255, 255, 255, 0.1);
 
@@ -14,7 +22,7 @@
     --base-box-gradient: linear-gradient(to left, #030712, #162e6e);
     --header-height: 80px;
 
-    /* Variabili Premium (Titanium Standard) */
+    /* Variabili Premium (Standard) */
     --premium-border-width: 1.5px;
     --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
 }
@@ -25,7 +33,7 @@ html:not(.dark) {
     --text-primary: #0f172a;
     --text-secondary: #64748b;
     --surface-glass: rgba(255, 255, 255, 0.7);
-    --surface-vault: rgba(255, 255, 255, 0.6);
+    --surface-core: rgba(255, 255, 255, 0.6);
     --surface-hover: rgba(255, 255, 255, 0.9);
     --border-color: rgba(0, 0, 0, 0.1);
 
@@ -33,7 +41,7 @@ html:not(.dark) {
     --base-box-gradient: linear-gradient(to bottom right, #f8fafc, #bfdbfe);
 }
 
-/* -------------------- RESET -------------------- */
+/* --- 1.2 RESET & STRUTTURA CORPO --- */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -41,33 +49,27 @@ html:not(.dark) {
 }
 
 body {
-    font-family: Manrope, sans-serif;
+    font-family: 'Manrope', sans-serif;
     background: var(--bg-primary);
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
 }
 
-/* NASCONDI BARRA DI SCORRIMENTO (UI PULITA) */
+/* NASCONDI BARRA DI SCORRIMENTO */
 html,
 body,
 .base-container,
 .base-main {
     scrollbar-width: none;
-    /* Firefox */
     -ms-overflow-style: none;
-    /* IE 10+ */
 }
 
 ::-webkit-scrollbar {
     display: none;
-    /* Chrome/Safari/Webkit */
-    width: 0;
-    background: transparent;
 }
 
-
-/* -------------------- UTILITÀ BASE (Strumenti Core) -------------------- */
+/* --- 1.3 UTILITÀ BASE --- */
 .flex {
     display: flex;
 }
@@ -120,8 +122,7 @@ body,
     opacity: 0.7;
 }
 
-/* -------------------- CONTAINER & FARO -------------------- */
-
+/* --- 1.4 CONTAINER & EFFETTO DIFFUSION --- */
 .base-container {
     position: relative;
     display: flex;
@@ -163,7 +164,7 @@ body,
     }
 }
 
-/* -------------------- HEADER & FOOTER MASTER (Standard Glassmorphism) -------------------- */
+/* --- 1.5 HEADER & FOOTER MASTER --- */
 .base-header,
 .base-footer {
     position: fixed;
@@ -174,57 +175,36 @@ body,
     display: flex;
     align-items: center;
     padding: 0 1.5rem;
-    pointer-events: auto;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .base-header {
     top: 0;
     height: 80px;
+    border-radius: 0 0 24px 24px;
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 
 .base-footer {
     bottom: 0;
     height: 80px;
     justify-content: space-between;
-}
-
-.base-header::before,
-.base-footer::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    backdrop-filter: blur(12px);
-    pointer-events: none;
-    background: var(--surface-glass);
-    border-radius: 0 0 24px 24px;
-}
-
-.base-footer::before {
     border-radius: 24px 24px 0 0;
-}
-
-/* EFFETTO SFUMATURA (Mask Template from Master) */
-.base-header::before {
-    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-}
-
-.base-footer::before {
     mask-image: linear-gradient(to top, black 40%, transparent 100%);
     -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
 }
 
-/* LAYOUT HEADER */
 .header-balanced-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 100%;
-    gap: 0.5rem;
     max-width: 48rem;
     margin: 0 auto;
+    gap: 0.5rem;
 }
 
 .header-left,
@@ -232,7 +212,6 @@ body,
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    flex-shrink: 0;
     min-width: 44px;
 }
 
@@ -240,20 +219,16 @@ body,
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
     text-align: center;
-    min-width: 0;
 }
 
 .header-title {
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin: 0;
     letter-spacing: 0.1em;
 }
 
-/* Pulsanti Icona Header/Footer (Standard Fixed) */
 .btn-icon-header {
     width: 42px;
     height: 42px;
@@ -264,23 +239,10 @@ body,
     background: transparent;
     border: none;
     color: var(--text-primary);
-    text-decoration: none;
     transition: transform 0.2s;
-    /* Solo scale, no background col */
     cursor: pointer;
     font-size: 24px;
-    -webkit-tap-highlight-color: transparent;
-    /* Rimuove box colorato su mobile */
     outline: none;
-}
-
-.btn-icon-header:hover,
-.btn-icon-header:active,
-.btn-icon-header:focus {
-    background: transparent;
-    border: none;
-    outline: none;
-    box-shadow: none;
 }
 
 .btn-icon-header:hover {
@@ -297,88 +259,38 @@ body,
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    flex-shrink: 0;
 }
 
 .header-avatar-box img {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     object-fit: cover;
-    display: block;
 }
 
-.header-avatar-icon {
-    font-size: 24px;
-    color: var(--text-primary);
-}
-
-#home-greeting-text {
-    color: var(--text-secondary);
-}
-
-/* SPACERS */
+/* --- 1.6 SPACERS & MAIN --- */
 .spacer-header {
     height: 80px;
-    width: 100%;
-    flex-shrink: 0;
 }
 
 .spacer-footer {
     height: 100px;
-    /* Un po' più alto per sicurezza scroll */
-    width: 100%;
-    flex-shrink: 0;
 }
 
-/* -------------------- MAIN AREA -------------------- */
 .base-main {
     flex: 1;
-    width: 100%;
     position: relative;
     z-index: 2;
-    background: transparent;
-    padding: 1.5rem;
-    padding-top: 1rem;
-}
-
-/* ========================================================================== */
-/* ==================== PULSANTI HOME PAGE ==================== */
-
-/* --- EFFETTI ESTETICI AVANZATI --- */
-.border-glow {
-    position: relative;
-    border: none !important;
-}
-
-.border-glow::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: var(--premium-border-width);
-    background: var(--premium-border-gradient);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: xor;
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.adaptive-shadow {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-}
-
-.adaptive-shadow:hover {
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+    padding: 1.5rem 1.5rem 1rem;
 }
 
 
+/* 
+   --------------------------------------------------------------------------
+   SEZIONE 2: PROTOCOLLO HOME (Specifico per home_page.html)
+   --------------------------------------------------------------------------
+*/
 
-/* -------------------- GRID SYSTEM (Responsive Prova) -------------------- */
+/* --- 2.1 GRID SYSTEM (Matrix Layout) --- */
 .matrix-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -389,12 +301,10 @@ body,
     gap: 1.25rem;
     width: 100%;
     padding: 1.5rem;
-    box-sizing: border-box;
     max-width: 1100px;
     margin: 0 auto;
 }
 
-/* Assegnazione Aree */
 .area-privato {
     grid-area: privato;
 }
@@ -413,37 +323,12 @@ body,
 
 @media (max-width:480px) {
     .matrix-grid {
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-            "privato azienda"
-            "scadenze scadenze"
-            "urgenze urgenze";
-        padding-left: 14px;
-        padding-right: 14px;
+        padding: 0 14px;
         gap: 0.9rem;
     }
-
-    .matrix-card {
-        min-height: 130px;
-        padding: 1.1rem;
-    }
-
-    .card-text-block h3 {
-        font-size: 0.95rem;
-    }
-
-    .card-text-block p {
-        font-size: 0.75rem;
-    }
 }
 
-@media (min-width:900px) {
-    .matrix-grid {
-        gap: 1.5rem;
-    }
-}
-
-/* -------------------- CARD -------------------- */
+/* --- 2.2 CARD CORE (Base & Hover) --- */
 .matrix-card {
     display: flex;
     flex-direction: column;
@@ -457,10 +342,7 @@ body,
     color: var(--text-primary);
     padding: 1.5rem;
     min-height: 180px;
-    width: 100%;
-    margin: 0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-sizing: border-box;
 }
 
 .matrix-card:active {
@@ -468,33 +350,115 @@ body,
     background: var(--surface-hover);
 }
 
-.matrix-icon-box {
-    margin-bottom: 0.5rem;
-    padding: 12px;
-    border-radius: 16px;
-    background: transparent;
+/* --- 2.3 EFFETTI CARD (Glow & Shadow) --- */
+.border-glow {
     position: relative;
+    border: none !important;
+}
+
+.border-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--premium-border-width);
+    background: var(--premium-border-gradient);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.adaptive-shadow {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.adaptive-shadow:hover {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+}
+
+/* --- 2.4 ELEMENTI DASHBOARD (Badge & Mini-Liste) --- */
+.badge-count {
+    padding: 2px 10px;
+    background: rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    border: 1px solid rgba(var(--accent-rgb, 255, 255, 255), 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: opacity 0.5s ease;
+}
+
+.micro-dashboard-list {
+    width: 100%;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     z-index: 10;
 }
 
-.card-text-block {
-    position: relative;
-    z-index: 10;
+.micro-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
 }
 
-.card-text-block h3 {
-    margin-bottom: 0.25rem;
+.micro-list-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
 }
 
-.card-text-block p {
-    opacity: 1;
-    font-size: 0.9rem;
+.micro-list-item .item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
 }
 
-/* --- COLORI E GRADIENTI (Spostati a fine file per precedenza) --- */
+.micro-list-item .item-icon-box {
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.micro-list-item .item-icon-box span {
+    font-size: 18px;
+}
+
+.micro-list-item .item-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    color: #fff;
+}
+
+.micro-list-item .item-badge {
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    color: #fff;
+}
+
+/* --- 2.5 GRADIENTI CARD (Colori Tematici) --- */
 .card-blue {
-    --accent-rgb: 0, 180, 255;
-    background: linear-gradient(135deg, rgba(0, 180, 255, 0.5), rgba(0, 80, 180, 0.3)) !important;
+    --accent-rgb: 0, 210, 255;
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.5), rgba(0, 120, 230, 0.3)) !important;
 }
 
 .card-green {
@@ -512,9 +476,9 @@ body,
     background: linear-gradient(135deg, rgba(255, 30, 0, 0.5), rgba(80, 0, 0, 0.3)) !important;
 }
 
-/* VARIANTI LIGHT MODE */
+/* --- 2.6 LIGHT MODE SPECIFICO HOME --- */
 html:not(.dark) .card-blue {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(0, 150, 255, 0.4)) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(0, 190, 255, 0.4)) !important;
 }
 
 html:not(.dark) .card-green {
@@ -527,4 +491,48 @@ html:not(.dark) .card-orange {
 
 html:not(.dark) .card-red {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 30, 0, 0.4)) !important;
+}
+
+html:not(.dark) .badge-count {
+    color: #0f172a;
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .micro-list-item {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+html:not(.dark) .micro-list-item .item-title {
+    color: #0f172a;
+}
+
+html:not(.dark) .micro-list-item .item-icon-box {
+    color: #475569;
+}
+
+html:not(.dark) .micro-list-item .item-badge {
+    background: rgba(0, 0, 0, 0.08);
+    color: #0f172a;
+}
+
+/* --- 2.7 MOBILE SPECIFICO HOME --- */
+@media (max-width:480px) {
+    .matrix-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .matrix-card {
+        min-height: 130px;
+        padding: 1.1rem;
+    }
+
+    .card-text-block h3 {
+        font-size: 0.95rem;
+    }
+
+    .card-text-block p {
+        font-size: 0.75rem;
+    }
 }
