@@ -13,6 +13,10 @@
     --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
     --base-box-gradient: linear-gradient(to left, #030712, #162e6e);
     --header-height: 80px;
+
+    /* Variabili Premium (Titanium Standard) */
+    --premium-border-width: 1.5px;
+    --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
 }
 
 /* LIGHT MODE OVERRIDES */
@@ -341,22 +345,59 @@ body,
 /* ========================================================================== */
 /* ==================== PULSANTI HOME PAGE ==================== */
 
-/* COLORI CARD (Gradienti Originali) */
+/* --- EFFETTI ESTETICI AVANZATI --- */
+.border-glow {
+    position: relative;
+    border: none !important;
+}
+
+.border-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--premium-border-width);
+    background: var(--premium-border-gradient);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.adaptive-shadow {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.adaptive-shadow:hover {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+}
+
+/* --- COLORI E GRADIENTI --- */
 .card-blue {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), transparent);
+    --accent-rgb: 37, 99, 235;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.4), transparent);
 }
 
 .card-green {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), transparent);
+    --accent-rgb: 16, 185, 129;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), transparent);
 }
 
 .card-orange {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent);
+    --accent-rgb: 245, 158, 11;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), transparent);
 }
 
 .card-red {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), transparent);
+    --accent-rgb: 239, 68, 68;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), transparent);
 }
+
+
 
 
 /* -------------------- GRID SYSTEM (Responsive Prova) -------------------- */
@@ -433,8 +474,7 @@ body,
     align-items: center;
     justify-content: center;
     text-align: center;
-    background: var(--surface-vault);
-    backdrop-filter: blur(12px);
+
     border-radius: 24px;
     border: 1px solid var(--border-color);
     text-decoration: none;
