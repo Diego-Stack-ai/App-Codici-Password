@@ -97,11 +97,28 @@ async function renderHeaderUser(user) {
     }
 }
 
-// Helper per impostare l'immagine avatar
+// Helper per impostare l'immagine avatar (Versione Tag IMG)
 function setAvatarImage(element, url) {
     if (!url) return;
-    element.style.backgroundImage = `url("${url}")`;
-    element.style.backgroundSize = 'cover';
-    element.style.backgroundPosition = 'center';
-    element.innerHTML = ''; // Rimuove l'icona di fallback
+
+    // Se l'elemento passato è il BOX, cerchiamo l'immagine dentro
+    let img = element.querySelector('img');
+    if (!img) {
+        // Se non c'è, forse l'elemento passato è già l'immagine o l'ID era quello del box
+        img = document.getElementById('user-avatar-img');
+    }
+
+    if (img) {
+        img.src = url;
+        // FIX FOTO GIGANTE: Forziamo le dimensioni
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '50%';
+    } else {
+        // Fallback robusto
+        console.warn("Elemento img avatar non trovato, uso background su container");
+        element.style.backgroundImage = `url("${url}")`;
+        element.style.backgroundSize = 'cover';
+    }
 }
