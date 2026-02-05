@@ -1275,7 +1275,6 @@ html:not(.dark) .micro-list-item .item-badge {
     border: 1px solid var(--border-color);
     transition: all 0.2s ease;
     text-decoration: none;
-    margin-bottom: 0.5rem;
 }
 
 .micro-list-item:hover {
