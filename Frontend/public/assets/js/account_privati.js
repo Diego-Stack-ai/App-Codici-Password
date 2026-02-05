@@ -3,192 +3,155 @@ import { SwipeList } from './swipe-list-v6.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { logError } from './utils.js';
+import { t } from './translations.js';
+import { initComponents } from './components.js';
 
 // --- STATE ---
 let allAccounts = [];
 let currentUser = null;
 let currentSwipeList = null;
-// Track IDs of shared accounts to exclude them from standard list
 let sharedAccountIds = new Set();
-let sortOrder = 'asc'; // Restored state
+let sortOrder = 'asc';
 const APP_VERSION = "v1.2 (Swipe Fix)";
 
 const logDebug = (msg) => console.log(`[${APP_VERSION}] ${msg}`);
 
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    const toast = document.createElement('div');
-    let bgClass = 'bg-gray-800 text-white';
-    if (type === 'error') bgClass = 'bg-red-500 text-white';
-    if (type === 'success') bgClass = 'bg-green-500 text-white';
-    toast.className = `${bgClass} px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-full opacity-0 pointer-events-auto`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.remove('translate-y-full', 'opacity-0'));
-    setTimeout(() => {
-        toast.classList.add('translate-y-full', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
 const THEMES = {
     standard: {
-        fabBg: ['bg-blue-600', 'hover:bg-blue-700', 'shadow-[0_0_15px_rgba(37,99,235,0.4)]', 'text-white'],
-        cardBorder: 'border-blue-500/30',
-        glowDetails: 'shadow-blue-500/20'
+        accent: 'rgba(80, 150, 255, 0.6)'
     },
     shared: {
-        fabBg: ['bg-purple-600', 'hover:bg-purple-700', 'shadow-[0_0_15px_rgba(147,51,234,0.4)]', 'text-white'],
-        cardBorder: 'border-purple-500/30',
-        glowDetails: 'shadow-purple-500/20'
+        accent: 'rgba(147, 51, 234, 0.6)'
     },
     memo: {
-        fabBg: ['bg-amber-600', 'hover:bg-amber-700', 'shadow-[0_0_15px_rgba(217,119,6,0.4)]', 'text-white'],
-        cardBorder: 'border-amber-500/30',
-        glowDetails: 'shadow-amber-500/20'
+        accent: 'rgba(245, 158, 11, 0.6)'
     },
     shared_memo: {
-        fabBg: ['bg-emerald-600', 'hover:bg-emerald-700', 'shadow-[0_0_15px_rgba(5,150,105,0.4)]', 'text-white'],
-        cardBorder: 'border-emerald-500/30',
-        glowDetails: 'shadow-emerald-500/20'
+        accent: 'rgba(16, 185, 129, 0.6)'
     }
 };
 
-function applyTheme(type) {
-    const theme = THEMES[type] || THEMES.standard;
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        // 1. Init UI (Protocol Standard)
+        await initProtocolUI();
+        // 2. Load Data
+        await loadAccounts();
+    } else {
+        setTimeout(() => window.location.href = 'index.html', 1000);
+    }
+});
 
-    // Helper to swap classes
-    const updateClasses = (id, classKeys) => {
-        const el = document.getElementById(id);
-        if (!el) return;
+async function initProtocolUI() {
+    await initComponents();
 
-        // Remove old theme classes
-        Object.values(THEMES).forEach(t => {
-            if (t.fabBg) el.classList.remove(...t.fabBg);
-        });
-
-        // Add new theme classes
-        if (classKeys === 'fabBg' && theme.fabBg) el.classList.add(...theme.fabBg);
-    };
-
-    updateClasses('add-account-btn', 'fabBg');
-    // Header remains neutral (Titanium Standard) - No JS modification needed for header/title
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("App Version:", APP_VERSION);
-
-    // Apply Theme immediately
+    // Header Setup
+    const hLeft = document.getElementById('header-left');
+    const hCenter = document.getElementById('header-center');
+    const hRight = document.getElementById('header-right');
     const urlParams = new URLSearchParams(window.location.search);
     const type = urlParams.get('type') || 'standard';
-    applyTheme(type);
 
-    // Visual Version Indicator (Temporary for debugging)
-    const title = document.getElementById('page-title');
-    if (title) title.setAttribute('title', APP_VERSION);
+    if (hLeft) {
+        hLeft.innerHTML = `<button onclick="window.location.href='area_privata.html'" class="btn-icon-header"><span class="material-symbols-outlined">arrow_back</span></button>`;
+    }
+    if (hCenter) {
+        let titleKey = "section_personal_accounts";
+        if (type === 'shared') titleKey = "section_shared_accounts";
+        else if (type === 'memo') titleKey = "section_note";
+        else if (type === 'shared_memo') titleKey = "section_shared_note";
+        hCenter.innerHTML = `<h2 class="header-title" data-t="${titleKey}">${t(titleKey)}</h2>`;
+    }
+    if (hRight) {
+        hRight.innerHTML = `
+            <div class="flex items-center gap-2">
+                <button id="sort-btn" class="btn-icon-header" title="Ordina">
+                    <span class="material-symbols-outlined">sort_by_alpha</span>
+                </button>
+                <a href="home_page.html" class="btn-icon-header">
+                    <span class="material-symbols-outlined">home</span>
+                </a>
+            </div>
+        `;
+        document.getElementById('sort-btn').onclick = toggleSort;
+    }
 
-    const searchInput = document.querySelector('input[type="search"]');
-    const sortBtn = document.getElementById('sort-btn');
+    // Footer Functional Center: Add Button
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        const theme = THEMES[type] || THEMES.standard;
+        fCenter.innerHTML = `
+            <button onclick="window.location.href='aggiungi_account_privato.html?type=${type}'" 
+                    id="add-account-btn" 
+                    class="btn-icon-header" 
+                    style="background: ${theme.accent}; color: white; border-radius: 50%; width: 50px; height: 50px; margin-top: -30px; border: 2px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+                <span class="material-symbols-outlined">add</span>
+            </button>
+        `;
+    }
 
+    // Apply translations to everything
+    const searchInput = document.getElementById('account-search');
     if (searchInput) {
         searchInput.addEventListener('input', filterAndRender);
     }
+}
+window.togglePin = async (id, isOwner, ownerId) => {
+    if (!currentUser) return;
+    const acc = allAccounts.find(a => a.id === id);
+    if (!acc) return;
 
-    if (sortBtn) {
-        sortBtn.onclick = toggleSort;
-    }
+    const newVal = !acc.isPinned;
+    acc.isPinned = newVal;
+    filterAndRender();
 
-    const container = document.getElementById('accounts-container');
-    if (container) {
-        container.onclick = function (e) {
-            const btn = e.target.closest('.copy-btn-dynamic');
-            if (btn) {
-                e.preventDefault(); e.stopPropagation();
-                const text = btn.getAttribute('data-copy');
-                navigator.clipboard.writeText(text).then(() => {
-                    const icon = btn.querySelector('span');
-                    const old = icon.textContent; icon.textContent = 'check';
-                    setTimeout(() => icon.textContent = old, 1500);
-                    showToast("Copiato negli appunti!");
-                });
-            }
-        };
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            logDebug("User loggato: " + user.email);
-            await loadAccounts();
+    try {
+        if (isOwner) {
+            await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), { isPinned: newVal });
         } else {
-            logDebug("User non loggato. Reindirizzo...");
-            setTimeout(() => window.location.href = 'index.html', 1000);
+            showToast("Pin su condivisi non persistente (Demo)", "info");
+        }
+    } catch (e) {
+        logError("Pin Toggle", e);
+        acc.isPinned = !newVal; // Revert
+        filterAndRender();
+        showToast("Errore nel modificare lo stato Pin", "error");
+    }
+};
+
+// Password Visibility Toggle
+window.toggleTripleVisibility = (id) => {
+    const eye = document.getElementById(`pass-eye-${id}`);
+    const passText = document.getElementById(`pass-text-${id}`);
+    const card = document.getElementById(`acc-${id}`);
+
+    if (!card || !eye || !passText) return;
+
+    // Recupera la password dal pulsante copia
+    let passVal = '••••••••';
+    const copyBtns = card.querySelectorAll('.copy-btn-dynamic');
+    copyBtns.forEach(btn => {
+        const title = (btn.getAttribute('title') || '').toLowerCase();
+        if (title.includes('password')) {
+            passVal = btn.getAttribute('data-copy') || passVal;
         }
     });
 
-    // Global Pin/Unpin function
-    window.togglePin = async (id, isOwner, ownerId) => {
-        if (!currentUser) return;
-        const acc = allAccounts.find(a => a.id === id);
-        if (!acc) return;
+    const isHidden = eye.textContent.trim() === 'visibility';
+    const dots = '••••••••';
 
-        const newVal = !acc.isPinned;
-        acc.isPinned = newVal;
-        filterAndRender();
+    if (isHidden) {
+        // Mostra password
+        eye.textContent = 'visibility_off';
+        passText.textContent = passVal;
+    } else {
+        // Nascondi password
+        eye.textContent = 'visibility';
+        passText.textContent = dots;
+    }
+};
 
-        try {
-            if (isOwner) {
-                await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), { isPinned: newVal });
-            } else {
-                showToast("Pin su condivisi non persistente (Demo)", "info");
-            }
-        } catch (e) {
-            logError("Pin Toggle", e);
-            acc.isPinned = !newVal; // Revert
-            filterAndRender();
-            showToast("Errore nel modificare lo stato Pin", "error");
-        }
-    };
-
-    // Unified Visibility Toggle (User, Account, Password)
-    window.toggleTripleVisibility = (id) => {
-        const eye = document.getElementById(`pass-eye-${id}`);
-        const userText = document.getElementById(`user-text-${id}`);
-        const accText = document.getElementById(`acc-text-${id}`);
-        const passText = document.getElementById(`pass-text-${id}`);
-
-        const card = document.getElementById(`acc-${id}`);
-        if (!card || !eye) return;
-
-        // Retrieve real values from copy buttons in the same card
-        const copyBtns = card.querySelectorAll('.copy-btn-dynamic');
-        let userVal = '', accVal = '', passVal = '';
-
-        copyBtns.forEach(btn => {
-            const title = (btn.getAttribute('title') || '').toLowerCase();
-            const val = btn.getAttribute('data-copy') || '';
-            if (title.includes('username') || title.includes('utente')) userVal = val;
-            else if (title.includes('account')) accVal = val;
-            else if (title.includes('password')) passVal = val;
-        });
-
-        const isHidden = eye.textContent === 'visibility';
-        const dots = '********';
-
-        if (isHidden) {
-            eye.textContent = 'visibility_off'; // Show "Hide" icon
-            if (userText) userText.textContent = userVal;
-            if (accText) accText.textContent = accVal;
-            if (passText) passText.textContent = passVal;
-        } else {
-            eye.textContent = 'visibility'; // Show "Show" icon
-            if (userText) userText.textContent = dots;
-            if (accText) accText.textContent = dots;
-            if (passText) passText.textContent = dots;
-        }
-    };
-});
 
 async function loadAccounts() {
     try {
@@ -341,7 +304,7 @@ function renderList(list) {
     if (!container) return;
 
     if (list.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 opacity-50"><p>Nessun account trovato.</p></div>`;
+        container.innerHTML = `<div class="text-center py-10 opacity-50"><p>${t('no_accounts_found')}</p></div>`;
         return;
     }
 
@@ -359,127 +322,83 @@ function renderList(list) {
 
         const isPinned = !!acc.isPinned;
         const pinIcon = 'push_pin';
-        // Pin Button Style using CSS Variables
-        const pinStyle = isPinned
-            ? 'color: var(--text-primary); opacity: 1;'
-            : 'color: var(--text-secondary); opacity: 0.5;';
-
-        const dots = '********';
+        const pinStyle = isPinned ? 'opacity: 1; color: var(--text-primary);' : 'opacity: 0.3;';
+        const dots = '••••••••';
 
         return `
-            <div class="relative overflow-hidden select-none swipe-row h-full shadow-lg border-glow saetta transition-all duration-300 hover:-translate-y-1 group" 
-                 style="touch-action: pan-y; border-radius: 24px;"
-                 id="acc-${acc.id}" 
-                 data-id="${acc.id}"
-                 data-owner="${acc.isOwner}"
-                 data-owner-id="${acc.ownerId || ''}">
+            <div class="micro-account-card swipe-row" id="acc-${acc.id}" 
+                 data-id="${acc.id}" data-owner="${acc.isOwner}" data-owner-id="${acc.ownerId || ''}">
               
               <!-- BACKGROUND ACTIONS -->
-              <div class="absolute inset-y-0 left-0 flex w-full swipe-bg-left opacity-0 transition-opacity z-0" style="border-radius: 24px;">
-                 <div class="w-full h-full bg-red-600/90 flex items-center justify-start pl-8" style="border-radius: 24px;">
-                    <div class="flex flex-col items-center">
-                        <span class="material-symbols-outlined text-white text-2xl">delete</span>
-                        <span class="view-label text-white mt-1">Elimina</span>
-                    </div>
+              <div class="swipe-backgrounds">
+                 <div class="swipe-bg-left">
+                    <span class="material-symbols-outlined text-white">delete</span>
+                 </div>
+                 <div class="swipe-bg-right">
+                    <span class="material-symbols-outlined text-white">archive</span>
                  </div>
               </div>
 
-              <div class="absolute inset-y-0 right-0 flex w-full swipe-bg-right opacity-0 transition-opacity z-0" style="border-radius: 24px;">
-                 <div class="w-full h-full bg-amber-600/90 flex items-center justify-end pr-8" style="border-radius: 24px;">
-                    <div class="flex flex-col items-center">
-                        <span class="material-symbols-outlined text-white text-2xl">archive</span>
-                        <span class="view-label text-white mt-1">Archivia</span>
+              <!-- FOREGROUND CONTENT: Compact Glass Card -->
+              <div class="relative z-10 swipe-content">
+                <div class="micro-account-content">
+                    <!-- Avatar Micro -->
+                    <div class="micro-account-avatar-box">
+                        <img class="micro-account-avatar" src="${avatar}" alt="">
+                        <div class="micro-account-badge" style="background: ${accentColor}"></div>
                     </div>
-                 </div>
-              </div>
 
-              <!-- FOREGROUND CONTENT: Titanium Glass Card -->
-              <div class="relative z-10 h-full overflow-hidden border swipe-content"
-                   style="border-radius: 24px; background: var(--surface-glass); backdrop-filter: blur(12px); border-color: var(--border-color);">
-                
-                <!-- INTERNAL BEACON GLOW -->
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 blur-md rounded-full"></div>
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full blur-xl" style="background: ${accentColor}"></div>
+                    <!-- Info Testuali -->
+                    <div class="micro-account-info" onclick="window.location.href='dettaglio_account_privato.html?id=${idSafe}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}'">
+                        <h3 class="micro-account-name">${acc.nomeAccount || t('without_name')}</h3>
+                    </div>
 
-                <a href="dettaglio_account_privato.html?id=${idSafe}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}" 
-                   draggable="false"
-                   class="block p-5 active:scale-[0.98] transition-all duration-300 h-full flex flex-col relative text-decoration-none">
+                    <!-- Azioni in alto a destra (Solo Occhio e Puntina) -->
+                    <div class="micro-account-top-actions">
+                        ${acc.password ? `
+                        <button onclick="event.stopPropagation(); window.toggleTripleVisibility('${acc.id}')" 
+                                class="micro-btn-utility" style="color: ${accentColor};">
+                            <span id="pass-eye-${acc.id}" class="material-symbols-outlined text-[16px]">visibility</span>
+                        </button>` : ''}
+
+                        <button onclick="event.stopPropagation(); window.togglePin('${acc.id}', ${acc.isOwner}, '${acc.ownerId}')" 
+                                class="micro-btn-utility" style="${pinStyle}">
+                            <span class="material-symbols-outlined text-[16px] ${isPinned ? 'filled' : ''}">push_pin</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dati visibili con pulsanti copia inline -->
+                <div class="micro-data-display">
+                    ${acc.username ? `
+                    <div class="micro-data-row">
+                        <span class="micro-data-label">${t('label_user')}:</span>
+                        <span class="micro-data-value">${acc.username}</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline" 
+                                data-copy="${acc.username.replace(/"/g, '&quot;')}" title="${t('copy_username')}">
+                            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                        </button>
+                    </div>` : ''}
                     
-                    <div class="flex items-start space-x-4">
-                        <div class="relative shrink-0">
-                            <img class="w-12 h-12 rounded-xl object-cover shadow-sm pointer-events-none" 
-                                 style="background: var(--surface-sub); border: 1px solid var(--border-color);"
-                                 src="${avatar}">
-                            <div class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-[var(--bg-primary)]" style="background: ${accentColor}"></div>
-                        </div>
-                        
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-3">
-                                <h3 class="font-bold text-base truncate leading-tight" style="color: var(--text-primary);">${acc.nomeAccount || 'Senza Nome'}</h3>
-                            </div>
-
-                            <div class="space-y-3">
-                                ${acc.username ? `
-                                <div class="relative">
-                                    <div class="view-label mb-1" style="color: var(--text-secondary);">Utente</div>
-                                    <div class="flex items-center justify-between rounded-lg px-3 h-9 border relative"
-                                         style="background: var(--surface-sub); border-color: var(--border-color);">
-                                        <span id="user-text-${acc.id}" class="text-sm truncate pr-10" style="color: var(--text-primary);">${dots}</span>
-                                        <button class="copy-btn-dynamic absolute right-0 top-0 h-full w-[36px] flex items-center justify-center rounded-r-lg hover:bg-white/10 transition-colors" 
-                                                style="color: ${accentColor};"
-                                                data-copy="${acc.username.replace(/"/g, '&quot;')}" title="Copia Username">
-                                            <span class="material-symbols-outlined text-[18px]">content_copy</span>
-                                        </button>
-                                    </div>
-                                </div>` : ''}
-
-                                ${acc.account ? `
-                                <div class="relative">
-                                    <div class="view-label mb-1" style="color: var(--text-secondary);">Account</div>
-                                    <div class="flex items-center justify-between rounded-lg px-3 h-9 border relative"
-                                         style="background: var(--surface-sub); border-color: var(--border-color);">
-                                        <span id="acc-text-${acc.id}" class="text-sm truncate pr-10" style="color: var(--text-primary);">${dots}</span>
-                                        <button class="copy-btn-dynamic absolute right-0 top-0 h-full w-[36px] flex items-center justify-center rounded-r-lg hover:bg-white/10 transition-colors" 
-                                                style="color: ${accentColor};"
-                                                data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account">
-                                            <span class="material-symbols-outlined text-[18px]">content_copy</span>
-                                        </button>
-                                    </div>
-                                </div>` : ''}
-
-                                ${acc.password ? `
-                                <div class="relative">
-                                    <div class="view-label mb-1" style="color: var(--text-secondary);">Password</div>
-                                    <div class="flex items-center justify-between rounded-lg px-3 h-9 border relative"
-                                         style="background: var(--surface-sub); border-color: var(--border-color);">
-                                        <span id="pass-text-${acc.id}" class="text-sm truncate pr-10 font-mono tracking-wider" style="color: var(--text-primary);">${dots}</span>
-                                        <button class="copy-btn-dynamic absolute right-0 top-0 h-full w-[36px] flex items-center justify-center rounded-r-lg hover:bg-white/10 transition-colors" 
-                                                style="color: ${accentColor};"
-                                                data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password">
-                                            <span class="material-symbols-outlined text-[18px]">content_copy</span>
-                                        </button>
-                                    </div>
-                                </div>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- UTILITY BUTTONS (Pin/Eye) -->
-                <div class="absolute top-4 right-4 z-20 flex flex-col gap-2">
-                    <button onclick="event.stopPropagation(); window.togglePin('${acc.id}', ${acc.isOwner}, '${acc.ownerId}')" 
-                            class="flex items-center justify-center transition-all active:scale-90" 
-                            style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); ${pinStyle}"
-                            title="${isPinned ? 'Rimuovi dai fissati' : 'Fissa in alto'}">
-                        <span class="material-symbols-outlined text-[18px] ${isPinned ? 'filled' : ''}">${pinIcon}</span>
-                    </button>
+                    ${acc.account ? `
+                    <div class="micro-data-row">
+                        <span class="micro-data-label">${t('label_account')}:</span>
+                        <span class="micro-data-value">${acc.account}</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline" 
+                                data-copy="${acc.account.replace(/"/g, '&quot;')}" title="${t('copy_account')}">
+                            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                        </button>
+                    </div>` : ''}
+                    
                     ${acc.password ? `
-                    <button onclick="event.stopPropagation(); window.toggleTripleVisibility('${acc.id}')" 
-                            class="flex items-center justify-center transition-all active:scale-90" 
-                            style="width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.1); color: ${accentColor};"
-                            title="Mostra/Nascondi Dati">
-                        <span id="pass-eye-${acc.id}" class="material-symbols-outlined text-[18px]">visibility</span>
-                    </button>` : ''}
+                    <div class="micro-data-row">
+                        <span class="micro-data-label">${t('label_password')}:</span>
+                        <span class="micro-data-value" id="pass-text-${acc.id}">${dots}</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline" 
+                                data-copy="${acc.password.replace(/"/g, '&quot;')}" title="${t('copy_password')}">
+                            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                        </button>
+                    </div>` : ''}
                 </div>
               </div>
             </div>
@@ -501,7 +420,7 @@ async function handleArchive(item) {
     const isOwner = item.dataset.owner === 'true';
 
     if (!isOwner) {
-        showToast("Solo il proprietario può archiviare.", "error");
+        showToast(t('error_only_owner_archive'), "error");
         setTimeout(() => filterAndRender(), 500);
         return;
     }
@@ -510,11 +429,11 @@ async function handleArchive(item) {
         await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), {
             isArchived: true
         });
-        showToast("Account archiviato", "success");
+        showToast(t('success_archived'), "success");
         allAccounts = allAccounts.filter(a => a.id !== id);
     } catch (e) {
         logError("Archive Account", e);
-        showToast("Errore durante l'archiviazione", "error");
+        showToast(t('error_generic'), "error");
         filterAndRender();
     }
 }
@@ -523,7 +442,7 @@ async function handleDelete(item) {
     const id = item.dataset.id;
     const isOwner = item.dataset.owner === 'true';
 
-    if (!confirm("Sei sicuro di voler eliminare definitivamente questo account?")) {
+    if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) {
         filterAndRender();
         return;
     }
@@ -531,16 +450,16 @@ async function handleDelete(item) {
     try {
         if (isOwner) {
             await deleteDoc(doc(db, "users", currentUser.uid, "accounts", id));
-            showToast("Account eliminato", "success");
+            showToast(t('success_deleted'), "success");
             allAccounts = allAccounts.filter(a => a.id !== id);
             filterAndRender();
         } else {
-            showToast("Impossibile eliminare account condivisi.", "error");
+            showToast(t('error_only_owner_delete'), "error");
             filterAndRender();
         }
     } catch (e) {
         logError("Delete Account", e);
-        showToast("Errore eliminazione", "error");
+        showToast(t('error_generic'), "error");
         filterAndRender();
     }
 }
@@ -549,8 +468,9 @@ function toggleSort() {
     sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     const sortBtn = document.getElementById('sort-btn');
     if (sortBtn) {
-        sortBtn.classList.toggle('bg-gray-200', sortOrder === 'desc');
+        const icon = sortBtn.querySelector('span');
+        if (icon) icon.textContent = sortOrder === 'asc' ? 'sort_by_alpha' : 'text_rotation_down';
     }
-    showToast(`Ordinamento: ${sortOrder === 'asc' ? 'A-Z' : 'Z-A'}`);
+    showToast(`${t('sort_label')}: ${sortOrder === 'asc' ? 'A-Z' : 'Z-A'}`);
     filterAndRender();
 }

@@ -23,8 +23,8 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Matrix V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo-vecchio.css?v=3.1">
+    <!-- Design System Master (Protocollo 1) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.1">
 
     <!-- Core Engine -->
 
@@ -32,39 +32,36 @@
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body class="titanium-bg">
+<body class="base-bg">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="titanium-container">
+    <div class="base-container">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="titanium-glow"></div>
+        <div class="base-glow"></div>
 
-        <!-- HEADER FISSO (Protocollo v3.0 Balanced) -->
-        <header id="header-placeholder" class="titanium-header"></header>
+        <!-- HEADER FISSO (Protocollo v3.1 Balanced) -->
+        <header id="header-placeholder" class="base-header"></header>
 
         <div class="spacer-header"></div>
 
-        <!-- Main Content -->
-        <main class="titanium-main">
+        <!-- Main Content (Titanium Main Strategy) -->
+        <main class="base-main">
 
             <!-- SEARCH BAR (Standard Titanium UI) -->
-            <!-- SEARCH BAR (Standard Titanium UI) -->
-            <div class="search-container mb-20">
-                <div class="glass-field border-glow rounded-xl h-50px px-4 flex items-center gap-3">
+            <div class="search-container mb-8">
+                <div class="glass-field border-glow rounded-xl h-[50px] px-4 flex items-center gap-3">
                     <span class="material-symbols-outlined opacity-50">search</span>
                     <input type="search" id="account-search" placeholder="Cerca account o credenziali..."
                         data-t-placeholder="search_placeholder"
-                        class="w-full bg-transparent border-none outline-none h-full text-base text-primary">
+                        class="w-full bg-transparent border-none outline-none h-full text-base text-white">
                 </div>
             </div>
 
-            <div class="h-8"></div>
-
             <!-- ACCOUNTS CONTAINER -->
-            <div id="accounts-container" class="accounts-grid-list">
+            <div id="accounts-container" class="flex flex-col gap-2">
                 <!-- Loading Spinner -->
-                <div class="loading-full">
-                    <div class="titanium-spinner"></div>
+                <div class="py-20 flex flex-col items-center justify-center gap-4 opacity-30">
+                    <span class="material-symbols-outlined animate-spin text-4xl">sync</span>
                     <p data-t="loading_data">Caricamento...</p>
                 </div>
             </div>
@@ -74,7 +71,7 @@
         <div class="spacer-footer"></div>
 
         <!-- FOOTER PREMIUM -->
-        <footer id="footer-placeholder" class="titanium-footer"></footer>
+        <footer id="footer-placeholder" class="base-footer"></footer>
 
     </div>
 

@@ -996,6 +996,267 @@ html:not(.dark) .micro-list-item .item-badge {
     }
 }
 
+/* --- 3.1 LISTA ACCOUNT PRIVATI (Account Privati Page) --- */
+
+.search-container {
+    margin-bottom: 2rem;
+}
+
+.micro-account-card {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    touch-action: pan-y;
+}
+
+.micro-account-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.swipe-content {
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.swipe-backgrounds {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1;
+}
+
+.swipe-bg-left,
+.swipe-bg-right {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border-radius: 16px;
+}
+
+.swipe-bg-left {
+    background: #dc2626;
+    padding-left: 1.5rem;
+    justify-content: flex-start;
+}
+
+.swipe-bg-right {
+    background: #d97706;
+    padding-right: 1.5rem;
+    justify-content: flex-end;
+}
+
+.text-white {
+    color: #ffffff;
+}
+
+.micro-account-content {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.micro-account-avatar-box {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.micro-account-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: var(--surface-core);
+    border: 1px solid var(--border-color);
+}
+
+.micro-account-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-primary);
+}
+
+.micro-account-info {
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.micro-account-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.micro-account-subtitle {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 2px;
+    opacity: 0.5;
+}
+
+.micro-account-subtitle span {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.micro-account-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.micro-data-display {
+    padding: 0.5rem 0.75rem 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.micro-data-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.micro-data-label {
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    min-width: 65px;
+    flex-shrink: 0;
+}
+
+.micro-data-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+}
+
+.micro-btn-copy-inline {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.micro-btn-copy-inline:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--text-primary);
+}
+
+.micro-btn-utility {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.micro-btn-utility:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.micro-actions-divider {
+    height: 20px;
+    width: 1px;
+    background: var(--border-color);
+    margin: 0 4px;
+}
+
+.micro-btn-copy {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.micro-btn-copy:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.micro-account-pin {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.micro-data-tray {
+    padding: 0 1rem 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.micro-data-item {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.micro-data-item span {
+    color: var(--text-primary);
+    margin-left: 4px;
+    text-transform: none;
+}
+
 /* ==========================================================================
    PROTOCOLLO IMPORTATO (DA VECCHIO CSS) - ZONA STAGING
    DA QUI IN POI IL CODICE È IMPORTATO PAGINA PER PAGINA
