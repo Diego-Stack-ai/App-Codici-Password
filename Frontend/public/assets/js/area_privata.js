@@ -58,6 +58,15 @@ async function initProtocolUI() {
         `;
     }
 
+    // Iniezione Shortcut Rubrica in Footer (Centro)
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        fCenter.innerHTML = `
+            <button onclick="document.getElementById('rubrica-toggle-btn').scrollIntoView({behavior: 'smooth'})" class="btn-icon-header" title="Rubrica">
+                <span class="material-symbols-outlined">group</span>
+            </button>
+        `;
+    }
 }
 
 /**
@@ -103,10 +112,11 @@ async function loadCounters(uid, email) {
         } catch (e) { console.warn("Counters (Invites) error", e); }
 
         // Update UI (Localized format with requested parentheses)
-        if (document.getElementById('count-standard')) document.getElementById('count-standard').textContent = `Account (${counts.standard})`;
-        if (document.getElementById('count-memo')) document.getElementById('count-memo').textContent = `Note (${counts.memo})`;
-        if (document.getElementById('count-shared')) document.getElementById('count-shared').textContent = `Invitati (${counts.shared})`;
-        if (document.getElementById('count-shared-memo')) document.getElementById('count-shared-memo').textContent = `Memo Team (${counts.sharedMemo})`;
+        // Spacing is now handled by CSS class .gap-2 in the HTML container
+        if (document.getElementById('count-standard')) document.getElementById('count-standard').textContent = `(${counts.standard})`;
+        if (document.getElementById('count-memo')) document.getElementById('count-memo').textContent = `(${counts.memo})`;
+        if (document.getElementById('count-shared')) document.getElementById('count-shared').textContent = `(${counts.shared})`;
+        if (document.getElementById('count-shared-memo')) document.getElementById('count-shared-memo').textContent = `(${counts.sharedMemo})`;
 
     } catch (e) { logError("Counters", e); }
 }
@@ -122,7 +132,7 @@ async function loadTopAccounts(uid) {
         // Try with ordering (needs index)
         let snap;
         try {
-            const q = query(collection(db, "users", uid, "accounts"), orderBy("views", "desc"), limit(4));
+            const q = query(collection(db, "users", uid, "accounts"), orderBy("views", "desc"), limit(10));
             snap = await getDocs(q);
         } catch (err) {
             console.warn("Top Accounts: Index for 'views' might be missing, falling back to unordered.", err);
@@ -140,23 +150,26 @@ async function loadTopAccounts(uid) {
         // Sort in memory if we used fallback
         const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         docs.sort((a, b) => (b.views || 0) - (a.views || 0));
-        const top4 = docs.slice(0, 4);
+        const top10 = docs.slice(0, 10);
 
-        top4.forEach(acc => {
+        // Update UI
+        top10.forEach((acc) => {
             const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
 
             const card = document.createElement('a');
             card.href = `dettaglio_account_privato.html?id=${acc.id}`;
-            card.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group shadow-sm mb-1";
+            card.className = "micro-list-item border-glow";
+            card.style.textDecoration = "none";
             card.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <img src="${avatar}" class="size-9 rounded-lg object-cover bg-slate-900/10 opacity-70 group-hover:opacity-100 transition-opacity">
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-slate-800 group-hover:text-slate-900">${acc.nomeAccount || 'Progetto'}</span>
-                        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${acc.views || 0} Visioni</span>
+                <div class="item-content">
+                    <div class="item-icon-box" style="width: 28px; height: 28px; flex-shrink: 0;">
+                        <img src="${avatar}" style="width: 100%; height: 100%; border-radius: 6px; object-fit: cover;">
                     </div>
+                    <span class="item-title" style="font-size: 0.85rem; font-weight: 600;">${acc.nomeAccount || 'Progetto'}</span>
                 </div>
-                <span class="material-symbols-outlined text-slate-300 group-hover:text-blue-600 text-sm transition-all group-hover:translate-x-1">chevron_right</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="item-badge" style="letter-spacing: 0.05em;">${acc.views || 0}</span>
+                </div>
             `;
             list.appendChild(card);
         });

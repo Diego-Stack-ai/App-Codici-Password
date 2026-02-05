@@ -56,6 +56,15 @@ body {
     overflow-x: hidden;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+}
+
 /* NASCONDI BARRA DI SCORRIMENTO */
 html,
 body,
@@ -96,6 +105,22 @@ body,
 
 .w-full {
     width: 100%;
+}
+
+.gap-1 {
+    gap: 0.25rem;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+.gap-4 {
+    gap: 1rem;
 }
 
 .h-full {
@@ -354,6 +379,7 @@ html:not(.dark) .btn-secondary {
     color: inherit;
     -webkit-tap-highlight-color: transparent;
     display: flex;
+    text-decoration: none;
 }
 
 .btn-icon-header {
@@ -370,6 +396,7 @@ html:not(.dark) .btn-secondary {
     cursor: pointer;
     font-size: 24px;
     outline: none;
+    text-decoration: none;
 }
 
 .btn-icon-header:hover {
@@ -681,12 +708,16 @@ html:not(.dark) .btn-secondary {
         "privato azienda"
         "scadenze scadenze"
         "urgenze urgenze";
-    gap: 1.25rem;
+    gap: 2rem;
     width: 100%;
     padding: 0 0 1.5rem 0;
     /* Rimosso padding laterale (già in base-main) */
     max-width: 1100px;
     margin: 0 auto;
+}
+
+.grid-span-2 {
+    grid-column: span 2;
 }
 
 .area-privato {
@@ -708,7 +739,7 @@ html:not(.dark) .btn-secondary {
 @media (max-width:480px) {
     .matrix-grid {
         padding: 0 14px;
-        gap: 0.9rem;
+        gap: 1.25rem;
     }
 }
 
@@ -788,11 +819,15 @@ html:not(.dark) .btn-secondary {
 
 .micro-dashboard-list {
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     z-index: 10;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 4px;
+    /* Spazio per scroll invisibile */
 }
 
 .micro-list-item {
@@ -800,7 +835,7 @@ html:not(.dark) .btn-secondary {
     align-items: center;
     justify-content: space-between;
     background: rgba(255, 255, 255, 0.05);
-    padding: 8px 12px;
+    padding: 6px 12px;
     border-radius: 12px;
     font-size: 0.85rem;
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -935,6 +970,29 @@ html:not(.dark) .micro-list-item .item-badge {
 
     .card-text-block p {
         font-size: 0.75rem;
+    }
+}
+
+/* 
+   --------------------------------------------------------------------------
+   SEZIONE 3: PROTOCOLLO PAGINE CONTENUTO (Area Privata, Azienda, ecc.)
+   --------------------------------------------------------------------------
+*/
+
+.content-matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
+}
+
+@media (max-width: 480px) {
+    .content-matrix-grid {
+        gap: 1rem;
+        padding: 0 14px 2rem 14px;
     }
 }
 

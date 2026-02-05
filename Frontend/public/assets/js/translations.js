@@ -253,7 +253,7 @@ export const translations = {
         section_shared_accounts: "Account Condivisi",
         section_note: "Note",
         section_shared_note: "Note Condivise",
-        top_used_access: "Accessi Più Usati",
+        top_used_access: "TOP 10 PIÙ USATI",
         rubrica_title: "Rubrica Contatti",
         rubrica_subtitle: "Gestione identità condivise",
         new_contact: "Nuovo Contatto",

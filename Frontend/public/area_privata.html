@@ -22,8 +22,8 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
 
-    <!-- Design System Master (Titanium Account Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo-vecchio.css?v=3.1">
+    <!-- Design System Master (Protocollo 1) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.1">
 
     <!-- Core Engine -->
 
@@ -32,161 +32,146 @@
 
 </head>
 
-<body class="titanium-bg">
+<body class="base-bg">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="titanium-container">
+    <div class="base-container">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="titanium-glow"></div>
+        <div class="base-glow"></div>
 
         <!-- HEADER FISSO (Protocollo v3.1) -->
-        <header id="header-placeholder" class="titanium-header"></header>
+        <header id="header-placeholder" class="base-header"></header>
         <div class="spacer-header"></div>
 
         <!-- MAIN CONTENT (Titanium Main Strategy) -->
-        <main class="titanium-main">
+        <main class="base-main">
 
             <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
-            <div class="matrix-grid mb-8 relative z-50">
+            <div class="content-matrix-grid relative z-50">
 
                 <!-- Account Standard -->
                 <a href="account_privati.html?type=standard" class="matrix-card card-blue border-glow adaptive-shadow">
-                    <div class="glass-shine"></div>
-                    <div class="saetta-master"></div>
-                    <div class="flex justify-between items-start w-full">
+                    <div class="flex justify-start items-center w-full mb-4">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">account_balance_wallet</span>
                         </div>
-                        <span id="count-standard" class="badge-count loading-pulse">
-                            <span data-t="loading">...</span>
-                        </span>
                     </div>
                     <div class="card-text-block">
-                        <h3 data-t="section_personal_accounts">Account Personali</h3>
-                        <p data-t="section_personal_desc" class="text-xs text-secondary">Cassaforte privata</p>
+                        <div class="flex items-center gap-2 justify-center">
+                            <h3 data-t="section_personal_accounts">Account Personali</h3>
+                            <span id="count-standard" class="text-xs opacity-50 font-bold"></span>
+                        </div>
                     </div>
                 </a>
 
                 <!-- Condivisi -->
                 <a href="account_privati.html?type=shared" class="matrix-card card-red border-glow adaptive-shadow">
-                    <div class="glass-shine"></div>
-                    <div class="saetta-master"></div>
-                    <div class="flex justify-between items-start w-full">
+                    <div class="flex justify-start items-center w-full mb-4">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">group</span>
                         </div>
-                        <span id="count-shared" class="badge-count loading-pulse">
-                            <span data-t="loading">...</span>
-                        </span>
                     </div>
                     <div class="card-text-block">
-                        <h3 data-t="section_shared_accounts">Account Condivisi</h3>
-                        <p data-t="section_shared_desc" class="text-xs text-secondary">Collaborazione</p>
+                        <div class="flex items-center gap-2 justify-center">
+                            <h3 data-t="section_shared_accounts">Account Condivisi</h3>
+                            <span id="count-shared" class="text-xs opacity-50 font-bold"></span>
+                        </div>
                     </div>
                 </a>
 
                 <!-- Memorandum -->
                 <a href="account_privati.html?type=memo" class="matrix-card card-orange border-glow adaptive-shadow">
-                    <div class="glass-shine"></div>
-                    <div class="saetta-master"></div>
-                    <div class="flex justify-between items-start w-full">
+                    <div class="flex justify-start items-center w-full mb-4">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">sticky_note_2</span>
                         </div>
-                        <span id="count-memo" class="badge-count loading-pulse">
-                            <span data-t="loading">...</span>
-                        </span>
                     </div>
                     <div class="card-text-block">
-                        <h3 data-t="section_note">Note</h3>
-                        <p data-t="section_note_desc" class="text-xs text-secondary">Appunti personali</p>
+                        <div class="flex items-center gap-2 justify-center">
+                            <h3 data-t="section_note">Note</h3>
+                            <span id="count-memo" class="text-xs opacity-50 font-bold"></span>
+                        </div>
                     </div>
                 </a>
 
                 <!-- Memo Condivisi -->
                 <a href="account_privati.html?type=shared_memo"
                     class="matrix-card card-green border-glow adaptive-shadow">
-                    <div class="glass-shine"></div>
-                    <div class="saetta-master"></div>
-                    <div class="flex justify-between items-start w-full">
+                    <div class="flex justify-start items-center w-full mb-4">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">folder_shared</span>
                         </div>
-                        <span id="count-shared-memo" class="badge-count loading-pulse">
-                            <span data-t="loading">...</span>
-                        </span>
                     </div>
                     <div class="card-text-block">
-                        <h3 data-t="section_shared_note">Note Condivise</h3>
-                        <p data-t="section_shared_note_desc" class="text-xs text-secondary">Appunti team</p>
+                        <div class="flex items-center gap-2 justify-center">
+                            <h3 data-t="section_shared_note">Note Condivise</h3>
+                            <span id="count-shared-memo" class="text-xs opacity-50 font-bold"></span>
+                        </div>
                     </div>
                 </a>
-            </div>
 
-            <!-- TOP 10 WIDGET -->
-            <div class="mb-8 relative z-40">
-                <div class="titanium-card overflow-hidden">
-                    <div class="widget-header">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-18 icon-accent-orange">star</span>
-                            <h3 class="widget-title" data-t="top_used_access">Accessi Più Usati</h3>
+                <!-- TOP 10 WIDGET (Spostato nella griglia per allineamento) -->
+                <div class="grid-span-2 relative z-40">
+                    <div class="base-card overflow-hidden">
+                        <div class="widget-header">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-18 icon-accent-orange">star</span>
+                                <h3 class="widget-title" data-t="top_used_access">TOP 10 PIÙ USATI</h3>
+                            </div>
+                        </div>
+                        <div id="top-accounts-list" class="p-4 flex flex-col gap-4">
+                            <!-- Loading -->
+                            <div class="py-10 flex justify-center opacity-20">
+                                <span class="material-symbols-outlined animate-spin-slow">sync</span>
+                            </div>
                         </div>
                     </div>
-                    <div id="top-accounts-list" class="p-4 space-y-2">
-                        <!-- Loading -->
-                        <div class="py-10 flex justify-center opacity-20">
-                            <span class="material-symbols-outlined animate-spin-slow">sync</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RUBRICA (Accordion) -->
-            <div class="px-2 mb-24 relative z-40">
-                <div class="titanium-card">
-                    <button id="rubrica-toggle-btn"
-                        class="w-full p-5 flex items-center justify-between transition-colors bg-transparent border-none cursor-pointer">
-                        <div class="flex items-center gap-4">
-                            <div class="settings-icon-box bg-purple-glass-10 icon-accent-purple size-10">
-                                <span class="material-symbols-outlined text-xl">contacts</span>
+                    <!-- RUBRICA (Integrata nella griglia per larghezza piena) -->
+                    <div class="grid-span-2 relative z-40" style="margin-top: 1rem;">
+                        <button id="rubrica-toggle-btn"
+                            class="micro-list-item card-orange border-glow adaptive-shadow w-full relative overflow-hidden flex items-center justify-between cursor-pointer"
+                            style="padding: 12px 16px; min-height: 70px;">
+                            <div class="flex items-center gap-4 relative z-10">
+                                <div class="settings-icon-box bg-white/10 icon-accent-orange size-10"
+                                    style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <span class="material-symbols-outlined text-xl">group</span>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="text-sm font-black m-0 text-white" data-t="rubrica_title">Rubrica
+                                        Contatti</h3>
+                                    <p class="opacity-60 text-[10px] tracked-wider font-bold all-caps m-0 text-white">
+                                        <span data-t="rubrica_subtitle">Gestione identità condivise</span>
+                                        <span id="rubrica-counter">(0)</span>
+                                    </p>
+                                </div>
                             </div>
-                            <div class="text-left">
-                                <h3 class="text-sm font-black m-0 text-white" data-t="rubrica_title">Rubrica Contatti
-                                </h3>
-                                <p class="opacity-60 text-base-xs tracked-wider font-bold all-caps m-0 text-white">
-                                    <span data-t="rubrica_subtitle">Gestione identità condivise</span>
-                                    <span id="rubrica-counter">(0)</span>
-                                </p>
+                        </button>
+
+                        <div id="rubrica-content" class="hidden base-card mt-2 overflow-hidden border-glow">
+                            <!-- Action Bar -->
+                            <div class="p-4 flex gap-2 bg-surface-sub">
+                                <button id="add-contact-btn" class="base-btn-primary flex-1 h-10 text-xs tracked-wide"
+                                    data-t="new_contact">Nuovo Contatto</button>
                             </div>
-                        </div>
-                        <span id="rubrica-chevron"
-                            class="material-symbols-outlined opacity-40 text-white transition-all">expand_more</span>
-                    </button>
 
-                    <div id="rubrica-content" class="hidden border-t-titanium">
-                        <!-- Action Bar -->
-                        <div class="p-4 flex gap-2 bg-surface-sub">
-                            <button id="add-contact-btn" class="titanium-btn-primary flex-1 h-10 text-xs tracked-wide"
-                                data-t="new_contact">Nuovo Contatto</button>
-                        </div>
-
-                        <!-- Form -->
-                        <div id="add-contact-form" class="hidden p-6 flex-col gap-4 bg-surface-vault border-b-titanium">
-                            <div class="grid grid-cols-2 gap-4">
-                                <input type="text" id="contact-nome" placeholder="Nome"
-                                    class="input-glass-standard h-12 text-sm">
-                                <input type="text" id="contact-cognome" placeholder="Cognome"
-                                    class="input-glass-standard h-12 text-sm">
+                            <!-- Form -->
+                            <div id="add-contact-form" class="hidden p-6 flex-col gap-4 bg-surface-vault border-b-base">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="text" id="contact-nome" placeholder="Nome"
+                                        class="input-glass-standard h-12 text-sm">
+                                    <input type="text" id="contact-cognome" placeholder="Cognome"
+                                        class="input-glass-standard h-12 text-sm">
+                                </div>
+                                <input type="email" id="contact-email" placeholder="Email (Unica per sharing)"
+                                    class="input-glass-standard h-12 text-sm w-full">
+                                <button id="btn-add-contact" class="base-btn-primary w-full h-12 font-extrabold"
+                                    data-t="save_contact">SALVA CONTATTO</button>
                             </div>
-                            <input type="email" id="contact-email" placeholder="Email (Unica per sharing)"
-                                class="input-glass-standard h-12 text-sm w-full">
-                            <button id="btn-add-contact" class="titanium-btn-primary w-full h-12 font-extrabold"
-                                data-t="save_contact">SALVA CONTATTO</button>
-                        </div>
 
-                        <!-- Contacts List -->
-                        <div id="contacts-list" class="p-4 flex flex-col gap-2">
-                            <!-- JS Generated -->
+                            <!-- Contacts List -->
+                            <div id="contacts-list" class="p-4 flex flex-col gap-2">
+                                <!-- JS Generated -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -196,8 +181,9 @@
 
         <div class="spacer-footer"></div>
         <!-- FOOTER PROTOCOL V3.1 -->
-        <footer id="footer-placeholder" class="titanium-footer"></footer>
+        <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
+
 
     <!-- SCRIPTS MODULARI -->
     <script type="module" src="assets/js/main.js?v=3.1"></script>

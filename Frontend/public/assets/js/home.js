@@ -234,7 +234,7 @@ async function renderDashboardDeadlines(user) {
             }
         }
         if (exList) {
-            exList.innerHTML = expired.slice(0, 3).map(item => renderMiniItem(item, today)).join('');
+            exList.innerHTML = expired.map(item => renderMiniItem(item, today)).join('');
         }
 
     } catch (e) {
