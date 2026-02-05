@@ -1,0 +1,406 @@
+/* -------------------- VARIABILI -------------------- */
+:root {
+    --bg-primary: #0a0f1e;
+    --text-primary: #fff;
+    --text-secondary: rgba(255, 255, 255, 0.5);
+    --surface-glass: rgba(15, 25, 50, 0.4);
+    --surface-vault: rgba(10, 15, 30, 0.5);
+    --surface-hover: rgba(20, 30, 60, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
+    --base-box-gradient: linear-gradient(to left, #030712, #162e6e);
+    --header-height: 80px;
+}
+
+/* LIGHT MODE OVERRIDES */
+html:not(.dark) {
+    --bg-primary: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --surface-glass: rgba(255, 255, 255, 0.7);
+    --surface-vault: rgba(255, 255, 255, 0.6);
+    --surface-hover: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.1);
+
+    --glow-gradient: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
+    --base-box-gradient: linear-gradient(to bottom right, #f8fafc, #bfdbfe);
+}
+
+/* -------------------- RESET -------------------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Manrope, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* NASCONDI BARRA DI SCORRIMENTO (UI PULITA) */
+html,
+body,
+.base-container,
+.base-main {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
+}
+
+::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari/Webkit */
+    width: 0;
+    background: transparent;
+}
+
+/* -------------------- CONTAINER & FARO -------------------- */
+.base-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 48rem;
+    margin: 0 auto;
+    background: var(--base-box-gradient);
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+}
+
+.base-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 150%;
+    height: 300%;
+    transform: translateX(-50%);
+    filter: blur(80px);
+    pointer-events: none;
+    background: var(--glow-gradient);
+    animation: glowFloat 5s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes glowFloat {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(-150px) scale(1);
+        opacity: 0.4;
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(100px) scale(1.4);
+        opacity: 0.9;
+    }
+}
+
+/* -------------------- HEADER & FOOTER MASTER (Standard Glassmorphism) -------------------- */
+.base-header,
+.base-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    pointer-events: auto;
+}
+
+.base-header {
+    top: 0;
+    height: 80px;
+}
+
+.base-footer {
+    bottom: 0;
+    height: 80px;
+    justify-content: space-between;
+}
+
+.base-header::before,
+.base-footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    backdrop-filter: blur(12px);
+    pointer-events: none;
+    background: var(--surface-glass);
+    border-radius: 0 0 24px 24px;
+}
+
+.base-footer::before {
+    border-radius: 24px 24px 0 0;
+}
+
+/* EFFETTO SFUMATURA (Mask Template from Master) */
+.base-header::before {
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+.base-footer::before {
+    mask-image: linear-gradient(to top, black 40%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+}
+
+/* LAYOUT HEADER */
+.header-balanced-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    gap: 0.5rem;
+    max-width: 48rem;
+    margin: 0 auto;
+}
+
+.header-left,
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    min-width: 44px;
+}
+
+.header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-width: 0;
+}
+
+.header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: 0.1em;
+}
+
+/* Pulsanti Icona Header/Footer (Standard Fixed) */
+.btn-icon-header {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: transform 0.2s;
+    /* Solo scale, no background col */
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.btn-icon-header:hover {
+    background: transparent;
+    /* RIMOSSO ALONE */
+    transform: scale(1.05);
+}
+
+.header-avatar-icon {
+    font-size: 24px;
+    color: var(--text-primary);
+}
+
+#home-greeting-text {
+    color: var(--text-secondary);
+}
+
+/* SPACERS */
+.spacer-header {
+    height: 80px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.spacer-footer {
+    height: 100px;
+    /* Un po' più alto per sicurezza scroll */
+    width: 100%;
+    flex-shrink: 0;
+}
+
+/* -------------------- MAIN AREA -------------------- */
+.base-main {
+    flex: 1;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    padding: 1.5rem;
+    padding-top: 1rem;
+}
+
+/* -------------------- GRID SYSTEM (Responsive Prova) -------------------- */
+.matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+
+@media (max-width:480px) {
+    .matrix-grid {
+        grid-template-columns: 1fr;
+        padding-left: 14px;
+        padding-right: 14px;
+        gap: 0.9rem;
+    }
+
+    .matrix-card {
+        min-height: 130px;
+    }
+
+    .matrix-card-inner {
+        padding: 1.2rem;
+    }
+}
+
+@media (min-width:481px) and (max-width:899px) {
+    .matrix-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (min-width:900px) {
+    .matrix-grid {
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* -------------------- CARD -------------------- */
+.matrix-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--surface-vault);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-primary);
+    padding: 1.5rem;
+    min-height: 160px;
+    max-width: calc(100% - 40px);
+    margin-left: auto;
+    margin-right: auto;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.matrix-card:active {
+    transform: scale(0.98);
+    background: var(--surface-hover);
+}
+
+.matrix-icon-box {
+    margin-bottom: 0.5rem;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.card-text-block h3 {
+    margin-bottom: 0.25rem;
+}
+
+.card-text-block p {
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+/* COLORI CARD */
+.card-blue {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), transparent);
+}
+
+.card-green {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), transparent);
+}
+
+.card-orange {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent);
+}
+
+.card-red {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), transparent);
+}
+
+/* UTILITÀ BASE */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.h-full {
+    height: 100%;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+.tracking-widest {
+    letter-spacing: 0.1em;
+}
+
+.opacity-70 {
+    opacity: 0.7;
+}
