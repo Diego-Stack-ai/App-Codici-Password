@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
     const injectFooterActions = () => {
-        const footerRight = document.getElementById('footer-actions-right');
+        const footerRight = document.getElementById('footer-right-actions');
         if (footerRight) {
             footerRight.innerHTML = `
                 <button id="btn-save-azienda" class="btn-icon-header" title="Salva Azienda">
@@ -113,8 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const icon = document.getElementById('icon-' + id);
         if (!input) return;
 
-        input.classList.toggle('titanium-shield');
-        if (input.classList.contains('titanium-shield')) {
+        input.classList.toggle('base-shield');
+        if (input.classList.contains('base-shield')) {
             if (icon) icon.textContent = 'visibility';
         } else {
             if (icon) icon.textContent = 'visibility_off';

@@ -15,7 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Design System Master (Titanium Gold V3.6) -->
-    <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/operatore.css?v=1.1">
 
     <!-- Core Engine -->
 
@@ -29,20 +29,20 @@
     </style>
 </head>
 
-<body class="titanium-bg">
+<body class="base-bg">
     <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="titanium-container">
+    <div class="base-container">
 
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="titanium-glow"></div>
+        <div class="base-glow"></div>
 
         <!-- Automated Titanium Header -->
-        <header id="header-placeholder" class="titanium-header"></header>
+        <header id="header-placeholder" class="base-header"></header>
 
         <div class="spacer-header"></div>
 
         <!-- Main Content -->
-        <main class="titanium-main">
+        <main class="base-main">
             <div id="loading-overlay" class="fixed inset-0 bg-black-90 z-60 flex items-center justify-center hidden">
                 <div class="flex-center-col gap-3">
                     <div class="size-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
@@ -109,9 +109,9 @@
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">key</span>
                                     <input id="account-password" type="text"
-                                        class="titanium-shield text-mono-wide leading-relaxed" />
+                                        class="base-shield text-mono-wide leading-relaxed" />
                                     <button type="button"
-                                        onclick="const i = document.getElementById('account-password'); i.classList.toggle('titanium-shield'); this.querySelector('span').textContent = i.classList.contains('titanium-shield')?'visibility':'visibility_off';"
+                                        onclick="const i = document.getElementById('account-password'); i.classList.toggle('base-shield'); this.querySelector('span').textContent = i.classList.contains('base-shield')?'visibility':'visibility_off';"
                                         class="glass-field-btn">
                                         <span class="material-symbols-outlined text-20">visibility</span>
                                     </button>
@@ -215,7 +215,7 @@
                             </div>
                             <label class="relative cursor-pointer flex items-center">
                                 <input class="absolute size-0 opacity-0" type="checkbox" id="flag-shared" />
-                                <div class="titanium-switch"></div>
+                                <div class="base-switch"></div>
                             </label>
                         </div>
 
@@ -245,7 +245,7 @@
                             </div>
                             <label class="relative cursor-pointer flex items-center">
                                 <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo" />
-                                <div class="titanium-switch titanium-switch-orange"></div>
+                                <div class="base-switch titanium-switch-orange"></div>
                             </label>
                         </div>
 
@@ -259,7 +259,7 @@
                             </div>
                             <label class="relative cursor-pointer flex items-center">
                                 <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo-shared" />
-                                <div class="titanium-switch titanium-switch-green"></div>
+                                <div class="base-switch titanium-switch-green"></div>
                             </label>
                         </div>
                     </div>
@@ -271,7 +271,7 @@
 
     <div class="spacer-footer"></div>
     <!-- FOOTER PREMIUM -->
-    <footer id="footer-placeholder" class="titanium-footer"></footer>
+    <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
 

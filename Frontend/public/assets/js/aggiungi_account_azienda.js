@@ -139,12 +139,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
     const injectFooterActions = () => {
-        const footerCenter = document.getElementById('footer-actions-center');
-        if (footerCenter) {
-            footerCenter.innerHTML = `
-                <button id="save-btn" class="btn-action-footer primary" title="Salva Account">
+        const footerRight = document.getElementById('footer-right-actions');
+        if (footerRight) {
+            footerRight.innerHTML = `
+                <button id="save-btn" class="btn-icon-header" title="Salva Account">
                     <span class="material-symbols-outlined">save</span>
-                    <span>Salva Account</span>
                 </button>
             `;
             setupSaveLogic();

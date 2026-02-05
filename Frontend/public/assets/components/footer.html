@@ -1,28 +1,21 @@
-<footer class="titanium-footer">
+<footer class="base-footer">
     <div id="footer-content" class="header-balanced-container">
-        <!-- ZONA SINISTRA: Azioni Dinamiche (Simmetria Protocollo) -->
-        <div class="header-left" id="footer-actions-left"></div>
-
-        <!-- ZONA CENTRO: Switcher Tema (Eccezione al Protocollo) -->
-        <div class="header-center">
-            <div class="flex items-center gap-6">
-                <button onclick="TitaniumTheme.setMode('light')" class="theme-switch-btn" title="Tema Chiaro">
-                    <span class="material-symbols-outlined">light_mode</span>
-                </button>
-                <button onclick="TitaniumTheme.setMode('dark')" class="theme-switch-btn" title="Tema Scuro">
-                    <span class="material-symbols-outlined">dark_mode</span>
-                </button>
-            </div>
+        <!-- ZONA SINISTRA: Switcher Tema (Protocollo 1) -->
+        <div class="header-left">
+            <button onclick="TitaniumTheme.setMode(TitaniumTheme.getMode() === 'dark' ? 'light' : 'dark')"
+                class="btn-icon-header" title="Cambia Tema">
+                <span class="material-symbols-outlined">contrast</span>
+            </button>
         </div>
 
-        <!-- ZONA DESTRA: Azioni Footer (Impostazioni + Page Actions) -->
-        <div class="header-right" id="footer-actions-right">
+        <!-- ZONA CENTRO: Icone Funzionali Pagina -->
+        <div id="footer-center-actions" class="header-center"></div>
+
+        <!-- ZONA DESTRA: Impostazioni & Azioni -->
+        <div id="footer-right-actions" class="header-right">
             <div id="footer-settings-link">
-                <a href="impostazioni.html"
-                    class="btn-icon-header opacity-60 hover:opacity-100 transition-opacity group/settings">
-                    <span
-                        class="material-symbols-outlined !text-xl transform group-hover/settings:rotate-90 transition-transform duration-500"
-                        style="font-variation-settings: 'wght' 200;">tune</span>
+                <a href="impostazioni.html" class="btn-icon-header footer-settings-link" title="Impostazioni">
+                    <span class="material-symbols-outlined footer-settings-icon">tune</span>
                 </a>
             </div>
         </div>

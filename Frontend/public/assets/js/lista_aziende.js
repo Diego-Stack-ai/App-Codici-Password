@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const hRight = document.getElementById('header-right');
             const fRight = document.getElementById('footer-actions-right');
 
-            if (hCenter && hLeft && hRight && fRight) {
+            if (hCenter && hLeft && hRight) {
                 clearInterval(checkInterval);
 
                 // --- HEADER ---
@@ -93,19 +93,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 hRight.appendChild(homeBtn);
 
                 // --- FOOTER ---
+                const fCenter = document.getElementById('footer-center-actions');
 
-                // Add Button (Primary Action -> Footer)
-                // Check if already added to avoid duplicates
-                if (!document.getElementById('add-company-btn')) {
+                // Add Button (Primary Action -> Footer Center)
+                if (fCenter && !document.getElementById('add-company-btn')) {
                     const addBtn = document.createElement('a');
                     addBtn.id = 'add-company-btn';
                     addBtn.href = 'aggiungi_nuova_azienda.html';
                     addBtn.className = 'btn-icon-header';
-                    addBtn.style.marginRight = '1rem'; // Space from Settings
                     addBtn.innerHTML = '<span class="material-symbols-outlined" style="color: var(--accent-blue); font-size: 28px;">add_circle</span>';
-
-                    // Prepend to Footer Right (Before Settings)
-                    fRight.prepend(addBtn);
+                    fCenter.appendChild(addBtn);
                 }
 
                 window.LOG("UI Setup Complete [Header & Footer Compliance]");
@@ -139,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadAziende() {
         if (!currentUser || !listContainer) return;
 
-            try {
+        try {
             window.LOG("Fetching collection: users/" + currentUser.uid + "/aziende");
             // Modular SDK: collection(db, path...)
             const colRef = collection(db, "users", currentUser.uid, "aziende");

@@ -74,11 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Internal function to apply Footer Buttons
         const applyFooter = () => {
-            const fLeft = document.getElementById('footer-actions-left');
-            const fRight = document.getElementById('footer-actions-right');
+            const fCenter = document.getElementById('footer-center-actions');
+            const fRight = document.getElementById('footer-right-actions');
 
-            // LEFT: Delete Button
-            if (fLeft && !document.getElementById('delete-btn')) {
+            // CENTER: Delete Button
+            if (fCenter && !document.getElementById('delete-btn')) {
                 const btnDel = document.createElement('button');
                 btnDel.id = 'delete-btn';
                 btnDel.className = 'btn-icon-header';
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnDel.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                 btnDel.innerHTML = '<span class="material-symbols-outlined">delete</span>';
                 btnDel.onclick = deleteAccount;
-                fLeft.appendChild(btnDel);
+                fCenter.appendChild(btnDel);
             }
 
             // RIGHT: Save Button
@@ -619,10 +619,10 @@ function renderBankAccounts() {
                     <label class="view-label" data-t="dispositive_password">Pass. Dispositiva</label>
                     <div class="glass-field border-glow">
                         <span class="material-symbols-outlined" style="margin-left: 1rem; color: var(--text-secondary); opacity: 0.4;">lock</span>
-                        <input type="text" class="dispositiva-input titanium-shield" 
+                        <input type="text" class="dispositiva-input base-shield" 
                             data-iban-idx="${ibanIdx}" value="${account.passwordDispositiva || ''}" 
                             style="font-family: monospace;" />
-                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="glass-field-btn">
+                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="glass-field-btn">
                             <span class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
                         </button>
                     </div>
@@ -766,9 +766,9 @@ function renderCardEntry(ibanIdx, cardIdx, card) {
                     <div class="glass-field-container">
                         <label class="view-label" data-t="pin">PIN</label>
                         <div class="glass-field border-glow" style="height: 3rem;">
-                            <input type="text" class="pin-input titanium-shield" 
+                            <input type="text" class="pin-input base-shield" 
                                 data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" style="text-align: center; font-family: monospace;" />
-                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('titanium-shield'); this.querySelector('span').textContent=i.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="glass-field-btn">
+                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="glass-field-btn">
                                 <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span>
                             </button>
                         </div>

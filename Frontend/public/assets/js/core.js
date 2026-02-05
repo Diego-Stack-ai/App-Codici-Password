@@ -44,7 +44,7 @@
 
         applyLogic: function () {
             const savedTheme = this.getMode();
-            const isForcedDark = document.documentElement.classList.contains('titanium-forced-dark');
+            const isForcedDark = document.documentElement.classList.contains('protocol-forced-dark');
 
             let shouldBeDark = false;
             let colorSchemeValue = "light";

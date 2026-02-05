@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" class="titanium-forced-dark">
+<html lang="it" class="dark protocol-forced-dark">
 
 <head>
     <meta charset="utf-8" />
@@ -18,94 +18,92 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
 
-    <!-- TITANIUM CORE & ACCESS SYSTEM (Protocollo V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
+    <!-- CORE STYLES -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.1">
 
-    <!-- Core UI & Engine (Protocollo V3.1) -->
-
+    <!-- CORE JS -->
     <script src="assets/js/core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body class="titanium-bg">
+<body class="base-bg">
 
-    <div class="titanium-container">
+    <div class="base-container">
 
-        <!-- LANGUAGE SELECTOR -->
-        <div class="lang-selector-container">
-            <button class="lang-btn-float" id="lang-toggle-btn">
-                <span class="material-symbols-outlined text-18">language</span>
-                <span class="lang-label" data-t="language">Lingua</span>
-                <span class="material-symbols-outlined text-16">expand_more</span>
-            </button>
-            <div class="lang-dropdown" id="lang-dropdown">
-                <!-- JS popola questo -->
-            </div>
-        </div>
-
-        <!-- Scenografia Protocollo V3.1 -->
-        <div class="titanium-glow"></div>
-        <div class="glass-glow"></div>
-        <div class="accesso-header"></div>
-        <div class="accesso-footer"></div>
+        <!-- Scenografia -->
+        <div class="base-glow"></div>
 
         <!-- Card Registrazione -->
-        <div class="titanium-vault border-glow">
+        <div class="auth-card border-glow">
+            <!-- Language Selector (Anchor to Card) -->
+            <div class="lang-selector-container">
+                <button id="lang-toggle-btn" class="lang-btn" aria-label="Cambia Lingua">
+                    <span class="material-symbols-outlined">language</span>
+                </button>
+                <div id="lang-dropdown" class="lang-dropdown">
+                    <!-- Popolato via JS -->
+                </div>
+            </div>
+
             <!-- SAETTA MASTER ANIMATION -->
             <div class="saetta-master"></div>
+            <div class="saetta-drop"></div>
+
+
 
             <!-- Icona Centrale -->
-            <div class="security-icon-box">
+            <div class="auth-icon-box">
                 <span class="material-symbols-outlined">person_add</span>
             </div>
 
             <!-- Titoli -->
-            <h1 class="accesso-title" data-t="register_page_title">Registrati</h1>
-            <p class="accesso-subtitle" data-t="login_subtitle">Crea il tuo account sicuro</p>
+            <h1 class="auth-title" data-t="register_page_title">Registrati</h1>
+            <p class="auth-subtitle" data-t="login_subtitle">Crea il tuo account sicuro</p>
 
             <!-- Form Registrazione -->
             <form id="register-form">
 
                 <!-- Nome & Cognome -->
-                <div class="accesso-form-row">
-                    <div class="accesso-form-group">
-                        <label class="accesso-label" data-t="label_name">Nome</label>
-                        <input id="nome" name="nome" type="text" required class="accesso-input" placeholder="Mario">
+                <div class="auth-form-row">
+                    <div class="auth-form-group">
+                        <label class="auth-label" data-t="label_name">Nome</label>
+                        <input id="nome" name="nome" type="text" required class="auth-input" placeholder="Mario">
                     </div>
-                    <div class="accesso-form-group">
-                        <label class="accesso-label" data-t="label_surname">Cognome</label>
-                        <input id="cognome" name="cognome" type="text" required class="accesso-input"
-                            placeholder="Rossi">
+                    <div class="auth-form-group">
+                        <label class="auth-label" data-t="label_surname">Cognome</label>
+                        <input id="cognome" name="cognome" type="text" required class="auth-input" placeholder="Rossi">
                     </div>
                 </div>
 
                 <!-- Email -->
-                <div class="accesso-form-group">
-                    <label class="accesso-label" data-t="email_label">Email</label>
-                    <input id="email" name="email" type="email" autocomplete="username" required class="accesso-input"
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="email_label">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="username" required class="auth-input"
                         data-t-placeholder="email_placeholder" placeholder="mario.rossi@email.com">
                 </div>
 
                 <!-- Password -->
-                <div class="accesso-form-group">
-                    <label class="accesso-label" data-t="password_label_reg">Password</label>
-                    <input id="password" name="password" type="password" autocomplete="new-password" required
-                        class="accesso-input" data-t-placeholder="password_placeholder_reg" placeholder="********">
-
-                    <button type="button" class="toggle-password" id="btn-toggle-password" aria-label="Mostra Password">
-                        <span class="material-symbols-outlined">visibility</span>
-                    </button>
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="password_label_reg">Password</label>
+                    <div class="password-wrapper">
+                        <input id="password" name="password" type="password" autocomplete="new-password" required
+                            class="auth-input" data-t-placeholder="password_placeholder_reg" placeholder="********">
+                        <button type="button" class="toggle-password" id="btn-toggle-password"
+                            aria-label="Mostra Password">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Conferma Password -->
-                <div class="accesso-form-group">
-                    <label class="accesso-label" data-t="confirm_new_password">Conferma Password</label>
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="confirm_new_password">Conferma Password</label>
                     <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password"
-                        required class="accesso-input" placeholder="********">
+                        required class="auth-input" placeholder="********">
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" id="register-submit-btn" class="accesso-btn" data-t="create_account_btn">
+                <button type="submit" id="register-submit-btn" class="auth-btn-primary" data-t="create_account_btn">
                     <span class="material-symbols-outlined text-20">check_circle</span>
                     Nuova registrazione
                 </button>
@@ -113,16 +111,18 @@
             </form>
 
             <!-- Login Link -->
-            <div class="accesso-nav-footer">
+            <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
                 <span data-t="have_account_text">Hai già un account?</span>
-                <a href="index.html" class="link-register" data-t="login_now_link">
+                <a href="index.html" class="link-register"
+                    style="color: #3b82f6; text-decoration: none; font-weight: 700; margin-left: 0.25rem; display: inline; margin-top: 0;"
+                    data-t="login_now_link">
                     Accedi ora
                 </a>
             </div>
 
             <!-- Footer Legale -->
             <div class="legal-footer">
-                <span class="opacity-50">Titanium Protocol V3.1</span>
+                <span class="opacity-50">&copy; 2026</span>
             </div>
 
         </div>

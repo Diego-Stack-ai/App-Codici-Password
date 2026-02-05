@@ -32,12 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
     const injectFooterActions = () => {
-        const footerCenter = document.getElementById('footer-actions-center');
-        if (footerCenter) {
-            footerCenter.innerHTML = `
-                <button id="save-btn" class="btn-action-footer primary" title="Sincronizza Protocollo">
+        const footerRight = document.getElementById('footer-right-actions');
+        if (footerRight) {
+            footerRight.innerHTML = `
+                <button id="save-btn" class="btn-icon-header" title="Sincronizza Protocollo">
                     <span class="material-symbols-outlined">send</span>
-                    <span data-t="sync_protocol">Sincronizza Protocollo</span>
                 </button>
             `;
             setupSave(); // Call setupSave after injection

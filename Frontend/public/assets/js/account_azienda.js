@@ -196,7 +196,7 @@ function applyTheme(theme) {
     const header = document.getElementById('company-header');
     if (header) {
         // Light Mode Override: Keep it White/Glass
-        if (document.body.classList.contains('titanium-light-bg')) {
+        if (!document.documentElement.classList.contains('dark')) {
             header.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
             header.style.borderColor = 'rgba(0,0,0,0.05)';
         } else {
@@ -207,9 +207,9 @@ function applyTheme(theme) {
     }
 
     // Dynamic Footer Background (Hex Alpha)
-    const footer = document.querySelector('.titanium-footer');
+    const footer = document.querySelector('.base-footer');
     if (footer) {
-        if (document.body.classList.contains('titanium-light-bg')) {
+        if (!document.documentElement.classList.contains('dark')) {
             footer.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
             footer.style.borderColor = 'rgba(0,0,0,0.05)';
         } else {
@@ -228,7 +228,7 @@ function applyTheme(theme) {
 
     // 2. Footer Generic Classes (Settings, Theme Switchers)
     // Target buttons in footer that are standard icons or theme switchers
-    const footerIcons = document.querySelectorAll('.titanium-footer .btn-icon-header, .titanium-footer .theme-switch-btn');
+    const footerIcons = document.querySelectorAll('.base-footer .btn-icon-header, .base-footer .theme-switch-btn');
     footerIcons.forEach(el => {
         el.style.color = theme.from;
         // Optional: Add subtle border color to match
@@ -306,8 +306,8 @@ function renderList(list) {
         // Dark Mode: Gradient based on theme color (from -> to)
         // Light Mode: Lighter gradient based on theme color
         let gradientStyle;
-        // FIX: Correct detection of Light Mode (Check if NO dark class on HTML, or explicit light class presence)
-        const isLightMode = !document.documentElement.classList.contains('dark') || document.body.classList.contains('titanium-light-bg');
+        // FIX: Correct detection of Light Mode (Check if NO dark class on HTML)
+        const isLightMode = !document.documentElement.classList.contains('dark');
 
         if (isLightMode) {
             // Light Mode: Very soft gradient from theme color
@@ -337,7 +337,7 @@ function renderList(list) {
               </div>
 
               <!-- FOREGROUND CONTENT: Card with Dynamic Gradient -->
-              <div class="titanium-card-light swipe-content p-0 overflow-hidden border-none bg-transparent">
+              <div class="base-card-transparent swipe-content p-0 overflow-hidden border-none bg-transparent">
                 <a href="dettaglio_account_azienda.html?id=${acc.id}&aziendaId=${currentAziendaId}" 
                    draggable="false"
                    style="display: block; padding: 0.75rem; text-decoration: none; position: relative; border-radius: 20px; border: 1px solid; ${gradientStyle}">

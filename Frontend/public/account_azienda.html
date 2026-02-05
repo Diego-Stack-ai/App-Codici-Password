@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Protocollo V3.1: Supporto Dual Theme -->
+    <!-- Protocollo 1: Supporto Dual Theme -->
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#0a0f1e">
     <title data-t="account_company">Account Azienda</title>
@@ -22,35 +22,33 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
+    <!-- Design System (Protocollo 1) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=1.0">
 
     <!-- Core Engine -->
-
     <script src="assets/js/core.js?v=3.1"></script>
-    <!-- UI Core: Gestione Header/Footer/Modal -->
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body class="titanium-bg">
-    <div class="titanium-container">
+<body class="base-bg">
+    <div class="base-container">
         <!-- 1. Ambient Glow -->
-        <div class="titanium-glow"></div>
+        <div class="base-glow"></div>
 
         <!-- 2. Header Centralizzato -->
-        <header id="header-placeholder" class="titanium-header"></header>
+        <header id="header-placeholder"></header>
         <div class="spacer-header"></div>
 
         <!-- 3. Main Content -->
-        <main class="titanium-main">
+        <main class="base-main">
 
-            <!-- Search Bar (Clean Style Auto-Search) -->
-            <!-- Search Bar (Titanium Glass Style) -->
+            <!-- Search Bar -->
             <div class="search-container mb-20">
-                <div class="glass-field border-glow rounded-xl h-50px px-4 flex items-center gap-3">
+                <div
+                    class="glass-field rounded-xl h-50px px-4 flex items-center gap-3 bg-white/5 border border-white/10">
                     <span class="material-symbols-outlined opacity-50">search</span>
                     <input type="search" placeholder="Cerca account..." id="search-input"
-                        class="w-full bg-transparent border-none outline-none h-full text-base text-primary">
+                        class="w-full bg-transparent border-none outline-none h-full text-base">
                 </div>
             </div>
 
@@ -60,8 +58,7 @@
             <div id="accounts-container" class="space-y-4">
                 <!-- Loading Spinner per stato iniziale -->
                 <div class="loading-full flex flex-col items-center justify-center py-12 text-gray-500/70">
-                    <div
-                        class="titanium-spinner w-10 h-10 border-4 border-blue-500 border-b-transparent rounded-full animate-spin mb-4">
+                    <div class="w-10 h-10 border-4 border-blue-500 border-b-transparent rounded-full animate-spin mb-4">
                     </div>
                     <p class="text-sm font-medium animate-pulse" data-t="loading_accounts">Caricamento account...</p>
                 </div>
@@ -71,11 +68,11 @@
             <div class="spacer-footer"></div>
 
             <!-- Toast Container -->
-            <div id="toast-container" class="titanium-toast-wrap"></div>
+            <div id="toast-container" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50"></div>
         </main>
 
         <!-- 4. Footer Centralizzato -->
-        <footer id="footer-placeholder" class="titanium-footer"></footer>
+        <footer id="footer-placeholder"></footer>
     </div>
 
     <!-- SCRIPTS -->

@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
     const injectFooterActions = () => {
-        const footerLeft = document.getElementById('footer-actions-left');
-        const footerRight = document.getElementById('footer-actions-right');
+        const footerCenter = document.getElementById('footer-center-actions');
+        const footerRight = document.getElementById('footer-right-actions');
 
-        if (footerLeft) {
-            footerLeft.innerHTML = `
+        if (footerCenter) {
+            footerCenter.innerHTML = `
                 <button id="toggle-search" class="btn-icon-header">
                     <span class="material-symbols-outlined" id="search-icon">search</span>
                 </button>

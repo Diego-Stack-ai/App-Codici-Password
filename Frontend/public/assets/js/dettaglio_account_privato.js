@@ -129,7 +129,7 @@ function initTitaniumUI() {
 
     // Internal function to apply Footer Button
     const applyFooter = () => {
-        const fRight = document.getElementById('footer-actions-right');
+        const fRight = document.getElementById('footer-right-actions');
         // Only proceed if footer container exists
         if (fRight) {
             // Check if button already exists to avoid duplicates
@@ -307,7 +307,7 @@ function render(acc) {
     const colors = getAccentColors(acc);
 
     // Set CSS variable on container for Titanium Glow and badges
-    const container = document.querySelector('.titanium-container');
+    const container = document.querySelector('.base-container');
     if (container) {
         container.style.setProperty('--accent-rgb', colors.rgb);
         container.style.setProperty('--accent-hex', colors.hex);
@@ -405,9 +405,9 @@ function render(acc) {
                             <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="dispositive_pass">Pass. Dispositiva</span>
                             <div class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
                                 <input readonly type="text"
-                                    class="titanium-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-white"
+                                    class="base-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-white"
                                     value="${bank.passwordDispositiva || ''}">
-                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
+                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('base-shield'); this.querySelector('span').textContent=p.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
                                     <span class="material-symbols-outlined text-sm">visibility</span>
                                 </button>
                                 <button onclick="window.copyText(this.parentElement.querySelector('input').value)" class="p-2 text-white/40 hover:text-white border-l border-white/5">
@@ -512,9 +512,9 @@ function render(acc) {
                                         <div class="flex flex-col gap-1.5">
                                             <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="pin">PIN</span>
                                             <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
-                                                <input readonly type="text" class="titanium-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" 
+                                                <input readonly type="text" class="base-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" 
                                                     value="${card.pin || ''}">
-                                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('titanium-shield'); this.querySelector('span').textContent=p.classList.contains('titanium-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
+                                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('base-shield'); this.querySelector('span').textContent=p.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
                                                     <span class="material-symbols-outlined text-sm">visibility</span>
                                                 </button>
                                             </div>
@@ -716,11 +716,11 @@ function setupListeners() {
 
     if (toggle && passInput) {
         toggle.onclick = () => {
-            passInput.classList.toggle('titanium-shield');
-            if (userInput) userInput.classList.toggle('titanium-shield');
-            if (accInput) accInput.classList.toggle('titanium-shield');
+            passInput.classList.toggle('base-shield');
+            if (userInput) userInput.classList.toggle('base-shield');
+            if (accInput) accInput.classList.toggle('base-shield');
 
-            const isMasked = passInput.classList.contains('titanium-shield');
+            const isMasked = passInput.classList.contains('base-shield');
             toggle.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';
         };
     }

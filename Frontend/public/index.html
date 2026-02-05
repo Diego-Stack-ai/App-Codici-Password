@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" class="titanium-forced-dark">
+<html lang="it" class="dark protocol-forced-dark">
 
 <head>
     <meta charset="utf-8" />
@@ -18,77 +18,76 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
 
-    <!-- TITANIUM CORE & ACCESS SYSTEM (Protocollo V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
+    <!-- CORE STYLES -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.1">
 
-    <!-- Core UI & Engine (Protocollo V3.1) -->
-
+    <!-- CORE JS -->
     <script src="assets/js/core.js?v=3.1"></script>
     <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
 </head>
 
-<body class="titanium-bg">
+<body class="base-bg">
 
-    <div class="titanium-container">
+    <div class="base-container">
 
-        <!-- LANGUAGE SELECTOR -->
-        <div class="lang-selector-container">
-            <button class="lang-btn-float" id="lang-toggle-btn">
-                <span class="material-symbols-outlined text-18">language</span>
-                <span class="lang-label" data-t="language">Lingua</span>
-                <span class="material-symbols-outlined text-16">expand_more</span>
-            </button>
-            <div class="lang-dropdown" id="lang-dropdown">
-                <!-- JS popola questo -->
-            </div>
-        </div>
-
-        <!-- Scenografia Protocollo V3.1 -->
-        <div class="titanium-glow"></div>
-        <div class="glass-glow"></div>
-        <div class="accesso-header"></div>
-        <div class="accesso-footer"></div>
+        <!-- Scenografia -->
+        <div class="base-glow"></div>
 
         <!-- Card Login -->
-        <div class="titanium-vault border-glow">
+        <div class="auth-card border-glow">
+            <!-- Language Selector (Anchor to Card) -->
+            <div class="lang-selector-container">
+                <button id="lang-toggle-btn" class="lang-btn" aria-label="Cambia Lingua">
+                    <span class="material-symbols-outlined">language</span>
+                </button>
+                <div id="lang-dropdown" class="lang-dropdown">
+                    <!-- Popolato via JS -->
+                </div>
+            </div>
+
             <!-- SAETTA MASTER ANIMATION -->
             <div class="saetta-master"></div>
+            <div class="saetta-drop"></div>
+
+
 
             <!-- Icona Centrale -->
-            <div class="security-icon-box">
+            <div class="auth-icon-box">
                 <span class="material-symbols-outlined">security</span>
             </div>
 
             <!-- Titoli -->
-            <h1 class="accesso-title" data-t="login_title">Accedi</h1>
-            <p class="accesso-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
+            <h1 class="auth-title" data-t="login_title">Accedi</h1>
+            <p class="auth-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
 
             <!-- Form Autenticazione -->
             <form id="login-form">
 
                 <!-- Email / Username -->
-                <div class="accesso-form-group">
-                    <label class="accesso-label" data-t="username_label">Username</label>
-                    <input id="email" name="username" type="text" autocomplete="username" required class="accesso-input"
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="username_label">Username</label>
+                    <input id="email" name="username" type="text" autocomplete="username" required class="auth-input"
                         data-t-placeholder="username_placeholder" placeholder="Email o Username">
                 </div>
 
                 <!-- Password -->
-                <div class="accesso-form-group">
-                    <label class="accesso-label" data-t="password_label">Password</label>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required
-                        class="accesso-input" placeholder="********">
-
-                    <button type="button" class="toggle-password" id="btn-toggle-password" aria-label="Mostra Password">
-                        <span class="material-symbols-outlined">visibility</span>
-                    </button>
+                <div class="auth-form-group">
+                    <label class="auth-label" data-t="password_label">Password</label>
+                    <div class="password-wrapper">
+                        <input id="password" name="password" type="password" autocomplete="current-password" required
+                            class="auth-input" placeholder="********">
+                        <button type="button" class="toggle-password" id="btn-toggle-password"
+                            aria-label="Mostra Password">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
 
                     <a href="reset_password.html" id="link-forgot-password" class="link-forgot"
                         data-t="forgot_password">Password dimenticata?</a>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" id="login-submit-btn" class="accesso-btn" data-t="auth_button">
+                <button type="submit" id="login-submit-btn" class="auth-btn-primary" data-t="auth_button">
                     <span class="material-symbols-outlined text-20">login</span>
                     Accedi
                 </button>
@@ -102,7 +101,7 @@
 
             <!-- Footer Legale -->
             <div class="legal-footer">
-                <span class="opacity-50">Titanium Protocol V3.1</span>
+                <span class="opacity-50">&copy; 2026</span>
             </div>
 
         </div>
