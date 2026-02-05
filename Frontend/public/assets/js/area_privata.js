@@ -159,16 +159,15 @@ async function loadTopAccounts(uid) {
             const card = document.createElement('a');
             card.href = `dettaglio_account_privato.html?id=${acc.id}`;
             card.className = "micro-list-item border-glow";
-            card.style.textDecoration = "none";
             card.innerHTML = `
-                <div class="item-content">
-                    <div class="item-icon-box" style="width: 28px; height: 28px; flex-shrink: 0;">
-                        <img src="${avatar}" style="width: 100%; height: 100%; border-radius: 6px; object-fit: cover;">
+                <div class="micro-item-content">
+                    <div class="micro-item-icon-box">
+                        <img src="${avatar}" alt="${acc.nomeAccount || 'Account'}">
                     </div>
-                    <span class="item-title" style="font-size: 0.85rem; font-weight: 600;">${acc.nomeAccount || 'Progetto'}</span>
+                    <span class="micro-item-title">${acc.nomeAccount || 'Progetto'}</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="item-badge" style="letter-spacing: 0.05em;">${acc.views || 0}</span>
+                <div class="micro-item-badge-container">
+                    <span class="micro-item-badge">${acc.views || 0}</span>
                 </div>
             `;
             list.appendChild(card);
