@@ -18,6 +18,15 @@ Modalità Dark fissa (Nero).
 
 Nessun header/footer standard e impossibilità di cambiare tema.
 
+**Standard UX Auth:**
+- **Container**: Obbligo di utilizzo classe `.auth-card` con `.border-glow`.
+- **Saetta System (Premium)**: Ogni card deve contenere il doppio effetto: 
+  - `.saetta-master` (Lo shimmer metallico di sfondo, 4s, intensità 8%).
+  - `.saetta-drop` (La linea verticale blu che cade, 3s).
+- **Selettore Lingua**: Nelle pagine di accesso (`index`, `registrati`), il selettore lingua deve essere ancorato *dentro* la card in alto a destra (`.lang-selector-container` inside `.auth-card`).
+- **Responsive**: Sotto i 480px, la card si adatta a `width: 90%` con `max-width: 360px` per mantenere l'estetica "compatta".
+
+
 Pagine “Contenuto”
 
 Tutte le altre pagine come home_page.html, privacy.html, area_privata.html, profilo_privato.html, account_privati.html, aggiungi_account_privato.html, dettaglio_account_privato.html, modifica_account_privato.html, archivio_account.html, lista_aziende.html, dati_azienda.html, account_azienda.html, aggiungi_nuova_azienda.html, modifica_azienda.html, aggiungi_account_azienda.html, dettaglio_account_azienda.html, modifica_account_azienda.html, scadenze.html, aggiungi_scadenza.html, dettaglio_scadenza.html, modifica_scadenza.html, regole_scadenze.html, impostazioni.html, configurazione_generali.html, configurazione_documenti.html, configurazione_automezzi.html, gestione_allegati.html, notifiche_storia.html
