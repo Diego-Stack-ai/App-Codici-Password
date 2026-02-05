@@ -156,3 +156,12 @@ D. Logout:
 Note Tecniche:
 - `ui-core.js` inietta dinamicamente l'HTML necessario nel `<body>`, non serve copiare codice HTML nelle singole pagine.
 - Il CSS è gestito centralmente in `operatore.css` (Sezione 1.4).
+8. Specifiche Pagine e Layout Critici
+
+## Area Privata (area_privata.html)
+- **Layout Griglia (Matrice 2x2):** La pagina utilizza una struttura a griglia per le 4 macro-aree (Privato, Azienda, Scadenze, Urgenze).
+- **Container:** Classe .content-matrix-grid.
+- **Card:** Classe .matrix-card.
+- **Regola di Stabilità (Allineamento 50/50):** Il layout attuale garantisce che le card siano perfettamente divise al 50%. Questo comportamento è sensibile alle modifiche CSS.
+- **DIVIETO DI REFACTORING GRIGLIA:** Non modificare le classi del container (.content-matrix-grid) né tentare di rifattorizzare la griglia in operatore.css senza un test esaustivo, in quanto tentativi precedenti hanno causato asimmetrie (pulsanti di sinistra più stretti). Mantenere la struttura HTML e CSS corrente per questa pagina.
+
