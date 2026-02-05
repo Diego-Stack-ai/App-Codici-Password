@@ -409,6 +409,7 @@ body,
 
 .badge-initial-hide {
     opacity: 0;
+    pointer-events: none;
 }
 
 .micro-dashboard-list {

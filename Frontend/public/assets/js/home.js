@@ -196,7 +196,13 @@ async function renderDashboardDeadlines(user) {
 
         if (upCount) upCount.textContent = upcoming.length;
         if (upBadge) {
-            upBadge.style.opacity = upcoming.length > 0 ? "1" : "0.3";
+            // Se ci sono scadenze mostro il badge, altrimenti lo nascondo (o grigio 0.3)
+            if (upcoming.length > 0) {
+                upBadge.classList.remove('badge-initial-hide');
+                upBadge.style.opacity = "1";
+            } else {
+                upBadge.classList.add('badge-initial-hide');
+            }
         }
         if (upList) {
             upList.innerHTML = upcoming.slice(0, 3).map(item => renderMiniItem(item, today)).join('');
@@ -209,7 +215,12 @@ async function renderDashboardDeadlines(user) {
 
         if (exCount) exCount.textContent = expired.length;
         if (exBadge) {
-            exBadge.style.opacity = expired.length > 0 ? "1" : "0.3";
+            if (expired.length > 0) {
+                exBadge.classList.remove('badge-initial-hide');
+                exBadge.style.opacity = "1";
+            } else {
+                exBadge.classList.add('badge-initial-hide');
+            }
         }
         if (exList) {
             exList.innerHTML = expired.slice(0, 3).map(item => renderMiniItem(item, today)).join('');
