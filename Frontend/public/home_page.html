@@ -27,14 +27,12 @@
         <div class="header-left">
           <a href="profilo_privato.html" class="avatar-header-link">
             <div id="header-user-avatar" class="header-avatar-box">
-              <img id="user-avatar-img" src="assets/images/user-avatar.png" alt="Avatar Utente"
-                onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00czLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYy04LTIuNjYtOC00LTh6Ii8+PC9zdmc+'">
+              <img id="user-avatar-img" src="assets/images/user-avatar.png" alt="Avatar Utente">
             </div>
           </a>
 
           <!-- Testo Cliccabile -->
-          <a href="profilo_privato.html"
-            style="text-decoration: none; color: inherit; -webkit-tap-highlight-color: transparent;">
+          <a href="profilo_privato.html" class="profile-header-link">
             <div class="flex flex-col justify-center">
               <span id="home-greeting-text" class="header-greeting-text">...</span>
               <h1 id="home-user-name" class="header-title">Home Page</h1>
@@ -47,7 +45,7 @@
 
         <!-- Right: Logout -->
         <div class="header-right">
-          <button id="header-logout-btn" class="btn-icon-header" onclick="window.location.href='index.html'">
+          <button id="header-logout-btn" class="btn-icon-header">
             <span class="material-symbols-outlined">logout</span>
           </button>
         </div>
@@ -112,17 +110,16 @@
     <!-- FOOTER -->
     <footer class="base-footer">
       <!-- SX: Theme Switcher -->
-      <button id="theme-toggle-home" class="btn-icon-header"
-        onclick="const h=document.documentElement; h.classList.toggle('dark');">
+      <button id="theme-toggle-home" class="btn-icon-header">
         <span class="material-symbols-outlined">contrast</span>
       </button>
 
       <!-- C: Empty Spacer -->
-      <div style="flex: 1;"></div>
+      <div class="footer-spacer"></div>
 
       <!-- DX: Settings Link -->
       <a href="impostazioni.html" class="btn-icon-header footer-settings-link">
-        <span class="material-symbols-outlined">settings</span>
+        <span class="material-symbols-outlined footer-settings-icon">tune</span>
       </a>
     </footer>
   </div>

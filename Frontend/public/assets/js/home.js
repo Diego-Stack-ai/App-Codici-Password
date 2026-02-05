@@ -27,19 +27,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Renderizza Scadenze e Urgenze
         await renderDashboardDeadlines(user);
-    });
 
-    // Logout Handler (Delegato se il bottone esiste staticamente)
+        // Inizializza Listeners (Logout, Tema, Avatar Fallback)
+        initHomeListeners();
+    });
+});
+
+/**
+ * Gestisce i click e gli eventi della Home Page (No Inline JS)
+ */
+function initHomeListeners() {
+    // 1. Logout
     const logoutBtn = document.getElementById('header-logout-btn');
     if (logoutBtn) {
-        logoutBtn.onclick = async () => {
+        logoutBtn.addEventListener('click', async () => {
             if (confirm("Vuoi uscire?")) {
                 await signOut(auth);
                 window.location.href = 'index.html';
             }
-        };
+        });
     }
-});
+
+    // 2. Toggle Tema (Sostituisce l'inline on click)
+    const themeBtn = document.getElementById('theme-toggle-home');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+    }
+
+    // 3. Avatar Fallback (Sostituisce onerror inline)
+    const avatarImg = document.getElementById('user-avatar-img');
+    if (avatarImg) {
+        avatarImg.addEventListener('error', function () {
+            this.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00czLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYy04LTIuNjYtOC00LTh6Ii8+PC9zdmc+';
+        });
+    }
+}
+
 
 /**
  * Gestisce il rendering dell'utente nell'Header

@@ -229,6 +229,13 @@ body,
     letter-spacing: 0.1em;
 }
 
+.profile-header-link {
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+}
+
 .btn-icon-header {
     width: 42px;
     height: 42px;
@@ -274,6 +281,10 @@ body,
 
 .spacer-footer {
     height: 100px;
+}
+
+.footer-spacer {
+    flex: 1;
 }
 
 .base-main {
@@ -453,6 +464,15 @@ body,
     background: rgba(0, 0, 0, 0.2);
     border-radius: 6px;
     color: #fff;
+}
+
+/* Rotazione Icona Tune in Footer */
+.footer-settings-link:hover .footer-settings-icon {
+    transform: rotate(90deg);
+}
+
+.footer-settings-icon {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --- 2.5 GRADIENTI CARD (Colori Tematici) --- */
