@@ -1,3 +1,5 @@
+/* ==================== PROTOCOLLO BASE (Struttura Core) ==================== */
+
 /* -------------------- VARIABILI -------------------- */
 :root {
     --bg-primary: #0a0f1e;
@@ -60,7 +62,62 @@ body,
     background: transparent;
 }
 
+
+/* -------------------- UTILITÀ BASE (Strumenti Core) -------------------- */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.h-full {
+    height: 100%;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+.tracking-widest {
+    letter-spacing: 0.1em;
+}
+
+.opacity-70 {
+    opacity: 0.7;
+}
+
 /* -------------------- CONTAINER & FARO -------------------- */
+
 .base-container {
     position: relative;
     display: flex;
@@ -281,20 +338,69 @@ body,
     padding-top: 1rem;
 }
 
+/* ========================================================================== */
+/* ==================== PULSANTI HOME PAGE ==================== */
+
+/* COLORI CARD (Gradienti Originali) */
+.card-blue {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), transparent);
+}
+
+.card-green {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), transparent);
+}
+
+.card-orange {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent);
+}
+
+.card-red {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), transparent);
+}
+
+
 /* -------------------- GRID SYSTEM (Responsive Prova) -------------------- */
 .matrix-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, auto);
+    grid-template-areas:
+        "privato scadenze azienda"
+        "privato urgenze azienda";
+    gap: 1.25rem;
     width: 100%;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 1.5rem;
     box-sizing: border-box;
+    max-width: 1000px;
+    margin: 0 auto;
 }
+
+/* Assegnazione Aree */
+.area-privato {
+    grid-area: privato;
+}
+
+.area-azienda {
+    grid-area: azienda;
+}
+
+.area-scadenze {
+    grid-area: scadenze;
+}
+
+.area-urgenze {
+    grid-area: urgenze;
+}
+
 
 @media (max-width:480px) {
     .matrix-grid {
         grid-template-columns: 1fr;
+        grid-template-areas:
+            "privato"
+            "azienda"
+            "scadenze"
+            "urgenze";
         padding-left: 14px;
         padding-right: 14px;
         gap: 0.9rem;
@@ -309,18 +415,14 @@ body,
     }
 }
 
-@media (min-width:481px) and (max-width:899px) {
-    .matrix-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-}
+/* Rimosso override 2 colonne per mantenere layout 3-colonne su tablet */
 
 @media (min-width:900px) {
     .matrix-grid {
-        max-width: 720px;
+        max-width: 1000px;
         margin-left: auto;
         margin-right: auto;
+        gap: 1.5rem;
     }
 }
 
@@ -338,11 +440,14 @@ body,
     text-decoration: none;
     color: var(--text-primary);
     padding: 1.5rem;
-    min-height: 160px;
-    max-width: calc(100% - 40px);
-    margin-left: auto;
-    margin-right: auto;
+    min-height: 180px;
+    /* Un po' più alto per card verticali */
+    width: 100%;
+    /* Occupa tutta l'area assegnata */
+    margin: 0;
+    /* Rimosso margin auto per controllo griglia */
     transition: transform 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
 }
 
 .matrix-card:active {
@@ -364,74 +469,4 @@ body,
 .card-text-block p {
     opacity: 0.8;
     font-size: 0.9rem;
-}
-
-/* COLORI CARD */
-.card-blue {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), transparent);
-}
-
-.card-green {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), transparent);
-}
-
-.card-orange {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent);
-}
-
-.card-red {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), transparent);
-}
-
-/* UTILITÀ BASE */
-.flex {
-    display: flex;
-}
-
-.flex-col {
-    flex-direction: column;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.items-start {
-    align-items: flex-start;
-}
-
-.justify-center {
-    justify-content: center;
-}
-
-.justify-between {
-    justify-content: space-between;
-}
-
-.w-full {
-    width: 100%;
-}
-
-.h-full {
-    height: 100%;
-}
-
-.text-xs {
-    font-size: 0.75rem;
-}
-
-.font-bold {
-    font-weight: 700;
-}
-
-.uppercase {
-    text-transform: uppercase;
-}
-
-.tracking-widest {
-    letter-spacing: 0.1em;
-}
-
-.opacity-70 {
-    opacity: 0.7;
 }
