@@ -727,6 +727,9 @@ html:not(.dark) .btn-secondary {
     padding: 1.5rem;
     min-height: 180px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
 }
 
 .matrix-card:active {
