@@ -122,3 +122,5 @@ function setAvatarImage(element, url) {
         element.style.backgroundSize = 'cover';
     }
 }
+
+

@@ -364,7 +364,7 @@ body,
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    z-index: 20;
+    z-index: 1;
 }
 
 .adaptive-shadow {
@@ -376,43 +376,21 @@ body,
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
 }
 
-/* --- COLORI E GRADIENTI --- */
-.card-blue {
-    --accent-rgb: 37, 99, 235;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.4), transparent);
-}
-
-.card-green {
-    --accent-rgb: 16, 185, 129;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), transparent);
-}
-
-.card-orange {
-    --accent-rgb: 245, 158, 11;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), transparent);
-}
-
-.card-red {
-    --accent-rgb: 239, 68, 68;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), transparent);
-}
-
-
 
 
 /* -------------------- GRID SYSTEM (Responsive Prova) -------------------- */
 .matrix-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, auto);
+    grid-template-columns: 1fr 1fr;
     grid-template-areas:
-        "privato scadenze azienda"
-        "privato urgenze azienda";
+        "privato azienda"
+        "scadenze scadenze"
+        "urgenze urgenze";
     gap: 1.25rem;
     width: 100%;
     padding: 1.5rem;
     box-sizing: border-box;
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -433,15 +411,13 @@ body,
     grid-area: urgenze;
 }
 
-
 @media (max-width:480px) {
     .matrix-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         grid-template-areas:
-            "privato"
-            "azienda"
-            "scadenze"
-            "urgenze";
+            "privato azienda"
+            "scadenze scadenze"
+            "urgenze urgenze";
         padding-left: 14px;
         padding-right: 14px;
         gap: 0.9rem;
@@ -449,20 +425,20 @@ body,
 
     .matrix-card {
         min-height: 130px;
+        padding: 1.1rem;
     }
 
-    .matrix-card-inner {
-        padding: 1.2rem;
+    .card-text-block h3 {
+        font-size: 0.95rem;
+    }
+
+    .card-text-block p {
+        font-size: 0.75rem;
     }
 }
 
-/* Rimosso override 2 colonne per mantenere layout 3-colonne su tablet */
-
 @media (min-width:900px) {
     .matrix-grid {
-        max-width: 1000px;
-        margin-left: auto;
-        margin-right: auto;
         gap: 1.5rem;
     }
 }
@@ -474,19 +450,16 @@ body,
     align-items: center;
     justify-content: center;
     text-align: center;
-
     border-radius: 24px;
+    background: var(--bg-primary);
     border: 1px solid var(--border-color);
     text-decoration: none;
     color: var(--text-primary);
     padding: 1.5rem;
     min-height: 180px;
-    /* Un po' più alto per card verticali */
     width: 100%;
-    /* Occupa tutta l'area assegnata */
     margin: 0;
-    /* Rimosso margin auto per controllo griglia */
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-sizing: border-box;
 }
 
@@ -499,7 +472,14 @@ body,
     margin-bottom: 0.5rem;
     padding: 12px;
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
+    position: relative;
+    z-index: 10;
+}
+
+.card-text-block {
+    position: relative;
+    z-index: 10;
 }
 
 .card-text-block h3 {
@@ -507,6 +487,44 @@ body,
 }
 
 .card-text-block p {
-    opacity: 0.8;
+    opacity: 1;
     font-size: 0.9rem;
+}
+
+/* --- COLORI E GRADIENTI (Spostati a fine file per precedenza) --- */
+.card-blue {
+    --accent-rgb: 0, 180, 255;
+    background: linear-gradient(135deg, rgba(0, 180, 255, 0.5), rgba(0, 80, 180, 0.3)) !important;
+}
+
+.card-green {
+    --accent-rgb: 50, 255, 50;
+    background: linear-gradient(135deg, rgba(50, 255, 50, 0.5), rgba(10, 80, 20, 0.3)) !important;
+}
+
+.card-orange {
+    --accent-rgb: 255, 220, 0;
+    background: linear-gradient(135deg, rgba(255, 220, 0, 0.5), rgba(130, 100, 0, 0.3)) !important;
+}
+
+.card-red {
+    --accent-rgb: 255, 30, 0;
+    background: linear-gradient(135deg, rgba(255, 30, 0, 0.5), rgba(80, 0, 0, 0.3)) !important;
+}
+
+/* VARIANTI LIGHT MODE */
+html:not(.dark) .card-blue {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(0, 150, 255, 0.4)) !important;
+}
+
+html:not(.dark) .card-green {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(50, 255, 50, 0.4)) !important;
+}
+
+html:not(.dark) .card-orange {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 200, 0, 0.4)) !important;
+}
+
+html:not(.dark) .card-red {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 30, 0, 0.4)) !important;
 }

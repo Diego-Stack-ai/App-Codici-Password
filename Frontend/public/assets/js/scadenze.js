@@ -29,10 +29,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchBarContainer = document.getElementById('search-bar-container');
     const searchInput = document.getElementById('deadline-search');
+
+    // --- LOGICA FILTRO DA URL ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlFilter = urlParams.get('filter');
+
     let activeFilter = 'Tutte';
+    if (urlFilter === 'urgenti') activeFilter = 'Urgenti';
+    else if (urlFilter === 'in_scadenza') activeFilter = 'In scadenza';
+
     let searchQuery = '';
     let sortType = 'date-asc';
     const filterChips = document.querySelectorAll('.filter-chip');
+
+    // Sincronizza i chip iniziali con il filtro da URL
+    if (urlFilter) {
+        filterChips.forEach(chip => {
+            if (chip.textContent.trim() === activeFilter) {
+                chip.classList.add('active');
+            } else {
+                chip.classList.remove('active');
+            }
+        });
+    }
 
     // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
     const injectFooterActions = () => {
