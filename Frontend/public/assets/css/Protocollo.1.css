@@ -208,11 +208,21 @@ body,
     /* Solo scale, no background col */
     cursor: pointer;
     font-size: 24px;
+    -webkit-tap-highlight-color: transparent;
+    /* Rimuove box colorato su mobile */
+    outline: none;
+}
+
+.btn-icon-header:hover,
+.btn-icon-header:active,
+.btn-icon-header:focus {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
 }
 
 .btn-icon-header:hover {
-    background: transparent;
-    /* RIMOSSO ALONE */
     transform: scale(1.05);
 }
 
