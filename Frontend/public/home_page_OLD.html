@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-t="home_page_title">Home Page</title>
+
+    <!-- Titanium V3.1 Engine Stack -->
+
+    <script src="assets/js/core.js?v=3.1"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <!-- CSS Standard (Titanium Protocol V4) -->
+    <link rel="stylesheet" href="assets/css/Protocollo.css?v=3.1">
+
+    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.1" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0f1e">
+</head>
+
+<body class="base-bg">
+    <div class="base-container">
+        <!-- Faro Estetico -->
+        <div class="base-glow"></div>
+
+        <!-- HEADER FISSO -->
+        <header class="base-header">
+            <div class="header-balanced-container">
+                <!-- Left: Foto Utente + Saluto -->
+                <div class="header-left" style="display: flex; align-items: center; gap: 12px; width: auto;">
+                    <a href="profilo_privato.html" class="avatar-header-link" style="text-decoration: none;">
+                        <div id="header-user-avatar"
+                            style="width: 38px; height: 38px; background: rgba(255,255,255,0.1); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
+                            <!-- Fallback Icon if no image -->
+                            <span class="material-symbols-outlined" style="font-size: 24px; color: white;">person</span>
+                        </div>
+                    </a>
+
+                    <!-- Saluto Spostato Qui -->
+                    <div class="flex flex-col items-start justify-center">
+                        <span id="home-greeting-text" class="text-xs font-bold uppercase tracking-widest opacity-70"
+                            style="line-height: 1; text-align: left;">...</span>
+                        <h1 id="home-user-name" class="header-title"
+                            style="margin-top: 2px; font-size: 1.1rem; text-align: left; margin: 0;">Home Page</h1>
+                    </div>
+                </div>
+
+                <!-- Center: Vuoto -->
+                <div class="header-center"></div>
+
+                <!-- Right: Logout -->
+                <div class="header-right">
+                    <button id="header-logout-btn" class="btn-icon-header"
+                        onclick="localStorage.removeItem('authToken'); window.location.href='index.html'">
+                        <span class="material-symbols-outlined">logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="spacer-header"></div>
+
+        <!-- MAIN -->
+        <main class="base-main home-main" data-lock-ui>
+
+            <div class="matrix-grid">
+
+                <!-- Card: PRIVATO (Matrix-Blue) -->
+                <a href="area_privata.html" class="matrix-card card-blue border-glow adaptive-shadow">
+                    <div class="glass-shine"></div>
+                    <div class="saetta-master"></div>
+                    <div class="matrix-icon-box">
+                        <span class="material-symbols-outlined">lock</span>
+                    </div>
+                    <div class="card-text-block">
+                        <h3 data-t="section_private_title">Privato</h3>
+                        <p data-t="section_private_desc">Cassaforte Personale</p>
+                    </div>
+                </a>
+
+                <!-- Card: AZIENDA (Matrix-Green) -->
+                <a href="lista_aziende.html" class="matrix-card card-green border-glow adaptive-shadow">
+                    <div class="glass-shine"></div>
+                    <div class="saetta-master"></div>
+                    <div class="matrix-icon-box">
+                        <span class="material-symbols-outlined">apartment</span>
+                    </div>
+                    <div class="card-text-block">
+                        <h3 data-t="section_company_title">Azienda</h3>
+                        <p data-t="section_company_desc">Gestione Risorse</p>
+                    </div>
+                </a>
+
+                <!-- Card: SCADENZE (Matrix-Orange) -->
+                <div data-href="scadenze.html" class="matrix-card card-orange border-glow adaptive-shadow">
+                    <div class="glass-shine"></div>
+                    <div class="saetta-master"></div>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                        </div>
+                        <span id="urgent-count-badge" class="badge-count loading-pulse">
+                            <span id="urgent-count">---</span>
+                        </span>
+                    </div>
+                    <div class="card-text-block">
+                        <h3 data-t="section_deadlines_title">Scadenze</h3>
+                        <p data-t="section_deadlines_desc">Controlla i prossimi impegni</p>
+                    </div>
+                    <!-- Mini List Dinamica -->
+                    <div id="deadline-list-container" class="dashboard-list">
+                        <!-- Skeleton loading items -->
+                        <div class="skeleton-text h-3 mb-2 w-4/5"></div>
+                        <div class="skeleton-text h-3 w-3/5"></div>
+                    </div>
+                </div>
+
+                <!-- Card: URGENZE (Matrix-Red) -->
+                <div id="urgenze-card" data-href="urgenze.html"
+                    class="matrix-card card-red border-glow adaptive-shadow">
+                    <div class="glass-shine"></div>
+                    <div class="saetta-master"></div>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">warning</span>
+                        </div>
+                        <span id="expired-count-badge" class="badge-count loading-pulse">
+                            <span id="expired-count">---</span>
+                        </span>
+                    </div>
+                    <div class="card-text-block">
+                        <h3 data-t="section_urgencies_title">Urgenze</h3>
+                        <p data-t="section_urgencies_desc">Documenti scaduti o mancanti</p>
+                    </div>
+                    <!-- Mini List Dinamica -->
+                    <div id="urgenze-list" class="dashboard-list">
+                        <!-- Skeleton loading items -->
+                        <div class="skeleton-text h-3 mb-2 w-7/10"></div>
+                        <div class="skeleton-text h-3 w-1/2"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <div class="spacer-footer"></div>
+
+        <!-- FOOTER PREMIUM -->
+        <footer class="base-footer">
+            <!-- SX: Theme Switcher -->
+            <button id="theme-toggle-home" class="btn-icon-header" onclick="
+                const html = document.documentElement;
+                const isDark = html.classList.contains('dark');
+                html.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            ">
+                <span class="material-symbols-outlined">contrast</span>
+            </button>
+
+            <!-- C: Empty Spacer -->
+            <div style="flex: 1;"></div>
+
+            <!-- DX: Settings Link -->
+            <a href="impostazioni.html" class="btn-icon-header">
+                <span class="material-symbols-outlined">settings</span>
+            </a>
+        </footer>
+    </div>
+
+    <!-- Scripts Modulari -->
+    <script type="module" src="assets/js/main.js?v=3.1"></script>
+    <script type="module" src="assets/js/home_OLD.js"></script>
+</body>
+
+</html>
