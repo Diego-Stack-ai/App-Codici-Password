@@ -704,6 +704,83 @@ html:not(.dark) .btn-secondary {
 }
 
 
+/* --- 1.8 LANGUAGE SELECTOR --- */
+.lang-selector-container {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+}
+
+.lang-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.lang-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    width: 160px;
+    background: rgba(20, 25, 40, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+}
+
+.lang-dropdown.show {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.lang-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.lang-option .flag {
+    font-size: 1.2rem;
+}
+
+
 /* 
    --------------------------------------------------------------------------
    SEZIONE 2: PROTOCOLLO HOME (Specifico per home_page.html)
@@ -840,7 +917,7 @@ html:not(.dark) .btn-secondary {
     /* Spazio per scroll invisibile */
 }
 
-.micro-list-item {
+.dashboard-list-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -852,25 +929,25 @@ html:not(.dark) .btn-secondary {
     transition: all 0.3s ease;
 }
 
-.micro-list-item:hover {
+.dashboard-list-item:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: translateX(5px);
 }
 
-.micro-list-item .item-content {
+.dashboard-list-item .item-content {
     display: flex;
     align-items: center;
     gap: 10px;
     overflow: hidden;
 }
 
-.micro-list-item .item-icon-box {
+.dashboard-list-item .item-icon-box {
     display: flex;
     align-items: center;
     color: rgba(255, 255, 255, 0.8);
 }
 
-.micro-list-item .item-icon-box span {
+.dashboard-list-item .item-icon-box span {
     font-size: 18px;
 }
 
@@ -1700,80 +1777,4 @@ input:checked+.base-switch::after {
 
 .section-pb-10 {
     padding-bottom: 2.5rem;
-}
-
-/* --- LANGUAGE SELECTOR --- */
-.lang-selector-container {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 50;
-}
-
-.lang-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--text-primary);
-    transition: all 0.2s;
-    backdrop-filter: blur(4px);
-}
-
-.lang-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.lang-dropdown {
-    position: absolute;
-    top: 110%;
-    right: 0;
-    width: 160px;
-    background: rgba(20, 25, 40, 0.95);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    padding: 0.5rem;
-    display: none;
-    flex-direction: column;
-    gap: 0.25rem;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.2s ease;
-}
-
-.lang-dropdown.show {
-    display: flex;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.lang-option {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    width: 100%;
-    text-align: left;
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.lang-option:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.lang-option .flag {
-    font-size: 1.2rem;
 }

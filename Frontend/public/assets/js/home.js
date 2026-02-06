@@ -253,7 +253,7 @@ function renderMiniItem(item, today) {
     else label = `${diffDays}g`;
 
     return `
-        <div class="micro-list-item">
+        <div class="dashboard-list-item">
             <div class="item-content">
                 <div class="item-icon-box">
                     <span class="material-symbols-outlined">${item.icon || 'event'}</span>
