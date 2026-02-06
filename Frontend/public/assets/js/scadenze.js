@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sortTrigger = document.getElementById('sort-trigger');
     const sortMenu = document.getElementById('sort-menu');
-    const sortItems = document.querySelectorAll('.titanium-dropdown-item');
+    const sortItems = document.querySelectorAll('.base-dropdown-item');
     const currentSortLabel = document.getElementById('current-sort');
 
     if (sortTrigger && sortMenu) {

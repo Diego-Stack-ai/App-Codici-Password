@@ -6,7 +6,7 @@ import { storage } from './firebase-config.js'; // Added storage import
 import { t } from './translations.js';
 
 /**
- * PROFILO PRIVATO MODULE (Titanium Account V3.0)
+ * PROFILO PRIVATO MODULE (PROTOCOLLO BASE Account V3.3)
  */
 
 let currentUserUid = null;
@@ -238,19 +238,19 @@ function renderEmailsView() {
             <div style="padding:1.5rem; position:relative; z-index:1;">
                 <h4 style="color:var(--text-primary); margin-bottom:1.2rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; font-weight:800;">Nuovo Account Email</h4>
                 <div style="display:grid; gap:1rem;">
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label class="field-label" style="color:var(--text-secondary);">Indirizzo Email</label>
-                        <input type="email" id="new-email-addr" placeholder="esempio@dominio.it" class="titanium-input">
+                        <input type="email" id="new-email-addr" placeholder="esempio@dominio.it" class="base-input">
                     </div>
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label class="field-label" style="color:var(--text-secondary);">Password Dedicata</label>
-                        <input type="text" id="new-email-pass" placeholder="Password per l'invio" class="titanium-input">
+                        <input type="text" id="new-email-pass" placeholder="Password per l'invio" class="base-input">
                     </div>
                 </div>
 
                 <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
-                    <button onclick="document.getElementById('pane-add-email').classList.remove('show')" class="titanium-btn-secondary" style="flex:1;">ANNULLA</button>
-                    <button onclick="window.saveNewEmail()" class="titanium-btn-primary" style="flex:1;">SALVA</button>
+                    <button onclick="document.getElementById('pane-add-email').classList.remove('show')" class="base-btn-secondary" style="flex:1;">ANNULLA</button>
+                    <button onclick="window.saveNewEmail()" class="base-btn-primary" style="flex:1;">SALVA</button>
                 </div>
             </div>
         </div>
@@ -279,7 +279,7 @@ function renderEmailsView() {
     visibleEmails.forEach(e => {
         const index = contactEmails.indexOf(e);
         const div = document.createElement('fieldset');
-        div.className = "glass-field-titanium glass-field-cyan";
+        div.className = "glass-field-base glass-field-cyan";
 
         // Inner wrapper for content layout
         const contentWrapperStyle = "display:flex; flex-direction:column; gap:1rem; width:100%;";
@@ -360,16 +360,16 @@ function renderEmailsView() {
                         </div>
                         <span class="field-value" style="word-break:break-all;">${e.address}</span>
                     </div>
-                    <div class="titanium-action-grid">
-                         <button class="titanium-action-btn btn-edit" 
+                    <div class="base-action-grid">
+                         <button class="base-action-btn btn-edit" 
                                  onclick="event.preventDefault(); window.editEmail(${index})">
                              <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
                          </button>
-                         <button class="titanium-action-btn btn-delete" 
+                         <button class="base-action-btn btn-delete" 
                                  onclick="event.preventDefault(); window.deleteEmail(${index})">
                              <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
                          </button>
-                         <button class="titanium-action-btn btn-copy" 
+                         <button class="base-action-btn btn-copy" 
                                  onclick="event.preventDefault(); navigator.clipboard.writeText('${e.address.replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
                             <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
                          </button>
@@ -500,7 +500,7 @@ window.openAttachmentManager = (index, type = 'email', parentIndex = null) => {
 
     const modal = document.createElement('div');
     modal.id = 'modal-manage-attach';
-    modal.className = 'titanium-modal-overlay';
+    modal.className = 'base-modal-overlay';
     modal.innerHTML = `
         <div class="settings-vault" style="width:100%; max-width:400px; padding:2rem; position:relative; overflow:hidden;">
             <!-- Glow Effect -->
@@ -512,10 +512,10 @@ window.openAttachmentManager = (index, type = 'email', parentIndex = null) => {
             <div id="manager-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem; max-height:200px; overflow-y:auto; position:relative; z-index:1;"></div>
 
             <div style="display:flex; gap:0.75rem; margin-bottom:1.5rem; position:relative; z-index:1;">
-                <button class="titanium-btn-secondary" style="flex:1; font-size:0.85rem;" onclick="document.getElementById('manager-camera-input').click()">
+                <button class="base-btn-secondary" style="flex:1; font-size:0.85rem;" onclick="document.getElementById('manager-camera-input').click()">
                     <span class="material-symbols-outlined" style="font-size:18px;">photo_camera</span> Scatta
                 </button>
-                <button class="titanium-btn-secondary" style="flex:1; font-size:0.85rem;" onclick="document.getElementById('manager-file-input').click()">
+                <button class="base-btn-secondary" style="flex:1; font-size:0.85rem;" onclick="document.getElementById('manager-file-input').click()">
                     <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span> Libreria
                 </button>
             </div>
@@ -524,8 +524,8 @@ window.openAttachmentManager = (index, type = 'email', parentIndex = null) => {
             <input type="file" id="manager-file-input" multiple style="display:none" onchange="window.addManagerFile(this)">
 
             <div style="display:flex; gap:1rem; position:relative; z-index:1;">
-                <button onclick="document.getElementById('modal-manage-attach').remove()" class="titanium-btn-secondary" style="flex:1;">Annulla</button>
-                <button onclick="window.saveManagerAttachments()" class="titanium-btn-primary" style="flex:1;">Salva</button>
+                <button onclick="document.getElementById('modal-manage-attach').remove()" class="base-btn-secondary" style="flex:1;">Annulla</button>
+                <button onclick="window.saveManagerAttachments()" class="base-btn-primary" style="flex:1;">Salva</button>
             </div>
         </div>
     `;
@@ -648,7 +648,7 @@ window.showConfirmModal = (message) => {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
         modal.id = 'custom-confirm-modal';
-        modal.className = 'titanium-modal-overlay';
+        modal.className = 'base-modal-overlay';
         modal.innerHTML = `
             <div class="settings-vault" style="width:100%; max-width:350px; padding:2.5rem 2rem; border:1px solid rgba(239, 68, 68, 0.2); position:relative; overflow:hidden; text-align:center;">
                 <div style="position:absolute; top:-10%; left:-10%; width:150px; height:150px; background:radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%); filter:blur(30px); pointer-events:none;"></div>
@@ -658,8 +658,8 @@ window.showConfirmModal = (message) => {
                 <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:2rem; position:relative; z-index:1; line-height:1.5;">${message}</p>
                 
                 <div style="display:flex; gap:1rem; justify-content:center; position:relative; z-index:1;">
-                    <button id="confirm-no-btn" class="titanium-btn-secondary" style="flex:1;">Annulla</button>
-                    <button id="confirm-yes-btn" class="titanium-btn-primary" style="flex:1; background:linear-gradient(135deg, #dc2626, #ef4444); box-shadow:0 10px 20px -5px rgba(239, 68, 68, 0.4);">Elimina</button>
+                    <button id="confirm-no-btn" class="base-btn-secondary" style="flex:1;">Annulla</button>
+                    <button id="confirm-yes-btn" class="base-btn-primary" style="flex:1; background:linear-gradient(135deg, #dc2626, #ef4444); box-shadow:0 10px 20px -5px rgba(239, 68, 68, 0.4);">Elimina</button>
                 </div>
             </div>
         `;
@@ -674,7 +674,7 @@ window.showFormModal = (title, fields) => {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
         modal.id = 'dynamic-form-modal';
-        modal.className = 'titanium-modal-overlay';
+        modal.className = 'base-modal-overlay';
 
         let fieldsHtml = '';
         fields.forEach(f => {
@@ -684,25 +684,25 @@ window.showFormModal = (title, fields) => {
 
             if (type === 'select' && f.options) {
                 fieldsHtml += `
-                    <div class="glass-field-titanium" style="margin-bottom:1rem;">
+                    <div class="glass-field-base" style="margin-bottom:1rem;">
                         <label class="field-label" style="color:var(--text-secondary);">${f.label}</label>
-                        <select id="modal-field-${f.id}" class="titanium-input">
+                        <select id="modal-field-${f.id}" class="base-input">
                             ${f.options.map(opt => `<option value="${opt}" ${opt === f.value ? 'selected' : ''}>${opt}</option>`).join('')}
                         </select>
                     </div>
                 `;
             } else if (type === 'textarea') {
                 fieldsHtml += `
-                    <div class="glass-field-titanium" style="margin-bottom:1rem;">
+                    <div class="glass-field-base" style="margin-bottom:1rem;">
                         <label class="field-label" style="color:var(--text-secondary);">${f.label}</label>
-                        <textarea id="modal-field-${f.id}" class="titanium-input" style="min-height:80px; resize:none;">${f.value}</textarea>
+                        <textarea id="modal-field-${f.id}" class="base-input" style="min-height:80px; resize:none;">${f.value}</textarea>
                     </div>
                 `;
             } else {
                 fieldsHtml += `
-                    <div class="glass-field-titanium" style="margin-bottom:1rem;">
+                    <div class="glass-field-base" style="margin-bottom:1rem;">
                         <label class="field-label" style="color:var(--text-secondary);">${f.label}</label>
-                        <input type="${type}" id="modal-field-${f.id}" value="${f.value}" ${maxLength} class="titanium-input" style="${extraStyles}">
+                        <input type="${type}" id="modal-field-${f.id}" value="${f.value}" ${maxLength} class="base-input" style="${extraStyles}">
                     </div>
                 `;
             }
@@ -718,8 +718,8 @@ window.showFormModal = (title, fields) => {
                     ${fieldsHtml}
                 </div>
                 <div style="display:flex; gap:1rem; margin-top:2rem; position:relative; z-index:1;">
-                    <button id="modal-cancel-btn" class="titanium-btn-secondary" style="flex:1;">ANNULLA</button>
-                    <button id="modal-confirm-btn" class="titanium-btn-primary" style="flex:1;">SALVA</button>
+                    <button id="modal-cancel-btn" class="base-btn-secondary" style="flex:1;">ANNULLA</button>
+                    <button id="modal-confirm-btn" class="base-btn-primary" style="flex:1;">SALVA</button>
                 </div>
             </div>
         `;
@@ -765,44 +765,44 @@ function renderAddressesView() {
             <div style="padding:1.5rem; position:relative; z-index:1;">
                 <h4 style="color:var(--text-primary); margin-bottom:1.2rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; font-weight:800;">Nuovo Indirizzo</h4>
                 <div style="display:grid; gap:1rem;">
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label class="field-label" style="color:var(--text-secondary);">Tipo Unità</label>
-                        <select id="addr-type" class="titanium-input">
+                        <select id="addr-type" class="base-input">
                             <option value="Residenza">Residenza</option>
                             <option value="Domicilio">Domicilio</option>
                             <option value="Lavoro">Lavoro</option>
                             <option value="Altro">Altro</option>
                         </select>
                     </div>
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label class="field-label" style="color:var(--text-secondary);">Via / Piazza</label>
-                        <input type="text" id="addr-street" placeholder="Es. Via Roma" class="titanium-input">
+                        <input type="text" id="addr-street" placeholder="Es. Via Roma" class="base-input">
                     </div>
-                    <div class="titanium-responsive-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
-                         <div class="glass-field-titanium">
+                    <div class="base-responsive-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+                         <div class="glass-field-base">
                             <label class="field-label" style="color:var(--text-secondary);">Civico</label>
-                            <input type="text" id="addr-civic" placeholder="Es. 10/A" class="titanium-input">
+                            <input type="text" id="addr-civic" placeholder="Es. 10/A" class="base-input">
                         </div>
-                        <div class="glass-field-titanium">
+                        <div class="glass-field-base">
                             <label class="field-label" style="color:var(--text-secondary);">CAP</label>
-                            <input type="text" id="addr-cap" placeholder="Es. 35030" class="titanium-input">
+                            <input type="text" id="addr-cap" placeholder="Es. 35030" class="base-input">
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns: 2fr 1fr; gap:0.75rem;">
-                         <div class="glass-field-titanium">
+                         <div class="glass-field-base">
                             <label class="field-label" style="color:var(--text-secondary);">Città</label>
-                            <input type="text" id="addr-city" placeholder="Es. Padova" class="titanium-input">
+                            <input type="text" id="addr-city" placeholder="Es. Padova" class="base-input">
                         </div>
-                        <div class="glass-field-titanium">
+                        <div class="glass-field-base">
                             <label class="field-label" style="color:var(--text-secondary);">Prov.</label>
-                            <input type="text" id="addr-prov" placeholder="PD" class="titanium-input" maxlength="2" style="text-transform:uppercase;">
+                            <input type="text" id="addr-prov" placeholder="PD" class="base-input" maxlength="2" style="text-transform:uppercase;">
                         </div>
                     </div>
                 </div>
 
                 <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
-                    <button onclick="document.getElementById('pane-add-address').classList.remove('show')" class="titanium-btn-secondary" style="flex:1;">ANNULLA</button>
-                    <button onclick="window.confirmSaveAddress(null)" class="titanium-btn-primary" style="flex:1;">SALVA</button>
+                    <button onclick="document.getElementById('pane-add-address').classList.remove('show')" class="base-btn-secondary" style="flex:1;">ANNULLA</button>
+                    <button onclick="window.confirmSaveAddress(null)" class="base-btn-primary" style="flex:1;">SALVA</button>
                 </div>
             </div>
         </div>
@@ -845,23 +845,23 @@ function renderAddressesView() {
                         <div style="font-size:0.75rem; opacity:0.7; word-break:break-word;">${cityInfo}</div>
                     </div>
                 </div>
-                <div class="titanium-action-grid">
-                    <button class="titanium-action-btn btn-view" 
+                <div class="base-action-grid">
+                    <button class="base-action-btn btn-view" 
                             title="Visualizza Dettagli"
                             onclick="event.preventDefault(); window.showAddressDetails(${index})">
                         <span class="material-symbols-outlined" style="font-size:16px;">visibility</span>
                     </button>
-                    <button class="titanium-action-btn btn-copy" 
+                    <button class="base-action-btn btn-copy" 
                             title="Copia Indirizzo"
                             onclick="event.preventDefault(); navigator.clipboard.writeText('${(fullAddr + ' ' + cityInfo).replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
                         <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
                     </button>
-                    <button class="titanium-action-btn btn-edit" 
+                    <button class="base-action-btn btn-edit" 
                             title="Modifica"
                             onclick="event.preventDefault(); window.editAddress(${index})">
                         <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
                     </button>
-                    <button class="titanium-action-btn btn-delete" 
+                    <button class="base-action-btn btn-delete" 
                             title="Elimina"
                             onclick="event.preventDefault(); window.deleteAddress(${index})">
                         <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
@@ -885,11 +885,11 @@ function renderAddressesView() {
                 <div id="pane-add-utility-${index}" class="accordion-content" style="margin-bottom:1rem;">
                     <div style="background:rgba(0,0,0,0.2); padding:1rem; border-radius:16px; border:1px solid var(--border-color);">
                         <div style="display:grid; gap:0.75rem;">
-                            <input type="text" id="util-type-${index}" placeholder="Tipo (Luce, Gas...)" class="titanium-input" style="font-size:0.85rem; padding:0.6rem;">
-                            <input type="text" id="util-value-${index}" placeholder="Codice POD/PDR" class="titanium-input" style="font-size:0.85rem; padding:0.6rem; font-family:monospace;">
+                            <input type="text" id="util-type-${index}" placeholder="Tipo (Luce, Gas...)" class="base-input" style="font-size:0.85rem; padding:0.6rem;">
+                            <input type="text" id="util-value-${index}" placeholder="Codice POD/PDR" class="base-input" style="font-size:0.85rem; padding:0.6rem; font-family:monospace;">
                             <div style="display:flex; gap:0.5rem;">
-                                <button onclick="window.closeAddUtilityPane(${index})" class="titanium-btn-secondary" style="flex:1; padding:0.5rem; font-size:0.75rem;">ANNULLA</button>
-                                <button onclick="window.confirmSaveUtility(${index})" class="titanium-btn-primary" style="flex:1; padding:0.5rem; font-size:0.75rem;">SALVA</button>
+                                <button onclick="window.closeAddUtilityPane(${index})" class="base-btn-secondary" style="flex:1; padding:0.5rem; font-size:0.75rem;">ANNULLA</button>
+                                <button onclick="window.confirmSaveUtility(${index})" class="base-btn-primary" style="flex:1; padding:0.5rem; font-size:0.75rem;">SALVA</button>
                             </div>
                         </div>
                     </div>
@@ -951,7 +951,7 @@ function renderUtilitiesInAddress(addrIndex) {
                     <div style="font-size:0.85rem; font-weight:600; font-family:monospace; word-break:break-all;">${u.value}</div>
                 </div>
                 <div style="display:flex; gap:0.4rem;">
-                    <button class="titanium-action-btn" onclick="window.openAttachmentManager(${uIdx}, 'utility', ${addrIndex})" style="color:#22d3ee; background:none; border:none; cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">add_circle</span></button>
+                    <button class="base-action-btn" onclick="window.openAttachmentManager(${uIdx}, 'utility', ${addrIndex})" style="color:#22d3ee; background:none; border:none; cursor:pointer;"><span class="material-symbols-outlined" style="font-size:16px;">add_circle</span></button>
                     <button onclick="window.editUtenza(${addrIndex}, ${uIdx})" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; padding:4px;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></button>
                     <button onclick="window.deleteUtenza(${addrIndex}, ${uIdx})" style="background:none; border:none; color:rgba(239,68,68,0.7); cursor:pointer; padding:4px;"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
                 </div>
@@ -968,7 +968,7 @@ window.showAddressDetails = (index) => {
 
     const modal = document.createElement('div');
     modal.id = 'modal-address-details';
-    modal.className = 'titanium-modal-overlay';
+    modal.className = 'base-modal-overlay';
 
     // Helper to create read-only field
     const field = (label, value) => `
@@ -1082,24 +1082,24 @@ function renderPhonesView() {
             <div style="padding:1.5rem; position:relative; z-index:1;">
                 <h4 style="color:var(--text-primary); margin-bottom:1.2rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; font-weight:800;">Nuovo Contatto Telefonico</h4>
                 <div style="display:grid; gap:1rem;">
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label class="field-label" style="color:var(--text-secondary);">Destinazione</label>
-                        <select id="new-phone-type" class="titanium-input">
+                        <select id="new-phone-type" class="base-input">
                             <option value="Cellulare">Cellulare</option>
                             <option value="Fisso">Fisso</option>
                             <option value="Lavoro">Lavoro</option>
                             <option value="Altro">Altro</option>
                         </select>
                     </div>
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label class="field-label" style="color:var(--text-secondary);">Numero di Telefono</label>
-                        <input type="tel" id="new-phone-number" placeholder="+39 340 ..." class="titanium-input">
+                        <input type="tel" id="new-phone-number" placeholder="+39 340 ..." class="base-input">
                     </div>
                 </div>
 
                 <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
-                    <button onclick="document.getElementById('pane-add-phone').classList.remove('show')" class="titanium-btn-secondary" style="flex:1;">ANNULLA</button>
-                    <button onclick="window.confirmAddPhone()" class="titanium-btn-primary" style="flex:1;">SALVA NUMERO</button>
+                    <button onclick="document.getElementById('pane-add-phone').classList.remove('show')" class="base-btn-secondary" style="flex:1;">ANNULLA</button>
+                    <button onclick="window.confirmAddPhone()" class="base-btn-primary" style="flex:1;">SALVA NUMERO</button>
                 </div>
             </div>
         </div>
@@ -1136,16 +1136,16 @@ function renderPhonesView() {
                     </div>
                     <span class="field-value" style="font-size:0.95rem; flex:1;">${p.number || '-'}</span>
                 </div>
-                <div class="titanium-action-grid">
-                    <button class="titanium-action-btn btn-edit" 
+                <div class="base-action-grid">
+                    <button class="base-action-btn btn-edit" 
                             onclick="event.preventDefault(); window.editPhone(${index})">
                         <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
                     </button>
-                    <button class="titanium-action-btn btn-delete" 
+                    <button class="base-action-btn btn-delete" 
                             onclick="event.preventDefault(); window.deletePhone(${index})">
                         <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
                     </button>
-                    <button class="titanium-action-btn btn-copy" 
+                    <button class="base-action-btn btn-copy" 
                             onclick="event.preventDefault(); navigator.clipboard.writeText('${(p.number || '').replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
                         <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
                     </button>
@@ -1282,34 +1282,34 @@ function renderDocumentiView() {
             <div style="padding:1.5rem; position:relative; z-index:1;">
                 <h4 style="color:var(--text-primary); margin-bottom:1.2rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; font-weight:800;">Nuovo Documento</h4>
                 <div style="display:grid; gap:1rem;">
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label class="field-label" style="color:var(--text-secondary);">Tipologia Documento</label>
-                        <select id="new-doc-type-select-main" class="titanium-input">
+                        <select id="new-doc-type-select-main" class="base-input">
                             ${optionsHtml}
                         </select>
                     </div>
 
-                    <div class="glass-field-titanium">
+                    <div class="glass-field-base">
                         <label id="label-num-doc" class="field-label" style="color:var(--text-secondary);">Numero</label>
-                        <input type="text" id="new-doc-number" placeholder="Inserisci numero..." class="titanium-input">
+                        <input type="text" id="new-doc-number" placeholder="Inserisci numero..." class="base-input">
                     </div>
 
                     <div id="dynamic-doc-fields" style="display:grid; gap:1rem;">
-                        <div id="row-expiry" class="glass-field-titanium">
+                        <div id="row-expiry" class="glass-field-base">
                             <label class="field-label" style="color:var(--text-secondary);">Data di Scadenza</label>
-                            <input type="date" id="new-doc-expiry" class="titanium-input" style="color-scheme:dark;">
+                            <input type="date" id="new-doc-expiry" class="base-input" style="color-scheme:dark;">
                         </div>
 
-                        <div id="row-emission" class="glass-field-titanium" style="display:none;">
+                        <div id="row-emission" class="glass-field-base" style="display:none;">
                             <label class="field-label" style="color:var(--text-secondary);">Ente / Luogo Rilascio</label>
-                            <input type="text" id="new-doc-emission" placeholder="Prefettura, Comune, ecc." class="titanium-input">
+                            <input type="text" id="new-doc-emission" placeholder="Prefettura, Comune, ecc." class="base-input">
                         </div>
                     </div>
                 </div>
 
                 <div style="display:flex; gap:0.75rem; margin-top:1.8rem;">
-                    <button onclick="document.getElementById('pane-add-document').classList.remove('show')" class="titanium-btn-secondary" style="flex:1;">ANNULLA</button>
-                    <button id="btn-save-document-inline" class="titanium-btn-primary" style="flex:1;">SALVA</button>
+                    <button onclick="document.getElementById('pane-add-document').classList.remove('show')" class="base-btn-secondary" style="flex:1;">ANNULLA</button>
+                    <button id="btn-save-document-inline" class="base-btn-primary" style="flex:1;">SALVA</button>
                 </div>
             </div>
         </div>
@@ -1398,7 +1398,7 @@ function renderDocumentiView() {
 
     userDocuments.forEach((docItem, index) => {
         const div = document.createElement('fieldset');
-        div.className = "glass-field-titanium glass-field-violet";
+        div.className = "glass-field-base glass-field-violet";
         div.style.marginBottom = "1rem";
 
         let num = docItem.num_serie || docItem.id_number || docItem.license_number || docItem.cf_value || docItem.codice_fiscale || docItem.cf || docItem.codiceFiscale;
@@ -1446,13 +1446,13 @@ function renderDocumentiView() {
                         <span class="field-value">${num}</span>
                         <div style="font-size:0.75rem; opacity:0.6;">${expiry}</div>
                     </div>
-                    <div class="titanium-action-grid">
-                        <button class="titanium-action-btn btn-copy" title="Copia Numero" onclick="navigator.clipboard.writeText('${num.replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
+                    <div class="base-action-grid">
+                        <button class="base-action-btn btn-copy" title="Copia Numero" onclick="navigator.clipboard.writeText('${num.replace(/'/g, "\\'")}').then(() => window.showToast('Copiato!'))">
                             <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
                         </button>
-                        <button class="titanium-action-btn btn-view" onclick="window.showDocumentDetails(${index})"><span class="material-symbols-outlined" style="font-size:16px;">visibility</span></button>
-                        <button class="titanium-action-btn btn-edit" onclick="window.editUserDocument(${index})"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></button>
-                        <button class="titanium-action-btn btn-delete" onclick="window.deleteUserDocument(${index})"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+                        <button class="base-action-btn btn-view" onclick="window.showDocumentDetails(${index})"><span class="material-symbols-outlined" style="font-size:16px;">visibility</span></button>
+                        <button class="base-action-btn btn-edit" onclick="window.editUserDocument(${index})"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></button>
+                        <button class="base-action-btn btn-delete" onclick="window.deleteUserDocument(${index})"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
                     </div>
                 </div>
                 ${docAttachmentsSection}
@@ -1579,7 +1579,7 @@ window.showDocumentDetails = (index) => {
 
     const modal = document.createElement('div');
     modal.id = 'doc-details-modal';
-    modal.className = 'titanium-modal-overlay';
+    modal.className = 'base-modal-overlay';
 
     modal.innerHTML = `
         <div class="settings-vault" style="width:100%; max-width:480px; max-height:85vh; overflow-y:auto; padding:2rem; position:relative;">
@@ -1594,7 +1594,7 @@ window.showDocumentDetails = (index) => {
                 ${fieldsHtml}
                 ${imgHtml}
             </div>
-            <button id="close-doc-details-btn" class="titanium-btn-primary" style="width:100%; margin-top:2rem;">Chiudi</button>
+            <button id="close-doc-details-btn" class="base-btn-primary" style="width:100%; margin-top:2rem;">Chiudi</button>
         </div>
     `;
 

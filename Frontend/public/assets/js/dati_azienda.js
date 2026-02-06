@@ -277,7 +277,7 @@ function populateFields(data, id) {
             }
         }
 
-        // Update Tabs UI (DARK TITANIUM)
+        // Update Tabs UI (PROTOCOLLO BASE)
         document.querySelectorAll('.location-tab').forEach((tab, i) => {
             const icon = tab.querySelector('.material-symbols-outlined');
             if (i === index) {
@@ -304,7 +304,7 @@ function populateFields(data, id) {
             const btn = document.createElement('button');
             const hasData = entry.data && (entry.data.indirizzo || entry.data.citta);
 
-            // Slightly more readable text (10px) but still compact (DARK TITANIUM)
+            // Slightly more readable text (10px) but still compact (PROTOCOLLO BASE)
             btn.className = `location-tab flex-1 flex flex-col items-center justify-center gap-1 px-1 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-300 border uppercase active:scale-95 min-w-0 ${!hasData ? 'opacity-40 grayscale' : ''}`;
 
             const label = entry.tipo.replace('Sede ', '')

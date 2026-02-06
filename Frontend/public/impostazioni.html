@@ -4,9 +4,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Impostazioni - Titanium Account</title>
+    <title>Impostazioni - PROTOCOLLO BASE</title>
 
-    <!-- Google Fonts -->
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
@@ -14,14 +21,13 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo-vecchio.css?v=3.1">
+    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
-    <!-- Core Engine -->
-
-    <script src="assets/js/core.js?v=3.1"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> <!-- CDN Fix -->
+    <!-- CORE JS -->
+    <script src="assets/js/core.js?v=3.3"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body class="base-bg">
@@ -223,7 +229,7 @@
                                     protezione</span>
                             </div>
                         </div>
-                        <input type="checkbox" id="2fa-toggle" class="titanium-toggle">
+                        <input type="checkbox" id="2fa-toggle" class="base-toggle">
                     </div>
                 </div>
 
@@ -238,7 +244,7 @@
                                 <span class="settings-desc" data-t="face_id_desc">Accesso rapido sicuro</span>
                             </div>
                         </div>
-                        <input type="checkbox" id="face-id-toggle" class="titanium-toggle">
+                        <input type="checkbox" id="face-id-toggle" class="base-toggle">
                     </div>
                 </div>
 
@@ -348,8 +354,8 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script type="module" src="assets/js/impostazioni.js?v=3.1"></script>
+    <script type="module" src="assets/js/main.js?v=3.3"></script>
+    <script type="module" src="assets/js/impostazioni.js?v=3.3"></script>
 </body>
 
 </html>

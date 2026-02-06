@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    initTitaniumUI();
+    initBaseUI();
 
     // Auth Listener
     onAuthStateChanged(auth, async (user) => {
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /**
  * Protocol UI Initialization (Fixed 3-Zone Header + Footer)
  */
-function initTitaniumUI() {
+function initBaseUI() {
     const hPlaceholder = document.getElementById('header-placeholder');
     if (!hPlaceholder) return;
 
@@ -97,7 +97,7 @@ function initTitaniumUI() {
                     <div id="header-right" class="header-right"></div>
                 </div>
             `;
-            hPlaceholder.setAttribute('data-titanium-init', 'true');
+            hPlaceholder.setAttribute('data-base-init', 'true');
         }
 
         // 3. Inject Content ONLY if containers are empty (prevents duplicates, fixes overwritten)

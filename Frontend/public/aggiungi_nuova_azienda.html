@@ -1,686 +1,440 @@
 <!DOCTYPE html>
-<html lang="it" class="dark">
+<html lang="it">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Aggiungi Azienda | BM Service</title>
 
-    <title>Aggiungi nuova Azienda</title>
+    <!-- PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0f1e">
 
-    <!-- Fonts -->
+    <!-- Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=1.1">
-
-    <!-- Core Engine -->
-
-    <script src="assets/js/core.js?v=3.1"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
     <style>
-        /* Form Controls Overrides per stile Legacy-to-V3 */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="tel"],
-        input[type="date"],
-        textarea {
-            background-color: rgba(0, 0, 0, 0.2) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
+        .base-bg {
+            background: radial-gradient(circle at top right, #1a2a4a 0%, #0a0f1e 100%);
+            min-height: 100vh;
+        }
+
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glassmorphism-sub {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .auth-input {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important;
             color: white !important;
+            transition: all 0.3s ease !important;
         }
 
-        input:focus,
-        textarea:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 1px #3b82f6 !important;
+        .auth-input:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: rgba(59, 130, 246, 0.5) !important;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15) !important;
         }
 
-        .checkbox-qr {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
+        .view-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 6px;
+            margin-left: 4px;
+            display: block;
         }
 
-        .checkbox-qr:checked {
-            background-color: #3b82f6;
-            border-color: #3b82f6;
+        .base-shield {
+            font-family: 'text-security-disc', sans-serif !important;
+            -webkit-text-security: disc !important;
+        }
+
+        /* Detail Section Styles */
+        .detail-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .glass-field-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .spacer-footer {
+            height: 120px;
         }
     </style>
 </head>
 
-<body class="base-bg">
+<body class="base-bg font-[Montserrat] text-white">
 
-    <div class="base-container">
-        <div class="base-glow"></div>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header id="header-placeholder" class="z-50"></header>
 
-        <!-- Automated Titanium Header -->
-        <header id="header-placeholder" class="base-header"></header>
-        <div class="spacer-header"></div>
+        <main class="flex-grow pt-24">
+            <div class="max-w-xl mx-auto px-4">
 
-        <!-- Main Content -->
-        <main class="base-main">
-            <div class="min-h-full flex flex-col">
-
-                <!-- 1. Logo Upload -->
-                <div class="mt-6 flex flex-col items-center gap-4">
-                    <div class="relative group cursor-pointer" onclick="document.getElementById('logo-upload').click()">
-                        <div
-                            class="w-28 h-28 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 overflow-hidden transition-colors group-hover:border-blue-500/50 group-hover:bg-blue-500/5">
-                            <img id="logo-preview" src="" class="w-full h-full object-cover hidden">
-                            <div id="logo-placeholder"
-                                class="flex flex-col items-center text-gray-500 group-hover:text-blue-400 transition-colors">
-                                <span class="material-symbols-outlined text-3xl mb-1">add_a_photo</span>
-                                <span class="text-[10px] font-medium uppercase tracking-wider">Logo</span>
-                            </div>
-                        </div>
-                        <div
-                            class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
-                            <span class="material-symbols-outlined text-white">edit</span>
-                        </div>
-                    </div>
-                    <input type="file" id="logo-upload" aria-label="Carica logo azienda" accept="image/*" class="hidden"
-                        onchange="previewLogo(this)">
+                <!-- 1. Intestazione -->
+                <div class="mb-8 text-center">
+                    <h1 class="text-3xl font-black tracking-tight text-white mb-2">Nuova Azienda</h1>
+                    <p class="text-gray-400 text-sm font-medium">Configurazione profilo societario</p>
                 </div>
 
-                <!-- 2. Dati Generali -->
-                <div class="mt-8 px-4">
-                    <div class="flex items-center gap-2 mb-4 px-1">
-                        <span class="material-symbols-outlined text-blue-500">domain</span>
-                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Dati Generali</h3>
+                <!-- 2. Logo Upload -->
+                <div class="flex flex-col items-center mb-8">
+                    <div id="logo-container"
+                        class="relative w-32 h-32 rounded-3xl overflow-hidden glassmorphism flex items-center justify-center border-2 border-dashed border-white/20 hover:border-blue-500/50 transition-all cursor-pointer group">
+                        <img id="logo-preview" class="hidden w-full h-full object-cover">
+                        <div id="logo-placeholder" class="text-center group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-4xl text-gray-500">add_a_photo</span>
+                        </div>
+                        <input type="file" id="referente-photo" class="absolute inset-0 opacity-0 cursor-pointer"
+                            accept="image/*" onchange="previewLogo(this)">
+                    </div>
+                    <span class="mt-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Logo
+                        Aziendale</span>
+                </div>
+
+                <!-- 3. Dati Generali -->
+                <div class="glassmorphism rounded-[2.5rem] p-6 space-y-6">
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined text-blue-500">business</span>
+                        <h3 class="detail-section-title">Anagrafica principale</h3>
                     </div>
 
                     <div class="space-y-4">
-                        <!-- Ragione Sociale -->
-                        <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ragione
-                                    Sociale <span class="text-red-500">*</span></label>
-                                <label
-                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                    <input type="checkbox" data-qr-field="ragioneSociale" checked
-                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
-                                </label>
-                            </div>
-                            <input id="ragione-sociale" type="text"
-                                class="w-full h-12 px-4 rounded-lg text-sm font-medium focus:outline-none"
-                                placeholder="Es. Tech Solutions S.r.l." />
+                        <div class="glass-field-container">
+                            <label class="view-label">Ragione Sociale</label>
+                            <input id="nome-azienda" type="text" class="auth-input h-12 px-4 w-full"
+                                placeholder="Nome completo azienda" />
                         </div>
 
-                        <!-- P.IVA & SDI -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg">
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Partita
-                                        IVA <span class="text-red-500">*</span></label>
-                                    <label
-                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                        <input type="checkbox" data-qr-field="partitaIva" checked
-                                            class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
-                                    </label>
-                                </div>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[20px]">tag</span>
-                                    <input id="piva" type="tel"
-                                        class="w-full h-12 pl-10 pr-4 rounded-lg text-sm font-medium focus:outline-none placeholder-gray-600"
-                                        placeholder="00000000000" />
-                                </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="glass-field-container">
+                                <label class="view-label">Partita IVA</label>
+                                <input id="piva-azienda" type="text" class="auth-input h-12 px-4 w-full"
+                                    placeholder="IT00000000000" />
                             </div>
-                            <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg">
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Codice
-                                        SDI</label>
-                                    <label
-                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                        <input type="checkbox" data-qr-field="codiceSDI" checked
-                                            class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
-                                    </label>
-                                </div>
-                                <input id="codice-sdi" type="text"
-                                    class="w-full h-12 px-4 rounded-lg text-sm font-medium focus:outline-none text-center uppercase tracking-widest placeholder-gray-600"
-                                    placeholder="XXXXXXX" maxlength="7" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Referente -->
-                <div class="mt-8 px-4">
-                    <div class="flex items-center gap-2 mb-4 px-1">
-                        <span class="material-symbols-outlined text-blue-500">person</span>
-                        <h3 class="text-white text-sm font-bold uppercase tracking-wider">Referente</h3>
-                    </div>
-
-                    <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg space-y-4">
-                        <div class="flex items-start gap-4">
-                            <div class="relative group cursor-pointer shrink-0"
-                                onclick="document.getElementById('referente-photo-upload').click()">
-                                <div
-                                    class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition-colors">
-                                    <img id="referente-photo-preview" class="w-full h-full object-cover hidden"
-                                        src="" />
-                                    <span id="referente-photo-placeholder"
-                                        class="material-symbols-outlined text-2xl text-gray-600 group-hover:text-blue-400 transition-colors">person</span>
-                                </div>
-                                <input type="file" id="referente-photo-upload" aria-label="Carica foto referente"
-                                    accept="image/*" class="hidden" onchange="previewReferentePhoto(this)">
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-center mb-1">
-                                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Titolo
-                                        (Opzionale)</label>
-                                    <label
-                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                        <input type="checkbox" data-qr-field="referenteTitolo" checked
-                                            class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
-                                    </label>
-                                </div>
-                                <input id="referente-titolo" type="text"
-                                    class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                    placeholder="Es. Amministratore" />
+                            <div class="glass-field-container">
+                                <label class="view-label">Codice Fiscale</label>
+                                <input id="cf-azienda" type="text" class="auth-input h-12 px-4 w-full"
+                                    placeholder="CF o P.IVA" />
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <label
-                                        class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nome</label>
-                                    <input type="checkbox" data-qr-field="referenteNome" checked
-                                        class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
+                        <div class="glass-field-container">
+                            <label class="view-label">Colore Tema</label>
+                            <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl border border-white/10">
+                                <div class="w-10 h-10 rounded-lg overflow-hidden border border-white/20">
+                                    <input id="color-azienda" type="color" value="#3b82f6"
+                                        class="w-[150%] h-[150%] -translate-x-1/4 -translate-y-1/4 cursor-pointer" />
                                 </div>
-                                <input id="referente-nome" type="text"
-                                    class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                    placeholder="Mario" />
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <label
-                                        class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Cognome</label>
-                                    <input type="checkbox" data-qr-field="referenteCognome" checked
-                                        class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
-                                </div>
-                                <input id="referente-cognome" type="text"
-                                    class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                    placeholder="Rossi" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label
-                                    class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Cellulare</label>
-                                <label
-                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                    <input type="checkbox" data-qr-field="referenteCellulare" checked
-                                        class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
-                                </label>
-                            </div>
-                            <div class="relative">
-                                <span
-                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 material-symbols-outlined text-[18px]">smartphone</span>
-                                <input id="referente-cellulare" type="tel"
-                                    class="w-full h-10 pl-9 pr-3 rounded-lg text-sm focus:outline-none placeholder-gray-600"
-                                    placeholder="+39 333 ..." />
+                                <span class="text-xs font-bold text-gray-400">Seleziona colore identificativo</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 4. Sedi -->
-                <div class="mt-8 space-y-4 px-4">
-                    <!-- Sede Legale -->
-                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
-                        <button type="button" onclick="toggleSection('section-legale')"
+                <div class="mt-8 space-y-4 px-1">
+                    <div class="bg-white/5 rounded-3xl overflow-hidden border border-white/10">
+                        <button onclick="toggleLocationSection('section-legal')"
                             class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
                             <div class="flex items-center gap-3">
-                                <span class="material-symbols-outlined text-blue-500">gavel</span>
-                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Legale</h3>
-                                <label
-                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
-                                    onclick="event.stopPropagation()">
-                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                    <input type="checkbox" data-qr-field="qrLegale" checked
-                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
-                                </label>
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-blue-500">location_on</span>
+                                </div>
+                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sedi Legali & Op.</h3>
                             </div>
-                            <span id="arrow-section-legale"
+                            <span id="arrow-section-legal"
                                 class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
                         </button>
-                        <div id="section-legale" class="border-t border-white/5 p-4 space-y-4 bg-black/20">
-                            <div class="flex gap-3">
-                                <div class="flex-[3]">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
-                                    <input id="indirizzo" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="Via Roma" />
-                                </div>
-                                <div class="flex-1">
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
-                                    <input id="civico" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
-                                        placeholder="1" />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                <div class="col-span-2 md:col-span-1">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
-                                    <input id="citta" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="Milano" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
-                                    <input id="provincia" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
-                                        placeholder="MI" maxlength="2" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
-                                    <input id="cap" type="tel"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
-                                        placeholder="20100" maxlength="5" />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                                <div>
-                                    <div class="flex justify-between mb-1">
-                                        <label class="text-[10px] text-gray-400 uppercase pl-1">CCIAA</label>
-                                        <input type="checkbox" data-qr-field="numeroCCIAA" checked
-                                            class="form-checkbox checkbox-qr w-3 h-3 rounded text-blue-500 focus:ring-0">
+
+                        <div id="section-legal" class="p-4 space-y-6 overflow-hidden"
+                            style="max-height: 0px; transition: max-height 0.3s ease-out;">
+                            <!-- Sede Legale -->
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/10 glassmorphism-sub">
+                                <div class="flex justify-between items-center mb-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-blue-400 text-lg">gavel</span>
+                                        <span class="text-xs font-bold text-white uppercase tracking-widest">Sede
+                                            Legale</span>
                                     </div>
-                                    <input id="numero-cciaa" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="REA-123" />
+                                    <label
+                                        class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                                        <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
+                                        <input type="checkbox" data-qr-field="sedeLegale" checked
+                                            class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500">
+                                    </label>
                                 </div>
-                                <div>
-                                    <div class="flex justify-between mb-1">
-                                        <label class="text-[10px] text-gray-400 uppercase pl-1">Data Iscrizione</label>
-                                        <input type="checkbox" data-qr-field="dataIscrizione" checked
-                                            class="form-checkbox checkbox-qr w-3 h-3 rounded text-blue-500 focus:ring-0">
+                                <div class="space-y-3">
+                                    <input id="sede-legale-indirizzo" type="text" class="auth-input h-10 py-0"
+                                        placeholder="Indirizzo completo" />
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <input id="sede-legale-citta" type="text" class="auth-input h-10 py-0"
+                                            placeholder="Città (Prov)" />
+                                        <input id="sede-legale-cap" type="text" class="auth-input h-10 py-0"
+                                            placeholder="CAP" />
                                     </div>
-                                    <input id="data-iscrizione" type="date"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <input id="sede-legale-cciaa" type="text" class="auth-input h-10 py-0"
+                                            placeholder="Numero CCIAA" />
+                                        <input id="sede-legale-data" type="date" class="auth-input h-10 py-0 px-2" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Other Sedi (Default collapsed) -->
-                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
-                        <button type="button" onclick="toggleSection('section-admin')"
-                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <span class="material-symbols-outlined text-blue-500">admin_panel_settings</span>
-                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Amministrativa
-                                </h3>
-                                <label
-                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
-                                    onclick="event.stopPropagation()">
-                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                    <input type="checkbox" data-qr-field="qrAdmin" checked
-                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
-                                </label>
-                            </div>
-                            <span id="arrow-section-admin"
-                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
-                        </button>
-                        <div id="section-admin" class="hidden border-t border-white/5 p-4 space-y-4 bg-black/20">
-                            <div class="flex gap-3">
-                                <div class="flex-[3]">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
-                                    <input id="admin-indirizzo" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
+                            <!-- Footer Sedi Altre -->
+                            <div class="space-y-3">
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-gray-500 text-lg">work</span>
+                                    <input id="sede-amministrativa-indirizzo" type="text"
+                                        class="bg-transparent border-none text-xs w-full focus:ring-0 text-white"
+                                        placeholder="Indirizzo Sede Amministrativa">
                                 </div>
-                                <div class="flex-1">
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
-                                    <input id="admin-civico" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center" />
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-gray-500 text-lg">factory</span>
+                                    <input id="sede-operativa-indirizzo" type="text"
+                                        class="bg-transparent border-none text-xs w-full focus:ring-0 text-white"
+                                        placeholder="Indirizzo Sede Operativa">
                                 </div>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                <div class="col-span-2 md:col-span-1">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
-                                    <input id="admin-citta" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
-                                    <input id="admin-provincia" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
-                                        maxlength="2" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
-                                    <input id="admin-cap" type="tel"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
-                                        maxlength="5" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
-                        <button type="button" onclick="toggleSection('section-oper')"
-                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <span class="material-symbols-outlined text-blue-500">engineering</span>
-                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Operativa</h3>
-                                <label
-                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
-                                    onclick="event.stopPropagation()">
-                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                    <input type="checkbox" data-qr-field="qrOper" checked
-                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
-                                </label>
-                            </div>
-                            <span id="arrow-section-oper"
-                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
-                        </button>
-                        <div id="section-oper" class="hidden border-t border-white/5 p-4 space-y-4 bg-black/20">
-                            <div class="flex gap-3">
-                                <div class="flex-[3]">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
-                                    <input id="oper-indirizzo" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
-                                </div>
-                                <div class="flex-1">
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
-                                    <input id="oper-civico" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center" />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                <div class="col-span-2 md:col-span-1">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
-                                    <input id="oper-citta" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
-                                    <input id="oper-provincia" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
-                                        maxlength="2" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
-                                    <input id="oper-cap" type="tel"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
-                                        maxlength="5" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
-                        <button type="button" onclick="toggleSection('section-comm')"
-                            class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <span class="material-symbols-outlined text-blue-500">storefront</span>
-                                <h3 class="text-white text-sm font-bold uppercase tracking-wider">Sede Commerciale</h3>
-                                <label
-                                    class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity ml-2"
-                                    onclick="event.stopPropagation()">
-                                    <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
-                                    <input type="checkbox" data-qr-field="qrComm" checked
-                                        class="form-checkbox checkbox-qr w-4 h-4 rounded text-blue-500 focus:ring-0">
-                                </label>
-                            </div>
-                            <span id="arrow-section-comm"
-                                class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
-                        </button>
-                        <div id="section-comm" class="hidden border-t border-white/5 p-4 space-y-4 bg-black/20">
-                            <div class="flex gap-3">
-                                <div class="flex-[3]">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Indirizzo</label>
-                                    <input id="comm-indirizzo" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
-                                </div>
-                                <div class="flex-1">
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">N.</label>
-                                    <input id="comm-civico" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center" />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                <div class="col-span-2 md:col-span-1">
-                                    <label class="text-[10px] text-gray-400 uppercase pl-1">Città</label>
-                                    <input id="comm-citta" type="text"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">Prov</label>
-                                    <input id="comm-provincia" type="text"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center uppercase"
-                                        maxlength="2" />
-                                </div>
-                                <div>
-                                    <label class="text-[10px] text-gray-400 uppercase text-center block">CAP</label>
-                                    <input id="comm-cap" type="tel"
-                                        class="w-full h-10 px-2 rounded-lg text-sm focus:outline-none text-center"
-                                        maxlength="5" />
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/10 flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-gray-500 text-lg">store</span>
+                                    <input id="sede-commerciale-indirizzo" type="text"
+                                        class="bg-transparent border-none text-xs w-full focus:ring-0 text-white"
+                                        placeholder="Indirizzo Sede Commerciale">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 5. Email Aziendali -->
-                <div class="mt-8 px-4">
-                    <div class="bg-[#1e293b] border border-white/5 rounded-xl overflow-hidden shadow-lg">
-                        <button type="button" onclick="toggleSection('section-email')"
+                <!-- 5. Email Sections -->
+                <div class="mt-4 space-y-4 px-1">
+                    <div class="bg-white/5 rounded-3xl overflow-hidden border border-white/10">
+                        <button onclick="toggleLocationSection('section-email')"
                             class="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors">
                             <div class="flex items-center gap-3">
-                                <span class="material-symbols-outlined text-blue-500">mail</span>
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-blue-500">mail</span>
+                                </div>
                                 <h3 class="text-white text-sm font-bold uppercase tracking-wider">Email Aziendali</h3>
                             </div>
                             <span id="arrow-section-email"
                                 class="material-symbols-outlined text-gray-500 transition-transform">expand_more</span>
                         </button>
-                        <div id="section-email" class="hidden border-t border-white/5 p-4 space-y-6 bg-black/20">
+                        <div id="section-email" class="p-4 space-y-6 overflow-hidden"
+                            style="max-height: 0px; transition: max-height 0.3s ease-out;">
 
                             <!-- PEC -->
-                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/10 glassmorphism-sub">
                                 <div class="flex justify-between items-center mb-3">
                                     <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-green-400 text-lg">verified</span>
-                                        <span class="text-xs font-bold text-white uppercase tracking-widest">PEC</span>
+                                        <span class="material-symbols-outlined text-emerald-400">verified</span>
+                                        <span class="text-xs font-bold text-white uppercase tracking-widest">PEC
+                                            Aziendale</span>
                                     </div>
                                     <label
                                         class="flex items-center gap-2 cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
                                         <span class="text-[10px] font-bold text-gray-500 uppercase">QR</span>
                                         <input type="checkbox" data-qr-field="aziendaEmail" checked
-                                            class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500 focus:ring-0">
+                                            class="form-checkbox checkbox-qr w-3.5 h-3.5 rounded text-blue-500">
                                     </label>
                                 </div>
                                 <div class="space-y-3">
-                                    <input id="email-pec" type="email"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
+                                    <input id="email-pec" type="email" class="auth-input h-10 py-0"
                                         placeholder="pec@azienda.it" />
                                     <div class="relative">
                                         <input id="email-pec-password" type="text"
-                                            class="base-shield w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none placeholder-gray-600"
-                                            placeholder="Password PEC" />
+                                            class="auth-input base-shield h-10 py-0 pr-10" placeholder="Password PEC" />
                                         <button type="button" onclick="togglePasswordVisibility('email-pec-password')"
-                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
                                             <span id="icon-email-pec-password"
-                                                class="material-symbols-outlined text-[18px]">visibility</span>
+                                                class="material-symbols-outlined text-lg">visibility</span>
                                         </button>
                                     </div>
-                                    <textarea id="email-pec-note"
-                                        class="w-full h-16 p-3 rounded-lg text-sm focus:outline-none resize-none"
-                                        placeholder="Note..."></textarea>
+                                    <textarea id="email-pec-note" class="auth-input h-16 resize-none py-2"
+                                        placeholder="Note accesso PEC..."></textarea>
                                 </div>
                             </div>
 
-                            <!-- AMMINISTRAZIONE -->
-                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <div class="flex justify-between items-center mb-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-blue-400 text-lg">payments</span>
+                            <!-- OTHERS GRID -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- AMMINISTRAZIONE -->
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 glassmorphism-sub">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="material-symbols-outlined text-blue-400">payments</span>
                                         <span
                                             class="text-xs font-bold text-white uppercase tracking-widest">Amministrazione</span>
                                     </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <input id="email-amministrazione" type="email"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="amministrazione@azienda.it" />
-                                    <div class="relative">
-                                        <input id="email-amministrazione-password" type="text"
-                                            class="base-shield w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none placeholder-gray-600"
-                                            placeholder="Password" />
-                                        <button type="button"
-                                            onclick="togglePasswordVisibility('email-amministrazione-password')"
-                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
-                                            <span id="icon-email-amministrazione-password"
-                                                class="material-symbols-outlined text-[18px]">visibility</span>
-                                        </button>
+                                    <div class="space-y-3">
+                                        <input id="email-amministrazione" type="email" class="auth-input h-10 py-0"
+                                            placeholder="email@ ..." />
+                                        <div class="relative">
+                                            <input id="email-amministrazione-password" type="text"
+                                                class="auth-input base-shield h-10 py-0 pr-10" placeholder="Password" />
+                                            <button type="button"
+                                                onclick="togglePasswordVisibility('email-amministrazione-password')"
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                                <span id="icon-email-amministrazione-password"
+                                                    class="material-symbols-outlined text-lg">visibility</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- PERSONALE -->
-                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <div class="flex justify-between items-center mb-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-purple-400 text-lg">group</span>
+                                <!-- PERSONALE -->
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 glassmorphism-sub">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="material-symbols-outlined text-purple-400">group</span>
                                         <span
                                             class="text-xs font-bold text-white uppercase tracking-widest">Personale</span>
                                     </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <input id="email-personale" type="email"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="personale@azienda.it" />
-                                    <div class="relative">
-                                        <input id="email-personale-password" type="text"
-                                            class="base-shield w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none placeholder-gray-600"
-                                            placeholder="Password" />
-                                        <button type="button"
-                                            onclick="togglePasswordVisibility('email-personale-password')"
-                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
-                                            <span id="icon-email-personale-password"
-                                                class="material-symbols-outlined text-[18px]">visibility</span>
-                                        </button>
+                                    <div class="space-y-3">
+                                        <input id="email-personale" type="email" class="auth-input h-10 py-0"
+                                            placeholder="email@ ..." />
+                                        <div class="relative">
+                                            <input id="email-personale-password" type="text"
+                                                class="auth-input base-shield h-10 py-0 pr-10" placeholder="Password" />
+                                            <button type="button"
+                                                onclick="togglePasswordVisibility('email-personale-password')"
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                                <span id="icon-email-personale-password"
+                                                    class="material-symbols-outlined text-lg">visibility</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- MANUTENZIONE -->
-                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <div class="flex justify-between items-center mb-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-orange-400 text-lg">build</span>
+                                <!-- MANUTENZIONE -->
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 glassmorphism-sub">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="material-symbols-outlined text-orange-400">build</span>
                                         <span
                                             class="text-xs font-bold text-white uppercase tracking-widest">Manutenzione</span>
                                     </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <input id="email-manutenzione" type="email"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="manutenzione@azienda.it" />
-                                    <div class="relative">
-                                        <input id="email-manutenzione-password" type="text"
-                                            class="base-shield w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none placeholder-gray-600"
-                                            placeholder="Password" />
-                                        <button type="button"
-                                            onclick="togglePasswordVisibility('email-manutenzione-password')"
-                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
-                                            <span id="icon-email-manutenzione-password"
-                                                class="material-symbols-outlined text-[18px]">visibility</span>
-                                        </button>
+                                    <div class="space-y-3">
+                                        <input id="email-manutenzione" type="email" class="auth-input h-10 py-0"
+                                            placeholder="email@ ..." />
+                                        <div class="relative">
+                                            <input id="email-manutenzione-password" type="text"
+                                                class="auth-input base-shield h-10 py-0 pr-10" placeholder="Password" />
+                                            <button type="button"
+                                                onclick="togglePasswordVisibility('email-manutenzione-password')"
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                                <span id="icon-email-manutenzione-password"
+                                                    class="material-symbols-outlined text-lg">visibility</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- ATTREZZATURA -->
-                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <div class="flex justify-between items-center mb-3">
-                                    <div class="flex items-center gap-2">
-                                        <span
-                                            class="material-symbols-outlined text-indigo-400 text-lg">precision_manufacturing</span>
-                                        <span
-                                            class="text-xs font-bold text-white uppercase tracking-widest">Attrezzatura</span>
-                                    </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <input id="email-attrezzatura" type="email"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="attrezzatura@azienda.it" />
-                                    <div class="relative">
-                                        <input id="email-attrezzatura-password" type="text"
-                                            class="base-shield w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none placeholder-gray-600"
-                                            placeholder="Password" />
-                                        <button type="button"
-                                            onclick="togglePasswordVisibility('email-attrezzatura-password')"
-                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
-                                            <span id="icon-email-attrezzatura-password"
-                                                class="material-symbols-outlined text-[18px]">visibility</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- MAGAZZINO -->
-                            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <div class="flex justify-between items-center mb-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-teal-400 text-lg">inventory_2</span>
+                                <!-- MAGAZZINO -->
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 glassmorphism-sub">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="material-symbols-outlined text-teal-400">inventory_2</span>
                                         <span
                                             class="text-xs font-bold text-white uppercase tracking-widest">Magazzino</span>
                                     </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <input id="email-magazzino" type="email"
-                                        class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                        placeholder="magazzino@azienda.it" />
-                                    <div class="relative">
-                                        <input id="email-magazzino-password" type="text"
-                                            class="base-shield w-full h-10 pl-3 pr-10 rounded-lg text-sm focus:outline-none placeholder-gray-600"
-                                            placeholder="Password" />
-                                        <button type="button"
-                                            onclick="togglePasswordVisibility('email-magazzino-password')"
-                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1">
-                                            <span id="icon-email-magazzino-password"
-                                                class="material-symbols-outlined text-[18px]">visibility</span>
-                                        </button>
+                                    <div class="space-y-3">
+                                        <input id="email-magazzino" type="email" class="auth-input h-10 py-0"
+                                            placeholder="email@ ..." />
+                                        <div class="relative">
+                                            <input id="email-magazzino-password" type="text"
+                                                class="auth-input base-shield h-10 py-0 pr-10" placeholder="Password" />
+                                            <button type="button"
+                                                onclick="togglePasswordVisibility('email-magazzino-password')"
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                                <span id="icon-email-magazzino-password"
+                                                    class="material-symbols-outlined text-lg">visibility</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
 
                 <!-- 6. Altri Dati -->
-                <div class="mt-8 px-4">
-                    <div class="bg-[#1e293b] p-4 rounded-xl border border-white/5 shadow-lg space-y-4">
-                        <div class="flex items-center gap-2 mb-2">
+                <div class="mt-8 px-4 pb-32">
+                    <div class="settings-item space-y-4">
+                        <div class="detail-section-header">
                             <span class="material-symbols-outlined text-yellow-500">info</span>
-                            <h3 class="text-white text-sm font-bold uppercase tracking-wider">Contatti & Note</h3>
+                            <h3 class="detail-section-title">Contatti & Note</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input id="telefono-azienda" type="tel"
-                                class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none"
-                                placeholder="Telefono Aziendale" />
-                            <input id="fax-azienda" type="tel"
-                                class="w-full h-10 px-3 rounded-lg text-sm focus:outline-none" placeholder="Fax" />
+                            <div class="glass-field-container">
+                                <label class="view-label">Telefono Aziendale</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-500 text-lg">phone</span>
+                                    <input id="telefono-azienda" type="tel" class="auth-input h-10 py-0 pl-10"
+                                        placeholder="000 000000" />
+                                </div>
+                            </div>
+                            <div class="glass-field-container">
+                                <label class="view-label">Fax</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-500 text-lg">print</span>
+                                    <input id="fax-azienda" type="tel" class="auth-input h-10 py-0 pl-10"
+                                        placeholder="000 000000" />
+                                </div>
+                            </div>
                         </div>
-                        <textarea id="note-azienda"
-                            class="w-full h-32 p-3 rounded-lg text-sm focus:outline-none resize-none"
-                            placeholder="Note generali sull'azienda..."></textarea>
+                        <div class="glass-field-container">
+                            <label class="view-label">Note Generali</label>
+                            <textarea id="note-azienda" class="auth-input min-h-[100px] resize-none py-2"
+                                placeholder="Note aggiuntive..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fixed Footer Action -->
+                <div
+                    class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0a0f1e] via-[#0a0f1e]/95 to-transparent backdrop-blur-md z-40">
+                    <div class="max-w-xl mx-auto">
+                        <button id="btn-save-azienda"
+                            class="base-btn-primary w-full h-14 rounded-2xl shadow-[0_8px_30px_rgb(59,130,246,0.3)] flex items-center justify-center gap-3">
+                            <span class="material-symbols-outlined">save</span>
+                            <span class="font-bold tracking-wide uppercase">Salva Azienda</span>
+                        </button>
                     </div>
                 </div>
 
@@ -692,8 +446,8 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script src="assets/js/aggiungi_azienda.js?v=3.1" type="module"></script>
+    <script type="module" src="assets/js/main.js?v=3.3"></script>
+    <script src="assets/js/aggiungi_azienda.js?v=3.3" type="module"></script>
 </body>
 
 </html>

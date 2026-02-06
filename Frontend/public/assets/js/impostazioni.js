@@ -6,7 +6,7 @@ import { syncTimeoutWithFirestore } from './inactivity-timer.js';
 import { showToast, showWarningModal } from './ui-core.js';
 
 /**
- * IMPOSTAZIONI PAGE MODULE (Titanium Account V1.1)
+ * IMPOSTAZIONI PAGE MODULE (PROTOCOLLO BASE Account V1.1)
  */
 
 const initImpostazioni = () => {

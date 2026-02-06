@@ -4,9 +4,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
-    <title>Modifica Account Azienda</title>
+    <title>Modifica Account Azienda - PROTOCOLLO BASE</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,13 +21,12 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=1.1">
+    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
-    <!-- Core Engine -->
-
-    <script src="assets/js/core.js?v=3.1"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+    <!-- CORE JS -->
+    <script src="assets/js/core.js?v=3.3"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
 
     <style>
         /* Form Controls Overrides per stile Legacy-to-V3 */
@@ -51,11 +55,11 @@
 </head>
 
 <body class="base-bg">
-
-    <div class="base-container">
+    <div class="base-container relative">
+        <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
-        <!-- Automated Titanium Header -->
+        <!-- Automated PROTOCOLLO BASE Header -->
         <header id="header-placeholder" class="base-header"></header>
         <div class="spacer-header"></div>
 
@@ -362,7 +366,7 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo" />
-                                <div class="base-switch titanium-switch-orange"></div>
+                                <div class="base-switch-orange"></div>
                             </label>
                         </div>
 
@@ -382,7 +386,7 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo-shared" />
-                                <div class="base-switch titanium-switch-green"></div>
+                                <div class="base-switch base-switch-green"></div>
                             </label>
                         </div>
                     </div>
@@ -397,8 +401,8 @@
     </div>
 
     <!-- Script -->
-    <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script type="module" src="assets/js/modifica_account_azienda.js?v=3.1"></script>
+    <script type="module" src="assets/js/main.js?v=3.3"></script>
+    <script type="module" src="assets/js/modifica_account_azienda.js?v=3.3"></script>
 </body>
 
 </html>

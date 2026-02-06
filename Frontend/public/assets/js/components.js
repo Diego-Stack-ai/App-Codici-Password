@@ -1,5 +1,5 @@
 /**
- * TITANIUM COMPONENTS SYSTEM
+ * PROTOCOLLO BASE COMPONENTS SYSTEM
  * Utility per caricare Header e Footer in modo asincrono
  */
 
@@ -19,7 +19,7 @@ export async function initComponents() {
         if (headerTarget) headerTarget.innerHTML = headerHtml;
         if (footerTarget) footerTarget.innerHTML = footerHtml;
 
-        console.log("Titanium Components Loaded.");
+        console.log("PROTOCOLLO BASE Components Loaded.");
     } catch (e) {
         console.error("Errore caricamento componenti:", e);
     }

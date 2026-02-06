@@ -1,17 +1,17 @@
 /**
- * TITANIUM MAIN ENTRY POINT
+ * PROTOCOLLO BASE MAIN ENTRY POINT
  * Coordina l'inizializzazione dei moduli UI dell'applicazione.
  */
 // Conditional console override: disable logs in production environments.
 // Uses `window.NODE_ENV` or `document.documentElement.dataset.env` as source.
-(function(){
-        try {
+(function () {
+    try {
         const env = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV) || window.NODE_ENV || document.documentElement.dataset.env || 'production';
-        const originalConsoleLog = console.log && console.log.bind(console) || function(){};
+        const originalConsoleLog = console.log && console.log.bind(console) || function () { };
 
         if (env === 'production') {
             // No-op logger in production
-            window.LOG = function(){};
+            window.LOG = function () { };
         } else {
             // In non-production, forward to original console
             window.LOG = (...args) => originalConsoleLog(...args);
@@ -19,19 +19,19 @@
 
         // Route all console.log calls through window.LOG so existing calls don't need edits
         console.log = (...args) => {
-            try { window.LOG(...args); } catch (e) {}
+            try { window.LOG(...args); } catch (e) { }
         };
         // Also route group/info/debug/trace to avoid leaking in prod
-        console.info = (...args) => { try { window.LOG(...args); } catch (e) {} };
-        console.debug = (...args) => { try { window.LOG(...args); } catch (e) {} };
-        console.trace = (...args) => { try { window.LOG(...args); } catch (e) {} };
-        console.group = (...args) => { try { window.LOG(...args); } catch (e) {} };
-        console.groupEnd = (...args) => { try { window.LOG(...args); } catch (e) {} };
+        console.info = (...args) => { try { window.LOG(...args); } catch (e) { } };
+        console.debug = (...args) => { try { window.LOG(...args); } catch (e) { } };
+        console.trace = (...args) => { try { window.LOG(...args); } catch (e) { } };
+        console.group = (...args) => { try { window.LOG(...args); } catch (e) { } };
+        console.groupEnd = (...args) => { try { window.LOG(...args); } catch (e) { } };
 
         // Expose env for other scripts if needed
         window.__APP_ENV = env;
     } catch (e) {
-        window.LOG = function(){};
+        window.LOG = function () { };
     }
 })();
 
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSharedComponents();
     }
 
-    console.log("Titanium Framework Initialized (v10.1)");
+    console.log("PROTOCOLLO BASE Initialized (v10.1)");
 });
 
 // --- HELPER: COMPONENT LOADER ---
@@ -128,7 +128,7 @@ async function loadSharedComponents() {
                 // AUTO-POPULATE HEADER if empty (Protocollo Balanced 3-Zone)
                 const headerContent = document.getElementById('header-content');
                 if (headerContent && !headerContent.hasChildNodes()) {
-                    const pageTitle = document.title.split(' - ')[0] || 'Titanium';
+                    const pageTitle = document.title.split(' - ')[0] || 'PROTOCOLLO BASE';
                     const path = window.location.pathname;
                     const isAuth = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
 

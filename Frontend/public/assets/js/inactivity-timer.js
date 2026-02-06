@@ -3,7 +3,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 /**
- * TITANIUM INACTIVITY TIMER (TITAN-LOCK v1.0)
+ * PROTOCOLLO BASE INACTIVITY TIMER (TITAN-LOCK v1.0)
  * Gestisce il blocco automatico dell'applicazione basato sul tempo di inattività.
  */
 

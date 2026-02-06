@@ -1,4 +1,4 @@
-// configurazione_generali.js v1.8 - Titanium Gold (Refreshed)
+// configurazione_generali.js v1.8 - PROTOCOLLO BASE (Refreshed)
 import { db, auth } from './firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";

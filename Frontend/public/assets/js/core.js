@@ -1,5 +1,5 @@
 /**
- * TITANIUM CORE ENGINE v2.2 (Time-Lock Protocol)
+ * PROTOCOLLO BASE CORE ENGINE v2.2 (Time-Lock Protocol)
  * Gestione centralizzata di Tema, Font, Protezioni e Meta-tag.
  * Blindatura Totale v3: Time-Based Logic per modalità Auto.
  */
@@ -22,7 +22,7 @@
             setInterval(() => this.applyLogic(), 60000);
 
             // Espone API globale
-            window.TitaniumTheme = this;
+            window.ProtocolloBaseTheme = this;
         },
 
         setMode: function (mode) {

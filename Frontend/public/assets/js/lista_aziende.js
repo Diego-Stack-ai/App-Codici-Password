@@ -262,14 +262,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const div = document.createElement('div');
             // Stagger animation
             div.style.animationDelay = `${index * 50}ms`;
-            div.className = "titanium-card border-glow adaptive-shadow animate-fade-in-up relative overflow-hidden group transition-all duration-200 cursor-pointer";
+            div.className = "base-card border-glow adaptive-shadow animate-fade-in-up relative overflow-hidden group transition-all duration-200 cursor-pointer";
             div.style.padding = "1.5rem";
 
             // Dynamic Color
             const theme = getCompanyColor(azienda.ragioneSociale, azienda.colorIndex);
 
             // Card Style & Visibility Logic
-            const isLightMode = !document.documentElement.classList.contains('dark') || document.body.classList.contains('titanium-light-bg');
+            const isLightMode = !document.documentElement.classList.contains('dark') || document.body.classList.contains('base-light-bg');
 
             if (isLightMode) {
                 // LIGHT MODE: White background, visible colored border (solid)
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 div.style.border = `1px solid ${theme.from}`;
                 div.style.boxShadow = `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`;
             } else {
-                // DARK MODE (Titanium Standard): Transparent/Tinted background, subtle border
+                // DARK MODE (PROTOCOLLO BASE): Transparent/Tinted background, subtle border
                 div.style.borderColor = `${theme.from}4d`; // 30%
                 div.style.backgroundColor = `${theme.from}08`; // ~3% tint
             }

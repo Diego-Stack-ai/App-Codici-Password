@@ -4,9 +4,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Componi Scadenza - Titanium Account</title>
+    <title>Componi Scadenza - PROTOCOLLO BASE</title>
 
-    <!-- Google Fonts -->
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
@@ -14,24 +21,21 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo-vecchio.css?v=3.1">
+    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
-
-
-    <!-- Core Engine -->
-
-    <script src="assets/js/core.js?v=3.1"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+    <!-- CORE JS -->
+    <script src="assets/js/core.js?v=3.3"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
 </head>
 
-<body class="titanium-bg">
-    <div class="titanium-container">
+<body class="base-bg">
+    <div class="base-container">
         <!-- Faro Estetico -->
-        <div class="titanium-glow"></div>
+        <div class="base-glow"></div>
 
         <!-- HEADER FISSO -->
-        <header class="titanium-header">
+        <header class="base-header">
             <div class="header-balanced-container">
                 <!-- ZONA SINISTRA: Navigazione Primaria -->
                 <div class="header-left">
@@ -99,7 +103,7 @@
                             </div>
                         </div>
 
-                        <button type="button" class="titanium-btn-primary accordion-header w-full mt-6 p-3 text-xs"
+                        <button type="button" class="base-btn-primary accordion-header w-full mt-6 p-3 text-xs"
                             data-target="guida-pane" data-t="guide_understand">HO CAPITO, CHIUDI GUIDA</button>
                     </div>
                 </div>
@@ -337,7 +341,7 @@
                                 <span class="settings-desc" data-t="whatsapp_desc">Invia notifica automatica</span>
                             </div>
                         </div>
-                        <input type="checkbox" id="whatsapp_enable" class="titanium-toggle">
+                        <input type="checkbox" id="whatsapp_enable" class="base-toggle">
                     </div>
                 </div>
             </div>
@@ -413,7 +417,7 @@
 
         <!-- AZIONE FISSA BOTTOM -->
         <div class="fixed-action-container fixed bottom-0 left-0 w-full p-4 bg-fade-up z-100">
-            <button id="save-button" class="titanium-btn-primary w-full p-4 flex items-center justify-center gap-2">
+            <button id="save-button" class="base-btn-primary w-full p-4 flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">save</span>
                 <span data-t="save_deadline" class="font-heavy tracked-wide all-caps">Salva</span>
             </button>
@@ -421,12 +425,12 @@
 
         <div class="spacer-footer"></div>
         <!-- FOOTER PREMIUM -->
-        <footer id="footer-placeholder" class="titanium-footer"></footer>
+        <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script src="assets/js/aggiungi_scadenza.js?v=3.1" type="module"></script>
+    <script type="module" src="assets/js/main.js?v=3.3"></script>
+    <script src="assets/js/aggiungi_scadenza.js?v=3.3" type="module"></script>
 </body>
 
 </html>

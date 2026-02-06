@@ -64,7 +64,7 @@ export function showToast(message, type = 'success') {
         document.body.appendChild(toast);
     }
 
-    // Reset classi e stile base (Titanium Style)
+    // Reset classi e stile base (PROTOCOLLO BASE Style)
     toast.className = 'fixed left-1/2 -translate-x-1/2 bg-white text-[#0a0f1e] px-6 py-3 rounded-full text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-none';
     toast.style.bottom = '120px';
     toast.style.zIndex = '999999';
@@ -98,7 +98,7 @@ export function showToast(message, type = 'success') {
 
 /**
  * [CORE UI] PREMIUM WARNING MODAL
- * Mostra un popup centrale in stile Titanium.
+ * Mostra un popup centrale in stile PROTOCOLLO BASE.
  */
 export function showWarningModal(title, message, callback = null) {
     const modalId = 'protocol-warning-modal';

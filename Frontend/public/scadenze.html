@@ -4,9 +4,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scadenze - Titanium Account</title>
+    <title>Scadenze - PROTOCOLLO BASE</title>
 
-    <!-- Google Fonts -->
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
@@ -14,23 +21,21 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Protocollo Comune V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo-vecchio.css?v=3.1">
+    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
-    <!-- Core Engine -->
-
-    <script src="assets/js/core.js?v=3.1"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+    <!-- CORE JS -->
+    <script src="assets/js/core.js?v=3.3"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
 </head>
 
-<body class="titanium-bg">
-    <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="titanium-container">
-        <!-- Faro Estetico -->
-        <div class="titanium-glow"></div>
+<body class="base-bg">
+    <div class="base-container">
+        <!-- GLOW LAYER -->
+        <div class="base-glow"></div>
 
         <!-- HEADER FISSO -->
-        <header class="titanium-header">
+        <header class="base-header">
             <div class="header-balanced-container">
                 <div class="header-left">
                     <a href="home_page.html" class="btn-icon-header">
@@ -75,22 +80,21 @@
                 </div>
 
                 <!-- Destra: Ordinamento -->
-                <div class="titanium-dropdown w-auto ml-auto shrink-0">
-                    <div id="sort-trigger" class="flex items-center gap-1 cursor-pointer opacity-80 whitespace-nowrap">
-                        <span class="material-symbols-outlined text-16">sort</span>
-                        <span id="current-sort" data-t="sort_date_near"
-                            class="text-10 font-black all-caps tracked-wide">DATA
-                            (VICINA)</span>
-                        <span class="material-symbols-outlined text-14 opacity-40">expand_more</span>
-                    </div>
-                    <div id="sort-menu" class="titanium-dropdown-menu right-0 origin-tr min-w-140">
-                        <div class="titanium-dropdown-item active" data-t="sort_date_near" data-value="date-asc">DATA
+                <div class="base-dropdown w-auto ml-auto shrink-0">
+                    <button id="sort-btn" class="base-btn-secondary h-10 px-4 rounded-xl flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">sort</span>
+                        <span data-t="sort_by"
+                            class="text-xs font-bold uppercase tracking-widest opacity-70">Ordina</span>
+                        <span class="material-symbols-outlined text-base">expand_more</span>
+                    </button>
+
+                    <div id="sort-menu" class="base-dropdown-menu right-0 origin-tr min-w-140">
+                        <div class="base-dropdown-item active" data-t="sort_date_near" data-value="date-asc">DATA
                             (VICINA)</div>
-                        <div class="titanium-dropdown-item" data-t="sort_date_far" data-value="date-desc">DATA (LONTANA)
+                        <div class="base-dropdown-item" data-t="sort_date_far" data-value="date-desc">DATA (LONTANA)
                         </div>
-                        <div class="titanium-dropdown-item" data-t="sort_name_az" data-value="name-asc">NOME (A-Z)</div>
-                        <div class="titanium-dropdown-item" data-t="sort_name_za" data-value="name-desc">NOME (Z-A)
-                        </div>
+                        <div class="base-dropdown-item" data-t="sort_name_az" data-value="name-asc">NOME (A-Z)</div>
+                        <div class="base-dropdown-item" data-t="sort_name_za" data-value="name-desc">NOME (Z-A)</div>
                     </div>
                 </div>
             </div>
@@ -118,12 +122,12 @@
 
         <div class="spacer-footer"></div>
         <!-- FOOTER PREMIUM -->
-        <footer id="footer-placeholder" class="titanium-footer"></footer>
+        <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script src="assets/js/scadenze.js?v=3.1" type="module"></script>
+    <script type="module" src="assets/js/main.js?v=3.3"></script>
+    <script src="assets/js/scadenze.js?v=3.3" type="module"></script>
 </body>
 
 </html>

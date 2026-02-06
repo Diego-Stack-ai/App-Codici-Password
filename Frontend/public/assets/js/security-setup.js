@@ -18,7 +18,7 @@ export async function showSecuritySetupModal(user, userData) {
             <div class="icon-header">
                 <span class="material-symbols-outlined !text-4xl">shield_lock</span>
             </div>
-            <h2>Protocollo Titanium</h2>
+            <h2>PROTOCOLLO BASE</h2>
             <p>La tua sicurezza è la nostra priorità. Configura ora il blocco automatico per proteggere i tuoi dati sensibili.</p>
             
             <div class="space-y-6 text-left">
@@ -28,7 +28,7 @@ export async function showSecuritySetupModal(user, userData) {
                         <span class="material-symbols-outlined text-blue-400">face</span>
                         <span class="text-xs font-bold text-white uppercase tracking-wider">Face ID / Biometria</span>
                     </div>
-                    <input type="checkbox" id="setup-face-id" class="titanium-toggle" checked>
+                    <input type="checkbox" id="setup-face-id" class="base-toggle" checked>
                 </div>
 
                 <!-- Selettore Tempo -->

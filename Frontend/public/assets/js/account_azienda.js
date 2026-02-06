@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.addEventListener('input', filterAndRender);
     }
 
-    // --- FIX: ROBUST HEADER INJECTION (Titanium V3.1) ---
+    // --- FIX: ROBUST HEADER INJECTION (PROTOCOLLO BASE) ---
     // Gestisce il caso di race condition dove main.js sovrascrive l'header
     function injectHeader() {
         const left = document.getElementById('header-left');

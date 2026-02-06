@@ -4,8 +4,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modifica Account Privato - PROTOCOLLO BASE</title>
 
-    <title>Modifica Account Privato - Titanium Gold</title>
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,19 +21,12 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Gold V3.6) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=1.1">
+    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
-    <!-- Core Engine -->
-
-    <script src="assets/js/core.js?v=3.6"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
-
-    <style>
-        .filled {
-            font-variation-settings: 'FILL' 1;
-        }
-    </style>
+    <!-- CORE JS -->
+    <script src="assets/js/core.js?v=3.3"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
 </head>
 
 <body class="base-bg">
@@ -36,7 +36,7 @@
         <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
         <div class="base-glow"></div>
 
-        <!-- Automated Titanium Header -->
+        <!-- Automated PROTOCOLLO BASE Header -->
         <header id="header-placeholder" class="base-header"></header>
 
         <div class="spacer-header"></div>
@@ -245,7 +245,7 @@
                             </div>
                             <label class="relative cursor-pointer flex items-center">
                                 <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo" />
-                                <div class="base-switch titanium-switch-orange"></div>
+                                <div class="base-switch base-switch-orange"></div>
                             </label>
                         </div>
 
@@ -259,7 +259,7 @@
                             </div>
                             <label class="relative cursor-pointer flex items-center">
                                 <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo-shared" />
-                                <div class="base-switch titanium-switch-green"></div>
+                                <div class="base-switch-green"></div>
                             </label>
                         </div>
                     </div>
@@ -275,8 +275,8 @@
     </div>
 
 
-    <script type="module" src="assets/js/main.js?v=3.6"></script>
-    <script type="module" src="assets/js/modifica_account_privato.js?v=3.6"></script>
+    <script type="module" src="assets/js/main.js?v=3.3"></script>
+    <script type="module" src="assets/js/modifica_account_privato.js?v=3.3"></script>
 </body>
 
 </html>

@@ -422,8 +422,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const icon = document.getElementById('icon-' + id);
         if (!input) return;
 
-        input.classList.toggle('titanium-shield');
-        const isShielded = input.classList.contains('titanium-shield');
+        input.classList.toggle('base-shield');
+        const isShielded = input.classList.contains('base-shield');
 
         if (icon) {
             icon.textContent = isShielded ? 'visibility' : 'visibility_off';

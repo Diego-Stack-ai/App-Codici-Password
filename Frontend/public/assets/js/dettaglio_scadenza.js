@@ -226,11 +226,11 @@ function renderScadenza(scadenza) {
     }
 
     // --- Helper Modale Custom (Stile Inline per Robustezza) ---
-    const showTitaniumConfirm = (title, message, confirmText = "Conferma", isDestructive = false) => {
+    const showBaseConfirm = (title, message, confirmText = "Conferma", isDestructive = false) => {
         return new Promise((resolve) => {
             // Crea overlay con stili inline forzati per garantire visibilità
             const overlay = document.createElement('div');
-            overlay.id = 'titanium-confirm-overlay';
+            overlay.id = 'base-confirm-overlay';
             overlay.style.cssText = `
                 position: fixed;
                 top: 0;
@@ -268,7 +268,7 @@ function renderScadenza(scadenza) {
                     font-family: 'Inter', sans-serif;
                     transform: scale(0.95);
                     transition: transform 0.2s ease-out;
-                " id="titanium-modal-box">
+                " id="base-modal-box">
                     
                     <!-- Glow -->
                     <div style="
@@ -325,7 +325,7 @@ function renderScadenza(scadenza) {
             // Trigger animazione entrata
             setTimeout(() => {
                 overlay.style.opacity = '1';
-                const box = overlay.querySelector('#titanium-modal-box');
+                const box = overlay.querySelector('#base-modal-box');
                 if (box) box.style.transform = 'scale(1)';
             }, 10);
 
@@ -341,7 +341,7 @@ function renderScadenza(scadenza) {
             // Cleanup & Listeners
             const cleanup = () => {
                 overlay.style.opacity = '0';
-                const box = overlay.querySelector('#titanium-modal-box');
+                const box = overlay.querySelector('#base-modal-box');
                 if (box) box.style.transform = 'scale(0.95)';
                 setTimeout(() => overlay.remove(), 200);
             };
@@ -361,7 +361,7 @@ function renderScadenza(scadenza) {
     if (deleteBtn) {
         deleteBtn.onclick = async (e) => {
             if (e) e.preventDefault();
-            const confirmed = await showTitaniumConfirm(
+            const confirmed = await showBaseConfirm(
                 "Elimina Scadenza",
                 "Sei sicuro di voler eliminare definitivamente questa scadenza? L'azione è irreversibile.",
                 "Elimina",
@@ -391,7 +391,7 @@ function renderScadenza(scadenza) {
                 : "Vuoi ripristinare questa scadenza tra quelle attive?";
             const btnText = nextStatus ? "Archivia" : "Ripristina";
 
-            const confirmed = await showTitaniumConfirm(title, msg, btnText, false);
+            const confirmed = await showBaseConfirm(title, msg, btnText, false);
 
             if (confirmed) {
                 try {

@@ -1,5 +1,5 @@
 /**
- * TITANIUM UI COMPONENTS
+ * PROTOCOLLO BASE UI COMPONENTS
  * Gestisce la logica dei componenti riutilizzabili (Pulsanti, Toggles, Icone)
  */
 
@@ -48,10 +48,10 @@ export function setupPasswordToggles() {
 
             const icon = this.querySelector('.material-symbols-outlined');
 
-            // 1. Supporto Titanium Shield (Standard Moderno)
-            if (input.classList.contains('titanium-shield') || input.id === 'password' || input.id === 'account-password') {
-                input.classList.toggle('titanium-shield');
-                const isShielded = input.classList.contains('titanium-shield');
+            // 1. Supporto Base Shield (Standard Moderno)
+            if (input.classList.contains('base-shield') || input.id === 'password' || input.id === 'account-password') {
+                input.classList.toggle('base-shield');
+                const isShielded = input.classList.contains('base-shield');
                 if (icon) icon.textContent = isShielded ? 'visibility' : 'visibility_off';
                 return;
             }

@@ -3,10 +3,15 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark only">
-    <meta name="theme-color" content="#0a0f1e">
-    <title>Nuovo Account Azienda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nuovo Account Azienda - PROTOCOLLO BASE</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,28 +21,28 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-    <!-- Design System Master (Titanium Protocol V3.1) -->
-    <link rel="stylesheet" href="assets/css/Protocollo-vecchio.css?v=3.1">
+    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
-    <!-- Core Engine -->
-
-    <script src="assets/js/core.js?v=3.1"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.1"></script>
+    <!-- CORE JS -->
+    <script src="assets/js/core.js?v=3.3"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
 
 
 </head>
 
-<body class="titanium-bg">
-    <div class="titanium-container">
-        <div class="titanium-glow"></div>
+<body class="base-bg">
+    <div class="base-container relative">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
 
-        <!-- Automated Titanium Header -->
-        <header id="header-placeholder" class="titanium-header"></header>
+        <!-- Automated PROTOCOLLO BASE Header -->
+        <header id="header-placeholder" class="base-header"></header>
 
         <div class="spacer-header"></div>
 
         <!-- Main Content -->
-        <main class="titanium-main">
+        <main class="base-main">
             <div class="w-full max-w-3xl mx-auto py-8 px-6 flex-col gap-8">
 
                 <!-- 1. Identificazione -->
@@ -154,13 +159,13 @@
                                 <span
                                     class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">key</span>
                                 <input id="password" type="text"
-                                    class="titanium-shield w-full h-12 pl-10 pr-20 rounded-xl text-sm font-medium outline-none text-mono-wide tracking-tight-wide"
+                                    class="base-shield w-full h-12 pl-10 pr-20 rounded-xl text-sm font-medium outline-none text-mono-wide tracking-tight-wide"
                                     placeholder="********" />
 
                                 <div
                                     class="absolute-right-2-center-y flex items-center gap-1 bg-white-5 rounded-lg p-1 border border-white-5">
                                     <button type="button"
-                                        onclick="const i = document.getElementById('password'); i.classList.toggle('titanium-shield'); this.querySelector('span').textContent = i.classList.contains('titanium-shield')?'visibility':'visibility_off';"
+                                        onclick="const i = document.getElementById('password'); i.classList.toggle('base-shield'); this.querySelector('span').textContent = i.classList.contains('base-shield')?'visibility':'visibility_off';"
                                         class="p-1-5 bg-transparent border-none rounded-md text-gray-400 cursor-pointer transition-all flex items-center">
                                         <span class="material-symbols-outlined text-18">visibility</span>
                                     </button>
@@ -269,13 +274,13 @@
         <div class="spacer-footer"></div>
 
         <!-- FOOTER PLACEHOLDER -->
-        <footer id="footer-placeholder" class="titanium-footer"></footer>
+        <footer id="footer-placeholder" class="base-footer"></footer>
 
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.1"></script>
-    <script type="module" src="assets/js/aggiungi_account_azienda.js?v=3.1"></script>
+    <script type="module" src="assets/js/main.js?v=3.3"></script>
+    <script type="module" src="assets/js/aggiungi_account_azienda.js?v=3.3"></script>
 </body>
 
 </html>

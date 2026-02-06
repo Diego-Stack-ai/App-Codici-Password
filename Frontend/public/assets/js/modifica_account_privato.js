@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- PROTOCOLLO: INIEZIONE ROBUSTA (BULLETPROOF) ---
-    function initTitaniumUI() {
+    function initBaseUI() {
         const hPlaceholder = document.getElementById('header-placeholder');
         if (!hPlaceholder) return;
 
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div id="header-right" class="header-right"></div>
                     </div>
                 `;
-                hPlaceholder.setAttribute('data-titanium-init', 'true');
+                hPlaceholder.setAttribute('data-base-init', 'true');
             }
 
             // 3. Inject Content ONLY if containers are empty
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     }
 
-    initTitaniumUI();
+    initBaseUI();
 
     onAuthStateChanged(auth, (user) => {
         if (user) {

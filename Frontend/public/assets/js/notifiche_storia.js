@@ -74,7 +74,7 @@ async function loadNotifications(uid) {
                 iconBgClass = 'bg-amber-glass text-amber-400';
             }
 
-            // Creazione Elemento (Titanium Glass Style)
+            // Creazione Elemento (PROTOCOLLO BASE Glass Style)
             const item = document.createElement('div');
             item.className = 'settings-item no-select'; // Utilizza classi di auth_impostazioni.css
             item.style.cursor = 'default';

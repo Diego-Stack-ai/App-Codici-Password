@@ -1,5 +1,5 @@
 /**
- * TITANIUM TRANSLATIONS SYSTEM
+ * PROTOCOLLO BASE TRANSLATIONS SYSTEM
  * Dizionario centralizzato per il supporto multilingua.
  */
 
@@ -1016,7 +1016,7 @@ export const translations = {
         success_save: "Données enregistrées avec succès !",
         error_generic: "Une erreur est survenue.",
         logout: "Déconnexion",
-        version: "Titanium Protocol v5.7",
+        version: "PROTOCOLLO BASE v5.7",
 
         language_current: "Français",
         select_language: "Choisir la langue",
@@ -1058,7 +1058,7 @@ export const translations = {
         theme_dark: "Sombre",
         theme_auto: "Auto",
         login_title: "Connexion",
-        login_subtitle: "Protocole Titanium",
+        login_subtitle: "Accesso PROTOCOLLO BASE",
         login_hint: "Entrez vos identifiants autorisés pour déverrouiller l'accès.",
         username_label: "Utilisateur",
         username_placeholder: "E-mail ou Utilisateur",
@@ -1246,7 +1246,7 @@ export const translations = {
         success_save: "Daten erfolgreich gespeichert!",
         error_generic: "Ein Fehler ist aufgetreten.",
         logout: "Abmelden",
-        version: "Titanium Protocol v5.6",
+        version: "PROTOCOLLO BASE v5.6",
 
         language_current: "Deutsch",
         select_language: "Sprache auswählen",
@@ -1282,7 +1282,7 @@ export const translations = {
         theme_dark: "Dunkel",
         theme_auto: "Auto",
         login_title: "Anmelden",
-        login_subtitle: "Titanium Protokoll",
+        login_subtitle: "Accesso PROTOCOLLO BASE",
         login_hint: "Geben Sie Ihre Anmeldedaten ein, um das System freizuschalten.",
         username_label: "Benutzername",
         username_placeholder: "E-Mail oder Benutzername",
@@ -1470,7 +1470,7 @@ export const translations = {
         success_save: "数据保存成功！",
         error_generic: "发生错误。",
         logout: "退出登录",
-        version: "Titanium Protocol v5.6",
+        version: "PROTOCOLLO BASE v5.6",
 
         language_current: "中文",
         select_language: "选择语言",
@@ -1694,7 +1694,7 @@ export const translations = {
         success_save: "डेटा सफलतापूर्वक सहेजा गया!",
         error_generic: "एक त्रुटि हुई।",
         logout: "लॉग आउट",
-        version: "Titanium Protocol v5.6",
+        version: "PROTOCOLLO BASE v5.6",
 
         language_current: "हिन्दी",
         select_language: "भाषा चुनें",
@@ -1918,7 +1918,7 @@ export const translations = {
         success_save: "Dados salvos com sucesso!",
         error_generic: "Ocorreu um erro.",
         logout: "Sair da conta",
-        version: "Titanium Protocol v5.6",
+        version: "PROTOCOLLO BASE v5.6",
 
         language_current: "Português",
         select_language: "Selecionar Idioma",
@@ -1954,7 +1954,7 @@ export const translations = {
         theme_dark: "Escuro",
         theme_auto: "Auto",
         login_title: "Entrar",
-        login_subtitle: "Protocolo Titanium",
+        login_subtitle: "PROTOCOLLO BASE",
         login_hint: "Insira suas credenciais autorizadas para desbloquear o sistema.",
         username_label: "Usuário",
         username_placeholder: "E-mail ou Usuário",

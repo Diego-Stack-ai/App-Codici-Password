@@ -1,5 +1,5 @@
 /**
- * TITANIUM UI PAGES
+ * PROTOCOLLO BASE UI PAGES
  * Gestisce la logica specifica per singole sezioni o pagine dell'app
  */
 
