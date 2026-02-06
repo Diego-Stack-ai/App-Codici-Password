@@ -2,7 +2,8 @@
 <html lang="it">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Area Privata - PROTOCOLLO BASE</title>
@@ -26,17 +27,17 @@
 </head>
 
 <body class="base-bg">
-    <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
+    <!-- 1. CONTENITORE PRINCIPALE -->
     <div class="base-container">
 
-        <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
+        <!-- 2. FARO ANIMATO "VIVO" -->
         <div class="base-glow"></div>
 
-        <!-- HEADER FISSO (Protocollo v3.1) -->
+        <!-- HEADER FISSO -->
         <header id="header-placeholder" class="base-header"></header>
         <div class="spacer-header"></div>
 
-        <!-- MAIN CONTENT (PROTOCOLLO BASE Main Strategy) -->
+        <!-- MAIN CONTENT -->
         <main class="base-main">
 
             <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
@@ -103,82 +104,93 @@
                     </div>
                 </a>
 
-                <!-- TOP 10 WIDGET (Spostato nella griglia per allineamento) -->
+                <!-- TOP 10 WIDGET SECTION -->
                 <div class="grid-span-2 relative z-40">
-                    <div class="base-card overflow-hidden"
-                        style="background: transparent; border: none; box-shadow: none;">
-                        <div class="widget-header" style="padding-top: 1rem;">
+                    <div class="base-card overflow-hidden base-card-clean">
+                        <div class="widget-header">
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-18 icon-accent-orange">star</span>
                                 <h3 class="widget-title" data-t="top_used_access">TOP 10 PIÙ USATI</h3>
                             </div>
                         </div>
-                        <div id="top-accounts-list" class="p-4"
-                            style="padding-top: 1.5rem; display: flex; flex-direction: column; gap: 8px;">
+                        <div id="top-accounts-list" class="p-4 flex flex-col gap-2">
                             <!-- Loading -->
                             <div class="py-10 flex justify-center opacity-20">
                                 <span class="material-symbols-outlined animate-spin-slow">sync</span>
                             </div>
                         </div>
                     </div>
-                    <!-- RUBRICA (Integrata nella griglia per larghezza piena) -->
-                    <div class="grid-span-2 relative z-40" style="margin-top: 1rem;">
-                        <button id="rubrica-toggle-btn"
-                            class="micro-list-item card-orange border-glow adaptive-shadow w-full relative overflow-hidden flex items-center justify-between cursor-pointer"
-                            style="padding: 12px 16px; min-height: 70px;">
-                            <div class="flex items-center gap-4 relative z-10">
-                                <div class="settings-icon-box bg-white/10 icon-accent-orange size-10"
-                                    style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
-                                    <span class="material-symbols-outlined text-xl">group</span>
-                                </div>
-                                <div class="text-left">
-                                    <h3 class="text-sm font-black m-0 text-white" data-t="rubrica_title">Rubrica
-                                        Contatti</h3>
-                                    <p class="opacity-60 text-[10px] tracked-wider font-bold all-caps m-0 text-white">
-                                        <span data-t="rubrica_subtitle">Gestione identità condivise</span>
-                                        <span id="rubrica-counter">(0)</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </button>
+                </div>
 
-                        <div id="rubrica-content" class="hidden base-card mt-2 overflow-hidden border-glow">
-                            <!-- Action Bar -->
-                            <div class="p-4 flex gap-2 bg-surface-sub">
-                                <button id="add-contact-btn" class="base-btn-primary flex-1 h-10 text-xs tracked-wide"
-                                    data-t="new_contact">Nuovo Contatto</button>
+                <!-- RUBRICA SECTION -->
+                <div class="grid-span-2 relative z-40 p-4">
+                    <!-- Bottone Toggle (Protocollo Rubrica V3.8) -->
+                    <button id="rubrica-toggle-btn" type="button"
+                        class="micro-list-item card-orange border-glow adaptive-shadow w-full relative overflow-hidden flex items-center justify-between cursor-pointer rounded-3xl rubrica-toggle-btn">
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="settings-icon-box bg-white/10 icon-accent-orange size-10">
+                                <span class="material-symbols-outlined text-xl">group</span>
+                            </div>
+                            <div class="text-left">
+                                <h3 class="text-sm font-black m-0" data-t="rubrica_title">Rubrica Contatti</h3>
+                                <p class="opacity-60 text-[10px] tracked-wider font-bold all-caps m-0">
+                                    <span>Condivise</span>
+                                    <span id="rubrica-counter">(0)</span>
+                                </p>
+                            </div>
+                        </div>
+                        <span id="rubrica-chevron"
+                            class="material-symbols-outlined transition-transform opacity-40">expand_more</span>
+                    </button>
+
+                    <!-- Contenuto Rubrica (Protocollo Rubrica V3.8) -->
+                    <div id="rubrica-content" class="hidden rubrica-container rounded-3xl card-orange">
+
+                        <div class="p-4">
+                            <!-- Pulsante Nuovo Contatto (Class-based) -->
+                            <div class="flex justify-center mb-6">
+                                <button id="add-contact-btn" type="button"
+                                    class="card-orange border-glow rounded-2xl cursor-pointer transition-all active:scale-95 rubrica-btn-new">
+                                    NUOVO CONTATTO
+                                </button>
                             </div>
 
-                            <!-- Form -->
-                            <div id="add-contact-form" class="hidden p-6 flex-col gap-4 bg-surface-vault border-b-base">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <input type="text" id="contact-nome" placeholder="Nome"
-                                        class="input-glass-standard h-12 text-sm">
-                                    <input type="text" id="contact-cognome" placeholder="Cognome"
-                                        class="input-glass-standard h-12 text-sm">
+                            <!-- Form di Inserimento (Protocollo Rubrica V3.8) -->
+                            <div id="add-contact-form" class="hidden flex-col gap-3 mb-6 rounded-2xl p-5 rubrica-form">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="flex flex-col gap-1">
+                                        <label class="auth-label text-[10px] ml-1 rubrica-label">Nome</label>
+                                        <input type="text" id="contact-nome" placeholder="Mario"
+                                            class="auth-input h-9 text-xs rubrica-input">
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <label class="auth-label text-[10px] ml-1 rubrica-label">Cognome</label>
+                                        <input type="text" id="contact-cognome" placeholder="Rossi"
+                                            class="auth-input h-9 text-xs rubrica-input">
+                                    </div>
                                 </div>
-                                <input type="email" id="contact-email" placeholder="Email (Unica per sharing)"
-                                    class="input-glass-standard h-12 text-sm w-full">
-                                <button id="btn-add-contact" class="base-btn-primary w-full h-12 font-extrabold"
+                                <div class="flex flex-col gap-1">
+                                    <label class="auth-label text-[10px] ml-1 rubrica-label">Email Condivisione</label>
+                                    <input type="email" id="contact-email" placeholder="mario.rossi@email.com"
+                                        class="auth-input h-9 text-xs w-full rubrica-input">
+                                </div>
+                                <button id="btn-add-contact" type="button"
+                                    class="card-orange border-glow w-full h-11 font-extrabold rounded-xl cursor-pointer rubrica-btn-new mt-2"
                                     data-t="save_contact">SALVA CONTATTO</button>
                             </div>
 
-                            <!-- Contacts List -->
-                            <div id="contacts-list" class="p-4 flex flex-col gap-2">
+                            <div id="contacts-list" class="flex flex-col gap-2 max-w-full overflow-hidden">
                                 <!-- JS Generated -->
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </main>
 
         <div class="spacer-footer"></div>
-        <!-- FOOTER PROTOCOL V3.1 -->
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
-
 
     <!-- SCRIPTS MODULARI -->
     <script type="module" src="assets/js/main.js?v=3.3"></script>
@@ -186,7 +198,3 @@
 </body>
 
 </html>
-
-
-
-

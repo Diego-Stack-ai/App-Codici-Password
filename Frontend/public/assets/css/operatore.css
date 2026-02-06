@@ -323,7 +323,7 @@ body,
 
 
 .text-amber-500 {
-    color: #f59e0b !important;
+    color: #f97316 !important;
 }
 
 .text-purple-400 {
@@ -376,6 +376,14 @@ body,
     border-radius: 1rem !important;
 }
 
+.rounded-3xl {
+    border-radius: 1.5rem !important;
+}
+
+.rounded-40 {
+    border-radius: 40px !important;
+}
+
 .size-full {
     width: 100% !important;
     height: 100% !important;
@@ -389,6 +397,28 @@ body,
 .size-10 {
     width: 2.5rem !important;
     height: 2.5rem !important;
+}
+
+.h-50px {
+    height: 50px !important;
+}
+
+.text-4xl {
+    font-size: 2.25rem !important;
+    line-height: 2.5rem !important;
+}
+
+/* Accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 .size-12 {
@@ -1534,8 +1564,8 @@ html:not(.dark) .btn-secondary {
 }
 
 .card-orange {
-    --accent-rgb: 255, 220, 0;
-    background: linear-gradient(135deg, rgba(255, 220, 0, 0.5), rgba(130, 100, 0, 0.3)) !important;
+    --accent-rgb: 255, 120, 0;
+    background: linear-gradient(135deg, rgba(255, 120, 0, 0.5), rgba(180, 70, 0, 0.3)) !important;
 }
 
 .card-red {
@@ -1553,7 +1583,7 @@ html:not(.dark) .card-green {
 }
 
 html:not(.dark) .card-orange {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 200, 0, 0.4)) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 120, 0, 0.4)) !important;
 }
 
 html:not(.dark) .card-red {
@@ -1625,6 +1655,124 @@ html:not(.dark) .micro-list-item .item-badge {
         gap: 1rem;
         padding: 0 14px 2rem 14px;
     }
+}
+
+/* --- 3.0 PROTOCOLLO RUBRICA (Area Privata - V3.8) --- */
+
+.base-card-clean {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.rubrica-container {
+    margin-top: 0.75rem;
+    overflow: hidden;
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 11px;
+    /* Base font size per la rubrica */
+}
+
+.rubrica-toggle-btn {
+    padding: 12px 16px;
+    min-height: 70px;
+}
+
+.rubrica-toggle-btn h3,
+.rubrica-toggle-btn p,
+.rubrica-toggle-btn span {
+    color: var(--text-primary) !important;
+}
+
+.rubrica-btn-new {
+    width: 80% !important;
+    height: 44px !important;
+    padding: 0 20px !important;
+    border: none !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px;
+    color: var(--text-primary) !important;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rubrica-form {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+    padding: 20px 30px 20px 20px !important;
+    /* Aumentato spazio a destra */
+}
+
+#contacts-list * {
+    font-size: inherit;
+    /* Permette il controllo granulare da JS o CSS superiore */
+}
+
+.rubrica-input {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    height: 42px !important;
+    padding: 0 15px !important;
+    font-size: 13px !important;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.rubrica-input:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    outline: none;
+}
+
+.rubrica-input::placeholder {
+    color: var(--text-primary);
+    opacity: 0.3;
+}
+
+.rubrica-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: var(--text-primary);
+    opacity: 0.8;
+    margin-bottom: 4px;
+    margin-left: 4px;
+}
+
+.rubrica-list-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.rubrica-item-name {
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: tight;
+    color: var(--text-primary);
+}
+
+.rubrica-item-email {
+    font-size: 9px !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.01em;
+    opacity: 0.5;
+    color: var(--text-primary);
+}
+
+.rubrica-item-action {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* --- 3.1 LISTA ACCOUNT PRIVATI (Account Privati Page) --- */
@@ -2162,7 +2310,7 @@ html:not(.dark) .micro-list-item .item-badge {
 }
 
 .icon-accent-orange {
-    color: #f59e0b;
+    color: #f97316;
 }
 
 
@@ -2309,7 +2457,7 @@ input:checked+.base-switch::after {
 }
 
 .icon-box-orange {
-    color: #f59e0b;
+    color: #f97316;
 }
 
 .icon-box-emerald {

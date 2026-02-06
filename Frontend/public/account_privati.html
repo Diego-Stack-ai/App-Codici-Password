@@ -2,26 +2,27 @@
 <html lang="it">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title data-t="account_private">Account Privati - PROTOCOLLO BASE</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.4" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/fonts.css?v=3.4">
+    <!-- Design System Master (PROTOCOLLO BASE V3.4) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.4">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="assets/js/core.js?v=3.4"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.4"></script>
 </head>
 
 <body class="base-bg">
@@ -41,10 +42,11 @@
 
             <!-- SEARCH BAR (Standard PROTOCOLLO BASE UI) -->
             <div class="search-container mb-8">
-                <div class="glass-field border-glow rounded-xl h-[50px] px-4 flex items-center gap-3">
+                <label for="account-search" class="sr-only">Cerca account</label>
+                <div class="glass-field border-glow rounded-xl h-50px px-4 flex items-center gap-3">
                     <span class="material-symbols-outlined opacity-50">search</span>
                     <input type="search" id="account-search" placeholder="Cerca account o credenziali..."
-                        data-t-placeholder="search_placeholder"
+                        data-t-placeholder="search_placeholder" autocomplete="off"
                         class="w-full bg-transparent border-none outline-none h-full text-base text-white">
                 </div>
             </div>
@@ -68,12 +70,8 @@
     </div>
 
     <!-- SCRIPTS MODULARI -->
-    <script type="module" src="assets/js/main.js?v=3.3"></script>
-    <script type="module" src="assets/js/account_privati.js?v=3.3"></script>
+    <script type="module" src="assets/js/main.js?v=3.4"></script>
+    <script type="module" src="assets/js/account_privati.js?v=3.4"></script>
 </body>
 
 </html>
-
-
-
-

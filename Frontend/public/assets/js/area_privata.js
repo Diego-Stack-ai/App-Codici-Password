@@ -205,18 +205,20 @@ async function loadRubrica(uid) {
         list.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
         list.forEach(c => {
             const div = document.createElement('div');
-            div.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group";
+            div.className = "flex items-center justify-between p-2 rounded-xl transition-all group overflow-hidden w-full rubrica-list-item";
+            div.style.marginBottom = "4px"; // Manteniamo solo il margine dinamico se necessario, o spostiamo a CSS
             div.innerHTML = `
-                <div class="flex items-center gap-3 min-w-0">
-                    <div class="size-8 rounded-lg bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center justify-center font-black text-xs uppercase shrink-0">${(c.nome || '?').charAt(0)}</div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-black text-slate-800 truncate">${c.nome} ${c.cognome || ''}</p>
-                        <p class="text-[9px] text-slate-400 font-bold truncate">${c.email}</p>
+                <div class="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                    <div class="size-6 rounded bg-orange-500/20 text-orange-500 border border-orange-500/30 flex items-center justify-center font-black text-[8px] uppercase shrink-0">${(c.nome || '?').charAt(0)}</div>
+                    <div class="min-w-0 flex-1 overflow-hidden">
+                        <p class="truncate m-0 rubrica-item-name">${c.nome} ${c.cognome || ''}</p>
+                        <p class="truncate m-0 uppercase tracking-tighter max-w-100 rubrica-item-email">${c.email}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
-                    <button onclick="window.location.href='mailto:${c.email}'" class="p-2 text-slate-400 hover:text-blue-600 transition-colors"><span class="material-symbols-outlined text-lg">mail</span></button>
-                    <button onclick="deleteContact('${uid}', '${c.id}')" class="p-2 text-slate-400 hover:text-red-600 transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
+                <div class="flex items-center gap-0 shrink-0 ml-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <button onclick="deleteContact('${uid}', '${c.id}')" class="p-1.5 rounded-md border-none cursor-pointer flex items-center justify-center rubrica-item-action hover:text-red-400 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
                 </div>
             `;
             rubricaList.appendChild(div);
