@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Regole Scadenze - PROTOCOLLO BASE</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Regole Scadenze - PROTOCOLLO BASE V3.6</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.6" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,12 +18,12 @@
 
     <!-- Fonts -->
     <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
 </head>
 
 <body class="base-bg">
@@ -29,114 +31,96 @@
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
-        <!-- HEADER FISSO -->
-        <header class="base-header">
-            <div class="header-balanced-container">
-                <!-- ZONA SINISTRA: Navigazione (1 icona) -->
-                <div class="header-left">
-                    <a href="impostazioni.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </a>
-                </div>
+        <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
 
-                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
-                <div class="header-center">
-                    <h1 class="header-title" data-t="expiry_rules_title_page">
-                        Regole Scadenze
-                    </h1>
-                </div>
-
-                <!-- ZONA DESTRA: Home (1 icona) -->
-                <div class="header-right">
-                    <a href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
         <div class="spacer-header"></div>
 
-        <main class="settings-container no-select">
+        <!-- Hero Header -->
+        <div class="hero-profile-header animate-in fade-in zoom-in-95 duration-700">
+            <div
+                class="size-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex-center shadow-2xl shadow-amber-500/20">
+                <span class="material-symbols-outlined text-4xl filled">rule</span>
+            </div>
+            <div class="flex-center-col mt-5">
+                <h2 class="text-xl font-black text-white uppercase tracking-widest leading-none"
+                    data-t="expiry_rules_title_page">Configurazione</h2>
+                <span class="badge-titanium mt-2">REGOLE SCADENZE</span>
+            </div>
+        </div>
 
-            <div class="settings-group">
+        <main class="base-main -mt-4">
+            <div class="flex-col-gap-4 pb-20">
+
                 <!-- 1. AUTOMEZZI -->
-                <div class="settings-item cursor-pointer"
-                    onclick="window.location.href='configurazione_automezzi.html'">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass-10 icon-accent-blue">
-                                <span class="material-symbols-outlined">directions_car</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="card_vehicles_title">Automezzi</span>
-                                <span class="settings-desc" data-t="card_vehicles_desc">Configura oggetti, periodi e
-                                    frequenze email per veicoli</span>
-                            </div>
+                <div class="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all group active:scale-95"
+                    data-action="navigate" data-href="configurazione_automezzi.html">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="size-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex-center group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-2xl">directions_car</span>
                         </div>
-                        <span class="material-symbols-outlined opacity-30">chevron_right</span>
+                        <div class="flex-col">
+                            <h4 class="text-sm font-black text-white uppercase tracking-wider"
+                                data-t="card_vehicles_title">Automezzi</h4>
+                            <p class="text-[10px] font-medium text-white/40 leading-tight" data-t="card_vehicles_desc">
+                                Configura periodi e frequenze per veicoli</p>
+                        </div>
                     </div>
+                    <span
+                        class="material-symbols-outlined text-white/20 mr-2 group-hover:translate-x-1 transition-transform">chevron_right</span>
                 </div>
 
                 <!-- 2. DOCUMENTI -->
-                <div class="settings-item cursor-pointer"
-                    onclick="window.location.href='configurazione_documenti.html'">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-emerald-glass-10 icon-accent-emerald">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="card_documents_title">Documenti</span>
-                                <span class="settings-desc" data-t="card_documents_desc">Gestione avvisi per Documenti e
-                                    Scadenze Varie</span>
-                            </div>
+                <div class="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all group active:scale-95"
+                    data-action="navigate" data-href="configurazione_documenti.html">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="size-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex-center group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-2xl">description</span>
                         </div>
-                        <span class="material-symbols-outlined opacity-30">chevron_right</span>
+                        <div class="flex-col">
+                            <h4 class="text-sm font-black text-white uppercase tracking-wider"
+                                data-t="card_documents_title">Documenti</h4>
+                            <p class="text-[10px] font-medium text-white/40 leading-tight" data-t="card_documents_desc">
+                                Gestione avvisi per Documenti e Scadenze Varie</p>
+                        </div>
                     </div>
+                    <span
+                        class="material-symbols-outlined text-white/20 mr-2 group-hover:translate-x-1 transition-transform">chevron_right</span>
                 </div>
 
                 <!-- 3. GENERICHE -->
-                <div class="settings-item cursor-pointer" onclick="window.location.href='configurazione_generali.html'">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-amber-glass-10 icon-accent-amber">
-                                <span class="material-symbols-outlined">settings_applications</span>
-                            </div>
-                            <div class="settings-text">
-                                <span class="settings-label" data-t="card_general_title">Regole Generali</span>
-                                <span class="settings-desc" data-t="card_general_desc">Configura oggetti e testi per
-                                    scadenze generiche</span>
-                            </div>
+                <div class="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all group active:scale-95"
+                    data-action="navigate" data-href="configurazione_generali.html">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="size-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex-center group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-2xl">settings_applications</span>
                         </div>
-                        <span class="material-symbols-outlined opacity-30">chevron_right</span>
+                        <div class="flex-col">
+                            <h4 class="text-sm font-black text-white uppercase tracking-wider"
+                                data-t="card_general_title">Regole Generali</h4>
+                            <p class="text-[10px] font-medium text-white/40 leading-tight" data-t="card_general_desc">
+                                Configura oggetti e testi per scadenze generiche</p>
+                        </div>
                     </div>
+                    <span
+                        class="material-symbols-outlined text-white/20 mr-2 group-hover:translate-x-1 transition-transform">chevron_right</span>
                 </div>
-            </div>
 
+            </div>
         </main>
+
         <div class="spacer-footer"></div>
-        <!-- FOOTER PREMIUM -->
+        <!-- Automated Footer -->
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
+
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.3"></script>
-    <!-- Script di traduzione rapido -->
-    <script type="module">
-        import { t } from './assets/js/translations.js';
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-t]').forEach(el => {
-                const key = el.getAttribute('data-t');
-                const translation = t(key);
-                if (translation && translation !== key) {
-                    el.textContent = translation;
-                }
-            });
-        });
-    </script>
+    <script type="module" src="assets/js/main.js?v=3.6"></script>
+
+
 </body>
 
 </html>
-
-
-
-

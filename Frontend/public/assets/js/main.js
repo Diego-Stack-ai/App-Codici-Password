@@ -38,6 +38,7 @@
 import { initLockedUX } from './ui-core.js';
 import { setupPasswordToggles, setupCopyButtons, setupCallButtons } from './ui-components.js';
 import { setupAccountCards, setupEditMode, setupAccountDetailView, setupCopyQrCode } from './ui-pages.js';
+import { initCleanup } from './cleanup.js';
 
 /**
  * INITIALIZATION
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Policy UX (Lockdown menu/selezione)
     initLockedUX();
+    initCleanup();
 
     // 2. Componenti Universali (Toggles, Copy, Call) - SALTA SU PAGINE AUTH
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -133,9 +135,8 @@ async function loadSharedComponents() {
                     const isAuth = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
 
                     headerContent.innerHTML = `
-                        <div class="header-left">
                             ${!(path.endsWith('index.html') || path.endsWith('/')) ? `
-                            <button onclick="window.history.back()" class="btn-icon-header">
+                            <button data-action="back" class="btn-icon-header">
                                 <span class="material-symbols-outlined">arrow_back</span>
                             </button>` : ''}
                         </div>

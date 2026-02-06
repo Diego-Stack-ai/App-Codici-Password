@@ -107,10 +107,11 @@ function initBaseUI() {
 
         if (hLeft && hLeft.innerHTML.trim() === '') {
             hLeft.innerHTML = `
-                <button onclick="history.back()" class="btn-icon-header">
+                <button id="btn-back-protocol" class="btn-icon-header">
                     <span class="material-symbols-outlined">arrow_back</span>
                 </button>
             `;
+            document.getElementById('btn-back-protocol').addEventListener('click', () => history.back());
         }
 
         if (hCenter && hCenter.innerHTML.trim() === '') {
@@ -141,7 +142,7 @@ function initBaseUI() {
                 btnEdit.innerHTML = '<span class="material-symbols-outlined">edit</span>';
 
                 // Robust ID retrieval on click
-                btnEdit.onclick = () => {
+                btnEdit.addEventListener('click', () => {
                     const params = new URLSearchParams(window.location.search);
                     const idToEdit = currentId || params.get('id');
                     if (idToEdit) {
@@ -149,7 +150,7 @@ function initBaseUI() {
                     } else {
                         console.error("ID mancante per modifica");
                     }
-                };
+                });
 
                 // Prepend to ensure it appears before settings icon if possible, or append.
                 // Using prepend to put it to the left of settings
@@ -203,9 +204,9 @@ function enableReadOnlyMode() {
     const bottomSection = document.querySelector('.detail-content-wrap section:last-child');
     if (bottomSection) {
         const btnRinuncia = document.createElement('button');
-        btnRinuncia.className = "btn-rinuncia-condivisione";
+        btnRinuncia.className = "auth-btn-primary mt-6 !bg-red-500/10 !text-red-400 border border-red-500/20";
         btnRinuncia.innerHTML = `<span class="material-symbols-outlined">person_remove</span> Rinuncia alla condivisione`;
-        btnRinuncia.onclick = removeSharedLink;
+        btnRinuncia.addEventListener('click', removeSharedLink);
         bottomSection.appendChild(btnRinuncia);
     }
 }
@@ -393,7 +394,7 @@ function render(acc) {
                             <input readonly
                                 class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold focus:ring-0 text-white uppercase font-mono"
                                 value="${bank.iban || ''}">
-                            <button onclick="window.copyText('${bank.iban}')" class="p-3 text-white/40 hover:text-white border-l border-white/5">
+                            <button data-action="copy-text" data-text="${bank.iban}" class="p-3 text-white/40 hover:text-white border-l border-white/5">
                                 <span class="material-symbols-outlined text-base">content_copy</span>
                             </button>
                         </div>
@@ -407,10 +408,10 @@ function render(acc) {
                                 <input readonly type="text"
                                     class="base-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-white"
                                     value="${bank.passwordDispositiva || ''}">
-                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('base-shield'); this.querySelector('span').textContent=p.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
+                                <button data-action="toggle-visibility" class="p-2 text-white/40">
                                     <span class="material-symbols-outlined text-sm">visibility</span>
                                 </button>
-                                <button onclick="window.copyText(this.parentElement.querySelector('input').value)" class="p-2 text-white/40 hover:text-white border-l border-white/5">
+                                <button data-action="copy-text" data-text="${bank.passwordDispositiva || ''}" class="p-2 text-white/40 hover:text-white border-l border-white/5">
                                     <span class="material-symbols-outlined text-sm">content_copy</span>
                                 </button>
                             </div>
@@ -435,14 +436,16 @@ function render(acc) {
                         <div class="grid grid-cols-2 gap-3">
                             <div class="flex flex-col gap-1">
                                 <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="phone">Telefono</span>
-                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteTelefono}')">
+                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                data-action="make-call" data-number="${bank.referenteTelefono}">
                                     <span class="material-symbols-outlined text-[16px] text-blue-500">call</span>
                                     <span class="text-xs font-bold text-white/70">${bank.referenteTelefono || '-'}</span>
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="mobile">Cellulare</span>
-                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteCellulare}')">
+                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                data-action="make-call" data-number="${bank.referenteCellulare}">
                                     <span class="material-symbols-outlined text-[16px] text-blue-500">smartphone</span>
                                     <span class="text-xs font-bold text-white/70">${bank.referenteCellulare || '-'}</span>
                                 </div>
@@ -468,7 +471,7 @@ function render(acc) {
                                             <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="holder">Titolare</span>
                                             <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                                 <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.titolare || ''}">
-                                                <button onclick="window.copyText('${card.titolare}')" class="p-2 text-white/40 hover:text-white">
+                                                <button data-action="copy-text" data-text="${card.titolare}" class="p-2 text-white/40 hover:text-white">
                                                     <span class="material-symbols-outlined text-base">content_copy</span>
                                                 </button>
                                             </div>
@@ -487,7 +490,7 @@ function render(acc) {
                                         <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="number">Numero</span>
                                         <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                             <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" value="${card.cardNumber || ''}">
-                                            <button onclick="window.copyText('${card.cardNumber}')" class="p-2 text-white/40 hover:text-white">
+                                            <button data-action="copy-text" data-text="${card.cardNumber}" class="p-2 text-white/40 hover:text-white">
                                                 <span class="material-symbols-outlined text-base">content_copy</span>
                                             </button>
                                         </div>
@@ -504,7 +507,7 @@ function render(acc) {
                                             <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="ccv">CCV</span>
                                             <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                                 <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.ccv || ''}">
-                                                <button onclick="window.copyText('${card.ccv}')" class="p-2 text-white/40 hover:text-white">
+                                                <button data-action="copy-text" data-text="${card.ccv}" class="p-2 text-white/40 hover:text-white">
                                                     <span class="material-symbols-outlined text-sm">content_copy</span>
                                                 </button>
                                             </div>
@@ -514,7 +517,7 @@ function render(acc) {
                                             <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                                 <input readonly type="text" class="base-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" 
                                                     value="${card.pin || ''}">
-                                                <button onclick="const p=this.previousElementSibling; p.classList.toggle('base-shield'); this.querySelector('span').textContent=p.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
+                                                <button data-action="toggle-visibility" class="p-2 text-white/40">
                                                     <span class="material-symbols-outlined text-sm">visibility</span>
                                                 </button>
                                             </div>
@@ -619,23 +622,29 @@ async function renderGuests(listItems) {
         }
 
         const div = document.createElement('div');
-        div.className = "flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5";
+        div.className = "rubrica-list-item"; // Reuse semantic class
         div.innerHTML = `
-            <div class="flex items-center gap-3 min-w-0">
-                <div class="h-8 w-8 rounded-full bg-cover bg-center border border-primary/20 shrink-0" style="background-image: url('${avatarUrl}')"></div>
-                <div class="min-w-0">
-                    <p class="text-xs font-bold truncate">${displayName}</p>
-                    <p class="text-[10px] text-white/40 truncate flex items-center gap-1">
-                        ${displayEmail} 
-                        <span class="bg-white/10 px-1 rounded text-[9px] text-white/60">${statusLabel}</span>
-                    </p>
+            <div class="rubrica-item-info-row">
+                <div class="rubrica-item-avatar" style="background-image: url('${avatarUrl}'); background-size: cover;"></div>
+                <div class="rubrica-item-info">
+                    <p class="truncate m-0 rubrica-item-name">${displayName}</p>
+                    <p class="truncate m-0 opacity-60 text-[10px]">${displayEmail} <span class="badge-status">${statusLabel}</span></p>
                 </div>
             </div>
-            <button onclick="window.handleRevoke('${guestUid}', '${displayEmail}')" class="text-red-400 hover:text-red-600 transition-colors shrink-0" title="Rimuovi Accesso">
-                <span class="material-symbols-outlined text-sm">remove_circle</span>
-            </button>
+            <div class="rubrica-item-actions">
+                <button class="btn-revoke-guest rubrica-item-action" data-uid="${guestUid}" data-email="${displayEmail}" title="Rimuovi Accesso">
+                    <span class="material-symbols-outlined">remove_circle</span>
+                </button>
+            </div>
         `;
         list.appendChild(div);
+
+        // Add Listener
+        div.querySelector('.btn-revoke-guest').addEventListener('click', (e) => {
+            const uid = e.currentTarget.getAttribute('data-uid');
+            const email = e.currentTarget.getAttribute('data-email');
+            window.handleRevoke(uid, email);
+        });
     }
 }
 
@@ -700,13 +709,17 @@ function showSaveModal(isSharingActive) {
 function setupListeners() {
     // Copy btns
     document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.onclick = () => {
+        btn.addEventListener('click', () => {
             const input = btn.parentElement.querySelector('input');
             copyText(input.value);
-        };
+        });
     });
     const copyNoteBtn = document.getElementById('copy-note');
-    if (copyNoteBtn) copyNoteBtn.onclick = () => copyText(document.getElementById('detail-note').textContent);
+    if (copyNoteBtn) {
+        copyNoteBtn.addEventListener('click', () => {
+            copyText(document.getElementById('detail-note').textContent);
+        });
+    }
 
     // Toggle Triple Visibility (Username, Account, Password)
     const toggle = document.getElementById('toggle-password');
@@ -715,36 +728,47 @@ function setupListeners() {
     const accInput = document.getElementById('detail-account');
 
     if (toggle && passInput) {
-        toggle.onclick = () => {
+        toggle.addEventListener('click', () => {
             passInput.classList.toggle('base-shield');
             if (userInput) userInput.classList.toggle('base-shield');
             if (accInput) accInput.classList.toggle('base-shield');
 
             const isMasked = passInput.classList.contains('base-shield');
             toggle.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';
-        };
+        });
     }
 
     // Website
     const webBtn = document.getElementById('open-website');
     const webInput = document.getElementById('detail-website');
     if (webBtn && webInput) {
-        webBtn.onclick = () => {
+        webBtn.addEventListener('click', () => {
             let url = webInput.value.trim();
             if (!url) return;
             if (!url.startsWith('http')) url = 'https://' + url;
             window.open(url, '_blank');
-        };
+        });
+    }
+
+    // Theme Toggle
+    const themeBtn = document.getElementById('theme-toggle-detail');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        });
     }
 
     // Call btns
     document.querySelectorAll('.call-btn').forEach(btn => {
-        btn.onclick = () => {
+        btn.addEventListener('click', () => {
             const num = btn.parentElement.querySelector('input').value.trim();
             if (num && num !== '-' && num !== '') {
                 window.location.href = `tel:${num.replace(/\s+/g, '')}`;
             }
-        };
+        });
     });
 
 

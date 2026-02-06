@@ -1,62 +1,55 @@
 <!DOCTYPE html>
-<html lang="it" class="dark">
+<html lang="it">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Modifica Account Privato - PROTOCOLLO BASE</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.6" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/fonts.css?v=3.6">
+    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
 </head>
 
 <body class="base-bg">
-    <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="base-container">
-
-        <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
+    <div class="base-container relative">
         <div class="base-glow"></div>
 
-        <!-- Automated PROTOCOLLO BASE Header -->
         <header id="header-placeholder" class="base-header"></header>
-
         <div class="spacer-header"></div>
 
-        <!-- Main Content -->
         <main class="base-main">
-            <div id="loading-overlay" class="fixed inset-0 bg-black-90 z-60 flex items-center justify-center hidden">
-                <div class="flex-center-col gap-3">
-                    <div class="size-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
+            <div id="loading-overlay" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center hidden">
+                <div class="flex-col-gap items-center">
+                    <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
                     </div>
-                    <p class="font-bold text-slate-400 text-sm" data-t="loading_data">Caricamento
-                        dati...</p>
+                    <p class="font-bold text-slate-400 text-sm" data-t="loading_data">Caricamento dati...</p>
                 </div>
             </div>
 
             <div class="detail-content-wrap">
-
                 <!-- Logo Uploader -->
                 <div class="hero-profile-header">
-                    <div class="detail-avatar-container" onclick="document.getElementById('logo-input').click()">
+                    <div id="btn-trigger-logo" class="detail-avatar-container">
                         <div id="logo-preview-container" class="detail-avatar border-glow">
-                            <img id="account-logo-preview" alt="Logo" class="size-full object-cover hidden" src="" />
-                            <div id="logo-placeholder" class="flex-center-col text-white-40 opacity-40">
-                                <span class="material-symbols-outlined text-30 mb-1">add_photo_alternate</span>
-                                <span class="text-8 font-black all-caps tracked-widest"
+                            <img id="account-logo-preview" alt="Logo" class="hidden" />
+                            <div id="logo-placeholder" class="flex-col-gap items-center opacity-40">
+                                <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                                <span class="text-[10px] font-black uppercase tracking-widest"
                                     data-t="visual_identity">Identità Visiva</span>
                             </div>
                         </div>
@@ -71,55 +64,52 @@
                         <h3 class="detail-section-title" data-t="access_protocol_data">Dati Protocollo Accesso</h3>
                     </div>
 
-                    <div class="flex-col gap-6">
-                        <!-- Nome Account -->
+                    <div class="flex-col-gap">
                         <div class="glass-field-container">
-                            <label class="view-label" data-t="account_name">Nome Account</label>
+                            <label class="view-label" for="account-name" data-t="account_name">Nome Account</label>
                             <div class="glass-field border-glow">
-                                <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">badge</span>
+                                <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
                                 <input id="account-name" type="text" data-t-placeholder="account_name_placeholder" />
                             </div>
                         </div>
 
-                        <!-- Username -->
                         <div class="glass-field-container">
-                            <label class="view-label" data-t="username_email">Username / Email</label>
+                            <label class="view-label" for="account-username" data-t="username_email">Username /
+                                Email</label>
                             <div class="glass-field border-glow">
-                                <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">person</span>
-                                <input id="account-username" type="text" data-t-placeholder="username_placeholder" />
+                                <span class="material-symbols-outlined ml-4 opacity-40">person</span>
+                                <input id="account-username" type="text" data-t-placeholder="username_placeholder"
+                                    autocomplete="off" readonly />
                             </div>
                         </div>
 
-                        <!-- Account & Password -->
-                        <div class="dashboard-grid-2" style="gap: 1.5rem;">
+                        <div class="form-grid-2">
                             <div class="glass-field-container">
-                                <label class="view-label" data-t="customer_code">Codice Cliente</label>
+                                <label class="view-label" for="account-password" data-t="password">Password</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">pin</span>
-                                    <input id="account-code" type="text" />
-                                </div>
-                            </div>
-                            <div class="glass-field-container">
-                                <label class="view-label" data-t="password">Password</label>
-                                <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">key</span>
-                                    <input id="account-password" type="text"
-                                        class="base-shield text-mono-wide leading-relaxed" />
-                                    <button type="button"
-                                        onclick="const i = document.getElementById('account-password'); i.classList.toggle('base-shield'); this.querySelector('span').textContent = i.classList.contains('base-shield')?'visibility':'visibility_off';"
-                                        class="glass-field-btn">
-                                        <span class="material-symbols-outlined text-20">visibility</span>
+                                    <span class="material-symbols-outlined ml-4 opacity-40">key</span>
+                                    <input id="account-password" type="password" class="base-shield"
+                                        autocomplete="new-password" readonly />
+                                    <button type="button" id="btn-toggle-password-edit" class="glass-field-btn">
+                                        <span class="material-symbols-outlined">visibility</span>
                                     </button>
                                 </div>
                             </div>
+                            <div class="glass-field-container">
+                                <label class="view-label" for="account-code" data-t="customer_code">Codice
+                                    Cliente</label>
+                                <div class="glass-field border-glow">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">pin</span>
+                                    <input id="account-code" type="text" />
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Sito Web -->
                         <div class="glass-field-container">
-                            <label class="view-label" data-t="website">Sito Web</label>
+                            <label class="view-label" for="account-url" data-t="website">Sito Web</label>
                             <div class="glass-field border-glow">
-                                <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">language</span>
-                                <input id="account-url" type="url" placeholder="https://" class="icon-accent-blue" />
+                                <span class="material-symbols-outlined ml-4 opacity-40">language</span>
+                                <input id="account-url" type="url" placeholder="https://" class="text-blue-400" />
                             </div>
                         </div>
                     </div>
@@ -127,20 +117,17 @@
 
                 <!-- 2. Coordinate Bancarie -->
                 <section>
-                    <div class="detail-section-header">
-                        <div class="flex items-center gap-3">
+                    <div class="detail-section-header justify-between">
+                        <div class="flex-center-gap">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-purple">account_balance</span>
                             <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
                         </div>
-                        <button type="button" id="btn-add-iban" class="glass-field-btn w-auto px-4 icon-accent-purple">
-                            + IBAN
-                        </button>
+                        <button type="button" id="btn-add-iban"
+                            class="glass-field-btn border h-auto py-1 px-3 text-[10px] font-black text-purple-400">+
+                            IBAN</button>
                     </div>
-
-                    <div id="iban-list-container" class="flex-col gap-6">
-                        <!-- IBANs will be injected here via JS -->
-                    </div>
+                    <div id="iban-list-container" class="flex-col-gap"></div>
                 </section>
 
                 <!-- 3. Referente -->
@@ -151,30 +138,26 @@
                         <h3 class="detail-section-title" data-t="referent_info">Informazioni Referente</h3>
                     </div>
 
-                    <div class="flex-col gap-6">
-                        <!-- Nome -->
+                    <div class="flex-col-gap">
                         <div class="glass-field-container">
-                            <label class="view-label" data-t="full_name">Nome e Cognome</label>
+                            <label class="view-label" for="ref-name" data-t="full_name">Nome e Cognome</label>
                             <div class="glass-field border-glow">
-                                <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">badge</span>
+                                <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
                                 <input id="ref-name" type="text" />
                             </div>
                         </div>
-
-                        <!-- Contatti -->
-                        <div class="dashboard-grid-2" style="gap: 1.5rem;">
+                        <div class="form-grid-2">
                             <div class="glass-field-container">
-                                <label class="view-label" data-t="phone">Telefono</label>
+                                <label class="view-label" for="ref-phone" data-t="phone">Telefono</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 text-white-40 opacity-40">call</span>
+                                    <span class="material-symbols-outlined ml-4 opacity-40">call</span>
                                     <input id="ref-phone" type="tel" />
                                 </div>
                             </div>
                             <div class="glass-field-container">
-                                <label class="view-label" data-t="mobile">Cellulare</label>
+                                <label class="view-label" for="ref-mobile" data-t="mobile">Cellulare</label>
                                 <div class="glass-field border-glow">
-                                    <span
-                                        class="material-symbols-outlined ml-4 text-white-40 opacity-40">smartphone</span>
+                                    <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
                                     <input id="ref-mobile" type="tel" />
                                 </div>
                             </div>
@@ -186,96 +169,67 @@
                 <section>
                     <div class="detail-section-header">
                         <span
-                            class="material-symbols-outlined detail-section-icon icon-accent-emerald">sticky_note_2</span>
+                            class="material-symbols-outlined detail-section-icon icon-accent-green">sticky_note_2</span>
                         <h3 class="detail-section-title" data-t="notes_and_sharing">Note e Condivisione</h3>
                     </div>
 
-                    <div class="flex-col gap-6">
-                        <!-- Note -->
+                    <div class="flex-col-gap">
                         <div class="glass-field-container">
-                            <label class="view-label" data-t="notes">Note</label>
+                            <label class="view-label" for="account-note" data-t="notes">Note</label>
                             <div class="glass-field border-glow h-auto">
                                 <textarea id="account-note" data-t-placeholder="notes_placeholder"
-                                    class="w-full min-h-120 bg-transparent border-none p-4 text-sm lh-relaxed text-white outline-none resize-none"></textarea>
+                                    class="form-textarea"></textarea>
                             </div>
                         </div>
 
-                        <!-- Opzioni Flags -->
-                        <div class="flex-col gap-4">
-                            <!-- Condiviso Toggle -->
-                            <div class="glass-field border-glow justify-between px-5">
-                                <span class="material-symbols-outlined filled icon-accent-blue text-20">share</span>
-                                <span class="text-white text-sm bold all-caps tracked-wide"
-                                    data-t="shared_account">Account Condiviso</span>
-                            </div>
-                            <label class="relative cursor-pointer flex items-center">
-                                <input class="absolute size-0 opacity-0" type="checkbox" id="flag-shared" />
+                        <div class="flex-col-gap">
+                            <!-- Shared Toggle -->
+                            <label class="visibility-option-card border-glow" for="flag-shared">
+                                <div class="flex-center-gap">
+                                    <span
+                                        class="material-symbols-outlined icon-accent-blue p-2 rounded-lg bg-blue-400/10">share</span>
+                                    <span class="text-xs font-black uppercase" data-t="shared_account">Account
+                                        Condiviso</span>
+                                </div>
+                                <input class="hidden" type="checkbox" id="flag-shared" />
                                 <div class="base-switch"></div>
                             </label>
                         </div>
 
-                        <!-- Condivisione Panel -->
-                        <div id="shared-management" class="hidden pl-4 border-l-2 border-white-5 ml-4 flex-col gap-4">
-                            <div id="guests-list" class="flex-col gap-2"></div>
+                        <div id="shared-management" class="hidden pl-6 border-l-2 border-white/10 flex-col-gap">
+                            <div id="guests-list" class="flex-col-gap"></div>
                             <div class="glass-field border-glow pr-0">
                                 <input id="invite-email" type="email" data-t-placeholder="invite_email_placeholder"
-                                    class="flex-1 pl-4 text-xs font-bold" />
-                                <button id="btn-send-invite" type="button" data-t="invite"
-                                    class="px-6 h-full text-blue-400 bg-white-10 border-none border-l border-white-5 font-black text-px-10 all-caps">
-                                    INVITA
-                                </button>
+                                    class="flex-1" />
+                                <button id="btn-send-invite" type="button"
+                                    class="glass-field-btn font-black text-xs px-4">INVITA</button>
                             </div>
                             <div id="rubrica-suggestions"
-                                class="hidden bg-slate-900 border border-white-5 rounded-2xl max-h-48 overflow-y-auto backdrop-blur-xl z-50">
+                                class="hidden bg-slate-900 border border-white/10 rounded-2xl max-h-48 overflow-y-auto">
                             </div>
                         </div>
 
                         <!-- Memorandum Toggle -->
-                        <div class="glass-field border-glow justify-between px-5">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <label class="visibility-option-card border-glow" for="flag-memo">
+                            <div class="flex-center-gap">
                                 <span
-                                    class="material-symbols-outlined filled icon-accent-orange text-20">lightbulb</span>
-                                <span class="text-white text-sm bold all-caps tracked-wide"
-                                    data-t="memorandum">Memorandum</span>
+                                    class="material-symbols-outlined icon-accent-orange p-2 rounded-lg bg-orange-400/10">lightbulb</span>
+                                <span class="text-xs font-black uppercase" data-t="memorandum">Memorandum</span>
                             </div>
-                            <label class="relative cursor-pointer flex items-center">
-                                <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo" />
-                                <div class="base-switch base-switch-orange"></div>
-                            </label>
-                        </div>
-
-                        <!-- Memo Condiviso Toggle -->
-                        <div class="glass-field border-glow justify-between px-5">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span
-                                    class="material-symbols-outlined filled icon-accent-emerald text-20">share_reviews</span>
-                                <span class="text-white text-sm bold all-caps tracked-wide"
-                                    data-t="shared_memo">Memorandum Condiviso</span>
-                            </div>
-                            <label class="relative cursor-pointer flex items-center">
-                                <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo-shared" />
-                                <div class="base-switch-green"></div>
-                            </label>
-                        </div>
+                            <input class="hidden" type="checkbox" id="flag-memo" />
+                            <div class="base-switch"></div>
+                        </label>
                     </div>
+                </section>
             </div>
-            </section>
+        </main>
 
-    </div>
-    </main>
-
-    <div class="spacer-footer"></div>
-    <!-- FOOTER PREMIUM -->
-    <footer id="footer-placeholder" class="base-footer"></footer>
+        <div class="spacer-footer"></div>
+        <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
-
-    <script type="module" src="assets/js/main.js?v=3.3"></script>
-    <script type="module" src="assets/js/modifica_account_privato.js?v=3.3"></script>
+    <script type="module" src="assets/js/main.js?v=3.6"></script>
+    <script type="module" src="assets/js/modifica_account_privato.js?v=3.6"></script>
 </body>
 
 </html>
-
-
-
-

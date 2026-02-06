@@ -154,19 +154,11 @@ function renderEmailsView() {
                             <span class="text-sm font-mono tracking-wider password-text flex-1">********</span>
                             <div class="flex items-center gap-1 opacity-0 group-hover/field:opacity-100 transition-opacity">
                                 <button class="text-cyan-400 p-1 hover:bg-cyan-500/10 rounded-lg transition-colors visibility-toggle" 
-                                    onclick="const txt = this.parentElement.parentElement.querySelector('.password-text'); 
-                                             const isMasked = txt.textContent === '********';
-                                             txt.textContent = isMasked ? '${e.password.replace(/'/g, "\\'")}' : '********';
-                                             this.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';">
+                                    data-action="toggle-text-mask" data-secret="${e.password.replace(/'/g, "\\'")}">
                                     <span class="material-symbols-outlined text-lg">visibility_off</span>
                                 </button>
                                 <button class="copy-button text-gray-400 hover:text-white p-1 rounded-lg transition-colors" 
-                                    onclick="const btn=this; navigator.clipboard.writeText('${e.password.replace(/'/g, "\\'")}').then(()=>{
-                                        const icon=btn.querySelector('span'); 
-                                        const old=icon.textContent;
-                                        icon.textContent='check';
-                                        setTimeout(()=>icon.textContent=old, 2000);
-                                    })">
+                                    data-action="copy-text" data-text="${e.password.replace(/'/g, "\\'")}">
                                     <span class="material-symbols-outlined text-lg">content_copy</span>
                                 </button>
                             </div>
@@ -191,10 +183,10 @@ function renderEmailsView() {
                     <div class="glass-field glass-field-cyan group/field">
                          <p class="text-sm font-medium break-all flex-1">${e.address}</p>
                          <div class="flex items-center gap-1 opacity-0 group-hover/field:opacity-100 transition-opacity">
-                             <button class="text-cyan-400 p-1 hover:bg-cyan-500/10 rounded-lg transition-colors" onclick="window.location.href='mailto:${e.address}'">
+                             <button class="text-cyan-400 p-1 hover:bg-cyan-500/10 rounded-lg transition-colors" data-action="navigate" data-href="mailto:${e.address}">
                                 <span class="material-symbols-outlined text-lg">mail</span>
                              </button>
-                             <button class="copy-button text-gray-400 hover:text-white p-1 rounded-lg transition-colors" onclick="navigator.clipboard.writeText('${e.address.replace(/'/g, "\\'")}').then(() => showToast('Email copiata!'))">
+                             <button class="copy-button text-gray-400 hover:text-white p-1 rounded-lg transition-colors" data-action="copy-text" data-text="${e.address.replace(/'/g, "\\'")}">
                                 <span class="material-symbols-outlined text-lg">content_copy</span>
                              </button>
                          </div>
@@ -244,11 +236,7 @@ function renderEmailsEdit() {
                         <span class="material-symbols-outlined text-[#CBD5E1] text-sm">key</span>
                         <input type="password" value="${e.password || ''}" data-index="${index}"
                             class="email-pass-real w-full bg-transparent text-[#F1F5F9] border-none p-0 text-sm focus:ring-0" placeholder="Password (opzionale)">
-                        <button type="button" class="text-[#CBD5E1] hover:text-primary transition-colors" onclick="
-                            const inp = this.previousElementSibling;
-                            inp.type = inp.type === 'password' ? 'text' : 'password';
-                            this.querySelector('span').textContent = inp.type === 'password' ? 'visibility_off' : 'visibility';
-                        ">
+                        <button type="button" class="text-[#CBD5E1] hover:text-primary transition-colors" data-action="toggle-visibility">
                             <span class="material-symbols-outlined text-lg">visibility_off</span>
                         </button>
                     </div>
@@ -377,7 +365,7 @@ function renderUtenzeView() {
             </div>
             <div class="glass-field glass-field-amber group/field mt-1">
                 <p class="text-sm font-bold text-white truncate flex-1 min-h-[1.25rem]">${u.value || '-'}</p>
-                <button class="copy-button text-amber-500 opacity-0 group-hover/field:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText('${(u.value || '').replace(/'/g, "\\'")}').then(() => showToast('Copiato!'))">
+                <button class="copy-button text-amber-500 opacity-0 group-hover/field:opacity-100 transition-opacity" data-action="copy-text" data-text="${(u.value || '').replace(/'/g, "\\'")}">
                     <span class="material-symbols-outlined text-lg">content_copy</span>
                 </button>
             </div>
@@ -516,7 +504,7 @@ function renderDocumentiView() {
                         <div class="glass-field glass-field-violet group/field">
                             <span class="text-sm font-semibold text-white break-all flex-1">${val}</span>
                             <button class="text-violet-400 opacity-0 group-hover/field:opacity-100 transition-opacity" 
-                                onclick="navigator.clipboard.writeText('${safeVal}').then(() => showToast('Copiato!'))">
+                                data-action="copy-text" data-text="${safeVal}">
                                 <span class="material-symbols-outlined text-[17px]">content_copy</span>
                             </button>
                         </div>
@@ -2094,6 +2082,45 @@ function updateSectionBadge(id, count) {
         el.classList.add('hidden');
     }
 }
+
+function setupDelegation() {
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+
+        const action = target.dataset.action;
+        const index = parseInt(target.dataset.index);
+
+        switch (action) {
+            case 'toggle-text-mask':
+                const wrapper = target.closest('.glass-field');
+                if (wrapper) {
+                    const txt = wrapper.querySelector('.password-text');
+                    if (txt) {
+                        const isMasked = txt.textContent === '********';
+                        txt.textContent = isMasked ? target.dataset.secret : '********';
+                        const span = target.querySelector('span');
+                        if (span) span.textContent = isMasked ? 'visibility' : 'visibility_off';
+                    }
+                }
+                break;
+            case 'delete-email': deleteEmail(index); break;
+            case 'delete-utenza':
+                if (confirm("Eliminare questa utenza?")) {
+                    userUtilities.splice(index, 1);
+                    renderUtenzeEdit();
+                }
+                break;
+            case 'delete-documento':
+                if (confirm("Eliminare questo documento?")) {
+                    userDocuments.splice(index, 1);
+                    renderDocumentiEdit();
+                }
+                break;
+        }
+    });
+}
+setupDelegation();
 
 
 

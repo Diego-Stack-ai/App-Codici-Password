@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Codici & Password - Accedi</title>
@@ -17,15 +17,15 @@
     <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
 
 
-<body class="base-bg overflow-hidden">
-    <!-- 1. WRAPPER PRINCIPALE (Gestisce lo sfondo e il layout full-page) -->
-    <div class="base-container flex items-center justify-center p-4 w-full h-full relative" style="min-height: 100vh;">
+<body class="base-bg">
+    <!-- 1. WRAPPER PRINCIPALE -->
+    <div class="base-container auth-viewport">
 
-        <!-- 2. FARO (Glow Effect - Sfondo luminoso) -->
+        <!-- 2. FARO (Glow Effect) -->
         <div class="base-glow"></div>
 
-        <!-- 3. VAULT CONTAINER (Login Content - Sopra il glow) -->
-        <div class="base-vault w-full max-w-md relative z-10">
+        <!-- 3. VAULT CONTAINER -->
+        <div class="auth-vault">
 
             <!-- Card Login -->
             <div class="auth-card border-glow">
@@ -57,14 +57,14 @@
 
                     <!-- Email / Username -->
                     <div class="auth-form-group">
-                        <label class="auth-label" data-t="username_label">Username</label>
+                        <label class="auth-label" for="email" data-t="username_label">Username</label>
                         <input id="email" name="username" type="text" autocomplete="username" required
                             class="auth-input" data-t-placeholder="username_placeholder" placeholder="Email o Username">
                     </div>
 
                     <!-- Password -->
                     <div class="auth-form-group">
-                        <label class="auth-label" data-t="password_label">Password</label>
+                        <label class="auth-label" for="password" data-t="password_label">Password</label>
                         <div class="password-wrapper">
                             <input id="password" name="password" type="password" autocomplete="current-password"
                                 required class="auth-input" placeholder="********">
@@ -80,7 +80,7 @@
 
                     <!-- Submit Button -->
                     <button type="submit" id="login-submit-btn" class="auth-btn-primary" data-t="auth_button">
-                        <span class="material-symbols-outlined text-20">login</span>
+                        <span class="material-symbols-outlined">login</span>
                         Accedi
                     </button>
 
@@ -93,7 +93,7 @@
 
                 <!-- Footer Legale -->
                 <div class="legal-footer">
-                    <span class="opacity-50">&copy; 2026</span>
+                    <span>&copy; 2026</span>
                 </div>
 
             </div>

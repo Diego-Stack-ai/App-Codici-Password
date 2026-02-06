@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Modifica Scadenza - PROTOCOLLO BASE</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Modifica Scadenza - PROTOCOLLO BASE V3.6</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.6" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,184 +18,122 @@
 
     <!-- Fonts -->
     <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
 </head>
 
 <body class="base-bg">
-    <div class="base-container">
-        <!-- Faro Estetico -->
+    <div class="base-container relative">
+        <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
-        <!-- HEADER FISSO -->
-        <header class="base-header">
-            <div class="header-balanced-container">
-                <div class="header-left">
-                    <button onclick="history.back()" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                </div>
-
-                <div class="header-center">
-                    <h2 class="header-title">Modifica Scadenza</h2>
-                </div>
-
-                <div class="header-right">
-                    <a href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
 
         <div class="spacer-header"></div>
 
-        <main class="settings-container no-select">
-            <div class="settings-group">
-                <h4 class="settings-group-title">Dettagli Scadenza</h4>
+        <!-- Main Content -->
+        <main class="base-main">
+            <div class="detail-content-wrap pb-20">
 
-                <!-- Titolo -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass">
-                                <span class="material-symbols-outlined filled">edit_document</span>
-                            </div>
-                            <div class="settings-text w-full">
-                                <span class="settings-label">Titolo</span>
-                                <input id="edit-title" type="text" placeholder="Es. Bollo Auto">
-                            </div>
+                <div class="mb-6 px-1">
+                    <h2 class="text-2xl font-black text-white leading-tight">Modifica Scadenza</h2>
+                    <p class="text-xs font-bold text-white/40 uppercase tracking-[0.2em] mt-1">Aggiornamento dettagli
+                        promemoria</p>
+                </div>
+
+                <!-- 1. Dati Principali -->
+                <div class="flex-col-gap-4">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Dettagli Scadenza
+                    </h3>
+                    <div class="glass-card p-5 flex-col-gap-4">
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">edit_document</span>
+                            <input id="edit-title" type="text" placeholder="Titolo (es. Bollo Auto)" />
+                        </div>
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">person</span>
+                            <input id="edit-holder" list="names-list" type="text"
+                                placeholder="Intestatario / Referente" />
+                            <datalist id="names-list"></datalist>
                         </div>
                     </div>
                 </div>
 
-                <!-- Intestatario (Ref) -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-purple-glass">
-                                <span class="material-symbols-outlined filled">person</span>
-                            </div>
-                            <div class="settings-text w-full">
-                                <span class="settings-label">Intestatario (Ref)</span>
-                                <input id="edit-holder" list="names-list" type="text" placeholder="Es. Mario Rossi">
-                                <datalist id="names-list"></datalist>
-                            </div>
+                <!-- 2. Pianificazione & Categoria -->
+                <div class="flex-col-gap-4 mt-8">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Pianificazione &
+                        Categoria</h3>
+                    <div class="glass-card p-5 flex-col-gap-4">
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">calendar_clock</span>
+                            <input id="edit-date" type="date"
+                                class="w-full bg-transparent border-none text-white outline-none" />
+                        </div>
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">category</span>
+                            <select id="edit-category"
+                                class="w-full bg-transparent border-none text-white outline-none cursor-pointer">
+                                <option value="">Seleziona Categoria...</option>
+                                <option value="Generale">Generale</option>
+                                <option value="Veicoli">Veicoli</option>
+                                <option value="Utenze">Utenze</option>
+                                <option value="Documenti">Documenti</option>
+                            </select>
+                            <span class="material-symbols-outlined text-white/20">expand_more</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Data Scadenza -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-amber-glass">
-                                <span class="material-symbols-outlined filled">calendar_clock</span>
+                <!-- 3. Note & Allegati -->
+                <div class="flex-col-gap-4 mt-8">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Note & Allegati</h3>
+                    <div class="glass-card flex-col-gap-4 overflow-hidden">
+                        <textarea id="edit-notes"
+                            class="w-full min-h-[120px] p-5 bg-transparent border-none text-sm text-white/80 outline-none resize-none leading-relaxed"
+                            placeholder="Note aggiuntive su questa scadenza..."></textarea>
+                    </div>
+
+                    <a id="btn-manage-attachments" href="#"
+                        class="glass-card p-4 flex items-center justify-between group hover:bg-white/5 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="size-10 rounded-xl bg-blue-500/10 flex-center border border-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined filled">attach_file</span>
                             </div>
-                            <div class="settings-text w-full">
-                                <span class="settings-label">Data Scadenza</span>
-                                <div class="relative w-full mt-1">
-                                    <input id="edit-date" type="date" class="color-scheme-dark">
-                                    <span
-                                        class="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none icon-18">calendar_month</span>
-                                </div>
+                            <div class="flex-col">
+                                <span class="text-[11px] font-black uppercase tracking-widest text-white">Gestisci
+                                    Allegati</span>
+                                <span class="text-[9px] font-bold text-white/20 uppercase tracking-widest">Foto e
+                                    Documenti caricati</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Categoria -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-emerald-glass">
-                                <span class="material-symbols-outlined filled">category</span>
-                            </div>
-                            <div class="settings-text w-full">
-                                <span class="settings-label">Categoria</span>
-                                <div class="relative w-full mt-1">
-                                    <select id="edit-category">
-                                        <option value="Generale">Generale</option>
-                                        <option value="Veicoli">Veicoli</option>
-                                        <option value="Utenze">Utenze</option>
-                                        <option value="Documenti">Documenti</option>
-                                    </select>
-                                    <span
-                                        class="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none icon-18">expand_more</span>
-                                </div>
-                            </div>
+                        <div class="flex items-center gap-3">
+                            <span id="attachments-count"
+                                class="bg-blue-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full hidden">0</span>
+                            <span
+                                class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-transform">chevron_right</span>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
-                <!-- Note -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-purple-glass">
-                                <span class="material-symbols-outlined filled">notes</span>
-                            </div>
-                            <div class="settings-text w-full">
-                                <span class="settings-label">Note</span>
-                                <textarea id="edit-notes" class="min-h-120 resize-none mt-2 text-sm lh-relaxed"
-                                    placeholder="Note aggiuntive..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="h-20"></div>
 
-                <!-- Documenti & Allegati -->
-                <div class="settings-group">
-                    <h4 class="settings-group-title">Documenti & Foto</h4>
-                    <div class="settings-item">
-                        <div class="settings-item-header">
-                            <div class="settings-item-info">
-                                <div class="settings-icon-box bg-blue-glass">
-                                    <span class="material-symbols-outlined filled">attach_file</span>
-                                </div>
-                                <div class="settings-text">
-                                    <span class="settings-label">Gestisci Allegati</span>
-                                    <span class="settings-desc">Aggiungi o rimuovi file per questa scadenza</span>
-                                </div>
-                            </div>
-                            <div class="settings-actions flex items-center">
-                                <span id="attachments-count"
-                                    class="text-xs font-bold text-blue-400 mr-3 hidden">0</span>
-                                <a id="btn-manage-attachments" href="#" class="btn-icon-header"
-                                    style="width: 32px; height: 32px;">
-                                    <span class="material-symbols-outlined icon-18">open_in_new</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            </div>
         </main>
 
-        <!-- AZIONE FISSA BOTTOM -->
-        <div class="fixed bottom-6 inset-x-0 flex justify-center items-center z-100 px-6 pointer-events-none">
-            <button id="save-changes-btn"
-                class="base-btn-primary pointer-events-auto w-full max-w-450 h-15 rounded-18 shadow-blue flex items-center justify-center gap-3">
-                <span class="material-symbols-outlined">save</span>
-                <span class="font-black tracked-widest all-caps">Salva Modifiche</span>
-            </button>
-        </div>
-
-        <div class="h-30"></div>
-        <footer id="footer-placeholder" class="base-footer"></footer>
+        <div class="spacer-footer"></div>
+        <!-- FOOTER PLACEHOLDER -->
+        <footer id="footer-placeholder" class="base-header"></footer>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.3"></script>
-    <script type="module" src="assets/js/modifica_scadenza.js?v=3.3"></script>
+    <script type="module" src="assets/js/main.js?v=3.6"></script>
+    <script type="module" src="assets/js/modifica_scadenza.js?v=3.6"></script>
 </body>
 
 </html>
-
-
-
-

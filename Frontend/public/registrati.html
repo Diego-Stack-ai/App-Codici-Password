@@ -24,15 +24,15 @@
     <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
 </head>
 
-<body class="base-bg overflow-x-hidden">
-    <!-- 1. WRAPPER PRINCIPALE (UI come index.html) -->
-    <div class="base-container flex items-center justify-center p-4 w-full relative" style="min-height: 100vh;">
+<body class="base-bg">
+    <!-- 1. WRAPPER PRINCIPALE -->
+    <div class="base-container auth-viewport">
 
         <!-- 2. FARO (Glow Effect) -->
         <div class="base-glow"></div>
 
         <!-- 3. VAULT CONTAINER -->
-        <div class="base-vault w-full max-w-md relative z-10 py-8">
+        <div class="auth-vault">
 
             <!-- Card Registrazione -->
             <div class="auth-card border-glow">
@@ -65,11 +65,11 @@
                     <!-- Nome & Cognome -->
                     <div class="auth-form-row">
                         <div class="auth-form-group">
-                            <label class="auth-label" data-t="label_name">Nome</label>
+                            <label class="auth-label" for="nome" data-t="label_name">Nome</label>
                             <input id="nome" name="nome" type="text" required class="auth-input" placeholder="Mario">
                         </div>
                         <div class="auth-form-group">
-                            <label class="auth-label" data-t="label_surname">Cognome</label>
+                            <label class="auth-label" for="cognome" data-t="label_surname">Cognome</label>
                             <input id="cognome" name="cognome" type="text" required class="auth-input"
                                 placeholder="Rossi">
                         </div>
@@ -77,14 +77,14 @@
 
                     <!-- Email -->
                     <div class="auth-form-group">
-                        <label class="auth-label" data-t="email_label">Email</label>
+                        <label class="auth-label" for="email" data-t="email_label">Email</label>
                         <input id="email" name="email" type="email" autocomplete="username" required class="auth-input"
                             data-t-placeholder="email_placeholder" placeholder="mario.rossi@email.com">
                     </div>
 
                     <!-- Password -->
                     <div class="auth-form-group">
-                        <label class="auth-label" data-t="password_label_reg">Password</label>
+                        <label class="auth-label" for="password" data-t="password_label_reg">Password</label>
                         <div class="password-wrapper">
                             <input id="password" name="password" type="password" autocomplete="new-password" required
                                 class="auth-input" data-t-placeholder="password_placeholder_reg" placeholder="********">
@@ -97,32 +97,31 @@
 
                     <!-- Conferma Password -->
                     <div class="auth-form-group">
-                        <label class="auth-label" data-t="confirm_new_password">Conferma Password</label>
+                        <label class="auth-label" for="confirm-password" data-t="confirm_new_password">Conferma
+                            Password</label>
                         <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password"
                             required class="auth-input" placeholder="********">
                     </div>
 
                     <!-- Submit Button -->
                     <button type="submit" id="register-submit-btn" class="auth-btn-primary" data-t="create_account_btn">
-                        <span class="material-symbols-outlined text-20">check_circle</span>
+                        <span class="material-symbols-outlined">check_circle</span>
                         Nuova registrazione
                     </button>
 
                 </form>
 
                 <!-- Login Link -->
-                <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+                <div class="auth-footer-link-box">
                     <span data-t="have_account_text">Hai già un account?</span>
-                    <a href="index.html" class="link-register"
-                        style="color: #3b82f6; text-decoration: none; font-weight: 700; margin-left: 0.25rem; display: inline; margin-top: 0;"
-                        data-t="login_now_link">
+                    <a href="index.html" class="link-register" data-t="login_now_link">
                         Accedi ora
                     </a>
                 </div>
 
                 <!-- Footer Legale -->
                 <div class="legal-footer">
-                    <span class="opacity-50">&copy; 2026</span>
+                    <span>&copy; 2026</span>
                 </div>
 
             </div>

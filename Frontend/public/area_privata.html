@@ -45,45 +45,45 @@
 
                 <!-- Account Standard -->
                 <a href="account_privati.html?type=standard" class="matrix-card card-blue border-glow adaptive-shadow">
-                    <div class="flex justify-start items-center w-full mb-4">
+                    <div class="matrix-card-header">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">account_balance_wallet</span>
                         </div>
                     </div>
                     <div class="card-text-block">
-                        <div class="flex items-center gap-2 justify-center">
+                        <div class="matrix-card-title-box">
                             <h3 data-t="section_personal_accounts">Account Personali</h3>
-                            <span id="count-standard" class="text-xs opacity-50 font-bold"></span>
+                            <span id="count-standard" class="badge-count"></span>
                         </div>
                     </div>
                 </a>
 
                 <!-- Condivisi -->
                 <a href="account_privati.html?type=shared" class="matrix-card card-red border-glow adaptive-shadow">
-                    <div class="flex justify-start items-center w-full mb-4">
+                    <div class="matrix-card-header">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">group</span>
                         </div>
                     </div>
                     <div class="card-text-block">
-                        <div class="flex items-center gap-2 justify-center">
+                        <div class="matrix-card-title-box">
                             <h3 data-t="section_shared_accounts">Account Condivisi</h3>
-                            <span id="count-shared" class="text-xs opacity-50 font-bold"></span>
+                            <span id="count-shared" class="badge-count"></span>
                         </div>
                     </div>
                 </a>
 
                 <!-- Memorandum -->
                 <a href="account_privati.html?type=memo" class="matrix-card card-orange border-glow adaptive-shadow">
-                    <div class="flex justify-start items-center w-full mb-4">
+                    <div class="matrix-card-header">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">sticky_note_2</span>
                         </div>
                     </div>
                     <div class="card-text-block">
-                        <div class="flex items-center gap-2 justify-center">
+                        <div class="matrix-card-title-box">
                             <h3 data-t="section_note">Note</h3>
-                            <span id="count-memo" class="text-xs opacity-50 font-bold"></span>
+                            <span id="count-memo" class="badge-count"></span>
                         </div>
                     </div>
                 </a>
@@ -91,50 +91,48 @@
                 <!-- Memo Condivisi -->
                 <a href="account_privati.html?type=shared_memo"
                     class="matrix-card card-green border-glow adaptive-shadow">
-                    <div class="flex justify-start items-center w-full mb-4">
+                    <div class="matrix-card-header">
                         <div class="matrix-icon-box">
                             <span class="material-symbols-outlined">folder_shared</span>
                         </div>
                     </div>
                     <div class="card-text-block">
-                        <div class="flex items-center gap-2 justify-center">
+                        <div class="matrix-card-title-box">
                             <h3 data-t="section_shared_note">Note Condivise</h3>
-                            <span id="count-shared-memo" class="text-xs opacity-50 font-bold"></span>
+                            <span id="count-shared-memo" class="badge-count"></span>
                         </div>
                     </div>
                 </a>
 
                 <!-- TOP 10 WIDGET SECTION -->
                 <div class="grid-span-2 relative z-40">
-                    <div class="base-card overflow-hidden base-card-clean">
-                        <div class="widget-header">
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-18 icon-accent-orange">star</span>
-                                <h3 class="widget-title" data-t="top_used_access">TOP 10 PIÙ USATI</h3>
-                            </div>
-                        </div>
-                        <div id="top-accounts-list" class="p-4 flex flex-col gap-2">
-                            <!-- Loading -->
-                            <div class="py-10 flex justify-center opacity-20">
-                                <span class="material-symbols-outlined animate-spin-slow">sync</span>
-                            </div>
+                    <div class="flex items-center gap-2 mb-2 px-1">
+                        <span class="material-symbols-outlined text-sm text-orange-400">star</span>
+                        <h3 class="text-xs font-bold text-white/60 uppercase tracking-widest" data-t="top_used_access">
+                            TOP 10 PIÙ USATI</h3>
+                    </div>
+                    <div id="top-accounts-list" class="flex flex-col gap-2">
+                        <!-- Loading -->
+                        <div class="py-10 flex justify-center opacity-20">
+                            <span class="material-symbols-outlined animate-spin-slow">sync</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- RUBRICA SECTION -->
-                <div class="grid-span-2 relative z-40 p-4">
+                <div class="grid-span-2 relative z-40 mt-4">
                     <!-- Bottone Toggle (Protocollo Rubrica V3.8) -->
                     <button id="rubrica-toggle-btn" type="button"
-                        class="micro-list-item card-orange border-glow adaptive-shadow w-full relative overflow-hidden flex items-center justify-between cursor-pointer rounded-3xl rubrica-toggle-btn">
-                        <div class="flex items-center gap-4 relative z-10">
-                            <div class="settings-icon-box bg-white/10 icon-accent-orange size-10">
-                                <span class="material-symbols-outlined text-xl">group</span>
+                        class="micro-account-card w-full flex items-center justify-between p-3 card-orange border-glow adaptive-shadow cursor-pointer hover:bg-white/5 transition-all active:scale-95">
+                        <div class="flex items-center gap-3">
+                            <div class="micro-account-avatar-box">
+                                <span
+                                    class="material-symbols-outlined text-orange-400 bg-white/10 rounded-lg p-1.5 ">group</span>
                             </div>
                             <div class="text-left">
-                                <h3 class="text-sm font-black m-0" data-t="rubrica_title">Rubrica Contatti</h3>
-                                <p class="opacity-60 text-[10px] tracked-wider font-bold all-caps m-0">
-                                    <span>Condivise</span>
+                                <h3 class="micro-account-name" data-t="rubrica_title">Rubrica Contatti</h3>
+                                <p class="micro-account-subtitle text-orange-400/70">
+                                    <span>Condivisi</span>
                                     <span id="rubrica-counter">(0)</span>
                                 </p>
                             </div>
@@ -156,26 +154,26 @@
                             </div>
 
                             <!-- Form di Inserimento (Protocollo Rubrica V3.8) -->
-                            <div id="add-contact-form" class="hidden flex-col gap-3 mb-6 rounded-2xl p-5 rubrica-form">
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="flex flex-col gap-1">
-                                        <label class="auth-label text-[10px] ml-1 rubrica-label">Nome</label>
+                            <div id="add-contact-form" class="hidden rubrica-form rounded-2xl p-5">
+                                <div class="rubrica-form-grid">
+                                    <div class="flex-col">
+                                        <label class="auth-label rubrica-label" for="contact-nome">Nome</label>
                                         <input type="text" id="contact-nome" placeholder="Mario"
-                                            class="auth-input h-9 text-xs rubrica-input">
+                                            class="auth-input rubrica-input">
                                     </div>
-                                    <div class="flex flex-col gap-1">
-                                        <label class="auth-label text-[10px] ml-1 rubrica-label">Cognome</label>
+                                    <div class="flex-col">
+                                        <label class="auth-label rubrica-label" for="contact-cognome">Cognome</label>
                                         <input type="text" id="contact-cognome" placeholder="Rossi"
-                                            class="auth-input h-9 text-xs rubrica-input">
+                                            class="auth-input rubrica-input">
                                     </div>
                                 </div>
-                                <div class="flex flex-col gap-1">
-                                    <label class="auth-label text-[10px] ml-1 rubrica-label">Email Condivisione</label>
+                                <div class="flex-col mt-4">
+                                    <label class="auth-label rubrica-label" for="contact-email">Email
+                                        Condivisione</label>
                                     <input type="email" id="contact-email" placeholder="mario.rossi@email.com"
-                                        class="auth-input h-9 text-xs w-full rubrica-input">
+                                        class="auth-input rubrica-input">
                                 </div>
-                                <button id="btn-add-contact" type="button"
-                                    class="card-orange border-glow w-full h-11 font-extrabold rounded-xl cursor-pointer rubrica-btn-new mt-2"
+                                <button id="btn-add-contact" type="button" class="auth-btn-primary mt-4"
                                     data-t="save_contact">SALVA CONTATTO</button>
                             </div>
 

@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dettaglio Scadenza - PROTOCOLLO BASE</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dettaglio Scadenza - PROTOCOLLO BASE V3.6</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.6" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,235 +18,151 @@
 
     <!-- Fonts -->
     <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
 </head>
 
 <body class="base-bg">
-    <div class="base-container">
-        <!-- GLOW LAYER -->
+    <div class="base-container relative">
+        <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
-        <!-- Header (Fixed Glass) -->
-        <header class="base-header">
-            <div class="header-balanced-container">
-                <!-- ZONA SINISTRA: Navigazione (1 icona) -->
-                <div class="header-left">
-                    <button onclick="history.back()" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                </div>
-
-                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
-                <div class="header-center">
-                    <h2 class="header-title" data-t="detail_page_title">
-                        Dettaglio Scadenza
-                    </h2>
-                </div>
-
-                <!-- ZONA DESTRA: Home (1 icona) -->
-                <div class="header-right">
-                    <a href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                </div>
-            </div>
-        </header>
+        <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
 
         <div class="spacer-header"></div>
 
-        <main class="settings-container no-select">
+        <!-- Main Content -->
+        <main class="base-main">
+            <div class="detail-content-wrap">
 
-            <!-- AZIONI (Toolbar) -->
-            <div class="settings-group p-0 bg-transparent border-none shadow-none">
-                <div class="flex-center-gap-10">
-                    <button id="complete-btn" class="btn-icon-header w-8 h-8" title="Archivia">
-                        <span class="material-symbols-outlined icon-18">archive</span>
-                    </button>
-
-                    <button id="edit-btn" class="btn-icon-header w-8 h-8" title="Modifica">
-                        <span class="material-symbols-outlined icon-18">edit</span>
-                    </button>
-
-                    <button id="delete-btn" class="btn-icon-header w-8 h-8" title="Elimina">
-                        <span class="material-symbols-outlined icon-18">delete</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- INFO PRINCIPALI (PROTOCOLLO BASE List Style) -->
-            <div class="settings-group">
-
-                <!-- Stato e Titolo -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-blue-glass">
-                                <span class="material-symbols-outlined">event_note</span>
-                            </div>
-                            <div class="settings-text w-full">
-                                <span class="settings-label" data-t="detail_object">Oggetto</span>
-                                <span id="detail-title"
-                                    class="font-bold text-lg leading-tight block mt-1 text-primary">Caricamento...</span>
-                            </div>
-                        </div>
-                        <span id="status-label"
-                            class="text-xs font-black all-caps tracking-widest px-3 py-1 rounded-full border bg-sub border-sub text-secondary">
-                            ...
-                        </span>
+                <!-- Hero Header -->
+                <div class="hero-profile-header">
+                    <div class="detail-avatar">
+                        <span class="material-symbols-outlined text-3xl">event_upcoming</span>
                     </div>
-                </div>
-
-                <!-- Intestatario -->
-                <div class="settings-item">
-                    <div class="settings-item-header">
-                        <div class="settings-item-info">
-                            <div class="settings-icon-box bg-purple-glass">
-                                <span class="material-symbols-outlined">person</span>
-                            </div>
-                            <div class="settings-text w-full">
-                                <span class="settings-label" data-t="holder_label">Intestatario</span>
-                                <span id="detail-intestatario"
-                                    class="font-bold text-base block mt-1 text-primary">...</span>
-                            </div>
+                    <div class="hero-title-container">
+                        <h1 id="detail-title" class="hero-title">Caricamento...</h1>
+                        <div class="flex items-center justify-center gap-2 mt-1">
+                            <p id="status-label" class="hero-category-badge">...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Data e Categoria Grid -->
+                <!-- Info Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Data -->
-                    <div class="settings-item">
-                        <div class="settings-item-header">
-                            <div class="settings-item-info">
-                                <div class="settings-icon-box bg-red-glass">
-                                    <span class="material-symbols-outlined">calendar_month</span>
-                                </div>
-                                <div class="settings-text">
-                                    <span class="settings-label" data-t="label_expiry">Scadenza</span>
-                                    <div class="flex items-baseline gap-1 mt-1 text-primary">
-                                        <span id="detail-date-day" class="text-xl font-bold">--</span>
-                                        <span id="detail-date-year" class="text-sm font-medium opacity-60">----</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Data Scadenza -->
+                    <div class="glass-field-container">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-sm text-red-400">calendar_month</span>
+                            <span class="view-label" data-t="expiry_date">Scadenza</span>
                         </div>
+                        <div class="flex items-baseline gap-1">
+                            <span id="detail-date-day" class="text-xl font-bold text-white">-- --</span>
+                            <span id="detail-date-year" class="text-xs font-bold text-white/40">----</span>
+                        </div>
+                    </div>
+
+                    <!-- Intestatario / Ref -->
+                    <div class="glass-field-container">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-sm text-purple-400">person</span>
+                            <span class="view-label" data-t="holder">Intestatario</span>
+                        </div>
+                        <span id="detail-intestatario" class="text-sm font-bold text-white truncate">-</span>
                     </div>
 
                     <!-- Categoria -->
-                    <div class="settings-item">
-                        <div class="settings-item-header">
-                            <div class="settings-item-info">
-                                <div class="settings-icon-box bg-emerald-glass">
-                                    <span class="material-symbols-outlined">category</span>
-                                </div>
-                                <div class="settings-text">
-                                    <span class="settings-label" data-t="category_label">Categoria</span>
-                                    <span id="detail-category"
-                                        class="text-base font-medium mt-1 text-primary">...</span>
-                                </div>
-                            </div>
+                    <div class="glass-field-container">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-sm text-emerald-400">category</span>
+                            <span class="view-label" data-t="category">Categoria</span>
+                        </div>
+                        <span id="detail-category" class="text-sm font-bold text-white truncate">-</span>
+                    </div>
+
+                    <!-- Veicolo (Se presente) -->
+                    <div id="section-vehicle" class="glass-field-container hidden">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-sm text-blue-400">directions_car</span>
+                            <span class="view-label" data-t="vehicle">Veicolo</span>
+                        </div>
+                        <span id="display-veicolo" class="text-sm font-bold text-white truncate">-</span>
+                    </div>
+                </div>
+
+                <!-- Email Preview -->
+                <div class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined detail-section-icon icon-purple">mail</span>
+                            <h3 class="detail-section-title" data-t="notification_preview">Anteprima Avviso</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-4">
+                        <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                            <p id="display-testo-email"
+                                class="text-xs text-white/70 leading-relaxed italic whitespace-pre-wrap">...</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Destinatari -->
+                <div id="display-destinatari-wrapper" class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="material-symbols-outlined detail-section-icon text-blue-400">alternate_email</span>
+                            <h3 class="detail-section-title" data-t="recipients">Destinatari Invio</h3>
+                        </div>
+                    </div>
+                    <div id="display-destinatari" class="grid grid-cols-1 gap-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Allegati -->
+                <div id="section-attachments" class="flex-col-gap-4 hidden">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="material-symbols-outlined detail-section-icon text-amber-500">attach_file</span>
+                            <h3 class="detail-section-title" data-t="attachments">Allegati Documenti</h3>
+                        </div>
+                    </div>
+                    <div id="display-attachments" class="grid grid-cols-1 gap-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Note -->
+                <div class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined detail-section-icon text-white/40">edit_note</span>
+                            <h3 class="detail-section-title" data-t="notes">Note Aggiuntive</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-4">
+                        <p id="detail-note-body" class="text-xs text-white/50 leading-relaxed italic">Nessuna nota
+                            presente.</p>
+                    </div>
+                </div>
+
             </div>
-
-
-
-            <!-- Details Sections -->
-            <div class="space-y-4">
-                <!-- Informazioni Veicolo -->
-                <div id="section-vehicle" class="settings-group">
-                    <div class="settings-item">
-                        <div class="settings-item-header">
-                            <div class="settings-item-info">
-                                <div class="settings-icon-box bg-blue-glass">
-                                    <span class="material-symbols-outlined">directions_car</span>
-                                </div>
-                                <div class="settings-text w-full">
-                                    <span class="settings-label" data-t="section_vehicle">Veicolo</span>
-                                    <span id="display-veicolo"
-                                        class="font-bold text-sm block mt-1 text-primary break-all">...</span>
-                                </div>
-                            </div>
-                            <button onclick="copyToClipboardText('display-veicolo')"
-                                class="size-10 flex items-center justify-center rounded-xl bg-white-5 text-gray-500 hover-text-white transition-colors">
-                                <span class="material-symbols-outlined text-20">content_copy</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Configurazione Notifica -->
-                <div class="settings-group">
-                    <h4 class="settings-group-title" data-t="section_email_config">Configurazione Email</h4>
-
-                    <div class="settings-item">
-                        <div class="flex flex-col gap-3 p-4">
-                            <div class="flex items-center gap-2">
-                                <div class="settings-icon-box bg-purple-glass scale-75">
-                                    <span class="material-symbols-outlined">mail</span>
-                                </div>
-                                <span class="text-xs font-black text-white-40 all-caps tracking-widest"
-                                    data-t="email_preview">Anteprima Messaggio</span>
-                            </div>
-                            <div class="bg-black-20 p-4 rounded-xl border border-white-5">
-                                <p id="display-testo-email"
-                                    class="text-sm text-gray-300 lh-relaxed font-medium text-pre">...
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="display-destinatari-wrapper" class="settings-item">
-                        <div class="flex flex-col gap-3 p-4">
-                            <span class="text-xs font-black text-white-40 all-caps tracking-widest"
-                                data-t="recipients_title">Destinatari</span>
-                            <div id="display-destinatari" class="grid grid-cols-1 gap-2">
-                                <!-- Injected via JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Documenti e Allegati -->
-                <div id="section-attachments" class="settings-group">
-                    <h4 class="settings-group-title" data-t="section_attachments_title">Allegati</h4>
-                    <div id="display-attachments" class="p-2 grid grid-cols-1 gap-2">
-                        <!-- Injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Note Aggiuntive -->
-                <div class="settings-group">
-                    <h4 class="settings-group-title" data-t="section_notes">Note</h4>
-                    <div class="settings-item">
-                        <div class="p-4">
-                            <p id="detail-note-body" class="text-sm text-gray-400 lh-relaxed italic">...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="footer-spacer h-10"></div>
         </main>
 
         <div class="spacer-footer"></div>
-        <!-- FOOTER PREMIUM -->
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.3"></script>
-    <script type="module" src="assets/js/dettaglio_scadenza.js?v=3.3"></script>
+    <script type="module" src="assets/js/main.js?v=3.6"></script>
+    <script type="module" src="assets/js/dettaglio_scadenza.js?v=3.6"></script>
 </body>
 
 </html>
-
-
-
-

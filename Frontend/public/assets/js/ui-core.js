@@ -136,13 +136,16 @@ export function showWarningModal(title, message, callback = null) {
     }, 10);
 
     const closeBtn = content.querySelector('#modal-ok-btn');
-    closeBtn.onclick = () => {
+
+    function handleWarningClose() {
         modal.classList.remove('active');
         setTimeout(() => {
             modal.remove();
             if (callback) callback();
         }, 300);
-    };
+    }
+
+    closeBtn.addEventListener('click', handleWarningClose);
 }
 
 // Esposizione globale (già gestita via window.X = X per i nuovi moduli)
@@ -193,18 +196,23 @@ window.showLogoutModal = function () {
         const btnConfirm = content.querySelector('#btn-confirm-logout');
         const btnCancel = content.querySelector('#btn-cancel-logout');
 
-        btnCancel.onclick = () => closeModal(false);
+        function handleCancelLogout() {
+            closeModal(false);
+        }
 
-        btnConfirm.onclick = () => {
+        function handleConfirmLogout() {
             // Mostra spinner
             btnConfirm.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 1.2rem;">progress_activity</span>';
             closeModal(true);
-        };
+        }
 
-        // Chiudi su click fuori
-        modal.onclick = (e) => {
+        function handleModalBackdropClick(e) {
             if (e.target === modal) closeModal(false);
-        };
+        }
+
+        btnCancel.addEventListener('click', handleCancelLogout);
+        btnConfirm.addEventListener('click', handleConfirmLogout);
+        modal.addEventListener('click', handleModalBackdropClick);
     });
 };
 
@@ -254,13 +262,21 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
             }, 300);
         };
 
-        content.querySelector('#confirm-cancel-btn').onclick = () => closeModal(false);
-        content.querySelector('#confirm-ok-btn').onclick = () => closeModal(true);
+        function handleConfirmCancel() {
+            closeModal(false);
+        }
 
-        // Chiudi su click fuori
-        modal.onclick = (e) => {
+        function handleConfirmOk() {
+            closeModal(true);
+        }
+
+        function handleConfirmBackdropClick(e) {
             if (e.target === modal) closeModal(false);
-        };
+        }
+
+        content.querySelector('#confirm-cancel-btn').addEventListener('click', handleConfirmCancel);
+        content.querySelector('#confirm-ok-btn').addEventListener('click', handleConfirmOk);
+        modal.addEventListener('click', handleConfirmBackdropClick);
     });
 };
 
@@ -320,13 +336,21 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
             }, 300);
         };
 
-        cancelBtn.onclick = () => closeModal(null);
-        confirmBtn.onclick = () => closeModal(input.value);
+        function handleInputCancel() {
+            closeModal(null);
+        }
 
-        // Enter key per conferma
-        input.onkeydown = (e) => {
+        function handleInputConfirm() {
+            closeModal(input.value);
+        }
+
+        function handleInputKeydown(e) {
             if (e.key === 'Enter') closeModal(input.value);
             if (e.key === 'Escape') closeModal(null);
-        };
+        }
+
+        cancelBtn.addEventListener('click', handleInputCancel);
+        confirmBtn.addEventListener('click', handleInputConfirm);
+        input.addEventListener('keydown', handleInputKeydown);
     });
 };

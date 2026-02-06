@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dati Azienda - PROTOCOLLO BASE</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dati Azienda - PROTOCOLLO BASE V3.6</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.6" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,368 +18,298 @@
 
     <!-- Fonts -->
     <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        /* Prevent translation of icons */
-        .material-symbols-outlined {
-            --webkit-translate: none;
-        }
-
-        :root {
-            --primary-color: #10b981;
-        }
-    </style>
 </head>
 
 <body class="base-bg">
-    <div class="base-container">
-
-        <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
+    <div class="base-container relative">
+        <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
-        <!-- Header (Standard PROTOCOLLO BASE) -->
-        <header class="base-header">
-            <div class="header-balanced-container">
-                <div class="header-left">
-                    <a id="btn-back" href="lista_aziende.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </a>
-                </div>
-                <div class="header-center">
-                    <h2 class="header-title">Dati Azienda</h2>
-                </div>
-                <div class="header-right">
-                    <a id="btn-home" href="home_page.html" class="btn-icon-header">
-                        <span class="material-symbols-outlined">home</span>
-                    </a>
-                    <button id="btn-edit-azienda" class="btn-icon-header" style="color: var(--accent-green);">
-                        <span class="material-symbols-outlined">edit</span>
-                    </button>
-                </div>
-            </div>
-        </header>
+        <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
 
-        <!-- Header Spacer -->
         <div class="spacer-header"></div>
 
+        <!-- Main Content -->
         <main class="base-main">
+            <div class="detail-content-wrap">
 
-            <!-- Main Content -->
-            <div class="p-5 flex flex-col gap-6">
-                <!-- Company Headline -->
-                <div class="flex flex-col gap-1 items-center text-center">
-                    <h1 id="ragione-sociale" class="selectable text-2xl font-extrabold uppercase"
-                        style="color: var(--text-primary);">
-                        Caricamento...</h1>
-                    <p id="forma-giuridica" class="selectable text-sm font-medium uppercase"
-                        style="color: var(--accent-green);">
-                        -</p>
-                </div>
-
-                <!-- QR Code & Logo Section -->
-                <div class="flex flex-col items-center gap-6">
-                    <div class="flex items-center justify-center gap-8 w-full">
-                        <!-- Logo Wrapper -->
-                        <div class="size-32 rounded-full flex items-center justify-center relative"
-                            style="background: var(--surface-sub); border: 2px solid var(--border-color);">
-                            <img id="azienda-logo" alt="Logo Azienda" class="w-full h-full rounded-full hidden"
-                                style="object-fit: cover;" src="" />
-                            <span id="azienda-logo-placeholder" class="material-symbols-outlined text-center"
-                                style="font-size: 3rem; opacity: 0.2;">domain</span>
+                <!-- Hero Profile Section -->
+                <div class="hero-profile-header">
+                    <div class="relative group">
+                        <div
+                            class="size-24 rounded-full flex-center bg-white/5 border border-white/10 overflow-hidden relative shadow-2xl">
+                            <img id="azienda-logo" class="w-full h-full object-cover hidden" src="" />
+                            <span id="azienda-logo-placeholder"
+                                class="material-symbols-outlined text-4xl opacity-20">domain</span>
                         </div>
+                        <!-- Status Badge -->
+                        <div class="hero-status-dot bg-emerald-500"></div>
+                    </div>
 
-                        <!-- QR Code Wrapper -->
-                        <div class="flex flex-col items-center justify-center gap-2 relative">
+                    <div class="hero-title-container">
+                        <h1 id="ragione-sociale" class="hero-title">Caricamento...</h1>
+                        <p id="forma-giuridica" class="hero-category-badge">Azienda</p>
+                    </div>
+
+                    <div class="flex gap-4 mt-6">
+                        <!-- QR Toggle -->
+                        <div class="relative">
                             <div id="qrcode-container"
-                                class="bg-white p-2 rounded-2xl flex items-center justify-center overflow-hidden"
-                                style="width: 140px; height: 140px;">
-                                <!-- QR rendered here -->
+                                class="size-24 bg-white p-1 rounded-xl flex-center overflow-hidden shadow-lg border-2 border-white/10">
                             </div>
-                            <button onclick="openQRZoom()"
-                                class="absolute -bottom-3 -right-3 size-10 rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 flex items-center justify-center hover:bg-emerald-400 transition-all z-10 ring-4 ring-[#0a0f1e] active:scale-90">
-                                <span class="material-symbols-outlined">zoom_in</span>
+                            <button id="btn-zoom-qr"
+                                class="absolute -bottom-2 -right-2 size-8 rounded-full bg-blue-500 text-white flex-center shadow-lg active:scale-95 transition-all">
+                                <span class="material-symbols-outlined text-lg">zoom_in</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Section: Referente -->
-                <div class="flex flex-col gap-3">
-                    <h3 class="text-xs font-bold uppercase"
-                        style="color: var(--accent-green); opacity: 0.8; padding: 0 4px; display: flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">person</span> Referente
-                    </h3>
-                    <div class="rounded-2xl border"
-                        style="background: var(--surface-sub); border-color: var(--border-color); overflow: hidden;">
-                        <!-- Person Info -->
-                        <div class="p-4 flex items-center gap-4 border-b"
-                            style="border-color: var(--border-color); background: rgba(255,255,255,0.02);">
-                            <div class="relative">
-                                <div id="referente-photo-wrapper"
-                                    class="size-14 rounded-full flex items-center justify-center overflow-hidden"
-                                    style="background: rgba(0,0,0,0.3); border: 2px solid var(--border-color);">
-                                    <img id="referente-photo" class="w-full h-full rounded-full hidden"
-                                        style="object-fit: cover;" src="" />
-                                    <span id="referente-photo-placeholder" class="material-symbols-outlined text-center"
-                                        style="font-size: 2rem; opacity: 0.2;">person</span>
-                                </div>
-                                <div
-                                    style="position: absolute; bottom: 0; right: 0; background: var(--accent-green); width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--bg-primary);">
-                                </div>
-                            </div>
-                            <div class="flex-1">
-                                <p id="referente-nome" class="selectable text-base font-bold text-white truncate">-</p>
-                                <p id="referente-ruolo" class="selectable text-xs font-medium uppercase truncate"
-                                    style="color: var(--accent-green);">-</p>
-                            </div>
-                            <button data-call-source="referente-cellulare"
-                                class="call-button flex items-center justify-center size-10 rounded-xl"
-                                style="background: rgba(0, 200, 83, 0.1); color: var(--accent-green); border: 1px solid rgba(0, 200, 83, 0.2);">
-                                <span class="material-symbols-outlined" style="font-size: 20px;">call</span>
-                            </button>
+                <div class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined detail-section-icon icon-emerald">person</span>
+                            <h3 class="detail-section-title" data-t="referent_details">Dettagli Referente</h3>
                         </div>
                     </div>
-                </div>
 
-                <!-- Section: Locations (Tabbed) -->
-                <div class="flex flex-col gap-3">
-                    <h3 class="text-xs font-bold uppercase"
-                        style="color: var(--accent-green); opacity: 0.8; padding: 0 4px; display: flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">domain</span> Sedi
-                    </h3>
-                    <div id="locations-tabs-container" class="flex gap-2 w-full"
-                        style="overflow-x: auto; padding: 4px;">
-                        <!-- Tabs will be generated here dynamically -->
-                    </div>
-
-                    <div id="location-content-card" class="rounded-2xl border p-1"
-                        style="background: var(--surface-sub); border-color: var(--border-color);">
-                        <div class="flex gap-3 p-3 items-start">
-                            <div class="flex-1 flex flex-col gap-1">
-                                <p id="indirizzo-completo" class="selectable text-sm font-medium text-white">-</p>
-                                <p id="citta-cap-prov" class="selectable text-xs" style="color: var(--text-secondary);">
-                                    -</p>
-                                <div class="flex gap-3 mt-3">
-                                    <button id="btn-vedi-mappa"
-                                        class="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2"
-                                        style="background: rgba(0, 200, 83, 0.1); color: var(--accent-green); border: 1px solid rgba(0, 200, 83, 0.2);">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">map</span>
-                                        Mappa
-                                    </button>
-                                </div>
+                    <div class="glass-card">
+                        <div class="flex items-center gap-4 p-4 border-b border-white/5">
+                            <div
+                                class="size-14 rounded-full flex-center bg-black/30 border border-white/10 overflow-hidden shrink-0">
+                                <img id="referente-photo" class="w-full h-full object-cover hidden" src="" />
+                                <span id="referente-photo-placeholder"
+                                    class="material-symbols-outlined text-2xl opacity-20">person</span>
                             </div>
-                            <div id="location-map-thumbnail" class="size-20 rounded-xl relative shrink-0"
-                                style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); overflow: hidden;">
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <span class="material-symbols-outlined"
-                                        style="color: var(--accent-green); opacity: 0.2; font-size: 40px;">location_on</span>
+                            <div class="flex-1 min-w-0">
+                                <p id="referente-nome" class="text-base font-bold text-white truncate">-</p>
+                                <p id="referente-ruolo"
+                                    class="text-[10px] font-black uppercase tracking-widest text-emerald-400">-</p>
+                            </div>
+                            <a id="btn-call-referente" href="tel:"
+                                class="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/20 active:scale-95 transition-all">
+                                <span class="material-symbols-outlined">call</span>
+                            </a>
+                        </div>
+                        <div class="p-4 bg-white/5">
+                            <div class="detail-row">
+                                <span class="view-label" data-t="whatsapp_number">Cellulare / WhatsApp</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="referente-cellulare" class="text-sm font-bold text-white">-</span>
+                                    <span
+                                        class="copy-btn material-symbols-outlined text-xs opacity-30 cursor-pointer hover:opacity-100"
+                                        data-copy-id="referente-cellulare">content_copy</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Section: Email -->
-                <div id="wrapper-email-section" class="flex flex-col gap-3">
-                    <h3 class="text-xs font-bold uppercase"
-                        style="color: var(--accent-green); opacity: 0.8; padding: 0 4px; display: flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">mail</span> Email Aziendali
-                    </h3>
-                    <div id="section-email-display" class="flex flex-col gap-3">
-                        <div id="email-list-container" class="flex flex-col gap-3">
-                            <!-- Categorical emails will be injected here via JS -->
+                <!-- Section: Sedi -->
+                <div class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined detail-section-icon icon-blue">location_on</span>
+                            <h3 class="detail-section-title" data-t="company_locations">Sedi Aziendali</h3>
                         </div>
+                    </div>
+
+                    <!-- Tabs Sedi -->
+                    <div id="locations-tabs-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
+                        <!-- Generato via JS -->
+                    </div>
+
+                    <div id="location-content-card" class="glass-card p-4 flex gap-4">
+                        <div class="flex-1 min-w-0 flex-col-gap-2">
+                            <div>
+                                <p id="indirizzo-completo" class="text-sm font-bold text-white">-</p>
+                                <p id="citta-cap-prov" class="text-[10px] text-white/40 font-medium">-</p>
+                            </div>
+                            <div class="mt-2">
+                                <button id="btn-vedi-mappa" class="base-btn-secondary w-fit py-2 px-4 text-xs">
+                                    <span class="material-symbols-outlined text-sm">map</span>
+                                    <span data-t="view_on_map">Mappa</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="location-map-thumbnail"
+                            class="size-24 rounded-2xl bg-black/40 border border-white/5 overflow-hidden relative shrink-0">
+                            <div class="absolute inset-0 flex-center">
+                                <span class="material-symbols-outlined text-blue-500/20 text-4xl">location_on</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Email Categorizzate -->
+                <div id="wrapper-email-section" class="flex-col-gap-4 hidden">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined detail-section-icon icon-purple">mail</span>
+                            <h3 class="detail-section-title" data-t="email_categories">Email Aziendali</h3>
+                        </div>
+                    </div>
+                    <div id="email-list-container" class="flex-col-gap-2">
+                        <!-- Generato via JS -->
                     </div>
                 </div>
 
                 <!-- Section: Dati Fiscali -->
-                <div class="flex flex-col gap-3">
-                    <h3 class="text-xs font-bold uppercase"
-                        style="color: var(--accent-green); opacity: 0.8; padding: 0 4px; display: flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">euro</span> Dati Fiscali
-                    </h3>
+                <div class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined detail-section-icon text-amber-500">payments</span>
+                            <h3 class="detail-section-title" data-t="fiscal_data">Dati Fiscali</h3>
+                        </div>
+                    </div>
 
-                    <div class="dashboard-grid-2">
-                        <!-- Card Item -->
-                        <div class="p-4 rounded-2xl border flex flex-col gap-1"
-                            style="background: var(--surface-sub); border-color: var(--border-color);">
-                            <span class="text-xs uppercase font-bold"
-                                style="color: var(--text-secondary); font-size: 10px;">Partita IVA</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="vat_number">Partita IVA</span>
                             <div class="flex items-center justify-between">
-                                <span id="piva" class="selectable text-sm font-bold text-white truncate">-</span>
-                                <span data-copy-target="piva" class="copy-btn material-symbols-outlined"
-                                    style="font-size: 16px; opacity: 0.3;">content_copy</span>
+                                <span id="piva" class="text-sm font-bold text-white">-</span>
+                                <span class="copy-btn material-symbols-outlined text-xs opacity-20"
+                                    data-copy-id="piva">content_copy</span>
                             </div>
                         </div>
-                        <!-- Card Item -->
-                        <div class="p-4 rounded-2xl border flex flex-col gap-1"
-                            style="background: var(--surface-sub); border-color: var(--border-color);">
-                            <span class="text-xs uppercase font-bold"
-                                style="color: var(--text-secondary); font-size: 10px;">Codice SDI</span>
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="sdi_code">Codice SDI</span>
                             <div class="flex items-center justify-between">
-                                <span id="codice-sdi" class="selectable text-sm font-bold text-white truncate">-</span>
-                                <span data-copy-target="codice-sdi" class="copy-btn material-symbols-outlined"
-                                    style="font-size: 16px; opacity: 0.3;">content_copy</span>
+                                <span id="codice-sdi" class="text-sm font-bold text-white">-</span>
+                                <span class="copy-btn material-symbols-outlined text-xs opacity-20"
+                                    data-copy-id="codice-sdi">content_copy</span>
                             </div>
                         </div>
-                        <!-- Card Item -->
-                        <div class="p-4 rounded-2xl border flex flex-col gap-1"
-                            style="background: var(--surface-sub); border-color: var(--border-color);">
-                            <span class="text-xs uppercase font-bold"
-                                style="color: var(--text-secondary); font-size: 10px;">CCIAA</span>
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="cciaa_number">CCIAA</span>
                             <div class="flex items-center justify-between">
-                                <span id="cciaa" class="text-sm font-bold text-white truncate">-</span>
-                                <span data-copy-target="cciaa" class="copy-btn material-symbols-outlined"
-                                    style="font-size: 16px; opacity: 0.3;">content_copy</span>
+                                <span id="cciaa" class="text-sm font-bold text-white">-</span>
+                                <span class="copy-btn material-symbols-outlined text-xs opacity-20"
+                                    data-copy-id="cciaa">content_copy</span>
                             </div>
                         </div>
-                        <!-- Card Item -->
-                        <div class="p-4 rounded-2xl border flex flex-col gap-1"
-                            style="background: var(--surface-sub); border-color: var(--border-color);">
-                            <span class="text-xs uppercase font-bold"
-                                style="color: var(--text-secondary); font-size: 10px;">Iscrizione</span>
-                            <div class="flex items-center justify-between">
-                                <span id="data-iscrizione" class="text-sm font-bold text-white truncate">-</span>
-                            </div>
+                        <div class="glass-field-container">
+                            <span class="view-label" data-t="registration_date">Data Iscrizione</span>
+                            <span id="data-iscrizione" class="text-sm font-bold text-white">-</span>
                         </div>
                     </div>
                 </div>
 
-
-                <!-- Section: Contatti Azienda -->
-                <div class="rounded-2xl border"
-                    style="background: var(--surface-sub); border-color: var(--border-color); overflow: hidden;">
-                    <div class="flex items-center justify-between p-4"
-                        style="border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.01);">
-                        <div class="flex items-center gap-3">
-                            <button data-call-source="telefono-azienda"
-                                class="call-button size-8 rounded-lg flex items-center justify-center"
-                                style="background: rgba(0, 200, 83, 0.1); color: var(--accent-green); border: 1px solid rgba(0, 200, 83, 0.2);">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">call</span>
-                            </button>
-                            <div class="flex flex-col">
-                                <span class="text-xs uppercase font-bold"
-                                    style="color: var(--text-secondary); font-size: 10px;">Telefono</span>
-                                <span id="telefono-azienda" class="text-sm font-medium text-white">-</span>
+                <!-- Section: Contatti Diretti -->
+                <div class="flex-col-gap-2">
+                    <div class="glass-card">
+                        <div class="flex items-center justify-between p-4 border-b border-white/5 group">
+                            <div class="flex items-center gap-3">
+                                <a id="btn-call-tel" href="tel:"
+                                    class="size-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/10">
+                                    <span class="material-symbols-outlined text-lg">call</span>
+                                </a>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black uppercase text-white/40 tracking-widest"
+                                        data-t="phone">Telefono</span>
+                                    <span id="telefono-azienda" class="text-sm font-bold text-white">-</span>
+                                </div>
                             </div>
+                            <span
+                                class="copy-btn material-symbols-outlined text-xs opacity-20 group-hover:opacity-100 transition-opacity"
+                                data-copy-id="telefono-azienda">content_copy</span>
                         </div>
-                        <span data-copy-target="telefono-azienda" class="copy-btn material-symbols-outlined"
-                            style="color: var(--text-secondary); font-size: 20px;">content_copy</span>
-                    </div>
-                    <div class="flex items-center justify-between p-4" style="background: rgba(255,255,255,0.01);">
-                        <div class="flex items-center gap-3">
-                            <button data-call-source="fax-azienda"
-                                class="call-button size-8 rounded-lg flex items-center justify-center"
-                                style="background: rgba(0, 200, 83, 0.1); color: var(--accent-green); border: 1px solid rgba(0, 200, 83, 0.2);">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">fax</span>
-                            </button>
-                            <div class="flex flex-col">
-                                <span class="text-xs uppercase font-bold"
-                                    style="color: var(--text-secondary); font-size: 10px;">Fax</span>
-                                <span id="fax-azienda" class="text-sm font-medium text-white">-</span>
+                        <div class="flex items-center justify-between p-4 group">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="size-8 rounded-lg bg-white/5 text-white/40 flex-center border border-white/10">
+                                    <span class="material-symbols-outlined text-lg">fax</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black uppercase text-white/40 tracking-widest"
+                                        data-t="fax">Fax</span>
+                                    <span id="fax-azienda" class="text-sm font-bold text-white">-</span>
+                                </div>
                             </div>
+                            <span
+                                class="copy-btn material-symbols-outlined text-xs opacity-20 group-hover:opacity-100 transition-opacity"
+                                data-copy-id="fax-azienda">content_copy</span>
                         </div>
-                        <span data-copy-target="fax-azienda" class="copy-btn material-symbols-outlined"
-                            style="color: var(--text-secondary); font-size: 20px;">content_copy</span>
                     </div>
                 </div>
 
                 <!-- Section: Note -->
-                <div class="flex flex-col gap-3">
+                <div class="flex-col-gap-3">
                     <div class="flex items-center justify-between px-1">
-                        <h3 class="text-xs font-bold uppercase"
-                            style="color: var(--accent-green); opacity: 0.8; display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">edit_note</span> Note
-                        </h3>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-500 text-lg">edit_note</span>
+                            <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60" data-t="notes">
+                                Note Aziendali</h3>
+                        </div>
                         <div class="flex gap-2">
-                            <span id="btn-cancel-note" class="hidden text-xs font-medium cursor-pointer"
-                                style="color: var(--text-secondary);">Annulla</span>
-                            <span id="btn-edit-note" class="text-xs font-medium cursor-pointer uppercase"
-                                style="color: var(--accent-green);">Modifica</span>
+                            <button id="btn-cancel-note"
+                                class="hidden text-[10px] font-bold text-white/40 uppercase">Annulla</button>
+                            <button id="btn-edit-note" class="text-[10px] font-bold text-amber-500 uppercase"
+                                data-t="edit">Modifica</button>
                         </div>
                     </div>
-                    <div class="p-4 rounded-2xl border relative overflow-hidden"
-                        style="background: rgba(255, 152, 0, 0.05); border-color: rgba(255, 152, 0, 0.2);">
-                        <div
-                            style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-orange); opacity: 0.5;">
-                        </div>
-                        <p id="note-azienda" class="selectable text-sm leading-relaxed"
-                            style="color: var(--text-primary); opacity: 0.9; white-space: pre-wrap;">-</p>
-                        <textarea id="note-azienda-edit" class="hidden w-full p-3 rounded-xl"
-                            style="background: rgba(0,0,0,0.4); border: 1px solid var(--accent-orange); color: white; font-size: 0.875rem; resize: none;"
-                            rows="4" placeholder="Scrivi qui eventuali note..."></textarea>
+                    <div class="glass-card border-l-4 border-l-amber-500/50 p-4 relative">
+                        <p id="note-azienda" class="text-sm text-white/80 whitespace-pre-wrap">-</p>
+                        <textarea id="note-azienda-edit"
+                            class="hidden w-full bg-black/40 p-3 rounded-xl border border-amber-500/30 text-white text-sm focus:outline-none focus:border-amber-500"
+                            rows="4"></textarea>
                     </div>
                 </div>
 
                 <!-- Section: Allegati -->
-                <div class="flex flex-col gap-3">
-                    <div class="flex items-center justify-between px-1 cursor-pointer" onclick="toggleAllegati()">
-                        <h3 class="text-xs font-bold uppercase"
-                            style="color: var(--accent-green); opacity: 0.8; display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">attach_file</span> Allegati
-                        </h3>
-                        <button class="flex items-center justify-center size-8 rounded-full"
-                            style="background: var(--surface-sub);" id="allegati-chevron">
-                            <span class="material-symbols-outlined"
-                                style="color: var(--text-secondary); font-size: 20px;">expand_more</span>
-                        </button>
-                    </div>
+                <div class="flex-col-gap-3">
+                    <button class="flex items-center justify-between w-full px-1 group" id="toggle-allegati-btn">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-opacity">attach_file</span>
+                            <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60"
+                                data-t="attachments">Allegati</h3>
+                        </div>
+                        <span id="allegati-chevron"
+                            class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
+                    </button>
 
-                    <div id="allegati-container" class="hidden" style="transition: all 0.3s ease;">
-                        <div id="allegati-list" class="flex flex-col gap-2 p-3 rounded-2xl border"
-                            style="background: var(--surface-sub); border-color: var(--border-color);">
-                            <!-- Allegati verranno iniettati qui -->
-                            <p class="text-xs text-center py-4 italic" style="color: var(--text-secondary);"
-                                id="no-allegati-msg">Nessun allegato presente</p>
+                    <div id="allegati-container" class="hidden">
+                        <div id="allegati-list" class="glass-card p-3 flex-col-gap-2">
+                            <p class="text-xs text-white/30 italic text-center py-4" data-t="no_attachments">Nessun
+                                allegato presente</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- QR Zoom Modal -->
-                <div id="qr-zoom-modal" class="fixed inset-0 flex items-center justify-center hidden"
-                    style="z-index: 10000; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);"
-                    onclick="closeQRZoom()">
-                    <div class="p-6 pb-12 rounded-3xl border relative"
-                        style="background: var(--bg-primary); border-color: var(--border-color); max-width: 90%; width: 350px;"
-                        onclick="event.stopPropagation()">
-                        <div id="qrcode-zoom-container" class="flex justify-center p-4 bg-white rounded-xl"></div>
-                        <p class="text-center text-xs font-bold uppercase mt-6"
-                            style="color: var(--accent-green); letter-spacing: 1px;">Scansiona QR Code</p>
-                        <button onclick="closeQRZoom()"
-                            class="absolute bottom-4 right-4 size-10 rounded-full flex items-center justify-center"
-                            style="background: var(--surface-sub); color: white;">
-                            <span class="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- TOAST NOTIFICATION (Standard) -->
-                <div id="toast" class="hidden">Operazione completata</div>
             </div>
         </main>
 
-        <!-- FOOTER PLACEHOLDER -->
+        <!-- QR Zoom Modal -->
+        <div id="qr-zoom-modal" class="fixed inset-0 flex-center z-[9999] hidden opacity-0 transition-all duration-300">
+            <div class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
+            <div class="relative glass-card p-8 scale-90 transition-transform duration-300 w-[90%] max-w-[400px]">
+                <div id="qrcode-zoom-container" class="bg-white p-4 rounded-3xl flex-center shadow-2xl"></div>
+                <p class="text-center text-[10px] font-black uppercase tracking-widest text-emerald-400 mt-6"
+                    data-t="scan_to_import">Scansiona per importare in rubrica</p>
+                <button id="btn-close-qr"
+                    class="absolute -top-4 -right-4 size-10 rounded-full bg-white/10 text-white flex-center border border-white/20 hover:bg-white/20 transition-all">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+
         <div class="spacer-footer"></div>
         <footer id="footer-placeholder" class="base-footer"></footer>
-
-        <script type="module" src="assets/js/main.js?v=3.3"></script>
-        <script type="module" src="assets/js/dati_azienda.js?v=3.3"></script>
     </div>
+
+    <!-- Scripts -->
+    <script type="module" src="assets/js/main.js?v=3.6"></script>
+    <script type="module" src="assets/js/dati_azienda.js?v=3.6"></script>
 </body>
 
 </html>
-
-
-
-

@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentAziendaId = urlParams.get('id');
 
     if (!currentAziendaId) {
-        alert("ID Azienda mancante!");
+        if (window.showToast) window.showToast("ID Azienda mancante!", "error");
         window.location.href = 'lista_aziende.html';
         return;
     }
@@ -92,10 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // INJECTION IDEMPOTENTE: Esegui solo se i pulsanti non esistono già
         if (!left.querySelector('#btn-back')) {
             left.innerHTML = `
-                <button id="btn-back" class="btn-icon-header" onclick="window.history.back()">
+                <button id="btn-back" class="btn-icon-header">
                     <span class="material-symbols-outlined">arrow_back</span>
                 </button>
             `;
+            const btnBack = left.querySelector('#btn-back');
+            btnBack.addEventListener('click', () => window.history.back());
         }
 
         if (!center.querySelector('#page-title')) {
@@ -105,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!right.querySelector('#sort-btn')) {
             right.innerHTML = `
                 <div class="flex items-center gap-1">
-                    <button id="sort-btn" class="btn-icon-header" onclick="toggleSort()">
+                    <button id="sort-btn" class="btn-icon-header">
                         <span class="material-symbols-outlined">sort_by_alpha</span>
                     </button>
                     <a id="btn-home" href="home_page.html" class="btn-icon-header">
@@ -113,7 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </a>
                 </div>
             `;
-            window.toggleSort = toggleSort;
+            const btnSort = right.querySelector('#sort-btn');
+            btnSort.addEventListener('click', () => toggleSort());
         }
 
         // Re-apply theme se necessario
@@ -136,10 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(injectHeader, 500);
     }
 
-    // Copy Button Delegation
+    // Copy Button Delegation (Not used since we attach directly in renderList, but kept as reference or for other dynamic elements)
     const container = document.getElementById('accounts-container');
     if (container) {
-        container.onclick = function (e) {
+        container.addEventListener('click', function (e) {
             const btn = e.target.closest('.copy-btn-dynamic');
             if (btn) {
                 e.preventDefault(); e.stopPropagation();
@@ -151,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast("Copiato negli appunti!");
                 });
             }
-        };
+        });
     }
 });
 
@@ -337,9 +340,10 @@ function renderList(list) {
               </div>
 
               <!-- FOREGROUND CONTENT: Card with Dynamic Gradient -->
-              <div class="base-card-transparent swipe-content p-0 overflow-hidden border-none bg-transparent">
+              <div class="base-card-transparent swipe-content p-0 overflow-hidden border-none bg-transparent card-container" data-id="${acc.id}">
                 <a href="dettaglio_account_azienda.html?id=${acc.id}&aziendaId=${currentAziendaId}" 
                    draggable="false"
+                   class="account-card-link"
                    style="display: block; padding: 0.75rem; text-decoration: none; position: relative; border-radius: 20px; border: 1px solid; ${gradientStyle}">
                     
                     <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
@@ -362,8 +366,7 @@ function renderList(list) {
                                         <span style="opacity: 0.7;">Utente:</span>
                                         <div style="display: flex; align-items: center;">
                                             <span id="user-text-${acc.id}" style="font-weight: 500; margin-right: 0.5rem; color: var(--text-primary);">********</span>
-                                            <button class="copy-btn-dynamic" data-copy="${acc.utente.replace(/"/g, '&quot;')}" title="Copia Utente"
-                                                    onclick="event.preventDefault(); event.stopPropagation(); copyText(this, '${acc.utente.replace(/'/g, "\\'")}')">
+                                            <button class="copy-btn-dynamic action-btn" data-copy="${acc.utente.replace(/"/g, '&quot;')}" title="Copia Utente">
                                                 <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
                                             </button>
                                         </div>
@@ -374,8 +377,7 @@ function renderList(list) {
                                         <span style="opacity: 0.7;">Account:</span>
                                         <div style="display: flex; align-items: center;">
                                             <span id="acc-text-${acc.id}" style="font-weight: 500; margin-right: 0.5rem; color: var(--text-primary);">********</span>
-                                            <button class="copy-btn-dynamic" data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account"
-                                                onclick="event.preventDefault(); event.stopPropagation(); copyText(this, '${acc.account.replace(/'/g, "\\'")}')">
+                                            <button class="copy-btn-dynamic action-btn" data-copy="${acc.account.replace(/"/g, '&quot;')}" title="Copia Account">
                                                 <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
                                             </button>
                                         </div>
@@ -386,8 +388,7 @@ function renderList(list) {
                                         <span style="opacity: 0.7;">Pass:</span>
                                         <div style="display: flex; align-items: center;">
                                             <span id="pass-text-${acc.id}" style="font-family: monospace; font-weight: 500; margin-right: 0.5rem; color: ${isLightMode ? '#334155' : '#e2e8f0'};">********</span>
-                                            <button class="copy-btn-dynamic" data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password"
-                                                onclick="event.preventDefault(); event.stopPropagation(); copyText(this, '${acc.password.replace(/'/g, "\\'")}')">
+                                            <button class="copy-btn-dynamic action-btn" data-copy="${acc.password.replace(/"/g, '&quot;')}" title="Copia Password">
                                                 <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
                                             </button>
                                         </div>
@@ -399,12 +400,12 @@ function renderList(list) {
                 
                 <!-- Helper Buttons Overlay (Pin/Eye) -->
                 <div style="position: absolute; top: 0.5rem; right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <button onclick="event.stopPropagation(); window.togglePin('${acc.id}')" 
+                    <button class="btn-pin-toggle action-btn" data-id="${acc.id}"
                             style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: all 0.2s; color: ${currentTheme.from}; ${pinStyle} ${!isPinned ? 'background: rgba(255,255,255,0.25);' : ''}">
                         <span class="material-symbols-outlined ${isPinned ? 'filled' : ''}" style="font-size: 18px;">push_pin</span>
                     </button>
                     ${acc.password ? `
-                    <button onclick="event.stopPropagation(); window.toggleTripleVisibility('${acc.id}')" 
+                    <button class="btn-visibility-toggle action-btn" data-id="${acc.id}"
                             style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.2); color: ${currentTheme.from}; cursor: pointer;">
                         <span id="pass-eye-${acc.id}" class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
                     </button>` : ''}
@@ -415,28 +416,53 @@ function renderList(list) {
         `;
     }).join('');
 
-    // Global copy handler helper (attach to window if not exists)
-    if (!window.copyText) {
-        window.copyText = (btn, text) => {
-            navigator.clipboard.writeText(text).then(() => {
-                const icon = btn.querySelector('span');
-                const old = icon.textContent;
-                icon.textContent = 'check';
-                icon.style.color = '#10b981';
-                showToast("Copiato!", "success");
-                setTimeout(() => {
-                    icon.textContent = old;
-                    icon.style.color = '';
-                }, 1500);
-            });
-        };
-    }
+    // Attach local listeners
+    container.querySelectorAll('.copy-btn-dynamic').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            copyText(btn, btn.dataset.copy);
+        });
+    });
+    container.querySelectorAll('.btn-pin-toggle').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            togglePin(btn.dataset.id);
+        });
+    });
+    container.querySelectorAll('.btn-visibility-toggle').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            toggleTripleVisibility(btn.dataset.id);
+        });
+    });
+
+    // Handle Link click carefully if inside swipe
+    container.querySelectorAll('.account-card-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Se lo swipe è attivo o è successo uno scroll, evita il click se necessario
+            // In questo caso SwipeList gestisce già gran parte, ma assicuriamoci
+        });
+    });
 
     if (currentSwipeList) currentSwipeList = null;
     currentSwipeList = new SwipeList('.swipe-row', {
         threshold: 0.15,
         onSwipeLeft: (item) => handleArchive(item),
         onSwipeRight: (item) => handleDelete(item)
+    });
+}
+
+function copyText(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const icon = btn.querySelector('span');
+        const old = icon.textContent;
+        icon.textContent = 'check';
+        icon.style.color = '#10b981';
+        showToast("Copiato!", "success");
+        setTimeout(() => {
+            icon.textContent = old;
+            icon.style.color = '';
+        }, 1500);
     });
 }
 
@@ -514,7 +540,13 @@ async function handleArchive(item) {
 
 async function handleDelete(item) {
     const id = item.dataset.id;
-    if (!confirm("Sei sicuro di voler eliminare questo account aziendale?")) {
+    const confirmed = await window.showConfirmModal(
+        "ELIMINAZIONE ACCOUNT Aziendale",
+        "Sei sicuro di voler eliminare questo account aziendale? L'operazione non è reversibile.",
+        "ELIMINA",
+        "ANNULLA"
+    );
+    if (!confirmed) {
         filterAndRender(); // Restore
         return;
     }

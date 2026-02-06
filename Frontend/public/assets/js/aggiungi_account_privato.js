@@ -30,6 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupUI();
     setupLogoUpload();
 
+    // Trigger per file-input e logo-input (Rimozione onclick dal HTML)
+    const btnLogo = document.getElementById('btn-trigger-logo');
+    if (btnLogo) btnLogo.addEventListener('click', () => document.getElementById('logo-input').click());
+
+    const btnFile = document.getElementById('btn-trigger-file');
+    if (btnFile) btnFile.addEventListener('click', () => document.getElementById('file-input').click());
+
     // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
     const injectFooterActions = () => {
         const footerRight = document.getElementById('footer-right-actions');
@@ -78,10 +85,10 @@ function setupUI() {
     const btnToggle = document.getElementById('btn-toggle-password');
     const passInput = document.getElementById('account-password');
     if (btnToggle && passInput) {
-        btnToggle.onclick = () => {
+        btnToggle.addEventListener('click', () => {
             passInput.classList.toggle('base-shield');
             btnToggle.querySelector('span').textContent = passInput.classList.contains('base-shield') ? 'visibility_off' : 'visibility';
-        };
+        });
     }
 
     // Banking UI Logic
@@ -133,10 +140,10 @@ function setupUI() {
 
             // Add click listeners to the divs we just created
             suggestions.querySelectorAll('div').forEach(div => {
-                div.onclick = () => {
+                div.addEventListener('click', () => {
                     inviteInput.value = div.dataset.email;
                     suggestions.classList.add('hidden');
-                };
+                });
             });
         });
     }
@@ -168,7 +175,7 @@ function renderBankAccounts() {
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-bold text-primary uppercase tracking-widest" data-t="account_counter">Conto #${ibanIdx + 1}</span>
                 ${bankAccounts.length > 1 ? `
-                    <button type="button" class="text-white/20 hover:text-red-500 transition-colors" onclick="removeIban(${ibanIdx})">
+                    <button type="button" class="text-white/20 hover:text-red-500 transition-colors btn-remove-iban" data-idx="${ibanIdx}">
                         <span class="material-symbols-outlined text-sm">delete</span>
                     </button>
                 ` : ''}
@@ -191,7 +198,7 @@ function renderBankAccounts() {
                     <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden focus-within:ring-1 focus-within:ring-primary/20 transition-all">
                         <input type="text" class="dispositiva-input base-shield w-full bg-transparent border-none h-11 px-4 text-sm focus:ring-0" 
                             data-iban-idx="${ibanIdx}" value="${account.passwordDispositiva || ''}" placeholder="Password..." />
-                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                        <button type="button" class="p-2 text-gray-400 btn-toggle-shield">
                             <span class="material-symbols-outlined text-sm">visibility</span>
                         </button>
                     </div>
@@ -238,7 +245,7 @@ function renderBankAccounts() {
             <div class="space-y-3 pl-4 border-l-2 border-primary/10 py-1">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Carte collegate</span>
-                    <button type="button" class="text-primary text-[10px] font-bold hover:underline flex items-center gap-0.5" onclick="addCard(${ibanIdx})">
+                    <button type="button" class="text-primary text-[10px] font-bold hover:underline flex items-center gap-0.5 btn-add-card" data-idx="${ibanIdx}">
                         <span class="material-symbols-outlined text-sm">add</span> Aggiungi carta
                     </button>
                 </div>
@@ -248,20 +255,35 @@ function renderBankAccounts() {
             </div>
         `;
         container.appendChild(ibanDiv);
-    });
 
-    // Event Listeners for Banking are handled globally now
+        // Add Listeners
+        ibanDiv.querySelector('.btn-remove-iban')?.addEventListener('click', () => removeIban(ibanIdx));
+        ibanDiv.querySelector('.btn-add-card')?.addEventListener('click', () => addCard(ibanIdx));
+        ibanDiv.querySelectorAll('.btn-toggle-shield').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = btn.previousElementSibling;
+                input.classList.toggle('base-shield');
+                btn.querySelector('span').textContent = input.classList.contains('base-shield') ? 'visibility' : 'visibility_off';
+            });
+        });
+
+        // Listeners for Cards
+        ibanDiv.querySelectorAll('.card-entry-item').forEach(cardEl => {
+            const cIdx = parseInt(cardEl.dataset.card);
+            cardEl.querySelector('.btn-remove-card')?.addEventListener('click', () => removeCard(ibanIdx, cIdx));
+        });
+    });
 }
 
 function renderCardEntry(ibanIdx, cardIdx, card) {
     return `
-        <div class="bg-white p-4 rounded-xl border border-black/5 shadow-sm space-y-4 relative">
+        <div class="bg-white p-4 rounded-xl border border-black/5 shadow-sm space-y-4 relative card-entry-item" data-iban="${ibanIdx}" data-card="${cardIdx}">
              <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-gray-400 text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
                     <span class="text-[10px] font-bold text-gray-500 uppercase">Strumento #${cardIdx + 1}</span>
                 </div>
-                <button type="button" class="text-gray-300 hover:text-red-500 transition-colors" onclick="removeCard(${ibanIdx}, ${cardIdx})">
+                <button type="button" class="text-gray-300 hover:text-red-500 transition-colors btn-remove-card">
                     <span class="material-symbols-outlined text-sm">close</span>
                 </button>
             </div>
@@ -311,7 +333,7 @@ function renderCardEntry(ibanIdx, cardIdx, card) {
                         <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
                             <input type="text" class="pin-input base-shield w-full bg-transparent border-none h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
                                 data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" placeholder="****" />
-                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                            <button type="button" class="p-2 text-gray-400 btn-toggle-shield">
                                 <span class="material-symbols-outlined text-sm">visibility</span>
                             </button>
                         </div>

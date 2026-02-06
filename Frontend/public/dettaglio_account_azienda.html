@@ -2,26 +2,27 @@
 <html lang="it">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dettaglio Account Azienda - PROTOCOLLO BASE</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.6" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/fonts.css?v=3.6">
+    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
 </head>
 
 <body class="base-bg">
@@ -142,7 +143,7 @@
 
                 <!-- SECTION: BANCARIO -->
                 <section id="section-banking" class="hidden">
-                    <button onclick="window.toggleBanking()" class="collapsible-trigger">
+                    <button id="btn-toggle-banking" class="collapsible-trigger">
                         <div class="flex-center-gap">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-green">payments</span>
@@ -157,7 +158,7 @@
 
                 <!-- SECTION: REFERENTE -->
                 <section id="section-referente" class="hidden">
-                    <button onclick="window.toggleReferente()" class="collapsible-trigger">
+                    <button id="btn-toggle-referente" class="collapsible-trigger">
                         <div class="flex-center-gap">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-blue">person_pin</span>
@@ -180,7 +181,7 @@
                                 <span class="view-label" data-t="phone">Telefono</span>
                                 <div class="glass-field border-glow">
                                     <input id="detail-referenteTelefono" readonly>
-                                    <button class="glass-field-btn icon-primary-light">
+                                    <button class="glass-field-btn icon-primary-light call-btn">
                                         <span class="material-symbols-outlined">call</span>
                                     </button>
                                 </div>
@@ -189,7 +190,7 @@
                                 <span class="view-label" data-t="mobile">Cellulare</span>
                                 <div class="glass-field border-glow">
                                     <input id="detail-referenteCellulare" readonly>
-                                    <button class="glass-field-btn icon-primary-light">
+                                    <button class="glass-field-btn icon-primary-light call-btn">
                                         <span class="material-symbols-outlined">call</span>
                                     </button>
                                 </div>
@@ -218,7 +219,7 @@
                         <span class="material-symbols-outlined detail-section-icon icon-blue">attach_file</span>
                         <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
                     </div>
-                    <div class="attachment-card-row border-glow" onclick="window.openAttachments()">
+                    <div id="btn-open-attachments" class="attachment-card-row border-glow">
                         <div class="attachment-info-wrap">
                             <div class="attachment-icon-box">
                                 <span class="material-symbols-outlined">folder_open</span>
@@ -280,7 +281,7 @@
                     </div>
 
                     <div id="shared-management" class="hidden mt-6">
-                        <button onclick="window.toggleAccessi()" class="collapsible-trigger">
+                        <button id="btn-toggle-accessi" class="collapsible-trigger">
                             <h4 class="view-label flex-center-gap">
                                 <span class="material-symbols-outlined text-sm">group</span>
                                 <span data-t="people_with_access">Persone con accesso</span>
@@ -314,13 +315,9 @@
         <footer id="footer-placeholder" class="base-footer"></footer>
 
         <!-- Scripts -->
-        <script type="module" src="assets/js/main.js?v=3.3"></script>
-        <script type="module" src="assets/js/dettaglio_account_azienda.js?v=3.3"></script>
+        <script type="module" src="assets/js/main.js?v=3.6"></script>
+        <script type="module" src="assets/js/dettaglio_account_azienda.js?v=3.6"></script>
     </div>
 </body>
 
 </html>
-
-
-
-

@@ -1,54 +1,7 @@
-
-// configurazione_automezzi.js v1.7 - Titanium Gold
 import { db, auth } from './firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { initComponents } from './components.js';
-import { t } from './translations.js';
 
-// Setup Base (Traduzioni)
-// --- ACCORDION LOGIC (Standalone) ---
-const initAccordion = () => {
-    document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', () => {
-            const targetId = header.getAttribute('data-target');
-            const targetContent = document.getElementById(targetId);
-            if (targetContent) {
-                const isShowing = targetContent.classList.toggle('show');
-
-                const chevron = header.querySelector('.settings-chevron');
-                if (chevron) {
-                    chevron.style.transform = isShowing ? 'rotate(180deg)' : 'rotate(0deg)';
-                }
-            }
-        });
-    });
-};
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAccordion);
-} else {
-    initAccordion();
-}
-
-// Setup Base (Traduzioni)
-initComponents().then(() => {
-    // --- TRADUZIONE STATICA DEL DOM ---
-    document.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        if (el.hasAttribute('placeholder')) {
-            el.setAttribute('placeholder', t(key));
-        } else {
-            el.textContent = t(key);
-        }
-    });
-});
-
-function log(msg) {
-    console.log("[Config Automezzi] " + msg);
-}
-
-// --- CONFIGURATION ---
 const DEFAULT_CONFIG = {
     deadlineTypes: [],
     models: [],
@@ -58,220 +11,188 @@ const DEFAULT_CONFIG = {
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentUser = null;
 
-// --- FUNCTIONS ---
+const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : console.log(msg);
 
-function renderTable(tbodyId, dataArray, listKey) {
-    const tbody = document.getElementById(tbodyId);
-    if (!tbody) return;
+document.addEventListener('DOMContentLoaded', () => {
+    // Buttons Listeners
+    document.getElementById('btn-add-type')?.addEventListener('click', () => addTypeItem());
+    document.getElementById('btn-add-model')?.addEventListener('click', () => addItem('models', 'Nuovo Veicolo (Modello - Targa):'));
+    document.getElementById('btn-add-template')?.addEventListener('click', () => addItem('emailTemplates', 'Nuovo Testo Email:'));
 
-    tbody.innerHTML = '';
-    if (!dataArray || dataArray.length === 0) {
-        tbody.innerHTML = `<tr><td class="px-4 py-3 text-gray-500 italic">${t('no_data')}</td></tr>`;
+    // Delegated actions for list items
+    ['container-types', 'container-models', 'container-templates'].forEach(id => {
+        document.getElementById(id)?.addEventListener('click', (e) => {
+            const btnEdit = e.target.closest('.btn-edit-item');
+            const btnDelete = e.target.closest('.btn-delete-item');
+
+            if (btnEdit) {
+                const { list, index } = btnEdit.dataset;
+                if (list === 'deadlineTypes') editType(parseInt(index));
+                else editItem(list, parseInt(index));
+            } else if (btnDelete) {
+                const { list, index } = btnDelete.dataset;
+                deleteItem(list, parseInt(index));
+            }
+        });
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            await loadConfig();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+});
+
+async function loadConfig() {
+    try {
+        const snap = await getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"));
+        if (snap.exists()) {
+            currentConfig = snap.data();
+            // Ensure defaults
+            if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
+            if (!currentConfig.models) currentConfig.models = [];
+            if (!currentConfig.emailTemplates) currentConfig.emailTemplates = [];
+        } else {
+            currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        }
+        renderAll();
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function saveConfig() {
+    try {
+        await setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"), currentConfig);
+        showToast("Configurazione salvata", "success");
+        renderAll();
+    } catch (e) {
+        console.error(e);
+        showToast("Errore salvataggio", "error");
+    }
+}
+
+function renderAll() {
+    renderTypes();
+    renderSimpleList('container-models', currentConfig.models, 'models');
+    renderSimpleList('container-templates', currentConfig.emailTemplates, 'emailTemplates');
+}
+
+function renderTypes() {
+    const container = document.getElementById('container-types');
+    if (!container) return;
+
+    if (currentConfig.deadlineTypes.length === 0) {
+        container.innerHTML = `<p class="text-[10px] text-white/30 uppercase text-center py-4">Nessun tipo configurato</p>`;
         return;
     }
 
-    dataArray.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.className = "group hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-200 dark:border-white/5 last:border-0";
-
-        // Escape quotes for safe injection in onclick
-        const safeListKey = listKey.replace(/'/g, "\\'");
-
-        tr.innerHTML = `
-             <td class="px-3 py-2 flex justify-between items-center text-gray-700 dark:text-gray-300 text-xs">
-                <span class="font-medium">${item}</span>
-                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
-                        style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
-                        onclick="window.editItem('${safeListKey}', ${index})">
-                        <span class="material-symbols-outlined text-[16px]">edit</span>
+    container.innerHTML = currentConfig.deadlineTypes.map((item, index) => {
+        // Handle migration from string to object
+        if (typeof item === 'string') {
+            item = { name: item, period: 14, freq: 7 };
+            currentConfig.deadlineTypes[index] = item;
+        }
+        return `
+            <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group">
+                <div class="flex-1">
+                    <span class="block text-sm font-bold text-white mb-1">${item.name}</span>
+                    <div class="flex gap-2">
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold uppercase tracking-widest">Preavviso ${item.period}gg</span>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/40 font-bold uppercase tracking-widest">Frequenza ${item.freq}gg</span>
+                    </div>
+                </div>
+                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button class="btn-edit-item glass-btn-sm" data-list="deadlineTypes" data-index="${index}">
+                        <span class="material-symbols-outlined text-sm">edit</span>
                     </button>
-                    <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
-                        style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
-                        onclick="window.deleteItem('${safeListKey}', ${index})">
-                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    <button class="btn-delete-item glass-btn-sm text-red-400" data-list="deadlineTypes" data-index="${index}">
+                        <span class="material-symbols-outlined text-sm">delete</span>
                     </button>
                 </div>
-            </td>
+            </div>
         `;
-        tbody.appendChild(tr);
-    });
+    }).join('');
 }
 
-window.renderAllTables = () => {
-    try {
-        // Custom Render for Types (Table with Columns)
-        const tbodyTypes = document.getElementById('tbody_types');
-        if (tbodyTypes) {
-            tbodyTypes.innerHTML = '';
-            if (!currentConfig.deadlineTypes || currentConfig.deadlineTypes.length === 0) {
-                tbodyTypes.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-gray-500 italic text-center text-xs">${t('no_data_configured')}</td></tr>`;
-            } else {
-                currentConfig.deadlineTypes.forEach((item, index) => {
-                    if (typeof item === 'string') {
-                        item = { name: item, period: 14, freq: 7 };
-                        currentConfig.deadlineTypes[index] = item;
-                    }
-                    const name = item.name || '';
-                    const period = item.period || 14;
-                    const freq = item.freq || 7;
+function renderSimpleList(containerId, data, listKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
 
-                    const tr = document.createElement('tr');
-                    tr.className = "group hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-slate-200 dark:border-white/5 last:border-0";
-                    tr.innerHTML = `
-                         <td class="px-3 py-2 font-medium text-gray-700 dark:text-gray-300 text-xs">${name}</td>
-                        <td class="px-2 py-2 text-center">
-                            <div class="inline-flex flex-col items-center gap-1">
-                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">${t('text_notice')}</span>
-                                <span class="font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded text-[10px] border border-blue-500/20">${period}gg</span>
-                            </div>
-                        </td>
-                        <td class="px-2 py-2 text-center">
-                            <div class="inline-flex flex-col items-center gap-1">
-                                <span class="text-[9px] text-gray-500 uppercase tracking-widest">${t('text_replica')}</span>
-                                <span class="font-bold text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] border border-slate-200 dark:border-white/10">${freq}gg</span>
-                            </div>
-                        </td>
-                        <td class="px-2 py-2 text-right">
-                             <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
-                                    style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
-                                    onclick="window.editType(${index})">
-                                    <span class="material-symbols-outlined text-[16px]">edit</span>
-                                </button>
-                                <button class="w-6 h-6 flex items-center justify-center rounded hover:opacity-100 transition-all"
-                                    style="background: transparent !important; box-shadow: none !important; border: none !important; outline: none !important; color: #94a3b8 !important; opacity: 0.5;"
-                                    onclick="window.deleteItem('deadlineTypes', ${index})">
-                                    <span class="material-symbols-outlined text-[16px]">delete</span>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    tbodyTypes.appendChild(tr);
-                });
-            }
-        }
-
-        renderTable('tbody_models', currentConfig.models, 'models');
-        renderTable('tbody_templates', currentConfig.emailTemplates, 'emailTemplates');
-    } catch (e) {
-        log("Render Error: " + e.message);
+    if (!data || data.length === 0) {
+        container.innerHTML = `<p class="text-[10px] text-white/30 uppercase text-center py-4">Nessun dato</p>`;
+        return;
     }
-};
 
-window.editType = async (index) => {
-    const item = currentConfig.deadlineTypes[index];
-    const newName = await window.showInputModal(t('prompt_edit_subject'), item.name);
-    if (newName === null) return;
-    let newPeriod = await window.showInputModal(t('prompt_days_notice'), item.period);
-    if (newPeriod === null) return;
-    let newFreq = await window.showInputModal(t('prompt_freq_days'), item.freq);
-    if (newFreq === null) return;
+    container.innerHTML = data.map((item, index) => `
+        <div class="p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group">
+            <span class="text-xs text-white/80 truncate pr-4">${item}</span>
+            <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <button class="btn-edit-item glass-btn-sm" data-list="${listKey}" data-index="${index}">
+                    <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
+                <button class="btn-delete-item glass-btn-sm text-red-400" data-list="${listKey}" data-index="${index}">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 
-    if (newName && !isNaN(newPeriod) && !isNaN(newFreq)) {
-        currentConfig.deadlineTypes[index] = {
-            name: newName.trim(),
-            period: parseInt(newPeriod),
-            freq: parseInt(newFreq)
-        };
-        window.renderAllTables();
-        await window.saveConfig(currentConfig);
-    }
-};
-
-window.addTypeItem = async () => {
-    const name = await window.showInputModal(t('prompt_new_subject'));
+async function addTypeItem() {
+    const name = await window.showInputModal("NOME TIPO SCADENZA", "", "Inserisci il nome (es. Revisione)");
     if (!name) return;
-    const period = await window.showInputModal(t('prompt_period_default'), "14");
+    const period = await window.showInputModal("GIORNI PREAVVISO", "14", "Giorni di anticipo per la prima notifica");
     if (period === null) return;
-    const freq = await window.showInputModal(t('prompt_freq_default'), "7");
+    const freq = await window.showInputModal("FREQUENZA NOTIFICA", "7", "Giorni tra una notifica e l'altra");
     if (freq === null) return;
 
-    if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
     currentConfig.deadlineTypes.push({
         name: name.trim(),
         period: parseInt(period) || 14,
         freq: parseInt(freq) || 7
     });
+    saveConfig();
+}
 
-    window.renderAllTables();
-    await window.saveConfig(currentConfig);
-};
+async function editType(index) {
+    const item = currentConfig.deadlineTypes[index];
+    const name = await window.showInputModal("MODIFICA NOME", item.name);
+    if (name === null) return;
+    const period = await window.showInputModal("GIORNI PREAVVISO", item.period.toString());
+    if (period === null) return;
+    const freq = await window.showInputModal("FREQUENZA NOTIFICA", item.freq.toString());
+    if (freq === null) return;
 
-window.saveConfig = async (newConfig) => {
-    if (!currentUser) return;
-    try {
-        const docRef = doc(db, "users", currentUser.uid, "settings", "deadlineConfig");
-        await setDoc(docRef, newConfig);
-        currentConfig = JSON.parse(JSON.stringify(newConfig));
-        if (window.showToast) window.showToast("Configurazione salvata!", 'success');
-    } catch (e) {
-        log("Firestore Save ERROR: " + e.message);
-        if (window.showToast) window.showToast("Errore salvataggio", 'error');
-    }
-};
+    currentConfig.deadlineTypes[index] = {
+        name: name.trim(),
+        period: parseInt(period) || 14,
+        freq: parseInt(freq) || 7
+    };
+    saveConfig();
+}
 
-window.loadConfig = async () => {
-    if (!currentUser) return;
-    try {
-        let docRef = doc(db, "users", currentUser.uid, "settings", "deadlineConfig");
-        let docSnap = await getDoc(docRef);
+async function addItem(listKey, prompt) {
+    const val = await window.showInputModal("AGGIUNGI", "", prompt);
+    if (!val || !val.trim()) return;
+    currentConfig[listKey].push(val.trim());
+    saveConfig();
+}
 
-        if (docSnap.exists()) {
-            const cloudData = docSnap.data();
-            if (!cloudData.deadlineTypes) cloudData.deadlineTypes = DEFAULT_CONFIG.deadlineTypes;
-            if (!cloudData.models) cloudData.models = DEFAULT_CONFIG.models;
-            if (!cloudData.emailTemplates) cloudData.emailTemplates = DEFAULT_CONFIG.emailTemplates;
-            currentConfig = cloudData;
-        } else {
-            currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-            await window.saveConfig(currentConfig);
-        }
-        window.renderAllTables();
-    } catch (e) {
-        log("Firestore Load ERROR: " + e.message);
-    }
-};
+async function editItem(listKey, index) {
+    const current = currentConfig[listKey][index];
+    const val = await window.showInputModal("MODIFICA", current);
+    if (val === null || !val.trim()) return;
+    currentConfig[listKey][index] = val.trim();
+    saveConfig();
+}
 
-window.toggleSection = (key) => {
-    const container = document.getElementById(`container_${key}`);
-    const icon = document.getElementById(`icon_${key}`);
-    if (container) {
-        const isHidden = container.classList.toggle('hidden');
-        if (icon) icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
-    }
-};
-
-window.addItem = async (listKey, promptText) => {
-    const value = await window.showInputModal(promptText);
-    if (!value || !value.trim()) return;
-    if (!currentConfig[listKey]) currentConfig[listKey] = [];
-    currentConfig[listKey].push(value.trim());
-    window.renderAllTables();
-    await window.saveConfig(currentConfig);
-};
-
-window.editItem = async (listKey, index) => {
-    const currentValue = currentConfig[listKey][index];
-    const newValue = await window.showInputModal(t('prompt_edit_item'), currentValue);
-    if (newValue === null || !newValue.trim()) return;
-    currentConfig[listKey][index] = newValue.trim();
-    window.renderAllTables();
-    await window.saveConfig(currentConfig);
-};
-
-window.deleteItem = async (listKey, index) => {
-    const confirmed = await window.showConfirmModal(t('confirm_delete_item'));
+async function deleteItem(listKey, index) {
+    const confirmed = await window.showConfirmModal("ELIMINA VOCE", "Sei sicuro di voler eliminare questa voce?");
     if (!confirmed) return;
     currentConfig[listKey].splice(index, 1);
-    window.renderAllTables();
-    await window.saveConfig(currentConfig);
-};
-
-// Initial Auth Setup
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        currentUser = user;
-        await window.loadConfig();
-    }
-});
+    saveConfig();
+}

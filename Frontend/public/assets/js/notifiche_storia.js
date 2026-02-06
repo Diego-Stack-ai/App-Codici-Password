@@ -1,30 +1,36 @@
 import { auth, db } from './firebase-config.js';
-import { collection, getDocs, writeBatch, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import {
+    collection, getDocs, writeBatch, orderBy, query, limit
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { translations } from './translations.js';
 
-// Attesa caricamento DOM
+let currentUid = null;
+
+const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : console.log(msg);
+const showConfirmModal = (t, m, c, d) => window.showConfirmModal ? window.showConfirmModal(t, m, c, d) : Promise.resolve(confirm(m));
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Inizializza auth listener
     onAuthStateChanged(auth, user => {
         if (user) {
+            currentUid = user.uid;
             loadNotifications(user.uid);
+            initEvents();
         } else {
             window.location.href = 'index.html';
         }
     });
-
-    // Traduzioni iniziali (se necessario, ma ui-core/main gestiscono di solito)
-    // Qui ci affidiamo al main.js o gestiamo titoli dynamic se serve
 });
 
-/**
- * Carica le notifiche da Firestore
- */
+function initEvents() {
+    document.getElementById('btn-clear-history')?.addEventListener('click', clearHistory);
+}
+
 async function loadNotifications(uid) {
-    const listContainer = document.getElementById('notifications-list');
-    const loadingIndicator = document.getElementById('loading-indicator');
-    const emptyState = document.getElementById('empty-state');
+    const list = document.getElementById('notifications-list');
+    const loading = document.getElementById('loading-indicator');
+    const empty = document.getElementById('empty-state');
+
+    if (!list) return;
 
     try {
         const q = query(
@@ -33,140 +39,103 @@ async function loadNotifications(uid) {
             limit(50)
         );
 
-        const snapshot = await getDocs(q);
+        const snap = await getDocs(q);
 
-        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        if (loading) loading.classList.add('hidden');
 
-        if (snapshot.empty) {
-            if (listContainer) listContainer.classList.add('hidden');
-            if (emptyState) emptyState.classList.remove('hidden');
+        if (snap.empty) {
+            list.classList.add('hidden');
+            if (empty) empty.classList.remove('hidden');
             return;
         }
 
-        if (emptyState) emptyState.classList.add('hidden');
-        if (listContainer) {
-            listContainer.classList.remove('hidden');
-            listContainer.innerHTML = ''; // Pulisci
-        }
+        if (empty) empty.classList.add('hidden');
+        list.classList.remove('hidden');
+        list.innerHTML = '';
 
-        snapshot.forEach(docSnap => {
+        snap.forEach(docSnap => {
             const data = docSnap.data();
             const date = data.timestamp ? new Date(data.timestamp.toDate()) : new Date();
-            const formattedDate = date.toLocaleDateString('it-IT', {
-                day: 'numeric',
-                month: 'short',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            const timeStr = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
 
-            // Mappa icone e colori
-            let icon = 'notifications';
-            let iconBgClass = 'bg-blue-glass text-blue-400';
+            const config = getNotificationConfig(data.type);
 
-            if (data.type === 'invite_accepted') {
-                icon = 'check_circle';
-                iconBgClass = 'bg-emerald-glass text-emerald-400';
-            } else if (data.type === 'invite_rejected' || data.type === 'share_revoked') {
-                icon = 'cancel';
-                iconBgClass = 'bg-rose-glass text-rose-400';
-            } else if (data.type === 'deadline') {
-                icon = 'warning';
-                iconBgClass = 'bg-amber-glass text-amber-400';
-            }
-
-            // Creazione Elemento (PROTOCOLLO BASE Glass Style)
             const item = document.createElement('div');
-            item.className = 'settings-item no-select'; // Utilizza classi di auth_impostazioni.css
-            item.style.cursor = 'default';
-            item.style.marginBottom = '0.75rem';
-
+            item.className = 'glass-card p-4 flex items-center gap-4 animate-in slide-in-from-bottom-2 duration-300';
             item.innerHTML = `
-                <div class="settings-item-header">
-                    <div class="settings-item-info">
-                        <div class="settings-icon-box ${iconBgClass}">
-                            <span class="material-symbols-outlined">${icon}</span>
-                        </div>
-                        <div class="settings-text" style="width: 100%;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                                <span class="settings-label" style="font-size: 0.9rem;">${data.message || 'Notifica'}</span>
-                                <span style="font-size: 0.7rem; opacity: 0.5; font-family: monospace;">${formattedDate}</span>
-                            </div>
-                            <span class="settings-desc" style="font-size: 0.75rem; opacity: 0.6;">${getCategoryLabel(data.type)}</span>
-                        </div>
+                <div class="size-12 rounded-2xl flex-center border ${config.border} ${config.bg} ${config.color} shadow-sm">
+                    <span class="material-symbols-outlined filled text-xl">${config.icon}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-black text-white/80 uppercase truncate">${data.message || 'Avviso di Sistema'}</span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[9px] font-bold text-white/20 uppercase tracking-widest">${config.label}</span>
+                        <div class="size-1 rounded-full bg-white/5"></div>
+                        <span class="text-[9px] font-bold text-white/40 uppercase tracking-widest">${dateStr} • ${timeStr}</span>
                     </div>
                 </div>
             `;
-
-            listContainer.appendChild(item);
+            list.appendChild(item);
         });
 
-    } catch (error) {
-        console.error("Error loading notifications:", error);
-        if (loadingIndicator) loadingIndicator.classList.add('hidden');
-        if (emptyState) emptyState.classList.remove('hidden');
-        window.showToast("Errore caricamento dati", "error");
+    } catch (e) {
+        console.error(e);
+        if (loading) loading.classList.add('hidden');
+        showToast("Errore caricamento notifiche", "error");
     }
 }
 
-/**
- * Helper per etichette categoria
- */
-function getCategoryLabel(type) {
+function getNotificationConfig(type) {
+    const base = { icon: 'notifications', bg: 'bg-white/5', border: 'border-white/10', color: 'text-white/40', label: 'Sistema' };
+
     switch (type) {
-        case 'invite_accepted': return 'Invito Accettato';
-        case 'invite_rejected': return 'Invito Rifiutato';
-        case 'share_revoked': return 'Condivisione Revocata';
-        case 'deadline': return 'Scadenza';
-        default: return 'Avviso di Sistema';
+        case 'invite_accepted':
+            return { icon: 'check_circle', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', color: 'text-emerald-400', label: 'Collaborazione' };
+        case 'invite_rejected':
+        case 'share_revoked':
+            return { icon: 'cancel', bg: 'bg-red-500/10', border: 'border-red-500/20', color: 'text-red-400', label: 'Accesso' };
+        case 'deadline':
+            return { icon: 'warning', bg: 'bg-amber-500/10', border: 'border-amber-500/20', color: 'text-amber-400', label: 'Scadenza' };
+        case 'security':
+            return { icon: 'shield', bg: 'bg-blue-500/10', border: 'border-blue-500/20', color: 'text-blue-400', label: 'Sicurezza' };
+        default:
+            return base;
     }
 }
 
-/**
- * Cancella storico (Esposta globalmente per l'onclick dell'HTML)
- */
-window.clearHistory = async function () {
-    const user = auth.currentUser;
-    if (!user) return;
+async function clearHistory() {
+    if (!currentUid) return;
 
-    // V3: Usa Modal di ui-core invece di confirm()
-    const confirmed = await window.showConfirmModal(
-        "Conferma Cancellazione",
-        "Vuoi davvero svuotare tutto lo storico delle notifiche?"
-    );
+    const ok = await showConfirmModal("SVUOTA STORICO", "Vuoi davvero cancellare definitivamente tutte le notifiche? L'azione non è reversibile.", "Svuota Tutto", true);
+    if (!ok) return;
 
-    if (!confirmed) return;
-
-    const listContainer = document.getElementById('notifications-list');
-    const emptyState = document.getElementById('empty-state');
-    const loadingIndicator = document.getElementById('loading-indicator');
+    const list = document.getElementById('notifications-list');
+    const loading = document.getElementById('loading-indicator');
+    const empty = document.getElementById('empty-state');
 
     try {
-        if (loadingIndicator && listContainer) {
-            loadingIndicator.classList.remove('hidden');
-            listContainer.classList.add('hidden');
-        }
+        if (loading) loading.classList.remove('hidden');
+        if (list) list.classList.add('hidden');
 
-        const q = collection(db, 'users', user.uid, 'notifications');
-        const snapshot = await getDocs(q);
+        const q = collection(db, 'users', currentUid, 'notifications');
+        const snap = await getDocs(q);
 
         const batch = writeBatch(db);
-        snapshot.docs.forEach(docSnap => {
-            batch.delete(docSnap.ref);
-        });
-
+        snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
 
-        if (listContainer) listContainer.innerHTML = '';
-        if (listContainer) listContainer.classList.remove('hidden'); // Ma è vuoto
-        if (emptyState) emptyState.classList.remove('hidden');
-        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+        if (list) list.innerHTML = '';
+        if (empty) empty.classList.remove('hidden');
+        if (loading) loading.classList.add('hidden');
 
-        window.showToast("Storico cancellato con successo", "success");
-
-    } catch (error) {
-        console.error("Error clearing history:", error);
-        window.showToast("Errore cancellazione", "error");
-        if (loadingIndicator) loadingIndicator.classList.add('hidden');
-        if (listContainer) listContainer.classList.remove('hidden');
+        showToast("Cronologia svuotata", "success");
+    } catch (e) {
+        console.error(e);
+        showToast("Errore cancellazione", "error");
+        if (loading) loading.classList.add('hidden');
+        if (list) list.classList.remove('hidden');
     }
-};
+}

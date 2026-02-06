@@ -38,10 +38,11 @@ async function initProtocolUI() {
 
     if (hLeft) {
         hLeft.innerHTML = `
-            <button onclick="history.back()" class="btn-icon-header">
+            <button id="btn-back" class="btn-icon-header">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
         `;
+        document.getElementById('btn-back').addEventListener('click', () => window.location.href = 'home_page.html');
     }
 
     if (hCenter) {
@@ -62,10 +63,13 @@ async function initProtocolUI() {
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         fCenter.innerHTML = `
-            <button onclick="document.getElementById('rubrica-toggle-btn').scrollIntoView({behavior: 'smooth'})" class="btn-icon-header" title="Rubrica">
+            <button id="btn-scroll-rubrica" class="btn-icon-header" title="Rubrica">
                 <span class="material-symbols-outlined">group</span>
             </button>
         `;
+        document.getElementById('btn-scroll-rubrica').addEventListener('click', () => {
+            document.getElementById('rubrica-toggle-btn').scrollIntoView({ behavior: 'smooth' });
+        });
     }
 }
 
@@ -129,7 +133,6 @@ async function loadTopAccounts(uid) {
     if (!list) return;
 
     try {
-        // Try with ordering (needs index)
         let snap;
         try {
             const q = query(collection(db, "users", uid, "accounts"), orderBy("views", "desc"), limit(10));
@@ -147,29 +150,86 @@ async function loadTopAccounts(uid) {
             return;
         }
 
-        // Sort in memory if we used fallback
         const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         docs.sort((a, b) => (b.views || 0) - (a.views || 0));
         const top10 = docs.slice(0, 10);
 
-        // Update UI
         top10.forEach((acc) => {
             const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
+            const isMemo = !!acc.hasMemo || acc.type === 'memorandum';
+            const isShared = !!acc.shared || !!acc.isMemoShared;
 
-            const card = document.createElement('a');
-            card.href = `dettaglio_account_privato.html?id=${acc.id}`;
-            card.className = "micro-list-item border-glow";
+            let accentColor = 'rgba(80, 150, 255, 0.6)'; // Blue
+            if (isShared && isMemo) accentColor = 'rgba(16, 185, 129, 0.6)';
+            else if (isShared) accentColor = 'rgba(147, 51, 234, 0.6)';
+            else if (isMemo) accentColor = 'rgba(245, 158, 11, 0.6)';
+
+            const dots = '••••••••';
+
+            const card = document.createElement('div');
+            card.className = "micro-account-card cursor-pointer hover:bg-white/5 transition-all active:scale-95";
+            card.style.marginBottom = "0.75rem";
+            // Click sull'intera card porta al dettaglio
+            card.setAttribute('data-action', 'navigate');
+            card.setAttribute('data-href', `dettaglio_account_privato.html?id=${acc.id}`);
+
             card.innerHTML = `
-                <div class="micro-item-content">
-                    <div class="micro-item-icon-box">
-                        <img src="${avatar}" alt="${acc.nomeAccount || 'Account'}">
+              <div class="swipe-content">
+                <div class="micro-account-content">
+                    <div class="micro-account-avatar-box">
+                        <img class="micro-account-avatar" src="${avatar}" alt="">
+                        <div class="micro-item-badge-dot" style="background: ${accentColor}"></div>
                     </div>
-                    <span class="micro-item-title">${acc.nomeAccount || 'Progetto'}</span>
+
+                    <div class="micro-account-info" data-id="${acc.id}">
+                        <h3 class="micro-account-name">${acc.nomeAccount || t('without_name')}</h3>
+                         <div class="micro-account-subtitle">
+                            <span>${t('views')}: ${acc.views || 0}</span>
+                        </div>
+                    </div>
+
+                     <div class="micro-account-top-actions">
+                        ${acc.password ? `
+                        <button class="micro-btn-utility btn-toggle-visibility relative z-10" style="color: ${accentColor};" data-action="toggle-visibility" data-stop-propagation="true">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>` : ''}
+                    </div>
                 </div>
-                <div class="micro-item-badge-container">
-                    <span class="micro-item-badge">${acc.views || 0}</span>
+
+                <div class="micro-data-display">
+                    ${acc.username ? `
+                    <div class="micro-data-row">
+                        <span class="micro-data-label">${t('label_user')}:</span>
+                        <span class="micro-data-value">${acc.username}</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline relative z-10" 
+                                data-action="copy-text" data-text="${acc.username.replace(/"/g, '&quot;')}" title="${t('copy_username')}" data-stop-propagation="true">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                    </div>` : ''}
+                    
+                    ${acc.account ? `
+                    <div class="micro-data-row">
+                        <span class="micro-data-label">${t('label_account')}:</span>
+                        <span class="micro-data-value">${acc.account}</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline relative z-10" 
+                                data-action="copy-text" data-text="${acc.account.replace(/"/g, '&quot;')}" title="${t('copy_account')}" data-stop-propagation="true">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                    </div>` : ''}
+                    
+                    ${acc.password ? `
+                    <div class="micro-data-row">
+                        <span class="micro-data-label">${t('label_password')}:</span>
+                        <span class="micro-data-value" id="pass-text-${acc.id}">${dots}</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline relative z-10" 
+                                data-action="copy-text" data-text="${acc.password.replace(/"/g, '&quot;')}" title="${t('copy_password')}" data-stop-propagation="true">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                    </div>` : ''}
                 </div>
+              </div>
             `;
+
             list.appendChild(card);
         });
     } catch (e) {
@@ -205,23 +265,30 @@ async function loadRubrica(uid) {
         list.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
         list.forEach(c => {
             const div = document.createElement('div');
-            div.className = "flex items-center justify-between p-2 rounded-xl transition-all group overflow-hidden w-full rubrica-list-item";
-            div.style.marginBottom = "4px"; // Manteniamo solo il margine dinamico se necessario, o spostiamo a CSS
+            div.className = "rubrica-list-item";
             div.innerHTML = `
-                <div class="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                    <div class="size-6 rounded bg-orange-500/20 text-orange-500 border border-orange-500/30 flex items-center justify-center font-black text-[8px] uppercase shrink-0">${(c.nome || '?').charAt(0)}</div>
-                    <div class="min-w-0 flex-1 overflow-hidden">
+                <div class="rubrica-item-info-row">
+                    <div class="rubrica-item-avatar">${(c.nome || '?').charAt(0)}</div>
+                    <div class="rubrica-item-info">
                         <p class="truncate m-0 rubrica-item-name">${c.nome} ${c.cognome || ''}</p>
-                        <p class="truncate m-0 uppercase tracking-tighter max-w-100 rubrica-item-email">${c.email}</p>
+                        <p class="truncate m-0 tracking-tighter max-w-100 rubrica-item-email">${c.email}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-0 shrink-0 ml-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <button onclick="deleteContact('${uid}', '${c.id}')" class="p-1.5 rounded-md border-none cursor-pointer flex items-center justify-center rubrica-item-action hover:text-red-400 transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                <div class="rubrica-item-actions">
+                    <button class="btn-delete-contact rubrica-item-action" data-id="${c.id}">
+                        <span class="material-symbols-outlined">delete</span>
                     </button>
                 </div>
             `;
             rubricaList.appendChild(div);
+        });
+
+        // Add event listeners to delete buttons
+        rubricaList.querySelectorAll('.btn-delete-contact').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                window.deleteContact(uid, id);
+            });
         });
     } catch (e) { logError("Rubrica Engine", e); }
 }

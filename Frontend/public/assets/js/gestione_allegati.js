@@ -2,22 +2,11 @@ import { db, auth, storage } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
     collection, doc, getDoc, getDocs, addDoc, deleteDoc,
-    serverTimestamp, query, orderBy, where
+    serverTimestamp, query, orderBy
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
-
-// --- STATE ---
-let currentUser = null;
-let currentId = null;
-let ownerId = null;
-let aziendaId = null;
-let context = null; // 'profile' or null
-let docType = null; // New parameter to filter by document type
-let currentFilter = 'all';
-let cachedAttachments = [];
-let pendingFile = null;
 
 const DOC_TYPES = [
     "Autorizzazione", "Carta di Circolazione", "Carta di Credito", "Carta di Debito",
@@ -30,363 +19,238 @@ const DOC_TYPES = [
     "Ricevuta Pagamento", "Sanità - Foto Scontrino", "Sanità - Referti Medici",
     "Sanità - Ricette Mediche", "Spesa - Foto Scontrino", "Visita Medica", "FIV",
     "Firma", "Isola Ecologica"
-];
+].sort();
 
-// --- INIT ---
+let currentId = new URLSearchParams(window.location.search).get('id');
+let ownerId = new URLSearchParams(window.location.search).get('ownerId');
+let aziendaId = new URLSearchParams(window.location.search).get('aziendaId');
+let context = new URLSearchParams(window.location.search).get('context');
+let docType = new URLSearchParams(window.location.search).get('docType');
+
+let currentFilter = 'all';
+let cachedAttachments = [];
+let pendingFile = null;
+
+const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : console.log(msg);
+const showConfirmModal = (t, m, c, d) => window.showConfirmModal ? window.showConfirmModal(t, m, c, d) : Promise.resolve(confirm(m));
+
 document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    currentId = urlParams.get('id');
-    ownerId = urlParams.get('ownerId');
-    aziendaId = urlParams.get('aziendaId');
-    context = urlParams.get('context');
-    docType = urlParams.get('docType'); // Capture the pre-filter type
-
     initUI();
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            currentUser = user;
-            if (!ownerId) ownerId = user.uid; // Default to current user if not specified
-
-            // If viewing someone else's data (shared), ensure we have permission logic here if needed
-            // For now assume ownerId is used for paths
-
-            await loadCompanyThemeIfNeeded();
+            if (!ownerId) ownerId = user.uid;
             await loadAttachments();
         } else {
             window.location.href = 'index.html';
         }
     });
+
+    // Event Listeners
+    document.getElementById('search-input')?.addEventListener('input', renderList);
+    document.getElementById('btn-trigger-upload')?.addEventListener('click', () => document.getElementById('file-upload').click());
+    document.getElementById('file-upload')?.addEventListener('change', (e) => handleFileUpload(e.target));
+    document.getElementById('btn-cancel-upload')?.addEventListener('click', closeUploadModal);
+    document.getElementById('btn-confirm-upload')?.addEventListener('click', confirmUpload);
+    document.getElementById('doc-type')?.addEventListener('change', (e) => {
+        const custom = document.getElementById('doc-custom-type');
+        if (e.target.value === 'custom') {
+            custom.classList.remove('hidden');
+            custom.focus();
+        } else {
+            custom.classList.add('hidden');
+        }
+    });
+
+    document.getElementById('filter-chips')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chip-btn');
+        if (btn) {
+            document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderList();
+        }
+    });
+
+    // Delegated actions for list
+    document.getElementById('attachments-list')?.addEventListener('click', (e) => {
+        const btnDelete = e.target.closest('.btn-delete-att');
+        const btnShare = e.target.closest('.btn-share-att');
+
+        if (btnDelete) {
+            e.stopPropagation();
+            deleteAttachment(btnDelete.dataset.id, btnDelete.dataset.name);
+        } else if (btnShare) {
+            e.stopPropagation();
+            shareAttachment(btnShare.dataset.url, btnShare.dataset.name);
+        } else {
+            const card = e.target.closest('.att-card');
+            if (card) window.open(card.dataset.url, '_blank');
+        }
+    });
 });
 
 function initUI() {
-    // Populate Select
     const select = document.getElementById('doc-type');
     if (select) {
-        DOC_TYPES.sort().forEach(type => {
-            const opt = document.createElement('option');
-            opt.value = type;
-            opt.textContent = type;
-            select.insertBefore(opt, select.lastElementChild); // Insert before "Custom"
+        DOC_TYPES.forEach(t => {
+            const opt = new Option(t, t);
+            select.add(opt, select.options[select.options.length - 1]);
         });
     }
 
-    // Search Listener
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', () => {
-            renderList(); // Local filtering on cached data
-        });
-    }
-
-    // Modal Events
-    window.checkCustomType = (select) => {
-        const customInput = document.getElementById('doc-custom-type');
-        if (select.value === 'custom') {
-            customInput.classList.remove('hidden');
-            customInput.focus();
-        } else {
-            customInput.classList.add('hidden');
-        }
-    };
-
-    window.closeUploadModal = () => {
-        document.getElementById('upload-modal').classList.add('hidden');
-        pendingFile = null;
-    };
-
-    window.confirmUpload = confirmUpload;
-    window.handleFileUpload = handleFileUpload;
-    window.filterAttachments = filterAttachments;
-    window.deleteAttachment = deleteAttachment;
-    window.shareAttachment = shareAttachment;
-
-    // Adjust Title for Profile or Scadenza
     if (context === 'profile') {
-        const titleEl = document.querySelector('h2');
-        if (titleEl) titleEl.textContent = docType ? `${docType}` : "Documenti Personali";
-    } else if (context === 'scadenza') {
-        const titleEl = document.querySelector('h2');
-        if (titleEl) titleEl.textContent = "Allegati Scadenza";
+        const sub = document.getElementById('context-subtitle');
+        if (sub) sub.textContent = docType || "Documenti Personali";
     }
 
-    // Pre-fill search if docType is provided
-    if (docType && searchInput) {
-        searchInput.value = docType;
+    if (docType) {
+        const search = document.getElementById('search-input');
+        if (search) search.value = docType;
     }
 }
-
-async function loadCompanyThemeIfNeeded() {
-    if (aziendaId && ownerId) {
-        // ... (existing logic)
-    }
-}
-
-// --- PATH HELPERS ---
-
-function getAttachmentsCollectionPath() {
-    // Determine the collection ref string based on context
-    const uid = ownerId || currentUser.uid;
-
-    if (context === 'profile') {
-        return collection(db, "users", uid, "personal_documents");
-    }
-
-    if (context === 'scadenza') {
-        // Save in subcollection of the deadline
-        return collection(db, "users", uid, "scadenze", currentId, "attachments");
-    }
-
-    if (aziendaId) {
-        return collection(db, "users", uid, "aziende", aziendaId, "accounts", currentId, "attachments");
-    } else {
-        return collection(db, "users", uid, "accounts", currentId, "attachments");
-    }
-}
-
-function getStorageRefPath(fileName) {
-    const uid = ownerId || currentUser.uid;
-
-    if (context === 'profile') {
-        return `users/${uid}/personal_documents/${fileName}`;
-    }
-
-    if (context === 'scadenza') {
-        return `users/${uid}/scadenze/${currentId}/attachments/${fileName}`;
-    }
-
-    if (aziendaId) {
-        return `users/${uid}/aziende/${aziendaId}/accounts/${currentId}/attachments/${fileName}`;
-    } else {
-        return `users/${uid}/accounts/${currentId}/attachments/${fileName}`;
-    }
-}
-
-
-// --- CORE FUNCTIONS ---
 
 async function loadAttachments() {
-    const listContainer = document.querySelector('.flex.flex-col.gap-3.px-4');
-    if (listContainer) listContainer.innerHTML = '<div class="text-center py-4 text-gray-400"><span class="material-symbols-outlined animate-spin">sync</span></div>';
-
     try {
-        const colRef = getAttachmentsCollectionPath();
+        const colRef = getCollectionPath();
         const q = query(colRef, orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
-
-        cachedAttachments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+        cachedAttachments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderList();
-
     } catch (e) {
-        console.error("Load error:", e);
-        if (listContainer) listContainer.innerHTML = `<p class="text-center text-red-400 text-sm">Errore caricamento: ${e.message}</p>`;
+        console.error(e);
+        showToast("Errore caricamento", "error");
     }
 }
 
 function renderList() {
-    const listContainer = document.querySelector('.flex.flex-col.gap-3.px-4');
-    if (!listContainer) return;
+    const container = document.getElementById('attachments-list');
+    if (!container) return;
 
-    if (cachedAttachments.length === 0) {
-        listContainer.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">Nessun file caricato.</p>';
-        return;
-    }
+    const search = document.getElementById('search-input')?.value.toLowerCase() || "";
 
-    // Filtering
-    const searchText = (document.getElementById('search-input')?.value || '').toLowerCase();
+    const filtered = cachedAttachments.filter(a => {
+        const type = (a.type || "").toLowerCase();
+        let catMatch = true;
+        if (currentFilter === 'pdf') catMatch = type.includes('pdf');
+        else if (currentFilter === 'image') catMatch = type.includes('image');
+        else if (currentFilter === 'video') catMatch = type.includes('video');
+        else if (currentFilter === 'file') catMatch = !type.includes('pdf') && !type.includes('image') && !type.includes('video');
 
-    const filtered = cachedAttachments.filter(data => {
-        // Category Filter
-        let categoryMatch = true;
-        const type = (data.type || '').toLowerCase();
+        const name = (a.name || "").toLowerCase();
+        const cat = (a.category || "").toLowerCase();
+        const searchMatch = !search || name.includes(search) || cat.includes(search);
 
-        if (currentFilter !== 'all') {
-            if (currentFilter === 'pdf') categoryMatch = type.includes('pdf');
-            else if (currentFilter === 'image') categoryMatch = type.includes('image');
-            else if (currentFilter === 'video') categoryMatch = type.includes('video');
-            else if (currentFilter === 'file') {
-                const isCommon = (type.includes('pdf') || type.includes('image') || type.includes('video'));
-                categoryMatch = !isCommon;
-            }
-        }
-
-        // Search Match
-        const name = (data.name || '').toLowerCase();
-        const cat = (data.category || '').toLowerCase();
-
-        // If docType is passed from URL, we prioritize it as a filter if search is empty or matches it
-        const finalSearchText = searchText || (docType ? docType.toLowerCase() : '');
-        const searchMatch = !finalSearchText || name.includes(finalSearchText) || cat.includes(finalSearchText);
-
-        return categoryMatch && searchMatch;
+        return catMatch && searchMatch;
     });
 
     if (filtered.length === 0) {
-        listContainer.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">Nessun file trovato per questo filtro.</p>';
+        container.innerHTML = `<p class="text-[10px] text-white/30 uppercase text-center py-12">${cachedAttachments.length === 0 ? 'Nessun file' : 'Nessun risultato'}</p>`;
         return;
     }
 
-    // HTML Generation
-    let html = '';
-    filtered.forEach(data => {
-        const type = (data.type || '').toLowerCase();
-        const isPdf = type.includes('pdf');
-        const isImg = type.includes('image');
-        const isVid = type.includes('video');
-
+    container.innerHTML = filtered.map(a => {
+        const type = (a.type || "").toLowerCase();
         let icon = 'description';
-        let colorClass = 'text-sky-600 bg-sky-50 border-sky-100';
+        let color = 'text-blue-400';
+        if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400'; }
+        else if (type.includes('image')) { icon = 'image'; color = 'text-purple-400'; }
+        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400'; }
 
-        if (isPdf) {
-            icon = 'picture_as_pdf';
-            colorClass = 'text-red-500 bg-red-50 border-red-100';
-        }
-        else if (isImg) {
-            icon = 'image';
-            colorClass = 'text-purple-500 bg-purple-50 border-purple-100';
-        }
-        else if (isVid) {
-            icon = 'movie';
-            colorClass = 'text-pink-500 bg-pink-50 border-pink-100';
-        }
+        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : '---';
+        const size = (a.size / (1024 * 1024)).toFixed(2);
 
-        const sizeMB = (data.size / (1024 * 1024)).toFixed(2);
-
-        let dateStr = 'Oggi';
-        if (data.createdAt && data.createdAt.toDate) {
-            dateStr = data.createdAt.toDate().toLocaleDateString();
-        }
-
-        html += `
-        <div onclick="window.open('${data.url}', '_blank')"
-            class="flex items-center gap-3 bg-white p-3 rounded-2xl shadow-sm border border-black/5 hover:border-[#137fec]/30 transition-all cursor-pointer group active:scale-[0.99]">
-            
-            <div class="flex items-center gap-1 shrink-0 mr-1">
-                 <div class="flex flex-col gap-1">
-                    <button onclick="event.stopPropagation(); shareAttachment('${data.url}', '${data.name.replace(/'/g, "\\'")}')" 
-                        class="size-8 flex items-center justify-center text-[#137fec] hover:text-white hover:bg-[#137fec] transition-all rounded-full bg-blue-50">
+        return `
+            <div class="att-card glass-card flex items-center gap-3 p-3 group transition-all active:scale-[0.98] cursor-pointer" data-url="${a.url}">
+                <!-- Quick Actions Left -->
+                 <div class="flex flex-col gap-1 border-r border-white/5 pr-2">
+                    <button class="btn-share-att size-8 flex-center text-blue-400 bg-blue-500/10 rounded-lg hover:bg-blue-500/20" data-url="${a.url}" data-name="${a.name.replace(/"/g, '&quot;')}">
                         <span class="material-symbols-outlined text-[18px]">ios_share</span>
                     </button>
-                    <button onclick="event.stopPropagation(); deleteAttachment('${data.id}', '${data.name.replace(/'/g, "\\'")}')" 
-                        class="size-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-red-500 transition-all rounded-full bg-gray-50">
+                    <button class="btn-delete-att size-8 flex-center text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg" data-id="${a.id}" data-name="${a.name.replace(/"/g, '&quot;')}">
                         <span class="material-symbols-outlined text-[18px]">delete</span>
                     </button>
-                 </div>
-                 <div class="w-px h-12 bg-gray-100 mx-2"></div>
-            </div>
-
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-                <div class="${colorClass} flex items-center justify-center rounded-2xl shrink-0 size-12 border shadow-sm">
-                    <span class="material-symbols-outlined text-[24px]">${icon}</span>
                 </div>
-                <div class="flex flex-col justify-center min-w-0 gap-0.5">
-                    <p class="text-[#0A162A] text-sm font-bold leading-tight truncate group-hover:text-[#137fec] transition-colors">
-                        ${data.name}
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100">
-                             ${data.category || 'File'}
-                        </span>
-                        <span class="text-slate-400 text-[11px] font-medium truncate">
-                            ${sizeMB} MB • ${dateStr}
-                        </span>
+                
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="size-12 rounded-2xl bg-white/5 flex-center border border-white/10 shrink-0">
+                        <span class="material-symbols-outlined ${color} text-2xl">${icon}</span>
+                    </div>
+                    <div class="flex-1 flex flex-col min-w-0 justify-center">
+                        <p class="text-sm font-bold text-white truncate">${a.name}</p>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 text-white/40 border border-white/5">${a.category || 'File'}</span>
+                            <span class="text-[10px] text-white/20 font-medium">${size} MB • ${date}</span>
+                        </div>
                     </div>
                 </div>
+                
+                <span class="material-symbols-outlined text-white/10 group-hover:text-white/40 transition-colors">chevron_right</span>
             </div>
-            
-            <span class="material-symbols-outlined text-slate-300 group-hover:text-[#137fec] transition-colors text-[20px]">chevron_right</span>
-        </div>`;
-    });
-
-    listContainer.innerHTML = html;
-}
-
-// --- ACTIONS ---
-
-function filterAttachments(type, btn) {
-    currentFilter = type;
-    document.querySelectorAll('.filter-chip').forEach(c => {
-        c.classList.remove('bg-[#137fec]/10', 'border-[#137fec]');
-        c.classList.add('bg-white', 'border-black/5');
-
-        const p = c.querySelector('p');
-        if (p) {
-            p.classList.remove('text-[#137fec]', 'font-bold');
-            p.classList.add('text-gray-600', 'font-medium');
-        }
-    });
-
-    if (btn) {
-        btn.classList.remove('bg-white', 'border-black/5');
-        btn.classList.add('bg-[#137fec]/10', 'border-[#137fec]');
-
-        const p = btn.querySelector('p');
-        if (p) {
-            p.classList.remove('text-gray-600', 'font-medium');
-            p.classList.add('text-[#137fec]', 'font-bold');
-        }
-    }
-    renderList();
+        `;
+    }).join("");
 }
 
 function handleFileUpload(input) {
     if (input.files[0]) {
         pendingFile = input.files[0];
-        document.getElementById('upload-modal').classList.remove('hidden');
+        const modal = document.getElementById('upload-modal');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.add('opacity-100');
+            modal.children[1].classList.remove('scale-90');
+            modal.children[1].classList.add('scale-100');
+        }, 10);
 
-        // Reset
-        const typeSelect = document.getElementById('doc-type');
-        if (docType && Array.from(typeSelect.options).some(o => o.value === docType)) {
-            typeSelect.value = docType;
-        } else {
-            typeSelect.value = "";
-        }
-
-        document.getElementById('doc-custom-type').value = "";
-        document.getElementById('doc-custom-type').classList.add('hidden');
-        document.getElementById('doc-desc').value = "";
-        input.value = '';
+        const sel = document.getElementById('doc-type');
+        if (docType && Array.from(sel.options).some(o => o.value === docType)) sel.value = docType;
+        else sel.value = "";
     }
+}
+
+function closeUploadModal() {
+    const modal = document.getElementById('upload-modal');
+    modal.classList.remove('opacity-100');
+    modal.children[1].classList.remove('scale-100');
+    modal.children[1].classList.add('scale-90');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        pendingFile = null;
+    }, 300);
 }
 
 async function confirmUpload() {
     if (!pendingFile) return;
 
-    const btn = document.querySelector('#upload-modal button:last-child');
-    const originalText = btn.innerHTML;
-
-    // Validate
-    const typeSelect = document.getElementById('doc-type');
-    let type = typeSelect.value;
-    const customType = document.getElementById('doc-custom-type').value.trim();
+    const sel = document.getElementById('doc-type');
+    let type = sel.value;
+    const custom = document.getElementById('doc-custom-type').value.trim();
     const desc = document.getElementById('doc-desc').value.trim();
 
-    if (!type) { alert("Seleziona un tipo di documento."); return; }
+    if (!type) { showToast("Scegli un tipo", "error"); return; }
     if (type === 'custom') {
-        if (!customType) { alert("Inserisci il nuovo tipo di documento."); return; }
-        type = customType;
+        if (!custom) { showToast("Scegli un tipo", "error"); return; }
+        type = custom;
     }
-    if (!desc) { alert("Inserisci una descrizione."); return; }
-    if (pendingFile.size > 10 * 1024 * 1024) { alert("Il file supera i 10MB."); return; }
+    if (!desc) { showToast("Inserisci descrizione", "error"); return; }
 
+    const btn = document.getElementById('btn-confirm-upload');
+    const originalText = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-lg">progress_activity</span> Caricamento...';
+    btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">sync</span> Caricamento...`;
 
     try {
         const ext = pendingFile.name.split('.').pop();
-        const newName = `${type} - ${desc}.${ext}`;
-        const storagePath = getStorageRefPath(`${Date.now()}_${newName}`);
-        const storageRefHandle = ref(storage, storagePath);
+        const fileName = `${type} - ${desc}.${ext}`;
+        const path = getStoragePath(`${Date.now()}_${fileName}`);
+        const sRef = ref(storage, path);
 
-        // Upload
-        const snap = await uploadBytes(storageRefHandle, pendingFile);
+        const snap = await uploadBytes(sRef, pendingFile);
         const url = await getDownloadURL(snap.ref);
 
-        // Firestore Save
-        await addDoc(getAttachmentsCollectionPath(), {
-            name: newName,
-            storagePath: storagePath, // Save path for deletion reference
+        await addDoc(getCollectionPath(), {
+            name: fileName,
+            storagePath: path,
             url: url,
             size: pendingFile.size,
             type: pendingFile.type || 'application/octet-stream',
@@ -395,83 +259,67 @@ async function confirmUpload() {
         });
 
         closeUploadModal();
-        showToast("File caricato correttamente!", "success");
+        showToast("File caricato!", "success");
         await loadAttachments();
-
-    } catch (error) {
-        console.error("Upload error:", error);
-        alert("Errore caricamento: " + error.message);
+    } catch (e) {
+        console.error(e);
+        showToast("Errore upload", "error");
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
 }
 
-async function deleteAttachment(docId, fileName) {
-    if (!confirm(`Sei sicuro di voler eliminare "${fileName}"?`)) return;
+async function deleteAttachment(id, name) {
+    const ok = await showConfirmModal("ELIMINA", `Confermi l'eliminazione di ${name}?`, "Elimina", true);
+    if (!ok) return;
 
     try {
-        // 1. Get doc data to find storage path
-        const docRef = doc(getAttachmentsCollectionPath(), docId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-
-            // 2. Delete Firestore Doc
+        const colRef = getCollectionPath();
+        const docRef = doc(colRef, id);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+            const data = snap.data();
             await deleteDoc(docRef);
-
-            // 3. Delete from Storage (if path exists)
-            if (data.storagePath) {
-                const storageRefHandle = ref(storage, data.storagePath);
-                await deleteObject(storageRefHandle).catch(err => console.warn("Storage delete warn:", err));
-            } else if (data.url) {
-                // Try to guess or parse ref from URL if storagePath missing (legacy)
-                const storageRefHandle = ref(storage, data.url); // This works only if regex matches bucket
-                await deleteObject(storageRefHandle).catch(err => console.warn("Storage delete from URL warn:", err));
-            }
+            if (data.storagePath) await deleteObject(ref(storage, data.storagePath));
+            showToast("Eliminato", "success");
+            await loadAttachments();
         }
-
-        showToast("Elemento eliminato.", "success");
-        await loadAttachments();
-
     } catch (e) {
-        console.error("Delete error:", e);
-        alert("Errore eliminazione: " + e.message);
+        console.error(e);
+        showToast("Errore", "error");
     }
 }
 
 async function shareAttachment(url, name) {
     if (navigator.share) {
         try {
-            await navigator.share({
-                title: name,
-                text: 'Ecco il documento: ' + name,
-                url: url
-            });
+            await navigator.share({ title: name, url: url });
         } catch (e) {
-            fallbackCopy(url);
+            copyToClipboard(url);
         }
     } else {
-        fallbackCopy(url);
+        copyToClipboard(url);
     }
 }
 
-function fallbackCopy(url) {
-    navigator.clipboard.writeText(url)
-        .then(() => showToast("Link copiato negli appunti!"))
-        .catch(() => window.open(url, '_blank'));
+function copyToClipboard(url) {
+    navigator.clipboard.writeText(url).then(() => showToast("Link copiato!", "success"));
 }
 
-function showToast(msg, type = 'info') {
-    const toast = document.getElementById('toast');
-    const msgEl = document.getElementById('toast-msg');
-    if (toast && msgEl) {
-        msgEl.textContent = msg;
-        toast.className = `fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-sm font-bold shadow-xl transition-all duration-300 pointer-events-none z-[100] flex items-center gap-2 transform translate-y-0 opacity-100 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-gray-900 text-white'}`;
+// Path Helpers
+function getCollectionPath() {
+    const uid = ownerId || auth.currentUser.uid;
+    if (context === 'profile') return collection(db, "users", uid, "personal_documents");
+    if (context === 'scadenza') return collection(db, "users", uid, "scadenze", currentId, "attachments");
+    if (aziendaId) return collection(db, "users", uid, "aziende", aziendaId, "accounts", currentId, "attachments");
+    return collection(db, "users", uid, "accounts", currentId, "attachments");
+}
 
-        setTimeout(() => {
-            toast.classList.add('translate-y-4', 'opacity-0');
-        }, 3000);
-    }
+function getStoragePath(fileName) {
+    const uid = ownerId || auth.currentUser.uid;
+    if (context === 'profile') return `users/${uid}/personal_documents/${fileName}`;
+    if (context === 'scadenza') return `users/${uid}/scadenze/${currentId}/attachments/${fileName}`;
+    if (aziendaId) return `users/${uid}/aziende/${aziendaId}/accounts/${currentId}/attachments/${fileName}`;
+    return `users/${uid}/accounts/${currentId}/attachments/${fileName}`;
 }

@@ -2,13 +2,15 @@
 <html lang="it" class="dark">
 
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Modifica Account Azienda - PROTOCOLLO BASE</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Modifica Account - PROTOCOLLO BASE V3.6</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
+    <link rel="manifest" href="manifest.json?v=3.6" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,37 +18,12 @@
 
     <!-- Fonts -->
     <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
     <!-- CORE JS -->
-    <script src="assets/js/core.js?v=3.3"></script>
-    <script type="module" src="assets/js/ui-core.js?v=3.3"></script>
-
-    <style>
-        /* Form Controls Overrides per stile Legacy-to-V3 */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="tel"],
-        input[type="url"],
-        textarea {
-            background-color: rgba(255, 255, 255, 0.03) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 1px #3b82f6 !important;
-            background-color: rgba(255, 255, 255, 0.05) !important;
-        }
-
-        .filled {
-            font-variation-settings: 'FILL' 1;
-        }
-    </style>
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
 </head>
 
 <body class="base-bg">
@@ -54,354 +31,203 @@
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
-        <!-- Automated PROTOCOLLO BASE Header -->
+        <!-- Automated Header -->
         <header id="header-placeholder" class="base-header"></header>
+
         <div class="spacer-header"></div>
 
         <!-- Main Content -->
         <main class="base-main">
-            <div class="w-full max-w-3xl mx-auto py-8 px-6 flex-col gap-8">
+            <div class="detail-content-wrap">
 
-                <!-- Logo Uploader -->
-                <div class="flex-center-col">
-                    <div class="relative cursor-pointer" onclick="document.getElementById('logo-input').click()">
+                <!-- Logo Uploader Area -->
+                <div class="flex-center-col py-6">
+                    <div class="relative group cursor-pointer" id="btn-trigger-logo">
                         <div
-                            class="size-24 rounded-full bg-slate-800 flex-center shadow-xl overflow-hidden relative border border-white-10">
-                            <img id="account-logo-preview" alt="Logo" class="size-full object-cover hidden" src="" />
-                            <div id="logo-placeholder" class="flex-center-col text-gray-500 transition-colors">
-                                <span class="material-symbols-outlined text-30">add_photo_alternate</span>
+                            class="size-28 rounded-3xl bg-white/5 border border-white/10 flex-center overflow-hidden shadow-2xl transition-all group-hover:scale-105 group-hover:border-white/20">
+                            <img id="account-logo-preview" class="size-full object-cover hidden" src="" />
+                            <div id="logo-placeholder" class="flex-center-col text-white/20">
+                                <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
                             </div>
-                            <!-- Hover Overlay -->
-                            <div class="absolute-inset-0 bg-black-50 flex-center opacity-0 transition-opacity">
-                                <span class="material-symbols-outlined text-white text-24">edit</span>
-                            </div>
+                        </div>
+                        <div
+                            class="absolute -bottom-2 -right-2 size-8 rounded-full bg-blue-500 flex-center border-4 border-[#0a0a14] text-white shadow-lg">
+                            <span class="material-symbols-outlined text-xs">edit</span>
                         </div>
                     </div>
                     <input type="file" id="logo-input" accept="image/*" class="hidden" />
-                    <p class="text-xs text-gray-500 mt-3 font-medium all-caps tracked-wide">
-                        Cambia Logo</p>
                 </div>
 
-                <!-- 1. Identificazione Account -->
-                <div class="flex-col gap-4">
-                    <div class="flex-center-gap-2 mb-2 pl-1">
-                        <span class="material-symbols-outlined icon-accent-blue">domain</span>
-                        <h3 class="text-white text-sm bold all-caps tracked-wide m-0">
-                            Identificazione</h3>
-                    </div>
-
-                    <div
-                        class="bg-slate-900-50 border border-white-5 rounded-3xl p-5 flex-col gap-5 shadow-lg backdrop-blur-sm">
-                        <!-- Nome Account -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Nome
-                                Azienda / Servizio</label>
-                            <div class="relative">
-                                <span
-                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">business</span>
-                                <input id="nome-account" type="text"
-                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                    placeholder="Es. Fornitore X" />
-                            </div>
+                <!-- 1. Identificazione Group -->
+                <div class="flex-col-gap-4">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1"
+                        data-t="identification">Identificazione</h3>
+                    <div class="glass-card p-5 flex-col-gap-4">
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">business</span>
+                            <input id="nome-account" type="text" placeholder="Nome Servizio / Azienda" />
                         </div>
-
-                        <!-- Sito Web -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Sito
-                                Web</label>
-                            <div class="relative">
-                                <span
-                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">language</span>
-                                <input id="sito-web" type="url"
-                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none text-blue-300"
-                                    placeholder="https://" />
-                            </div>
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">language</span>
+                            <input id="sito-web" type="url" placeholder="Sito Web (https://...)"
+                                class="text-blue-400" />
                         </div>
-
-                        <!-- Codice Società & N. Iscrizione -->
-                        <div class="dashboard-grid-2 gap-5">
-                            <div>
-                                <label
-                                    class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Codice
-                                    Società</label>
-                                <div class="relative">
-                                    <span
-                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">pin</span>
-                                    <input id="codice-societa" type="text"
-                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                        placeholder="Cod. 123" />
-                                </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="titanium-input-group">
+                                <span class="material-symbols-outlined">pin</span>
+                                <input id="codice-societa" type="text" placeholder="Codice" />
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">N.
-                                    Iscrizione</label>
-                                <div class="relative">
-                                    <span
-                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">confirmation_number</span>
-                                    <input id="numero-iscrizione" type="text"
-                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                        placeholder="Iscr. 456" />
-                                </div>
+                            <div class="titanium-input-group">
+                                <span class="material-symbols-outlined">confirmation_number</span>
+                                <input id="numero-iscrizione" type="text" placeholder="Iscrizione" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. Credenziali -->
-                <div class="flex-col gap-4">
-                    <div class="flex-center-gap-2 mb-2 pl-1">
-                        <span class="material-symbols-outlined icon-accent-emerald">lock</span>
-                        <h3 class="text-white text-sm bold all-caps tracked-wide m-0">
-                            Credenziali Accesso</h3>
-                    </div>
-
-                    <div
-                        class="bg-slate-900-50 border border-white-5 rounded-3xl p-5 flex-col gap-5 shadow-lg backdrop-blur-sm">
-                        <!-- Utente -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Username
-                                / Email</label>
-                            <div class="relative">
-                                <span
-                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">person</span>
-                                <input id="utente" type="text"
-                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                    placeholder="user@example.com" />
-                            </div>
+                <!-- 2. Credenziali Group -->
+                <div class="flex-col-gap-4 mt-6">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1"
+                        data-t="credentials">Credenziali Accesso</h3>
+                    <div class="glass-card p-5 flex-col-gap-4">
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">person</span>
+                            <input id="utente" type="text" placeholder="Utente / Email" />
                         </div>
-
-                        <!-- Account & Password -->
-                        <div class="dashboard-grid-2 gap-5">
-                            <div>
-                                <label
-                                    class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Account
-                                    ID</label>
-                                <div class="relative">
-                                    <span
-                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">folder_shared</span>
-                                    <input id="account" type="text"
-                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                        placeholder="Cod. Cliente" />
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Password</label>
-                                <div class="relative">
-                                    <span
-                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">key</span>
-                                    <input id="password" type="text"
-                                        class="base-shield w-full h-12 pl-10 pr-20 rounded-xl text-sm font-medium outline-none text-mono-wide"
-                                        placeholder="********" />
-                                    <!-- Visibility & Copy -->
-                                    <div class="absolute-right-2-center-y flex items-center">
-                                        <button type="button"
-                                            onclick="const i = document.getElementById('password'); i.classList.toggle('base-shield'); this.querySelector('span').textContent = i.classList.contains('base-shield')?'visibility':'visibility_off';"
-                                            class="p-1-5 text-gray-400 border-none bg-transparent cursor-pointer rounded-lg transition-all flex items-center">
-                                            <span class="material-symbols-outlined icon-18">visibility</span>
-                                        </button>
-                                        <button type="button" onclick="copyToClipboard('password')"
-                                            class="p-1-5 text-gray-400 border-none bg-transparent cursor-pointer rounded-lg transition-all flex items-center">
-                                            <span class="material-symbols-outlined icon-18">content_copy</span>
-                                        </button>
-                                    </div>
-                                </div>
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">folder_shared</span>
+                            <input id="account" type="text" placeholder="Codice Account" />
+                        </div>
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">key</span>
+                            <input id="password" type="text" class="base-shield" placeholder="Password" />
+                            <div class="flex items-center gap-1 pr-1">
+                                <button type="button"
+                                    class="btn-toggle-pass size-8 flex-center text-white/20 hover:text-white transition-colors"
+                                    data-target="password">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </button>
+                                <button type="button"
+                                    class="btn-copy-val size-8 flex-center text-white/20 hover:text-white transition-colors"
+                                    data-target="password">
+                                    <span class="material-symbols-outlined text-lg">content_copy</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 3. Coordinate Bancarie -->
-                <div class="flex-col gap-4" id="banking-section">
-                    <div class="flex-center items-center justify-between mb-2 pl-1">
-                        <div class="flex-center-gap-2">
-                            <span class="material-symbols-outlined icon-accent-purple">account_balance</span>
-                            <h3 class="text-white text-sm bold all-caps tracked-wide m-0">
-                                Coordinate Bancarie</h3>
-                        </div>
-                        <button type="button" id="btn-add-iban"
-                            class="text-blue-400 bg-transparent border-transparent rounded-lg py-1-5 px-2 text-xs bold flex-center items-center gap-1 cursor-pointer transition-all">
-                            <span class="material-symbols-outlined icon-16">add_circle</span> Aggiungi
+                <div class="flex-col-gap-4 mt-6">
+                    <div class="flex items-center justify-between px-1">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40"
+                            data-t="banking_title">Coordinate Bancarie</h3>
+                        <button id="btn-add-iban"
+                            class="flex items-center gap-1 text-blue-400 font-black text-[9px] uppercase hover:brightness-110 transition-all">
+                            <span class="material-symbols-outlined text-sm">add_circle</span>
+                            <span>Aggiungi</span>
                         </button>
                     </div>
-
-                    <div id="iban-list-container" class="flex-col gap-4">
-                        <!-- IBANs will be injected here -->
+                    <div id="iban-list-container" class="flex-col-gap-4">
+                        <!-- Injected via JS -->
                     </div>
                 </div>
 
-                <!-- 4. Referente -->
-                <div class="flex-col gap-4">
-                    <div class="flex-center-gap-2 mb-2 pl-1">
-                        <span class="material-symbols-outlined icon-accent-orange">assignment_ind</span>
-                        <h3 class="text-white text-sm bold all-caps tracked-wide m-0">
-                            Referente Aziendale</h3>
-                    </div>
-
-                    <div
-                        class="bg-slate-900-50 border border-white-5 rounded-3xl p-5 flex-col gap-5 shadow-lg backdrop-blur-sm">
-                        <!-- Nome -->
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Nome
-                                e Cognome</label>
-                            <div class="relative">
-                                <span
-                                    class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">badge</span>
-                                <input id="referente-nome" type="text"
-                                    class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                    placeholder="Es. Mario Rossi" />
-                            </div>
+                <!-- 4. Referente Aziendale -->
+                <div class="flex-col-gap-4 mt-6">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1" data-t="referent">
+                        Referente</h3>
+                    <div class="glass-card p-5 flex-col-gap-4">
+                        <div class="titanium-input-group">
+                            <span class="material-symbols-outlined">badge</span>
+                            <input id="referente-nome" type="text" placeholder="Nome e Cognome" />
                         </div>
-
-                        <!-- Contatti -->
-                        <div class="dashboard-grid-2 gap-5">
-                            <div>
-                                <label
-                                    class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Telefono</label>
-                                <div class="relative">
-                                    <span
-                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">call</span>
-                                    <input id="referente-telefono" type="tel"
-                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                        placeholder="02..." />
-                                </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="titanium-input-group">
+                                <span class="material-symbols-outlined">call</span>
+                                <input id="referente-telefono" type="tel" placeholder="Ufficio" />
                             </div>
-                            <div>
-                                <label
-                                    class="block text-xs font-semibold text-gray-400 all-caps tracked-wide mb-2">Cellulare</label>
-                                <div class="relative">
-                                    <span
-                                        class="material-symbols-outlined absolute-left-3-center-y text-gray-500 text-20">smartphone</span>
-                                    <input id="referente-cellulare" type="tel"
-                                        class="w-full h-12 pl-10 pr-4 rounded-xl text-sm font-medium outline-none"
-                                        placeholder="333..." />
-                                </div>
+                            <div class="titanium-input-group">
+                                <span class="material-symbols-outlined">smartphone</span>
+                                <input id="referente-cellulare" type="tel" placeholder="Mobile" />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 5. Note & Opzioni -->
-                <div class="flex-col gap-4">
-                    <div class="flex-center-gap-2 mb-2 pl-1">
-                        <span class="material-symbols-outlined icon-accent-cyan">sticky_note_2</span>
-                        <h3 class="text-white text-sm bold all-caps tracked-wide m-0">
-                            Note & Opzioni</h3>
-                    </div>
-
-                    <!-- Note -->
-                    <div class="bg-slate-900-50 border border-white-5 rounded-3xl overflow-hidden shadow-lg mb-4">
+                <div class="flex-col-gap-4 mt-6">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1"
+                        data-t="ext_options">Note & Opzioni</h3>
+                    <div class="glass-card flex-col-gap-4 overflow-hidden">
                         <textarea id="note"
-                            class="w-full min-h-120 p-5 bg-transparent border-none text-sm text-gray-300 lh-relaxed outline-none resize-none"
+                            class="w-full min-h-[120px] p-5 bg-transparent border-none text-sm text-white/80 outline-none resize-none leading-relaxed"
                             placeholder="Note aggiuntive..."></textarea>
                     </div>
 
-                    <!-- Opzioni Flags -->
-                    <div
-                        class="bg-slate-900-50 border border-white-5 rounded-3xl p-5 flex-col gap-6 shadow-lg backdrop-blur-sm">
-                        <!-- Condiviso Toggle -->
+                    <!-- Toggles -->
+                    <div class="glass-card p-5 flex-col-gap-6">
                         <div class="flex items-center justify-between">
-                            <div class="flex-center-gap-3">
-                                <div class="icon-box-blue">
-                                    <span class="material-symbols-outlined filled">share</span>
-                                </div>
-                                <div class="flex-col">
-                                    <span class="block text-white text-sm bold">Account
-                                        Condiviso</span>
-                                    <span class="block text-xs text-gray-500">Permetti l'accesso ad
-                                        altri
-                                        utenti</span>
-                                </div>
+                            <div class="flex-col text-left">
+                                <span class="text-xs font-black text-white uppercase tracking-widest">Condiviso</span>
+                                <span class="text-[10px] text-white/30 font-bold uppercase mt-0.5">Visibile agli
+                                    invitati</span>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input class="absolute size-0 opacity-0" type="checkbox" id="flag-shared" />
-                                <div class="base-switch"></div>
-                            </label>
+                            <input type="checkbox" id="flag-shared" class="titanium-toggle">
                         </div>
 
-                        <!-- Condivisione Panel -->
-                        <div id="shared-management" class="hidden pl-2 border-l-2 border-blue-20 ml-4">
-                            <!-- Lista Invitati -->
-                            <div id="guests-list" class="flex-col gap-2 mb-3">
-                                <!-- Popolato via JS -->
+                        <!-- Management Area (Conditional) -->
+                        <div id="shared-management" class="hidden flex-col gap-4 pl-4 border-l border-white/5 pb-2">
+                            <div id="guests-list" class="flex-col gap-2">
+                                <!-- Guests here -->
                             </div>
-
-                            <!-- Input Invito -->
-                            <div class="relative">
-                                <div
-                                    class="flex items-center bg-black-40 border border-white-10 rounded-xl overflow-hidden transition-border">
-                                    <!-- Input Email -->
-                                    <input id="invite-email" type="email"
-                                        class="flex-1 bg-transparent border-none h-12 px-4 text-sm text-white outline-none"
-                                        placeholder="Email utente da invitare">
-                                    <button id="btn-send-invite" type="button"
-                                        class="p-3 text-blue-400 bg-transparent border-none border-l border-white-10 cursor-pointer transition-bg">
-                                        <span class="material-symbols-outlined">person_add</span>
-                                    </button>
-                                </div>
+                            <div class="titanium-input-group">
+                                <span class="material-symbols-outlined">group_add</span>
+                                <input id="invite-email" type="email" placeholder="Email utente da invitare" />
+                                <button id="btn-send-invite"
+                                    class="size-10 flex-center text-blue-400 hover:bg-white/5 rounded-xl transition-colors">
+                                    <span class="material-symbols-outlined">send</span>
+                                </button>
                                 <div id="rubrica-suggestions"
-                                    class="hidden absolute top-full inset-x-0 mt-1 bg-slate-800 border border-white-10 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
-                                    <!-- Popolato via JS -->
+                                    class="hidden absolute top-full left-0 right-0 mt-2 glass-card z-50 max-h-48 overflow-y-auto">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Memorandum Toggle -->
                         <div class="flex items-center justify-between">
-                            <div class="flex-center-gap-3">
-                                <div class="icon-box-amber">
-                                    <span class="material-symbols-outlined filled">lightbulb</span>
-                                </div>
-                                <div class="flex-col">
-                                    <span class="block text-white text-sm bold">Memorandum</span>
-                                    <span class="block text-xs text-gray-500">Metti in evidenza
-                                        questo
-                                        account</span>
-                                </div>
+                            <div class="flex-col text-left">
+                                <span class="text-xs font-black text-white uppercase tracking-widest">Memorandum</span>
+                                <span class="text-[10px] text-white/30 font-bold uppercase mt-0.5">Metti in
+                                    evidenza</span>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo" />
-                                <div class="base-switch-orange"></div>
-                            </label>
+                            <input type="checkbox" id="flag-memo" class="titanium-toggle-amber">
                         </div>
 
-                        <!-- Memo Condiviso Toggle -->
                         <div class="flex items-center justify-between">
-                            <div class="flex-center-gap-3">
-                                <div class="icon-box-emerald">
-                                    <span class="material-symbols-outlined filled">share_reviews</span>
-                                </div>
-                                <div class="flex-col">
-                                    <span class="block text-white text-sm bold">Memorandum
-                                        Condiviso</span>
-                                    <span class="block text-xs text-gray-500">Evidenzia anche per
-                                        gli
-                                        invitati</span>
-                                </div>
+                            <div class="flex-col text-left">
+                                <span class="text-xs font-black text-white uppercase tracking-widest">Memo
+                                    Condiviso</span>
+                                <span class="text-[10px] text-white/30 font-bold uppercase mt-0.5">In evidenza per
+                                    altri</span>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input class="absolute size-0 opacity-0" type="checkbox" id="flag-memo-shared" />
-                                <div class="base-switch base-switch-green"></div>
-                            </label>
+                            <input type="checkbox" id="flag-memo-shared" class="titanium-toggle-emerald">
                         </div>
                     </div>
                 </div>
+
+                <div class="h-20"></div>
 
             </div>
         </main>
 
         <div class="spacer-footer"></div>
-        <!-- FOOTER PREMIUM -->
+        <!-- FOOTER PLACEHOLDER -->
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
-    <!-- Script -->
-    <script type="module" src="assets/js/main.js?v=3.3"></script>
-    <script type="module" src="assets/js/modifica_account_azienda.js?v=3.3"></script>
+    <!-- Scripts -->
+    <script type="module" src="assets/js/main.js?v=3.6"></script>
+    <script type="module" src="assets/js/modifica_account_azienda.js?v=3.6"></script>
 </body>
 
 </html>
-
-
-
-

@@ -52,10 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (hLeft && hLeft.innerHTML.trim() === '') {
                 hLeft.innerHTML = `
-                    <button onclick="history.back()" class="btn-icon-header">
+                    <button id="btn-back-protocol" class="btn-icon-header">
                         <span class="material-symbols-outlined">arrow_back</span>
                     </button>
                 `;
+                document.getElementById('btn-back-protocol').addEventListener('click', () => history.back());
             }
 
             if (hCenter && hCenter.innerHTML.trim() === '') {
@@ -86,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnDel.style.color = '#ef4444';
                 btnDel.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                 btnDel.innerHTML = '<span class="material-symbols-outlined">delete</span>';
-                btnDel.onclick = deleteAccount;
+                btnDel.addEventListener('click', deleteAccount);
                 fCenter.appendChild(btnDel);
             }
 
@@ -100,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnSave.style.color = '#3b82f6';
                 btnSave.style.borderColor = 'rgba(59, 130, 246, 0.3)';
                 btnSave.innerHTML = '<span class="material-symbols-outlined">save</span>';
-                btnSave.onclick = saveChanges;
+                btnSave.addEventListener('click', saveChanges);
 
                 // Prepend to be on the left of settings
                 fRight.prepend(btnSave);
@@ -144,6 +145,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupUI();
     setupImageUploader();
+
+    // Trigger per logo-input
+    const btnLogo = document.getElementById('btn-trigger-logo');
+    if (btnLogo) btnLogo.addEventListener('click', () => document.getElementById('logo-input').click());
+
+    // Main Password Toggle
+    const btnToggle = document.getElementById('btn-toggle-password-edit');
+    const passInput = document.getElementById('account-password');
+    if (btnToggle && passInput) {
+        btnToggle.addEventListener('click', () => {
+            const isPassword = passInput.type === 'password';
+            passInput.type = isPassword ? 'text' : 'password';
+
+            // Toggle shield class for extra effect
+            if (isPassword) {
+                passInput.classList.remove('base-shield');
+            } else {
+                passInput.classList.add('base-shield');
+            }
+
+            btnToggle.querySelector('span').textContent = isPassword ? 'visibility_off' : 'visibility';
+        });
+    }
 });
 
 // FUNCTIONS
@@ -308,10 +332,10 @@ function setupUI() {
             `).join('');
 
             suggestions.querySelectorAll('div').forEach(div => {
-                div.onclick = () => {
+                div.addEventListener('click', () => {
                     inviteInput.value = div.dataset.email;
                     suggestions.classList.add('hidden');
-                };
+                });
             });
         });
     }
@@ -320,6 +344,22 @@ function setupUI() {
     if (btnInvite) {
         btnInvite.addEventListener('click', sendInvite);
     }
+
+    // AUTOFILL PROTECTION HANDLERS
+    const protectedFields = ['account-username', 'account-password', 'account-code'];
+    protectedFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', () => {
+                if (el.hasAttribute('readonly')) el.removeAttribute('readonly');
+            });
+            el.addEventListener('focus', () => {
+                if (el.hasAttribute('readonly')) el.removeAttribute('readonly');
+            });
+            // Restore readonly on blur to protect again? Maybe too aggressive.
+            // Let's keep it editable once unlocked for UX connectivity.
+        }
+    });
 }
 
 function toggleSharingUI(show) {
@@ -412,7 +452,7 @@ async function renderGuests(listItems) {
 
         const removeBtn = div.querySelector('button');
         if (removeBtn) {
-            removeBtn.onclick = () => handleRevoke(guestEmail);
+            removeBtn.addEventListener('click', () => handleRevoke(guestEmail));
         }
         list.appendChild(div);
     });
@@ -598,7 +638,7 @@ function renderBankAccounts() {
                     <span class="text-[10px] font-900 text-white/40 uppercase tracking-[0.2em]">Conto Protocollo #${ibanIdx + 1}</span>
                 </div>
                 ${bankAccounts.length > 1 ? `
-                    <button type="button" class="btn-icon-header" style="width: 32px; height: 32px; color: var(--accent-red); border-color: rgba(155, 28, 28, 0.2);" onclick="removeIban(${ibanIdx})">
+                    <button type="button" class="btn-icon-header btn-remove-iban" style="width: 32px; height: 32px; color: var(--accent-red); border-color: rgba(155, 28, 28, 0.2);" data-idx="${ibanIdx}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
                     </button>
                 ` : ''}
@@ -622,7 +662,7 @@ function renderBankAccounts() {
                         <input type="text" class="dispositiva-input base-shield" 
                             data-iban-idx="${ibanIdx}" value="${account.passwordDispositiva || ''}" 
                             style="font-family: monospace;" />
-                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="glass-field-btn">
+                        <button type="button" class="glass-field-btn btn-toggle-shield">
                             <span class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
                         </button>
                     </div>
@@ -678,7 +718,7 @@ function renderBankAccounts() {
                          <span class="material-symbols-outlined text-[var(--accent-purple)]" style="font-size: 18px;">credit_card</span>
                          <span class="text-[9px] font-900 text-white/40 uppercase tracking-widest" data-t="linked_instruments">Strumenti di Pagamento</span>
                     </div>
-                    <button type="button" class="btn-icon-header" style="width: 32px; height: 32px; color: var(--accent-blue); border-color: rgba(33, 150, 243, 0.2);" onclick="addCard(${ibanIdx})">
+                    <button type="button" class="btn-icon-header btn-add-card-edit" style="width: 32px; height: 32px; color: var(--accent-blue); border-color: rgba(33, 150, 243, 0.2);" data-idx="${ibanIdx}">
                         <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
                     </button>
                 </div>
@@ -692,7 +732,30 @@ function renderBankAccounts() {
 
     // Attach local listeners
     container.querySelectorAll('.iban-input').forEach(input => {
-        input.oninput = (e) => bankAccounts[e.target.dataset.ibanIdx].iban = e.target.value.trim().toUpperCase();
+        input.addEventListener('input', (e) => bankAccounts[e.target.dataset.ibanIdx].iban = e.target.value.trim().toUpperCase());
+    });
+    container.querySelectorAll('.btn-remove-iban').forEach(btn => {
+        btn.addEventListener('click', (e) => removeIban(parseInt(btn.dataset.idx)));
+    });
+    container.querySelectorAll('.btn-add-card-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => addCard(parseInt(btn.dataset.idx)));
+    });
+    container.querySelectorAll('.btn-remove-card-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => removeCard(parseInt(btn.dataset.iban), parseInt(btn.dataset.card)));
+    });
+    container.querySelectorAll('.btn-toggle-shield').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = btn.previousElementSibling;
+            input.classList.toggle('base-shield');
+            btn.querySelector('span').textContent = input.classList.contains('base-shield') ? 'visibility' : 'visibility_off';
+        });
+    });
+    container.querySelectorAll('.btn-toggle-shield-card').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = btn.previousElementSibling;
+            input.classList.toggle('base-shield');
+            btn.querySelector('span').textContent = input.classList.contains('base-shield') ? 'visibility' : 'visibility_off';
+        });
     });
 }
 
@@ -704,7 +767,7 @@ function renderCardEntry(ibanIdx, cardIdx, card) {
                     <span class="material-symbols-outlined text-white/40" style="font-size: 18px;">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
                     <span class="text-[9px] font-900 text-white/40 uppercase tracking-wider">Strumento #${cardIdx + 1}</span>
                 </div>
-                <button type="button" class="btn-icon-header" style="width: 28px; height: 28px; color: var(--accent-red); border-color: transparent;" onclick="removeCard(${ibanIdx}, ${cardIdx})">
+                <button type="button" class="btn-icon-header btn-remove-card-edit" style="width: 28px; height: 28px; color: var(--accent-red); border-color: transparent;" data-iban="${ibanIdx}" data-card="${cardIdx}">
                     <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
                 </button>
             </div>
@@ -768,7 +831,7 @@ function renderCardEntry(ibanIdx, cardIdx, card) {
                         <div class="glass-field border-glow" style="height: 3rem;">
                             <input type="text" class="pin-input base-shield" 
                                 data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" style="text-align: center; font-family: monospace;" />
-                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="glass-field-btn">
+                            <button type="button" class="glass-field-btn btn-toggle-shield-card">
                                 <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span>
                             </button>
                         </div>

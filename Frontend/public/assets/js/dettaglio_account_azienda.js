@@ -67,9 +67,10 @@ function applyTheme(companyName, colorIndex) {
 // --- GLOBAL HELPERS (Local aliases for backwards compatibility or specialized overrides) ---
 // Note: window.copyText and window.makeCall are defined globally in main.js
 
-window.toggleReferente = function () {
+const toggleReferente = function () {
     const content = document.getElementById('referente-content');
     const chevron = document.getElementById('referente-chevron');
+    if (!content) return;
     if (content.classList.contains('hidden')) {
         content.classList.remove('hidden');
         if (chevron) chevron.style.transform = 'rotate(180deg)';
@@ -79,7 +80,7 @@ window.toggleReferente = function () {
     }
 };
 
-window.toggleAccessi = function () {
+const toggleAccessi = function () {
     const content = document.getElementById('accessi-content');
     const chevron = document.getElementById('accessi-chevron');
     if (content && content.classList.contains('hidden')) {
@@ -91,7 +92,7 @@ window.toggleAccessi = function () {
     }
 };
 
-window.toggleBanking = function () {
+const toggleBanking = function () {
     const content = document.getElementById('banking-content');
     const chevron = document.getElementById('banking-chevron');
     if (content && content.classList.contains('hidden')) {
@@ -103,7 +104,7 @@ window.toggleBanking = function () {
     }
 };
 
-window.openAttachments = function () {
+const openAttachments = function () {
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
     const aziendaId = urlParams.get('aziendaId');
@@ -112,7 +113,7 @@ window.openAttachments = function () {
     }
 };
 
-window.toggleSharingUI = function (show) {
+const toggleSharingUI = function (show) {
     const section = document.getElementById('shared-management');
     if (section) {
         if (show) section.classList.remove('hidden');
@@ -120,7 +121,7 @@ window.toggleSharingUI = function (show) {
     }
 };
 
-window.closeSaveModal = () => {
+const closeSaveModal = () => {
     const modal = document.getElementById('save-modal');
     if (modal) modal.classList.add('hidden');
 };
@@ -128,14 +129,26 @@ window.closeSaveModal = () => {
 
 // --- MAIN LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Loaded (Re-Authored) - DETAIL ACCOUNT AZIENDA");
-
     const urlParams = new URLSearchParams(window.location.search);
     const accountId = urlParams.get('id');
     const aziendaId = urlParams.get('aziendaId');
+    console.log("DOM Loaded (Re-Authored) - DETAIL ACCOUNT AZIENDA");
+
+    // Toggle listeners for sections
+    const btnToggleBanking = document.getElementById('btn-toggle-banking');
+    if (btnToggleBanking) btnToggleBanking.addEventListener('click', toggleBanking);
+
+    const btnToggleReferente = document.getElementById('btn-toggle-referente');
+    if (btnToggleReferente) btnToggleReferente.addEventListener('click', toggleReferente);
+
+    const btnOpenAttachments = document.getElementById('btn-open-attachments');
+    if (btnOpenAttachments) btnOpenAttachments.addEventListener('click', openAttachments);
+
+    const btnToggleAccessi = document.getElementById('btn-toggle-accessi');
+    if (btnToggleAccessi) btnToggleAccessi.addEventListener('click', toggleAccessi);
 
     if (!accountId || !aziendaId) {
-        alert("ID account o azienda mancante.");
+        if (window.showToast) window.showToast("ID account o azienda mancante.", "error");
         window.location.href = 'lista_aziende.html';
         return;
     }
@@ -154,9 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             const btnEdit = document.getElementById('btn-edit-footer');
             if (btnEdit) {
-                btnEdit.onclick = () => {
+                btnEdit.addEventListener('click', () => {
                     window.location.href = `modifica_account_azienda.html?id=${encodeURIComponent(accountId)}&aziendaId=${encodeURIComponent(aziendaId)}`;
-                };
+                });
             }
         }
         // Re-apply theme to footer actions
@@ -181,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Back Button (Automated by header, but we keep this for legacy if header fails)
     const btnBack = document.getElementById('btn-back');
-    if (btnBack) btnBack.onclick = () => window.history.back();
+    if (btnBack) btnBack.addEventListener('click', () => window.history.back());
     async function loadAccountDetails(uid, azId, accId) {
         try {
             // Get Company Data (Theme)
@@ -207,8 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 originalData = { ...data, docId: accId, aziendaId: azId };
                 renderData(data);
             } else {
-                alert("Account non trovato.");
-                // Redirect logic if needed
+                if (window.showToast) window.showToast("Account non trovato.", "error");
             }
         } catch (error) {
             console.error("Error loading details:", error);
@@ -282,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input readonly
                                     class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold focus:ring-0 text-white uppercase font-mono"
                                     value="${bank.iban || ''}">
-                                <button onclick="window.copyText('${bank.iban}')" class="p-3 text-white/40 hover:text-white border-l border-white/5">
+                                <button class="p-3 text-white/40 hover:text-white border-l border-white/5 btn-copy-iban" data-iban="${bank.iban || ''}">
                                     <span class="material-symbols-outlined text-base">content_copy</span>
                                 </button>
                             </div>
@@ -296,10 +308,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                      <input readonly type="text"
                                          class="base-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-white"
                                          value="${bank.passwordDispositiva || ''}">
-                                     <button onclick="const p=this.previousElementSibling; p.classList.toggle('base-shield'); this.querySelector('span').textContent=p.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
+                                     <button class="p-2 text-white/40 btn-toggle-shield-bank">
                                          <span class="material-symbols-outlined text-sm">visibility</span>
                                      </button>
-                                     <button onclick="window.copyText(this.parentElement.querySelector('input').value)" class="p-2 text-white/40 hover:text-white border-l border-white/5">
+                                     <button class="p-2 text-white/40 hover:text-white border-l border-white/5 btn-copy-field">
                                          <span class="material-symbols-outlined text-sm">content_copy</span>
                                      </button>
                                  </div>
@@ -325,14 +337,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="phone">Telefono</span>
-                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteTelefono}')" title="Chiama">
+                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors btn-make-call" data-num="${bank.referenteTelefono || ''}" title="Chiama">
                                         <span class="material-symbols-outlined text-[16px] text-blue-500">call</span>
                                         <span class="text-xs font-bold text-white/70">${bank.referenteTelefono || '-'}</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="mobile">Cellulare</span>
-                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="window.makeCall('${bank.referenteCellulare}')" title="Chiama">
+                                    <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors btn-make-call" data-num="${bank.referenteCellulare || ''}" title="Chiama">
                                         <span class="material-symbols-outlined text-[16px] text-blue-500">smartphone</span>
                                         <span class="text-xs font-bold text-white/70">${bank.referenteCellulare || '-'}</span>
                                     </div>
@@ -358,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                                 <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="holder">Titolare</span>
                                                 <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                                     <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.titolare || ''}">
-                                                    <button onclick="window.copyText('${card.titolare}')" class="p-2 text-white/40 hover:text-white">
+                                                    <button class="p-2 text-white/40 hover:text-white btn-copy-field">
                                                         <span class="material-symbols-outlined text-base">content_copy</span>
                                                     </button>
                                                 </div>
@@ -377,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                             <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="number">Numero</span>
                                             <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                                 <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" value="${card.cardNumber || ''}">
-                                                <button onclick="window.copyText('${card.cardNumber}')" class="p-2 text-white/40 hover:text-white">
+                                                <button class="p-2 text-white/40 hover:text-white btn-copy-field">
                                                     <span class="material-symbols-outlined text-base">content_copy</span>
                                                 </button>
                                             </div>
@@ -394,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                                 <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="ccv">CCV</span>
                                                 <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                                     <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.ccv || ''}">
-                                                    <button onclick="window.copyText('${card.ccv}')" class="p-2 text-white/40 hover:text-white">
+                                                    <button class="p-2 text-white/40 hover:text-white btn-copy-field">
                                                         <span class="material-symbols-outlined text-sm">content_copy</span>
                                                     </button>
                                                 </div>
@@ -404,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                                   <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
                                                       <input readonly type="text" class="base-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" 
                                                          value="${card.pin || ''}">
-                                                      <button onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-white/40">
+                                                      <button class="p-2 text-white/40 btn-toggle-shield-bank">
                                                           <span class="material-symbols-outlined text-sm">visibility</span>
                                                       </button>
                                                   </div>
@@ -425,6 +437,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         ` : ''}
                     </div>
                 `).join('');
+
+                // Attach dynamically generated listeners
+                bankingContent.querySelectorAll('.btn-copy-iban').forEach(btn => {
+                    btn.addEventListener('click', () => window.copyText(btn.dataset.iban));
+                });
+                bankingContent.querySelectorAll('.btn-toggle-shield-bank').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const p = btn.previousElementSibling;
+                        p.classList.toggle('base-shield');
+                        btn.querySelector('span').textContent = p.classList.contains('base-shield') ? 'visibility' : 'visibility_off';
+                    });
+                });
+                bankingContent.querySelectorAll('.btn-copy-field').forEach(btn => {
+                    btn.addEventListener('click', () => window.copyText(btn.parentElement.querySelector('input').value));
+                });
+                bankingContent.querySelectorAll('.btn-make-call').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const num = el.dataset.num;
+                        if (num && num !== '-' && num !== '') {
+                            window.location.href = `tel:${num.replace(/\s+/g, '')}`;
+                        }
+                    });
+                });
             }
         }
 
@@ -439,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Sharing UI State
         const isSharing = data.shared || data.isMemoShared;
-        window.toggleSharingUI(isSharing);
+        toggleSharingUI(isSharing);
 
         // Render Guests
         renderGuests(data.sharedWith || []);
@@ -518,16 +553,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         </p>
                     </div>
                 </div>
-                <button onclick="window.handleRevoke('${email}')" class="text-red-400 hover:text-red-600 transition-colors shrink-0" title="Rimuovi Accesso">
+                <button class="text-red-400 hover:text-red-600 transition-colors shrink-0 btn-revoke-guest" data-email="${email}" title="Rimuovi Accesso">
                     <span class="material-symbols-outlined text-sm">remove_circle</span>
                 </button>
             `;
+            const btnRevoke = div.querySelector('.btn-revoke-guest');
+            btnRevoke.addEventListener('click', () => handleRevoke(email));
             container.appendChild(div);
         });
     }
 
-    window.handleRevoke = async (email) => {
-        if (!confirm(`Revocare l'accesso a ${email}?`)) return;
+    const handleRevoke = async (email) => {
+        const confirmed = await window.showConfirmModal(
+            "REVOCA ACCESSO",
+            `Revocare l'accesso a ${email}?`,
+            "REVOCA",
+            "ANNULLA"
+        );
+        if (!confirmed) return;
         try {
             // 1. Update sharedWith array (removing object or string)
             // Since firestore arrayRemove only works for exact match, read-filter-write is safer for objects
@@ -576,13 +619,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupListeners() {
         // Copy btns
         document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.onclick = () => {
+            btn.addEventListener('click', () => {
                 const input = btn.parentElement.querySelector('input');
                 window.copyText(input.value);
-            };
+            });
         });
         const copyNoteBtn = document.getElementById('copy-note');
-        if (copyNoteBtn) copyNoteBtn.onclick = () => window.copyText(document.getElementById('detail-note').textContent);
+        if (copyNoteBtn) copyNoteBtn.addEventListener('click', () => window.copyText(document.getElementById('detail-note').textContent));
 
         // Toggle Password Visibility (Titanium Reveal Strategy)
         const toggle = document.getElementById('toggle-password');
@@ -591,26 +634,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const accInput = document.getElementById('detail-account');
 
         if (toggle && passInput) {
-            toggle.onclick = () => {
+            toggle.addEventListener('click', () => {
                 passInput.classList.toggle('base-shield');
                 if (userInput) userInput.classList.toggle('base-shield');
                 if (accInput) accInput.classList.toggle('base-shield');
 
                 const isMasked = passInput.classList.contains('base-shield');
                 toggle.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';
-            };
+            });
         }
 
         // Open Website
         const webBtn = document.getElementById('open-website');
         const webInput = document.getElementById('detail-website');
         if (webBtn && webInput) {
-            webBtn.onclick = () => {
+            webBtn.addEventListener('click', () => {
                 let url = webInput.value.trim();
                 if (!url) return;
                 if (!url.startsWith('http')) url = 'https://' + url;
                 window.open(url, '_blank');
-            };
+            });
         }
 
         // Call btns
@@ -640,7 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isSharing = checkShared.checked || checkMemoShared.checked;
 
                     if (isSharing) {
-                        window.toggleSharingUI(true);
+                        toggleSharingUI(true);
                         // Auto open accordion
                         const content = document.getElementById('accessi-content');
                         const chevron = document.getElementById('accessi-chevron');
@@ -649,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (chevron) chevron.style.transform = 'rotate(180deg)';
                         }
                     } else {
-                        window.toggleSharingUI(false);
+                        toggleSharingUI(false);
                         const content = document.getElementById('accessi-content');
                         if (content && !content.classList.contains('hidden')) {
                             content.classList.add('hidden'); // Close accordion
@@ -666,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const inviteSelect = document.getElementById('invite-select');
 
         if (btnSave) {
-            btnSave.onclick = async () => {
+            btnSave.addEventListener('click', async () => {
                 const isShared = checkShared.checked || checkMemoShared.checked;
                 const newGuestEmail = inviteSelect ? inviteSelect.value : '';
 
@@ -675,9 +718,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hasGuests = guestsContainer && !guestsContainer.textContent.includes('Nessun accesso attivo');
 
                 if (isShared && !hasGuests && !newGuestEmail) {
-                    alert("Seleziona una persona da invitare o verifica che ci siano già accessi attivi.");
-                    window.closeSaveModal();
-                    window.toggleSharingUI(true);
+                    if (window.showToast) window.showToast("Seleziona una persona da invitare o verifica che ci siano già accessi attivi.", "error");
+                    closeSaveModal();
+                    toggleSharingUI(true);
                     const content = document.getElementById('accessi-content');
                     if (content) content.classList.remove('hidden');
                     if (inviteSelect) inviteSelect.focus();
@@ -722,7 +765,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     await updateDoc(accRef, updatePayload);
 
                     showToast("Salvato con successo!");
-                    window.closeSaveModal();
+                    closeSaveModal();
 
                     // Reload Data
                     await loadAccountDetails(currentUser.uid, aziendaId, accountId);
@@ -734,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } finally {
                     btnSave.disabled = false;
                 }
-            };
+            });
         }
     }
 

@@ -54,7 +54,10 @@ async function initProtocolUI() {
     const type = urlParams.get('type') || 'standard';
 
     if (hLeft) {
-        hLeft.innerHTML = `<button onclick="window.location.href='area_privata.html'" class="btn-icon-header"><span class="material-symbols-outlined">arrow_back</span></button>`;
+        hLeft.innerHTML = `<button id="btn-back-area" class="btn-icon-header"><span class="material-symbols-outlined">arrow_back</span></button>`;
+        document.getElementById('btn-back-area').addEventListener('click', () => {
+            window.location.href = 'area_privata.html';
+        });
     }
     if (hCenter) {
         let titleKey = "section_personal_accounts";
@@ -82,13 +85,13 @@ async function initProtocolUI() {
     if (fCenter) {
         const theme = THEMES[type] || THEMES.standard;
         fCenter.innerHTML = `
-            <button onclick="window.location.href='aggiungi_account_privato.html?type=${type}'" 
-                    id="add-account-btn" 
-                    class="btn-icon-header" 
-                    style="background: ${theme.accent}; color: white; border-radius: 50%; width: 50px; height: 50px; margin-top: -30px; border: 2px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+            <button id="add-account-btn" class="btn-floating-add" style="background: ${theme.accent}">
                 <span class="material-symbols-outlined">add</span>
             </button>
         `;
+        document.getElementById('add-account-btn').addEventListener('click', () => {
+            window.location.href = `aggiungi_account_privato.html?type=${type}`;
+        });
     }
 
     // Apply translations to everything
@@ -310,8 +313,6 @@ function renderList(list) {
 
     container.innerHTML = list.map(acc => {
         const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
-        const idSafe = encodeURIComponent(acc.id);
-
         const isMemo = acc._isMemo;
         const isShared = acc._isShared || acc.isSharedWithMe || sharedAccountIds.has(acc.id);
 
@@ -321,62 +322,49 @@ function renderList(list) {
         else if (isMemo) accentColor = 'rgba(245, 158, 11, 0.6)'; // Amber
 
         const isPinned = !!acc.isPinned;
-        const pinIcon = 'push_pin';
-        const pinStyle = isPinned ? 'opacity: 1; color: var(--text-primary);' : 'opacity: 0.3;';
         const dots = '••••••••';
 
         return `
-            <div class="micro-account-card swipe-row" id="acc-${acc.id}" 
-                 data-id="${acc.id}" data-owner="${acc.isOwner}" data-owner-id="${acc.ownerId || ''}">
+            <div class="micro-account-card swipe-row cursor-pointer hover:bg-white/5 transition-all active:scale-95" id="acc-${acc.id}" 
+                 data-id="${acc.id}" data-owner="${acc.isOwner}" data-owner-id="${acc.ownerId || ''}"
+                 data-action="navigate" data-href="dettaglio_account_privato.html?id=${acc.id}${acc.isOwner ? '' : `&ownerId=${acc.ownerId || ''}`}">
               
-              <!-- BACKGROUND ACTIONS -->
               <div class="swipe-backgrounds">
-                 <div class="swipe-bg-left">
-                    <span class="material-symbols-outlined text-white">delete</span>
-                 </div>
-                 <div class="swipe-bg-right">
-                    <span class="material-symbols-outlined text-white">archive</span>
-                 </div>
+                 <div class="swipe-bg-left"><span class="material-symbols-outlined">delete</span></div>
+                 <div class="swipe-bg-right"><span class="material-symbols-outlined">archive</span></div>
               </div>
 
-              <!-- FOREGROUND CONTENT: Compact Glass Card -->
               <div class="relative z-10 swipe-content">
                 <div class="micro-account-content">
-                    <!-- Avatar Micro -->
                     <div class="micro-account-avatar-box">
                         <img class="micro-account-avatar" src="${avatar}" alt="">
-                        <div class="micro-account-badge" style="background: ${accentColor}"></div>
+                        <div class="micro-item-badge-dot" style="background: ${accentColor}"></div>
                     </div>
 
-                    <!-- Info Testuali -->
-                    <div class="micro-account-info" onclick="window.location.href='dettaglio_account_privato.html?id=${idSafe}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}'">
+                    <div class="micro-account-info">
                         <h3 class="micro-account-name">${acc.nomeAccount || t('without_name')}</h3>
                     </div>
 
-                    <!-- Azioni in alto a destra (Solo Occhio e Puntina) -->
                     <div class="micro-account-top-actions">
                         ${acc.password ? `
-                        <button onclick="event.stopPropagation(); window.toggleTripleVisibility('${acc.id}')" 
-                                class="micro-btn-utility" style="color: ${accentColor};">
-                            <span id="pass-eye-${acc.id}" class="material-symbols-outlined text-[16px]">visibility</span>
+                        <button class="micro-btn-utility btn-toggle-visibility relative z-10" style="color: ${accentColor};" data-stop-propagation="true">
+                            <span id="pass-eye-${acc.id}" class="material-symbols-outlined">visibility</span>
                         </button>` : ''}
 
-                        <button onclick="event.stopPropagation(); window.togglePin('${acc.id}', ${acc.isOwner}, '${acc.ownerId}')" 
-                                class="micro-btn-utility" style="${pinStyle}">
-                            <span class="material-symbols-outlined text-[16px] ${isPinned ? 'filled' : ''}">push_pin</span>
+                        <button class="micro-btn-utility btn-toggle-pin relative z-10 ${isPinned ? 'is-active' : ''}" data-stop-propagation="true">
+                            <span class="material-symbols-outlined ${isPinned ? 'filled' : ''}">push_pin</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Dati visibili con pulsanti copia inline -->
                 <div class="micro-data-display">
                     ${acc.username ? `
                     <div class="micro-data-row">
                         <span class="micro-data-label">${t('label_user')}:</span>
                         <span class="micro-data-value">${acc.username}</span>
-                        <button class="copy-btn-dynamic micro-btn-copy-inline" 
-                                data-copy="${acc.username.replace(/"/g, '&quot;')}" title="${t('copy_username')}">
-                            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline relative z-10" 
+                                data-copy="${acc.username.replace(/"/g, '&quot;')}" title="${t('copy_username')}" data-stop-propagation="true">
+                            <span class="material-symbols-outlined">content_copy</span>
                         </button>
                     </div>` : ''}
                     
@@ -384,9 +372,9 @@ function renderList(list) {
                     <div class="micro-data-row">
                         <span class="micro-data-label">${t('label_account')}:</span>
                         <span class="micro-data-value">${acc.account}</span>
-                        <button class="copy-btn-dynamic micro-btn-copy-inline" 
-                                data-copy="${acc.account.replace(/"/g, '&quot;')}" title="${t('copy_account')}">
-                            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline relative z-10" 
+                                data-copy="${acc.account.replace(/"/g, '&quot;')}" title="${t('copy_account')}" data-stop-propagation="true">
+                            <span class="material-symbols-outlined">content_copy</span>
                         </button>
                     </div>` : ''}
                     
@@ -394,9 +382,9 @@ function renderList(list) {
                     <div class="micro-data-row">
                         <span class="micro-data-label">${t('label_password')}:</span>
                         <span class="micro-data-value" id="pass-text-${acc.id}">${dots}</span>
-                        <button class="copy-btn-dynamic micro-btn-copy-inline" 
-                                data-copy="${acc.password.replace(/"/g, '&quot;')}" title="${t('copy_password')}">
-                            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+                        <button class="copy-btn-dynamic micro-btn-copy-inline relative z-10" 
+                                data-copy="${acc.password.replace(/"/g, '&quot;')}" title="${t('copy_password')}" data-stop-propagation="true">
+                            <span class="material-symbols-outlined">content_copy</span>
                         </button>
                     </div>` : ''}
                 </div>
@@ -404,6 +392,49 @@ function renderList(list) {
             </div>
             `;
     }).join('');
+
+    // Event Delegation SPECIFICA per questa pagina (mix old/new logic)
+    // Nota: La navigazione card è gestita da cleanup.js (data-action="navigate")
+    // Dobbiamo gestire solo swipe e stop propagation manuali per le azioni specifiche di questa pagina
+
+    container.querySelectorAll('.micro-account-card').forEach(card => {
+        const id = card.dataset.id;
+        const isOwner = card.dataset.owner === 'true';
+        const ownerId = card.dataset.ownerId;
+
+        // I pulsanti con data-stop-propagation sono gestiti globalmente in cleanup.js per fermare il bubbling,
+        // ma le loro logiche specifiche (toggle pin, toggle visibility, copy old style) devono essere attaccate qui.
+
+        const btnVisibility = card.querySelector('.btn-toggle-visibility');
+        if (btnVisibility) {
+            btnVisibility.onclick = (e) => {
+                // Stop propagation è gestito dal data-attribute hook in cleanup.js o qui manualmente per sicurezza
+                e.stopPropagation();
+                window.toggleTripleVisibility(id);
+            };
+        }
+
+        const btnPin = card.querySelector('.btn-toggle-pin');
+        if (btnPin) {
+            btnPin.onclick = (e) => {
+                e.stopPropagation();
+                window.togglePin(id, isOwner, ownerId);
+            };
+        }
+
+        // Gestione Copy Old Style (per compatibilità con window.toggleTripleVisibility che legge data-copy)
+        card.querySelectorAll('.copy-btn-dynamic').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const text = btn.getAttribute('data-copy');
+                if (text) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        if (window.showToast) window.showToast(t('copied') || "Copiato!", "success");
+                    });
+                }
+            };
+        });
+    });
 
     if (currentSwipeList) currentSwipeList = null;
     currentSwipeList = new SwipeList('.swipe-row', {

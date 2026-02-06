@@ -28,11 +28,9 @@ const companyPalettes = [
 ];
 
 function getCompanyColor(companyName, colorIndex) {
-    // 1. Prefer Stored Index
     if (typeof colorIndex === 'number' && companyPalettes[colorIndex]) {
         return companyPalettes[colorIndex];
     }
-    // 2. Fallback
     if (!companyName) return companyPalettes[0];
     let hash = 0;
     for (let i = 0; i < companyName.length; i++) {
@@ -46,7 +44,6 @@ function applyTheme(companyName, colorIndex) {
     const theme = getCompanyColor(companyName, colorIndex);
     document.documentElement.style.setProperty('--primary-color', theme.from);
 
-    // Update Save Button Gradient
     const btnSave = document.getElementById('save-btn');
     if (btnSave) {
         btnSave.style.background = `linear-gradient(to right, ${theme.from}, ${theme.to})`;
@@ -55,52 +52,41 @@ function applyTheme(companyName, colorIndex) {
 }
 
 // Helpers
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    const toast = document.createElement('div');
-    let bgClass = 'bg-gray-800 text-white';
-    if (type === 'error') bgClass = 'bg-red-500 text-white';
-    if (type === 'success') bgClass = 'bg-green-500 text-white';
-    toast.className = `${bgClass} px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 transform translate-y-full opacity-0 pointer-events-auto`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.remove('translate-y-full', 'opacity-0'));
-    setTimeout(() => {
-        toast.classList.add('translate-y-full', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// Expose copyToClipboard globally for the HTML button
-window.copyToClipboard = function (elementId) {
-    const el = document.getElementById(elementId);
-    if (el && el.value) {
-        navigator.clipboard.writeText(el.value).then(() => showToast("Copiato!", "success"));
-    }
-};
+const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : console.log(msg);
 
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const aziendaId = urlParams.get('aziendaId');
 
-    const btnBack = document.getElementById('btn-back');
-    if (btnBack) {
-        btnBack.onclick = () => {
-            if (aziendaId) window.location.href = `account_azienda.html?id=${aziendaId}`;
-            else history.back();
-        };
-    }
-
     if (!aziendaId) {
         showToast("ID Azienda mancante", 'error');
+    }
+
+    // Static Event Listeners
+    const btnTogglePass = document.getElementById('btn-toggle-password');
+    if (btnTogglePass) {
+        btnTogglePass.addEventListener('click', () => {
+            const input = document.getElementById('password');
+            const icon = btnTogglePass.querySelector('span');
+            input.classList.toggle('base-shield');
+            icon.textContent = input.classList.contains('base-shield') ? 'visibility' : 'visibility_off';
+        });
+    }
+
+    const btnCopyPass = document.getElementById('btn-copy-password');
+    if (btnCopyPass) {
+        btnCopyPass.addEventListener('click', () => {
+            const val = document.getElementById('password').value;
+            if (val) {
+                navigator.clipboard.writeText(val).then(() => showToast("Password copiata!", "success"));
+            }
+        });
     }
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
             window.location.href = 'index.html';
         } else {
-            // Fetch Company Theme
             if (aziendaId) {
                 try {
                     const docRef = doc(db, "users", user.uid, "aziende", aziendaId);
@@ -137,19 +123,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     renderBankAccounts();
 
-    // --- PROTOCOLLO: INIEZIONE AZIONI NEL FOOTER ---
-    const injectFooterActions = () => {
+    // Iniezione Save Button nel Footer
+    const interval = setInterval(() => {
         const footerRight = document.getElementById('footer-right-actions');
         if (footerRight) {
+            clearInterval(interval);
             footerRight.innerHTML = `
-                <button id="save-btn" class="btn-icon-header" title="Salva Account">
+                <button id="save-btn" class="base-btn-primary flex-center-gap" title="Salva Account">
                     <span class="material-symbols-outlined">save</span>
+                    <span data-t="save_account">Salva Account</span>
                 </button>
             `;
             setupSaveLogic();
         }
-    };
-    setTimeout(injectFooterActions, 500);
+    }, 100);
 });
 
 function setupSaveLogic() {
@@ -159,7 +146,7 @@ function setupSaveLogic() {
     const urlParams = new URLSearchParams(window.location.search);
     const aziendaId = urlParams.get('aziendaId');
 
-    btnSave.onclick = async function () {
+    btnSave.addEventListener('click', async () => {
         if (!auth.currentUser) return;
 
         const nome = document.getElementById('nome-account').value.trim();
@@ -188,7 +175,7 @@ function setupSaveLogic() {
 
         try {
             btnSave.disabled = true;
-            btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin mr-2">progress_activity</span> Salvataggio...`;
+            btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin mr-2">progress_activity</span> <span data-t="saving">Salvataggio...</span>`;
 
             const colRef = collection(db, "users", auth.currentUser.uid, "aziende", aziendaId, "accounts");
             await addDoc(colRef, data);
@@ -202,10 +189,11 @@ function setupSaveLogic() {
             console.error(e);
             showToast("Errore: " + e.message, 'error');
             btnSave.disabled = false;
-            btnSave.innerHTML = `<span class="material-symbols-outlined">save</span> Salva Account`;
+            btnSave.innerHTML = `<span class="material-symbols-outlined">save</span> <span data-t="save_account">Salva Account</span>`;
         }
-    };
+    });
 }
+
 // --- BANKING FUNCTIONS ---
 function renderBankAccounts() {
     const container = document.getElementById('iban-list-container');
@@ -214,87 +202,95 @@ function renderBankAccounts() {
 
     bankAccounts.forEach((account, ibanIdx) => {
         const ibanDiv = document.createElement('div');
-        ibanDiv.className = "bg-white/50 p-4 rounded-2xl border border-black/5 space-y-4 relative animate-in fade-in slide-in-from-top-4 duration-500";
+        ibanDiv.className = "p-5 bg-slate-500/5 rounded-3xl border border-white/5 border-glow flex-col-gap-4 relative";
 
         ibanDiv.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Conto #${ibanIdx + 1}</span>
+            <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Conto #${ibanIdx + 1}</span>
                 ${bankAccounts.length > 1 ? `
-                    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" onclick="removeIban(${ibanIdx})">
+                    <button type="button" class="btn-remove-iban text-white/40 hover:text-red-500 transition-colors" data-idx="${ibanIdx}">
                         <span class="material-symbols-outlined text-sm">delete</span>
                     </button>
                 ` : ''}
             </div>
             
-            <div class="flex flex-col gap-2">
-                <label class="text-[#0A162A] text-xs font-bold uppercase tracking-wide opacity-50 pl-1">IBAN</label>
-                <div class="flex w-full items-center rounded-xl border border-black/5 bg-white overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all shadow-sm">
-                    <div class="pl-4 text-gray-400 flex items-center justify-center">
-                        <span class="material-symbols-outlined">account_balance</span>
-                    </div>
-                    <input type="text" class="iban-input w-full bg-transparent border-none h-14 px-4 text-base text-[#0A162A] font-mono focus:ring-0 uppercase font-bold" 
+            <div class="glass-field-container">
+                <label class="view-label">IBAN</label>
+                <div class="glass-field">
+                    <span class="material-symbols-outlined opacity-70 mr-2">account_balance</span>
+                    <input type="text" class="iban-input uppercase font-bold font-mono" 
                         data-iban-idx="${ibanIdx}" value="${account.iban}" placeholder="IT00..." />
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Pass. Dispositiva</label>
-                    <div class="flex items-center bg-white rounded-xl border border-black/5 overflow-hidden focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                        <input type="text" class="dispositiva-input base-shield w-full bg-transparent border-none h-11 px-4 text-sm focus:ring-0" 
+            <div class="form-grid-2">
+                <div class="glass-field-container">
+                    <label class="view-label">Pass. Dispositiva</label>
+                    <div class="glass-field">
+                        <input type="text" class="dispositiva-input base-shield" 
                             data-iban-idx="${ibanIdx}" value="${account.passwordDispositiva || ''}" placeholder="Password..." />
-                        <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                        <button type="button" class="btn-toggle-shield-bank glass-field-btn">
                             <span class="material-symbols-outlined text-sm">visibility</span>
                         </button>
                     </div>
                 </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Nota IBAN</label>
-                    <textarea class="iban-nota-input w-full bg-white rounded-xl border border-black/5 px-4 py-2.5 text-sm focus:ring-1 focus:ring-primary/20 resize-none" 
-                        data-iban-idx="${ibanIdx}" rows="1" placeholder="Note per questo IBAN...">${account.nota || ''}</textarea>
+                <div class="glass-field-container">
+                    <label class="view-label">Nota IBAN</label>
+                    <div class="glass-field">
+                        <input type="text" class="iban-nota-input" 
+                            data-iban-idx="${ibanIdx}" value="${account.nota || ''}" placeholder="Note..." />
+                    </div>
                 </div>
             </div>
 
-            <!-- SEZIONE REFERENTE -->
-            <div class="bg-primary/5 p-4 rounded-2xl border border-primary/10 space-y-3">
-                <div class="flex items-center gap-2 text-primary">
+            <!-- SEZIONE REFERENTE BANCA -->
+            <div class="bg-blue-500/5 p-4 rounded-2xl border border-white/5 flex-col-gap-3">
+                <div class="flex items-center gap-2 text-blue-500">
                     <span class="material-symbols-outlined text-sm">contact_phone</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest">Referente Banca</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Referente Banca</span>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Nome</label>
-                        <input type="text" class="ref-nome-input w-full bg-white rounded-lg border border-black/5 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteNome || ''}" placeholder="Nome" />
+                <div class="form-grid-2">
+                    <div class="glass-field-container">
+                        <label class="view-label">Nome</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 flex items-center px-3 h-10">
+                            <input type="text" class="ref-nome-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" value="${account.referenteNome || ''}" placeholder="Nome" />
+                        </div>
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Cognome</label>
-                        <input type="text" class="ref-cognome-input w-full bg-white rounded-lg border border-black/5 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteCognome || ''}" placeholder="Cognome" />
+                    <div class="glass-field-container">
+                        <label class="view-label">Cognome</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 flex items-center px-3 h-10">
+                             <input type="text" class="ref-cognome-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" value="${account.referenteCognome || ''}" placeholder="Cognome" />
+                        </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Telefono</label>
-                        <input type="text" class="ref-tel-input w-full bg-white rounded-lg border border-black/5 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteTelefono || ''}" placeholder="Tel." />
+                <div class="form-grid-2">
+                    <div class="glass-field-container">
+                        <label class="view-label">Telefono</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 flex items-center px-3 h-10">
+                             <input type="tel" class="ref-tel-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" value="${account.referenteTelefono || ''}" placeholder="Tel." />
+                        </div>
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase pl-1">Cellulare</label>
-                        <input type="text" class="ref-cell-input w-full bg-white rounded-lg border border-black/5 h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" value="${account.referenteCellulare || ''}" placeholder="Cell." />
+                    <div class="glass-field-container">
+                        <label class="view-label">Cellulare</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 flex items-center px-3 h-10">
+                              <input type="tel" class="ref-cell-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" value="${account.referenteCellulare || ''}" placeholder="Cell." />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-3 pl-4 border-l-2 border-primary/10 py-1">
+            <div class="flex-col-gap-3 pl-4 border-l-2 border-white/5">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Carte collegate</span>
-                    <button type="button" class="text-primary text-[10px] font-bold hover:underline flex items-center gap-0.5" onclick="addCard(${ibanIdx})">
+                    <span class="text-[10px] font-bold text-white/40 uppercase tracking-widest">Strumenti collegati</span>
+                    <button type="button" class="btn-add-card text-blue-500 text-[10px] font-bold hover:underline flex items-center gap-0.5" data-idx="${ibanIdx}">
                         <span class="material-symbols-outlined text-sm">add</span> Aggiungi carta
                     </button>
                 </div>
-                <div class="card-list-container space-y-4">
+                <div class="flex-col-gap-4">
                     ${account.cards.map((card, cardIdx) => renderCardEntry(ibanIdx, cardIdx, card)).join('')}
                 </div>
             </div>
@@ -302,101 +298,143 @@ function renderBankAccounts() {
         container.appendChild(ibanDiv);
     });
 
-    // Event Listeners for Banking are handled globally now
+    // Attach Dynamic Listeners
+    container.querySelectorAll('.btn-remove-iban').forEach(btn => {
+        btn.onclick = () => removeIban(parseInt(btn.dataset.idx));
+    });
+    container.querySelectorAll('.btn-add-card').forEach(btn => {
+        btn.onclick = () => addCard(parseInt(btn.dataset.idx));
+    });
+    container.querySelectorAll('.btn-toggle-shield-bank').forEach(btn => {
+        btn.onclick = () => {
+            const input = btn.previousElementSibling;
+            input.classList.toggle('base-shield');
+            btn.querySelector('span').textContent = input.classList.contains('base-shield') ? 'visibility' : 'visibility_off';
+        };
+    });
+    container.querySelectorAll('.btn-remove-card').forEach(btn => {
+        btn.onclick = () => removeCard(parseInt(btn.dataset.ibanIdx), parseInt(btn.dataset.cardIdx));
+    });
+    container.querySelectorAll('.type-input-select').forEach(select => {
+        select.onchange = (e) => {
+            const ibanIdx = select.dataset.ibanIdx;
+            const cardIdx = select.dataset.cardIdx;
+            bankAccounts[ibanIdx].cards[cardIdx].type = e.target.value;
+            renderBankAccounts();
+        };
+    });
 }
 
 function renderCardEntry(ibanIdx, cardIdx, card) {
     return `
-        <div class="bg-white p-4 rounded-xl border border-black/5 shadow-sm space-y-4 relative">
-             <div class="flex items-center justify-between">
+        <div class="bg-white/5 p-4 rounded-2xl border border-white/5 shadow-sm flex-col-gap-4 relative">
+             <div class="flex items-center justify-between border-b border-white/5 pb-2">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-gray-400 text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
-                    <span class="text-[10px] font-bold text-gray-500 uppercase">Strumento #${cardIdx + 1}</span>
+                    <span class="material-symbols-outlined text-blue-500 text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
+                    <span class="text-[10px] font-bold text-white/40 uppercase">Strumento #${cardIdx + 1}</span>
                 </div>
-                <button type="button" class="text-gray-300 hover:text-red-500 transition-colors" onclick="removeCard(${ibanIdx}, ${cardIdx})">
+                <button type="button" class="btn-remove-card text-white/20 hover:text-red-500 transition-colors" data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}">
                     <span class="material-symbols-outlined text-sm">close</span>
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Tipo Strumento</label>
-                    <select class="type-input w-full bg-slate-50 border-none rounded-lg h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                        data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}">
-                        <option value="Credit" ${card.type === 'Credit' ? 'selected' : ''}>Carta di credito (Credit)</option>
-                        <option value="Debit" ${card.type === 'Debit' ? 'selected' : ''}>Bancomat (Debit)</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Titolare</label>
-                        <input type="text" class="titolare-input w-full bg-slate-50 border-none rounded-lg h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.titolare || ''}" placeholder="Titolare..." />
-                    </div>
-                    <div class="flex flex-col gap-1.5 ${card.type === 'Debit' ? 'hidden' : ''}">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Tipo Carta</label>
-                        <input type="text" class="cardtype-input w-full bg-slate-50 border-none rounded-lg h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardType || ''}" placeholder="Visa, MC..." />
+            <div class="flex-col-gap-3">
+                <div class="glass-field-container">
+                    <label class="view-label">Tipo Strumento</label>
+                    <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 px-3 h-10 flex items-center">
+                        <select class="type-input-select glass-select" data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}">
+                            <option value="Credit" ${card.type === 'Credit' ? 'selected' : ''}>Carta di credito (Credit)</option>
+                            <option value="Debit" ${card.type === 'Debit' ? 'selected' : ''}>Bancomat (Debit)</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Numero</label>
-                    <input type="text" class="number-input w-full bg-slate-50 border-none rounded-lg h-10 px-3 text-sm font-mono focus:ring-1 focus:ring-primary/20" 
-                        data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardNumber || ''}" placeholder="**** **** **** ****" />
+                <div class="form-grid-2">
+                    <div class="glass-field-container">
+                        <label class="view-label">Titolare</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 px-3 h-10 flex items-center">
+                            <input type="text" class="titolare-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.titolare || ''}" placeholder="Titolare..." />
+                        </div>
+                    </div>
+                    <div class="glass-field-container ${card.type === 'Debit' ? 'hidden' : ''}">
+                        <label class="view-label">Tipo Carta</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 px-3 h-10 flex items-center">
+                            <input type="text" class="cardtype-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardType || ''}" placeholder="Visa, MC..." />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-field-container">
+                    <label class="view-label">Numero</label>
+                    <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 px-3 h-10 flex items-center">
+                        <input type="text" class="number-input bg-transparent border-none text-sm text-white w-full outline-none font-mono" 
+                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.cardNumber || ''}" placeholder="**** **** **** ****" />
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Scadenza</label>
-                        <input type="text" class="expiry-input w-full bg-slate-50 border-none rounded-lg h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.expiry || ''}" placeholder="MM/AA" />
+                    <div class="glass-field-container">
+                        <label class="view-label">Scadenza</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 px-3 h-10 flex items-center">
+                            <input type="text" class="expiry-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.expiry || ''}" placeholder="MM/AA" />
+                        </div>
                     </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">CCV</label>
-                        <input type="text" class="ccv-input w-full bg-slate-50 border-none rounded-lg h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
-                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.ccv || ''}" placeholder="123" />
+                    <div class="glass-field-container">
+                        <label class="view-label">CCV</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 px-3 h-10 flex items-center">
+                            <input type="text" class="ccv-input bg-transparent border-none text-sm text-white w-full outline-none" 
+                                data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.ccv || ''}" placeholder="123" />
+                        </div>
                     </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">PIN</label>
-                        <div class="flex items-center bg-slate-50 rounded-lg overflow-hidden border border-black/5">
-                            <input type="text" class="pin-input base-shield w-full bg-transparent border-none h-10 px-3 text-sm focus:ring-1 focus:ring-primary/20" 
+                    <div class="glass-field-container">
+                        <label class="view-label">PIN</label>
+                        <div class="glass-field-small bg-white/5 rounded-xl border border-white/5 px-3 h-10 flex items-center">
+                            <input type="text" class="pin-input base-shield bg-transparent border-none text-sm text-white w-full outline-none font-mono" 
                                 data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" value="${card.pin || ''}" placeholder="****" />
-                            <button type="button" onclick="const i=this.previousElementSibling; i.classList.toggle('base-shield'); this.querySelector('span').textContent=i.classList.contains('base-shield')?'visibility':'visibility_off';" class="p-2 text-gray-400">
+                            <button type="button" class="btn-toggle-shield-bank glass-field-btn">
                                 <span class="material-symbols-outlined text-sm">visibility</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase pl-1">Note</label>
-                    <textarea class="note-input w-full bg-slate-50 border-none rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary/20 resize-none" 
-                        data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" rows="2" placeholder="Note sulla carta...">${card.note || ''}</textarea>
+                <div class="glass-field-container">
+                    <label class="view-label">Note</label>
+                    <div class="note-display-box" style="min-height: 60px;">
+                        <textarea class="note-input bg-transparent border-none text-sm text-white w-full outline-none resize-none px-2 py-1" 
+                            data-iban-idx="${ibanIdx}" data-card-idx="${cardIdx}" rows="2" placeholder="Note sulla carta...">${card.note || ''}</textarea>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 }
 
-// Global actions
-window.addCard = (ibanIdx) => {
+// Global actions (locally scoped helper)
+function addCard(ibanIdx) {
     bankAccounts[ibanIdx].cards.push({ type: 'Credit', titolare: '', cardType: '', cardNumber: '', expiry: '', ccv: '', pin: '', note: '' });
     renderBankAccounts();
-};
+}
 
-window.removeCard = (ibanIdx, cardIdx) => {
+function removeCard(ibanIdx, cardIdx) {
     bankAccounts[ibanIdx].cards.splice(cardIdx, 1);
     renderBankAccounts();
-};
+}
 
-window.removeIban = (ibanIdx) => {
-    if (confirm("Eliminare interamente questo IBAN e tutte le carte collegate?")) {
+function removeIban(ibanIdx) {
+    if (window.showConfirmModal) {
+        window.showConfirmModal("Elimina IBAN", "Sei sicuro di voler eliminare interamente questo IBAN e tutte le carte collegate?", () => {
+            bankAccounts.splice(ibanIdx, 1);
+            renderBankAccounts();
+        });
+    } else if (confirm("Eliminare?")) {
         bankAccounts.splice(ibanIdx, 1);
         renderBankAccounts();
     }
-};
+}
 
 document.addEventListener('input', (e) => {
     const el = e.target;
@@ -407,11 +445,7 @@ document.addEventListener('input', (e) => {
 
         if (el.dataset.cardIdx !== undefined) {
             const card = account.cards[el.dataset.cardIdx];
-            if (el.classList.contains('type-input')) {
-                card.type = el.value;
-                renderBankAccounts();
-            }
-            else if (el.classList.contains('titolare-input')) card.titolare = el.value;
+            if (el.classList.contains('titolare-input')) card.titolare = el.value;
             else if (el.classList.contains('cardtype-input')) card.cardType = el.value;
             else if (el.classList.contains('expiry-input')) {
                 let val = el.value.replace(/\D/g, '');
@@ -425,8 +459,8 @@ document.addEventListener('input', (e) => {
             else if (el.classList.contains('ccv-input')) card.ccv = el.value;
             else if (el.classList.contains('pin-input')) card.pin = el.value;
             else if (el.classList.contains('note-input')) card.note = el.value;
+            else if (el.classList.contains('number-input')) card.cardNumber = el.value;
         } else {
-            // IBAN Level Fields
             if (el.classList.contains('iban-input')) account.iban = el.value.trim().toUpperCase();
             else if (el.classList.contains('dispositiva-input')) account.passwordDispositiva = el.value;
             else if (el.classList.contains('ref-nome-input')) account.referenteNome = el.value;
