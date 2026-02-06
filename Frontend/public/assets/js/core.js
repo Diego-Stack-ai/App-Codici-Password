@@ -114,6 +114,8 @@
 
     // --- 3. GESTIONE ASSET (Font, Icone) ---
     function injectGlobalAssets() {
+        // DISATTIVATO: I font sono ora serviti localmente da assets/css/fonts.css
+        /*
         const head = document.head;
         if (!document.querySelector('link[href*="fonts.googleapis.com"]')) {
             const assets = [
@@ -128,6 +130,7 @@
                 head.appendChild(link);
             });
         }
+        */
     }
 
     // --- 4. PROTEZIONI UI ---

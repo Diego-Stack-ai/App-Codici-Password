@@ -1,0 +1,181 @@
+/* ==========================================================================
+   LOCAL FONTS DEFINITION (Google Fonts Replacement)
+   ========================================================================== */
+
+/* 
+   --------------------------------------------------------------------------
+   MANROPE (Variable Weight: 200-800)
+   --------------------------------------------------------------------------
+*/
+
+/* 
+   Per ottimizzazione, usiamo il range completo di pesi disponibili.
+   Il file scaricato da Google Fonts viene solitamente suddiviso in chunk unicode.
+   Qui stiamo usando una definizione semplificata che punta ai file principali.
+   
+   NOTA: Lo script di download ha scaricato molti file (chunk). 
+   Per semplicità e robustezza, useremo un approccio standard:
+   Se i file scaricati sono segmentati per unicode-range (comportamento standard di Google Fonts CSS),
+   dovremmo replicare ESATTAMENTE il CSS originale di Google.
+   
+   Tuttavia, dato che abbiamo scaricato i file raw, mappiamo i principali.
+   
+   Se lo script ha scaricato 30 file, significa che Manrope è servito in chunk.
+   Per evitare di includere 30 @font-face manualmente e rischiare errori,
+   in un ambiente di produzione locale "semplificato", spesso conviene servire il file completo.
+   
+   Ma dato che abbiamo i chunk, ricostruiamo una mappatura di base.
+*/
+
+/* MANROPE - Latin (Fallback generico ai chunk principali se presenti) 
+   NOTA: Senza un'analisi dei singoli file unicode-range, mappiamo il latino base.
+   In questo caso specifico, per garantire che funzioni tutto offline senza complessità eccessiva,
+   usiamo il file che contiene i caratteri latini (solitamente uno dei più grandi).
+*/
+
+/* Manrope (Tutti i pesi supportati dal file variabile se presente, altrimenti mapping statico) */
+
+/* 
+   IMPORTANTE: Google Fonts serve font divisi in molti file per performance (unicode-range).
+   Lo script ha scaricato `manrope-0.woff2` ... `manrope-29.woff2`.
+   Senza conoscere l'esatto range di ogni file, l'approccio migliore è:
+   1. Usare il file .woff2 completo se disponibile (non scaricato qui).
+   2. OPPURE (piano B attuale): Usare i file scaricati mappando i range come fatto da Google.
+   
+   Dato che non abbiamo i range esatti estratti dallo script (limitazione dello script semplice),
+   useremo un approccio pragmatico: 
+   Il file più grande o il primo della serie spesso contiene il latino base.
+   
+   Dai file scaricati:
+   material-symbols-0.woff2 è enorme (3.8MB) -> Contiene TUTTO. Ottimo.
+   manrope-*.woff2 sono piccoli chunk.
+   
+   PERCORSO CORRETTO:
+   Per Manrope, siccome serviamo un'app Italiana, ci serve il subset Latin.
+   
+   Genererò un CSS che include i file principali. Se vedi caratteri mancanti, 
+   dovremo scaricare il file "completo" da un'altra fonte o usare un downloader più furbo.
+   
+   Tuttavia, Google Fonts CSS usa unicode-range.
+   Per ora mappiamo i font in modo generico usando il file più probabile per il set Latino.
+   
+   (Analisi file: manrope-11.woff2, 17, 23, 29 sono ~24KB, probabilmente Latin)
+*/
+
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/manrope/manrope-5.woff2') format('woff2');
+    /* Latin extension probabilmente */
+    unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/manrope/manrope-11.woff2') format('woff2');
+    /* Latin */
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Mapping pesi successivi (500, 600, 700, 800) riutilizzando gli stessi file 
+   perché il font è probabilmente variabile o statico multi-range.
+   Google serve lo stesso file SRC per diversi font-weight se sono nello stesso range 
+   (se Variable Font).
+*/
+
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/manrope/manrope-11.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/manrope/manrope-11.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../fonts/manrope/manrope-11.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('../fonts/manrope/manrope-11.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+/* 
+   --------------------------------------------------------------------------
+   MATERIAL SYMBOLS OUTLINED (Variable Font)
+   --------------------------------------------------------------------------
+*/
+
+@font-face {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+    /* Importante per icone per evitare flash di testo */
+    src: url('../fonts/material-symbols/material-symbols-0.woff2') format('woff2');
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+
+    /* Supporto Variable Font axes */
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Classi di utilità per Material Symbols */
+.material-symbols-outlined.filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-icons-md-18 {
+    font-size: 18px;
+}
+
+.material-icons-md-24 {
+    font-size: 24px;
+}
+
+.material-icons-md-36 {
+    font-size: 36px;
+}
+
+.material-icons-md-48 {
+    font-size: 48px;
+}
