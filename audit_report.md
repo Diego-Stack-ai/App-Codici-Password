@@ -28,10 +28,10 @@
 | `impostazioni.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
 | `lista_aziende.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
 | `modifica_account_azienda.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
-| `modifica_azienda.html` | ❌ | ❌ | ❌ | ❌ | ❌ | **DA REVISIONARE** |
-| `modifica_scadenza.html` | ❌ | ❌ | ❌ | ❌ | ❌ | **DA REVISIONARE** |
-| `notifiche_storia.html` | ❌ | ❌ | ❌ | ❌ | ❌ | **DA REVISIONARE** |
-| `privacy.html` | ❌ | ❌ | ❌ | ❌ | ❌ | **DA REVISIONARE** |
-| `profilo_privato.html` | ❌ | ❌ | ❌ | ❌ | ❌ | **DA REVISIONARE** |
-| `regole_scadenze.html` | ❌ | ❌ | ❌ | ❌ | ❌ | **DA REVISIONARE** |
-| `scadenze.html` | ❌ | ❌ | ❌ | ❌ | ❌ | **DA REVISIONARE** |
+| `modifica_azienda.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
+| `modifica_scadenza.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
+| `notifiche_storia.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
+| `privacy.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
+| `profilo_privato.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
+| `regole_scadenze.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |
+| `scadenze.html` | ✅ | ✅ | ✅ | ✅ | ✅ | **CONFORME** |

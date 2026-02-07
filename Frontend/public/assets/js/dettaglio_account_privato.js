@@ -3,12 +3,15 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/fi
 import { doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, arrayUnion, arrayRemove, increment } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { makeCall } from './utils.js';
 
+// --- 1. GLOBALS & CONFIG ---
+window.t = window.t || ((k) => k);
+
 // --- STATE ---
 let currentUid = null;
 let currentId = null;
 let ownerId = null;
 let isReadOnly = false;
-let originalData = {};
+let originalData = null;
 let myContacts = [];
 
 // --- HELPERS ---
@@ -111,12 +114,13 @@ function initBaseUI() {
                     <span class="material-symbols-outlined">arrow_back</span>
                 </button>
             `;
-            document.getElementById('btn-back-protocol').addEventListener('click', () => history.back());
+            document.getElementById('btn-back-protocol').addEventListener('click', () => window.location.href = 'account_privati.html');
         }
 
         if (hCenter && hCenter.innerHTML.trim() === '') {
-            const titleText = (window.t && window.t('account_detail')) || 'Dettaglio Account';
-            hCenter.innerHTML = `<h1 class="header-title" id="header-nome-account" data-t="account_detail">${titleText}</h1>`;
+            // Placeholder iniziale mentre carichiamo i dati veri
+            const loadingText = (window.t && window.t('loading')) || 'Caricamento...';
+            hCenter.innerHTML = `<h1 class="header-title animate-pulse" id="header-nome-account">${loadingText}</h1>`;
         }
 
         if (hRight && hRight.innerHTML.trim() === '') {
@@ -146,7 +150,7 @@ function initBaseUI() {
                     const params = new URLSearchParams(window.location.search);
                     const idToEdit = currentId || params.get('id');
                     if (idToEdit) {
-                        window.location.href = `modifica_account_privato.html?id=${encodeURIComponent(idToEdit)}`;
+                        window.location.href = `form_account_privato.html?id=${encodeURIComponent(idToEdit)}`;
                     } else {
                         console.error("ID mancante per modifica");
                     }
@@ -291,7 +295,7 @@ async function loadAccount(uid, id) {
 
 const getAccentColors = (acc) => {
     // Determine type from flags
-    const isBanking = (Array.isArray(acc.banking) && acc.banking.length > 0) || (acc.banking && acc.banking.iban);
+    const isBanking = acc.isBanking === true;
     const isMemo = acc.hasMemo || acc._isMemo;
     const isShared = acc.shared || acc.isMemoShared || acc._isShared;
 
@@ -371,167 +375,141 @@ function render(acc) {
     }
 
     // Banking Details
-    const bankingArr = Array.isArray(acc.banking) ? acc.banking : (acc.banking && acc.banking.iban ? [acc.banking] : []);
-    const hasBanking = bankingArr.length > 0;
+    let bankingArr = [];
+    if (Array.isArray(acc.banking)) {
+        bankingArr = acc.banking;
+    } else if (acc.banking && acc.banking.iban) {
+        bankingArr = [acc.banking];
+    } else if (acc.iban && acc.iban.trim() !== '') {
+        bankingArr = [{ iban: acc.iban, cards: [] }];
+    }
+
+    const hasBanking = acc.isBanking === true;
     const sectionBanking = document.getElementById('section-banking');
     if (sectionBanking) {
         sectionBanking.classList.toggle('hidden', !hasBanking);
+    }
+
+    // Toggle suggerimento bancario
+    const bankingPrompt = document.getElementById('add-banking-prompt');
+    if (bankingPrompt) {
+        bankingPrompt.classList.toggle('hidden', hasBanking);
     }
 
     if (hasBanking) {
         const bankingContent = document.getElementById('banking-content');
         if (bankingContent) {
             bankingContent.innerHTML = bankingArr.map((bank, idx) => `
-                <div class="space-y-4 p-4 bg-slate-500/5 rounded-2xl border border-white/5 border-glow">
+                <div class="space-y-4 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 border-glow relative">
                     <div class="flex items-center justify-between border-b border-white/5 pb-2">
-                        <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">${window.t('account') || 'Conto'} #${idx + 1}</span>
+                        <span class="text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em]">${window.t('account') || 'Conto'} #${idx + 1}</span>
                     </div>
 
-                    <!-- IBAN -->
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-[11px] font-bold text-white/40 uppercase ml-1" data-t="iban">IBAN</span>
-                        <div class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
-                            <input readonly
-                                class="flex-1 bg-transparent border-none h-12 px-4 text-sm font-bold focus:ring-0 text-white uppercase font-mono"
-                                value="${bank.iban || ''}">
-                            <button data-action="copy-text" data-text="${bank.iban}" class="p-3 text-white/40 hover:text-white border-l border-white/5">
-                                <span class="material-symbols-outlined text-base">content_copy</span>
+                    <!-- IBAN Principal -->
+                    <div class="bg-black/20 p-2.5 rounded-xl border border-white/5">
+                        <div class="micro-data-row">
+                            <span class="micro-data-label" data-t="iban">Codice IBAN</span>
+                            <span class="micro-data-value text-emerald-400 font-mono tracking-wider truncate">${bank.iban || '-'}</span>
+                            <button class="micro-btn-copy-inline relative z-10" data-action="copy-text" data-text="${bank.iban}">
+                                <span class="material-symbols-outlined !text-[14px]">content_copy</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- PASSWORD & NOTA -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="dispositive_pass">Pass. Dispositiva</span>
-                            <div class="flex items-center bg-slate-500/5 rounded-xl border border-white/5 overflow-hidden backdrop-blur-sm border-glow">
-                                <input readonly type="text"
-                                    class="base-shield flex-1 bg-transparent border-none h-10 px-4 text-sm focus:ring-0 text-white"
-                                    value="${bank.passwordDispositiva || ''}">
-                                <button data-action="toggle-visibility" class="p-2 text-white/40">
-                                    <span class="material-symbols-outlined text-sm">visibility</span>
-                                </button>
-                                <button data-action="copy-text" data-text="${bank.passwordDispositiva || ''}" class="p-2 text-white/40 hover:text-white border-l border-white/5">
-                                    <span class="material-symbols-outlined text-sm">content_copy</span>
-                                </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-black/20 p-2.5 rounded-xl border border-white/5 h-full">
+                            <div class="micro-data-row">
+                                <span class="micro-data-label" data-t="dispositive_pass">Pass. Disp.</span>
+                                <span id="bank-pass-${idx}" class="micro-data-value base-shield truncate">${bank.passwordDispositiva || '••••••••'}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button class="micro-btn-copy-inline relative z-10 !bg-transparent" data-action="toggle-visibility">
+                                        <span class="material-symbols-outlined !text-[14px]">visibility</span>
+                                    </button>
+                                    <button class="micro-btn-copy-inline relative z-10" data-action="copy-text" data-text="${bank.passwordDispositiva}">
+                                        <span class="material-symbols-outlined !text-[14px]">content_copy</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>                        <div class="flex flex-col gap-1.5">
-                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="iban_note">Nota IBAN</span>
-                            <div class="selectable bg-white/5 p-2.5 rounded-xl text-xs text-white/60 border border-white/5 min-h-[40px] flex items-center italic">
-                                ${bank.nota || '-'}
+                        </div>
+                        <div class="bg-black/20 p-2.5 rounded-xl border border-white/5 h-full">
+                            <div class="micro-data-row">
+                                <span class="micro-data-label" data-t="iban_note">Nota Rapida</span>
+                                <span class="micro-data-value italic text-white/50 truncate">${bank.nota || '-'}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- SEZIONE REFERENTE BANCA -->
-                    <div class="bg-blue-500/5 p-4 rounded-2xl border border-white/5 space-y-3">
-                        <div class="flex items-center gap-2 text-blue-500">
-                            <span class="material-symbols-outlined text-sm">contact_phone</span>
-                            <span class="text-[10px] font-black uppercase tracking-widest" data-t="bank_referent">Referente Banca</span>
+                    <div class="bg-emerald-500/10 p-3 rounded-xl border border-white/5 space-y-2.5">
+                        <div class="flex items-center gap-2 text-emerald-500/80">
+                            <span class="material-symbols-outlined text-xs">contact_emergency</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest" data-t="bank_referent">Referente dedicato</span>
                         </div>
-                        <div class="flex flex-col gap-1">
-                            <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="full_name">Nome e Cognome</span>
-                            <p class="text-sm font-bold text-white ml-1">${bank.referenteNome || ''} ${bank.referenteCognome || ''}</p>
+                        <div class="micro-data-row px-1">
+                             <span class="micro-data-value font-black text-white text-[11px] uppercase tracking-wide">${bank.referenteNome || 'No Name'}</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="flex flex-col gap-1">
-                                <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="phone">Telefono</span>
-                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors"
-                data-action="make-call" data-number="${bank.referenteTelefono}">
-                                    <span class="material-symbols-outlined text-[16px] text-blue-500">call</span>
-                                    <span class="text-xs font-bold text-white/70">${bank.referenteTelefono || '-'}</span>
-                                </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="micro-data-row bg-black/20 p-2 rounded-lg border border-white/5 cursor-pointer hover:bg-emerald-500/10 transition-all group"
+                                data-action="make-call" data-number="${bank.referenteTelefono}">
+                                <span class="material-symbols-outlined text-[14px] text-emerald-500/50 group-hover:text-emerald-400">call</span>
+                                <span class="micro-data-value text-[10px] font-bold text-white/60 group-hover:text-white">${bank.referenteTelefono || '-'}</span>
                             </div>
-                            <div class="flex flex-col gap-1">
-                                <span class="text-[9px] font-bold text-white/40 uppercase ml-1" data-t="mobile">Cellulare</span>
-                                <div class="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors"
-                data-action="make-call" data-number="${bank.referenteCellulare}">
-                                    <span class="material-symbols-outlined text-[16px] text-blue-500">smartphone</span>
-                                    <span class="text-xs font-bold text-white/70">${bank.referenteCellulare || '-'}</span>
-                                </div>
+                            <div class="micro-data-row bg-black/20 p-2 rounded-lg border border-white/5 cursor-pointer hover:bg-emerald-500/10 transition-all group"
+                                data-action="make-call" data-number="${bank.referenteCellulare}">
+                                <span class="material-symbols-outlined text-[14px] text-emerald-500/50 group-hover:text-emerald-400">smartphone</span>
+                                <span class="micro-data-value text-[10px] font-bold text-white/60 group-hover:text-white">${bank.referenteCellulare || '-'}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Carte collegate -->
                     ${(bank.cards || []).length > 0 ? `
-                        <div class="space-y-4 pt-2">
-                            <span class="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1" data-t="linked_tools">Strumenti collegati</span>
+                        <div class="space-y-3 pt-1">
+                            <span class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] ml-1" data-t="linked_tools">Strumenti di Pagamento</span>
                             ${bank.cards.map((card, cIdx) => `
-                                <div class="bg-white/5 p-4 rounded-xl border border-white/5 shadow-sm space-y-4">
+                                <div class="bg-black/10 p-3 rounded-xl border border-white/5 space-y-3 border-glow">
                                      <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-blue-500 text-sm">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
-                                            <span class="text-xs font-black text-blue-500 uppercase">${card.type === 'Debit' ? (window.t('bancomat') || 'Bancomat') : (window.t('credit_card') || 'Carta di Credito')}</span>
+                                        <div class="flex items-center gap-2 text-emerald-500/80">
+                                            <span class="material-symbols-outlined text-xs">${card.type === 'Debit' ? 'account_balance_wallet' : 'credit_card'}</span>
+                                            <span class="text-[10px] font-black uppercase tracking-widest">${card.type === 'Debit' ? (window.t('bancomat') || 'Bancomat') : (window.t('credit_card') || 'Carta di Credito')}</span>
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="holder">Titolare</span>
-                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
-                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.titolare || ''}">
-                                                <button data-action="copy-text" data-text="${card.titolare}" class="p-2 text-white/40 hover:text-white">
-                                                    <span class="material-symbols-outlined text-base">content_copy</span>
-                                                </button>
-                                            </div>
+                                    <div class="space-y-2">
+                                        <div class="micro-data-row bg-black/20 p-2 rounded-lg border border-white/5">
+                                            <span class="micro-data-label" data-t="holder">Titolare</span>
+                                            <span class="micro-data-value truncate text-[10px] font-bold uppercase">${card.titolare || '-'}</span>
+                                            <button class="micro-btn-copy-inline relative z-10" data-action="copy-text" data-text="${card.titolare}">
+                                                <span class="material-symbols-outlined !text-[12px]">content_copy</span>
+                                            </button>
                                         </div>
-                                        ${card.type !== 'Debit' ? `
-                                        <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="card_type">Tipo Carta</span>
-                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
-                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.cardType || ''}">
-                                            </div>
-                                        </div>
-                                        ` : ''}
-                                    </div>
-
-                                    <div class="flex flex-col gap-1.5">
-                                        <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="number">Numero</span>
-                                        <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
-                                            <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" value="${card.cardNumber || ''}">
-                                            <button data-action="copy-text" data-text="${card.cardNumber}" class="p-2 text-white/40 hover:text-white">
-                                                <span class="material-symbols-outlined text-base">content_copy</span>
+                                        <div class="micro-data-row bg-black/20 p-2 rounded-lg border border-white/5">
+                                            <span class="micro-data-label" data-t="number">Numero</span>
+                                            <span class="micro-data-value truncate text-[10px] font-mono font-bold tracking-widest">${card.cardNumber || '-'}</span>
+                                            <button class="micro-btn-copy-inline relative z-10" data-action="copy-text" data-text="${card.cardNumber}">
+                                                <span class="material-symbols-outlined !text-[12px]">content_copy</span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-3 gap-3">
-                                        <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="expiry">Scadenza</span>
-                                            <div class="flex items-center bg-white/5 rounded-lg h-10 px-3 text-sm text-white border border-white/5">
-                                                ${card.expiry || '-'}
-                                            </div>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        <div class="col-span-2 micro-data-row bg-black/20 p-2 rounded-lg border border-white/5">
+                                            <span class="micro-data-label !min-w-0 mr-2" data-t="expiry">Scad.</span>
+                                            <span class="micro-data-value text-[10px] font-bold">${card.expiry || '-'}</span>
                                         </div>
-                                        <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="ccv">CCV</span>
-                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
-                                                <input readonly class="flex-1 bg-transparent border-none h-10 px-3 text-sm text-white" value="${card.ccv || ''}">
-                                                <button data-action="copy-text" data-text="${card.ccv}" class="p-2 text-white/40 hover:text-white">
-                                                    <span class="material-symbols-outlined text-sm">content_copy</span>
-                                                </button>
-                                            </div>
+                                        <div class="col-span-1 micro-data-row bg-black/20 p-2 rounded-lg border border-white/5">
+                                            <span class="micro-data-label !min-w-0 mr-2" data-t="ccv">CCV</span>
+                                            <span class="micro-data-value text-[10px] font-bold">${card.ccv || '-'}</span>
                                         </div>
-                                        <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="pin">PIN</span>
-                                            <div class="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/5">
-                                                <input readonly type="text" class="base-shield pin-field flex-1 bg-transparent border-none h-10 px-3 text-sm font-mono text-white" 
-                                                    value="${card.pin || ''}">
-                                                <button data-action="toggle-visibility" class="p-2 text-white/40">
-                                                    <span class="material-symbols-outlined text-sm">visibility</span>
-                                                </button>
-                                            </div>
+                                        <div class="col-span-1 micro-data-row bg-black/20 p-2 rounded-lg border border-white/5">
+                                            <span class="micro-data-label !min-w-0 mr-2" data-t="pin">PIN</span>
+                                            <span class="micro-data-value base-shield font-mono text-[10px]">${card.pin || '••••'}</span>
+                                            <button class="micro-btn-copy-inline relative z-10 !bg-transparent" data-action="toggle-visibility">
+                                                <span class="material-symbols-outlined !text-[12px]">visibility</span>
+                                            </button>
                                         </div>
                                     </div>
-
-                                    ${card.note ? `
-                                        <div class="flex flex-col gap-1.5">
-                                            <span class="text-[10px] font-bold text-white/40 uppercase ml-1" data-t="tool_note">Note Strumento</span>
-                                            <div class="selectable bg-white/5 p-3 rounded-lg text-xs text-white/60 italic border border-white/5">
-                                                ${card.note}
-                                            </div>
-                                        </div>
-                                    ` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -542,7 +520,7 @@ function render(acc) {
     }
 
     const elNote = document.getElementById('detail-note');
-    if (elNote) elNote.textContent = acc.note || window.t('no_notes') || 'Nessuna nota presente.';
+    if (elNote) elNote.textContent = acc.note || '-';
 
     // Checkboxes
     const chkShared = document.getElementById('detail-shared');
@@ -721,20 +699,24 @@ function setupListeners() {
         });
     }
 
-    // Toggle Triple Visibility (Username, Account, Password)
+    // Toggle Password Visibility (ONLY password)
     const toggle = document.getElementById('toggle-password');
     const passInput = document.getElementById('detail-password');
-    const userInput = document.getElementById('detail-username');
-    const accInput = document.getElementById('detail-account');
 
     if (toggle && passInput) {
-        toggle.addEventListener('click', () => {
-            passInput.classList.toggle('base-shield');
-            if (userInput) userInput.classList.toggle('base-shield');
-            if (accInput) accInput.classList.toggle('base-shield');
 
+        // Stato iniziale: nascosta
+        passInput.classList.add('base-shield');
+        passInput.type = "password";
+
+        toggle.addEventListener('click', () => {
             const isMasked = passInput.classList.contains('base-shield');
-            toggle.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';
+
+            passInput.classList.toggle('base-shield');
+            passInput.type = isMasked ? "text" : "password";
+
+            const icon = toggle.querySelector('span');
+            if (icon) icon.textContent = isMasked ? 'visibility_off' : 'visibility';
         });
     }
 
@@ -771,6 +753,27 @@ function setupListeners() {
         });
     });
 
+    // Coordinate Bancarie Toggle
+    const bankingBtn = document.getElementById('banking-toggle');
+    if (bankingBtn) {
+        bankingBtn.addEventListener('click', () => window.toggleBanking());
+    }
+
+    // Banking Info Modal
+    const btnBankingInfo = document.getElementById('btn-banking-info');
+    if (btnBankingInfo) {
+        btnBankingInfo.addEventListener('click', () => {
+            if (window.showWarningModal) {
+                window.showWarningModal(
+                    "AGGIUNGI CONTO BANCARIO",
+                    "Per gestire IBAN e strumenti di pagamento, entra in modalità <b>Modifica</b> e attiva l'opzione <b>'Account Bancario'</b> nelle impostazioni dell'account."
+                );
+            }
+        });
+    }
+
+    // Safe Translation Helper
+    const t = (k) => (window.t && typeof window.t === 'function') ? window.t(k) : k;
 
     // Flags & Modal Trigger
     const checkShared = document.getElementById('detail-shared');
@@ -780,7 +783,7 @@ function setupListeners() {
     if (checkShared && checkMemo && checkMemoShared) {
         const flags = [checkShared, checkMemo, checkMemoShared];
         flags.forEach(el => {
-            el.onchange = () => {
+            el.addEventListener('change', () => {
                 // Mutual Exclusion Logic
                 if (el.checked) {
                     flags.forEach(other => { if (other !== el) other.checked = false; });
@@ -809,23 +812,79 @@ function setupListeners() {
                 // Show Modal instead of Bar
                 const isSharingActive = checkShared.checked || checkMemoShared.checked;
                 showSaveModal(isSharingActive);
-            };
+            });
         });
     }
+
+    // TOGGLE PASSWORD LOGIC (Specific)
+    const togglePwdBtnDetail = document.getElementById('toggle-password');
+    const passwordInputDetail = document.getElementById('detail-password');
+
+    if (togglePwdBtnDetail && passwordInputDetail) {
+        // Initial State
+        passwordInputDetail.classList.add('base-shield');
+        passwordInputDetail.type = "password";
+
+        // Remove old listeners by cloning
+        const newBtn = togglePwdBtnDetail.cloneNode(true);
+        togglePwdBtnDetail.parentNode.replaceChild(newBtn, togglePwdBtnDetail);
+
+        newBtn.addEventListener('click', () => {
+            const isMasked = passwordInputDetail.classList.contains('base-shield');
+
+            passwordInputDetail.classList.toggle('base-shield');
+            passwordInputDetail.type = isMasked ? "text" : "password";
+
+            const icon = newBtn.querySelector('span');
+            if (icon) icon.textContent = isMasked ? 'visibility_off' : 'visibility';
+        });
+    }
+
+    // GLOBAL DELEGATION FOR BANKING TOGGLES
+    if (!window._bankingToggleInit) {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action="toggle-visibility"]');
+            if (!btn) return;
+
+            // Find value span in the same row
+            const wrapper = btn.closest(".micro-data-row");
+            const valueSpan = wrapper ? wrapper.querySelector(".micro-data-value") : null;
+
+            if (!valueSpan) return;
+
+            // Toggle logic for span elements using base-shield class
+            const isMasked = valueSpan.classList.contains('base-shield');
+
+            if (isMasked) {
+                valueSpan.classList.remove('base-shield');
+            } else {
+                valueSpan.classList.add('base-shield');
+            }
+
+            const icon = btn.querySelector('span');
+            if (icon) icon.textContent = isMasked ? 'visibility_off' : 'visibility';
+        });
+        window._bankingToggleInit = true;
+    }
+
 
     // Save Button (Inside Modal)
     const btnSave = document.getElementById('btn-save-modal'); // Updated ID
     const inviteSelect = document.getElementById('invite-select');
 
     if (btnSave) {
-        btnSave.onclick = async () => {
+        // Remove old listeners
+        const newBtnSave = btnSave.cloneNode(true);
+        btnSave.parentNode.replaceChild(newBtnSave, btnSave);
+
+        newBtnSave.addEventListener('click', async () => {
             const isShared = checkShared.checked || checkMemoShared.checked;
             const newGuestEmail = inviteSelect ? inviteSelect.value : '';
             const guestsContainer = document.getElementById('guests-list');
             const hasGuests = guestsContainer && guestsContainer.children.length > 0 && !guestsContainer.textContent.includes('Nessun accesso attivo');
 
             if (isShared && !hasGuests && !newGuestEmail) {
-                if (window.showToast) window.showToast(window.t("select_user_error") || "Seleziona un utente.", "error");
+                if (window.showToast) window.showToast(t("select_user_error") || "Seleziona un utente.", "error");
                 window.closeSaveModal(); // Close modal to let user interact
                 toggleSharingUI(true);
                 const content = document.getElementById('accessi-content');
@@ -834,8 +893,8 @@ function setupListeners() {
                 return;
             }
 
-            btnSave.disabled = true;
-            btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> ${window.t('processing') || 'Elaborazione...'}`;
+            newBtnSave.disabled = true;
+            newBtnSave.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> ${t("processing") || 'Elaborazione...'}`;
 
             try {
                 // 1. New Invite
@@ -870,8 +929,6 @@ function setupListeners() {
 
                 // Auto-revoke if unchecked
                 if (!checkShared.checked && !checkMemoShared.checked) {
-                    // Notify revocation logic here?
-                    // For brevity, deleting invites and clearing sharedWith
                     const qInvites = query(collection(db, "invites"),
                         where("accountId", "==", originalData.docId),
                         where("ownerId", "==", currentUid)
@@ -879,9 +936,6 @@ function setupListeners() {
                     const snapInvites = await getDocs(qInvites);
                     const delPromises = snapInvites.docs.map(d => deleteDoc(d.ref));
                     await Promise.all(delPromises);
-
-                    // Notify logic omitted for simplicity or can be added if critical
-                    // ...
 
                     updatePayload.sharedWith = [];
                 }
@@ -892,7 +946,7 @@ function setupListeners() {
                     renderGuests([]);
                 }
 
-                if (window.showToast) window.showToast(window.t("changes_saved_invite_sent") || "Modifiche salvate e invito inviato!", "success");
+                if (window.showToast) window.showToast(t("changes_saved_invite_sent") || "Modifiche salvate e invito inviato!", "success");
                 window.closeSaveModal(); // Close Modal
 
                 // Reload
@@ -901,12 +955,12 @@ function setupListeners() {
 
             } catch (e) {
                 console.error(e);
-                if (window.showToast) window.showToast(window.t("error_saving") || "Errore salvataggio.", "error");
+                if (window.showToast) window.showToast(t("error_saving") || "Errore salvataggio.", "error");
             } finally {
-                btnSave.disabled = false;
+                newBtnSave.disabled = false;
                 // Text reset handled by showSaveModal next time
             }
-        };
+        });
     }
 }
 

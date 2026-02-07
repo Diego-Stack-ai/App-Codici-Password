@@ -6,7 +6,7 @@
         content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Modifica Account Privato - PROTOCOLLO BASE</title>
+    <title>Account Privato - PROTOCOLLO BASE</title>
 
     <!-- PWA / Mobile Capable -->
     <link rel="manifest" href="manifest.json?v=3.6" />
@@ -44,15 +44,23 @@
             <div class="detail-content-wrap">
                 <!-- Logo Uploader -->
                 <div class="hero-profile-header">
-                    <div id="btn-trigger-logo" class="detail-avatar-container">
-                        <div id="logo-preview-container" class="detail-avatar border-glow">
-                            <img id="account-logo-preview" alt="Logo" class="hidden" />
-                            <div id="logo-placeholder" class="flex-col-gap items-center opacity-40">
-                                <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
-                                <span class="text-[10px] font-black uppercase tracking-widest"
-                                    data-t="visual_identity">Identità Visiva</span>
+                    <div class="logo-uploader-group">
+                        <div id="btn-trigger-logo" class="detail-avatar-container relative cursor-pointer">
+                            <div id="logo-preview-container"
+                                class="detail-avatar border-glow overflow-hidden rounded-full relative">
+                                <img id="account-logo-preview" alt="Logo"
+                                    class="hidden w-full h-full object-cover absolute inset-0" />
+                                <div id="logo-placeholder" class="logo-placeholder-content">
+                                    <span
+                                        class="material-symbols-outlined logo-placeholder-icon">add_photo_alternate</span>
+                                    <span class="logo-placeholder-text" data-t="visual_identity">Logo Account</span>
+                                </div>
                             </div>
                         </div>
+                        <!-- Tasto Rimozione Logo -->
+                        <button id="btn-remove-logo" type="button" class="btn-remove-logo">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
                     </div>
                     <input type="file" id="logo-input" accept="image/*" class="hidden" />
                 </div>
@@ -69,7 +77,8 @@
                             <label class="view-label" for="account-name" data-t="account_name">Nome Account</label>
                             <div class="glass-field border-glow">
                                 <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
-                                <input id="account-name" type="text" data-t-placeholder="account_name_placeholder" />
+                                <input id="account-name" name="account_name" type="text"
+                                    data-t-placeholder="account_name_placeholder" autocomplete="off" />
                             </div>
                         </div>
 
@@ -78,29 +87,31 @@
                                 Email</label>
                             <div class="glass-field border-glow">
                                 <span class="material-symbols-outlined ml-4 opacity-40">person</span>
-                                <input id="account-username" type="text" data-t-placeholder="username_placeholder"
-                                    autocomplete="off" readonly />
+                                <input id="account-username" name="account_username" type="text"
+                                    data-t-placeholder="username_placeholder" autocomplete="off" />
                             </div>
                         </div>
 
                         <div class="form-grid-2">
                             <div class="glass-field-container">
-                                <label class="view-label" for="account-password" data-t="password">Password</label>
-                                <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">key</span>
-                                    <input id="account-password" type="password" class="base-shield"
-                                        autocomplete="new-password" readonly />
-                                    <button type="button" id="btn-toggle-password-edit" class="glass-field-btn">
-                                        <span class="material-symbols-outlined">visibility</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="glass-field-container">
-                                <label class="view-label" for="account-code" data-t="customer_code">Codice
-                                    Cliente</label>
+                                <label class="view-label" for="account-code" data-t="account_code">Account /
+                                    Codice</label>
                                 <div class="glass-field border-glow">
                                     <span class="material-symbols-outlined ml-4 opacity-40">pin</span>
-                                    <input id="account-code" type="text" />
+                                    <input id="account-code" name="account_code" type="text"
+                                        data-t-placeholder="code_placeholder" autocomplete="off" />
+                                </div>
+                            </div>
+
+                            <div class="glass-field-container">
+                                <label class="view-label" for="account-password" data-t="password">Password</label>
+                                <div class="glass-field border-glow">
+                                    <button id="btn-toggle-password-edit" type="button" class="ml-4 opacity-40">
+                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                    </button>
+                                    <input id="account-password" name="account_password" type="password"
+                                        class="base-shield" data-t-placeholder="password_placeholder"
+                                        autocomplete="new-password" />
                                 </div>
                             </div>
                         </div>
@@ -109,14 +120,32 @@
                             <label class="view-label" for="account-url" data-t="website">Sito Web</label>
                             <div class="glass-field border-glow">
                                 <span class="material-symbols-outlined ml-4 opacity-40">language</span>
-                                <input id="account-url" type="url" placeholder="https://" class="text-blue-400" />
+                                <input id="account-url" name="account_url" type="url" placeholder="https://"
+                                    class="text-blue-400" autocomplete="off" />
                             </div>
+                        </div>
+
+                        <!-- Flag Bancario -->
+                        <div class="mt-2 flex justify-start">
+                            <label
+                                class="visibility-option-card border-glow w-full sm:w-auto border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-transparent">
+                                <div class="flex-center-gap flex-1">
+                                    <span
+                                        class="material-symbols-outlined icon-accent-purple p-2 rounded-lg bg-purple-400/10 text-sm">account_balance</span>
+                                    <span class="text-xs font-black uppercase" data-t="is_banking_account">Account
+                                        Bancario</span>
+                                </div>
+                                <input class="hidden" type="checkbox" id="flag-banking" />
+                                <div
+                                    class="base-switch bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/5">
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </section>
 
                 <!-- 2. Coordinate Bancarie -->
-                <section>
+                <section id="banking-section" class="hidden">
                     <div class="detail-section-header justify-between">
                         <div class="flex-center-gap">
                             <span
@@ -169,22 +198,23 @@
                 <section>
                     <div class="detail-section-header">
                         <span
-                            class="material-symbols-outlined detail-section-icon icon-accent-green">sticky_note_2</span>
+                            class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
                         <h3 class="detail-section-title" data-t="notes_and_sharing">Note e Condivisione</h3>
                     </div>
 
                     <div class="flex-col-gap">
                         <div class="glass-field-container">
                             <label class="view-label" for="account-note" data-t="notes">Note</label>
-                            <div class="glass-field border-glow h-auto">
+                            <div class="note-display-box border-glow">
                                 <textarea id="account-note" data-t-placeholder="notes_placeholder"
-                                    class="form-textarea"></textarea>
+                                    class="form-textarea form-textarea-notes"></textarea>
                             </div>
                         </div>
 
                         <div class="flex-col-gap">
                             <!-- Shared Toggle -->
-                            <label class="visibility-option-card border-glow" for="flag-shared">
+                            <label
+                                class="visibility-option-card border-glow border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-transparent">
                                 <div class="flex-center-gap">
                                     <span
                                         class="material-symbols-outlined icon-accent-blue p-2 rounded-lg bg-blue-400/10">share</span>
@@ -192,7 +222,9 @@
                                         Condiviso</span>
                                 </div>
                                 <input class="hidden" type="checkbox" id="flag-shared" />
-                                <div class="base-switch"></div>
+                                <div
+                                    class="base-switch bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/5">
+                                </div>
                             </label>
                         </div>
 
@@ -210,14 +242,32 @@
                         </div>
 
                         <!-- Memorandum Toggle -->
-                        <label class="visibility-option-card border-glow" for="flag-memo">
+                        <label
+                            class="visibility-option-card border-glow border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-transparent">
                             <div class="flex-center-gap">
                                 <span
                                     class="material-symbols-outlined icon-accent-orange p-2 rounded-lg bg-orange-400/10">lightbulb</span>
                                 <span class="text-xs font-black uppercase" data-t="memorandum">Memorandum</span>
                             </div>
                             <input class="hidden" type="checkbox" id="flag-memo" />
-                            <div class="base-switch"></div>
+                            <div
+                                class="base-switch bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/5">
+                            </div>
+                        </label>
+
+                        <!-- Memorandum Shared Toggle -->
+                        <label
+                            class="visibility-option-card border-glow border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-transparent">
+                            <div class="flex-center-gap">
+                                <span
+                                    class="material-symbols-outlined icon-accent-green p-2 rounded-lg bg-green-400/10">broadcast_on_personal</span>
+                                <span class="text-xs font-black uppercase" data-t="memo_shared">Memorandum
+                                    Condiviso</span>
+                            </div>
+                            <input class="hidden" type="checkbox" id="flag-memo-shared" />
+                            <div
+                                class="base-switch bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/5">
+                            </div>
                         </label>
                     </div>
                 </section>
@@ -229,7 +279,7 @@
     </div>
 
     <script type="module" src="assets/js/main.js?v=3.6"></script>
-    <script type="module" src="assets/js/modifica_account_privato.js?v=3.6"></script>
+    <script type="module" src="assets/js/form_account_privato.js?v=3.6"></script>
 </body>
 
 </html>

@@ -92,15 +92,18 @@
                     <div class="glass-card p-5 flex-col-gap-4">
                         <div class="titanium-input-group">
                             <span class="material-symbols-outlined">person</span>
-                            <input id="utente" type="text" placeholder="Utente / Email" />
+                            <input id="utente" name="account_username" type="text" placeholder="Utente / Email"
+                                autocomplete="off" />
                         </div>
                         <div class="titanium-input-group">
                             <span class="material-symbols-outlined">folder_shared</span>
-                            <input id="account" type="text" placeholder="Codice Account" />
+                            <input id="account" name="account_code" type="text" placeholder="Codice Account"
+                                autocomplete="off" />
                         </div>
                         <div class="titanium-input-group">
                             <span class="material-symbols-outlined">key</span>
-                            <input id="password" type="text" class="base-shield" placeholder="Password" />
+                            <input id="password" name="account_password" type="password" class="base-shield"
+                                placeholder="Password" autocomplete="new-password" />
                             <div class="flex items-center gap-1 pr-1">
                                 <button type="button"
                                     class="btn-toggle-pass size-8 flex-center text-white/20 hover:text-white transition-colors"

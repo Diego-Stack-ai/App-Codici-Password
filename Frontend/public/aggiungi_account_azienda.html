@@ -110,7 +110,8 @@
                             <label class="view-label" data-t="username_email">Username / Email</label>
                             <div class="glass-field">
                                 <span class="material-symbols-outlined opacity-70 mr-2">person</span>
-                                <input id="utente" type="text" placeholder="user@example.com" />
+                                <input id="utente" name="account_username" type="text" placeholder="user@example.com"
+                                    autocomplete="off" />
                             </div>
                         </div>
 
@@ -119,7 +120,8 @@
                             <label class="view-label" data-t="account_id">Account ID</label>
                             <div class="glass-field">
                                 <span class="material-symbols-outlined opacity-70 mr-2">folder_shared</span>
-                                <input id="account" type="text" placeholder="Codice cliente / Sottoconto" />
+                                <input id="account" name="account_code" type="text"
+                                    placeholder="Codice cliente / Sottoconto" autocomplete="off" />
                             </div>
                         </div>
 
@@ -128,8 +130,9 @@
                             <label class="view-label" data-t="password">Password</label>
                             <div class="glass-field">
                                 <span class="material-symbols-outlined opacity-70 mr-2">key</span>
-                                <input id="password" type="text" class="base-shield field-value-password"
-                                    placeholder="********" />
+                                <input id="password" name="account_password" type="password"
+                                    class="base-shield field-value-password" placeholder="********"
+                                    autocomplete="new-password" />
                                 <div class="flex items-center gap-1 ml-2">
                                     <button type="button" id="btn-toggle-password" class="glass-field-btn">
                                         <span class="material-symbols-outlined">visibility</span>

@@ -90,7 +90,7 @@ async function initProtocolUI() {
             </button>
         `;
         document.getElementById('add-account-btn').addEventListener('click', () => {
-            window.location.href = `aggiungi_account_privato.html?type=${type}`;
+            window.location.href = `form_account_privato.html?type=${type}`;
         });
     }
 

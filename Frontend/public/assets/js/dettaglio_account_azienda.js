@@ -7,6 +7,9 @@ import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, collection, addDoc, qu
 
 import { showToast } from './ui-core.js';
 
+// Fallback sicuro per window.t
+window.t = window.t || ((k) => k);
+
 // --- THEME LOGIC ---
 const companyPalettes = [
     { from: '#10b981', to: '#047857', name: 'Green' },   // Green
@@ -146,6 +149,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btnToggleAccessi = document.getElementById('btn-toggle-accessi');
     if (btnToggleAccessi) btnToggleAccessi.addEventListener('click', toggleAccessi);
+
+    // TOGGLE PASSWORD LOGIC (Specific)
+    const togglePwdBtnDetail = document.getElementById('toggle-password');
+    const passwordInputDetail = document.getElementById('detail-password');
+
+    if (togglePwdBtnDetail && passwordInputDetail) {
+        // Stato iniziale
+        passwordInputDetail.classList.add('base-shield');
+        passwordInputDetail.type = "password";
+
+        togglePwdBtnDetail.addEventListener('click', () => {
+            const isMasked = passwordInputDetail.classList.contains('base-shield');
+            passwordInputDetail.classList.toggle('base-shield');
+            passwordInputDetail.type = isMasked ? "text" : "password";
+
+            const icon = togglePwdBtnDetail.querySelector('span');
+            if (icon) icon.textContent = isMasked ? 'visibility_off' : 'visibility';
+        });
+    }
 
     if (!accountId || !aziendaId) {
         if (window.showToast) window.showToast("ID account o azienda mancante.", "error");

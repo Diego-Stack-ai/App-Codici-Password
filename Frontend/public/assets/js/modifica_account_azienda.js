@@ -5,6 +5,9 @@ import {
     collection, addDoc, getDocs, query, where
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
+// Fallback sicuro per window.t
+window.t = window.t || ((k) => k);
+
 let currentUid = null;
 let currentAziendaId = null;
 let currentAccountId = null;
@@ -49,8 +52,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnCopy = e.target.closest('.btn-copy-val');
         if (btnToggle) {
             const input = document.getElementById(btnToggle.dataset.target);
-            const isShield = input.classList.toggle('base-shield');
-            btnToggle.querySelector('span').textContent = isShield ? 'visibility' : 'visibility_off';
+            if (input) {
+                const isMasked = input.type === "password";
+                input.type = isMasked ? "text" : "password";
+
+                // Toggle base-shield logic
+                if (isMasked) input.classList.remove('base-shield'); // Reveal
+                else input.classList.add('base-shield'); // Hide
+
+                const icon = btnToggle.querySelector('span');
+                if (icon) icon.textContent = isMasked ? 'visibility_off' : 'visibility';
+            }
         } else if (btnCopy) {
             const val = document.getElementById(btnCopy.dataset.target).value;
             if (val) navigator.clipboard.writeText(val).then(() => showToast("Copiato!", "success"));

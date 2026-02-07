@@ -2,6 +2,9 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
+// Fallback sicuro per window.t
+window.t = window.t || ((k) => k);
+
 let bankAccounts = [{
     iban: '',
     cards: [],
@@ -68,8 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btnTogglePass.addEventListener('click', () => {
             const input = document.getElementById('password');
             const icon = btnTogglePass.querySelector('span');
-            input.classList.toggle('base-shield');
-            icon.textContent = input.classList.contains('base-shield') ? 'visibility' : 'visibility_off';
+
+            const isMasked = input.type === "password";
+            input.type = isMasked ? "text" : "password";
+
+            if (isMasked) input.classList.remove('base-shield');
+            else input.classList.add('base-shield');
+
+            icon.textContent = isMasked ? 'visibility_off' : 'visibility';
         });
     }
 
