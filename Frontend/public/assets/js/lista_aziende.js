@@ -1,27 +1,33 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { showToast } from './ui-core.js';
+import { initComponents } from './components.js';
+import { t } from './translations.js';
 
 let allAziende = [];
 let sortOrder = 'asc';
 
-const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : console.log(msg);
-
 const companyPalettes = [
-    { from: '#3b82f6', to: '#1d4ed8', tail: 'blue' },   // Blue
-    { from: '#10b981', to: '#047857', tail: 'emerald' }, // Green
-    { from: '#8b5cf6', to: '#6d28d9', tail: 'purple' }, // Purple
-    { from: '#f59e0b', to: '#b45309', tail: 'amber' },  // Orange
-    { from: '#ec4899', to: '#be185d', tail: 'pink' },   // Pink
-    { from: '#ef4444', to: '#b91c1c', tail: 'red' },    // Red
-    { from: '#06b6d4', to: '#0e7490', tail: 'cyan' },   // Cyan
+    { key: 'blue', label: 'Blue' },
+    { key: 'green', label: 'Green' },
+    { key: 'orange', label: 'Orange' },
+    { key: 'amber', label: 'Amber' },
+    { key: 'red', label: 'Red' },
+    { key: 'purple', label: 'Purple' },
+    { key: 'cyan', label: 'Cyan' },
+    { key: 'pink', label: 'Pink' },
+    { key: 'emerald', label: 'Emerald' }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            // 1. Inizializzazione Componenti (Header/Footer Protocol)
+            await initProtocolUI();
+
+            // 2. Caricamento Dati
             await loadAziende();
-            setupDynamicUI();
         } else {
             window.location.href = 'index.html';
         }
@@ -29,25 +35,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Delegation for actions
     document.getElementById('aziende-list-container')?.addEventListener('click', (e) => {
-        const btnPin = e.target.closest('.btn-pin-azienda');
         const btnDettagli = e.target.closest('.btn-azienda-dettagli');
         const btnAccount = e.target.closest('.btn-azienda-account');
+        const btnPin = e.target.closest('.btn-pin-azienda');
+        const card = e.target.closest('.matrix-card');
 
         if (btnPin) {
             e.stopPropagation();
-            togglePin(btnPin.dataset.id);
+            const id = btnPin.getAttribute('data-id');
+            togglePin(id);
         } else if (btnDettagli) {
             e.stopPropagation();
-            window.location.href = `dati_azienda.html?id=${btnDettagli.dataset.id}`;
+            const id = btnDettagli.getAttribute('data-id');
+            window.location.href = `modifica_azienda.html?id=${id}`;
         } else if (btnAccount) {
             e.stopPropagation();
-            window.location.href = `account_azienda.html?id=${btnAccount.dataset.id}`;
-        } else {
-            const card = e.target.closest('.azienda-card');
-            if (card) window.location.href = `account_azienda.html?id=${card.dataset.id}`;
+            const id = btnAccount.getAttribute('data-id');
+            window.location.href = `account_azienda.html?id=${id}`;
+        } else if (card) {
+            // Se si clicca sulla card ma non sui bottoni specifici, vai agli account (o dettagli?) 
+            // Default behavior: go to accounts for ease of access
+            const id = card.getAttribute('data-id');
+            window.location.href = `account_azienda.html?id=${id}`;
         }
     });
 });
+
+/**
+ * PROTOCOLLO UI: Gestione Header Balanced e Footer Placeholder
+ */
+async function initProtocolUI() {
+    await initComponents();
+
+    const hLeft = document.getElementById('header-left');
+    const hCenter = document.getElementById('header-center');
+    const hRight = document.getElementById('header-right');
+
+    if (hLeft) {
+        hLeft.innerHTML = `
+            <button id="btn-back" class="btn-icon-header">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+        `;
+        document.getElementById('btn-back')?.addEventListener('click', () => window.location.href = 'home_page.html');
+    }
+
+    if (hCenter) {
+        hCenter.innerHTML = `
+             <h2 class="header-title uppercase tracking-widest text-shadow-glow">LE MIE AZIENDE</h2>
+        `;
+    }
+
+    if (hRight) {
+        hRight.innerHTML = `
+            <a href="aggiungi_nuova_azienda.html" class="btn-icon-header text-accent-green" title="Aggiungi Azienda">
+                <span class="material-symbols-outlined">add_business</span>
+            </a>
+        `;
+    }
+
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        fCenter.innerHTML = `
+            <a href="home_page.html" class="btn-icon-header" title="Home">
+                <span class="material-symbols-outlined">home</span>
+            </a>
+        `;
+    }
+}
 
 async function loadAziende() {
     try {
@@ -59,41 +114,6 @@ async function loadAziende() {
         console.error(e);
         showToast("Errore caricamento", "error");
     }
-}
-
-function setupDynamicUI() {
-    const interval = setInterval(() => {
-        const hCenter = document.getElementById('header-center');
-        const hRight = document.getElementById('header-right');
-        const fCenter = document.getElementById('footer-center-actions');
-
-        if (hCenter && hRight && fCenter) {
-            clearInterval(interval);
-
-            hCenter.innerHTML = `<h2 class="header-title" data-t="companies">Aziende</h2>`;
-
-            // Header Actions: Sort
-            const sBtn = document.createElement('button');
-            sBtn.className = 'btn-icon-header';
-            sBtn.innerHTML = '<span class="material-symbols-outlined">sort_by_alpha</span>';
-            sBtn.onclick = () => {
-                sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-                showToast(sortOrder === 'asc' ? 'A-Z' : 'Z-A', 'info');
-                renderAziende();
-            };
-            hRight.prepend(sBtn);
-
-            // Footer actions: Add
-            fCenter.innerHTML = `
-                <button id="footer-btn-add" class="fab-btn-primary" title="Aggiungi Azienda">
-                    <span class="material-symbols-outlined">add</span>
-                </button>
-            `;
-            document.getElementById('footer-btn-add').onclick = () => {
-                window.location.href = 'aggiungi_nuova_azienda.html';
-            };
-        }
-    }, 100);
 }
 
 function renderAziende() {
@@ -121,40 +141,36 @@ function renderAziende() {
     });
 
     container.innerHTML = sorted.map((a, idx) => {
-        const pal = getPalette(a.ragioneSociale, a.colorIndex);
-        const logo = a.logo ? `<img src="${a.logo}" class="size-full object-cover rounded-2xl" />` : `<span class="text-xl font-black">${(a.ragioneSociale || 'A').charAt(0).toUpperCase()}</span>`;
+        const palKey = getPaletteKey(a.ragioneSociale, a.colorIndex);
+        const logo = a.logo ? `<img src="${a.logo}" class="size-full object-cover rounded-xl" />` : `<span class="text-xl font-black">${(a.ragioneSociale || 'A').charAt(0).toUpperCase()}</span>`;
 
         return `
-            <div class="azienda-card glass-card p-5 group flex flex-col gap-5 relative overflow-hidden transition-all active:scale-[0.98]" data-id="${a.id}">
-                <!-- Background Accent -->
-                <div class="absolute top-0 right-0 size-32 bg-[${pal.from}]/5 blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="matrix-card card-${palKey} border-glow adaptive-shadow group flex flex-col relative overflow-hidden transition-all active:scale-[0.98] p-4 cursor-pointer min-h-[160px]" data-id="${a.id}">
+                
+                <!-- Pin Button (Top Right Absolute) -->
+                <button type="button" class="btn-pin-azienda absolute top-3 right-3 z-30 w-8 h-8 p-0 flex items-center justify-center bg-transparent border-none outline-none transition-all ${a.isPinned ? 'text-amber-400 opacity-100' : 'text-white/30 hover:text-white opacity-0 group-hover:opacity-100'}" data-id="${a.id}" onclick="event.stopPropagation()">
+                    <span class="material-symbols-outlined text-2xl drop-shadow-md select-none ${a.isPinned ? 'filled rotate-[-45deg]' : ''}" style="font-variation-settings: 'FILL' ${a.isPinned ? 1 : 0}, 'wght' 600;">push_pin</span>
+                </button>
 
-                <!-- Card Header -->
-                <div class="flex items-start gap-4 z-10">
-                    <div class="size-14 rounded-2xl flex-center border-glow text-white shrink-0 shadow-lg" style="background: linear-gradient(135deg, ${pal.from}, ${pal.to})">
+                <!-- Card Body (Flex Grow to push actions down) -->
+                <div class="flex-1 flex items-center gap-4 z-10 w-full mb-4 px-1">
+                    <!-- Logo Box -->
+                    <div class="size-16 rounded-2xl flex items-center justify-center border-glow text-primary shrink-0 shadow-lg bg-surface-field overflow-hidden">
                         ${logo}
                     </div>
-                    <div class="flex-1 min-w-0 pr-4">
-                        <h3 class="text-base font-black text-white truncate leading-tight">${a.ragioneSociale || 'Senza Nome'}</h3>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-[9px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/5">P.IVA: ${a.partitaIva || '---'}</span>
-                        </div>
-                    </div>
                     
-                    <!-- Pin Button -->
-                    <button class="btn-pin-azienda absolute top-4 right-4 text-white/20 hover:text-white transition-all ${a.isPinned ? '!text-amber-500 !opacity-100' : 'opacity-0 group-hover:opacity-100'}" data-id="${a.id}">
-                        <span class="material-symbols-outlined text-lg ${a.isPinned ? 'filled rotate-[-45deg]' : ''}">push_pin</span>
-                    </button>
+                    <!-- Text Box -->
+                    <div class="flex-1 min-w-0 flex items-center">
+                        <h3 class="text-base font-black text-primary truncate leading-snug w-full pr-8">${a.ragioneSociale || 'Senza Nome'}</h3>
+                    </div>
                 </div>
 
-                <!-- Card Actions -->
-                <div class="flex gap-3 z-10">
-                    <button class="btn-azienda-dettagli flex-1 h-12 rounded-xl flex-center gap-2 bg-white/5 border border-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-all font-bold text-xs" data-id="${a.id}">
-                        <span class="material-symbols-outlined text-base">domain</span>
-                        <span data-t="details">Dettagli</span>
+                <!-- Footer Quick Actions (Pushed Bottom) -->
+                <div class="grid grid-cols-2 gap-3 z-10 w-full mt-auto">
+                    <button class="btn-azienda-dettagli btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm" data-id="${a.id}">
+                        <span>Dettaglio</span>
                     </button>
-                    <button class="btn-azienda-account flex-1 h-12 rounded-xl flex-center gap-2 text-white hover:brightness-110 transition-all font-bold text-xs" style="background: linear-gradient(135deg, ${pal.from}, ${pal.to}); box-shadow: 0 4px 12px ${pal.from}40;" data-id="${a.id}">
-                        <span class="material-symbols-outlined text-base">folder_shared</span>
+                    <button class="btn-azienda-account btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm" data-id="${a.id}">
                         <span>Account</span>
                     </button>
                 </div>
@@ -163,12 +179,12 @@ function renderAziende() {
     }).join("");
 }
 
-function getPalette(name, idx) {
-    if (typeof idx === 'number' && companyPalettes[idx]) return companyPalettes[idx];
-    if (!name) return companyPalettes[0];
+function getPaletteKey(name, idx) {
+    if (typeof idx === 'number' && companyPalettes[idx]) return companyPalettes[idx].key;
+    if (!name) return companyPalettes[0].key;
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    return companyPalettes[Math.abs(hash) % companyPalettes.length];
+    return companyPalettes[Math.abs(hash) % companyPalettes.length].key;
 }
 
 async function togglePin(id) {

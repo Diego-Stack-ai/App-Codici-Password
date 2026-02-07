@@ -98,8 +98,93 @@ body,
     display: flex;
 }
 
+.relative {
+    position: relative !important;
+}
+
+.absolute {
+    position: absolute !important;
+}
+
+.top-2 {
+    top: 0.5rem !important;
+}
+
+.top-3 {
+    top: 0.75rem !important;
+}
+
+.right-2 {
+    right: 0.5rem !important;
+}
+
+.right-3 {
+    right: 0.75rem !important;
+}
+
+.z-30 {
+    z-index: 30 !important;
+}
+
+.bg-transparent {
+    background-color: transparent !important;
+}
+
+.border-none {
+    border: none !important;
+}
+
+.p-0 {
+    padding: 0 !important;
+}
+
+.w-8 {
+    width: 2rem !important;
+}
+
+.h-8 {
+    height: 2rem !important;
+}
+
+.items-center {
+    align-items: center !important;
+}
+
+.justify-center {
+    justify-content: center !important;
+}
+
+/* Specific PIN Button Override to ensure execution despite CSP blocks on inline */
+.btn-pin-azienda {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    position: absolute !important;
+    top: 0.75rem !important;
+    /* Force top-3 equivalent */
+    right: 0.75rem !important;
+    /* Force right-3 equivalent */
+}
+
 .flex-col {
     flex-direction: column;
+}
+
+.flex-1 {
+    flex: 1 1 0%;
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rounded-xl {
+    border-radius: 0.75rem;
 }
 
 .items-center {
@@ -142,6 +227,57 @@ body,
     height: 100%;
 }
 
+.h-10 {
+    height: 2.5rem !important;
+    /* 40px */
+}
+
+.h-11 {
+    height: 2.75rem !important;
+    /* 44px */
+}
+
+.h-12 {
+    height: 3rem !important;
+    /* 48px */
+}
+
+.h-14 {
+    height: 3.5rem !important;
+    /* 56px */
+}
+
+/* --- Button Ghost Styles (Manual Tailwind override) --- */
+.btn-ghost-light,
+.btn-ghost-dark,
+html.dark .btn-ghost-adaptive,
+html:not(.dark) .btn-ghost-adaptive {
+    background-color: transparent !important;
+    /* Border defined specifically below */
+    color: inherit !important;
+}
+
+/* Specific adaptive colors */
+html.dark .btn-ghost-adaptive {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+html.dark .btn-ghost-adaptive:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+html:not(.dark) .btn-ghost-adaptive {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-primary) !important;
+}
+
+html:not(.dark) .btn-ghost-adaptive:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
 .text-xs {
     font-size: 0.75rem;
 }
@@ -172,6 +308,12 @@ body,
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.flex-center {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 /* --- 1.4 COMMON UTILITIES (Protocol Compact) --- */
@@ -307,6 +449,14 @@ body,
     color: #ffffff !important;
 }
 
+.text-primary {
+    color: var(--text-primary) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
 .text-slate-400 {
     color: #94a3b8 !important;
 }
@@ -440,6 +590,19 @@ body,
 .size-14 {
     width: 3.5rem !important;
     height: 3.5rem !important;
+}
+
+.size-16 {
+    width: 4rem !important;
+    height: 4rem !important;
+}
+
+.w-16 {
+    width: 4rem !important;
+}
+
+.h-16 {
+    height: 4rem !important;
 }
 
 .size-32 {
@@ -1786,6 +1949,31 @@ html:not(.dark) .btn-secondary {
     background: linear-gradient(135deg, rgba(255, 30, 0, 0.5), rgba(80, 0, 0, 0.3)) !important;
 }
 
+.card-purple {
+    --accent-rgb: 147, 51, 234;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.5), rgba(88, 28, 135, 0.3)) !important;
+}
+
+.card-cyan {
+    --accent-rgb: 6, 182, 212;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.5), rgba(14, 116, 144, 0.3)) !important;
+}
+
+.card-emerald {
+    --accent-rgb: 16, 185, 129;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(4, 120, 87, 0.3)) !important;
+}
+
+.card-pink {
+    --accent-rgb: 236, 72, 153;
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.5), rgba(190, 24, 93, 0.3)) !important;
+}
+
+.card-amber {
+    --accent-rgb: 245, 158, 11;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.5), rgba(180, 83, 9, 0.3)) !important;
+}
+
 /* --- 2.6 LIGHT MODE SPECIFICO HOME --- */
 html:not(.dark) .card-blue {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(0, 190, 255, 0.4)) !important;
@@ -1801,6 +1989,26 @@ html:not(.dark) .card-orange {
 
 html:not(.dark) .card-red {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 30, 0, 0.4)) !important;
+}
+
+html:not(.dark) .card-purple {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(147, 51, 234, 0.4)) !important;
+}
+
+html:not(.dark) .card-cyan {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(6, 182, 212, 0.4)) !important;
+}
+
+html:not(.dark) .card-emerald {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(16, 185, 129, 0.4)) !important;
+}
+
+html:not(.dark) .card-pink {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(236, 72, 153, 0.4)) !important;
+}
+
+html:not(.dark) .card-amber {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(245, 158, 11, 0.4)) !important;
 }
 
 html:not(.dark) .badge-count {
@@ -1905,6 +2113,13 @@ html:not(.dark) .micro-list-item .item-badge {
     max-width: 1100px;
     margin: 0 auto;
     padding-bottom: 2rem;
+}
+
+.aziende-grid-gap {
+    gap: 1.5rem !important;
+    /* Spaziatura aumentata per lista aziende */
+    grid-template-columns: 1fr !important;
+    /* Layout a colonna singola obbligatorio */
 }
 
 @media (max-width: 480px) {
@@ -2104,10 +2319,15 @@ html:not(.dark) .micro-list-item .item-badge {
 
 .micro-account-content {
     padding: 0.5rem 0.75rem;
+    padding-right: 3.5rem;
+    /* Space for absolute actions */
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    position: static;
+    /* Let children position relative to swipe-content */
 }
+
 
 .micro-account-avatar-box {
     position: relative;
@@ -2164,10 +2384,15 @@ html:not(.dark) .micro-list-item .item-badge {
 }
 
 .micro-account-top-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    z-index: 20;
 }
+
 
 .micro-data-display {
     padding: 0.5rem 0.75rem 0.5rem 0.75rem;
@@ -2227,7 +2452,8 @@ html:not(.dark) .micro-list-item .item-badge {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
+    /* Removed background (was rgba(255, 255, 255, 0.05)) */
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2815,7 +3041,7 @@ html:not(.dark) .micro-list-item .item-badge {
 .btn-banking-info .info-text {
     font-size: 10px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
@@ -3221,4 +3447,8 @@ input:checked+.base-switch::after {
 
 .icon-purple {
     color: #8b5cf6;
+}
+
+.note-display-box {
+    min-height: 60px;
 }

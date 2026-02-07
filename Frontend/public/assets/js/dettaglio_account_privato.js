@@ -436,7 +436,7 @@ function render(acc) {
                         <div class="bg-black/20 p-2.5 rounded-xl border border-white/5 h-full">
                             <div class="micro-data-row">
                                 <span class="micro-data-label" data-t="iban_note">Nota Rapida</span>
-                                <span class="micro-data-value italic text-white/50 truncate">${bank.nota || '-'}</span>
+                                <span class="micro-data-value italic text-secondary truncate">${bank.nota || '-'}</span>
                             </div>
                         </div>
                     </div>
@@ -448,18 +448,18 @@ function render(acc) {
                             <span class="text-[9px] font-black uppercase tracking-widest" data-t="bank_referent">Referente dedicato</span>
                         </div>
                         <div class="micro-data-row px-1">
-                             <span class="micro-data-value font-black text-white text-[11px] uppercase tracking-wide">${bank.referenteNome || 'No Name'}</span>
+                             <span class="micro-data-value font-black text-primary text-[11px] uppercase tracking-wide">${bank.referenteNome || 'No Name'}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="micro-data-row bg-black/20 p-2 rounded-lg border border-white/5 cursor-pointer hover:bg-emerald-500/10 transition-all group"
                                 data-action="make-call" data-number="${bank.referenteTelefono}">
                                 <span class="material-symbols-outlined text-[14px] text-emerald-500/50 group-hover:text-emerald-400">call</span>
-                                <span class="micro-data-value text-[10px] font-bold text-white/60 group-hover:text-white">${bank.referenteTelefono || '-'}</span>
+                                <span class="micro-data-value text-[10px] font-bold text-secondary group-hover:text-primary">${bank.referenteTelefono || '-'}</span>
                             </div>
                             <div class="micro-data-row bg-black/20 p-2 rounded-lg border border-white/5 cursor-pointer hover:bg-emerald-500/10 transition-all group"
                                 data-action="make-call" data-number="${bank.referenteCellulare}">
                                 <span class="material-symbols-outlined text-[14px] text-emerald-500/50 group-hover:text-emerald-400">smartphone</span>
-                                <span class="micro-data-value text-[10px] font-bold text-white/60 group-hover:text-white">${bank.referenteCellulare || '-'}</span>
+                                <span class="micro-data-value text-[10px] font-bold text-secondary group-hover:text-primary">${bank.referenteCellulare || '-'}</span>
                             </div>
                         </div>
                     </div>
@@ -467,7 +467,7 @@ function render(acc) {
                     <!-- Carte collegate -->
                     ${(bank.cards || []).length > 0 ? `
                         <div class="space-y-3 pt-1">
-                            <span class="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] ml-1" data-t="linked_tools">Strumenti di Pagamento</span>
+                            <span class="text-[9px] font-black text-secondary uppercase tracking-[0.2em] ml-1 opacity-20" data-t="linked_tools">Strumenti di Pagamento</span>
                             ${bank.cards.map((card, cIdx) => `
                                 <div class="bg-black/10 p-3 rounded-xl border border-white/5 space-y-3 border-glow">
                                      <div class="flex items-center justify-between">
@@ -551,7 +551,7 @@ async function renderGuests(listItems) {
     list.innerHTML = '';
 
     if (!listItems || listItems.length === 0) {
-        list.innerHTML = `<p class="text-xs text-white/40 italic ml-1">${window.t('no_active_access') || 'Nessun accesso attivo.'}</p>`;
+        list.innerHTML = `<p class="text-xs text-secondary italic ml-1">${window.t('no_active_access') || 'Nessun accesso attivo.'}</p>`;
         return;
     }
 
