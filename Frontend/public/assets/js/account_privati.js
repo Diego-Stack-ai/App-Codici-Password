@@ -123,37 +123,8 @@ window.togglePin = async (id, isOwner, ownerId) => {
     }
 };
 
-// Password Visibility Toggle
-window.toggleTripleVisibility = (id) => {
-    const eye = document.getElementById(`pass-eye-${id}`);
-    const passText = document.getElementById(`pass-text-${id}`);
-    const card = document.getElementById(`acc-${id}`);
+// La logica di visibilità password è stata spostata in cleanup.js per essere globale
 
-    if (!card || !eye || !passText) return;
-
-    // Recupera la password dal pulsante copia
-    let passVal = '••••••••';
-    const copyBtns = card.querySelectorAll('.copy-btn-dynamic');
-    copyBtns.forEach(btn => {
-        const title = (btn.getAttribute('title') || '').toLowerCase();
-        if (title.includes('password')) {
-            passVal = btn.getAttribute('data-copy') || passVal;
-        }
-    });
-
-    const isHidden = eye.textContent.trim() === 'visibility';
-    const dots = '••••••••';
-
-    if (isHidden) {
-        // Mostra password
-        eye.textContent = 'visibility_off';
-        passText.textContent = passVal;
-    } else {
-        // Nascondi password
-        eye.textContent = 'visibility';
-        passText.textContent = dots;
-    }
-};
 
 
 async function loadAccounts() {

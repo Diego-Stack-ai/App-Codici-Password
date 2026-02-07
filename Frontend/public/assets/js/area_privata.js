@@ -28,10 +28,8 @@ onAuthStateChanged(auth, async (user) => {
  * PROTOCOLLO UI: Gestione Header Balanced e Footer Placeholder
  */
 async function initProtocolUI() {
-    // Carichiamo i componenti base (se necessario)
     await initComponents();
 
-    // Iniezione Header Balanced (3 Zone)
     const hLeft = document.getElementById('header-left');
     const hCenter = document.getElementById('header-center');
     const hRight = document.getElementById('header-right');
@@ -59,7 +57,6 @@ async function initProtocolUI() {
         `;
     }
 
-    // Iniezione Shortcut Rubrica in Footer (Centro)
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         fCenter.innerHTML = `
@@ -78,7 +75,6 @@ async function initProtocolUI() {
  */
 async function loadCounters(uid, email) {
     try {
-        // 1. Own Accounts
         const allSnap = await getDocs(collection(db, "users", uid, "accounts"));
         let counts = { standard: 0, memo: 0, shared: 0, sharedMemo: 0 };
 
@@ -98,7 +94,6 @@ async function loadCounters(uid, email) {
             }
         });
 
-        // 2. Add counts of accounts shared WITH me (Accepted Invites)
         try {
             const invitesQ = query(collection(db, "invites"),
                 where("recipientEmail", "==", email),
@@ -108,15 +103,11 @@ async function loadCounters(uid, email) {
             invitesSnap.forEach(invDoc => {
                 const inv = invDoc.data();
                 if (inv.type === 'privato') {
-                    // Usually shared accounts are either standard shared or memo shared
-                    // For now, let's treat all as 'shared' unless we fetch the account to know
                     counts.shared++;
                 }
             });
         } catch (e) { console.warn("Counters (Invites) error", e); }
 
-        // Update UI (Localized format with requested parentheses)
-        // Spacing is now handled by CSS class .gap-2 in the HTML container
         if (document.getElementById('count-standard')) document.getElementById('count-standard').textContent = `(${counts.standard})`;
         if (document.getElementById('count-memo')) document.getElementById('count-memo').textContent = `(${counts.memo})`;
         if (document.getElementById('count-shared')) document.getElementById('count-shared').textContent = `(${counts.shared})`;
@@ -126,7 +117,7 @@ async function loadCounters(uid, email) {
 }
 
 /**
- * TOP ACCOUNTS WIDGET: Rendering degli ultimi protocolli usati
+ * TOP ACCOUNTS WIDGET
  */
 async function loadTopAccounts(uid) {
     const list = document.getElementById('top-accounts-list');
@@ -138,7 +129,6 @@ async function loadTopAccounts(uid) {
             const q = query(collection(db, "users", uid, "accounts"), orderBy("views", "desc"), limit(10));
             snap = await getDocs(q);
         } catch (err) {
-            console.warn("Top Accounts: Index for 'views' might be missing, falling back to unordered.", err);
             const qFallback = query(collection(db, "users", uid, "accounts"), limit(20));
             snap = await getDocs(qFallback);
         }
@@ -159,18 +149,25 @@ async function loadTopAccounts(uid) {
             const isMemo = !!acc.hasMemo || acc.type === 'memorandum';
             const isShared = !!acc.shared || !!acc.isMemoShared;
 
-            let accentColor = 'rgba(80, 150, 255, 0.6)'; // Blue
-            if (isShared && isMemo) accentColor = 'rgba(16, 185, 129, 0.6)';
-            else if (isShared) accentColor = 'rgba(147, 51, 234, 0.6)';
-            else if (isMemo) accentColor = 'rgba(245, 158, 11, 0.6)';
+            let badgeClass = '';
+            let textAccentClass = 'text-accent-blue';
+
+            if (isShared && isMemo) {
+                badgeClass = 'badge-shared-memo';
+                textAccentClass = 'text-accent-green';
+            } else if (isShared) {
+                badgeClass = 'badge-shared';
+                textAccentClass = 'text-accent-purple';
+            } else if (isMemo) {
+                badgeClass = 'badge-memo';
+                textAccentClass = 'text-accent-orange';
+            }
 
             const dots = '••••••••';
-
             const card = document.createElement('div');
             card.className = "micro-account-card cursor-pointer hover:bg-white/5 transition-all active:scale-95";
-            card.style.marginBottom = "0.75rem";
-            // Click sull'intera card porta al dettaglio
             card.setAttribute('data-action', 'navigate');
+            card.setAttribute('data-id', acc.id);
             card.setAttribute('data-href', `dettaglio_account_privato.html?id=${acc.id}`);
 
             card.innerHTML = `
@@ -178,7 +175,7 @@ async function loadTopAccounts(uid) {
                 <div class="micro-account-content">
                     <div class="micro-account-avatar-box">
                         <img class="micro-account-avatar" src="${avatar}" alt="">
-                        <div class="micro-item-badge-dot" style="background: ${accentColor}"></div>
+                        <div class="micro-item-badge-dot ${badgeClass}"></div>
                     </div>
 
                     <div class="micro-account-info" data-id="${acc.id}">
@@ -190,7 +187,7 @@ async function loadTopAccounts(uid) {
 
                      <div class="micro-account-top-actions">
                         ${acc.password ? `
-                        <button class="micro-btn-utility btn-toggle-visibility relative z-10" style="color: ${accentColor};" data-action="toggle-visibility" data-stop-propagation="true">
+                        <button class="micro-btn-utility btn-toggle-visibility relative z-10 ${textAccentClass}" data-action="toggle-visibility" data-stop-propagation="true">
                             <span class="material-symbols-outlined">visibility</span>
                         </button>` : ''}
                     </div>
@@ -239,27 +236,35 @@ async function loadTopAccounts(uid) {
 }
 
 /**
- * RUBRICA ENGINE: Accordion, Form, List
+ * RUBRICA ENGINE
  */
 const rubricaContent = document.getElementById('rubrica-content');
 const rubricaChevron = document.getElementById('rubrica-chevron');
 const rubricaList = document.getElementById('contacts-list');
 
-document.getElementById('rubrica-toggle-btn').onclick = () => {
-    const isHidden = rubricaContent.classList.toggle('hidden');
-    rubricaChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
-};
+if (document.getElementById('rubrica-toggle-btn')) {
+    document.getElementById('rubrica-toggle-btn').onclick = () => {
+        const isHidden = rubricaContent.classList.toggle('hidden');
+        if (rubricaChevron) {
+            rubricaChevron.classList.toggle('rotate-180', !isHidden);
+        }
+    };
+}
 
-document.getElementById('add-contact-btn').onclick = (e) => {
-    e.stopPropagation();
-    document.getElementById('add-contact-form').classList.toggle('hidden');
-};
+if (document.getElementById('add-contact-btn')) {
+    document.getElementById('add-contact-btn').onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('add-contact-form').classList.toggle('hidden');
+    };
+}
 
 async function loadRubrica(uid) {
     if (!rubricaList) return;
     try {
         const list = await getContacts(uid);
-        document.getElementById('rubrica-counter').textContent = `(${list.length})`;
+        if (document.getElementById('rubrica-counter')) {
+            document.getElementById('rubrica-counter').textContent = `(${list.length})`;
+        }
         rubricaList.innerHTML = list.length === 0 ? `<p class="text-xs text-white/10 py-10 text-center">${t('empty_contacts')}</p>` : '';
 
         list.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
@@ -283,9 +288,8 @@ async function loadRubrica(uid) {
             rubricaList.appendChild(div);
         });
 
-        // Add event listeners to delete buttons
         rubricaList.querySelectorAll('.btn-delete-contact').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id');
                 window.deleteContact(uid, id);
             });
@@ -294,7 +298,6 @@ async function loadRubrica(uid) {
 }
 
 window.deleteContact = async (uid, id) => {
-    // V3.5: Use Premium Confirm
     const confirmed = await window.showConfirmModal(
         "ELIMINAZIONE CONTATTO",
         "Rimuovere definitivamente questo contatto dalla rubrica?",
@@ -311,18 +314,20 @@ window.deleteContact = async (uid, id) => {
     }
 };
 
-document.getElementById('btn-add-contact').onclick = async () => {
-    const nome = document.getElementById('contact-nome').value.trim();
-    const cognome = document.getElementById('contact-cognome').value.trim();
-    const email = document.getElementById('contact-email').value.trim();
-    const user = auth.currentUser;
-    if (!user || !email) return;
+if (document.getElementById('btn-add-contact')) {
+    document.getElementById('btn-add-contact').onclick = async () => {
+        const nome = document.getElementById('contact-nome').value.trim();
+        const cognome = document.getElementById('contact-cognome').value.trim();
+        const email = document.getElementById('contact-email').value.trim();
+        const user = auth.currentUser;
+        if (!user || !email) return;
 
-    try {
-        await addContact(user.uid, { nome, cognome, email, createdAt: new Date().toISOString() });
-        showToast(t('identity_registered'), "success");
-        document.querySelectorAll('#add-contact-form input').forEach(i => i.value = '');
-        document.getElementById('add-contact-form').classList.add('hidden');
-        loadRubrica(user.uid);
-    } catch (e) { logError("Rubrica Add", e); }
-};
+        try {
+            await addContact(user.uid, { nome, cognome, email, createdAt: new Date().toISOString() });
+            showToast(t('identity_registered'), "success");
+            document.querySelectorAll('#add-contact-form input').forEach(i => i.value = '');
+            document.getElementById('add-contact-form').classList.add('hidden');
+            loadRubrica(user.uid);
+        } catch (e) { logError("Rubrica Add", e); }
+    };
+}

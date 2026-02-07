@@ -1,7 +1,7 @@
 /**
- * PROTOCOLLO BASE CORE ENGINE v2.2 (Time-Lock Protocol)
+ * PROTOCOLLO BASE CORE ENGINE v2.3 (CSP-Safe Edition)
  * Gestione centralizzata di Tema, Font, Protezioni e Meta-tag.
- * Blindatura Totale v3: Time-Based Logic per modalità Auto.
+ * Blindatura Totale v3.1: CSP Optimized (Zero Inline Styles)
  */
 
 (function () {
@@ -28,9 +28,6 @@
         setMode: function (mode) {
             localStorage.setItem('theme', mode);
             this.applyLogic();
-            // Reload necessario solo se vogliamo purificare il DOM completamente, 
-            // ma con la logica attuale basta riapplicare. 
-            // Per sicurezza nelle impostazioni facciamo reload, qui applichiamo.
         },
 
         getMode: function () {
@@ -51,21 +48,15 @@
 
             // LOGICA DECISIONALE (Gerarchia)
             if (isForcedDark) {
-                // 1. Priorità massima: Pagine di sicurezza (Login, Reset)
                 shouldBeDark = true;
                 colorSchemeValue = "dark";
             } else if (savedTheme === 'light') {
-                // 2. Manuale Utente: CHIARO (Ignora tutto)
                 shouldBeDark = false;
                 colorSchemeValue = "light";
             } else if (savedTheme === 'dark') {
-                // 3. Manuale Utente: SCURO (Ignora tutto)
                 shouldBeDark = true;
                 colorSchemeValue = "dark";
             } else {
-                // 4. Automatico: LOGICA TIME-BASED (Ignora sensore telefono)
-                // 07:00 - 19:00 -> CHIARO
-                // 19:00 - 07:00 -> SCURO
                 if (this.isDayTime()) {
                     shouldBeDark = false;
                     colorSchemeValue = "light";
@@ -75,14 +66,12 @@
                 }
             }
 
-            // APPLICAZIONE CLASSI DOM
+            // APPLICAZIONE CLASSI DOM (CSP Safe: No inline styles)
             const html = document.documentElement;
             if (shouldBeDark) {
                 html.classList.add('dark');
-                html.style.backgroundColor = "#0a0f1e";
             } else {
                 html.classList.remove('dark');
-                html.style.backgroundColor = "#f0f4f8";
             }
 
             // INIEZIONE META TAG (BLINDATURA)
@@ -95,7 +84,7 @@
             // color-scheme
             let metaScheme = head.querySelector('meta[name="color-scheme"]');
             if (!metaScheme) {
-                metaScheme = document.createElement('meta');
+                metaScheme = head.querySelector('meta[name="color-scheme"]') || document.createElement('meta');
                 metaScheme.name = "color-scheme";
                 head.appendChild(metaScheme);
             }
@@ -108,49 +97,33 @@
                 metaTheme.name = "theme-color";
                 head.appendChild(metaTheme);
             }
-            metaTheme.content = scheme === 'dark' ? "#0a0f1e" : "#f0f4f8";
+            // Allineato con variabili CSS --bg-primary
+            metaTheme.content = scheme === 'dark' ? "#0a0f1e" : "#e2e8f0";
         }
     };
 
     // --- 3. GESTIONE ASSET (Font, Icone) ---
     function injectGlobalAssets() {
-        // DISATTIVATO: I font sono ora serviti localmente da assets/css/fonts.css
-        /*
-        const head = document.head;
-        if (!document.querySelector('link[href*="fonts.googleapis.com"]')) {
-            const assets = [
-                { rel: "preconnect", href: "https://fonts.googleapis.com" },
-                { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-                { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" },
-                { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" }
-            ];
-            assets.forEach(attr => {
-                const link = document.createElement('link');
-                Object.assign(link, attr);
-                head.appendChild(link);
-            });
-        }
-        */
+        // Nessuna iniezione dinamica di link se non necessaria, preferire HTML statico per CSP
     }
 
     // --- 4. PROTEZIONI UI ---
     function applyProtections() {
-        // Disabilita zoom su iOS (spesso ignorato ma ci proviamo)
-        // Disabilita long-press menu contestuale tranne su input
         document.addEventListener('contextmenu', e => {
             if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) e.preventDefault();
         }, false);
     }
 
-    // --- 5. STEALTH REVEAL (Previene flash bianco) ---
+    // --- 5. STEALTH REVEAL (Safe Transition) ---
     function initReveal() {
-        const style = document.createElement('style');
-        style.innerHTML = `body { opacity: 0; transition: opacity 0.3s ease-in-out; }`;
-        document.head.appendChild(style);
-
+        // CSP Safe: La classe .revealed è definita in operatore.css
         const reveal = () => {
             requestAnimationFrame(() => {
-                setTimeout(() => { document.body.style.opacity = '1'; }, 50);
+                setTimeout(() => {
+                    if (document.body) {
+                        document.body.classList.add('revealed');
+                    }
+                }, 50);
             });
         };
 

@@ -22,15 +22,10 @@ if (document.readyState === 'loading') {
 /**
  * [POLICY] BLOCCO UX NATIVA (APP BLINDA)
  * Impedisce il menu contestuale e la selezione per simulare un'app nativa.
+ * CSP-Safe: Stili spostati in operatore.css tramite [data-lock-ui]
  */
 export function initLockedUX() {
-    // 1. Policy Semantica: Gli elementi con data-lock-ui non permettono selezione
-    document.querySelectorAll('[data-lock-ui]').forEach(el => {
-        el.style.userSelect = 'none';
-        el.style.webkitUserSelect = 'none';
-    });
-
-    // 2. Blocco Menu Contestuale (App Blinda)
+    // 1. Blocco Menu Contestuale (App Blinda)
     document.addEventListener('contextmenu', (e) => {
         const target = e.target;
         const tag = (target && target.tagName) ? target.tagName.toLowerCase() : '';
@@ -39,7 +34,7 @@ export function initLockedUX() {
         }
     });
 
-    // 3. Blocco Selezione Browser (Backup per vecchi motori)
+    // 2. Blocco Selezione Browser (Backup per vecchi motori)
     document.addEventListener('selectstart', (e) => {
         const target = e.target;
         const tag = (target && target.tagName) ? target.tagName.toLowerCase() : '';
@@ -51,59 +46,48 @@ export function initLockedUX() {
 
 /**
  * [CORE UI] TOAST NOTIFICATION
- * Mostra un feedback temporaneo all'utente.
+ * CSP-Safe: Usa classi CSS per stili e animazioni.
  */
 export function showToast(message, type = 'success') {
     let toast = document.getElementById('toast');
 
-    // Auto-creazione o reset se mancante
     if (!toast) {
-        if (!document.body) return; // Protezione se chiamato troppo presto
+        if (!document.body) return;
         toast = document.createElement('div');
         toast.id = 'toast';
         document.body.appendChild(toast);
     }
 
-    // Reset classi e stile base (PROTOCOLLO BASE Style)
-    toast.className = 'fixed left-1/2 -translate-x-1/2 bg-white text-[#0a0f1e] px-6 py-3 rounded-full text-sm font-bold shadow-[0_10px_40px_rgba(0,0,0,0.5)] pointer-events-none';
-    toast.style.bottom = '120px';
-    toast.style.zIndex = '999999';
-    toast.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-    toast.style.opacity = '0';
-    toast.style.transform = 'translate(-50%, 20px)';
+    // Reset classi e applica contenuto
+    toast.className = '';
+    const iconColorClass = type === 'error' ? 'text-red-500' : (type === 'info' ? 'text-blue-500' : 'text-green-400');
+    const iconName = type === 'error' ? 'error' : (type === 'info' ? 'info' : 'check_circle');
 
-    // Gestione contenuto
     toast.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px;">
-            <span class="material-symbols-outlined" style="font-size:1.2rem; color:${type === 'error' ? '#ef4444' : (type === 'info' ? '#3b82f6' : '#22c55e')}">
-                ${type === 'error' ? 'error' : (type === 'info' ? 'info' : 'check_circle')}
-            </span>
+        <div class="toast-content">
+            <span class="material-symbols-outlined toast-icon ${iconColorClass}">${iconName}</span>
             <span>${message}</span>
         </div>
     `;
 
-    // Trigger Animazione (Timeout più affidabile di RAF in alcuni contesti)
+    // Trigger Animazione
     setTimeout(() => {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translate(-50%, 0)';
-    }, 50);
+        toast.classList.add('active');
+    }, 10);
 
     // Auto-hide
     if (window._toastTimeout) clearTimeout(window._toastTimeout);
     window._toastTimeout = setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%, 20px)';
+        toast.classList.remove('active');
     }, 3000);
 }
 
 /**
  * [CORE UI] PREMIUM WARNING MODAL
- * Mostra un popup centrale in stile PROTOCOLLO BASE.
  */
 export function showWarningModal(title, message, callback = null) {
     const modalId = 'protocol-warning-modal';
     let modal = document.getElementById(modalId);
-
     if (modal) modal.remove();
 
     modal = document.createElement('div');
@@ -114,7 +98,7 @@ export function showWarningModal(title, message, callback = null) {
     content.className = 'modal-box';
 
     content.innerHTML = `
-        <span class="material-symbols-outlined modal-icon icon-box-blue">info</span>
+        <span class="material-symbols-outlined modal-icon icon-accent-blue">info</span>
         <h3 class="modal-title">${title}</h3>
         <p class="modal-text">${message}</p>
         <div class="modal-actions">
@@ -123,38 +107,25 @@ export function showWarningModal(title, message, callback = null) {
     `;
 
     modal.appendChild(content);
+    document.body.appendChild(modal);
 
-    if (document.body) {
-        document.body.appendChild(modal);
-    } else {
-        document.addEventListener('DOMContentLoaded', () => document.body.appendChild(modal));
-    }
-
-    // Animazione ingresso
-    setTimeout(() => {
-        modal.classList.add('active');
-    }, 10);
+    setTimeout(() => modal.classList.add('active'), 10);
 
     const closeBtn = content.querySelector('#modal-ok-btn');
-
-    function handleWarningClose() {
+    closeBtn.addEventListener('click', () => {
         modal.classList.remove('active');
         setTimeout(() => {
             modal.remove();
             if (callback) callback();
         }, 300);
-    }
-
-    closeBtn.addEventListener('click', handleWarningClose);
+    });
 }
 
-// Esposizione globale (già gestita via window.X = X per i nuovi moduli)
 window.showToast = showToast;
 window.showWarningModal = showWarningModal;
 
 /**
  * [CORE UI] LOGOUT MODAL
- * Modale specifico per il logout con stile Danger.
  */
 window.showLogoutModal = function () {
     return new Promise((resolve) => {
@@ -170,7 +141,7 @@ window.showLogoutModal = function () {
         content.className = 'modal-box';
 
         content.innerHTML = `
-            <span class="material-symbols-outlined modal-icon icon-box-orange">logout</span>
+            <span class="material-symbols-outlined modal-icon icon-accent-orange">logout</span>
             <h3 class="modal-title">Vuoi uscire?</h3>
             <p class="modal-text">Dovrai effettuare nuovamente il login per accedere.</p>
             <div class="modal-actions">
@@ -182,7 +153,6 @@ window.showLogoutModal = function () {
         modal.appendChild(content);
         document.body.appendChild(modal);
 
-        // Animazione
         setTimeout(() => modal.classList.add('active'), 10);
 
         const closeModal = (confirmed) => {
@@ -196,29 +166,17 @@ window.showLogoutModal = function () {
         const btnConfirm = content.querySelector('#btn-confirm-logout');
         const btnCancel = content.querySelector('#btn-cancel-logout');
 
-        function handleCancelLogout() {
-            closeModal(false);
-        }
-
-        function handleConfirmLogout() {
-            // Mostra spinner
-            btnConfirm.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 1.2rem;">progress_activity</span>';
+        btnCancel.addEventListener('click', () => closeModal(false));
+        btnConfirm.addEventListener('click', () => {
+            btnConfirm.innerHTML = '<span class="material-symbols-outlined animate-spin toast-icon">progress_activity</span>';
             closeModal(true);
-        }
-
-        function handleModalBackdropClick(e) {
-            if (e.target === modal) closeModal(false);
-        }
-
-        btnCancel.addEventListener('click', handleCancelLogout);
-        btnConfirm.addEventListener('click', handleConfirmLogout);
-        modal.addEventListener('click', handleModalBackdropClick);
+        });
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
 };
 
 /**
  * [CORE UI] CONFIRM MODAL
- * Sostituto Premium di confirm(). Restituisce una Promise<boolean>.
  */
 window.showConfirmModal = function (title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
     return new Promise((resolve) => {
@@ -234,10 +192,9 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
         content.className = 'modal-box';
 
         content.innerHTML = `
-            <span class="material-symbols-outlined modal-icon icon-box-blue">help_outline</span>
+            <span class="material-symbols-outlined modal-icon icon-accent-blue">help_outline</span>
             <h3 class="modal-title">${title}</h3>
             <p class="modal-text">${message}</p>
-            
             <div class="modal-actions">
                 <button id="confirm-cancel-btn" class="btn-modal btn-secondary">${cancelText}</button>
                 <button id="confirm-ok-btn" class="btn-modal btn-primary">${confirmText}</button>
@@ -245,13 +202,8 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
         `;
 
         modal.appendChild(content);
-        if (document.body) {
-            document.body.appendChild(modal);
-        } else {
-            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(modal));
-        }
+        document.body.appendChild(modal);
 
-        // Animazione
         setTimeout(() => modal.classList.add('active'), 10);
 
         const closeModal = (val) => {
@@ -262,28 +214,14 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
             }, 300);
         };
 
-        function handleConfirmCancel() {
-            closeModal(false);
-        }
-
-        function handleConfirmOk() {
-            closeModal(true);
-        }
-
-        function handleConfirmBackdropClick(e) {
-            if (e.target === modal) closeModal(false);
-        }
-
-        content.querySelector('#confirm-cancel-btn').addEventListener('click', handleConfirmCancel);
-        content.querySelector('#confirm-ok-btn').addEventListener('click', handleConfirmOk);
-        modal.addEventListener('click', handleConfirmBackdropClick);
+        content.querySelector('#confirm-cancel-btn').addEventListener('click', () => closeModal(false));
+        content.querySelector('#confirm-ok-btn').addEventListener('click', () => closeModal(true));
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
 };
 
 /**
  * [CORE UI] INPUT MODAL
- * Sostituto Premium di prompt(). Restituisce una Promise.
- * Risolve con value (stringa) se confermato, null se annullato.
  */
 window.showInputModal = function (title, initialValue = '', placeholder = '') {
     return new Promise((resolve) => {
@@ -300,10 +238,8 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
 
         content.innerHTML = `
             <h3 class="modal-title">${title}</h3>
-            <div style="height: 2px; width: 40px; background: #3b82f6; border-radius: 2px; margin: 0 auto 1.5rem auto;"></div>
-            
-            <input type="text" value="${initialValue}" placeholder="${placeholder}" class="glass-field" style="width: 100%; margin-bottom: 1.5rem; text-align: center;">
-
+            <div class="modal-accent-bar"></div>
+            <input type="text" value="${initialValue}" placeholder="${placeholder}" class="glass-field modal-input-glass">
             <div class="modal-actions">
                 <button id="modal-cancel-btn" class="btn-modal btn-secondary">Annulla</button>
                 <button id="modal-confirm-btn" class="btn-modal btn-primary">Conferma</button>
@@ -311,17 +247,9 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
         `;
 
         modal.appendChild(content);
-        if (document.body) {
-            document.body.appendChild(modal);
-        } else {
-            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(modal));
-        }
+        document.body.appendChild(modal);
 
         const input = content.querySelector('input');
-        const cancelBtn = content.querySelector('#modal-cancel-btn');
-        const confirmBtn = content.querySelector('#modal-confirm-btn');
-
-        // Animazione
         setTimeout(() => {
             modal.classList.add('active');
             input.focus();
@@ -336,21 +264,11 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
             }, 300);
         };
 
-        function handleInputCancel() {
-            closeModal(null);
-        }
-
-        function handleInputConfirm() {
-            closeModal(input.value);
-        }
-
-        function handleInputKeydown(e) {
+        content.querySelector('#modal-cancel-btn').addEventListener('click', () => closeModal(null));
+        content.querySelector('#modal-confirm-btn').addEventListener('click', () => closeModal(input.value));
+        input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') closeModal(input.value);
             if (e.key === 'Escape') closeModal(null);
-        }
-
-        cancelBtn.addEventListener('click', handleInputCancel);
-        confirmBtn.addEventListener('click', handleInputConfirm);
-        input.addEventListener('keydown', handleInputKeydown);
+        });
     });
 };

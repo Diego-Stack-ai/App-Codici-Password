@@ -294,14 +294,15 @@ async function loadAccount(uid, id) {
 }
 
 const getAccentColors = (acc) => {
-    // Determine type from flags
     const isBanking = acc.isBanking === true;
     const isMemo = acc.hasMemo || acc._isMemo;
-    const isShared = acc.shared || acc.isMemoShared || acc._isShared;
+    const isShared = acc.shared || acc._isShared;
+    const isMemoShared = acc.isMemoShared;
 
     if (isBanking) return { key: 'emerald', via: 'via-emerald-500/40', bg: 'bg-emerald-500', hex: '#10b981', rgb: '16, 185, 129' };
-    if (isMemo) return { key: 'amber', via: 'via-amber-500/40', bg: 'bg-amber-500', hex: '#f59e0b', rgb: '245, 158, 11' };
+    if (isMemoShared) return { key: 'green', via: 'via-green-500/40', bg: 'bg-green-500', hex: '#22c55e', rgb: '34, 197, 94' };
     if (isShared) return { key: 'rose', via: 'via-rose-500/40', bg: 'bg-rose-500', hex: '#f43f5e', rgb: '244, 63, 94' };
+    if (isMemo) return { key: 'amber', via: 'via-amber-500/40', bg: 'bg-amber-500', hex: '#f59e0b', rgb: '245, 158, 11' };
     return { key: 'blue', via: 'via-blue-500/40', bg: 'bg-blue-500', hex: '#3b82f6', rgb: '59, 130, 246' };
 };
 
@@ -534,6 +535,9 @@ function render(acc) {
     toggleSharingUI(acc.shared || acc.isMemoShared);
     renderGuests(acc.sharedWith || []);
     updateAttachmentCount(ownerId, acc.docId);
+
+    // Aggiornamento Badge Tipologia (Regola 6)
+    updateAccountTypeBadge(acc);
 }
 
 function toggleSharingUI(show) {
@@ -1060,4 +1064,35 @@ async function updateAttachmentCount(uid, docId) {
     } catch (e) {
         console.error("Error counting attachments", e);
     }
+}
+
+/**
+ * Renderizza il badge della tipologia di account (Regola 6)
+ */
+function updateAccountTypeBadge(acc) {
+    const badge = document.getElementById('account-type-badge');
+    if (!badge) return;
+
+    badge.classList.remove('hidden');
+
+    let label = "Account Privato";
+    let style = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+
+    if (acc.isMemoShared) {
+        label = "Memorandum Condiviso";
+        style = "bg-green-500/10 text-green-400 border border-green-500/20";
+    } else if (acc.shared) {
+        label = "Account Condiviso";
+        style = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+    } else if (acc.hasMemo) {
+        label = "Memorandum";
+        style = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+    } else if (acc.isBanking) {
+        label = "Account Bancario";
+        style = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+    }
+
+    badge.textContent = label;
+    // Reset classes and apply new style (maintaining existing basic classes)
+    badge.className = `mt-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block ${style}`;
 }

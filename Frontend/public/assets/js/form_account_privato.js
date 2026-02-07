@@ -85,10 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isEditing && fCenter && !document.getElementById('delete-btn')) {
                 const btnDel = document.createElement('button');
                 btnDel.id = 'delete-btn';
-                btnDel.className = 'btn-icon-header';
+                btnDel.className = 'btn-icon-header btn-delete-footer';
                 btnDel.title = (window.t && window.t('delete_account')) || 'Elimina Account';
-                btnDel.style.color = '#ef4444';
-                btnDel.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                 btnDel.innerHTML = '<span class="material-symbols-outlined">delete</span>';
                 btnDel.addEventListener('click', deleteAccount);
                 fCenter.appendChild(btnDel);
@@ -98,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (fRight && !document.getElementById('save-btn')) {
                 const btnSave = document.createElement('button');
                 btnSave.id = 'save-btn';
-                btnSave.className = 'btn-icon-header';
+                btnSave.className = 'btn-icon-header btn-save-footer';
 
                 // Text/Icon depending on mode
                 const btnTitle = isEditing
@@ -106,9 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     : ((window.t && window.t('create_account')) || 'Crea Account');
 
                 btnSave.title = btnTitle;
-                btnSave.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                btnSave.style.color = '#3b82f6';
-                btnSave.style.borderColor = 'rgba(59, 130, 246, 0.3)';
 
                 // Icon: save (disk) for edit, check_circle (or add) for create
                 const iconName = isEditing ? 'save' : 'check_circle';
@@ -266,13 +261,16 @@ async function loadData(id) {
         setVal('ref-phone', ref.telefono || data.referenteTelefono);
         setVal('ref-mobile', ref.cellulare || data.referenteCellulare);
 
-        // Flags
-        const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
-        setCheck('flag-shared', data.shared);
-        setCheck('flag-memo', data.hasMemo);
-        setCheck('flag-memo-shared', data.isMemoShared);
+        // Flags (Reset e Set esplicito)
+        const fShared = document.getElementById('flag-shared');
+        const fMemo = document.getElementById('flag-memo');
+        const fMemoShared = document.getElementById('flag-memo-shared');
 
-        toggleSharingUI(data.shared || data.isMemoShared);
+        if (fShared) fShared.checked = !!data.shared;
+        if (fMemo) fMemo.checked = !!data.hasMemo;
+        if (fMemoShared) fMemoShared.checked = !!data.isMemoShared;
+
+        syncShareDropdownVisibility();
 
         // Render Guests (Edit Mode)
         if (data.sharedWith) {
@@ -313,18 +311,26 @@ function setupUI() {
     const suggestions = document.getElementById('rubrica-suggestions');
     const btnInvite = document.getElementById('btn-send-invite');
 
-    // Flags Logic
+    // Modulo logic: Mutua esclusione e validazione (Regola 1 & 2)
     const flagShared = document.getElementById('flag-shared');
     const flagMemo = document.getElementById('flag-memo');
     const flagMemoShared = document.getElementById('flag-memo-shared');
-    const flags = [flagShared, flagMemo, flagMemoShared].filter(f => f); // Filter nulls just in case
+    const flags = [flagShared, flagMemo, flagMemoShared].filter(f => f);
 
     flags.forEach(el => {
         el.addEventListener('change', () => {
             if (el.checked) {
-                flags.forEach(other => { if (other !== el) other.checked = false; });
+                // Valida le regole prima di permettere l'attivazione
+                if (!validateFlagRulesOnToggle(el.id)) {
+                    el.checked = false;
+                    syncShareDropdownVisibility();
+                    return;
+                }
+                // Se valido, attiva uno e azzera gli altri
+                setFlagExclusive(el.id);
+            } else {
+                syncShareDropdownVisibility();
             }
-            toggleSharingUI(flagShared?.checked || flagMemoShared?.checked);
         });
     });
 
@@ -389,9 +395,14 @@ function setupUI() {
     }
 }
 
-function toggleSharingUI(show) {
+/**
+ * Sincronizza la visibilità del dropdown di condivisione (Regola 3)
+ */
+function syncShareDropdownVisibility() {
+    const isShared = document.getElementById('flag-shared')?.checked;
+    const isMemoShared = document.getElementById('flag-memo-shared')?.checked;
     const mgmt = document.getElementById('shared-management');
-    if (mgmt) mgmt.classList.toggle('hidden', !show);
+    if (mgmt) mgmt.classList.toggle('hidden', !(isShared || isMemoShared));
 }
 
 function setupImageUploader() {
@@ -801,7 +812,10 @@ async function saveChanges() {
     const btn = document.getElementById('save-btn');
     if (!btn) return;
 
-    // Validate
+    // VALIDAZIONE REGOLE FLAG (Regola 4)
+    if (!validateBeforeSave()) return;
+
+    // Valida Campi Base
     const name = document.getElementById('account-name').value;
     if (!name) { showToast("Il nome account è obbligatorio", "error"); return; }
 
@@ -838,6 +852,26 @@ async function saveChanges() {
             isBanking: getC('flag-banking'),
             updatedAt: new Date().toISOString()
         };
+
+        // VALIDAZIONE CONDIVISIONE (Protocollo 3.6)
+        if (payload.shared || payload.isMemoShared) {
+            const hasExisting = accountData && accountData.sharedWith && accountData.sharedWith.length > 0;
+            const hasPending = pendingInvites && pendingInvites.length > 0;
+
+            if (!hasExisting && !hasPending) {
+                if (window.showWarningModal) {
+                    window.showWarningModal(
+                        "CONTATTO MANCANTE",
+                        "Hai attivato una modalità di condivisione. Devi selezionare almeno un contatto dalla rubrica o invitarne uno nuovo per poter salvare."
+                    );
+                } else {
+                    showToast("Seleziona almeno un contatto per la condivisione.", "error");
+                }
+                btn.disabled = false;
+                btn.innerHTML = OriginalHtml;
+                return;
+            }
+        }
 
         if (isEditing) {
             // UDPATE
@@ -900,3 +934,258 @@ async function deleteAccount() {
         showToast("Errore eliminazione: " + e.message, "error");
     }
 }
+
+// --- NUOVE FUNZIONI DI LOGICA FLAG (Regola 1, 2, 3, 4) ---
+
+/**
+ * Ottiene lo stato delle credenziali principali (Username, Codice, Password)
+ */
+function getMainCredentialState() {
+    const username = document.getElementById('account-username')?.value.trim() || '';
+    const code = document.getElementById('account-code')?.value.trim() || '';
+    const password = document.getElementById('account-password')?.value.trim() || '';
+    return {
+        hasData: username !== '' || code !== '' || password !== '',
+        fields: { username, code, password }
+    };
+}
+
+/**
+ * Gestisce la mutua esclusione dei flag (Regola 1)
+ */
+function setFlagExclusive(activeFlagId) {
+    const flags = ['flag-shared', 'flag-memo', 'flag-memo-shared'];
+    flags.forEach(id => {
+        if (id !== activeFlagId) {
+            const el = document.getElementById(id);
+            if (el) el.checked = false;
+        }
+    });
+    syncShareDropdownVisibility();
+}
+
+/**
+ * Valida le regole dei dati al momento del toggle di un flag (Regola 2)
+ */
+function validateFlagRulesOnToggle(flagId) {
+    const state = getMainCredentialState();
+
+    // Regola 2A: Memorandum e Memorandum Condiviso non possono avere credenziali
+    if (flagId === 'flag-memo' || flagId === 'flag-memo-shared') {
+        if (state.hasData) {
+            if (window.showWarningModal) {
+                window.showWarningModal(
+                    "AZIONE BLOCCATA",
+                    "In modalità Memorandum le credenziali (Username, Codice, Password) devono essere vuote. Cancella i dati prima di attivare questo flag."
+                );
+            } else {
+                showToast("Dati presenti. Impossibile attivare Memorandum.", "error");
+            }
+            return false;
+        }
+    }
+
+    // Regola 2B: Account Condiviso deve avere almeno una credenziale
+    if (flagId === 'flag-shared') {
+        if (!state.hasData) {
+            if (window.showWarningModal) {
+                window.showWarningModal(
+                    "AZIONE BLOCCATA",
+                    "Per attivare la condivisione account devi inserire almeno una credenziale (Username, Codice o Password)."
+                );
+            } else {
+                showToast("Dati mancanti. Impossibile attivare Condivisione.", "error");
+            }
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Validazione globale prima del salvataggio (Regola 3 & 4)
+ */
+function validateBeforeSave() {
+    const isShared = document.getElementById('flag-shared')?.checked;
+    const isMemoShared = document.getElementById('flag-memo-shared')?.checked;
+    const isMemo = document.getElementById('flag-memo')?.checked;
+    const state = getMainCredentialState();
+
+    // 1. Coerenza credenziali (Regola 2)
+    if ((isMemo || isMemoShared) && state.hasData) {
+        showToast("Memorandum non può contenere credenziali.", "error");
+        return false;
+    }
+    if (isShared && !state.hasData) {
+        showToast("L'account condiviso deve avere almeno una credenziale.", "error");
+        return false;
+    }
+
+    // 2. Dropdown contatti obbligatorio (Regola 3)
+    if (isShared || isMemoShared) {
+        const hasExisting = accountData && accountData.sharedWith && accountData.sharedWith.length > 0;
+        const hasPending = pendingInvites && pendingInvites.length > 0;
+
+        if (!hasExisting && !hasPending) {
+            if (window.showWarningModal) {
+                window.showWarningModal(
+                    "CONTATTO MANCANTE",
+                    "Hai attivato una modalità di condivisione. Devi selezionare almeno un contatto dalla rubrica o invitarne uno nuovo per poter salvare."
+                );
+            } else {
+                showToast("Seleziona almeno un contatto per la condivisione.", "error");
+            }
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/* --- DEV MODE: TEST SUITE (Regola 6) --- */
+/* --- DEV MODE: TEST SUITE (Regola 6) --- */
+const isDev = location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "[::1]" || window.DEBUG === true;
+window.__TEST_FLAGS__ = window.__TEST_FLAGS__ || {};
+
+if (isDev) {
+    Object.assign(window.__TEST_FLAGS__, {
+        testMutualExclusion: () => {
+            const fShared = document.getElementById('flag-shared');
+            const fMemo = document.getElementById('flag-memo');
+            const fMemoShared = document.getElementById('flag-memo-shared');
+            if (!fShared || !fMemo || !fMemoShared) return false;
+
+            const oldS = fShared.checked, oldM = fMemo.checked, oldMS = fMemoShared.checked;
+
+            fShared.checked = true;
+            setFlagExclusive('flag-shared');
+            const ok1 = fShared.checked && !fMemo.checked && !fMemoShared.checked;
+
+            fMemo.checked = true;
+            setFlagExclusive('flag-memo');
+            const ok2 = !fShared.checked && fMemo.checked && !fMemoShared.checked;
+
+            fShared.checked = oldS; fMemo.checked = oldM; fMemoShared.checked = oldMS;
+            syncShareDropdownVisibility();
+            return ok1 && ok2;
+        },
+
+        testMemoValidation: () => {
+            const userField = document.getElementById('account-username');
+            if (!userField) return false;
+            const originalValue = userField.value;
+            userField.value = "test";
+            const resultFail = validateFlagRulesOnToggle('flag-memo');
+            userField.value = "";
+            const resultPass = validateFlagRulesOnToggle('flag-memo');
+            userField.value = originalValue;
+            return (resultFail === false && resultPass === true);
+        },
+
+        testSharedValidation: () => {
+            const userField = document.getElementById('account-username');
+            const codeField = document.getElementById('account-code');
+            const passField = document.getElementById('account-password');
+            if (!userField) return false;
+            const ovU = userField.value, ovC = codeField?.value || '', ovP = passField?.value || '';
+            userField.value = ""; if (codeField) codeField.value = ""; if (passField) passField.value = "";
+            const resultFail = validateFlagRulesOnToggle('flag-shared');
+            userField.value = "admin";
+            const resultPass = validateFlagRulesOnToggle('flag-shared');
+            userField.value = ovU; if (codeField) codeField.value = ovC; if (passField) passField.value = ovP;
+            return (resultFail === false && resultPass === true);
+        },
+
+        testDropdownRequired: () => {
+            const fShared = document.getElementById('flag-shared');
+            if (!fShared) return false;
+            const originalChecked = fShared.checked, originalData = accountData, originalInvites = pendingInvites;
+            fShared.checked = true;
+            accountData = { sharedWith: [] }; pendingInvites = [];
+            const result = validateBeforeSave();
+            fShared.checked = originalChecked; accountData = originalData; pendingInvites = originalInvites;
+            return (result === false);
+        },
+
+        testLoadSync: () => {
+            const fShared = document.getElementById('flag-shared');
+            const mgmt = document.getElementById('shared-management');
+            if (!fShared || !mgmt) return false;
+            const original = fShared.checked;
+            fShared.checked = true; syncShareDropdownVisibility();
+            const ok1 = !mgmt.classList.contains('hidden');
+            fShared.checked = false; syncShareDropdownVisibility();
+            const ok2 = mgmt.classList.contains('hidden');
+            fShared.checked = original; syncShareDropdownVisibility();
+            return ok1 && ok2;
+        },
+
+        runAllTests: function () {
+            console.group("%c[TEST FLAGS] Esecuzione completa", "color: orange; font-weight: bold;");
+
+            try {
+                console.group("1️⃣ Mutual Exclusion");
+                const res = this.testMutualExclusion();
+                console.assert(res, "Mutual exclusion check failed!");
+                if (res) console.log("%c✔ Mutual exclusion OK", "color: green;");
+                console.groupEnd();
+            } catch (e) {
+                console.error("%c❌ Mutual exclusion FAILED", "color: red;", e);
+            }
+
+            try {
+                console.group("2️⃣ Memorandum Validation");
+                const res = this.testMemoValidation();
+                console.assert(res, "Memorandum validation check failed!");
+                if (res) console.log("%c✔ Memorandum validation OK", "color: green;");
+                console.groupEnd();
+            } catch (e) {
+                console.error("%c❌ Memorandum validation FAILED", "color: red;", e);
+            }
+
+            try {
+                console.group("3️⃣ Shared Account Validation");
+                const res = this.testSharedValidation();
+                console.assert(res, "Shared validation check failed!");
+                if (res) console.log("%c✔ Shared validation OK", "color: green;");
+                console.groupEnd();
+            } catch (e) {
+                console.error("%c❌ Shared validation FAILED", "color: red;", e);
+            }
+
+            try {
+                console.group("4️⃣ Dropdown / Contact Required");
+                const res = this.testDropdownRequired();
+                console.assert(res, "Dropdown validation check failed!");
+                if (res) console.log("%c✔ Dropdown check OK", "color: green;");
+                console.groupEnd();
+            } catch (e) {
+                console.error("%c❌ Dropdown check FAILED", "color: red;", e);
+            }
+
+            try {
+                console.group("5️⃣ Load / Sync Verification");
+                const res = this.testLoadSync();
+                console.assert(res, "Load & Sync verification check failed!");
+                if (res) console.log("%c✔ Load & Sync OK", "color: green;");
+                console.groupEnd();
+            } catch (e) {
+                console.error("%c❌ Load & Sync FAILED", "color: red;", e);
+            }
+
+            console.groupEnd();
+            console.log("%c✅ Tutti i test completati", "color: orange; font-weight: bold;");
+        }
+    });
+
+    console.log("%c[DEV] Test flags disponibili:", "color: blue; font-weight: bold;");
+    console.log("Esegui: window.__TEST_FLAGS__.runAllTests() per un collaudo completo della logica flags.");
+} else {
+    // Hidden way to enable tests if NOT on localhost (for remote dev/testing)
+    window.__ENABLE_TESTS__ = () => {
+        window.DEBUG = true;
+        location.reload();
+    };
+}
+
