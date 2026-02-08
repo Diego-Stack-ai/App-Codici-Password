@@ -5,7 +5,7 @@
 
 import { auth, db } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
-import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
@@ -22,7 +22,11 @@ observeAuth(async (user) => {
         loadCounters(user.uid, user.email);
         loadTopAccounts(user.uid);
         loadRubrica(user.uid);
+        loadRubrica(user.uid);
         setupEventListeners(user.uid);
+
+        // Check for pending invites
+        checkForPendingInvites(user.email);
     }
 });
 
@@ -260,3 +264,65 @@ function setupEventListeners(uid) {
     }
 }
 
+/**
+ * INVITE SYSTEM (Receiver Side)
+ */
+async function checkForPendingInvites(email) {
+    if (!email) return;
+
+    try {
+        const q = query(collection(db, "invites"),
+            where("recipientEmail", "==", email),
+            where("status", "==", "pending")
+        );
+        const snap = await getDocs(q);
+
+        if (!snap.empty) {
+            // Processing one invite at a time for simplicity
+            const inviteDoc = snap.docs[0];
+            const inviteData = inviteDoc.data();
+            showInviteModal(inviteDoc.id, inviteData);
+        }
+    } catch (e) { logError("CheckInvites", e); }
+}
+
+function showInviteModal(inviteId, data) {
+    // Prevent duplicates
+    if (document.getElementById('invite-modal')) return;
+
+    const modal = createElement('div', { id: 'invite-modal', className: 'modal-overlay active' }, [
+        createElement('div', { className: 'modal-box' }, [
+            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-purple', textContent: 'mail' }),
+            createElement('h3', { className: 'modal-title', textContent: t('invite_received_title') || 'Nuovo Invito' }),
+            createElement('p', { className: 'modal-text', textContent: `${data.senderEmail} ${t('invite_received_msg') || 'ha condiviso un account con te:'}` }),
+            createElement('p', { className: 'text-sm font-bold text-white mt-2 mb-4', textContent: data.accountName }),
+            createElement('div', { className: 'modal-actions' }, [
+                createElement('button', {
+                    className: 'btn-modal btn-secondary',
+                    textContent: t('invite_reject') || 'Rifiuta',
+                    onclick: () => handleInviteResponse(inviteId, 'rejected')
+                }),
+                createElement('button', {
+                    className: 'btn-modal btn-primary',
+                    textContent: t('invite_accept') || 'Accetta',
+                    onclick: () => handleInviteResponse(inviteId, 'accepted')
+                })
+            ])
+        ])
+    ]);
+    document.body.appendChild(modal);
+}
+
+async function handleInviteResponse(inviteId, status) {
+    const modal = document.getElementById('invite-modal');
+    if (modal) modal.remove();
+
+    try {
+        await updateDoc(doc(db, "invites", inviteId), { status: status, respondedAt: new Date().toISOString() });
+        showToast(status === 'accepted' ? "Invito accettato!" : "Invito rifiutato", status === 'accepted' ? 'success' : 'info');
+
+        if (status === 'accepted') {
+            setTimeout(() => window.location.reload(), 1000); // Reload to show new data
+        }
+    } catch (e) { logError("InviteResponse", e); showToast(t('error_generic'), 'error'); }
+}
