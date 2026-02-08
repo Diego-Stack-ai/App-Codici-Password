@@ -482,57 +482,71 @@ window.saveAccount = async () => {
 
     try {
         let targetId = currentDocId;
+
+        // --- LOGICA GESTIONE INVITI (Revoca & Anti-Spam) ---
+        // 1. REVOCA: Se stiamo aggiornando, controlliamo se c'era una condivisione precedente da rimuovere
+        if (isEditing) {
+            const oldSnap = await getDoc(doc(db, "users", currentUid, "accounts", currentDocId));
+            if (oldSnap.exists()) {
+                const oldData = oldSnap.data();
+                const wasShared = oldData.shared || oldData.isMemoShared;
+                const oldRecipient = oldData.recipientEmail;
+
+                // Se era condiviso e ora NON lo è più, oppure è cambiato il destinatario -> CANCELLA VECCHIO INVITO
+                if (wasShared && (!isSharingActive || (isSharingActive && oldRecipient !== inviteEmail))) {
+                    const oldInviteId = `${currentDocId}_${oldRecipient.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    try {
+                        await deleteDoc(doc(db, "invites", oldInviteId));
+                        console.log("Invito revocato per:", oldRecipient);
+                    } catch (e) { console.warn("Errore revoca invito:", e); }
+                }
+            }
+        }
+
+        // 2. SALVATAGGIO DATI ACCOUNT
         if (isEditing) {
             await updateDoc(doc(db, "users", currentUid, "accounts", currentDocId), data);
-
-            // Messaggio specifico per condivisione vs salvataggio standard
-            if (data.shared || data.isMemoShared) {
-                // LOGICA INVITO REALE (Sistema Interno) - Update case
-                const inviteData = {
-                    senderId: currentUid,
-                    senderEmail: auth.currentUser?.email || 'unknown',
-                    recipientEmail: data.recipientEmail,
-                    accountId: targetId,
-                    accountName: data.nomeAccount,
-                    type: data.isMemoShared ? 'memorandum' : 'privato',
-                    status: 'pending',
-                    createdAt: new Date().toISOString()
-                };
-                const inviteId = `${targetId}_${data.recipientEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                await setDoc(doc(db, "invites", inviteId), inviteData);
-
-                showToast(t('success_invite_sent'));
-            } else {
-                showToast(t('success_save'));
-            }
         } else {
             data.createdAt = new Date().toISOString();
             const docRef = await addDoc(collection(db, "users", currentUid, "accounts"), data);
             targetId = docRef.id;
+        }
 
-            if (data.shared || data.isMemoShared) {
-                // LOGICA INVITO REALE (Sistema Interno)
-                // Creiamo un documento nella collezione 'invites' che il destinatario potrà vedere
+        // 3. INVIO/AGGIORNAMENTO INVITO (Se condivisione attiva)
+        if (isSharingActive) {
+            const inviteId = `${targetId}_${inviteEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const inviteRef = doc(db, "invites", inviteId);
+            const inviteSnap = await getDoc(inviteRef);
+
+            let shouldSend = true;
+            if (inviteSnap.exists()) {
+                const existingStatus = inviteSnap.data().status;
+                if (existingStatus === 'accepted' || existingStatus === 'pending') {
+                    shouldSend = false; // L'invito è già valido, non resettiamo a 'pending'
+                    console.log("Invito già esistente e attivo. Salto invio duplicato.");
+                }
+            }
+
+            if (shouldSend) {
                 const inviteData = {
                     senderId: currentUid,
                     senderEmail: auth.currentUser?.email || 'unknown',
-                    recipientEmail: data.recipientEmail,
+                    recipientEmail: inviteEmail,
                     accountId: targetId,
                     accountName: data.nomeAccount,
                     type: data.isMemoShared ? 'memorandum' : 'privato',
                     status: 'pending',
                     createdAt: new Date().toISOString()
                 };
-
-                // Usiamo una chiave univoca per evitare duplicati: accountId_recipientEmail
-                const inviteId = `${targetId}_${data.recipientEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                await setDoc(doc(db, "invites", inviteId), inviteData);
-
+                await setDoc(inviteRef, inviteData);
                 showToast(t('success_invite_sent'));
             } else {
-                showToast(t('success_create') || "Account creato!");
+                showToast(t('success_save') + " (Condivisione aggiornata)");
             }
+        } else {
+            showToast(isEditing ? t('success_save') : utf8_to_b64(t('success_create')));
         }
+
         setTimeout(() => window.location.href = `dettaglio_account_privato.html?id=${targetId}`, 1000);
     } catch (e) { logError("SaveAccount", e); showToast(t('error_generic'), "error"); }
 };
