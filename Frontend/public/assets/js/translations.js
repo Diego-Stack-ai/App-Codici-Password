@@ -14,6 +14,7 @@ export const translations = {
         loading_data: "Ricezione Dati...",
         success_save: "Dati salvati con successo!",
         success_invite_sent: "Invito inviato con successo!",
+        status_pending: "In attesa",
         error_generic: "Si è verificato un errore.",
         logout: "Esci dall'account",
         version: "",

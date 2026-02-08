@@ -165,9 +165,8 @@ function renderAccount(acc) {
         }
     }
 
-    // Sharing
     if (acc.shared || acc.isMemoShared) {
-        const mgmt = document.getElementById('shared-management');
+        const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
         renderGuests(acc.sharedWith || []);
     }
@@ -310,14 +309,20 @@ async function renderGuests(guests) {
         if (typeof item === 'object' && item.status === 'rejected') continue;
 
         const displayEmail = typeof item === 'object' ? item.email : item;
-        const div = createElement('div', { className: 'rubrica-list-item' }, [
+        const isPending = typeof item === 'object' && item.status === 'pending';
+
+        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
             createElement('div', { className: 'rubrica-item-info-row' }, [
                 createElement('div', { className: 'rubrica-item-avatar', textContent: '?' }),
                 createElement('div', { className: 'rubrica-item-info' }, [
                     createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: displayEmail.split('@')[0] }),
                     createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: displayEmail })
                 ])
-            ])
+            ]),
+            isPending ? createElement('span', {
+                className: 'ml-auto text-[8px] font-black uppercase px-2 py-1 rounded bg-orange-500/20 text-orange-400 border border-orange-500/20 animate-pulse',
+                textContent: t('status_pending') || 'In attesa'
+            }) : null
         ]);
         list.appendChild(div);
     }
