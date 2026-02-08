@@ -5,7 +5,7 @@
 
 import { auth, db } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
-import { doc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
@@ -473,7 +473,6 @@ window.saveAccount = async () => {
 
     // RULE 4: Validation for Sharing
     if (data.shared || data.isMemoShared) {
-        const inviteEmail = get('invite-email');
         if (!inviteEmail) {
             showToast("Per salvare devi scegliere un contatto o disattivare il flag", "warning");
             return;
@@ -489,7 +488,12 @@ window.saveAccount = async () => {
         // --- LOGICA GESTIONE INVITI (Revoca & Anti-Spam) ---
         // 1. REVOCA: Se stiamo aggiornando, controlliamo se c'era una condivisione precedente da rimuovere
         if (isEditing) {
-            const oldSnap = await getDoc(doc(db, "users", currentUid, "accounts", currentDocId));
+            // FORCE FROM SERVER: Ignoriamo la cache del dispositivo per assicurarci di leggere lo stato REALE dell'account
+            /* 
+              Problema risolto: Su mobile la cache a volte indicava l'account come non condiviso anche se lo era,
+              facendo saltare la revoca. Ora chiediamo direttamente al database. 
+            */
+            const oldSnap = await getDocFromServer(doc(db, "users", currentUid, "accounts", currentDocId));
             if (oldSnap.exists()) {
                 const oldData = oldSnap.data();
                 const wasShared = oldData.shared || oldData.isMemoShared;
@@ -561,4 +565,3 @@ window.saveAccount = async () => {
         setTimeout(() => window.location.href = `dettaglio_account_privato.html?id=${targetId}`, 1000);
     } catch (e) { logError("SaveAccount", e); showToast(t('error_generic'), "error"); }
 };
-
