@@ -26,22 +26,28 @@ service cloud.firestore {
     }
 
     // --- INVITI ---
+    // --- INVITI ---
     match /invites/{inviteId} {
-      allow read: if request.auth != null && (
+      // 1. GET (Lettura puntuale): Permessa a tutti gli autenticati per check esistenza
+      allow get: if request.auth != null;
+
+      // 2. LIST (Query): Solo se sei mittente o destinatario
+      allow list: if request.auth != null && (
         resource.data.senderId == request.auth.uid || 
-        resource.data.senderUid == request.auth.uid ||
         resource.data.recipientEmail == request.auth.token.email
       );
-      allow create: if request.auth != null;
+
+      // 3. CREATE: Solo se sei autenticato e ti dichiari come sender
+      allow create: if request.auth != null && request.resource.data.senderId == request.auth.uid;
+
+      // 4. UPDATE: Solo mittente o destinatario (es. per accettare/rifiutare)
       allow update: if request.auth != null && (
         resource.data.senderId == request.auth.uid || 
-        resource.data.senderUid == request.auth.uid ||
         resource.data.recipientEmail == request.auth.token.email
       );
-      allow delete: if request.auth != null && (
-        resource.data.senderId == request.auth.uid || 
-        resource.data.senderUid == request.auth.uid
-      );
+
+      // 5. DELETE: Solo il mittente può revocare (cancellare)
+      allow delete: if request.auth != null && resource.data.senderId == request.auth.uid;
     }
   }
 }
