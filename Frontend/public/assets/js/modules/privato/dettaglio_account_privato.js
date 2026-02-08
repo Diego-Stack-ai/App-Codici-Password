@@ -11,7 +11,7 @@ import {
 import {
     ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
-import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT } from '../../utils.js';
@@ -139,7 +139,7 @@ function renderAccount(acc) {
             avatar.style.backgroundSize = 'cover';
         } else {
             avatar.style.backgroundImage = 'none';
-            // Fallback icon logic if needed
+            setChildren(avatar, createSafeAccountIcon(acc.nomeAccount));
         }
     }
 
@@ -173,7 +173,7 @@ function renderAccount(acc) {
             const btnBankingInfo = document.getElementById('btn-banking-info');
             if (btnBankingInfo) {
                 const infoText = btnBankingInfo.querySelector('.info-text');
-                if (infoText) infoText.textContent = t('visual_identity');
+                if (infoText) infoText.textContent = t('banking_hint');
                 btnBankingInfo.onclick = () => {
                     window.location.href = `form_account_privato.html?id=${currentId}`;
                 };

@@ -292,7 +292,9 @@ export const translations = {
         remove_from_pinned: "Rimuovi dai fissati",
         pin_to_top: "Fissa in alto",
         show_hide_data: "Mostra/Nascondi Dati",
-        visual_identity: "Puoi attivare le coordinate bancarie e carte di credito in modalità Modifica.",
+        banking_hint: "Puoi attivare le coordinate bancarie e carte di credito in modalità Modifica.",
+        company_logo: "Logo Azienda",
+        account_logo: "Logo Account",
         add_logo: "Aggiungi Logo",
 
         // HOME PAGE

@@ -180,8 +180,8 @@ function createAziendaCard(a) {
         createElement('div', { className: 'grid grid-cols-2 gap-3 z-10 w-full mt-auto' }, [
             createElement('button', {
                 className: 'btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm',
-                onclick: (e) => { e.stopPropagation(); window.location.href = `modifica_azienda.html?id=${a.id}`; }
-            }, [createElement('span', { textContent: 'Dettaglio Azienda' })]),
+                onclick: (e) => { e.stopPropagation(); window.location.href = `dati_azienda.html?id=${a.id}`; }
+            }, [createElement('span', { textContent: 'Dati Azienda' })]),
             createElement('button', {
                 className: 'btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm',
                 onclick: (e) => { e.stopPropagation(); window.location.href = `account_azienda.html?id=${a.id}`; }

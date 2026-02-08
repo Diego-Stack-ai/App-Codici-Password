@@ -95,3 +95,15 @@ export const setChildren = (parent, children) => {
 export const clearElement = (el) => {
     if (el) el.textContent = '';
 };
+
+/**
+ * Crea un'icona placeholder con iniziali (Avatar Fallback)
+ * @param {string} name - nome dell'account
+ * @returns {HTMLElement}
+ */
+export const createSafeAccountIcon = (name) => {
+    const initials = (name || '?').charAt(0).toUpperCase();
+    return createElement('div', {
+        className: 'w-full h-full flex items-center justify-center bg-white/5 text-white/20 text-2xl font-black uppercase'
+    }, initials);
+};

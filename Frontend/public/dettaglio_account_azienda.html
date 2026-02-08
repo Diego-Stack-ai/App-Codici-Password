@@ -31,6 +31,8 @@
     <div class="base-container relative">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
+        <!-- 2. FARO ANIMATO -->
+        <div class="base-glow pointer-events-none"></div>
 
         <!-- HEADER FISSO (Protocollo Placeholder) -->
         <header id="header-placeholder" class="base-header"></header>
@@ -137,6 +139,14 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Suggerimento Conto Bancario -->
+                        <div id="add-banking-prompt" class="banking-prompt-box hidden">
+                            <button type="button" id="btn-banking-info" class="btn-banking-info">
+                                <span class="material-symbols-outlined info-icon">info</span>
+                                <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
+                            </button>
+                        </div>
                     </div>
                 </section>
 
@@ -166,18 +176,37 @@
                         <h3 class="detail-section-title">Informazioni Referente</h3>
                     </div>
                     <div class="flex-col-gap mt-4">
+                        <!-- Nome Referente -->
                         <div class="glass-field-container">
                             <label class="view-label">Nome Referente</label>
-                            <p id="ref-name" class="detail-field-p border-glow min-h-[44px] flex items-center px-4">-
-                            </p>
+                            <div class="detail-field-box border-glow">
+                                <span class="material-symbols-outlined ml-4 opacity-40">person</span>
+                                <input id="ref-name" readonly class="detail-field-input no-transform"
+                                    autocomplete="off">
+                                <button class="btn-icon-header copy-btn" type="button" data-field="ref-name">
+                                    <span class="material-symbols-outlined">content_copy</span>
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Telefoni -->
                         <div class="glass-field-container">
                             <label class="view-label">Contatti (Fisso / Cellulare)</label>
                             <div class="flex flex-col gap-2">
-                                <p id="ref-phone"
-                                    class="detail-field-p border-glow min-h-[44px] flex items-center px-4">-</p>
-                                <p id="ref-mobile"
-                                    class="detail-field-p border-glow min-h-[44px] flex items-center px-4">-</p>
+                                <div class="detail-field-box border-glow">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">call</span>
+                                    <input id="ref-phone" readonly class="detail-field-input no-transform">
+                                    <button class="btn-icon-header copy-btn" type="button" data-field="ref-phone">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
+                                <div class="detail-field-box border-glow">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
+                                    <input id="ref-mobile" readonly class="detail-field-input no-transform">
+                                    <button class="btn-icon-header copy-btn" type="button" data-field="ref-mobile">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -213,6 +242,17 @@
                         <button id="copy-note" class="btn-icon-header" type="button" data-field="detail-note">
                             <span class="material-symbols-outlined text-sm">content_copy</span>
                         </button>
+                    </div>
+                </section>
+
+                <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
+                <section id="shared-management-section" class="mt-8 mb-10 hidden">
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
+                        <h3 class="detail-section-title">Gestione Accessi</h3>
+                    </div>
+                    <div id="guests-list" class="flex-col-gap mt-4">
+                        <!-- Guest rows injected here -->
                     </div>
                 </section>
 

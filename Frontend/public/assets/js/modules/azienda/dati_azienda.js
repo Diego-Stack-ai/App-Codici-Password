@@ -40,16 +40,17 @@ async function initProtocolUI() {
     console.log('[dati_azienda] UI Base gestita da main.js');
 
     // Footer Right
-    const fRight = document.getElementById('footer-right-actions');
-    if (fRight) {
-        clearElement(fRight);
-        setChildren(fRight, createElement('button', {
+    // Footer Center Actions
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        clearElement(fCenter);
+        setChildren(fCenter, createElement('button', {
             id: 'footer-btn-edit',
-            className: 'base-btn-primary flex-center-gap',
+            className: 'btn-floating-add !bg-amber-500',
+            title: t('edit') || 'Modifica',
             onclick: () => window.location.href = `modifica_azienda.html?id=${currentAziendaId}`
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' }),
-            createElement('span', { textContent: t('edit') || 'Modifica' })
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
         ]));
     }
 }

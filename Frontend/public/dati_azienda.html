@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" class="dark">
+<html lang="it">
 
 <head>
     <meta http-equiv="Content-Security-Policy"
@@ -7,234 +7,311 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dati Azienda - PROTOCOLLO BASE V3.6</title> <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.6" />
+    <title>Dati Azienda - PROTOCOLLO OPERATORE V5.4</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=5.4" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css"> <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6"> <!-- CORE JS -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="assets/css/fonts.css?v=5.4">
+    <!-- Design System Master (PROTOCOLLO OPERATORE V5.4) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=5.4">
+
+    <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
     <script type="module" src="assets/js/ui-core.js"></script>
 </head>
 
 <body class="base-bg">
-    <div class="base-container relative"> <!-- Ambient Glow -->
-        <div class="base-glow"></div> <!-- Automated Header -->
+    <div class="base-container relative">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
+        <div class="base-glow pointer-events-none"></div>
+
+        <!-- Automated Header -->
         <header id="header-placeholder" class="base-header"></header>
-        <div class="spacer-header"></div> <!-- Main Content -->
+
+        <div class="spacer-header"></div>
+
         <main class="base-main">
-            <div class="detail-content-wrap"> <!-- Hero Profile Section -->
-                <div class="hero-profile-header">
-                    <div class="relative group">
-                        <div
-                            class="size-24 rounded-full flex-center bg-white/5 border border-white/10 overflow-hidden relative shadow-2xl">
-                            <img id="azienda-logo" class="w-full h-full object-cover hidden" src="" /> <span
-                                id="azienda-logo-placeholder"
+            <!-- Hero Profile Header (Logo & QR) -->
+            <div class="hero-profile-header">
+                <div class="flex items-center justify-center gap-6 mb-4">
+                    <!-- Logo Azienda -->
+                    <div class="detail-avatar-container">
+                        <div id="azienda-logo-container" class="detail-avatar border-glow bg-white/5 overflow-hidden">
+                            <img id="azienda-logo" class="w-full h-full object-cover hidden" src="" />
+                            <span id="azienda-logo-placeholder"
                                 class="material-symbols-outlined text-4xl opacity-20">domain</span>
                         </div>
-                        <!-- Status Badge -->
                         <div class="hero-status-dot bg-emerald-500"></div>
                     </div>
-                    <div class="hero-title-container">
-                        <h1 id="ragione-sociale" class="hero-title">Caricamento...</h1>
-                        <p id="forma-giuridica" class="hero-category-badge">Azienda</p>
-                    </div>
-                    <div class="flex gap-4 mt-6"> <!-- QR Toggle -->
-                        <div class="relative">
-                            <div id="qrcode-container"
-                                class="size-24 bg-white p-1 rounded-xl flex-center overflow-hidden shadow-lg border-2 border-white/10">
-                            </div> <button id="btn-zoom-qr"
-                                class="absolute -bottom-2 -right-2 size-8 rounded-full bg-blue-500 text-white flex-center shadow-lg active:scale-95 transition-all">
-                                <span class="material-symbols-outlined text-lg">zoom_in</span> </button>
+
+                    <!-- QR Code Brief -->
+                    <div id="btn-zoom-qr" class="cursor-pointer group relative">
+                        <div id="qrcode-container"
+                            class="size-20 bg-white p-1 rounded-2xl flex-center overflow-hidden border-glow shadow-lg transition-transform group-hover:scale-105">
+                            <!-- Injected via JS -->
                         </div>
-                    </div>
-                </div> <!-- Section: Referente -->
-                <div class="flex-col-gap-4">
-                    <div class="detail-section-header">
-                        <div class="flex items-center gap-3"> <span
-                                class="material-symbols-outlined detail-section-icon icon-emerald">person</span>
-                            <h3 class="detail-section-title" data-t="referent_details">Dettagli Referente</h3>
-                        </div>
-                    </div>
-                    <div class="glass-card">
-                        <div class="flex items-center gap-4 p-4 border-b border-white/5">
-                            <div
-                                class="size-14 rounded-full flex-center bg-black/30 border border-white/10 overflow-hidden shrink-0">
-                                <img id="referente-photo" class="w-full h-full object-cover hidden" src="" /> <span
-                                    id="referente-photo-placeholder"
-                                    class="material-symbols-outlined text-2xl opacity-20">person</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p id="referente-nome" class="text-base font-bold text-white truncate">-</p>
-                                <p id="referente-ruolo"
-                                    class="text-[10px] font-black uppercase tracking-widest text-emerald-400">-</p>
-                            </div> <a id="btn-call-referente" href="tel:"
-                                class="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/20 active:scale-95 transition-all">
-                                <span class="material-symbols-outlined">call</span> </a>
-                        </div>
-                        <div class="p-4 bg-white/5">
-                            <div class="detail-row"> <span class="view-label" data-t="whatsapp_number">Cellulare /
-                                    WhatsApp</span>
-                                <div class="flex items-center gap-2"> <span id="referente-cellulare"
-                                        class="text-sm font-bold text-white">-</span> <span
-                                        class="copy-btn material-symbols-outlined text-xs opacity-30 cursor-pointer hover:opacity-100"
-                                        data-copy-id="referente-cellulare">content_copy</span> </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- Section: Sedi -->
-                <div class="flex-col-gap-4">
-                    <div class="detail-section-header">
-                        <div class="flex items-center gap-3"> <span
-                                class="material-symbols-outlined detail-section-icon icon-blue">location_on</span>
-                            <h3 class="detail-section-title" data-t="company_locations">Sedi Aziendali</h3>
-                        </div>
-                    </div> <!-- Tabs Sedi -->
-                    <div id="locations-tabs-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
-                        <!-- Generato via JS -->
-                    </div>
-                    <div id="location-content-card" class="glass-card p-4 flex gap-4">
-                        <div class="flex-1 min-w-0 flex-col-gap-2">
-                            <div>
-                                <p id="indirizzo-completo" class="text-sm font-bold text-white">-</p>
-                                <p id="citta-cap-prov" class="text-[10px] text-white/40 font-medium">-</p>
-                            </div>
-                            <div class="mt-2"> <button id="btn-vedi-mappa"
-                                    class="base-btn-secondary w-fit py-2 px-4 text-xs"> <span
-                                        class="material-symbols-outlined text-sm">map</span> <span
-                                        data-t="view_on_map">Mappa</span> </button> </div>
-                        </div>
-                        <div id="location-map-thumbnail"
-                            class="size-24 rounded-2xl bg-black/40 border border-white/5 overflow-hidden relative shrink-0">
-                            <div class="absolute inset-0 flex-center"> <span
-                                    class="material-symbols-outlined text-blue-500/20 text-4xl">location_on</span>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- Section: Email Categorizzate -->
-                <div id="wrapper-email-section" class="flex-col-gap-4 hidden">
-                    <div class="detail-section-header">
-                        <div class="flex items-center gap-3"> <span
-                                class="material-symbols-outlined detail-section-icon icon-purple">mail</span>
-                            <h3 class="detail-section-title" data-t="email_categories">Email Aziendali</h3>
-                        </div>
-                    </div>
-                    <div id="email-list-container" class="flex-col-gap-2"> <!-- Generato via JS --> </div>
-                </div> <!-- Section: Dati Fiscali -->
-                <div class="flex-col-gap-4">
-                    <div class="detail-section-header">
-                        <div class="flex items-center gap-3"> <span
-                                class="material-symbols-outlined detail-section-icon text-amber-500">payments</span>
-                            <h3 class="detail-section-title" data-t="fiscal_data">Dati Fiscali</h3>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="glass-field-container"> <span class="view-label" data-t="vat_number">Partita
-                                IVA</span>
-                            <div class="flex items-center justify-between"> <span id="piva"
-                                    class="text-sm font-bold text-white">-</span> <span
-                                    class="copy-btn material-symbols-outlined text-xs opacity-20"
-                                    data-copy-id="piva">content_copy</span> </div>
-                        </div>
-                        <div class="glass-field-container"> <span class="view-label" data-t="sdi_code">Codice SDI</span>
-                            <div class="flex items-center justify-between"> <span id="codice-sdi"
-                                    class="text-sm font-bold text-white">-</span> <span
-                                    class="copy-btn material-symbols-outlined text-xs opacity-20"
-                                    data-copy-id="codice-sdi">content_copy</span> </div>
-                        </div>
-                        <div class="glass-field-container"> <span class="view-label" data-t="cciaa_number">CCIAA</span>
-                            <div class="flex items-center justify-between"> <span id="cciaa"
-                                    class="text-sm font-bold text-white">-</span> <span
-                                    class="copy-btn material-symbols-outlined text-xs opacity-20"
-                                    data-copy-id="cciaa">content_copy</span> </div>
-                        </div>
-                        <div class="glass-field-container"> <span class="view-label" data-t="registration_date">Data
-                                Iscrizione</span> <span id="data-iscrizione"
-                                class="text-sm font-bold text-white">-</span> </div>
-                    </div>
-                </div> <!-- Section: Contatti Diretti -->
-                <div class="flex-col-gap-2">
-                    <div class="glass-card">
-                        <div class="flex items-center justify-between p-4 border-b border-white/5 group">
-                            <div class="flex items-center gap-3"> <a id="btn-call-tel" href="tel:"
-                                    class="size-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/10">
-                                    <span class="material-symbols-outlined text-lg">call</span> </a>
-                                <div class="flex flex-col"> <span
-                                        class="text-[9px] font-black uppercase text-white/40 tracking-widest"
-                                        data-t="phone">Telefono</span> <span id="telefono-azienda"
-                                        class="text-sm font-bold text-white">-</span> </div>
-                            </div> <span
-                                class="copy-btn material-symbols-outlined text-xs opacity-20 group-hover:opacity-100 transition-opacity"
-                                data-copy-id="telefono-azienda">content_copy</span>
-                        </div>
-                        <div class="flex items-center justify-between p-4 group">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="size-8 rounded-lg bg-white/5 text-white/40 flex-center border border-white/10">
-                                    <span class="material-symbols-outlined text-lg">fax</span>
-                                </div>
-                                <div class="flex flex-col"> <span
-                                        class="text-[9px] font-black uppercase text-white/40 tracking-widest"
-                                        data-t="fax">Fax</span> <span id="fax-azienda"
-                                        class="text-sm font-bold text-white">-</span> </div>
-                            </div> <span
-                                class="copy-btn material-symbols-outlined text-xs opacity-20 group-hover:opacity-100 transition-opacity"
-                                data-copy-id="fax-azienda">content_copy</span>
-                        </div>
-                    </div>
-                </div> <!-- Section: Note -->
-                <div class="flex-col-gap-3">
-                    <div class="flex items-center justify-between px-1">
-                        <div class="flex items-center gap-2"> <span
-                                class="material-symbols-outlined text-amber-500 text-lg">edit_note</span>
-                            <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60" data-t="notes">
-                                Note Aziendali</h3>
-                        </div>
-                        <div class="flex gap-2"> <button id="btn-cancel-note"
-                                class="hidden text-[10px] font-bold text-white/40 uppercase">Annulla</button> <button
-                                id="btn-edit-note" class="text-[10px] font-bold text-amber-500 uppercase"
-                                data-t="edit">Modifica</button> </div>
-                    </div>
-                    <div class="glass-card border-l-4 border-l-amber-500/50 p-4 relative">
-                        <p id="note-azienda" class="text-sm text-white/80 whitespace-pre-wrap">-</p> <textarea
-                            id="note-azienda-edit"
-                            class="hidden w-full bg-black/40 p-3 rounded-xl border border-amber-500/30 text-white text-sm focus:outline-none focus:border-amber-500"
-                            rows="4"></textarea>
-                    </div>
-                </div> <!-- Section: Allegati -->
-                <div class="flex-col-gap-3"> <button class="flex items-center justify-between w-full px-1 group"
-                        id="toggle-allegati-btn">
-                        <div class="flex items-center gap-2"> <span
-                                class="material-symbols-outlined text-lg opacity-40 group-hover:opacity-100 transition-opacity">attach_file</span>
-                            <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60"
-                                data-t="attachments">Allegati</h3>
-                        </div> <span id="allegati-chevron"
-                            class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
-                    </button>
-                    <div id="allegati-container" class="hidden">
-                        <div id="allegati-list" class="glass-card p-3 flex-col-gap-2">
-                            <p class="text-xs text-white/30 italic text-center py-4" data-t="no_attachments">Nessun
-                                allegato presente</p>
+                        <div
+                            class="absolute -bottom-2 -right-2 size-7 rounded-full bg-blue-500 text-white flex-center shadow-lg">
+                            <span class="material-symbols-outlined text-sm">zoom_in</span>
                         </div>
                     </div>
                 </div>
+
+                <div class="hero-title-container">
+                    <h1 id="ragione-sociale" class="hero-title selectable">Caricamento...</h1>
+                    <div id="forma-giuridica"
+                        class="mx-auto mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20 inline-block">
+                        Azienda
+                    </div>
+                </div>
             </div>
-        </main> <!-- QR Zoom Modal -->
+
+            <div class="detail-content-wrap">
+                <!-- Section: Referente -->
+                <section class="mt-8">
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon icon-accent-emerald">person</span>
+                        <h3 class="detail-section-title" data-t="referent_details">Dettagli Referente</h3>
+                    </div>
+
+                    <div class="flex-col-gap mt-4">
+                        <div class="glass-field-container">
+                            <div class="detail-field-box border-glow flex items-center p-4">
+                                <div
+                                    class="size-14 rounded-full flex-center bg-black/30 border border-white/10 overflow-hidden shrink-0 mr-4">
+                                    <img id="referente-photo" class="w-full h-full object-cover hidden" src="" />
+                                    <span id="referente-photo-placeholder"
+                                        class="material-symbols-outlined text-2xl opacity-20">person</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p id="referente-nome" class="text-base font-bold text-white truncate">-</p>
+                                    <p id="referente-ruolo"
+                                        class="text-[10px] font-black uppercase tracking-widest text-emerald-400">-</p>
+                                </div>
+                                <a id="btn-call-referente" href="tel:"
+                                    class="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/20 active:scale-95 transition-all">
+                                    <span class="material-symbols-outlined">call</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="whatsapp_number">Cellulare / WhatsApp</label>
+                            <div class="detail-field-box border-glow">
+                                <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
+                                <span id="referente-cellulare" class="detail-field-input !flex items-center">-</span>
+                                <button class="btn-icon-header copy-btn" type="button"
+                                    data-copy-target="referente-cellulare">
+                                    <span class="material-symbols-outlined">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Sedi -->
+                <section class="mt-8">
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">location_on</span>
+                        <h3 class="detail-section-title" data-t="company_locations">Sedi Aziendali</h3>
+                    </div>
+
+                    <div id="locations-tabs-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1 mt-4">
+                        <!-- Generato via JS -->
+                    </div>
+
+                    <div id="location-content-card" class="detail-field-box border-glow mt-2 !block p-4">
+                        <div class="flex gap-4">
+                            <div class="flex-1 min-w-0 flex flex-col gap-2">
+                                <div>
+                                    <p id="indirizzo-completo" class="text-sm font-bold text-white">-</p>
+                                    <p id="citta-cap-prov" class="text-[10px] text-white/40 font-medium">-</p>
+                                </div>
+                                <div class="mt-auto pt-2">
+                                    <button id="btn-vedi-mappa"
+                                        class="base-btn-secondary w-full py-2 px-4 text-[10px] h-9">
+                                        <span class="material-symbols-outlined text-sm">map</span>
+                                        <span data-t="view_on_map">Mappa</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="location-map-thumbnail"
+                                class="size-24 rounded-2xl bg-black/40 border border-white/5 overflow-hidden relative shrink-0">
+                                <!-- Map Iframe injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Contatti Diretti -->
+                <section class="mt-8">
+                    <div class="detail-section-header">
+                        <span
+                            class="material-symbols-outlined detail-section-icon icon-accent-blue">contact_phone</span>
+                        <h3 class="detail-section-title">Contatti Diretti</h3>
+                    </div>
+
+                    <div class="flex-col-gap mt-4">
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="phone">Telefono</label>
+                            <div class="detail-field-box border-glow">
+                                <a id="btn-call-tel" href="tel:" class="btn-icon-header shrink-0">
+                                    <span class="material-symbols-outlined text-emerald-500">call</span>
+                                </a>
+                                <span id="telefono-azienda" class="detail-field-input !flex items-center">-</span>
+                                <button class="btn-icon-header copy-btn" type="button"
+                                    data-copy-target="telefono-azienda">
+                                    <span class="material-symbols-outlined">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="fax">Fax</label>
+                            <div class="detail-field-box border-glow">
+                                <span class="material-symbols-outlined ml-4 opacity-40">fax</span>
+                                <span id="fax-azienda" class="detail-field-input !flex items-center">-</span>
+                                <button class="btn-icon-header copy-btn" type="button" data-copy-target="fax-azienda">
+                                    <span class="material-symbols-outlined">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Email Categorizzate -->
+                <section id="wrapper-email-section" class="mt-8 hidden">
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon icon-accent-purple">mail</span>
+                        <h3 class="detail-section-title" data-t="email_categories">Email Aziendali</h3>
+                    </div>
+                    <div id="email-list-container" class="flex-col-gap mt-4">
+                        <!-- Generato via JS -->
+                    </div>
+                </section>
+
+                <!-- Section: Dati Fiscali -->
+                <section class="mt-8">
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon icon-accent-amber">payments</span>
+                        <h3 class="detail-section-title" data-t="fiscal_data">Dati Fiscali</h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="vat_number">Partita IVA</label>
+                            <div class="detail-field-box border-glow">
+                                <span id="piva" class="detail-field-input !p-3 !text-[11px] !flex items-center">-</span>
+                                <button class="btn-icon-header copy-btn" type="button" data-copy-target="piva">
+                                    <span class="material-symbols-outlined !text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="sdi_code">Codice SDI</label>
+                            <div class="detail-field-box border-glow">
+                                <span id="codice-sdi"
+                                    class="detail-field-input !p-3 !text-[11px] !flex items-center">-</span>
+                                <button class="btn-icon-header copy-btn" type="button" data-copy-target="codice-sdi">
+                                    <span class="material-symbols-outlined !text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="cciaa_number">CCIAA</label>
+                            <div class="detail-field-box border-glow">
+                                <span id="cciaa"
+                                    class="detail-field-input !p-3 !text-[11px] !flex items-center">-</span>
+                                <button class="btn-icon-header copy-btn" type="button" data-copy-target="cciaa">
+                                    <span class="material-symbols-outlined !text-sm">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-field-container">
+                            <label class="view-label" data-t="registration_date">Iscrizione</label>
+                            <div class="detail-field-box border-glow">
+                                <span id="data-iscrizione"
+                                    class="detail-field-input !p-3 !text-[11px] !flex items-center">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Note -->
+                <section class="mt-8">
+                    <div class="detail-section-header justify-between">
+                        <div class="flex-center-gap">
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber">edit_note</span>
+                            <h3 class="detail-section-title" data-t="notes">Note Aziendali</h3>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="btn-cancel-note"
+                                class="hidden text-[10px] font-bold text-white/40 uppercase">Annulla</button>
+                            <button id="btn-edit-note" class="text-[10px] font-bold text-amber-500 uppercase"
+                                data-t="edit">Modifica</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-field-box border-glow mt-4 !block p-4 border-l-4 border-l-amber-500/50">
+                        <p id="note-azienda" class="text-sm text-white/80 whitespace-pre-wrap">-</p>
+                        <textarea id="note-azienda-edit"
+                            class="hidden w-full bg-black/40 p-3 rounded-xl border border-amber-500/30 text-white text-sm focus:outline-none focus:border-amber-500"
+                            rows="4"></textarea>
+                    </div>
+                </section>
+
+                <!-- Section: Allegati -->
+                <section class="mt-8 mb-10">
+                    <button class="flex items-center justify-between w-full group" id="toggle-allegati-btn">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                            <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
+                        </div>
+                        <span id="allegati-chevron"
+                            class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
+                    </button>
+
+                    <div id="allegati-container" class="hidden mt-4">
+                        <div id="allegati-list" class="flex-col-gap">
+                            <p class="text-[10px] text-white/20 uppercase text-center py-4" data-t="no_attachments">
+                                Nessun allegato</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- QR Zoom Modal -->
         <div id="qr-zoom-modal" class="fixed inset-0 flex-center z-[9999] hidden opacity-0 transition-all duration-300">
             <div class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
             <div class="relative glass-card p-8 scale-90 transition-transform duration-300 w-[90%] max-w-[400px]">
                 <div id="qrcode-zoom-container" class="bg-white p-4 rounded-3xl flex-center shadow-2xl"></div>
                 <p class="text-center text-[10px] font-black uppercase tracking-widest text-emerald-400 mt-6"
-                    data-t="scan_to_import">Scansiona per importare in rubrica</p> <button id="btn-close-qr"
+                    data-t="scan_to_import">Scansiona per importare in rubrica</p>
+                <button id="btn-close-qr"
                     class="absolute -top-4 -right-4 size-10 rounded-full bg-white/10 text-white flex-center border border-white/20 hover:bg-white/20 transition-all">
-                    <span class="material-symbols-outlined">close</span> </button>
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
         </div>
+
         <div class="spacer-footer"></div>
         <footer id="footer-placeholder" class="base-footer"></footer>
-    </div> <!-- Scripts -->
+    </div>
+
+    <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/modules/azienda/dati_azienda.js"></script>
 </body>

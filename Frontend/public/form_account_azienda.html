@@ -57,7 +57,7 @@
                                 <div id="logo-placeholder" class="logo-placeholder-content">
                                     <span
                                         class="material-symbols-outlined logo-placeholder-icon">add_photo_alternate</span>
-                                    <span class="logo-placeholder-text" data-t="visual_identity">Logo Account</span>
+                                    <span class="logo-placeholder-text" data-t="company_logo">Logo Azienda</span>
                                 </div>
                             </div>
                         </div>
@@ -163,7 +163,7 @@
                     <div id="iban-list-container" class="flex flex-col gap-4 mt-4"></div>
                 </section>
 
-                <!-- 3. Referente (Specifico Azienda) -->
+                <!-- 3. Referente Aziendale -->
                 <section class="mt-8">
                     <div class="detail-section-header">
                         <span
@@ -198,19 +198,81 @@
                     </div>
                 </section>
 
-                <!-- 4. Note -->
+                <!-- 4. Note & Condivisione -->
                 <section class="mt-8 mb-10">
                     <div class="detail-section-header">
                         <span
                             class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
-                        <h3 class="detail-section-title" data-t="notes">Note</h3>
+                        <h3 class="detail-section-title" data-t="notes_and_sharing">Note e Condivisione</h3>
                     </div>
+
                     <div class="flex flex-col gap-4">
                         <div class="glass-field-container">
+                            <label class="view-label" for="account-note" data-t="notes">Note</label>
                             <div class="note-display-box border-glow">
                                 <textarea id="account-note" data-t-placeholder="notes_placeholder"
                                     class="form-textarea form-textarea-notes w-full p-3 bg-transparent border-none text-white text-sm outline-none"></textarea>
                             </div>
+                        </div>
+
+                        <div class="flex flex-col gap-3">
+                            <!-- Shared Toggle -->
+                            <label
+                                class="visibility-option-card border-glow border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-transparent cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="material-symbols-outlined icon-accent-blue p-2 rounded-lg bg-blue-400/10 text-sm">share</span>
+                                    <span class="text-xs font-black uppercase" data-t="shared_account">Account
+                                        Condiviso</span>
+                                </div>
+                                <input class="hidden" type="checkbox" id="flag-shared" />
+                                <div
+                                    class="base-switch bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/5">
+                                </div>
+                            </label>
+
+                            <div id="shared-management"
+                                class="hidden pl-6 border-l-2 border-white/10 flex flex-col gap-4">
+                                <div id="guests-list" class="flex flex-col gap-2"></div>
+                                <div class="glass-field border-glow pr-0 flex">
+                                    <input id="invite-email" type="email" placeholder="Cerca contatto o email..."
+                                        class="flex-1 bg-transparent border-none text-white text-sm p-3 outline-none" />
+                                    <button id="btn-send-invite" type="button"
+                                        class="glass-field-btn font-black text-[10px] px-4 h-full">INVITA</button>
+                                </div>
+                                <div id="rubrica-suggestions"
+                                    class="hidden border border-white/10 rounded-2xl max-h-48 overflow-y-auto z-50 shadow-lg bg-slate-900/90 backdrop-blur-md">
+                                </div>
+                            </div>
+
+                            <!-- Memorandum Toggle -->
+                            <label
+                                class="visibility-option-card border-glow border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-transparent cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="material-symbols-outlined icon-accent-orange p-2 rounded-lg bg-orange-400/10 text-sm">lightbulb</span>
+                                    <span class="text-xs font-black uppercase" data-t="memorandum">Memorandum</span>
+                                </div>
+                                <input class="hidden" type="checkbox" id="flag-memo" />
+                                <div
+                                    class="base-switch bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/5">
+                                </div>
+                            </label>
+
+                            <!-- Memorandum Shared Toggle -->
+                            <label
+                                class="visibility-option-card border-glow border border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-transparent cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span
+                                        class="material-symbols-outlined icon-accent-green p-2 rounded-lg bg-green-400/10 text-sm">broadcast_on_personal</span>
+                                    <span class="text-xs font-black uppercase" data-t="memo_shared">Memorandum
+                                        Condiviso</span>
+                                </div>
+                                <input class="hidden" type="checkbox" id="flag-memo-shared" />
+                                <div
+                                    class="base-switch bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/5">
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </section>
@@ -229,5 +291,3 @@
 </body>
 
 </html>
-
-
