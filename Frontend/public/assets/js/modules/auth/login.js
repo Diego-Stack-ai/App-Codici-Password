@@ -15,10 +15,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // 1. AppState di base (Protocollo Comune)
+        const path = window.location.pathname;
+        const isAuthPage = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.includes(p)) || path.endsWith('/');
+
         window.AppState = window.AppState || {
             user: null,
             theme: 'dark',
-            language: localStorage.getItem('app_language') || 'it'
+            language: localStorage.getItem('app_language') || 'it',
+            isAuthPage: isAuthPage
         };
 
         // 2. TRADUZIONI 
@@ -202,14 +206,18 @@ function setupPasswordToggle() {
     const input = document.getElementById('password');
     if (!btn || !input) return;
 
-    btn.onclick = (e) => {
+    btn.addEventListener('click', (e) => {
         e.preventDefault();
         const isSecret = input.type === 'password';
         input.type = isSecret ? 'text' : 'password';
 
         const icon = btn.querySelector('.material-symbols-outlined');
-        if (icon) icon.textContent = isSecret ? 'visibility_off' : 'visibility';
-    };
+        if (icon) {
+            // Se è testo (visibile), mostriamo l'occhio sbarrato (azione: nascondi)
+            // Se è password (nascosto), mostriamo l'occhio aperto (azione: mostra)
+            icon.textContent = isSecret ? 'visibility_off' : 'visibility';
+        }
+    });
 }
 
 /**

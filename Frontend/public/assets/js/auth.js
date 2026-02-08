@@ -18,12 +18,13 @@ import { logError } from './utils.js';
  */
 export function observeAuth(callback) {
     onAuthStateChanged(auth, (user) => {
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const path = window.location.pathname.toLowerCase();
         const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
+        const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
         if (!user) {
-            // Se non siamo in una pagina di auth (index, registrati, etc), reindirizza
-            if (!authPages.includes(currentPage) && currentPage !== '') {
+            // Se non siamo in una pagina di auth, reindirizza al login
+            if (!isAuthPage) {
                 window.location.href = 'index.html';
                 return;
             }
@@ -147,13 +148,8 @@ async function login(email, password) {
             showToast("Login effettuato con successo!", "success");
         }
 
-        // Il redirect verrà gestito da onAuthStateChanged in checkAuthState, 
-        // ma mettiamo un fallback di sicurezza più rapido.
-        setTimeout(() => {
-            if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) {
-                window.location.href = "home_page.html";
-            }
-        }, 100);
+        // NOTA: Il redirect viene ora gestito dall'osservatore centrale onAuthStateChanged
+        // per evitare doppie navigazioni o conflitti.
     } catch (error) {
         logError("Auth Login", error);
         let message = "Credenziali non valide.";
@@ -210,22 +206,22 @@ async function resetPassword(email) {
 function checkAuthState() {
     let initialCheckDone = false;
     onAuthStateChanged(auth, async (user) => {
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const path = window.location.pathname.toLowerCase();
         const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
-        const isAuthPage = authPages.includes(currentPage);
+        const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
-        window.LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Page: ${currentPage}`);
+        window.LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (user) {
-            // User is signed in.
+            // Utente loggato: se tenta di accedere al login, lo mandiamo alla home
             if (isAuthPage) {
-                window.LOG("[AUTH] Redirecting to home: user already logged in.");
+                window.LOG("[AUTH] Already logged in, redirecting to home...");
                 window.location.href = 'home_page.html';
             }
         } else {
-            // No user is signed in.
+            // Utente non loggato: se tenta di accedere a una pagina protetta, lo mandiamo al login
             if (!isAuthPage) {
-                window.LOG("[AUTH] Redirecting to login: no user session.");
+                window.LOG("[AUTH] No session, redirecting to login...");
                 window.location.href = 'index.html';
             }
         }

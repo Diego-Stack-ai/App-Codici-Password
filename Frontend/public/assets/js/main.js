@@ -55,9 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initCleanup();
 
     // 2. Componenti Universali (Toggles, Copy, Call) - SALTA SU PAGINE AUTH
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const path = window.location.pathname.toLowerCase();
     const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
-    const isAuthPage = authPages.includes(currentPage);
+    const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
     if (!isAuthPage) {
         setupPasswordToggles();

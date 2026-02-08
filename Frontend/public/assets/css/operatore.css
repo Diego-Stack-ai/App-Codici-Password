@@ -1638,6 +1638,8 @@ html:not(.dark) .btn-secondary {
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 20;
+    pointer-events: auto;
 }
 
 /* --- Saetta System (Premium UX) --- */
