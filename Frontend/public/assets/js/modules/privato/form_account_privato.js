@@ -5,7 +5,7 @@
 
 import { auth, db } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
-import { doc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
@@ -486,6 +486,20 @@ window.saveAccount = async () => {
 
             // Messaggio specifico per condivisione vs salvataggio standard
             if (data.shared || data.isMemoShared) {
+                // LOGICA INVITO REALE (Sistema Interno) - Update case
+                const inviteData = {
+                    senderId: currentUid,
+                    senderEmail: auth.currentUser?.email || 'unknown',
+                    recipientEmail: data.recipientEmail,
+                    accountId: targetId,
+                    accountName: data.nomeAccount,
+                    type: data.isMemoShared ? 'memorandum' : 'privato',
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+                const inviteId = `${targetId}_${data.recipientEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                await setDoc(doc(db, "invites", inviteId), inviteData);
+
                 showToast(t('success_invite_sent'));
             } else {
                 showToast(t('success_save'));
@@ -496,6 +510,23 @@ window.saveAccount = async () => {
             targetId = docRef.id;
 
             if (data.shared || data.isMemoShared) {
+                // LOGICA INVITO REALE (Sistema Interno)
+                // Creiamo un documento nella collezione 'invites' che il destinatario potrà vedere
+                const inviteData = {
+                    senderId: currentUid,
+                    senderEmail: auth.currentUser?.email || 'unknown',
+                    recipientEmail: data.recipientEmail,
+                    accountId: targetId,
+                    accountName: data.nomeAccount,
+                    type: data.isMemoShared ? 'memorandum' : 'privato',
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+
+                // Usiamo una chiave univoca per evitare duplicati: accountId_recipientEmail
+                const inviteId = `${targetId}_${data.recipientEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                await setDoc(doc(db, "invites", inviteId), inviteData);
+
                 showToast(t('success_invite_sent'));
             } else {
                 showToast(t('success_create') || "Account creato!");
