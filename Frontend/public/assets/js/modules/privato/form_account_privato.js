@@ -466,6 +466,9 @@ window.saveAccount = async () => {
         updatedAt: new Date().toISOString()
     };
 
+    const isSharingActive = (data.shared || data.isMemoShared);
+    const inviteEmail = get('invite-email');
+
     if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); return; }
 
     // RULE 4: Validation for Sharing
