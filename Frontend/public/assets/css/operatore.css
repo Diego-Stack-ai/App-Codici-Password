@@ -126,6 +126,92 @@ body,
     z-index: 30 !important;
 }
 
+.rotate-neg-45 {
+    transform: rotate(-45deg) !important;
+}
+
+.pin-active {
+    font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24 !important;
+    color: #fbbf24 !important;
+    /* amber-400 */
+}
+
+.pin-inactive {
+    font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24 !important;
+}
+
+.text-accent-blue {
+    color: rgba(80, 150, 255, 0.6) !important;
+}
+
+.bg-accent-blue {
+    background-color: rgba(80, 150, 255, 0.6) !important;
+}
+
+.text-accent-purple {
+    color: rgba(147, 51, 234, 0.6) !important;
+}
+
+.bg-accent-purple {
+    background-color: rgba(147, 51, 234, 0.6) !important;
+}
+
+.text-accent-amber {
+    color: rgba(245, 158, 11, 0.8) !important;
+}
+
+.bg-accent-amber {
+    background-color: rgba(245, 158, 11, 0.6) !important;
+}
+
+.bg-accent-amber-5 {
+    background-color: rgba(245, 158, 11, 0.05) !important;
+}
+
+.border-accent-amber-30 {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.text-accent-emerald {
+    color: rgba(16, 185, 129, 0.6) !important;
+}
+
+.bg-accent-emerald {
+    background-color: rgba(16, 185, 129, 0.6) !important;
+}
+
+.text-accent-red {
+    color: rgba(239, 68, 68, 0.8) !important;
+}
+
+.bg-accent-red-5 {
+    background-color: rgba(239, 68, 68, 0.05) !important;
+}
+
+.border-accent-red-30 {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.text-accent-blue-400 {
+    color: rgba(96, 165, 250, 1) !important;
+}
+
+.bg-accent-blue-5 {
+    background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+.border-accent-blue-30 {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.opacity-0 {
+    opacity: 0 !important;
+}
+
+.opacity-100 {
+    opacity: 1 !important;
+}
+
 .bg-transparent {
     background-color: transparent !important;
 }
@@ -3228,7 +3314,7 @@ html:not(.dark) .micro-list-item .item-badge {
     color: var(--text-secondary);
 }
 
-/* SWITCH (ex Titanium Switch) -> BASE SWITCH */
+/* SWITCH (ex Operatore Switch) -> BASE SWITCH */
 .base-switch {
     width: 44px;
     height: 24px;
@@ -3451,4 +3537,129 @@ input:checked+.base-switch::after {
 
 .note-display-box {
     min-height: 60px;
+}
+
+/* 
+   --------------------------------------------------------------------------
+   SEZIONE 10: UTILITY PER REFACTORING SICUREZZA (CSP COMPLIANT)
+   --------------------------------------------------------------------------
+*/
+
+.micro-data-label-accent {
+    color: var(--accent-color, #fbbf24);
+    opacity: 0.8;
+}
+
+.text-white-10 {
+    color: rgba(255, 255, 255, 0.1);
+}
+
+.text-white-20 {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.text-white-40 {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.text-white-60 {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.text-white-80 {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.bg-emerald-500-5 {
+    background-color: rgba(16, 185, 129, 0.05);
+}
+
+.bg-emerald-500-10 {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.bg-emerald-500-20 {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+.border-emerald-500-10 {
+    border-color: rgba(16, 185, 129, 0.1);
+}
+
+.border-emerald-500-20 {
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.opacity-10 {
+    opacity: 0.1;
+}
+
+.opacity-20 {
+    opacity: 0.2;
+}
+
+.opacity-40 {
+    opacity: 0.4;
+}
+
+.opacity-60 {
+    opacity: 0.6;
+}
+
+.opacity-80 {
+    opacity: 0.8;
+}
+
+.font-black {
+    font-weight: 900;
+}
+
+.tracking-widest {
+    letter-spacing: 0.1em;
+}
+
+.tracking-tight {
+    letter-spacing: -0.025em;
+}
+
+.tracking-tighter {
+    letter-spacing: -0.05em;
+}
+
+.max-w-100 {
+    max-width: 100px;
+}
+
+.max-w-150 {
+    max-width: 150px;
+}
+
+.animate-in {
+    animation: animateIn 0.3s ease-out;
+}
+
+.slide-in-from-left-2 {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes animateIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-0.5rem);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }

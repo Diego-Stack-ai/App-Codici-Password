@@ -94,7 +94,7 @@ function initGlobalDelegation() {
                         input.type = isHidden ? 'text' : 'password';
                         if (span) span.textContent = isHidden ? 'visibility_off' : 'visibility';
                     } else {
-                        // Titanium shield class toggle
+                        // base shield class toggle
                         input.classList.toggle('base-shield');
                         const isMasked = input.classList.contains('base-shield');
                         if (span) span.textContent = isMasked ? 'visibility' : 'visibility_off';
@@ -163,41 +163,4 @@ function initTranslations() {
     window.addEventListener('content-updated', translate);
 }
 
-/**
- * GLOBAL HELPER: Password Visibility Toggle per le Liste (Account Privati / Top 10)
- */
-window.toggleTripleVisibility = (id) => {
-    const card = document.getElementById(`acc-${id}`) || document.querySelector(`.micro-account-card[data-id="${id}"]`);
-    const eye = document.getElementById(`pass-eye-${id}`) || (card ? card.querySelector('.material-symbols-outlined') : null);
-    const passText = document.getElementById(`pass-text-${id}`) || (card ? card.querySelector('.micro-data-value[id^="pass-text-"]') : null);
-
-    if (!card) return;
-
-    // Se non abbiamo gli ID precisi, proviamo a cercarli nel DOM relativo alla card
-    const targetEye = eye || card.querySelector('.btn-toggle-visibility span');
-    const targetPassText = passText || card.querySelector('[id^="pass-text-"]');
-
-    if (!targetEye || !targetPassText) return;
-
-    // Recupera la password dal pulsante copia o attributo
-    let passVal = '••••••••';
-    const copyBtns = card.querySelectorAll('.copy-btn-dynamic');
-    copyBtns.forEach(btn => {
-        const title = (btn.getAttribute('title') || '').toLowerCase();
-        // Supporto sia per traduzione che per chiave statica
-        if (title.includes('password') || title.includes('copy_password')) {
-            passVal = btn.getAttribute('data-copy') || passVal;
-        }
-    });
-
-    const isHidden = targetEye.textContent.trim() === 'visibility';
-    const dots = '••••••••';
-
-    if (isHidden) {
-        targetEye.textContent = 'visibility_off';
-        targetPassText.textContent = passVal;
-    } else {
-        targetEye.textContent = 'visibility';
-        targetPassText.textContent = dots;
-    }
-};
+// La funzione toggleTripleVisibility è stata spostata in ui-core.js

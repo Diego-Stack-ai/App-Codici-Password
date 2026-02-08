@@ -1,4 +1,5 @@
 import { initComponents } from './components.js';
+import { createElement, setChildren, safeSetText } from './dom-utils.js';
 
 /**
  * [CORE UI] INITIALIZATION
@@ -63,12 +64,15 @@ export function showToast(message, type = 'success') {
     const iconColorClass = type === 'error' ? 'text-red-500' : (type === 'info' ? 'text-blue-500' : 'text-green-400');
     const iconName = type === 'error' ? 'error' : (type === 'info' ? 'info' : 'check_circle');
 
-    toast.innerHTML = `
-        <div class="toast-content">
-            <span class="material-symbols-outlined toast-icon ${iconColorClass}">${iconName}</span>
-            <span>${message}</span>
-        </div>
-    `;
+    const content = createElement('div', { className: 'toast-content' }, [
+        createElement('span', {
+            className: `material-symbols-outlined toast-icon ${iconColorClass}`,
+            textContent: iconName
+        }),
+        createElement('span', {}, [message])
+    ]);
+
+    setChildren(toast, content);
 
     // Trigger Animazione
     setTimeout(() => {
@@ -90,29 +94,27 @@ export function showWarningModal(title, message, callback = null) {
     let modal = document.getElementById(modalId);
     if (modal) modal.remove();
 
-    modal = document.createElement('div');
-    modal.id = modalId;
-    modal.className = 'modal-overlay';
+    modal = createElement('div', { id: modalId, className: 'modal-overlay' });
 
-    const content = document.createElement('div');
-    content.className = 'modal-box';
+    const btnOk = createElement('button', {
+        id: 'modal-ok-btn',
+        className: 'btn-modal btn-primary',
+        textContent: 'Ho Capito'
+    });
 
-    content.innerHTML = `
-        <span class="material-symbols-outlined modal-icon icon-accent-blue">info</span>
-        <h3 class="modal-title">${title}</h3>
-        <p class="modal-text">${message}</p>
-        <div class="modal-actions">
-            <button id="modal-ok-btn" class="btn-modal btn-primary">Ho Capito</button>
-        </div>
-    `;
+    const content = createElement('div', { className: 'modal-box' }, [
+        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'info' }),
+        createElement('h3', { className: 'modal-title', textContent: title }),
+        createElement('p', { className: 'modal-text', textContent: message }),
+        createElement('div', { className: 'modal-actions' }, [btnOk])
+    ]);
 
     modal.appendChild(content);
     document.body.appendChild(modal);
 
     setTimeout(() => modal.classList.add('active'), 10);
 
-    const closeBtn = content.querySelector('#modal-ok-btn');
-    closeBtn.addEventListener('click', () => {
+    btnOk.addEventListener('click', () => {
         modal.classList.remove('active');
         setTimeout(() => {
             modal.remove();
@@ -133,22 +135,17 @@ window.showLogoutModal = function () {
         let modal = document.getElementById(modalId);
         if (modal) modal.remove();
 
-        modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal-overlay';
+        modal = createElement('div', { id: modalId, className: 'modal-overlay' });
 
-        const content = document.createElement('div');
-        content.className = 'modal-box';
+        const btnCancel = createElement('button', { id: 'btn-cancel-logout', className: 'btn-modal btn-secondary', textContent: 'Annulla' });
+        const btnConfirm = createElement('button', { id: 'btn-confirm-logout', className: 'btn-modal btn-danger', textContent: 'Esci' });
 
-        content.innerHTML = `
-            <span class="material-symbols-outlined modal-icon icon-accent-orange">logout</span>
-            <h3 class="modal-title">Vuoi uscire?</h3>
-            <p class="modal-text">Dovrai effettuare nuovamente il login per accedere.</p>
-            <div class="modal-actions">
-                <button id="btn-cancel-logout" class="btn-modal btn-secondary">Annulla</button>
-                <button id="btn-confirm-logout" class="btn-modal btn-danger">Esci</button>
-            </div>
-        `;
+        const content = createElement('div', { className: 'modal-box' }, [
+            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-orange', textContent: 'logout' }),
+            createElement('h3', { className: 'modal-title', textContent: 'Vuoi uscire?' }),
+            createElement('p', { className: 'modal-text', textContent: 'Dovrai effettuare nuovamente il login per accedere.' }),
+            createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
+        ]);
 
         modal.appendChild(content);
         document.body.appendChild(modal);
@@ -163,12 +160,9 @@ window.showLogoutModal = function () {
             }, 300);
         };
 
-        const btnConfirm = content.querySelector('#btn-confirm-logout');
-        const btnCancel = content.querySelector('#btn-cancel-logout');
-
         btnCancel.addEventListener('click', () => closeModal(false));
         btnConfirm.addEventListener('click', () => {
-            btnConfirm.innerHTML = '<span class="material-symbols-outlined animate-spin toast-icon">progress_activity</span>';
+            setChildren(btnConfirm, createElement('span', { className: 'material-symbols-outlined animate-spin toast-icon', textContent: 'progress_activity' }));
             closeModal(true);
         });
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
@@ -184,22 +178,17 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
         let modal = document.getElementById(modalId);
         if (modal) modal.remove();
 
-        modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal-overlay';
+        modal = createElement('div', { id: modalId, className: 'modal-overlay' });
 
-        const content = document.createElement('div');
-        content.className = 'modal-box';
+        const btnCancel = createElement('button', { id: 'confirm-cancel-btn', className: 'btn-modal btn-secondary', textContent: cancelText });
+        const btnConfirm = createElement('button', { id: 'confirm-ok-btn', className: 'btn-modal btn-primary', textContent: confirmText });
 
-        content.innerHTML = `
-            <span class="material-symbols-outlined modal-icon icon-accent-blue">help_outline</span>
-            <h3 class="modal-title">${title}</h3>
-            <p class="modal-text">${message}</p>
-            <div class="modal-actions">
-                <button id="confirm-cancel-btn" class="btn-modal btn-secondary">${cancelText}</button>
-                <button id="confirm-ok-btn" class="btn-modal btn-primary">${confirmText}</button>
-            </div>
-        `;
+        const content = createElement('div', { className: 'modal-box' }, [
+            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
+            createElement('h3', { className: 'modal-title', textContent: title }),
+            createElement('p', { className: 'modal-text', textContent: message }),
+            createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
+        ]);
 
         modal.appendChild(content);
         document.body.appendChild(modal);
@@ -214,8 +203,8 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
             }, 300);
         };
 
-        content.querySelector('#confirm-cancel-btn').addEventListener('click', () => closeModal(false));
-        content.querySelector('#confirm-ok-btn').addEventListener('click', () => closeModal(true));
+        btnCancel.addEventListener('click', () => closeModal(false));
+        btnConfirm.addEventListener('click', () => closeModal(true));
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
 };
@@ -229,27 +218,28 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
         let modal = document.getElementById(modalId);
         if (modal) modal.remove();
 
-        modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal-overlay';
+        modal = createElement('div', { id: modalId, className: 'modal-overlay' });
 
-        const content = document.createElement('div');
-        content.className = 'modal-box';
+        const input = createElement('input', {
+            type: 'text',
+            value: initialValue,
+            placeholder: placeholder,
+            className: 'glass-field modal-input-glass'
+        });
 
-        content.innerHTML = `
-            <h3 class="modal-title">${title}</h3>
-            <div class="modal-accent-bar"></div>
-            <input type="text" value="${initialValue}" placeholder="${placeholder}" class="glass-field modal-input-glass">
-            <div class="modal-actions">
-                <button id="modal-cancel-btn" class="btn-modal btn-secondary">Annulla</button>
-                <button id="modal-confirm-btn" class="btn-modal btn-primary">Conferma</button>
-            </div>
-        `;
+        const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: 'Annulla' });
+        const btnConfirm = createElement('button', { id: 'modal-confirm-btn', className: 'btn-modal btn-primary', textContent: 'Conferma' });
+
+        const content = createElement('div', { className: 'modal-box' }, [
+            createElement('h3', { className: 'modal-title', textContent: title }),
+            createElement('div', { className: 'modal-accent-bar' }),
+            input,
+            createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
+        ]);
 
         modal.appendChild(content);
         document.body.appendChild(modal);
 
-        const input = content.querySelector('input');
         setTimeout(() => {
             modal.classList.add('active');
             input.focus();
@@ -264,11 +254,49 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
             }, 300);
         };
 
-        content.querySelector('#modal-cancel-btn').addEventListener('click', () => closeModal(null));
-        content.querySelector('#modal-confirm-btn').addEventListener('click', () => closeModal(input.value));
+        btnCancel.addEventListener('click', () => closeModal(null));
+        btnConfirm.addEventListener('click', () => closeModal(input.value));
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') closeModal(input.value);
             if (e.key === 'Escape') closeModal(null);
         });
     });
 };
+
+/**
+ * [CORE UI] TOGGLE TRIPLE VISIBILITY
+ * Gestisce la visibilità delle credenziali nelle liste (User, Account, Password).
+ */
+export function toggleTripleVisibility(id) {
+    const card = document.getElementById(`acc-${id}`) || document.querySelector(`.micro-account-card[data-id="${id}"]`);
+    if (!card) return;
+
+    const eye = document.getElementById(`pass-eye-${id}`) || card.querySelector('.btn-toggle-visibility span') || card.querySelector('.micro-btn-utility span');
+    const passText = document.getElementById(`pass-text-${id}`) || card.querySelector('[id^="pass-text-"]') || card.querySelector('.micro-data-value:last-child') || card.querySelector('.micro-data-row:last-child .micro-data-value');
+
+    if (!eye || !passText) return;
+
+    const isHidden = eye.textContent.trim() === 'visibility';
+    const dots = '••••••••';
+
+    if (isHidden) {
+        eye.textContent = 'visibility_off';
+        // Se abbiamo salvato il valore nel dataset, usiamolo
+        if (passText.dataset.realValue) {
+            passText.textContent = passText.dataset.realValue;
+        } else {
+            // Fallback: prova a cercarlo nei pulsanti copia se non presente nel dataset
+            const copyBtn = card.querySelector('.btn-toggle-visibility')?.parentElement?.querySelector('.micro-btn-copy-inline');
+            // Nota: questa logica di fallback dipende dalle implementazioni specifiche
+        }
+    } else {
+        eye.textContent = 'visibility';
+        if (!passText.dataset.realValue && passText.textContent !== dots) {
+            passText.dataset.realValue = passText.textContent;
+        }
+        passText.textContent = dots;
+    }
+}
+
+window.toggleTripleVisibility = toggleTripleVisibility;
+

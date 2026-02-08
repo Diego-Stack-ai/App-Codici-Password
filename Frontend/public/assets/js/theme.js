@@ -14,7 +14,7 @@ export function setTheme(mode) {
     if (window.ProtocolloBaseTheme) {
         window.ProtocolloBaseTheme.setMode(mode);
     } else {
-        // Fallback nel caso titanium-core non sia caricato (non dovrebbe succedere)
+        // Fallback nel caso base-core non sia caricato (non dovrebbe succedere)
         localStorage.setItem('theme', mode);
         location.reload();
     }

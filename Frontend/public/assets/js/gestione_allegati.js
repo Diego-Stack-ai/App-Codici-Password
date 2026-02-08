@@ -7,6 +7,8 @@ import {
 import {
     ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { createElement, setChildren, clearElement } from './dom-utils.js';
+import { showToast, showConfirmModal } from './ui-core.js';
 
 const DOC_TYPES = [
     "Autorizzazione", "Carta di Circolazione", "Carta di Credito", "Carta di Debito",
@@ -30,9 +32,6 @@ let docType = new URLSearchParams(window.location.search).get('docType');
 let currentFilter = 'all';
 let cachedAttachments = [];
 let pendingFile = null;
-
-const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : console.log(msg);
-const showConfirmModal = (t, m, c, d) => window.showConfirmModal ? window.showConfirmModal(t, m, c, d) : Promise.resolve(confirm(m));
 
 document.addEventListener('DOMContentLoaded', () => {
     initUI();
@@ -144,12 +143,18 @@ function renderList() {
         return catMatch && searchMatch;
     });
 
+    clearElement(container);
+
     if (filtered.length === 0) {
-        container.innerHTML = `<p class="text-[10px] text-white/30 uppercase text-center py-12">${cachedAttachments.length === 0 ? 'Nessun file' : 'Nessun risultato'}</p>`;
+        const msg = cachedAttachments.length === 0 ? 'Nessun file' : 'Nessun risultato';
+        container.appendChild(createElement('p', {
+            className: 'text-[10px] text-white/30 uppercase text-center py-12',
+            textContent: msg
+        }));
         return;
     }
 
-    container.innerHTML = filtered.map(a => {
+    const items = filtered.map(a => {
         const type = (a.type || "").toLowerCase();
         let icon = 'description';
         let color = 'text-blue-400';
@@ -160,35 +165,53 @@ function renderList() {
         const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : '---';
         const size = (a.size / (1024 * 1024)).toFixed(2);
 
-        return `
-            <div class="att-card glass-card flex items-center gap-3 p-3 group transition-all active:scale-[0.98] cursor-pointer" data-url="${a.url}">
-                <!-- Quick Actions Left -->
-                 <div class="flex flex-col gap-1 border-r border-white/5 pr-2">
-                    <button class="btn-share-att size-8 flex-center text-blue-400 bg-blue-500/10 rounded-lg hover:bg-blue-500/20" data-url="${a.url}" data-name="${a.name.replace(/"/g, '&quot;')}">
-                        <span class="material-symbols-outlined text-[18px]">ios_share</span>
-                    </button>
-                    <button class="btn-delete-att size-8 flex-center text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg" data-id="${a.id}" data-name="${a.name.replace(/"/g, '&quot;')}">
-                        <span class="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
-                </div>
-                
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <div class="size-12 rounded-2xl bg-white/5 flex-center border border-white/10 shrink-0">
-                        <span class="material-symbols-outlined ${color} text-2xl">${icon}</span>
-                    </div>
-                    <div class="flex-1 flex flex-col min-w-0 justify-center">
-                        <p class="text-sm font-bold text-white truncate">${a.name}</p>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 text-white/40 border border-white/5">${a.category || 'File'}</span>
-                            <span class="text-[10px] text-white/20 font-medium">${size} MB • ${date}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <span class="material-symbols-outlined text-white/10 group-hover:text-white/40 transition-colors">chevron_right</span>
-            </div>
-        `;
-    }).join("");
+        // Quick Actions Left
+        const quickActions = createElement('div', { className: 'flex flex-col gap-1 border-r border-white/5 pr-2' }, [
+            createElement('button', {
+                className: 'btn-share-att size-8 flex-center text-blue-400 bg-blue-500/10 rounded-lg hover:bg-blue-500/20',
+                dataset: { url: a.url, name: a.name }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-[18px]', textContent: 'ios_share' })
+            ]),
+            createElement('button', {
+                className: 'btn-delete-att size-8 flex-center text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-lg',
+                dataset: { id: a.id, name: a.name }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-[18px]', textContent: 'delete' })
+            ])
+        ]);
+
+        // Main Info
+        const mainInfo = createElement('div', { className: 'flex items-center gap-3 flex-1 min-w-0' }, [
+            createElement('div', { className: 'size-12 rounded-2xl bg-white/5 flex-center border border-white/10 shrink-0' }, [
+                createElement('span', { className: `material-symbols-outlined ${color} text-2xl`, textContent: icon })
+            ]),
+            createElement('div', { className: 'flex-1 flex flex-col min-w-0 justify-center' }, [
+                createElement('p', { className: 'text-sm font-bold text-white truncate', textContent: a.name }),
+                createElement('div', { className: 'flex items-center gap-2' }, [
+                    createElement('span', {
+                        className: 'text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 text-white/40 border border-white/5',
+                        textContent: a.category || 'File'
+                    }),
+                    createElement('span', {
+                        className: 'text-[10px] text-white/20 font-medium',
+                        textContent: `${size} MB • ${date}`
+                    })
+                ])
+            ])
+        ]);
+
+        return createElement('div', {
+            className: 'att-card glass-card flex items-center gap-3 p-3 group transition-all active:scale-[0.98] cursor-pointer',
+            dataset: { url: a.url }
+        }, [
+            quickActions,
+            mainInfo,
+            createElement('span', { className: 'material-symbols-outlined text-white/10 group-hover:text-white/40 transition-colors', textContent: 'chevron_right' })
+        ]);
+    });
+
+    setChildren(container, items);
 }
 
 function handleFileUpload(input) {
@@ -235,9 +258,13 @@ async function confirmUpload() {
     if (!desc) { showToast("Inserisci descrizione", "error"); return; }
 
     const btn = document.getElementById('btn-confirm-upload');
-    const originalText = btn.innerHTML;
+    const originalText = btn.textContent;
     btn.disabled = true;
-    btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">sync</span> Caricamento...`;
+
+    // Show spinner
+    clearElement(btn);
+    btn.appendChild(createElement('span', { className: 'material-symbols-outlined animate-spin text-sm', textContent: 'sync' }));
+    btn.appendChild(document.createTextNode(' Caricamento...'));
 
     try {
         const ext = pendingFile.name.split('.').pop();
@@ -266,7 +293,8 @@ async function confirmUpload() {
         showToast("Errore upload", "error");
     } finally {
         btn.disabled = false;
-        btn.innerHTML = originalText;
+        clearElement(btn);
+        btn.textContent = "Conferma Upload"; // Restore simpler text for safety
     }
 }
 

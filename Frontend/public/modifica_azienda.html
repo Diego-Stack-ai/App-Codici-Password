@@ -79,20 +79,20 @@
                             Required</div>
                     </div>
                     <div class="glass-card p-5 flex-col-gap-4">
-                        <div class="titanium-input-group">
+                        <div class="base-input-group">
                             <span class="material-symbols-outlined">business</span>
                             <input id="ragione-sociale" type="text" placeholder="Ragione Sociale" />
                             <input type="checkbox" data-qr-field="ragioneSociale" title="Includi in QR"
                                 class="size-4 ml-2 accent-blue-500" checked />
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="titanium-input-group">
+                            <div class="base-input-group">
                                 <span class="material-symbols-outlined">tag</span>
                                 <input id="piva" type="tel" placeholder="Partita IVA" />
                                 <input type="checkbox" data-qr-field="partitaIva" title="Includi in QR"
                                     class="size-4 ml-2 accent-blue-500" checked />
                             </div>
-                            <div class="titanium-input-group">
+                            <div class="base-input-group">
                                 <span class="material-symbols-outlined">qr_code</span>
                                 <input id="codice-sdi" type="text" placeholder="Codice SDI"
                                     class="uppercase tracking-widest" maxlength="7" />
@@ -134,7 +134,7 @@
                                 </div>
                             </div>
                             <input type="file" id="referente-photo-upload" accept="image/*" class="hidden" />
-                            <div class="flex-1 titanium-input-group h-20">
+                            <div class="flex-1 base-input-group h-20">
                                 <span class="material-symbols-outlined">badge</span>
                                 <input id="referente-titolo" type="text" placeholder="Ruolo / Titolo (es. CEO)" />
                                 <input type="checkbox" data-qr-field="referenteTitolo"
@@ -142,20 +142,20 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="titanium-input-group">
+                            <div class="base-input-group">
                                 <span class="material-symbols-outlined">person</span>
                                 <input id="referente-nome" type="text" placeholder="Nome" />
                                 <input type="checkbox" data-qr-field="referenteNome"
                                     class="size-3.5 ml-2 accent-purple-500" checked />
                             </div>
-                            <div class="titanium-input-group">
+                            <div class="base-input-group">
                                 <span class="material-symbols-outlined">person</span>
                                 <input id="referente-cognome" type="text" placeholder="Cognome" />
                                 <input type="checkbox" data-qr-field="referenteCognome"
                                     class="size-3.5 ml-2 accent-purple-500" checked />
                             </div>
                         </div>
-                        <div class="titanium-input-group">
+                        <div class="base-input-group">
                             <span class="material-symbols-outlined">smartphone</span>
                             <input id="referente-cellulare" type="tel" placeholder="Cellulare" />
                             <input type="checkbox" data-qr-field="referenteCellulare"
@@ -190,34 +190,34 @@
                         <div id="section-legale"
                             class="collapsible-section px-5 pb-5 pt-2 flex-col-gap-4 overflow-hidden max-h-0 transition-all duration-300 ease-out">
                             <div class="grid grid-cols-[3fr_1fr] gap-3">
-                                <div class="titanium-input-group h-11">
+                                <div class="base-input-group h-11">
                                     <input id="indirizzo" type="text" placeholder="Via / Piazza" class="text-xs" />
                                 </div>
-                                <div class="titanium-input-group h-11">
+                                <div class="base-input-group h-11">
                                     <input id="civico" type="text" placeholder="N." class="text-xs text-center" />
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 gap-3">
-                                <div class="titanium-input-group h-11">
+                                <div class="base-input-group h-11">
                                     <input id="citta" type="text" placeholder="Città" class="text-xs" />
                                 </div>
-                                <div class="titanium-input-group h-11">
+                                <div class="base-input-group h-11">
                                     <input id="provincia" type="text" placeholder="Prov"
                                         class="text-xs text-center uppercase" maxlength="2" />
                                 </div>
-                                <div class="titanium-input-group h-11">
+                                <div class="base-input-group h-11">
                                     <input id="cap" type="tel" placeholder="CAP" class="text-xs text-center"
                                         maxlength="5" />
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3 mt-1">
-                                <div class="titanium-input-group h-11">
+                                <div class="base-input-group h-11">
                                     <span class="text-[10px] font-black text-white/20 mr-2 uppercase">CCIAA</span>
                                     <input id="numero-cciaa" type="text" placeholder="REA..." class="text-xs" />
                                     <input type="checkbox" data-qr-field="numeroCCIAA"
                                         class="size-3 ml-2 accent-blue-500" checked />
                                 </div>
-                                <div class="titanium-input-group h-11">
+                                <div class="base-input-group h-11">
                                     <input id="data-iscrizione" type="date"
                                         class="text-xs bg-transparent border-none text-white outline-none w-full" />
                                     <input type="checkbox" data-qr-field="dataIscrizione"
@@ -252,20 +252,19 @@
                                     class="collapsible-section px-5 pb-5 pt-2 flex-col-gap-4 overflow-hidden max-h-0 transition-all duration-300 ease-out">
                                     <div class="grid grid-cols-[3fr_1fr] gap-3">
                                         <input id="admin-indirizzo" type="text"
-                                            class="titanium-input-group !pl-4 h-10 text-xs" placeholder="Indirizzo" />
+                                            class="base-input-group !pl-4 h-10 text-xs" placeholder="Indirizzo" />
                                         <input id="admin-civico" type="text"
-                                            class="titanium-input-group !pl-2 h-10 text-xs text-center"
-                                            placeholder="N." />
+                                            class="base-input-group !pl-2 h-10 text-xs text-center" placeholder="N." />
                                     </div>
                                     <div class="grid grid-cols-3 gap-3">
-                                        <input id="admin-citta" type="text"
-                                            class="titanium-input-group !pl-4 h-10 text-xs" placeholder="Città" />
+                                        <input id="admin-citta" type="text" class="base-input-group !pl-4 h-10 text-xs"
+                                            placeholder="Città" />
                                         <input id="admin-provincia" type="text"
-                                            class="titanium-input-group !pl-2 h-10 text-xs text-center uppercase"
+                                            class="base-input-group !pl-2 h-10 text-xs text-center uppercase"
                                             placeholder="PR" maxlength="2" />
                                         <input id="admin-cap" type="tel"
-                                            class="titanium-input-group !pl-2 h-10 text-xs text-center"
-                                            placeholder="CAP" maxlength="5" />
+                                            class="base-input-group !pl-2 h-10 text-xs text-center" placeholder="CAP"
+                                            maxlength="5" />
                                     </div>
                                 </div>
                             </div>
@@ -292,20 +291,19 @@
                                     class="collapsible-section px-5 pb-5 pt-2 flex-col-gap-4 overflow-hidden max-h-0 transition-all duration-300 ease-out">
                                     <div class="grid grid-cols-[3fr_1fr] gap-3">
                                         <input id="oper-indirizzo" type="text"
-                                            class="titanium-input-group !pl-4 h-10 text-xs" placeholder="Indirizzo" />
+                                            class="base-input-group !pl-4 h-10 text-xs" placeholder="Indirizzo" />
                                         <input id="oper-civico" type="text"
-                                            class="titanium-input-group !pl-2 h-10 text-xs text-center"
-                                            placeholder="N." />
+                                            class="base-input-group !pl-2 h-10 text-xs text-center" placeholder="N." />
                                     </div>
                                     <div class="grid grid-cols-3 gap-3">
-                                        <input id="oper-citta" type="text"
-                                            class="titanium-input-group !pl-4 h-10 text-xs" placeholder="Città" />
+                                        <input id="oper-citta" type="text" class="base-input-group !pl-4 h-10 text-xs"
+                                            placeholder="Città" />
                                         <input id="oper-provincia" type="text"
-                                            class="titanium-input-group !pl-2 h-10 text-xs text-center uppercase"
+                                            class="base-input-group !pl-2 h-10 text-xs text-center uppercase"
                                             placeholder="PR" maxlength="2" />
                                         <input id="oper-cap" type="tel"
-                                            class="titanium-input-group !pl-2 h-10 text-xs text-center"
-                                            placeholder="CAP" maxlength="5" />
+                                            class="base-input-group !pl-2 h-10 text-xs text-center" placeholder="CAP"
+                                            maxlength="5" />
                                     </div>
                                 </div>
                             </div>
@@ -343,10 +341,10 @@
                                         class="size-3 accent-emerald-500" checked />
                                 </div>
                                 <div class="flex-col-gap-3">
-                                    <div class="titanium-input-group h-10">
+                                    <div class="base-input-group h-10">
                                         <input id="email-pec" type="email" placeholder="email@pec.it" class="text-xs" />
                                     </div>
-                                    <div class="titanium-input-group h-10">
+                                    <div class="base-input-group h-10">
                                         <input id="email-pec-password" type="text" class="base-shield text-xs"
                                             placeholder="Password PEC" />
                                         <button class="btn-toggle-pass size-8 flex-center text-white/20"
@@ -366,19 +364,17 @@
                                     <span
                                         class="text-[9px] font-black uppercase tracking-widest text-blue-400">Amministrazione</span>
                                     <input id="email-amministrazione" type="email"
-                                        class="titanium-input-group !pl-4 h-9 text-xs" placeholder="Email" />
+                                        class="base-input-group !pl-4 h-9 text-xs" placeholder="Email" />
                                     <input id="email-amministrazione-password" type="text"
-                                        class="titanium-input-group !pl-4 h-9 text-xs base-shield"
-                                        placeholder="Password" />
+                                        class="base-input-group !pl-4 h-9 text-xs base-shield" placeholder="Password" />
                                 </div>
                                 <div class="flex-col-gap-2 bg-white/5 p-4 rounded-2xl border border-white/5">
                                     <span
                                         class="text-[9px] font-black uppercase tracking-widest text-purple-400">Personale</span>
-                                    <input id="email-personale" type="email"
-                                        class="titanium-input-group !pl-4 h-9 text-xs" placeholder="Email" />
+                                    <input id="email-personale" type="email" class="base-input-group !pl-4 h-9 text-xs"
+                                        placeholder="Email" />
                                     <input id="email-personale-password" type="text"
-                                        class="titanium-input-group !pl-4 h-9 text-xs base-shield"
-                                        placeholder="Password" />
+                                        class="base-input-group !pl-4 h-9 text-xs base-shield" placeholder="Password" />
                                 </div>
                             </div>
                         </div>
@@ -425,8 +421,8 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js?v=3.6"></script>
-    <script type="module" src="assets/js/modifica_azienda.js?v=3.6"></script>
+    <script type="module" src="assets/js/main.js?v=4.4"></script>
+    <script type="module" src="assets/js/modules/azienda/modifica_azienda.js?v=4.1"></script>
 </body>
 
 </html>

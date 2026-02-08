@@ -1,1 +1,120 @@
-<!DOCTYPE html> <html lang="it" class="dark"> <head> <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;"> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"> <title>Dettaglio Scadenza - PROTOCOLLO BASE V3.6</title> <!-- PWA / Mobile Capable --> <link rel="manifest" href="manifest.json?v=3.6" /> <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png"> <meta name="mobile-web-app-capable" content="yes"> <meta name="apple-mobile-web-app-capable" content="yes"> <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts --> <link rel="stylesheet" href="assets/css/fonts.css"> <!-- Design System Master (PROTOCOLLO BASE V3.6) --> <link rel="stylesheet" href="assets/css/operatore.css?v=3.6"> <!-- CORE JS --> <script src="assets/js/core.js?v=3.6"></script> <script type="module" src="assets/js/ui-core.js?v=3.6"></script> </head> <body class="base-bg"> <div class="base-container relative"> <!-- Ambient Glow --> <div class="base-glow"></div> <!-- Automated Header --> <header id="header-placeholder" class="base-header"></header> <div class="spacer-header"></div> <!-- Main Content --> <main class="base-main"> <div class="detail-content-wrap"> <!-- Hero Header --> <div class="hero-profile-header"> <div class="detail-avatar"> <span class="material-symbols-outlined text-3xl">event_upcoming</span> </div> <div class="hero-title-container"> <h1 id="detail-title" class="hero-title">Caricamento...</h1> <div class="flex items-center justify-center gap-2 mt-1"> <p id="status-label" class="hero-category-badge">...</p> </div> </div> </div> <!-- Info Grid --> <div class="grid grid-cols-1 md:grid-cols-2 gap-3"> <!-- Data Scadenza --> <div class="glass-field-container"> <div class="flex items-center gap-2 mb-1"> <span class="material-symbols-outlined text-sm text-red-400">calendar_month</span> <span class="view-label" data-t="expiry_date">Scadenza</span> </div> <div class="flex items-baseline gap-1"> <span id="detail-date-day" class="text-xl font-bold text-white">-- --</span> <span id="detail-date-year" class="text-xs font-bold text-white/40">----</span> </div> </div> <!-- Intestatario / Ref --> <div class="glass-field-container"> <div class="flex items-center gap-2 mb-1"> <span class="material-symbols-outlined text-sm text-purple-400">person</span> <span class="view-label" data-t="holder">Intestatario</span> </div> <span id="detail-intestatario" class="text-sm font-bold text-white truncate">-</span> </div> <!-- Categoria --> <div class="glass-field-container"> <div class="flex items-center gap-2 mb-1"> <span class="material-symbols-outlined text-sm text-emerald-400">category</span> <span class="view-label" data-t="category">Categoria</span> </div> <span id="detail-category" class="text-sm font-bold text-white truncate">-</span> </div> <!-- Veicolo (Se presente) --> <div id="section-vehicle" class="glass-field-container hidden"> <div class="flex items-center gap-2 mb-1"> <span class="material-symbols-outlined text-sm text-blue-400">directions_car</span> <span class="view-label" data-t="vehicle">Veicolo</span> </div> <span id="display-veicolo" class="text-sm font-bold text-white truncate">-</span> </div> </div> <!-- Email Preview --> <div class="flex-col-gap-4"> <div class="detail-section-header"> <div class="flex items-center gap-3"> <span class="material-symbols-outlined detail-section-icon icon-purple">mail</span> <h3 class="detail-section-title" data-t="notification_preview">Anteprima Avviso</h3> </div> </div> <div class="glass-card p-4"> <div class="bg-black/40 p-3 rounded-xl border border-white/5"> <p id="display-testo-email" class="text-xs text-white/70 leading-relaxed italic whitespace-pre-wrap">...</p> </div> </div> </div> <!-- Destinatari --> <div id="display-destinatari-wrapper" class="flex-col-gap-4"> <div class="detail-section-header"> <div class="flex items-center gap-3"> <span class="material-symbols-outlined detail-section-icon text-blue-400">alternate_email</span> <h3 class="detail-section-title" data-t="recipients">Destinatari Invio</h3> </div> </div> <div id="display-destinatari" class="grid grid-cols-1 gap-2"> <!-- Rendered via JS --> </div> </div> <!-- Allegati --> <div id="section-attachments" class="flex-col-gap-4 hidden"> <div class="detail-section-header"> <div class="flex items-center gap-3"> <span class="material-symbols-outlined detail-section-icon text-amber-500">attach_file</span> <h3 class="detail-section-title" data-t="attachments">Allegati Documenti</h3> </div> </div> <div id="display-attachments" class="grid grid-cols-1 gap-2"> <!-- Rendered via JS --> </div> </div> <!-- Note --> <div class="flex-col-gap-4"> <div class="detail-section-header"> <div class="flex items-center gap-3"> <span class="material-symbols-outlined detail-section-icon text-white/40">edit_note</span> <h3 class="detail-section-title" data-t="notes">Note Aggiuntive</h3> </div> </div> <div class="glass-card p-4"> <p id="detail-note-body" class="text-xs text-white/50 leading-relaxed italic">Nessuna nota presente.</p> </div> </div> </div> </main> <div class="spacer-footer"></div> <footer id="footer-placeholder" class="base-footer"></footer> </div> <!-- Scripts --> <script type="module" src="assets/js/main.js?v=3.6"></script> <script type="module" src="assets/js/dettaglio_scadenza.js?v=3.6"></script> </body> </html>
+<!DOCTYPE html>
+<html lang="it" class="dark">
+
+<head>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dettaglio Scadenza - PROTOCOLLO BASE V3.6</title> <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.6" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
+    <link rel="stylesheet" href="assets/css/fonts.css"> <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
+    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6"> <!-- CORE JS -->
+    <script src="assets/js/core.js?v=3.6"></script>
+    <script type="module" src="assets/js/ui-core.js?v=3.6"></script>
+</head>
+
+<body class="base-bg">
+    <div class="base-container relative"> <!-- Ambient Glow -->
+        <div class="base-glow"></div> <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
+        <div class="spacer-header"></div> <!-- Main Content -->
+        <main class="base-main">
+            <div class="detail-content-wrap"> <!-- Hero Header -->
+                <div class="hero-profile-header">
+                    <div class="detail-avatar"> <span class="material-symbols-outlined text-3xl">event_upcoming</span>
+                    </div>
+                    <div class="hero-title-container">
+                        <h1 id="detail-title" class="hero-title">Caricamento...</h1>
+                        <div class="flex items-center justify-center gap-2 mt-1">
+                            <p id="status-label" class="hero-category-badge">...</p>
+                        </div>
+                    </div>
+                </div> <!-- Info Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3"> <!-- Data Scadenza -->
+                    <div class="glass-field-container">
+                        <div class="flex items-center gap-2 mb-1"> <span
+                                class="material-symbols-outlined text-sm text-red-400">calendar_month</span> <span
+                                class="view-label" data-t="expiry_date">Scadenza</span> </div>
+                        <div class="flex items-baseline gap-1"> <span id="detail-date-day"
+                                class="text-xl font-bold text-white">-- --</span> <span id="detail-date-year"
+                                class="text-xs font-bold text-white/40">----</span> </div>
+                    </div> <!-- Intestatario / Ref -->
+                    <div class="glass-field-container">
+                        <div class="flex items-center gap-2 mb-1"> <span
+                                class="material-symbols-outlined text-sm text-purple-400">person</span> <span
+                                class="view-label" data-t="holder">Intestatario</span> </div> <span
+                            id="detail-intestatario" class="text-sm font-bold text-white truncate">-</span>
+                    </div> <!-- Categoria -->
+                    <div class="glass-field-container">
+                        <div class="flex items-center gap-2 mb-1"> <span
+                                class="material-symbols-outlined text-sm text-emerald-400">category</span> <span
+                                class="view-label" data-t="category">Categoria</span> </div> <span id="detail-category"
+                            class="text-sm font-bold text-white truncate">-</span>
+                    </div> <!-- Veicolo (Se presente) -->
+                    <div id="section-vehicle" class="glass-field-container hidden">
+                        <div class="flex items-center gap-2 mb-1"> <span
+                                class="material-symbols-outlined text-sm text-blue-400">directions_car</span> <span
+                                class="view-label" data-t="vehicle">Veicolo</span> </div> <span id="display-veicolo"
+                            class="text-sm font-bold text-white truncate">-</span>
+                    </div>
+                </div> <!-- Email Preview -->
+                <div class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3"> <span
+                                class="material-symbols-outlined detail-section-icon icon-purple">mail</span>
+                            <h3 class="detail-section-title" data-t="notification_preview">Anteprima Avviso</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-4">
+                        <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                            <p id="display-testo-email"
+                                class="text-xs text-white/70 leading-relaxed italic whitespace-pre-wrap">...</p>
+                        </div>
+                    </div>
+                </div> <!-- Destinatari -->
+                <div id="display-destinatari-wrapper" class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3"> <span
+                                class="material-symbols-outlined detail-section-icon text-blue-400">alternate_email</span>
+                            <h3 class="detail-section-title" data-t="recipients">Destinatari Invio</h3>
+                        </div>
+                    </div>
+                    <div id="display-destinatari" class="grid grid-cols-1 gap-2"> <!-- Rendered via JS --> </div>
+                </div> <!-- Allegati -->
+                <div id="section-attachments" class="flex-col-gap-4 hidden">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3"> <span
+                                class="material-symbols-outlined detail-section-icon text-amber-500">attach_file</span>
+                            <h3 class="detail-section-title" data-t="attachments">Allegati Documenti</h3>
+                        </div>
+                    </div>
+                    <div id="display-attachments" class="grid grid-cols-1 gap-2"> <!-- Rendered via JS --> </div>
+                </div> <!-- Note -->
+                <div class="flex-col-gap-4">
+                    <div class="detail-section-header">
+                        <div class="flex items-center gap-3"> <span
+                                class="material-symbols-outlined detail-section-icon text-white/40">edit_note</span>
+                            <h3 class="detail-section-title" data-t="notes">Note Aggiuntive</h3>
+                        </div>
+                    </div>
+                    <div class="glass-card p-4">
+                        <p id="detail-note-body" class="text-xs text-white/50 leading-relaxed italic">Nessuna nota
+                            presente.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div class="spacer-footer"></div>
+        <footer id="footer-placeholder" class="base-footer"></footer>
+    </div> <!-- Scripts -->
+    <script type="module" src="assets/js/main.js?v=4.4"></script>
+    <script type="module" src="assets/js/modules/scadenze/dettaglio_scadenza.js?v=4.4"></script>
+</body>
+
+</html>

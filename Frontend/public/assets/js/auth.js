@@ -13,6 +13,26 @@ import { showToast } from './ui-core.js';
 import { logError } from './utils.js';
 
 /**
+ * Centrialized Auth Observer
+ * @param {Function} callback - Function to run when auth state changes
+ */
+export function observeAuth(callback) {
+    onAuthStateChanged(auth, (user) => {
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
+
+        if (!user) {
+            // Se non siamo in una pagina di auth (index, registrati, etc), reindirizza
+            if (!authPages.includes(currentPage) && currentPage !== '') {
+                window.location.href = 'index.html';
+                return;
+            }
+        }
+        if (callback) callback(user);
+    });
+}
+
+/**
  * Registers a new user using Firebase Auth.
  * @param {string} nome - User's first name.
  * @param {string} cognome - User's last name.
@@ -234,5 +254,6 @@ export {
     login,
     logout,
     resetPassword,
-    checkAuthState
+    checkAuthState,
+    observeAuth
 };

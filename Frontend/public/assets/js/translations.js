@@ -11,6 +11,7 @@ export const translations = {
         save: "Salva",
         cancel: "Annulla",
         loading: "Caricamento...",
+        loading_data: "Ricezione Dati...",
         success_save: "Dati salvati con successo!",
         error_generic: "Si è verificato un errore.",
         logout: "Esci dall'account",

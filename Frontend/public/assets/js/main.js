@@ -1,34 +1,28 @@
 /**
- * PROTOCOLLO BASE MAIN ENTRY POINT
+ * PROTOCOLLO BASE MAIN ENTRY POINT (V4.4)
  * Coordina l'inizializzazione dei moduli UI dell'applicazione.
+ * Refactor: Rimozione innerHTML, uso dom-utils.js, centralizzazione in components.js.
  */
-// Conditional console override: disable logs in production environments.
-// Uses `window.NODE_ENV` or `document.documentElement.dataset.env` as source.
+
+// Conditional console override
 (function () {
     try {
         const env = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV) || window.NODE_ENV || document.documentElement.dataset.env || 'production';
         const originalConsoleLog = console.log && console.log.bind(console) || function () { };
 
         if (env === 'production') {
-            // No-op logger in production
             window.LOG = function () { };
         } else {
-            // In non-production, forward to original console
             window.LOG = (...args) => originalConsoleLog(...args);
         }
 
-        // Route all console.log calls through window.LOG so existing calls don't need edits
-        console.log = (...args) => {
-            try { window.LOG(...args); } catch (e) { }
-        };
-        // Also route group/info/debug/trace to avoid leaking in prod
+        console.log = (...args) => { try { window.LOG(...args); } catch (e) { } };
         console.info = (...args) => { try { window.LOG(...args); } catch (e) { } };
         console.debug = (...args) => { try { window.LOG(...args); } catch (e) { } };
         console.trace = (...args) => { try { window.LOG(...args); } catch (e) { } };
         console.group = (...args) => { try { window.LOG(...args); } catch (e) { } };
         console.groupEnd = (...args) => { try { window.LOG(...args); } catch (e) { } };
 
-        // Expose env for other scripts if needed
         window.__APP_ENV = env;
     } catch (e) {
         window.LOG = function () { };
@@ -39,6 +33,7 @@ import { initLockedUX } from './ui-core.js';
 import { setupPasswordToggles, setupCopyButtons, setupCallButtons } from './ui-components.js';
 import { setupAccountCards, setupEditMode, setupAccountDetailView, setupCopyQrCode } from './ui-pages.js';
 import { initCleanup } from './cleanup.js';
+import { initComponents } from './components.js'; // Imports components system
 
 /**
  * INITIALIZATION
@@ -47,16 +42,12 @@ import { initCleanup } from './cleanup.js';
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showSecuritySetupModal } from './security-setup.js';
+import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 
 // Inizializza il controllo inattività globalmente (SOSPESO TEMPORANEAMENTE PER SVILUPPO)
 // initInactivityTimer();
 
-/**
- * INITIALIZATION
- * Attiva tutte le funzionalità globali al caricamento del DOM.
- */
 document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Policy UX (Lockdown menu/selezione)
@@ -86,9 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (user) {
             const currentPage = window.location.pathname.split('/').pop();
-            // Evitiamo il modal nelle pagine di login/registrazione
-            const authPages = ['index.html', 'registrati.html', 'reset_password.html'];
-            if (authPages.includes(currentPage) || currentPage === '') return;
+            const excludePages = ['index.html', 'registrati.html', 'reset_password.html'];
+            if (excludePages.includes(currentPage) || currentPage === '') return;
 
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -105,71 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 5. LOAD SHARED COMPONENTS (Header/Footer)
-    // Skip on Home Page to avoid race condition with home.js which loads them independently
+    // Utilizziamo initComponents che gestisce Auth/App logic internamente
+    // Skip on Home Page to avoid double loading if home.js does it (home.js actually relies on main usually, but initComponents handles checks)
     const pathName = window.location.pathname;
     const isHomePage = pathName.endsWith('home_page.html') || pathName.endsWith('/');
-    if (!pathName.includes('home_page.html')) {
-        loadSharedComponents();
-    }
 
-    console.log("PROTOCOLLO BASE Initialized (v10.1)");
+    // initComponents handles checks for existing placeholders.
+    // However, if home.js handles heavily custom header logic, we might need coordination.
+    // Based on previous code, main.js was responsible for loading components unless specifically excluded.
+    // We entrust initComponents to do the right thing based on placeholder existence.
+    initComponents();
+
+    console.log("PROTOCOLLO BASE Initialized (v4.4)");
 });
-
-// --- HELPER: COMPONENT LOADER ---
-async function loadSharedComponents() {
-    const headerPh = document.getElementById('header-placeholder');
-    if (headerPh && headerPh.children.length === 0) {
-        try {
-            const res = await fetch('assets/components/header.html');
-            if (res.ok) {
-                // SECURITY CHECK: If header was populated while fetching, ABORT overwrite
-                if (headerPh.children.length > 0) return;
-
-                headerPh.innerHTML = await res.text();
-
-                // AUTO-POPULATE HEADER if empty (Protocollo Balanced 3-Zone)
-                const headerContent = document.getElementById('header-content');
-                if (headerContent && !headerContent.hasChildNodes()) {
-                    const pageTitle = document.title.split(' - ')[0] || 'PROTOCOLLO BASE';
-                    const path = window.location.pathname;
-                    const isAuth = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
-
-                    headerContent.innerHTML = `
-                            ${!(path.endsWith('index.html') || path.endsWith('/')) ? `
-                            <button data-action="back" class="btn-icon-header">
-                                <span class="material-symbols-outlined">arrow_back</span>
-                            </button>` : ''}
-                        </div>
-
-                        <div class="header-center">
-                            <h1 class="header-title">${pageTitle}</h1>
-                        </div>
-
-                        <div class="header-right" id="header-right">
-                             ${!isAuth ? `
-                             <a href="home_page.html" class="btn-icon-header">
-                                <span class="material-symbols-outlined">home</span>
-                             </a>` : ''}
-                        </div>
-                    `;
-                }
-            }
-        } catch (e) { console.warn("Header load error", e); }
-    }
-
-    const footerPh = document.getElementById('footer-placeholder');
-    if (footerPh) {
-        try {
-            const res = await fetch('assets/components/footer.html');
-            if (res.ok) {
-                footerPh.innerHTML = await res.text();
-
-                // HIDE settings button if already on settings page
-                if (window.location.pathname.includes('impostazioni.html')) {
-                    const settingsBtn = document.getElementById('footer-settings-link');
-                    if (settingsBtn) settingsBtn.style.display = 'none';
-                }
-            }
-        } catch (e) { console.warn("Footer load error", e); }
-    }
-}
