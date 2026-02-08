@@ -13,6 +13,7 @@ export const translations = {
         loading: "Caricamento...",
         loading_data: "Ricezione Dati...",
         success_save: "Dati salvati con successo!",
+        success_invite_sent: "Invito inviato con successo!",
         error_generic: "Si è verificato un errore.",
         logout: "Esci dall'account",
         version: "",

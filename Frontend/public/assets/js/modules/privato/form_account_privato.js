@@ -19,6 +19,9 @@ let isEditing = false;
 let bankAccounts = []; // Inizialmente vuoto per nuovi account
 let myContacts = [];
 
+// Utility per recupero rapido valori (evita ReferenceError)
+const get = (id) => document.getElementById(id)?.value.trim() || '';
+
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
@@ -480,12 +483,23 @@ window.saveAccount = async () => {
         let targetId = currentDocId;
         if (isEditing) {
             await updateDoc(doc(db, "users", currentUid, "accounts", currentDocId), data);
-            showToast(t('success_save'));
+
+            // Messaggio specifico per condivisione vs salvataggio standard
+            if (data.shared || data.isMemoShared) {
+                showToast(t('success_invite_sent'));
+            } else {
+                showToast(t('success_save'));
+            }
         } else {
             data.createdAt = new Date().toISOString();
             const docRef = await addDoc(collection(db, "users", currentUid, "accounts"), data);
             targetId = docRef.id;
-            showToast(t('success_create') || "Account creato!");
+
+            if (data.shared || data.isMemoShared) {
+                showToast(t('success_invite_sent'));
+            } else {
+                showToast(t('success_create') || "Account creato!");
+            }
         }
         setTimeout(() => window.location.href = `dettaglio_account_privato.html?id=${targetId}`, 1000);
     } catch (e) { logError("SaveAccount", e); showToast(t('error_generic'), "error"); }
