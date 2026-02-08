@@ -7,9 +7,10 @@ import { auth, db } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
 import { doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT } from '../../utils.js';
+import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -34,6 +35,28 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUid = user.uid;
             ownerId = params.get('ownerId') || user.uid;
             isReadOnly = (ownerId !== currentUid);
+
+            // Inizializza Header e Footer secondo Protocollo Base
+            await initComponents();
+
+            // Aggiungi pulsante Edit nel footer (solo se non è read-only)
+            if (!isReadOnly) {
+                const fCenter = document.getElementById('footer-center-actions');
+                if (fCenter) {
+                    clearElement(fCenter);
+                    const editBtn = createElement('button', {
+                        id: 'btn-edit-footer',
+                        className: 'btn-floating-add bg-accent-blue'
+                    }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                    ]);
+                    editBtn.onclick = () => {
+                        console.log('[dettaglio] Navigating to form with ID:', currentId);
+                        window.location.href = `form_account_privato.html?id=${currentId}`;
+                    };
+                    setChildren(fCenter, editBtn);
+                }
+            }
 
             if (isReadOnly) setupReadOnlyUI();
             await loadAccount();
@@ -63,6 +86,7 @@ async function loadAccount() {
         if (!isReadOnly) updateDoc(docRef, { views: increment(1) }).catch(console.warn);
 
         renderAccount(accountData);
+        setupActions();
     } catch (e) {
         logError("LoadAccount", e);
         showToast(t('error_loading'), "error");
@@ -122,6 +146,25 @@ function renderAccount(acc) {
     // Banking
     renderBanking(acc);
 
+    // Gestione Suggerimento Conto Bancario
+    const hasRealBanking = checkRealBankingData(acc);
+    const bankingPrompt = document.getElementById('add-banking-prompt');
+    if (bankingPrompt) {
+        if (!hasRealBanking && !isReadOnly) {
+            bankingPrompt.classList.remove('hidden');
+            const btnBankingInfo = document.getElementById('btn-banking-info');
+            if (btnBankingInfo) {
+                const infoText = btnBankingInfo.querySelector('.info-text');
+                if (infoText) infoText.textContent = t('visual_identity');
+                btnBankingInfo.onclick = () => {
+                    window.location.href = `form_account_privato.html?id=${currentId}`;
+                };
+            }
+        } else {
+            bankingPrompt.classList.add('hidden');
+        }
+    }
+
     // Sharing
     if (acc.shared || acc.isMemoShared) {
         const mgmt = document.getElementById('shared-management');
@@ -135,7 +178,8 @@ function renderBanking(acc) {
     const content = document.getElementById('banking-content');
     if (!section || !content) return;
 
-    if (!acc.isBanking) {
+    const hasCardsAtRoot = (acc.cards && acc.cards.length > 0);
+    if (!acc.isBanking && !hasCardsAtRoot) {
         section.classList.add('hidden');
         return;
     }
@@ -143,7 +187,35 @@ function renderBanking(acc) {
     section.classList.remove('hidden');
     clearElement(content);
 
-    const bankingArr = Array.isArray(acc.banking) ? acc.banking : (acc.banking ? [acc.banking] : (acc.iban ? [{ iban: acc.iban }] : []));
+    // Normalizzazione dati per compatibilità:
+    // Supportiamo l'array 'banking' (standard attuale) o i campi a radice (legacy)
+    let bankingArr = [];
+    if (Array.isArray(acc.banking)) {
+        bankingArr = acc.banking;
+    } else if (acc.iban || hasCardsAtRoot) {
+        bankingArr = [{
+            iban: acc.iban || '',
+            cards: acc.cards || [],
+            passwordDispositiva: acc.passwordDispositiva || '',
+            referenteNome: acc.referenteNome || '',
+            referenteTelefono: acc.referenteTelefono || '',
+            referenteCellulare: acc.referenteCellulare || ''
+        }];
+    }
+
+    // Double check: if still no banking array or empty elements, hide
+    const hasRealBankingData = bankingArr.some(bank => {
+        const hasIban = bank.iban && bank.iban.trim().length > 0;
+        const hasDisp = bank.passwordDispositiva && bank.passwordDispositiva.trim().length > 0;
+        const hasCards = bank.cards && bank.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
+        const hasRef = (bank.referenteTelefono?.trim() || bank.referenteCellulare?.trim());
+        return hasIban || hasDisp || hasCards || hasRef;
+    });
+
+    if (!hasRealBankingData) {
+        section.classList.add('hidden');
+        return;
+    }
 
     bankingArr.forEach((bank, idx) => {
         const card = createElement('div', { className: 'space-y-4 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 border-glow relative' }, [
@@ -169,12 +241,24 @@ function renderBanking(acc) {
                     createElement('span', { className: 'material-symbols-outlined text-xs', textContent: 'contact_emergency' }),
                     createElement('span', { className: 'text-[9px] font-black uppercase tracking-widest', textContent: 'Referente' })
                 ]),
-                createElement('div', { className: 'text-[11px] font-black text-white uppercase', textContent: bank.referenteNome || '-' }),
-                createElement('div', { className: 'grid grid-cols-2 gap-2' }, [
+                createElement('div', { className: 'text-[11px] font-black uppercase', textContent: bank.referenteNome || '-' }),
+                createElement('div', { className: 'flex flex-col gap-2' }, [
                     createCallBtn('call', bank.referenteTelefono),
                     createCallBtn('smartphone', bank.referenteCellulare)
                 ])
-            ])
+            ]),
+            // Cards Section
+            bank.cards && bank.cards.length > 0 ? createElement('div', { className: 'space-y-2' }, [
+                createElement('div', { className: 'text-[9px] font-black text-white/40 uppercase tracking-widest px-1', textContent: 'Carte / Bancomat' }),
+                ...bank.cards.map(c => createElement('div', { className: 'bg-black/40 p-3 rounded-xl border border-white/5 flex flex-col gap-2 border-glow' }, [
+                    createElement('div', { className: 'text-[10px] font-black text-emerald-400 uppercase', textContent: c.cardType || c.type || 'Carta' }),
+                    createMicroRow('Titolare', c.titolare || '-'),
+                    createMicroRow('Numero', c.cardNumber || '-', true),
+                    createMicroRow('Scadenza', c.expiry || '-'),
+                    createMicroRow('PIN', c.pin || '••••', true, true),
+                    createMicroRow('CCV', c.ccv || '-', true, true)
+                ]))
+            ]) : null
         ]);
         content.appendChild(card);
     });
@@ -205,7 +289,7 @@ function createCallBtn(icon, num) {
         onclick: () => { if (num) window.location.href = `tel:${num.replace(/\s+/g, '')}`; }
     }, [
         createElement('span', { className: 'material-symbols-outlined text-[14px] text-emerald-500/50 group-hover:text-emerald-400', textContent: icon }),
-        createElement('span', { className: 'micro-data-value text-[10px] font-bold text-white group-hover:text-primary', textContent: num || '-' })
+        createElement('span', { className: 'micro-data-value text-[10px] font-bold group-hover:text-primary', textContent: num || '-' })
     ]);
 }
 
@@ -266,10 +350,11 @@ function setupReadOnlyUI() {
 }
 
 function setupActions() {
-    // Copy Generic
-    document.querySelectorAll('.btn-copy-field').forEach(btn => {
+    // Copy Buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.onclick = () => {
-            const input = btn.closest('.glass-field')?.querySelector('input');
+            const container = btn.closest('.detail-field-box') || btn.closest('.glass-field-container');
+            const input = container?.querySelector('input');
             if (input && input.value) {
                 navigator.clipboard.writeText(input.value);
                 showToast(t('copied') || "Copiato!");
@@ -278,16 +363,79 @@ function setupActions() {
     });
 
     // Toggle Password
-    document.querySelectorAll('.btn-toggle-field').forEach(btn => {
-        btn.onclick = () => {
-            const input = btn.closest('.glass-field')?.querySelector('input');
+    const toggleBtn = document.getElementById('toggle-password');
+    if (toggleBtn) {
+        toggleBtn.onclick = () => {
+            const input = document.getElementById('detail-password');
             if (input) {
                 const isPass = input.type === 'password';
                 input.type = isPass ? 'text' : 'password';
                 input.classList.toggle('base-shield', !isPass);
-                btn.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
+                toggleBtn.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
             }
         };
-    });
+    }
+
+    // Open Website
+    const openWebBtn = document.getElementById('open-website');
+    if (openWebBtn) {
+        openWebBtn.onclick = () => {
+            const url = document.getElementById('detail-website')?.value;
+            if (url) window.open(url.startsWith('http') ? url : `https://${url}`, '_blank');
+        };
+    }
+
+    // Copy Note
+    const copyNoteBtn = document.getElementById('copy-note');
+    if (copyNoteBtn) {
+        copyNoteBtn.onclick = () => {
+            const note = document.getElementById('detail-note')?.textContent;
+            if (note && note !== '-') {
+                navigator.clipboard.writeText(note);
+                showToast(t('copied') || "Copiato!");
+            }
+        };
+    }
+
+    // Banking Toggle
+    const bankToggle = document.getElementById('banking-toggle');
+    const bankContent = document.getElementById('banking-content');
+    const bankChevron = document.getElementById('banking-chevron');
+    if (bankToggle && bankContent) {
+        bankToggle.onclick = () => {
+            const isHidden = bankContent.classList.toggle('hidden');
+            if (bankChevron) {
+                bankChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+                bankChevron.classList.toggle('text-white/20', isHidden);
+                bankChevron.classList.toggle('text-emerald-500', !isHidden);
+            }
+        };
+    }
 }
 
+
+/**
+ * Utility per rilevare se ci sono dati bancari reali
+ */
+function checkRealBankingData(acc) {
+    let bankingArr = [];
+    if (Array.isArray(acc.banking)) {
+        bankingArr = acc.banking;
+    } else if (acc.iban || (acc.cards && acc.cards.length > 0)) {
+        bankingArr = [{
+            iban: acc.iban || '',
+            cards: acc.cards || [],
+            passwordDispositiva: acc.passwordDispositiva || '',
+            referenteNome: acc.referenteNome || '',
+            referenteTelefono: acc.referenteTelefono || '',
+            referenteCellulare: acc.referenteCellulare || ''
+        }];
+    }
+    return bankingArr.some(bank => {
+        const hasIban = bank.iban && bank.iban.trim().length > 0;
+        const hasDisp = bank.passwordDispositiva && bank.passwordDispositiva.trim().length > 0;
+        const hasCards = bank.cards && bank.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
+        const hasRef = (bank.referenteTelefono?.trim() || bank.referenteCellulare?.trim());
+        return hasIban || hasDisp || hasCards || hasRef;
+    });
+}

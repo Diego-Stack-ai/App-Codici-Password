@@ -73,7 +73,7 @@ observeAuth(async (user) => {
 async function initProtocolUI() {
     await initComponents();
 
-    // Header Left
+    // Header Left - Back personalizzato (va a home invece di history.back)
     const hLeft = document.getElementById('header-left');
     if (hLeft) {
         clearElement(hLeft);
@@ -85,41 +85,9 @@ async function initProtocolUI() {
         ]));
     }
 
-    // Header Center
-    const hCenter = document.getElementById('header-center');
-    if (hCenter) {
-        clearElement(hCenter);
-        setChildren(hCenter, createElement('h2', {
-            className: 'header-title uppercase tracking-widest text-shadow-glow',
-            textContent: t('my_companies') || 'LE MIE AZIENDE'
-        }));
-    }
-
-    // Header Right
-    const hRight = document.getElementById('header-right');
-    if (hRight) {
-        clearElement(hRight);
-        setChildren(hRight, createElement('a', {
-            href: 'aggiungi_nuova_azienda.html',
-            className: 'btn-icon-header text-accent-green',
-            title: t('add_company') || 'Aggiungi Azienda'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'add_business' })
-        ]));
-    }
-
-    // Footer Center
-    const fCenter = document.getElementById('footer-center-actions');
-    if (fCenter) {
-        clearElement(fCenter);
-        setChildren(fCenter, createElement('a', {
-            href: 'home_page.html',
-            className: 'btn-icon-header',
-            title: 'Home'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
-        ]));
-    }
+    // Header Center - Usa il titolo standard da initComponents() ("Le Mie Aziende")
+    // Header Right - Usa quello standard di initComponents() (Home button)
+    // Footer - Usa quello standard di initComponents() (Tema SX, Vuoto C, Settings DX)
 }
 
 async function loadAziende(uid) {
@@ -178,7 +146,7 @@ function createAziendaCard(a) {
         // Pin Button
         createElement('button', {
             type: 'button',
-            className: `btn-pin-azienda absolute top-3 right-3 z-30 w-8 h-8 p-0 flex items-center justify-center bg-transparent border-none outline-none transition-all ${a.isPinned ? 'text-amber-400 opacity-100' : 'text-white/30 hover:text-white opacity-0 group-hover:opacity-100'}`,
+            className: `btn-pin-azienda absolute top-3 right-3 z-30 w-8 h-8 p-0 flex items-center justify-center bg-transparent border-none outline-none transition-all ${a.isPinned ? 'text-amber-400 opacity-100' : 'text-white/30 hover:text-white opacity-40 hover:opacity-100'}`,
             onclick: (e) => { e.stopPropagation(); togglePin(a.id); }
         }, [
             createElement('span', {
@@ -210,7 +178,7 @@ function createAziendaCard(a) {
             createElement('button', {
                 className: 'btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm',
                 onclick: (e) => { e.stopPropagation(); window.location.href = `modifica_azienda.html?id=${a.id}`; }
-            }, [createElement('span', { textContent: t('detail_short') || 'Dettaglio' })]),
+            }, [createElement('span', { textContent: 'Dettaglio Azienda' })]),
             createElement('button', {
                 className: 'btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm',
                 onclick: (e) => { e.stopPropagation(); window.location.href = `account_azienda.html?id=${a.id}`; }

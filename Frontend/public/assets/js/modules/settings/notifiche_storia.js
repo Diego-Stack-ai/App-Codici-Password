@@ -9,7 +9,7 @@ import {
     collection, getDocs, writeBatch, orderBy, query, limit
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 
 let currentUid = null;

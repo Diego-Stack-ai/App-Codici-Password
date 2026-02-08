@@ -231,13 +231,14 @@
                         <div id="shared-management" class="hidden pl-6 border-l-2 border-white/10 flex-col-gap">
                             <div id="guests-list" class="flex-col-gap"></div>
                             <div class="glass-field border-glow pr-0">
-                                <input id="invite-email" type="email" data-t-placeholder="invite_email_placeholder"
-                                    class="flex-1" />
+                                <input id="invite-email" type="email" placeholder="Cerca contatto o inserisci email..."
+                                    data-t-placeholder="invite_search_placeholder" class="flex-1" />
                                 <button id="btn-send-invite" type="button"
                                     class="glass-field-btn font-black text-xs px-4">INVITA</button>
                             </div>
                             <div id="rubrica-suggestions"
-                                class="hidden bg-slate-900 border border-white/10 rounded-2xl max-h-48 overflow-y-auto">
+                                class="hidden border border-white/10 rounded-2xl max-h-48 overflow-y-auto z-50 shadow-lg"
+                                style="background: var(--surface-glass); backdrop-filter: blur(10px);">
                             </div>
                         </div>
 
@@ -283,5 +284,3 @@
 </body>
 
 </html>
-
-

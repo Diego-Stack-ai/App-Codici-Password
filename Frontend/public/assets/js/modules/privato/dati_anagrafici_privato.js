@@ -14,7 +14,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { updateProfile } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT } from '../../utils.js';
 

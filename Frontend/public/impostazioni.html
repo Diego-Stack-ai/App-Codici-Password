@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="assets/css/operatore.css?v=3.6"> <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
     <script type="module" src="assets/js/ui-core.js"></script>
-    <script src="public/https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body class="base-bg">
@@ -51,7 +50,8 @@
                         <div class="flex items-center gap-4">
                             <div
                                 class="size-10 rounded-xl bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10 shrink-0 group-hover:bg-purple-500/20 transition-all">
-                                <span class="material-symbols-outlined">translate</span> </div>
+                                <span class="material-symbols-outlined">translate</span>
+                            </div>
                             <div class="flex flex-col"> <span class="text-sm font-bold text-white"
                                     data-t="language_title">Lingua App</span> <span id="current-lang-label"
                                     class="text-[10px] text-white/40 font-bold uppercase tracking-widest">Italiano</span>
@@ -67,12 +67,14 @@
                             class="lang-option flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all text-xs font-medium text-white/70"
                             data-code="en"> <span class="text-base">ðŸ‡ºðŸ‡¸</span> English </button> <button
                             class="lang-option flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all text-xs font-medium text-white/70"
-                            data-code="ro"> <span class="text-base">ðŸ‡·ðŸ‡´</span> RomÃ¢nÄƒ </button> </div> <!-- Tema -->
+                            data-code="ro"> <span class="text-base">ðŸ‡·ðŸ‡´</span> RomÃ¢nÄƒ </button>
+                    </div> <!-- Tema -->
                     <div class="glass-card p-4">
                         <div class="flex items-center gap-4 mb-4">
                             <div
                                 class="size-10 rounded-xl bg-blue-500/10 text-blue-400 flex-center border border-blue-500/10">
-                                <span class="material-symbols-outlined">palette</span> </div>
+                                <span class="material-symbols-outlined">palette</span>
+                            </div>
                             <div class="flex flex-col"> <span class="text-sm font-bold text-white"
                                     data-t="theme_title">Tema Visivo</span> <span
                                     class="text-[10px] text-white/40 font-bold uppercase tracking-widest"
@@ -82,15 +84,17 @@
                                 data-theme="light" data-t="theme_light">Chiaro</button> <button
                                 class="timer-btn flex-1 theme-btn" data-theme="auto" data-t="theme_auto">Auto</button>
                             <button class="timer-btn flex-1 theme-btn" data-theme="dark"
-                                data-t="theme_dark">Scuro</button> </div>
+                                data-t="theme_dark">Scuro</button>
+                        </div>
                     </div> <!-- Link Rapidi -->
                     <div class="flex-col-gap-2"> <button class="glass-card flex items-center justify-between p-4 group"
                             id="btn-expiry-rules">
                             <div class="flex items-center gap-4">
                                 <div
                                     class="size-10 rounded-xl bg-amber-500/10 text-amber-500 flex-center border border-amber-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">calendar_month</span> </div> <span
-                                    class="text-sm font-bold text-white" data-t="expiry_rules_title_page">Regole invio
+                                    <span class="material-symbols-outlined">calendar_month</span>
+                                </div> <span class="text-sm font-bold text-white"
+                                    data-t="expiry_rules_title_page">Regole invio
                                     scadenze</span>
                             </div> <span
                                 class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-all">chevron_right</span>
@@ -99,8 +103,8 @@
                             <div class="flex items-center gap-4">
                                 <div
                                     class="size-10 rounded-xl bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">archive</span> </div> <span
-                                    class="text-sm font-bold text-white" data-t="account_archive">Archivio
+                                    <span class="material-symbols-outlined">archive</span>
+                                </div> <span class="text-sm font-bold text-white" data-t="account_archive">Archivio
                                     Account</span>
                             </div> <span
                                 class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-all">chevron_right</span>
@@ -113,7 +117,8 @@
                         <div class="flex items-center gap-4">
                             <div
                                 class="size-10 rounded-xl bg-red-500/10 text-red-400 flex-center border border-red-500/10 shrink-0">
-                                <span class="material-symbols-outlined">lock_reset</span> </div>
+                                <span class="material-symbols-outlined">lock_reset</span>
+                            </div>
                             <div class="flex flex-col text-left"> <span class="text-sm font-bold text-white"
                                     data-t="change_password">Cambio Password</span> <span
                                     class="text-[10px] text-white/40 font-bold uppercase tracking-widest"
@@ -126,16 +131,16 @@
                             <div class="flex items-center gap-4">
                                 <div
                                     class="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">verified_user</span> </div> <span
-                                    class="text-sm font-bold text-white" data-t="two_factor_auth">2FA</span>
+                                    <span class="material-symbols-outlined">verified_user</span>
+                                </div> <span class="text-sm font-bold text-white" data-t="two_factor_auth">2FA</span>
                             </div> <input type="checkbox" id="2fa-toggle" class="base-toggle">
                         </div>
                         <div class="glass-card flex items-center justify-between p-4">
                             <div class="flex items-center gap-4">
                                 <div
                                     class="size-10 rounded-xl bg-blue-500/10 text-blue-400 flex-center border border-blue-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">face</span> </div> <span
-                                    class="text-sm font-bold text-white" data-t="face_id">Biometrico</span>
+                                    <span class="material-symbols-outlined">face</span>
+                                </div> <span class="text-sm font-bold text-white" data-t="face_id">Biometrico</span>
                             </div> <input type="checkbox" id="face-id-toggle" class="base-toggle">
                         </div>
                     </div> <!-- Inactivity Lock -->
@@ -143,7 +148,8 @@
                         <div class="flex items-center gap-4 mb-4">
                             <div
                                 class="size-10 rounded-xl bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10">
-                                <span class="material-symbols-outlined">timer</span> </div>
+                                <span class="material-symbols-outlined">timer</span>
+                            </div>
                             <div class="flex flex-col"> <span class="text-sm font-bold text-white"
                                     data-t="lock_inactivity">Blocco InattivitÃ </span> <span
                                     class="text-[10px] text-white/40 font-bold uppercase tracking-widest"
@@ -152,7 +158,8 @@
                         <div class="flex gap-2" id="lock-timer-selector"> <button class="timer-btn flex-1" data-val="0"
                                 data-t="lock_immediately">Subito</button> <button class="timer-btn flex-1"
                                 data-val="1">1'</button> <button class="timer-btn flex-1" data-val="3">3'</button>
-                            <button class="timer-btn flex-1" data-val="5">5'</button> </div>
+                            <button class="timer-btn flex-1" data-val="5">5'</button>
+                        </div>
                     </div>
                 </div> <!-- Info Group -->
                 <div class="flex-col-gap-3 mt-4">
@@ -163,8 +170,9 @@
                             <div class="flex items-center gap-4">
                                 <div
                                     class="size-10 rounded-xl bg-blue-500/10 text-blue-400 flex-center border border-blue-500/10 shrink-0 group-hover:bg-blue-500/20 transition-all">
-                                    <span class="material-symbols-outlined">info</span> </div> <span
-                                    class="text-sm font-bold text-white" data-t="app_info_title">Informazioni App</span>
+                                    <span class="material-symbols-outlined">info</span>
+                                </div> <span class="text-sm font-bold text-white" data-t="app_info_title">Informazioni
+                                    App</span>
                             </div> <span id="info-chevron"
                                 class="material-symbols-outlined text-white/10 transition-transform">expand_more</span>
                         </button>
@@ -178,8 +186,9 @@
                         <div class="flex items-center gap-4">
                             <div
                                 class="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/10 shrink-0">
-                                <span class="material-symbols-outlined">shield</span> </div> <span
-                                class="text-sm font-bold text-white" data-t="privacy_policy_title">Privacy & Dati</span>
+                                <span class="material-symbols-outlined">shield</span>
+                            </div> <span class="text-sm font-bold text-white" data-t="privacy_policy_title">Privacy &
+                                Dati</span>
                         </div> <span
                             class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-all">chevron_right</span>
                     </button>
@@ -207,6 +216,3 @@
 </body>
 
 </html>
-
-
-

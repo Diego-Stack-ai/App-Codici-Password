@@ -1,6 +1,7 @@
 /**
- * PROFILO PRIVATO MODULE (V4.1)
+ * PROFILO PRIVATO MODULE (V4.2)
  * Gestione profilo con form dinamici e protocollo DOM sicuro.
+ * V4.2: Aggiunto initComponents() per header/footer standard.
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
@@ -8,9 +9,10 @@ import { observeAuth } from '../../auth.js';
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT } from '../../utils.js';
+import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUserUid = null;
@@ -24,7 +26,10 @@ let userDocuments = [];
 const avatarImg = document.getElementById('profile-avatar');
 const nameDisplay = document.getElementById('user-display-name');
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Inizializza Header e Footer secondo Protocollo Base
+    await initComponents();
+
     observeAuth(async (user) => {
         if (user) {
             currentUserUid = user.uid;

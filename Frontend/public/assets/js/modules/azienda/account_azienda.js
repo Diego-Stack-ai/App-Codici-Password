@@ -8,7 +8,7 @@ import { observeAuth } from '../../auth.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components.js';
@@ -54,69 +54,68 @@ observeAuth(async (user) => {
 });
 
 async function initProtocolUI() {
-    await initComponents();
+    try {
+        console.log('[account_azienda] Inizializzazione UI...', { currentAziendaId });
+        await initComponents();
+        console.log('[account_azienda] initComponents completato');
 
-    // 1. Header Left
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => window.location.href = 'lista_aziende.html'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
-    }
+        // 1. Header Left - Back personalizzato (va a lista_aziende invece di history.back)
+        const hLeft = document.getElementById('header-left');
+        if (hLeft) {
+            clearElement(hLeft);
+            setChildren(hLeft, createElement('button', {
+                className: 'btn-icon-header',
+                onclick: () => window.location.href = 'lista_aziende.html'
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+            ]));
+        }
 
-    // 2. Header Center
-    const hCenter = document.getElementById('header-center');
-    if (hCenter) {
-        clearElement(hCenter);
-        setChildren(hCenter, createElement('h2', {
-            className: 'header-title',
-            textContent: t('company_accounts') || 'Account Azienda'
-        }));
-    }
+        // 2. Header Center - Usa il titolo standard da initComponents() ("Account Azienda")
 
-    // 3. Header Right
-    const hRight = document.getElementById('header-right');
-    if (hRight) {
-        clearElement(hRight);
-        setChildren(hRight, createElement('div', { className: 'flex items-center gap-2' }, [
-            createElement('button', {
+        // 3. Header Right - Aggiungi Sort button accanto a Home (già presente da initComponents)
+        const hRight = document.getElementById('header-right');
+        if (hRight) {
+            const sortBtn = createElement('button', {
                 id: 'sort-btn',
                 className: 'btn-icon-header',
                 title: t('sort') || 'Ordina',
-                onclick: toggleSort
+                onclick: () => toggleSort()
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'sort_by_alpha' })
-            ]),
-            createElement('a', {
-                href: 'home_page.html',
-                className: 'btn-icon-header'
+            ]);
+
+            if (hRight.firstChild) {
+                hRight.insertBefore(sortBtn, hRight.firstChild);
+            } else {
+                hRight.appendChild(sortBtn);
+            }
+        }
+
+        // 4. Footer Center - Pulsante Add Account
+        const fCenter = document.getElementById('footer-center-actions');
+        if (fCenter && currentAziendaId) {
+            clearElement(fCenter);
+            setChildren(fCenter, createElement('button', {
+                id: 'add-account-btn',
+                className: 'btn-floating-add bg-accent-blue',
+                onclick: () => window.location.href = `form_account_azienda.html?aziendaId=${currentAziendaId}`
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
-            ])
-        ]));
-    }
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+            ]));
+        }
 
-    // 4. Footer Center
-    const fCenter = document.getElementById('footer-center-actions');
-    if (fCenter) {
-        clearElement(fCenter);
-        setChildren(fCenter, createElement('button', {
-            id: 'add-account-btn',
-            className: 'btn-floating-add bg-accent-blue',
-            onclick: () => window.location.href = `form_account_azienda.html?aziendaId=${currentAziendaId}`
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
-        ]));
-    }
+        // 5. Search Bar
+        const searchInput = document.getElementById('account-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterAndRender);
+        }
 
-    // 5. Search Bar
-    const searchInput = document.getElementById('account-search');
-    if (searchInput) {
-        searchInput.addEventListener('input', filterAndRender);
+        console.log('[account_azienda] UI inizializzata con successo');
+    } catch (error) {
+        console.error('[account_azienda] Errore in initProtocolUI:', error);
+        logError("initProtocolUI", error);
+        throw error;
     }
 }
 

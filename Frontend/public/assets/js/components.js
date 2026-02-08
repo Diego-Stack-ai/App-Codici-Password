@@ -1,7 +1,8 @@
 /**
- * PROTOCOLLO BASE COMPONENTS SYSTEM (V4.4)
+ * PROTOCOLLO BASE COMPONENTS SYSTEM (V4.5)
  * Utility per caricare Header e Footer in modo sicuro e dinamico.
  * Refactor: Rimozione innerHTML, uso dom-utils.js.
+ * V4.5: Settings button ora opaco/disabilitato su impostazioni.html invece di nascosto.
  */
 
 import { createElement, setChildren, clearElement } from './dom-utils.js';
@@ -28,8 +29,17 @@ export async function initComponents() {
 
             // Back Button (Solo se non siamo su Auth o Home)
             if (!isAuth && !path.endsWith('home_page.html')) {
+                let backFn = () => window.history.back();
+
+                // Override back behavior for specific pages to ensure logical navigation
+                if (path.endsWith('dettaglio_account_privato.html') || path.endsWith('form_account_privato.html')) {
+                    backFn = () => window.location.href = 'account_privati.html';
+                } else if (path.endsWith('dettaglio_account_azienda.html') || path.endsWith('form_account_azienda.html') || path.endsWith('modifica_account_azienda.html')) {
+                    backFn = () => window.location.href = 'account_azienda.html';
+                }
+
                 headerLeft.appendChild(
-                    createElement('button', { className: 'btn-icon-header', dataset: { action: 'back' }, onclick: () => window.history.back() }, [
+                    createElement('button', { className: 'btn-icon-header', dataset: { action: 'back' }, onclick: backFn }, [
                         createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
                     ])
                 );
@@ -74,11 +84,16 @@ export async function initComponents() {
 
             const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });
 
-            // Settings Link (Solo se non siamo su Auth e non su Impostazioni)
-            if (!isAuth && !path.includes('impostazioni.html')) {
+            // Settings Link (Sempre visibile, opaco se sei su Impostazioni)
+            if (!isAuth) {
+                const isOnSettings = path.includes('impostazioni.html');
                 const settLink = createElement('div', { id: 'footer-settings-link' });
                 settLink.appendChild(
-                    createElement('a', { href: 'impostazioni.html', className: 'btn-icon-header footer-settings-link', title: 'Impostazioni' }, [
+                    createElement('a', {
+                        href: isOnSettings ? '#' : 'impostazioni.html',
+                        className: `btn-icon-header footer-settings-link ${isOnSettings ? 'opacity-30 pointer-events-none' : ''}`,
+                        title: isOnSettings ? 'Sei qui' : 'Impostazioni'
+                    }, [
                         createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
                     ])
                 );
@@ -93,7 +108,7 @@ export async function initComponents() {
             footerPh.appendChild(footer);
         }
 
-        console.log("PROTOCOLLO BASE Components Initialized (DOM Safe) V4.4");
+        console.log("PROTOCOLLO BASE Components Initialized (DOM Safe) V4.5");
 
     } catch (e) {
         console.error("Errore inizializzazione componenti:", e);

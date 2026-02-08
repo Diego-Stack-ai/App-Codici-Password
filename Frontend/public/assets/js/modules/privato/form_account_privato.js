@@ -7,15 +7,16 @@ import { auth, db } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
 import { doc, getDoc, updateDoc, deleteDoc, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUid = null;
 let currentDocId = null;
 let isEditing = false;
-let bankAccounts = [{ iban: '', cards: [] }];
+let bankAccounts = []; // Inizialmente vuoto per nuovi account
 let myContacts = [];
 
 // --- INITIALIZATION ---
@@ -27,6 +28,37 @@ document.addEventListener('DOMContentLoaded', () => {
     observeAuth(async (user) => {
         if (user) {
             currentUid = user.uid;
+
+            // Inizializza Header e Footer secondo Protocollo Base
+            await initComponents();
+
+            // Aggiungi pulsante Salva nel footer
+            const fCenter = document.getElementById('footer-center-actions');
+            if (fCenter) {
+                clearElement(fCenter);
+                setChildren(fCenter, createElement('button', {
+                    id: 'btn-save-footer',
+                    className: 'btn-floating-add bg-accent-blue',
+                    onclick: () => window.saveAccount()
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+                ]));
+            }
+
+            // Personalizza pulsante Back per tornare al dettaglio (se in modifica)
+            if (isEditing && currentDocId) {
+                const hLeft = document.getElementById('header-left');
+                if (hLeft) {
+                    clearElement(hLeft);
+                    setChildren(hLeft, createElement('button', {
+                        className: 'btn-icon-header',
+                        onclick: () => window.location.href = `dettaglio_account_privato.html?id=${currentDocId}`
+                    }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+                    ]));
+                }
+            }
+
             if (isEditing) await loadData();
             await loadRubrica();
         }
@@ -53,18 +85,55 @@ async function loadData() {
         setVal('account-url', data.url || data.sitoWeb);
         setVal('account-note', data.note);
 
-        // Banking
-        if (data.isBanking) {
-            document.getElementById('flag-banking').checked = true;
-            document.getElementById('banking-section').classList.remove('hidden');
-            bankAccounts = Array.isArray(data.banking) ? data.banking : [data.banking || { iban: '', cards: [] }];
-            renderBankAccounts();
+        // Banking & Cards (Normalize & Validate)
+        let loadedBanking = [];
+        if (Array.isArray(data.banking)) {
+            loadedBanking = data.banking;
+        } else if (data.banking) {
+            loadedBanking = [data.banking];
+        } else if (data.iban || (data.cards && data.cards.length > 0)) {
+            loadedBanking = [{
+                iban: data.iban || '',
+                passwordDispositiva: data.passwordDispositiva || '',
+                referenteTelefono: data.referenteTelefono || '',
+                referenteCellulare: data.referenteCellulare || '',
+                cards: data.cards || []
+            }];
         }
 
-        // Flags
-        if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = !!data.shared;
+        const hasRealData = loadedBanking.some(acc => {
+            const hasIban = acc.iban && acc.iban.trim().length > 0;
+            const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
+            const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
+            const hasRef = (acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
+            return hasIban || hasDisp || hasCards || hasRef;
+        });
+
+        if (hasRealData) {
+            bankAccounts = loadedBanking;
+            document.getElementById('flag-banking').checked = true;
+            document.getElementById('banking-section').classList.remove('hidden');
+            renderBankAccounts();
+        } else {
+            // Se non ci sono dati reali, il flag rimane spento e la sezione chiusa
+            document.getElementById('flag-banking').checked = false;
+            document.getElementById('banking-section').classList.add('hidden');
+            bankAccounts = [];
+        }
+
+        // Flags & Sharing UI
+        const isShared = !!data.shared;
+        const isMemoShared = !!data.isMemoShared;
+
+        if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared;
         if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = !!data.hasMemo;
-        if (document.getElementById('flag-memo-shared')) document.getElementById('flag-memo-shared').checked = !!data.isMemoShared;
+        if (document.getElementById('flag-memo-shared')) document.getElementById('flag-memo-shared').checked = isMemoShared;
+
+        if (isShared || isMemoShared) {
+            const mgmt = document.getElementById('shared-management');
+            if (mgmt) mgmt.classList.remove('hidden');
+            setVal('invite-email', data.recipientEmail);
+        }
 
         // Logo
         if (data.logo || data.avatar) {
@@ -88,13 +157,45 @@ async function loadRubrica() {
  * UI ENGINE
  */
 function setupUI() {
-    // Flag Mutual Exclusion
+    // Flag Mutual Exclusion & Sharing Rules
     const flags = ['flag-shared', 'flag-memo', 'flag-memo-shared'].map(id => document.getElementById(id)).filter(Boolean);
     flags.forEach(f => {
         f.onchange = () => {
-            if (f.checked) flags.forEach(other => { if (other !== f) other.checked = false; });
+            const get = (id) => document.getElementById(id)?.value.trim() || '';
+            const fieldsPopulated = !!(get('account-username') || get('account-code') || get('account-password'));
+
+            if (f.checked) {
+                // RULE 2A: Memorandum/Shared Memo -> Fields must be empty
+                if ((f.id === 'flag-memo' || f.id === 'flag-memo-shared') && fieldsPopulated) {
+                    f.checked = false;
+                    showToast("Per usare Memorandum devi prima svuotare Username / Codice / Password", "warning");
+                    return;
+                }
+
+                // RULE 2B: Shared -> At least one field populated
+                if (f.id === 'flag-shared' && !fieldsPopulated) {
+                    f.checked = false;
+                    showToast("Per condividere un account devi inserire almeno Username, Codice o Password", "warning");
+                    return;
+                }
+
+                // RULE 3: Mutua esclusione
+                flags.forEach(other => { if (other !== f) other.checked = false; });
+            }
+
+            // RULE 4: Dropdown visibility
             const mgmt = document.getElementById('shared-management');
-            if (mgmt) mgmt.classList.toggle('hidden', !document.getElementById('flag-shared').checked && !document.getElementById('flag-memo-shared').checked);
+            const isSharing = document.getElementById('flag-shared').checked || document.getElementById('flag-memo-shared').checked;
+            if (mgmt) {
+                mgmt.classList.toggle('hidden', !isSharing);
+                if (!isSharing) {
+                    // Reset sharing fields
+                    const inviteInput = document.getElementById('invite-email');
+                    if (inviteInput) inviteInput.value = '';
+                    const suggestions = document.getElementById('rubrica-suggestions');
+                    if (suggestions) suggestions.classList.add('hidden');
+                }
+            }
         };
     });
 
@@ -128,37 +229,195 @@ function setupUI() {
             }
         };
     }
+
+    // Toggle Password
+    const togglePassBtn = document.getElementById('btn-toggle-password-edit');
+    if (togglePassBtn) {
+        togglePassBtn.onclick = () => {
+            const input = document.getElementById('account-password');
+            if (input) {
+                const isPass = input.type === 'password';
+                input.type = isPass ? 'text' : 'password';
+                input.classList.toggle('base-shield', !isPass);
+                togglePassBtn.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
+            }
+        };
+    }
+
+    // RULE 5: Rubrica/Suggestions logic
+    const inviteInput = document.getElementById('invite-email');
+    const suggestions = document.getElementById('rubrica-suggestions');
+    if (inviteInput && suggestions) {
+        inviteInput.onfocus = () => {
+            if (myContacts.length > 0) {
+                renderSuggestions(myContacts);
+                suggestions.classList.remove('hidden');
+            }
+        };
+        inviteInput.oninput = (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = myContacts.filter(c => c.email.toLowerCase().includes(val) || (c.nome && c.nome.toLowerCase().includes(val)));
+            renderSuggestions(filtered);
+            suggestions.classList.toggle('hidden', filtered.length === 0);
+        };
+    }
+
+    // Close suggestions on outside click
+    document.addEventListener('click', (e) => {
+        if (!inviteInput?.contains(e.target) && !suggestions?.contains(e.target)) {
+            suggestions?.classList.add('hidden');
+        }
+    });
 }
 
-/**
- * BANKING MANAGEMENT
- */
+function renderSuggestions(list) {
+    const container = document.getElementById('rubrica-suggestions');
+    if (!container) return;
+    clearElement(container);
+    list.forEach(c => {
+        const div = createElement('div', {
+            className: 'p-3 cursor-pointer border-b border-white/5 last:border-none flex-col-gap selection-item-hover',
+            style: 'transition: background 0.2s',
+            onclick: () => {
+                document.getElementById('invite-email').value = c.email;
+                container.classList.add('hidden');
+            }
+        }, [
+            createElement('p', { className: 'text-xs font-bold text-primary m-0', textContent: c.nome || c.email.split('@')[0] }),
+            createElement('p', { className: 'text-[10px] text-secondary m-0', textContent: c.email })
+        ]);
+        container.appendChild(div);
+    });
+}
+
 function renderBankAccounts() {
     const container = document.getElementById('iban-list-container');
     if (!container) return;
     clearElement(container);
 
     bankAccounts.forEach((acc, idx) => {
+        const isOpen = acc._isOpen !== false; // Default aperto se non specificato
+
         const div = createElement('div', { className: 'flex-col-gap p-4 rounded-2xl border border-white/10 bg-white/5 relative border-glow mb-4' }, [
-            createElement('div', { className: 'flex items-center justify-between mb-2' }, [
-                createElement('span', { className: 'text-[10px] font-black uppercase text-purple-400', textContent: `Conto #${idx + 1}` }),
-                bankAccounts.length > 1 ? createElement('button', {
-                    className: 'text-red-400 text-xs',
-                    onclick: () => { bankAccounts.splice(idx, 1); renderBankAccounts(); }
-                }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })]) : null
+            createElement('div', {
+                className: 'flex items-center justify-between mb-2 cursor-pointer',
+                onclick: () => { acc._isOpen = !isOpen; renderBankAccounts(); }
+            }, [
+                createElement('div', { className: 'flex items-center gap-2' }, [
+                    createElement('span', {
+                        className: 'material-symbols-outlined text-[16px] text-purple-400 transition-transform',
+                        style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
+                        textContent: 'expand_more'
+                    }),
+                    createElement('span', { className: 'text-[10px] font-black uppercase text-purple-400', textContent: acc.iban ? `Conto: ${acc.iban.substring(0, 10)}...` : `Nuovo Conto #${idx + 1}` })
+                ]),
+                createElement('button', {
+                    className: 'bg-transparent border-none text-red-500/20 hover:text-red-500 transition-all p-1 flex items-center justify-center',
+                    onclick: async (e) => {
+                        e.stopPropagation();
+                        const ok = await window.showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
+                        if (ok) {
+                            bankAccounts.splice(idx, 1);
+                            renderBankAccounts();
+                        }
+                    }
+                }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })])
             ]),
-            createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
-            createInputField('Pass. Disp.', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock')
+
+            // Content (Solo se aperto)
+            isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
+                createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
+                createInputField('Pass. Disp.', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock'),
+
+                // Referente Banca
+                createElement('div', { className: 'flex-col-gap mt-2' }, [
+                    createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
+                    createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone')
+                ]),
+
+                // Carte Section
+                createElement('div', { className: 'mt-4 border-t border-white/5 pt-4' }, [
+                    createElement('div', { className: 'flex items-center justify-between mb-3' }, [
+                        createElement('span', { className: 'text-[9px] font-black uppercase text-white/40 tracking-widest', textContent: 'Carte Associate' }),
+                        createElement('button', {
+                            className: 'bg-transparent border-none text-emerald-400/40 hover:text-emerald-400 transition-all p-1 flex items-center justify-center',
+                            onclick: () => {
+                                if (!acc.cards) acc.cards = [];
+                                // Chiudi altre carte
+                                acc.cards.forEach(c => c._isOpen = false);
+                                acc.cards.push({ cardType: '', cardNumber: '', expiry: '', titolare: '', ccv: '', pin: '', type: 'Credit', _isOpen: true });
+                                renderBankAccounts();
+                            }
+                        }, [
+                            createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'add_card' })
+                        ])
+                    ]),
+                    createElement('div', { className: 'flex-col-gap' }, (acc.cards || []).map((card, cIdx) => renderCardEntry(idx, cIdx, card)))
+                ])
+            ]) : null
         ]);
         container.appendChild(div);
     });
 
-    const addBtn = createElement('button', {
-        className: 'w-full py-3 rounded-xl bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase border border-purple-500/20 mt-2',
-        onclick: () => { bankAccounts.push({ iban: '', cards: [] }); renderBankAccounts(); },
-        textContent: '+ Aggiungi Conto'
-    });
-    container.appendChild(addBtn);
+    // Hook up the header button if it exists
+    const headAddBtn = document.getElementById('btn-add-iban');
+    if (headAddBtn) headAddBtn.onclick = () => {
+        // Chiudi altri IBAN
+        bankAccounts.forEach(a => a._isOpen = false);
+        bankAccounts.push({
+            iban: '',
+            passwordDispositiva: '',
+            referenteNome: '',
+            referenteTelefono: '',
+            referenteCellulare: '',
+            cards: [],
+            _isOpen: true
+        });
+        renderBankAccounts();
+    };
+}
+
+function renderCardEntry(bankIdx, cardIdx, card) {
+    const isOpen = card._isOpen !== false;
+
+    return createElement('div', { className: 'bg-black/20 p-4 rounded-2xl border border-white/5 relative group mb-3 border-glow' }, [
+        // Card Header (Clickable to toggle)
+        createElement('div', {
+            className: 'flex items-center justify-between cursor-pointer mb-2 pr-10',
+            onclick: () => { card._isOpen = !isOpen; renderBankAccounts(); }
+        }, [
+            createElement('div', { className: 'flex items-center gap-2' }, [
+                createElement('span', {
+                    className: 'material-symbols-outlined text-[16px] text-emerald-400 transition-transform',
+                    style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
+                    textContent: 'credit_card'
+                }),
+                createElement('span', { className: 'text-[10px] font-black uppercase text-emerald-400', textContent: card.cardType || `Carta #${cardIdx + 1}` })
+            ])
+        ]),
+
+        createElement('button', {
+            className: 'absolute top-3 right-3 bg-transparent border-none text-red-500/20 hover:text-red-500 transition-all p-1 flex items-center justify-center',
+            onclick: async (e) => {
+                e.stopPropagation();
+                const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
+                const ok = await window.showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
+                if (ok) {
+                    bankAccounts[bankIdx].cards.splice(cardIdx, 1);
+                    renderBankAccounts();
+                }
+            }
+        }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })]),
+
+        isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
+            createInputField('Nome Carta (es. Visa, Blu...)', card.cardType, (val) => bankAccounts[bankIdx].cards[cardIdx].cardType = val, 'credit_card'),
+            createInputField('Titolare', card.titolare, (val) => bankAccounts[bankIdx].cards[cardIdx].titolare = val, 'person'),
+            createInputField('Numero Carta', card.cardNumber, (val) => bankAccounts[bankIdx].cards[cardIdx].cardNumber = val, 'numbers'),
+            createInputField('Scadenza', card.expiry, (val) => bankAccounts[bankIdx].cards[cardIdx].expiry = val, 'event'),
+            createInputField('PIN', card.pin, (val) => bankAccounts[bankIdx].cards[cardIdx].pin = val, 'pin'),
+            createInputField('CCV', card.ccv, (val) => bankAccounts[bankIdx].cards[cardIdx].ccv = val, 'verified_user')
+        ]) : null
+    ]);
 }
 
 function createInputField(label, value, onInput, icon) {
@@ -167,7 +426,7 @@ function createInputField(label, value, onInput, icon) {
         createElement('div', { className: 'glass-field border-glow' }, [
             createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
             createElement('input', {
-                className: 'bg-transparent border-none text-white text-xs p-3 w-full outline-none',
+                className: 'bg-transparent border-none text-primary text-xs p-3 w-full outline-none',
                 value: value || '',
                 placeholder: label,
                 oninput: (e) => onInput(e.target.value)
@@ -180,7 +439,15 @@ function createInputField(label, value, onInput, icon) {
  * ACTIONS
  */
 window.saveAccount = async () => {
-    const get = (id) => document.getElementById(id)?.value.trim() || '';
+    // Check if banking actually has data
+    const hasBankingData = (bankAccounts || []).some(acc => {
+        const hasIban = acc.iban && acc.iban.trim().length > 0;
+        const hasDisp = acc.passwordDispositiva && acc.passwordDispositiva.trim().length > 0;
+        const hasCards = acc.cards && acc.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
+        const hasRef = (acc.referenteTelefono?.trim() || acc.referenteCellulare?.trim());
+        return hasIban || hasDisp || hasCards || hasRef;
+    });
+
     const data = {
         nomeAccount: get('account-name'),
         username: get('account-username'),
@@ -191,23 +458,36 @@ window.saveAccount = async () => {
         shared: document.getElementById('flag-shared')?.checked || false,
         hasMemo: document.getElementById('flag-memo')?.checked || false,
         isMemoShared: document.getElementById('flag-memo-shared')?.checked || false,
-        isBanking: document.getElementById('flag-banking')?.checked || false,
+        isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
         banking: bankAccounts,
         updatedAt: new Date().toISOString()
     };
 
     if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); return; }
 
+    // RULE 4: Validation for Sharing
+    if (data.shared || data.isMemoShared) {
+        const inviteEmail = get('invite-email');
+        if (!inviteEmail) {
+            showToast("Per salvare devi scegliere un contatto o disattivare il flag", "warning");
+            return;
+        }
+        data.recipientEmail = inviteEmail;
+        data.sharedWith = [{ email: inviteEmail, status: 'pending' }]; // For compatibility with Detail page and Rule 7
+    }
+
     try {
+        let targetId = currentDocId;
         if (isEditing) {
             await updateDoc(doc(db, "users", currentUid, "accounts", currentDocId), data);
             showToast(t('success_save'));
         } else {
             data.createdAt = new Date().toISOString();
-            await addDoc(collection(db, "users", currentUid, "accounts"), data);
+            const docRef = await addDoc(collection(db, "users", currentUid, "accounts"), data);
+            targetId = docRef.id;
             showToast(t('success_create') || "Account creato!");
         }
-        setTimeout(() => window.location.href = 'account_privati.html', 1000);
+        setTimeout(() => window.location.href = `dettaglio_account_privato.html?id=${targetId}`, 1000);
     } catch (e) { logError("SaveAccount", e); showToast(t('error_generic'), "error"); }
 };
 

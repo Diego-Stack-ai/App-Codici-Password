@@ -1,6 +1,7 @@
 /**
- * IMPOSTAZIONI MODULE (V4.4)
+ * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
+ * V4.6: Aggiunto initComponents() per header/footer standard con Settings button opaco.
  */
 
 import { auth, db } from '../../firebase-config.js';
@@ -8,12 +9,21 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
+import { initComponents } from '../../components.js';
+
+// Carica QRCode library locale
+const qrcodeScript = document.createElement('script');
+qrcodeScript.src = '../../vendor/qrcode.min.js';
+document.head.appendChild(qrcodeScript);
 
 let currentUserData = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Inizializza Header e Footer secondo Protocollo Base
+    await initComponents();
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             await loadUserData(user);

@@ -1,5 +1,5 @@
 /**
- * DATI AZIENDA MODULE (V4.1)
+ * DATI AZIENDA MODULE (V4.2)
  * Visualizzazione dettagliata anagrafica aziendale, QR vCard, sedi e allegati.
  */
 
@@ -11,6 +11,11 @@ import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components.js';
+
+// Carica QRCode library locale
+const qrcodeScript = document.createElement('script');
+qrcodeScript.src = '../../vendor/qrcode.min.js';
+document.head.appendChild(qrcodeScript);
 
 // --- STATE ---
 let currentAziendaId = new URLSearchParams(window.location.search).get('id');

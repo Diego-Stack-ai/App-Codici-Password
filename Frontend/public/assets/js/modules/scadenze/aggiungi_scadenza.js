@@ -9,7 +9,7 @@ import { collection, addDoc, Timestamp, doc, getDoc, updateDoc, setDoc } from "h
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { EMAILS, buildEmailSubject } from './scadenza_templates.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');

@@ -138,6 +138,8 @@ export const translations = {
         archive_all: "Tutti gli archiviati",
         archive_private_only: "Solo Archivio Privato",
         archive_search_placeholder: "Cerca nell'archivio...",
+        invite_search_placeholder: "Cerca contatto o inserisci email...",
+        confirm_delete_card: "Sei sicuro di voler eliminare questa carta?",
         restore: "Ripristina",
         delete: "Elimina",
 
@@ -283,6 +285,7 @@ export const translations = {
         remove_from_pinned: "Rimuovi dai fissati",
         pin_to_top: "Fissa in alto",
         show_hide_data: "Mostra/Nascondi Dati",
+        visual_identity: "Puoi attivare le coordinate bancarie e carte di credito in modalità Modifica.",
 
         // HOME PAGE
         home_page_title: "Home Page",

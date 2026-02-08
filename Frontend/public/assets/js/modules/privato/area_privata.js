@@ -7,13 +7,17 @@ import { auth, db } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
 import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { initComponents } from '../../components.js';
 
 // --- INITIALIZATION ---
 observeAuth(async (user) => {
     if (user) {
+        // Inizializza Header e Footer secondo Protocollo Base
+        await initComponents();
+
         // Load Data
         loadCounters(user.uid, user.email);
         loadTopAccounts(user.uid);
