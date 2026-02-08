@@ -15,6 +15,7 @@ export const translations = {
         success_save: "Dati salvati con successo!",
         success_invite_sent: "Invito inviato con successo!",
         status_pending: "In attesa",
+        status_accepted: "Accettato",
         error_generic: "Si è verificato un errore.",
         invite_received_title: "Nuovo Invito",
         invite_received_msg: "ha condiviso un account con te:",
