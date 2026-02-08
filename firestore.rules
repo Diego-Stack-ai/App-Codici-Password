@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- UTENTI (Profili e Account) ---
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Sottocollezione ACCOUNTS
+      match /accounts/{accountId} {
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow update, delete: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null && (
+          request.auth.uid == userId || 
+          // Permetti lettura se l'email è nell'array semplice sharedWithEmails
+          (resource.data.sharedWithEmails is list && 
+           resource.data.sharedWithEmails.hasAny([request.auth.token.email]))
+        );
+      }
+      
+      // Sottocollezione CONTACTS
+      match /contacts/{contactId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // --- INVITI ---
+    match /invites/{inviteId} {
+      allow read: if request.auth != null && (
+        resource.data.senderId == request.auth.uid || 
+        resource.data.senderUid == request.auth.uid ||
+        resource.data.recipientEmail == request.auth.token.email
+      );
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (
+        resource.data.senderId == request.auth.uid || 
+        resource.data.senderUid == request.auth.uid ||
+        resource.data.recipientEmail == request.auth.token.email
+      );
+      allow delete: if request.auth != null && (
+        resource.data.senderId == request.auth.uid || 
+        resource.data.senderUid == request.auth.uid
+      );
+    }
+  }
+}

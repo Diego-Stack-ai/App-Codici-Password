@@ -477,6 +477,7 @@ window.saveAccount = async () => {
         }
         data.recipientEmail = inviteEmail;
         data.sharedWith = [{ email: inviteEmail, status: 'pending' }]; // For compatibility with Detail page and Rule 7
+        data.sharedWithEmails = [inviteEmail]; // For Security Rules (Simple Array Check)
     }
 
     try {
