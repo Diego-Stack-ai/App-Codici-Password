@@ -493,12 +493,15 @@ window.saveAccount = async () => {
                 const oldRecipient = oldData.recipientEmail;
 
                 // Se era condiviso e ora NON lo è più, oppure è cambiato il destinatario -> CANCELLA VECCHIO INVITO
-                if (wasShared && (!isSharingActive || (isSharingActive && oldRecipient !== inviteEmail))) {
-                    const oldInviteId = `${currentDocId}_${oldRecipient.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                if (wasShared && oldRecipient && (!isSharingActive || (isSharingActive && oldRecipient !== inviteEmail))) {
                     try {
+                        const oldInviteId = `${currentDocId}_${oldRecipient.replace(/[^a-zA-Z0-9]/g, '_')}`;
                         await deleteDoc(doc(db, "invites", oldInviteId));
-                        console.log("Invito revocato per:", oldRecipient);
-                    } catch (e) { console.warn("Errore revoca invito:", e); }
+                        console.log("Invito revocato con successo per:", oldRecipient);
+                    } catch (e) {
+                        // NON BLOCANTE: Se non riesco a cancellare l'invito, vado avanti lo stesso a salvare l'account
+                        console.warn("Impossibile revocare invito (potrebbe non esistere già):", e);
+                    }
                 }
             }
         }
