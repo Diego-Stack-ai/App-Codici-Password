@@ -65,11 +65,15 @@ async function loadAccounts() {
         const invitePromises = invitesSnap.docs.map(async invDoc => {
             const inv = invDoc.data();
             try {
-                const accSnap = await getDoc(doc(db, "users", inv.senderUid, "accounts", inv.accountId));
+                // FIXED: Use senderId (standard) or fallback to senderUid (legacy)
+                const senderId = inv.senderId || inv.senderUid;
+                if (!senderId) { console.error("Missing senderId in invite:", inv); return null; }
+
+                const accSnap = await getDoc(doc(db, "users", senderId, "accounts", inv.accountId));
                 if (accSnap.exists()) {
                     const d = accSnap.data();
                     sharedAccountIds.add(accSnap.id);
-                    return { ...d, id: accSnap.id, isOwner: false, ownerId: inv.senderUid, _isGuest: true };
+                    return { ...d, id: accSnap.id, isOwner: false, ownerId: senderId, _isGuest: true };
                 }
             } catch (e) { logError("LoadShared", e); }
             return null;
