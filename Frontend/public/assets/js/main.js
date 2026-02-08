@@ -107,4 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initComponents();
 
     console.log("PROTOCOLLO BASE Initialized (v4.4)");
+
+    // Force reveal content to avoid black screen
+    setTimeout(() => document.body.classList.add('revealed'), 100);
 });

@@ -254,6 +254,5 @@ export {
     login,
     logout,
     resetPassword,
-    checkAuthState,
-    observeAuth
+    checkAuthState
 };

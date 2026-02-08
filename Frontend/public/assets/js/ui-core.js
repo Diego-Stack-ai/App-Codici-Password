@@ -212,7 +212,10 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
 /**
  * [CORE UI] INPUT MODAL
  */
-window.showInputModal = function (title, initialValue = '', placeholder = '') {
+/**
+ * [CORE UI] INPUT MODAL
+ */
+export function showInputModal(title, initialValue = '', placeholder = '') {
     return new Promise((resolve) => {
         const modalId = 'protocol-input-modal';
         let modal = document.getElementById(modalId);
@@ -227,8 +230,25 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
             className: 'glass-field modal-input-glass'
         });
 
-        const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: 'Annulla' });
-        const btnConfirm = createElement('button', { id: 'modal-confirm-btn', className: 'btn-modal btn-primary', textContent: 'Conferma' });
+        const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: 'Annulla' }, []);
+        const btnConfirm = createElement('button', { id: 'modal-confirm-btn', className: 'btn-modal btn-primary', textContent: 'Conferma' }, []);
+
+        // Listener per chiusura
+        const closeModal = (val) => {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+                resolve(val);
+            }, 300);
+        };
+
+        btnCancel.addEventListener('click', () => closeModal(null));
+        btnConfirm.addEventListener('click', () => closeModal(input.value));
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') closeModal(input.value);
+            if (e.key === 'Escape') closeModal(null);
+        });
 
         const content = createElement('div', { className: 'modal-box' }, [
             createElement('h3', { className: 'modal-title', textContent: title }),
@@ -243,25 +263,13 @@ window.showInputModal = function (title, initialValue = '', placeholder = '') {
         setTimeout(() => {
             modal.classList.add('active');
             input.focus();
-            if (initialValue) input.setSelectionRange(initialValue.length, initialValue.length);
+            if (initialValue && initialValue.length > 0) {
+                try { input.setSelectionRange(initialValue.length, initialValue.length); } catch (e) { }
+            }
         }, 10);
-
-        const closeModal = (val) => {
-            modal.classList.remove('active');
-            setTimeout(() => {
-                modal.remove();
-                resolve(val);
-            }, 300);
-        };
-
-        btnCancel.addEventListener('click', () => closeModal(null));
-        btnConfirm.addEventListener('click', () => closeModal(input.value));
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') closeModal(input.value);
-            if (e.key === 'Escape') closeModal(null);
-        });
     });
-};
+}
+window.showInputModal = showInputModal;
 
 /**
  * [CORE UI] TOGGLE TRIPLE VISIBILITY
