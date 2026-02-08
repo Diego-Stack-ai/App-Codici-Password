@@ -305,26 +305,79 @@ async function renderGuests(guests) {
         return;
     }
 
-    for (const item of guests) {
-        if (typeof item === 'object' && item.status === 'rejected') continue;
+    // Mappa per aggiornamenti batch se necessario
+    let needsUpdate = false;
+    let updatedGuests = [...guests];
 
-        const displayEmail = typeof item === 'object' ? item.email : item;
-        const isPending = typeof item === 'object' && item.status === 'pending';
+    for (let i = 0; i < guests.length; i++) {
+        let item = guests[i];
+
+        // Normalizzazione item stringa vs oggetto
+        if (typeof item !== 'object') {
+            item = { email: item, status: 'accepted' };
+        }
+
+        if (item.status === 'rejected') continue;
+
+        const displayEmail = item.email;
+        let isPending = item.status === 'pending';
+        let displayStatus = t('status_pending') || 'In attesa';
+        let statusClass = 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse';
+
+        // LIVE STATUS CHECK
+        if (isPending) {
+            try {
+                // Cerchiamo l'invito reale corrispondente
+                // Nota: L'ID invito è costruito come accountId_emailSanitized
+                const inviteId = `${currentId}_${displayEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const invSnap = await getDoc(doc(db, "invites", inviteId));
+
+                if (invSnap.exists()) {
+                    const invData = invSnap.data();
+                    if (invData.status === 'accepted') {
+                        // AGGIORNAMENTO UI
+                        isPending = false;
+                        displayStatus = t('status_accepted') || 'Accettato';
+                        statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
+
+                        // Preparo aggiornamento persistente
+                        updatedGuests[i] = { ...item, status: 'accepted' };
+                        needsUpdate = true;
+                    } else if (invData.status === 'rejected') {
+                        // Se rifiutato, lo saltiamo visivamente (o mostriamo rifiutato)
+                        updatedGuests[i] = { ...item, status: 'rejected' };
+                        needsUpdate = true;
+                        continue;
+                    }
+                }
+            } catch (e) { console.warn("LiveCheck failed", e); }
+        } else {
+            displayStatus = t('status_accepted') || 'Accettato';
+            statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
+        }
 
         const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
             createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-avatar', textContent: '?' }),
+                createElement('div', { className: 'rubrica-item-avatar', textContent: displayEmail.charAt(0).toUpperCase() }),
                 createElement('div', { className: 'rubrica-item-info' }, [
                     createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: displayEmail.split('@')[0] }),
                     createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: displayEmail })
                 ])
             ]),
-            isPending ? createElement('span', {
-                className: 'ml-auto text-[8px] font-black uppercase px-2 py-1 rounded bg-orange-500/20 text-orange-400 border border-orange-500/20 animate-pulse',
-                textContent: t('status_pending') || 'In attesa'
-            }) : null
+            createElement('span', {
+                className: `ml-auto text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                textContent: displayStatus
+            })
         ]);
         list.appendChild(div);
+    }
+
+    // SELF-HEALING: Se abbiamo rilevato cambiamenti di stato, aggiorniamo il documento
+    if (needsUpdate && !isReadOnly) {
+        try {
+            await updateDoc(doc(db, "users", currentUid, "accounts", currentId), { sharedWith: updatedGuests });
+            console.log("Account sharedWith list auto-updated based on invites status.");
+        } catch (e) { console.error("SelfHealing update failed", e); }
     }
 }
 
