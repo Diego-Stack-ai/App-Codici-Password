@@ -499,15 +499,28 @@ window.saveAccount = async () => {
                 const wasShared = oldData.shared || oldData.isMemoShared;
                 const oldRecipient = oldData.recipientEmail;
 
-                // Se era condiviso e ora NON lo è più, oppure è cambiato il destinatario -> CANCELLA VECCHIO INVITO
-                if (wasShared && oldRecipient && (!isSharingActive || (isSharingActive && oldRecipient !== inviteEmail))) {
+                // Se era condiviso e ora NON lo è più, oppure è cambiato il destinatario -> CANCELLA VECCHIO INVITO (Search & Destroy)
+                if (wasShared && (!isSharingActive || (isSharingActive && oldRecipient !== inviteEmail))) {
                     try {
-                        const oldInviteId = `${currentDocId}_${oldRecipient.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                        await deleteDoc(doc(db, "invites", oldInviteId));
-                        console.log("Invito revocato con successo per:", oldRecipient);
+                        const q = query(
+                            collection(db, "invites"),
+                            where("accountId", "==", currentDocId),
+                            where("senderId", "==", currentUid)
+                        );
+                        // Usiamo getDocsFromCache o standard getDocs. Qui getDocs standard va bene, 
+                        // ma se vogliamo essere sicuri di trovarlo anche se appena creato altrove, usiamo standard.
+                        const querySnapshot = await getDocs(q);
+
+                        querySnapshot.forEach(async (docSnap) => {
+                            await deleteDoc(docSnap.ref);
+                            console.log("Invito revocato (Search&Destroy) ID:", docSnap.id);
+                        });
+
+                        if (querySnapshot.empty) {
+                            console.warn("Nessun invito trovato da revocare tramite query.");
+                        }
                     } catch (e) {
-                        // NON BLOCANTE: Se non riesco a cancellare l'invito, vado avanti lo stesso a salvare l'account
-                        console.warn("Impossibile revocare invito (potrebbe non esistere già):", e);
+                        console.warn("Errore revoca invito (Query):", e);
                     }
                 }
             }
