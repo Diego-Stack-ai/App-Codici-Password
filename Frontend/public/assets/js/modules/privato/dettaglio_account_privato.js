@@ -3,11 +3,16 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js';
+import { auth, db, storage } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
-import { doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import {
+    doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, increment, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import {
+    ref, uploadBytes, getDownloadURL, deleteObject
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import { initComponents } from '../../components.js';
@@ -98,6 +103,7 @@ async function loadAccount() {
         if (!isReadOnly) updateDoc(docRef, { views: increment(1) }).catch(console.warn);
 
         renderAccount(accountData);
+        await loadAttachments();
         setupActions();
     } catch (e) {
         logError("LoadAccount", e);
@@ -181,6 +187,17 @@ function renderAccount(acc) {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
         renderGuests(acc.sharedWith || []);
+    }
+
+    // --- ALLEGATI: Aggancio Listener ---
+    const btnAdd = document.getElementById('btn-add-attachment');
+    if (btnAdd) {
+        if (isReadOnly) {
+            btnAdd.classList.add('hidden');
+        } else {
+            btnAdd.classList.remove('hidden');
+            btnAdd.onclick = openSourceSelector;
+        }
     }
 }
 
@@ -480,6 +497,176 @@ function setupActions() {
                 bankChevron.classList.toggle('text-emerald-500', !isHidden);
             }
         };
+    }
+
+    // --- MODALE SELEZIONE SORGENTE ---
+    const sourceModal = document.getElementById('source-selector-modal');
+    if (sourceModal) {
+        // Pulsanti Sorgente
+        sourceModal.querySelectorAll('[data-source]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.source;
+                const input = document.getElementById(`input-${type}`);
+                if (input) input.click();
+                closeSourceSelector();
+            });
+        });
+
+        // Pulsante Annulla
+        document.getElementById('btn-cancel-source')?.addEventListener('click', closeSourceSelector);
+    }
+
+    // Listeners for hidden inputs
+    ['input-camera', 'input-video', 'input-gallery', 'input-file'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', (e) => handleFileUpload(e.target));
+    });
+}
+
+// --- ATTACHMENTS LOGIC ---
+
+function openSourceSelector() {
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeSourceSelector() {
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+async function handleFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", false);
+    if (!ok) {
+        input.value = '';
+        return;
+    }
+
+    showToast("Caricamento in corso...", "info");
+
+    try {
+        const timestamp = Date.now();
+        const storagePath = `users/${ownerId}/accounts/${currentId}/attachments/${timestamp}_${file.name}`;
+        const sRef = ref(storage, storagePath);
+
+        const snap = await uploadBytes(sRef, file);
+        const url = await getDownloadURL(snap.ref);
+
+        const colRef = collection(db, "users", ownerId, "accounts", currentId, "attachments");
+        await addDoc(colRef, {
+            name: file.name,
+            url: url,
+            storagePath: storagePath,
+            type: file.type || 'application/octet-stream',
+            size: file.size,
+            createdAt: serverTimestamp()
+        });
+
+        showToast("Allegato caricato!", "success");
+        await loadAttachments();
+    } catch (e) {
+        logError("UploadAttachment", e);
+        showToast("Errore durante il caricamento", "error");
+    } finally {
+        input.value = '';
+    }
+}
+
+async function loadAttachments() {
+    const container = document.getElementById('attachments-list');
+    if (!container) return;
+
+    try {
+        const colRef = collection(db, "users", ownerId, "accounts", currentId, "attachments");
+        const q = query(colRef, orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+
+        const attachments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAttachments(attachments);
+    } catch (e) {
+        logError("LoadAttachments", e);
+    }
+}
+
+function renderAttachments(list) {
+    const container = document.getElementById('attachments-list');
+    if (!container) return;
+
+    clearElement(container);
+
+    if (list.length === 0) {
+        container.appendChild(createElement('p', {
+            className: 'text-[10px] text-white/20 uppercase text-center py-4',
+            textContent: t('no_attachments') || 'Nessun allegato'
+        }));
+        return;
+    }
+
+    const items = list.map(a => {
+        const type = (a.type || "").toLowerCase();
+        let icon = 'description';
+        let color = 'text-blue-400';
+        if (type.includes('image')) { icon = 'image'; color = 'text-purple-400'; }
+        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400'; }
+        else if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400'; }
+
+        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : '---';
+        const size = (a.size / (1024 * 1024)).toFixed(2);
+
+        return createElement('div', { className: 'glass-card flex items-center gap-3 p-3 group transition-all active:scale-[0.98]' }, [
+            createElement('div', {
+                className: 'size-10 rounded-xl bg-white/5 flex-center border border-white/10 shrink-0 cursor-pointer',
+                onclick: () => window.open(a.url, '_blank')
+            }, [
+                createElement('span', { className: `material-symbols-outlined ${color} text-xl`, textContent: icon })
+            ]),
+            createElement('div', {
+                className: 'flex-1 flex flex-col min-w-0 cursor-pointer',
+                onclick: () => window.open(a.url, '_blank')
+            }, [
+                createElement('p', { className: 'text-xs font-bold text-white truncate', textContent: a.name }),
+                createElement('span', { className: 'text-[9px] text-white/20 font-medium', textContent: `${size} MB • ${date}` })
+            ]),
+            !isReadOnly ? createElement('button', {
+                className: 'btn-icon-header opacity-20 group-hover:opacity-100 hover:text-red-400 transition-all',
+                onclick: () => deleteAttachment(a)
+            }, [
+                createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })
+            ]) : null
+        ]);
+    });
+
+    setChildren(container, items);
+}
+
+async function deleteAttachment(att) {
+    const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", true);
+    if (!ok) return;
+
+    try {
+        // Delete from Firestore
+        const docRef = doc(db, "users", ownerId, "accounts", currentId, "attachments", att.id);
+        await deleteDoc(docRef);
+
+        // Delete from Storage
+        if (att.storagePath) {
+            const sRef = ref(storage, att.storagePath);
+            await deleteObject(sRef);
+        }
+
+        showToast("Allegato eliminato", "success");
+        await loadAttachments();
+    } catch (e) {
+        logError("DeleteAttachment", e);
+        showToast("Errore durante l'eliminazione", "error");
     }
 }
 

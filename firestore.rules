@@ -3,26 +3,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // --- UTENTI (Profili e Account) ---
+    // --- UTENTI (Profilo e Sottocollezioni) ---
+    // 1. Permesso sul documento utente stesso
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
 
-      // Sottocollezione ACCOUNTS
-      match /accounts/{accountId} {
-        allow create: if request.auth != null && request.auth.uid == userId;
-        allow update, delete: if request.auth != null && request.auth.uid == userId;
-        allow read: if request.auth != null && (
-          request.auth.uid == userId || 
-          // Permetti lettura se l'email è nell'array semplice sharedWithEmails
-          (resource.data.sharedWithEmails is list && 
-           resource.data.sharedWithEmails.hasAny([request.auth.token.email]))
-        );
-      }
-      
-      // Sottocollezione CONTACTS
-      match /contacts/{contactId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
+    // 2. Permesso su TUTTE le sottocollezioni dell'utente (aziende, accounts, contacts, etc.)
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 3. Regola speciale per la CONDIVISIONE di ACCOUNT tra utenti diversi
+    match /users/{userId}/accounts/{accountId} {
+      allow read: if request.auth != null && (
+        resource.data.sharedWithEmails is list && 
+        resource.data.sharedWithEmails.hasAny([request.auth.token.email])
+      );
     }
 
     // --- INVITI ---

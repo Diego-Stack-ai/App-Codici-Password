@@ -37,29 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initProtocolUI() {
-    await initComponents();
-
-    // Header Left
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => history.back()
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
-    }
-
-    // Header Center
-    const hCenter = document.getElementById('header-center');
-    if (hCenter) {
-        clearElement(hCenter);
-        setChildren(hCenter, createElement('h2', {
-            className: 'header-title',
-            textContent: t('company_details') || 'Dati Azienda'
-        }));
-    }
+    console.log('[dati_azienda] UI Base gestita da main.js');
 
     // Footer Right
     const fRight = document.getElementById('footer-right-actions');
@@ -151,6 +129,12 @@ async function loadData(uid) {
 
 function populateFields(data) {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
+
+    // Aggiorna titolo Header (quello creato da initComponents)
+    const hTitle = document.querySelector('.base-header .header-title');
+    if (hTitle) {
+        hTitle.textContent = data.ragioneSociale || t('company_details');
+    }
 
     set('ragione-sociale', data.ragioneSociale);
     set('forma-giuridica', data.formaGiuridica);

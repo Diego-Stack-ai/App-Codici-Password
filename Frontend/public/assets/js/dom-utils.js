@@ -39,6 +39,8 @@ export const createElement = (tag, props = {}, children = []) => {
         } else if (key === 'innerHTML') {
             console.warn("Uso di innerHTML in createElement bloccato per sicurezza.");
             // Non assegniamo innerHTML.
+        } else if (key.startsWith('on') && typeof props[key] === 'function') {
+            el[key] = props[key];
         } else if (key in el && typeof el[key] !== 'function') {
             try {
                 el[key] = props[key];

@@ -44,31 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initProtocolUI() {
-    await initComponents();
+    console.log('[modifica_azienda] Configurazione azioni footer...');
 
-    // Header Left
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => history.back()
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
-    }
-
-    // Header Center
-    const hCenter = document.getElementById('header-center');
-    if (hCenter) {
-        clearElement(hCenter);
-        setChildren(hCenter, createElement('h2', {
-            className: 'header-title',
-            textContent: t('edit_company') || 'Modifica Azienda'
-        }));
-    }
-
-    // Footer Center
+    // Footer Center - Pulsante Delete
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         clearElement(fCenter);

@@ -53,40 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initBaseUI() {
-    // Header
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => {
-                if (isEditing) window.location.href = `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}`;
-                else window.location.href = `account_azienda.html?id=${currentAziendaId}`;
-            }
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
-    }
+    console.log('[form_account_azienda] UI Base gestita da main.js');
 
-    const hCenter = document.getElementById('header-center');
-    if (hCenter) {
-        clearElement(hCenter);
-        setChildren(hCenter, createElement('h1', {
-            id: 'header-title-page',
-            className: `header-title ${isEditing ? 'animate-pulse' : ''}`,
-            textContent: isEditing ? (t('loading') || 'Caricamento...') : (t('new_company_account') || 'Nuovo Account Azienda')
-        }));
-    }
-
-    const hRight = document.getElementById('header-right');
-    if (hRight) {
-        clearElement(hRight);
-        setChildren(hRight, createElement('a', {
-            href: 'home_page.html',
-            className: 'btn-icon-header'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
-        ]));
+    // Aggiorna titolo Header (se già presente)
+    const hTitle = document.querySelector('.base-header .header-title');
+    if (hTitle) {
+        hTitle.textContent = isEditing ? (t('loading') || 'Caricamento...') : (t('new_company_account') || 'Nuovo Account Azienda');
+        if (isEditing) hTitle.classList.add('animate-pulse');
     }
 
     // Footer
@@ -140,7 +113,7 @@ async function loadData(id) {
         setV('ref-phone', data.referenteTelefono || data.referente?.telefono);
         setV('ref-mobile', data.referenteCellulare || data.referente?.cellulare);
 
-        const hTitle = document.getElementById('header-title-page');
+        const hTitle = document.querySelector('.base-header .header-title');
         if (hTitle) {
             hTitle.textContent = data.nomeAccount || t('edit_account') || 'Modifica Account';
             hTitle.classList.remove('animate-pulse');

@@ -33,6 +33,7 @@ observeAuth(async (user) => {
         }
 
         try {
+            await initComponents();
             await Promise.all([
                 initProtocolUI(),
                 loadAccounts()
@@ -55,21 +56,7 @@ observeAuth(async (user) => {
 
 async function initProtocolUI() {
     try {
-        console.log('[account_azienda] Inizializzazione UI...', { currentAziendaId });
-        await initComponents();
-        console.log('[account_azienda] initComponents completato');
-
-        // 1. Header Left - Back personalizzato (va a lista_aziende invece di history.back)
-        const hLeft = document.getElementById('header-left');
-        if (hLeft) {
-            clearElement(hLeft);
-            setChildren(hLeft, createElement('button', {
-                className: 'btn-icon-header',
-                onclick: () => window.location.href = 'lista_aziende.html'
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-            ]));
-        }
+        console.log('[account_azienda] Configurazione UI specifica...');
 
         // 2. Header Center - Usa il titolo standard da initComponents() ("Account Azienda")
 

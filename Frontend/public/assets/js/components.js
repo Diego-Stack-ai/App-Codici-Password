@@ -32,10 +32,18 @@ export async function initComponents() {
                 let backFn = () => window.history.back();
 
                 // Override back behavior for specific pages to ensure logical navigation
+                const urlParams = new URLSearchParams(window.location.search);
+                const aziendaId = urlParams.get('aziendaId') || urlParams.get('id'); // 'id' su account_azienda.html, 'aziendaId' su dettaglio
+
                 if (path.endsWith('dettaglio_account_privato.html') || path.endsWith('form_account_privato.html')) {
                     backFn = () => window.location.href = 'account_privati.html';
+                } else if (path.endsWith('lista_aziende.html')) {
+                    backFn = () => window.location.href = 'home_page.html';
+                } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html') || path.endsWith('modifica_azienda.html')) {
+                    backFn = () => window.location.href = 'lista_aziende.html';
                 } else if (path.endsWith('dettaglio_account_azienda.html') || path.endsWith('form_account_azienda.html') || path.endsWith('modifica_account_azienda.html')) {
-                    backFn = () => window.location.href = 'account_azienda.html';
+                    // Torna alla lista account di quella specifica azienda
+                    backFn = () => window.location.href = `account_azienda.html?id=${aziendaId}`;
                 }
 
                 headerLeft.appendChild(

@@ -30,6 +30,7 @@ const companyPalettes = [
 // --- INITIALIZATION ---
 observeAuth(async (user) => {
     if (user) {
+        await initComponents();
         initProtocolUI();
 
         const loadingTimeout = setTimeout(() => {
@@ -71,23 +72,21 @@ observeAuth(async (user) => {
 });
 
 async function initProtocolUI() {
-    await initComponents();
+    console.log('[lista_aziende] UI inizializzata tramite main.js');
 
-    // Header Left - Back personalizzato (va a home invece di history.back)
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => window.location.href = 'home_page.html'
+    // Aggiungi pulsante "+" nel footer center
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        clearElement(fCenter);
+        setChildren(fCenter, createElement('button', {
+            id: 'add-azienda-btn',
+            className: 'btn-floating-add bg-accent-blue',
+            title: 'Aggiungi Azienda',
+            onclick: () => window.location.href = 'aggiungi_nuova_azienda.html'
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
         ]));
     }
-
-    // Header Center - Usa il titolo standard da initComponents() ("Le Mie Aziende")
-    // Header Right - Usa quello standard di initComponents() (Home button)
-    // Footer - Usa quello standard di initComponents() (Tema SX, Vuoto C, Settings DX)
 }
 
 async function loadAziende(uid) {
@@ -109,12 +108,16 @@ function renderAziende() {
     clearElement(container);
 
     if (allAziende.length === 0) {
-        setChildren(container, createElement('div', { className: 'col-span-full flex-center-col py-20 opacity-20' }, [
-            createElement('span', { className: 'material-symbols-outlined text-4xl', textContent: 'domain_disabled' }),
+        setChildren(container, createElement('div', { className: 'col-span-full flex-center-col py-20' }, [
+            createElement('span', { className: 'material-symbols-outlined text-4xl opacity-20', textContent: 'domain_disabled' }),
             createElement('p', {
-                className: 'text-[10px] font-black uppercase tracking-widest mt-4',
+                className: 'text-[10px] font-black uppercase tracking-widest mt-4 opacity-40',
                 textContent: t('no_companies_found') || 'Nessuna Azienda Trovata'
-            })
+            }),
+            createElement('button', {
+                className: 'btn-ghost-adaptive mt-6 px-8 h-12 rounded-xl text-xs font-black uppercase tracking-wider',
+                onclick: () => window.location.href = 'aggiungi_nuova_azienda.html'
+            }, [createElement('span', { textContent: 'Aggiungi Ora' })])
         ]));
         return;
     }

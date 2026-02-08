@@ -169,6 +169,24 @@
                     </div>
                 </section>
 
+                <!-- ALLEGATI (Sezione Dinamica) -->
+                <section id="section-attachments" class="mt-8">
+                    <div class="detail-section-header justify-between">
+                        <div class="flex-center-gap">
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                            <h3 class="detail-section-title">Allegati</h3>
+                        </div>
+                        <button id="btn-add-attachment" type="button" class="btn-icon-header">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                    <div id="attachments-list" class="flex-col-gap mt-4">
+                        <!-- Injected via JS -->
+                        <p class="text-[10px] text-white/20 uppercase text-center py-4">Nessun allegato</p>
+                    </div>
+                </section>
+
                 <!-- NOTE -->
                 <section class="mt-6">
                     <div class="detail-section-header">
@@ -205,11 +223,56 @@
 
     </div>
 
+    <!-- Hidden File Inputs for Different Sources -->
+    <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden">
+    <input type="file" id="input-gallery" accept="image/*,video/*" class="hidden">
+    <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden">
+
+    <!-- Source Selector Modal -->
+    <div id="source-selector-modal" class="modal-overlay">
+        <div class="modal-box max-w-[320px] !p-0 overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-sm font-black uppercase tracking-widest text-center mb-6 opacity-40">Seleziona Sorgente
+                </h3>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button
+                        class="flex-center-col gap-3 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group"
+                        data-source="camera">
+                        <span
+                            class="material-symbols-outlined text-4xl text-blue-400 group-hover:scale-110 transition-transform">photo_camera</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white/80">Fotocamera</span>
+                    </button>
+
+                    <button
+                        class="flex-center-col gap-3 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-purple-500/10 hover:border-purple-500/30 transition-all group"
+                        data-source="gallery">
+                        <span
+                            class="material-symbols-outlined text-4xl text-purple-400 group-hover:scale-110 transition-transform">collections</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white/80">Galleria</span>
+                    </button>
+
+                    <button
+                        class="col-span-2 flex-center gap-3 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 transition-all group"
+                        data-source="file">
+                        <span
+                            class="material-symbols-outlined text-3xl text-amber-400 group-hover:scale-110 transition-transform">description</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white/80">Documento (PDF,
+                            DOC, etc)</span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" id="btn-cancel-source"
+                class="w-full py-5 border-t border-white/5 text-[11px] font-black uppercase tracking-[0.2em] text-white/30 hover:text-white hover:bg-white/5 transition-all">
+                Annulla
+            </button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/modules/privato/dettaglio_account_privato.js"></script>
 </body>
 
 </html>
-
-

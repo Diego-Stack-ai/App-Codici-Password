@@ -129,7 +129,7 @@ window.showWarningModal = showWarningModal;
 /**
  * [CORE UI] LOGOUT MODAL
  */
-window.showLogoutModal = function () {
+export async function showLogoutModal() {
     return new Promise((resolve) => {
         const modalId = 'logout-modal-dynamic';
         let modal = document.getElementById(modalId);
@@ -167,12 +167,13 @@ window.showLogoutModal = function () {
         });
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
-};
+}
+window.showLogoutModal = showLogoutModal;
 
 /**
  * [CORE UI] CONFIRM MODAL
  */
-window.showConfirmModal = function (title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
+export async function showConfirmModal(title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
     return new Promise((resolve) => {
         const modalId = 'protocol-confirm-modal';
         let modal = document.getElementById(modalId);
@@ -207,7 +208,8 @@ window.showConfirmModal = function (title, message, confirmText = 'Conferma', ca
         btnConfirm.addEventListener('click', () => closeModal(true));
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
-};
+}
+window.showConfirmModal = showConfirmModal;
 
 /**
  * [CORE UI] INPUT MODAL

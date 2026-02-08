@@ -45,6 +45,20 @@ function setupUI() {
     if (searchInput) {
         searchInput.addEventListener('input', filterAndRender);
     }
+
+    // Aggiungi pulsante "+" nel footer center
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        clearElement(fCenter);
+        const type = new URLSearchParams(window.location.search).get('type') || 'standard';
+        setChildren(fCenter, createElement('button', {
+            id: 'add-account-btn',
+            className: 'btn-floating-add bg-accent-blue',
+            onclick: () => window.location.href = `form_account_privato.html?type=${type}`
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+        ]));
+    }
 }
 
 /**
@@ -145,8 +159,13 @@ function renderList(list) {
     clearElement(container);
 
     if (list.length === 0) {
-        setChildren(container, createElement('div', { className: 'text-center py-10 opacity-50' }, [
-            createElement('p', { textContent: t('no_accounts_found') || 'Nessun account trovato' })
+        const type = new URLSearchParams(window.location.search).get('type') || 'standard';
+        setChildren(container, createElement('div', { className: 'text-center py-10' }, [
+            createElement('p', { className: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6', textContent: t('no_accounts_found') || 'Nessun account trovato' }),
+            createElement('button', {
+                className: 'btn-ghost-adaptive mx-auto px-8 h-12 rounded-xl text-xs font-black uppercase tracking-wider',
+                onclick: () => window.location.href = `form_account_privato.html?type=${type}`
+            }, [createElement('span', { textContent: 'Crea Primo Account' })])
         ]));
         return;
     }

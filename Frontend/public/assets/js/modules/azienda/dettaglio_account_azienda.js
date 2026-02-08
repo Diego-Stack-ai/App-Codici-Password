@@ -3,11 +3,17 @@
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
  */
 
-import { auth, db } from '../../firebase-config.js';
+import { auth, db, storage } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
-import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import {
+    doc, getDoc, updateDoc, increment,
+    collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import {
+    ref, uploadBytes, getDownloadURL, deleteObject
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 
@@ -43,52 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initBaseUI() {
-    // Header
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => window.location.href = `account_azienda.html?id=${currentAziendaId}`
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
-    }
-
-    const hCenter = document.getElementById('header-center');
-    if (hCenter) {
-        clearElement(hCenter);
-        setChildren(hCenter, createElement('h1', {
-            id: 'header-nome-account',
-            className: 'header-title animate-pulse',
-            textContent: t('loading') || 'Caricamento...'
-        }));
-    }
-
-    const hRight = document.getElementById('header-right');
-    if (hRight) {
-        clearElement(hRight);
-        setChildren(hRight, createElement('a', {
-            href: 'home_page.html',
-            className: 'btn-icon-header'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
-        ]));
-    }
-
-    // Footer Edit Button
-    const fRight = document.getElementById('footer-right-actions');
-    if (fRight) {
-        setChildren(fRight, [
-            createElement('button', {
-                id: 'btn-edit-footer',
-                className: 'btn-icon-header',
-                onclick: () => window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
-            ])
-        ]);
-    }
+    console.log('[dettaglio_account_azienda] UI Base gestita da main.js');
 }
 
 async function loadAccount(id) {
@@ -105,6 +66,7 @@ async function loadAccount(id) {
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
         render(originalData);
+        await loadAttachments();
 
     } catch (e) {
         logError("LoadAccount", e);
@@ -115,10 +77,25 @@ async function loadAccount(id) {
 function render(acc) {
     document.title = acc.nomeAccount || 'Dettaglio Azienda';
 
-    const hNome = document.getElementById('header-nome-account');
-    if (hNome) {
-        hNome.textContent = acc.nomeAccount || t('without_name');
-        hNome.classList.remove('animate-pulse');
+    // Aggiorna titolo Header (quello creato da initComponents)
+    const hTitle = document.querySelector('.base-header .header-title');
+    if (hTitle) {
+        hTitle.textContent = acc.nomeAccount || t('without_name');
+    }
+
+    // Inietta pulsante Edit nel Footer (specifico per questa pagina)
+    const fRight = document.getElementById('footer-right-actions');
+    if (fRight) {
+        clearElement(fRight);
+        setChildren(fRight, [
+            createElement('button', {
+                id: 'btn-edit-footer',
+                className: 'btn-icon-header',
+                onclick: () => window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+            ])
+        ]);
     }
 
     const heroTitle = document.getElementById('hero-title');
@@ -187,6 +164,12 @@ function render(acc) {
             setChildren(bankingContent, rows);
         }
     }
+
+    // --- ALLEGATI: Aggancio Listener ---
+    const btnAdd = document.getElementById('btn-add-attachment');
+    if (btnAdd) {
+        btnAdd.onclick = openSourceSelector;
+    }
 }
 
 function setupListeners() {
@@ -242,6 +225,177 @@ function setupListeners() {
             if (content) content.classList.toggle('hidden');
             if (chevron) chevron.classList.toggle('rotate-180');
         };
+    }
+
+    // --- MODALE SELEZIONE SORGENTE ---
+    const sourceModal = document.getElementById('source-selector-modal');
+    if (sourceModal) {
+        // Pulsanti Sorgente
+        sourceModal.querySelectorAll('[data-source]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.source;
+                const input = document.getElementById(`input-${type}`);
+                if (input) input.click();
+                closeSourceSelector();
+            });
+        });
+
+        // Pulsante Annulla
+        document.getElementById('btn-cancel-source')?.addEventListener('click', closeSourceSelector);
+    }
+
+    // Hidden Input Listeners
+    ['input-camera', 'input-video', 'input-gallery', 'input-file'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', (e) => handleFileUpload(e.target));
+    });
+}
+
+// --- ATTACHMENTS LOGIC ---
+
+function openSourceSelector() {
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeSourceSelector() {
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+async function handleFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", false);
+    if (!ok) {
+        input.value = '';
+        return;
+    }
+
+    showToast("Caricamento in corso...", "info");
+
+    try {
+        const ext = file.name.split('.').pop();
+        const timestamp = Date.now();
+        const storagePath = `users/${currentUid}/aziende/${currentAziendaId}/accounts/${currentId}/attachments/${timestamp}_${file.name}`;
+        const sRef = ref(storage, storagePath);
+
+        const snap = await uploadBytes(sRef, file);
+        const url = await getDownloadURL(snap.ref);
+
+        const colRef = collection(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId, "attachments");
+        await addDoc(colRef, {
+            name: file.name,
+            url: url,
+            storagePath: storagePath,
+            type: file.type || 'application/octet-stream',
+            size: file.size,
+            createdAt: serverTimestamp()
+        });
+
+        showToast("Allegato caricato!", "success");
+        await loadAttachments();
+    } catch (e) {
+        logError("UploadAttachment", e);
+        showToast("Errore durante il caricamento", "error");
+    } finally {
+        input.value = '';
+    }
+}
+
+async function loadAttachments() {
+    const container = document.getElementById('attachments-list');
+    if (!container) return;
+
+    try {
+        const colRef = collection(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId, "attachments");
+        const q = query(colRef, orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+
+        const attachments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAttachments(attachments);
+    } catch (e) {
+        logError("LoadAttachments", e);
+    }
+}
+
+function renderAttachments(list) {
+    const container = document.getElementById('attachments-list');
+    if (!container) return;
+
+    clearElement(container);
+
+    if (list.length === 0) {
+        container.appendChild(createElement('p', {
+            className: 'text-[10px] text-white/20 uppercase text-center py-4',
+            textContent: t('no_attachments') || 'Nessun allegato'
+        }));
+        return;
+    }
+
+    const items = list.map(a => {
+        const type = (a.type || "").toLowerCase();
+        let icon = 'description';
+        let color = 'text-blue-400';
+        if (type.includes('image')) { icon = 'image'; color = 'text-purple-400'; }
+        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400'; }
+        else if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400'; }
+
+        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : '---';
+        const size = (a.size / (1024 * 1024)).toFixed(2);
+
+        return createElement('div', { className: 'glass-card flex items-center gap-3 p-3 group transition-all active:scale-[0.98]' }, [
+            createElement('div', {
+                className: 'size-10 rounded-xl bg-white/5 flex-center border border-white/10 shrink-0 cursor-pointer',
+                onclick: () => window.open(a.url, '_blank')
+            }, [
+                createElement('span', { className: `material-symbols-outlined ${color} text-xl`, textContent: icon })
+            ]),
+            createElement('div', {
+                className: 'flex-1 flex flex-col min-w-0 cursor-pointer',
+                onclick: () => window.open(a.url, '_blank')
+            }, [
+                createElement('p', { className: 'text-xs font-bold text-white truncate', textContent: a.name }),
+                createElement('span', { className: 'text-[9px] text-white/20 font-medium', textContent: `${size} MB • ${date}` })
+            ]),
+            createElement('button', {
+                className: 'btn-icon-header opacity-20 group-hover:opacity-100 hover:text-red-400 transition-all',
+                onclick: () => deleteAttachment(a)
+            }, [
+                createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })
+            ])
+        ]);
+    });
+
+    setChildren(container, items);
+}
+
+async function deleteAttachment(att) {
+    const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", true);
+    if (!ok) return;
+
+    try {
+        // Delete from Firestore
+        const docRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId, "attachments", att.id);
+        await deleteDoc(docRef);
+
+        // Delete from Storage
+        if (att.storagePath) {
+            const sRef = ref(storage, att.storagePath);
+            await deleteObject(sRef);
+        }
+
+        showToast("Allegato eliminato", "success");
+        await loadAttachments();
+    } catch (e) {
+        logError("DeleteAttachment", e);
+        showToast("Errore durante l'eliminazione", "error");
     }
 }
 
