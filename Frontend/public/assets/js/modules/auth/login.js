@@ -15,13 +15,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // 1. AppState di base (Protocollo Comune)
-        const path = window.location.pathname;
-        const isAuthPage = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.includes(p)) || path.endsWith('/');
+        let savedLang = 'it';
+        try { savedLang = localStorage.getItem('app_language') || 'it'; } catch (e) { }
+
+        const path = window.location.pathname.toLowerCase();
+        const isAuthPage = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
         window.AppState = window.AppState || {
             user: null,
             theme: 'dark',
-            language: localStorage.getItem('app_language') || 'it',
+            language: savedLang,
             isAuthPage: isAuthPage
         };
 
@@ -170,11 +173,8 @@ function setupLoginForm() {
 
             showToast(t('success_auth') || "Accesso autorizzato!", "success");
 
-            // 5. Redirect controllato
-            setTimeout(() => {
-                window.location.href = "home_page.html";
-            }, 800);
-
+            // Il redirect viene gestito centralmente da checkAuthState() in auth.js
+            // per garantire coerenza tra tutti i dispositivi.
         } catch (err) {
             console.error("[LOGIN] Auth Failure:", err);
             submitBtn.disabled = false;
@@ -208,13 +208,22 @@ function setupPasswordToggle() {
 
     btn.addEventListener('click', (e) => {
         e.preventDefault();
-        const isSecret = input.type === 'password';
-        input.type = isSecret ? 'text' : 'password';
+        e.stopPropagation();
+
+        const isSecret = input.type === 'password' || input.classList.contains('base-shield');
+
+        if (isSecret) {
+            input.type = 'text';
+            input.classList.remove('base-shield');
+        } else {
+            input.type = 'password';
+            // Non aggiungiamo base-shield qui se è di tipo password, il browser lo maschera già
+        }
 
         const icon = btn.querySelector('.material-symbols-outlined');
         if (icon) {
-            // Se è testo (visibile), mostriamo l'occhio sbarrato (azione: nascondi)
-            // Se è password (nascosto), mostriamo l'occhio aperto (azione: mostra)
+            // Se lo rendiamo visibile (text), mostriamo occhio sbarrato per "nascondi"
+            // Se lo rendiamo segreto (password), mostriamo occhio aperto per "mostra"
             icon.textContent = isSecret ? 'visibility_off' : 'visibility';
         }
     });

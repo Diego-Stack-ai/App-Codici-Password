@@ -6,11 +6,16 @@ import {
     onAuthStateChanged,
     updateProfile,
     sendPasswordResetEmail,
-    sendEmailVerification
+    sendEmailVerification,
+    setPersistence,
+    browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from './ui-core.js';
 import { logError } from './utils.js';
+
+// Imposta la persistenza esplicita per evitare logout inattesi su mobile
+setPersistence(auth, browserLocalPersistence).catch(e => console.error("Persistence error:", e));
 
 /**
  * Centrialized Auth Observer
@@ -213,16 +218,22 @@ function checkAuthState() {
         window.LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (user) {
-            // Utente loggato: se tenta di accedere al login, lo mandiamo alla home
+            // Utente loggato: se siamo su una pagina di login, spostiamoci sulla home
+            // Usiamo percorsi assoluti per massima compatibilità mobile
             if (isAuthPage) {
-                window.LOG("[AUTH] Already logged in, redirecting to home...");
-                window.location.href = 'home_page.html';
+                if (!path.includes('home_page.html')) {
+                    window.LOG("[AUTH] Already logged in, redirecting to /home_page.html");
+                    window.location.href = '/home_page.html';
+                }
             }
         } else {
-            // Utente non loggato: se tenta di accedere a una pagina protetta, lo mandiamo al login
+            // Utente non loggato: se siamo su una pagina protetta, andiamo al login
             if (!isAuthPage) {
-                window.LOG("[AUTH] No session, redirecting to login...");
-                window.location.href = 'index.html';
+                // Evitiamo di ricaricare se siamo già sulla root o su index.html
+                if (!path.includes('index.html') && path !== '/' && path !== '') {
+                    window.LOG("[AUTH] No session, redirecting to /index.html");
+                    window.location.href = '/index.html';
+                }
             }
         }
     });
