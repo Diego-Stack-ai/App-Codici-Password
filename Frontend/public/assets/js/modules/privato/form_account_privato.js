@@ -520,37 +520,42 @@ window.saveAccount = async () => {
 
         // 3. INVIO/AGGIORNAMENTO INVITO (Se condivisione attiva)
         if (isSharingActive) {
-            const inviteId = `${targetId}_${inviteEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            const inviteRef = doc(db, "invites", inviteId);
-            const inviteSnap = await getDoc(inviteRef);
+            try {
+                const inviteId = `${targetId}_${inviteEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const inviteRef = doc(db, "invites", inviteId);
+                const inviteSnap = await getDoc(inviteRef); // Questo potrebbe fallire se non ho permessi lettura
 
-            let shouldSend = true;
-            if (inviteSnap.exists()) {
-                const existingStatus = inviteSnap.data().status;
-                if (existingStatus === 'accepted' || existingStatus === 'pending') {
-                    shouldSend = false; // L'invito è già valido, non resettiamo a 'pending'
-                    console.log("Invito già esistente e attivo. Salto invio duplicato.");
+                let shouldSend = true;
+                if (inviteSnap && inviteSnap.exists()) {
+                    const existingStatus = inviteSnap.data().status;
+                    if (existingStatus === 'accepted' || existingStatus === 'pending') {
+                        shouldSend = false; // L'invito è già valido, non resettiamo a 'pending'
+                        console.log("Invito già esistente e attivo. Salto invio duplicato.");
+                    }
                 }
-            }
 
-            if (shouldSend) {
-                const inviteData = {
-                    senderId: currentUid,
-                    senderEmail: auth.currentUser?.email || 'unknown',
-                    recipientEmail: inviteEmail,
-                    accountId: targetId,
-                    accountName: data.nomeAccount,
-                    type: data.isMemoShared ? 'memorandum' : 'privato',
-                    status: 'pending',
-                    createdAt: new Date().toISOString()
-                };
-                await setDoc(inviteRef, inviteData);
-                showToast(t('success_invite_sent'));
-            } else {
-                showToast(t('success_save') + " (Condivisione aggiornata)");
+                if (shouldSend) {
+                    const inviteData = {
+                        senderId: currentUid,
+                        senderEmail: auth.currentUser?.email || 'unknown',
+                        recipientEmail: inviteEmail,
+                        accountId: targetId,
+                        accountName: data.nomeAccount,
+                        type: data.isMemoShared ? 'memorandum' : 'privato',
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                    };
+                    await setDoc(inviteRef, inviteData);
+                    showToast(t('success_invite_sent'));
+                } else {
+                    showToast(t('success_save') + " (Condivisione aggiornata)");
+                }
+            } catch (invError) {
+                console.warn("Errore durante invio invito:", invError);
+                showToast("Account salvato, ma errore invio invito: " + invError.message, "warning");
             }
         } else {
-            showToast(isEditing ? t('success_save') : utf8_to_b64(t('success_create')));
+            showToast(isEditing ? t('success_save') : t('success_create') || "Account creato!");
         }
 
         setTimeout(() => window.location.href = `dettaglio_account_privato.html?id=${targetId}`, 1000);
