@@ -287,6 +287,7 @@ export const translations = {
         pin_to_top: "Fissa in alto",
         show_hide_data: "Mostra/Nascondi Dati",
         visual_identity: "Puoi attivare le coordinate bancarie e carte di credito in modalità Modifica.",
+        add_logo: "Aggiungi Logo",
 
         // HOME PAGE
         home_page_title: "Home Page",
