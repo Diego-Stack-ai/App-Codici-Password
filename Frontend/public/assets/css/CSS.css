@@ -1,0 +1,226 @@
+/* CSS.css - Nuova versione con nomi semplificati per le pagine di accesso */
+
+.sfondo {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+     /* sfondo: imposta lo sfondo principale scuro della pagina */
+}
+
+.padding {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    flex: 1;
+     /* padding: contenitore centrale che gestisce larghezza, padding e centratura verticale/orizzontale */
+}
+
+.faro {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(10,15,30,0.0) 70%);
+     /* faro: crea un effetto glow luminoso dietro la card */
+}
+
+.contenitore {
+    width: 100%;
+    max-width: 448px;
+    position: relative;
+    z-index: 10;
+     /* contenitore: wrapper che contiene la card centrale */
+}
+
+.scheda {
+    background: rgba(15, 25, 50, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    position: relative;
+     /* scheda: la card vera e propria, con bordo arrotondato e padding, che contiene form e titoli */
+}
+
+.bordo-luminoso {
+    box-shadow: 0 0 16px 4px rgba(37,99,235,0.25);
+    border-color: #3b82f6;
+     /* bordo-luminoso: aggiunge un bordo luminoso attorno alla card (effetto glow) */
+}
+
+.saetta {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #3b82f6 0%, #fff 100%);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    animation: saettaAnim 1.5s infinite alternate;
+     /* saetta: elementi decorativi animati (ad esempio una saetta o linea di luce) che danno movimento alla card */
+}
+@keyframes saettaAnim {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.icona-box {
+    width: 70px;
+    height: 70px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    color: #3b82f6;
+     /* icona-box: box che contiene l’icona centrale (es. lucchetto, chiave, ecc.) nella card */
+}
+
+.titolo {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: white;
+     /* titolo: stile per il titolo principale della card */
+}
+
+.sottotitolo {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 2.5rem;
+     /* sottotitolo: stile per il sottotitolo della card */
+}
+
+.gruppo-campi {
+    margin-bottom: 1.5rem;
+    text-align: left;
+     /* gruppo-campi: gruppi dei form per organizzare i campi in modo ordinato */
+}
+
+.etichetta {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+     /* etichetta: stile per le etichette dei campi del form */
+}
+
+.campo-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1rem;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+     /* campo-input: stile per i campi input del form */
+}
+
+.campo-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+     /* campo-input:focus: stile attivo del campo input quando selezionato */
+}
+
+.pulsante-principale {
+    width: 100%;
+    padding: 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-weight: 800;
+     /* pulsante-principale: bottone principale della card (es. Accedi, Registrati) */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.sfondo {
+    /* ...regole di base-bg... */
+}
+
+.padding {
+    /* ...regole di base-container e auth-viewport... */
+}
+
+.faro {
+    /* ...regole di base-glow... */
+}
+
+.contenitore {
+    /* ...regole di auth-vault... */
+}
+
+.scheda {
+    /* ...regole di auth-card... */
+}
+
+.bordo-luminoso {
+    /* ...regole di border-glow... */
+}
+
+.saetta {
+
+/* --- ANIMAZIONE SAETTA ---
+    /* ...regole di saetta-master e saetta-drop... */
+}
+
+@keyframes saettaAnim {
+        0% { opacity: 0.7; }
+        100% { opacity: 1; }
+}
+.icona-box {
+    /* ...regole di auth-icon-box... */
+}
+
+.titolo {
+    /* ...regole di auth-title... */
+}
+
+.sottotitolo {
+    /* ...regole di auth-subtitle... */
+}
+
+.gruppo-campi {
+    /* ...regole di auth-form-group... */
+}
+
+.etichetta {
+    /* ...regole di auth-label... */
+}
+
+.campo-input {
+    /* ...regole di auth-input... */
+}
+
+.pulsante-principale {
+    /* ...regole di auth-btn-primary... */
+}

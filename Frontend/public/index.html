@@ -15,21 +15,23 @@
     <link rel="stylesheet" href="assets/css/fonts.css">
     <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
     <link rel="stylesheet" href="assets/css/operatore.css?v=3.3">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/CSS.css?v=1.0">
 
 </head>
 
-<body class="base-bg">
+<body class="sfondo base-bg">
     <!-- 1. WRAPPER PRINCIPALE -->
-    <div class="base-container auth-viewport">
+    <div class="padding base-container auth-viewport">
 
         <!-- 2. FARO (Glow Effect) -->
-        <div class="base-glow"></div>
+        <div class="faro base-glow"></div>
 
         <!-- 3. VAULT CONTAINER -->
-        <div class="auth-vault">
+        <div class="contenitore auth-vault">
 
             <!-- Card Login -->
-            <div class="auth-card border-glow">
+            <div class="scheda bordo-luminoso auth-card border-glow">
                 <!-- Language Selector (Anchor to Card) -->
                 <div class="lang-selector-container">
                     <button id="lang-toggle-btn" class="lang-btn" aria-label="Cambia Lingua">
@@ -41,34 +43,33 @@
                 </div>
 
                 <!-- SAETTA MASTER ANIMATION -->
-                <div class="saetta-master"></div>
-                <div class="saetta-drop"></div>
+                <div class="saetta"></div>
 
                 <!-- Icona Centrale -->
-                <div class="auth-icon-box">
+                <div class="icona-box auth-icon-box">
                     <span class="material-symbols-outlined">security</span>
                 </div>
 
                 <!-- Titoli -->
-                <h1 class="auth-title" data-t="login_title">Accedi</h1>
-                <p class="auth-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
+                <h1 class="titolo auth-title" data-t="login_title">Accedi</h1>
+                <p class="sottotitolo auth-subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
 
                 <!-- Form Autenticazione -->
                 <form id="login-form">
 
                     <!-- Email / Username -->
-                    <div class="auth-form-group">
-                        <label class="auth-label" for="email" data-t="username_label">Username</label>
+                    <div class="gruppo-campi auth-form-group">
+                        <label class="etichetta auth-label" for="email" data-t="username_label">Username</label>
                         <input id="email" name="username" type="text" autocomplete="username" required
-                            class="auth-input" data-t-placeholder="username_placeholder" placeholder="Email o Username">
+                            class="campo-input auth-input" data-t-placeholder="username_placeholder" placeholder="Email o Username">
                     </div>
 
                     <!-- Password -->
-                    <div class="auth-form-group">
-                        <label class="auth-label" for="password" data-t="password_label">Password</label>
+                    <div class="gruppo-campi auth-form-group">
+                        <label class="etichetta auth-label" for="password" data-t="password_label">Password</label>
                         <div class="password-wrapper">
                             <input id="password" name="password" type="password" autocomplete="current-password"
-                                required class="auth-input" placeholder="********">
+                                required class="campo-input auth-input" placeholder="********">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
                                 aria-label="Mostra Password">
                                 <span class="material-symbols-outlined">visibility</span>
@@ -80,7 +81,7 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" id="login-submit-btn" class="auth-btn-primary" data-t="auth_button">
+                    <button type="submit" id="login-submit-btn" class="pulsante-principale auth-btn-primary" data-t="auth_button">
                         <span class="material-symbols-outlined">login</span>
                         Accedi
                     </button>
@@ -106,3 +107,5 @@
     <script type="module" src="assets/js/modules/auth/login.js"></script>
 
 </body>
+
+</html>

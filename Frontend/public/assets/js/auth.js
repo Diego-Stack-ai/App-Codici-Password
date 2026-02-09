@@ -219,11 +219,11 @@ function checkAuthState() {
 
         if (user) {
             // Utente loggato: se siamo su una pagina di login, spostiamoci sulla home
-            // Usiamo percorsi assoluti per massima compatibilità mobile
+            // Usiamo percorsi relativi per compatibilità con Live Server
             if (isAuthPage) {
                 if (!path.includes('home_page.html')) {
-                    window.LOG("[AUTH] Already logged in, redirecting to /home_page.html");
-                    window.location.href = '/home_page.html';
+                    window.LOG("[AUTH] Already logged in, redirecting to home_page.html");
+                    window.location.href = 'home_page.html';
                 }
             }
         } else {
