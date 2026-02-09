@@ -12,10 +12,15 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components.js';
 
-// Carica QRCode library locale
-const qrcodeScript = document.createElement('script');
-qrcodeScript.src = '../../vendor/qrcode.min.js';
-document.head.appendChild(qrcodeScript);
+// Carica QRCode library locale con Promise
+const qrcodeReady = new Promise((resolve) => {
+    if (window.QRCode) return resolve();
+    const script = document.createElement('script');
+    script.src = 'assets/js/vendor/qrcode.min.js';
+    script.onload = () => resolve();
+    script.onerror = () => { console.error("Failed to load QRCode lib"); resolve(); };
+    document.head.appendChild(script);
+});
 
 // --- STATE ---
 let currentAziendaId = new URLSearchParams(window.location.search).get('id');
@@ -366,7 +371,7 @@ function togglePwd(id, btn) {
     }
 }
 
-function handleLogoAndQR(data) {
+async function handleLogoAndQR(data) {
     const logoImg = document.getElementById('azienda-logo');
     const logoPlace = document.getElementById('azienda-logo-placeholder');
     if (data.logo && logoImg) {
@@ -376,6 +381,11 @@ function handleLogoAndQR(data) {
     }
 
     const vcard = buildVCard(data);
+
+    // Wait for lib
+    await qrcodeReady;
+    if (typeof QRCode === 'undefined') return;
+
     const options = { width: 100, height: 100, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M };
 
     const qrCont = document.getElementById('qrcode-container');
@@ -386,11 +396,83 @@ function handleLogoAndQR(data) {
 }
 
 function buildVCard(data) {
+    const config = data.qrConfig || {};
     let v = "BEGIN:VCARD\nVERSION:3.0\n";
-    v += `FN:${data.ragioneSociale}\nORG:${data.ragioneSociale}\n`;
-    if (data.referenteCellulare) v += `TEL;TYPE=CELL:${data.referenteCellulare}\n`;
-    if (data.telefonoAzienda) v += `TEL;TYPE=WORK,VOICE:${data.telefonoAzienda}\n`;
-    if (data.aziendaEmail) v += `EMAIL;TYPE=PREF,INTERNET:${data.aziendaEmail}\n`;
+
+    // Ragione Sociale (FN, ORG)
+    // Default true if config missing (retrocompatibility), explicit false check
+    if (config.ragioneSociale !== false) {
+        v += `FN:${data.ragioneSociale || 'Azienda'}\nORG:${data.ragioneSociale || ''}\n`;
+    }
+
+    // Referente
+    const nome = (config.referenteNome !== false) ? (data.referenteNome || '') : '';
+    const cognome = (config.referenteCognome !== false) ? (data.referenteCognome || '') : '';
+    const titolo = (config.referenteTitolo !== false) ? (data.referenteTitolo || '') : '';
+
+    if (nome || cognome) {
+        v += `N:${cognome};${nome};;;\n`;
+    }
+    if (titolo) {
+        v += `TITLE:${titolo}\n`;
+    }
+
+    // Cellulare Referente
+    if (config.referenteCellulare !== false && data.referenteCellulare) {
+        v += `TEL;TYPE=CELL:${data.referenteCellulare}\n`;
+    }
+
+    // Email (PEC) - Key map: aziendaEmail (from modify page flag) -> matches data.emails.pec
+    const pecEmail = data.emails?.pec?.email || data.aziendaEmail;
+    if (config.aziendaEmail !== false && pecEmail) {
+        v += `EMAIL;TYPE=WORK,INTERNET:${pecEmail}\n`;
+    }
+
+    // Extra Data in NOTE or Custom Fields
+    let notes = [];
+    if (config.partitaIva !== false && data.partitaIva) notes.push(`P.IVA: ${data.partitaIva}`);
+    if (config.codiceSDI !== false && data.codiceSDI) notes.push(`SDI: ${data.codiceSDI}`);
+    if (config.numeroCCIAA !== false && data.numeroCCIAA) notes.push(`CCIAA: ${data.numeroCCIAA}`);
+
+    if (config.dataIscrizione !== false && data.dataIscrizione) {
+        const d = data.dataIscrizione.split('-');
+        const dIT = d.length === 3 ? `${d[2]}/${d[1]}/${d[0]}` : data.dataIscrizione;
+        notes.push(`Iscr: ${dIT}`);
+    }
+
+    // Sede Legale (qrLegale)
+    if (config.qrLegale !== false) {
+        const addr = data.indirizzoSede || '';
+        const civ = data.civicoSede || '';
+        const cit = data.cittaSede || '';
+        const prov = data.provinciaSede || '';
+        const cap = data.capSede || '';
+        if (addr || cit) {
+            v += `ADR;TYPE=WORK,PREF:;;${addr} ${civ};${cit};${prov};${cap};Italiana\n`;
+        }
+    }
+
+    // Altre Sedi (Dynamic Loop)
+    if (data.altreSedi && Array.isArray(data.altreSedi)) {
+        data.altreSedi.forEach(sede => {
+            if (sede.qr !== false && (sede.indirizzo || sede.citta)) {
+                let typeParams = 'WORK';
+                const tLower = (sede.tipo || '').toLowerCase();
+                if (tLower.includes('amm')) typeParams = 'WORK,POSTAL';
+                else if (tLower.includes('oper') || tLower.includes('magazz') || tLower.includes('logis')) typeParams = 'WORK,PARCEL';
+
+                v += `ADR;TYPE=${typeParams}:;;${sede.indirizzo || ''} ${sede.civico || ''};${sede.citta || ''};${sede.provincia || ''};${sede.cap || ''};Italiana\n`;
+
+                // Add to notes for visibility if reader doesn't support multiple ADRs well
+                notes.push(`${sede.tipo || 'Sede'}: ${sede.indirizzo || ''} ${sede.citta || ''}`);
+            }
+        });
+    }
+
+    if (notes.length > 0) {
+        v += `NOTE:${notes.join(' - ')}\n`;
+    }
+
     v += "END:VCARD";
     return v;
 }

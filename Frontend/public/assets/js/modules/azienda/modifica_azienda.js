@@ -147,6 +147,8 @@ function initFormEvents() {
 
     // Extra Emails
     document.getElementById('btn-add-email')?.addEventListener('click', () => addExtraEmail());
+    // Extra Sedi
+    document.getElementById('btn-add-sede')?.addEventListener('click', () => addExtraSede());
 }
 
 window.openSourceSelector = openSourceSelector;
@@ -231,7 +233,17 @@ function populateForm(data) {
         set('email-personale', data.emails.personale?.email);
         set('email-personale-password', data.emails.personale?.password);
 
-        // Extra Emails
+        // Extra Sedi
+        const sediContainer = document.getElementById('altre-sedi-container');
+        if (sediContainer) clearElement(sediContainer);
+
+        if (data.altreSedi && Array.isArray(data.altreSedi)) {
+            data.altreSedi.forEach(s => addExtraSede(s));
+        } else {
+            // Tentativo recupero legacy (admin/oper) se l'array non esisteva
+            // Ma se non esisteva, è perché è la prima volta o sono vuoti.
+            // Possiamo opzionalmente aggiungere una sede vuota se vogliamo, ma meglio di no.
+        }
         const container = document.getElementById('email-extra-container');
         if (container) clearElement(container);
 
@@ -364,12 +376,14 @@ function addExtraEmail(data = null) {
             type: 'text',
             className: 'flex-1 bg-transparent border-none text-[9px] font-black uppercase tracking-widest text-blue-400 placeholder-white/20 outline-none p-0 email-type',
             placeholder: 'TIPO EMAIL (ES. ORDINI)',
-            value: data ? data.tipo : ''
+            value: data ? data.tipo : '',
+            'aria-label': 'Tipo Email'
         }),
         createElement('button', {
             type: 'button',
             className: 'text-red-400/50 hover:text-red-400 transition-colors',
-            onclick: () => wrapper.remove()
+            onclick: () => wrapper.remove(),
+            'aria-label': 'Rimuovi email'
         }, [
             createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
         ])
@@ -382,7 +396,8 @@ function addExtraEmail(data = null) {
                 type: 'email',
                 className: 'detail-field-input email-value',
                 placeholder: 'Indirizzo Email',
-                value: data ? data.email : ''
+                value: data ? data.email : '',
+                'aria-label': 'Indirizzo Email Extra'
             })
         ])
     ]);
@@ -396,7 +411,8 @@ function addExtraEmail(data = null) {
                 type: 'text',
                 className: 'detail-field-input base-shield email-pass',
                 placeholder: 'Password',
-                value: data ? data.password : ''
+                value: data ? data.password : '',
+                'aria-label': 'Password Email Extra'
             }),
             createElement('div', { className: 'detail-field-actions pr-2' }, [
                 createElement('button', {
@@ -414,6 +430,95 @@ function addExtraEmail(data = null) {
     container.appendChild(wrapper);
 }
 
+function addExtraSede(data = null) {
+    const container = document.getElementById('altre-sedi-container');
+    if (!container) return;
+
+    const uniqueId = `sede-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+    const wrapper = createElement('div', { className: 'glass-card overflow-hidden extra-sede-item animate-in slide-in-from-top-2 fade-in duration-300 mb-4' });
+
+    // Header
+    const header = createElement('div', { className: 'p-4 flex items-center justify-between cursor-pointer bg-white/5 hover:bg-white/10 transition-colors' }, [
+        createElement('div', { className: 'flex items-center gap-3 flex-1' }, [
+            createElement('span', { className: 'material-symbols-outlined text-purple-400', textContent: 'domain' }),
+            createElement('div', { className: 'flex-1 border-b border-transparent focus-within:border-purple-500/50 transition-colors mr-4' }, [
+                createElement('input', {
+                    type: 'text',
+                    className: 'w-full bg-transparent text-xs font-bold uppercase tracking-widest text-white placeholder-white/20 outline-none sede-tipo',
+                    placeholder: 'TIPO SEDE (ES. OPERATIVA)',
+                    value: data ? (data.tipo || '').replace('Sede ', '') : '',
+                    onclick: (e) => e.stopPropagation()
+                })
+            ]),
+            createElement('div', { className: 'flex items-center gap-1 opacity-40' }, [
+                createElement('input', {
+                    type: 'checkbox',
+                    className: 'size-3.5 accent-purple-500 sede-qr',
+                    checked: data ? (data.qr !== false) : true,
+                    onclick: (e) => e.stopPropagation(),
+                    'aria-label': 'Includi nel QR'
+                }),
+                createElement('span', { className: 'text-[8px] font-bold uppercase', textContent: 'QR' })
+            ])
+        ]),
+        createElement('div', { className: 'flex items-center gap-2' }, [
+            createElement('button', {
+                type: 'button',
+                className: 'text-red-400/50 hover:text-red-400 p-1 transition-colors',
+                onclick: (e) => { e.stopPropagation(); wrapper.remove(); }
+            }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })]),
+            createElement('span', {
+                className: 'material-symbols-outlined text-white/20 transition-transform duration-300',
+                textContent: 'expand_more',
+                id: `arrow-${uniqueId}`
+            })
+        ])
+    ]);
+
+    // Body
+    const body = createElement('div', { id: `body-${uniqueId}`, className: 'px-5 pb-5 pt-2 flex flex-col gap-3 hidden' }, [
+        createElement('div', { className: 'grid grid-cols-[3fr_1fr] gap-3' }, [
+            createFieldBox('Indirizzo', 'text', data?.indirizzo, 'sede-indirizzo', 'Via / Piazza'),
+            createFieldBox('N.', 'text', data?.civico, 'sede-civico', 'N.', true)
+        ]),
+        createElement('div', { className: 'grid grid-cols-3 gap-3' }, [
+            createFieldBox('Città', 'text', data?.citta, 'sede-citta', 'Città'),
+            createFieldBox('Prov', 'text', data?.provincia, 'sede-provincia', 'PR', true, true),
+            createFieldBox('CAP', 'tel', data?.cap, 'sede-cap', 'CAP', true)
+        ])
+    ]);
+
+    // Toggle
+    header.addEventListener('click', () => {
+        const arrow = header.querySelector(`#arrow-${uniqueId}`);
+        if (body.classList.contains('hidden')) {
+            body.classList.remove('hidden');
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+        } else {
+            body.classList.add('hidden');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }
+    });
+
+    setChildren(wrapper, [header, body]);
+    container.appendChild(wrapper);
+}
+
+function createFieldBox(label, type, val, cls, place, center = false, uppercase = false) {
+    return createElement('div', { className: 'glass-field-container' }, [
+        createElement('label', { className: 'view-label', textContent: label }),
+        createElement('div', { className: 'detail-field-box border-glow h-10' }, [
+            createElement('input', {
+                type: type,
+                className: `detail-field-input ${cls} ${center ? 'text-center' : ''} ${uppercase ? 'uppercase' : ''}`,
+                value: val || '',
+                placeholder: place,
+                maxLength: uppercase ? 2 : (cls.includes('cap') ? 5 : undefined)
+            })
+        ])
+    ]);
+}
+
 async function saveAzienda() {
     const ragioneSociale = document.getElementById('ragione-sociale')?.value.trim();
     if (!ragioneSociale) { showToast(t('error_missing_company_name'), "error"); return; }
@@ -428,24 +533,19 @@ async function saveAzienda() {
         const qrConfig = {};
         document.querySelectorAll('input[data-qr-field]').forEach(cb => qrConfig[cb.dataset.qrField] = cb.checked);
 
-        const altreSedi = [];
-        const sediConf = [
-            { id: 'admin', tipo: 'Sede Amministrativa' },
-            { id: 'oper', tipo: 'Sede Operativa' }
-        ];
-        sediConf.forEach(s => {
-            const addr = document.getElementById(`${s.id}-indirizzo`)?.value.trim();
-            if (addr) {
-                altreSedi.push({
-                    tipo: s.tipo,
-                    indirizzo: addr,
-                    civico: document.getElementById(`${s.id}-civico`)?.value.trim(),
-                    citta: document.getElementById(`${s.id}-citta`)?.value.trim(),
-                    provincia: document.getElementById(`${s.id}-provincia`)?.value.trim().toUpperCase(),
-                    cap: document.getElementById(`${s.id}-cap`)?.value.trim()
-                });
-            }
-        });
+        const altreSedi = Array.from(document.querySelectorAll('.extra-sede-item')).map(el => ({
+            tipo: el.querySelector('.sede-tipo')?.value.trim(),
+            indirizzo: el.querySelector('.sede-indirizzo')?.value.trim(),
+            civico: el.querySelector('.sede-civico')?.value.trim(),
+            citta: el.querySelector('.sede-citta')?.value.trim(),
+            provincia: el.querySelector('.sede-provincia')?.value.trim().toUpperCase(),
+            cap: el.querySelector('.sede-cap')?.value.trim(),
+            qr: el.querySelector('.sede-qr')?.checked
+        })).filter(s => s.tipo || s.indirizzo);
+
+        // Add default QR flags for dynamic sedi into qrConfig (virtual keys qrSede_Index?)
+        // Actually, we store 'qr' property inside the object in altreSedi array.
+        // buildVCard needs to handle this property directly from the object.
 
         const data = {
             ragioneSociale,
