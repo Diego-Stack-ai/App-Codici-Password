@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             currentUid = user.uid;
 
-            // Inizializza Header e Footer (Protocollo Gold)
+            // Inizializza Header e Footer (Protocollo Base)
             await initComponents();
 
             // Pulsante Edit nel Footer Center (Floating Action Button)
@@ -373,18 +373,27 @@ function setupActions() {
 
 // --- ATTACHMENTS LOGIC ---
 
+// Renderli globali per onclick HTML
+window.openSourceSelector = openSourceSelector;
+window.closeSourceSelector = closeSourceSelector;
+
 function openSourceSelector() {
+    console.log("Opening Source Selector");
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.add('active');
+        modal.classList.remove('invisible', 'opacity-0');
+        // modal.classList.add('active'); 
         document.body.style.overflow = 'hidden';
+    } else {
+        console.error("Modal source-selector-modal not found");
     }
 }
 
 function closeSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.remove('active');
+        modal.classList.add('invisible', 'opacity-0');
+        // modal.classList.remove('active');
         document.body.style.overflow = '';
     }
 }
@@ -455,7 +464,7 @@ function renderAttachments(list) {
     if (list.length === 0) {
         container.appendChild(createElement('p', {
             className: 'text-[10px] text-white/20 uppercase text-center py-4',
-            textContent: t('no_attachments') || 'Nessun allegato'
+            textContent: 'Nessun allegato'
         }));
         return;
     }

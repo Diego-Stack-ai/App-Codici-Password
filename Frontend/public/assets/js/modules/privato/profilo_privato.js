@@ -178,9 +178,7 @@ function renderUtilitiesInCard(utils, list, addrIdx) {
                 createElement('span', { className: 'text-[10px] font-bold text-white/60 tracking-wider', textContent: u.value })
             ]),
             createElement('div', { className: 'flex items-center gap-1' }, [
-                createElement('button', { className: 'size-6 text-white/20 hover:text-white', dataset: { action: 'open-attachments', idx: uIdx, type: 'utility', parent: addrIdx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'attach_file' })
-                ]),
+
                 createElement('button', { className: 'size-6 text-white/20 hover:text-white', dataset: { action: 'edit-utility', idx: addrIdx, uidx: uIdx } }, [
                     createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
                 ]),
@@ -299,9 +297,7 @@ function renderDocumentiView() {
                 ])
             ]),
             createElement('div', { className: 'flex items-center gap-1' }, [
-                createElement('button', { className: 'size-8 rounded-lg bg-white/5 flex-center text-white/20 hover:text-white', dataset: { action: 'open-attachments', idx, type: 'document' } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'attach_file' })
-                ]),
+
                 createElement('button', { className: 'size-8 rounded-lg bg-white/5 flex-center text-white/20 hover:text-white', dataset: { action: 'edit-doc', idx } }, [
                     createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
                 ]),
@@ -337,10 +333,7 @@ function setupDelegation() {
             case 'delete-email': deleteEmail(idx); break;
             case 'edit-doc': window.editUserDocument(idx); break;
             case 'delete-doc': deleteDocumento(idx); break;
-            case 'open-attachments':
-                const parent = target.dataset.parent ? parseInt(target.dataset.parent) : null;
-                window.openAttachmentManager(idx, target.dataset.type, parent);
-                break;
+
         }
     });
 }

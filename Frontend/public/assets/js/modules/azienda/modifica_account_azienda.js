@@ -111,7 +111,7 @@ async function loadAccount() {
 function populateForm(data) {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     set('nome-account', data.nomeAccount);
-    set('sito-web', data.sitoWeb);
+    set('sito-web', data.url || data.sitoWeb); // Lettura retrocompatibile
     set('codice-societa', data.codiceSocieta);
     set('numero-iscrizione', data.numeroIscrizione);
     set('utente', data.utente);
@@ -352,7 +352,7 @@ async function saveAccount() {
     try {
         const data = {
             nomeAccount: nome,
-            sitoWeb: document.getElementById('sito-web')?.value.trim(),
+            url: document.getElementById('sito-web')?.value.trim(), // Uniformato a 'url' come in creazione
             codiceSocieta: document.getElementById('codice-societa')?.value.trim(),
             numeroIscrizione: document.getElementById('numero-iscrizione')?.value.trim(),
             utente: document.getElementById('utente')?.value.trim(),

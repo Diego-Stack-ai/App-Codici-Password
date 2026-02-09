@@ -98,18 +98,7 @@ async function initPage(user) {
         document.getElementById('edit-category').value = scadenza.category || scadenza.type || '';
         document.getElementById('edit-notes').value = scadenza.notes || '';
 
-        // Manage Attachments Link
-        const btnManage = document.getElementById('btn-manage-attachments');
-        if (btnManage) {
-            btnManage.href = `gestione_allegati.html?id=${currentScadenzaId}&context=scadenza&ownerId=${user.uid}`;
-            const attRef = collection(db, "users", user.uid, "scadenze", currentScadenzaId, "attachments");
-            const attSnap = await getDocs(attRef);
-            const count = document.getElementById('attachments-count');
-            if (count) {
-                count.textContent = attSnap.size;
-                count.classList.toggle('hidden', attSnap.size === 0);
-            }
-        }
+
     } catch (e) {
         console.error(e);
         showToast("Errore caricamento dati", "error");

@@ -524,18 +524,24 @@ function setupActions() {
 
 // --- ATTACHMENTS LOGIC ---
 
+window.openSourceSelector = openSourceSelector;
+window.closeSourceSelector = closeSourceSelector;
+
 function openSourceSelector() {
+    console.log("Opening Source Selector Privato");
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.add('active');
+        modal.classList.remove('invisible', 'opacity-0');
         document.body.style.overflow = 'hidden';
+    } else {
+        console.error("Modale non trovato");
     }
 }
 
 function closeSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.remove('active');
+        modal.classList.add('invisible', 'opacity-0');
         document.body.style.overflow = '';
     }
 }
@@ -605,7 +611,7 @@ function renderAttachments(list) {
     if (list.length === 0) {
         container.appendChild(createElement('p', {
             className: 'text-[10px] text-white/20 uppercase text-center py-4',
-            textContent: t('no_attachments') || 'Nessun allegato'
+            textContent: 'Nessun allegato'
         }));
         return;
     }

@@ -55,7 +55,7 @@ async function initProtocolUI() {
             className: 'footer-action-btn text-red-400',
             onclick: deleteAzienda
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
         ]));
     }
 
@@ -113,13 +113,64 @@ function initFormEvents() {
         }
     });
 
-    // Attachments
-    document.getElementById('btn-trigger-upload')?.addEventListener('click', () => document.getElementById('file-input')?.click());
-    document.getElementById('file-input')?.addEventListener('change', (e) => {
-        selectedFiles.push(...Array.from(e.target.files));
-        renderAttachments();
-        e.target.value = '';
+    // Attachments Premium
+    const btnUpload = document.getElementById('btn-trigger-upload');
+    if (btnUpload) {
+        btnUpload.onclick = openSourceSelector;
+    }
+
+    // Modal Events
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.querySelectorAll('[data-source]').forEach(btn => {
+            btn.onclick = () => {
+                const type = btn.dataset.source;
+                const input = document.getElementById(`input-${type}`);
+                if (input) input.click();
+                closeSourceSelector();
+            };
+        });
+        document.getElementById('btn-cancel-source').onclick = closeSourceSelector;
+    }
+
+    // Hidden Inputs listeners
+    ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                selectedFiles.push(...files);
+                renderAttachments();
+            }
+            e.target.value = '';
+        });
     });
+
+    // Extra Emails
+    document.getElementById('btn-add-email')?.addEventListener('click', () => addExtraEmail());
+}
+
+window.openSourceSelector = openSourceSelector;
+window.closeSourceSelector = closeSourceSelector;
+
+function openSourceSelector() {
+    console.log("Opening Source Selector Modifica Azienda");
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.classList.remove('invisible', 'opacity-0');
+        // modal.classList.add('active'); // Manteniamo per sicurezza
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error("Modale non trovato");
+    }
+}
+
+function closeSourceSelector() {
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.classList.add('invisible', 'opacity-0');
+        // modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 function handleImagePreview(e, previewId, placeholderId) {
@@ -141,9 +192,15 @@ function toggleSection(id, btn) {
     const arrow = btn.querySelector('.chevron') || document.getElementById('arrow-' + id);
     if (!el) return;
 
-    const isOpen = !el.classList.contains('hidden');
-    el.classList.toggle('hidden', isOpen);
-    if (arrow) arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    const isOpen = el.style.maxHeight && el.style.maxHeight !== '0px';
+
+    if (isOpen) {
+        el.style.maxHeight = '0px';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+    } else {
+        el.style.maxHeight = el.scrollHeight + 'px';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+    }
 }
 
 function populateForm(data) {
@@ -152,7 +209,6 @@ function populateForm(data) {
     set('ragione-sociale', data.ragioneSociale);
     set('piva', data.partitaIva);
     set('codice-sdi', data.codiceSDI);
-    set('color-azienda', data.themeColor || '#3b82f6');
     set('referente-titolo', data.referenteTitolo);
     set('referente-nome', data.referenteNome);
     set('referente-cognome', data.referenteCognome);
@@ -174,6 +230,30 @@ function populateForm(data) {
         set('email-amministrazione-password', data.emails.amministrazione?.password);
         set('email-personale', data.emails.personale?.email);
         set('email-personale-password', data.emails.personale?.password);
+
+        // Extra Emails
+        const container = document.getElementById('email-extra-container');
+        if (container) clearElement(container);
+
+        // 1. Check for custom keys (legacy or manual db entries)
+        const fixedKeys = ['pec', 'amministrazione', 'personale', 'extra'];
+        Object.keys(data.emails).forEach(key => {
+            if (!fixedKeys.includes(key)) {
+                const obj = data.emails[key];
+                if (obj && typeof obj === 'object') {
+                    addExtraEmail({
+                        tipo: key, // Use key as type label
+                        email: obj.email || '',
+                        password: obj.password || ''
+                    });
+                }
+            }
+        });
+
+        // 2. Check for new array format
+        if (data.emails.extra && Array.isArray(data.emails.extra)) {
+            data.emails.extra.forEach(item => addExtraEmail(item));
+        }
     }
 
     if (data.logo) {
@@ -227,32 +307,41 @@ function renderAttachments() {
         ...selectedFiles.map((f, i) => ({ name: f.name, existing: false, idx: i }))
     ];
 
-    const cards = all.map(f => createElement('div', {
-        className: 'flex items-center justify-between p-3 glass-card border-white/5 animate-in slide-in-from-left-2 transition-all'
-    }, [
-        createElement('div', { className: 'flex items-center gap-3' }, [
-            createElement('span', {
-                className: 'material-symbols-outlined text-white/20',
-                textContent: f.name?.toLowerCase().endsWith('.pdf') ? 'picture_as_pdf' : 'description'
-            }),
-            createElement('div', { className: 'flex-col' }, [
-                createElement('span', {
-                    className: 'text-[10px] font-black text-white/80 uppercase truncate max-w-[150px]',
-                    textContent: f.name
-                }),
-                createElement('span', {
-                    className: 'text-[8px] font-bold text-white/20 uppercase tracking-widest',
-                    textContent: f.existing ? (t('uploaded') || 'Caricato') : (t('new') || 'Nuovo')
-                })
-            ])
-        ]),
-        createElement('button', {
-            className: 'size-8 flex-center text-red-400/40 hover:text-red-400 transition-colors',
-            onclick: () => removeAttachment(f.idx, f.existing)
+    const cards = all.map(f => {
+        const type = (f.name || "").toLowerCase();
+        let icon = 'description';
+        let color = 'text-white/20';
+
+        if (type.endsWith('.pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
+        else if (type.match(/\.(jpg|jpeg|png|gif|webp)$/)) { icon = 'image'; color = 'text-purple-400/40'; }
+
+        return createElement('div', {
+            className: 'flex items-center justify-between p-3 glass-card border-white/5 animate-in slide-in-from-left-2 transition-all'
         }, [
-            createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'close' })
-        ])
-    ]));
+            createElement('div', { className: 'flex items-center gap-3' }, [
+                createElement('span', {
+                    className: `material-symbols-outlined ${color}`,
+                    textContent: icon
+                }),
+                createElement('div', { className: 'flex-col' }, [
+                    createElement('span', {
+                        className: 'text-[10px] font-black text-white/80 uppercase truncate max-w-[150px]',
+                        textContent: f.name
+                    }),
+                    createElement('span', {
+                        className: 'text-[8px] font-bold text-white/20 uppercase tracking-widest',
+                        textContent: f.existing ? (t('uploaded') || 'Caricato') : (t('new') || 'Nuovo')
+                    })
+                ])
+            ]),
+            createElement('button', {
+                className: 'size-8 flex-center text-red-400/40 hover:text-red-400 transition-colors',
+                onclick: () => removeAttachment(f.idx, f.existing)
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'close' })
+            ])
+        ]);
+    });
 
     setChildren(list, cards);
 }
@@ -261,6 +350,68 @@ function removeAttachment(idx, existing) {
     if (existing) existingAttachments.splice(idx, 1);
     else selectedFiles.splice(idx, 1);
     renderAttachments();
+}
+
+function addExtraEmail(data = null) {
+    const container = document.getElementById('email-extra-container');
+    if (!container) return;
+
+    const wrapper = createElement('div', { className: 'email-extra-item bg-white/5 p-4 rounded-2xl border border-white/5 flex-col-gap-3 relative animate-in slide-in-from-top-2 fade-in duration-300' });
+
+    // Header con Tipo e Remove
+    const header = createElement('div', { className: 'flex items-center gap-2 mb-1' }, [
+        createElement('input', {
+            type: 'text',
+            className: 'flex-1 bg-transparent border-none text-[9px] font-black uppercase tracking-widest text-blue-400 placeholder-white/20 outline-none p-0 email-type',
+            placeholder: 'TIPO EMAIL (ES. ORDINI)',
+            value: data ? data.tipo : ''
+        }),
+        createElement('button', {
+            type: 'button',
+            className: 'text-red-400/50 hover:text-red-400 transition-colors',
+            onclick: () => wrapper.remove()
+        }, [
+            createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+        ])
+    ]);
+
+    // Email Input
+    const emailBox = createElement('div', { className: 'glass-field-container' }, [
+        createElement('div', { className: 'detail-field-box border-glow h-9' }, [
+            createElement('input', {
+                type: 'email',
+                className: 'detail-field-input email-value',
+                placeholder: 'Indirizzo Email',
+                value: data ? data.email : ''
+            })
+        ])
+    ]);
+
+    // Password Input
+    const uniqueId = 'pass-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    const passBox = createElement('div', { className: 'glass-field-container' }, [
+        createElement('div', { className: 'detail-field-box border-glow h-9' }, [
+            createElement('input', {
+                id: uniqueId,
+                type: 'text',
+                className: 'detail-field-input base-shield email-pass',
+                placeholder: 'Password',
+                value: data ? data.password : ''
+            }),
+            createElement('div', { className: 'detail-field-actions pr-2' }, [
+                createElement('button', {
+                    type: 'button',
+                    className: 'btn-toggle-pass size-8 flex-center text-white/20 hover:text-white transition-colors',
+                    'data-target': uniqueId
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'visibility' })
+                ])
+            ])
+        ])
+    ]);
+
+    setChildren(wrapper, [header, emailBox, passBox]);
+    container.appendChild(wrapper);
 }
 
 async function saveAzienda() {
@@ -300,7 +451,6 @@ async function saveAzienda() {
             ragioneSociale,
             partitaIva: document.getElementById('piva')?.value.trim(),
             codiceSDI: document.getElementById('codice-sdi')?.value.trim().toUpperCase(),
-            themeColor: document.getElementById('color-azienda')?.value,
             referenteTitolo: document.getElementById('referente-titolo')?.value.trim(),
             referenteNome: document.getElementById('referente-nome')?.value.trim(),
             referenteCognome: document.getElementById('referente-cognome')?.value.trim(),
@@ -325,7 +475,12 @@ async function saveAzienda() {
                 personale: {
                     email: document.getElementById('email-personale')?.value.trim(),
                     password: document.getElementById('email-personale-password')?.value.trim()
-                }
+                },
+                extra: Array.from(document.querySelectorAll('.email-extra-item')).map(el => ({
+                    tipo: el.querySelector('.email-type')?.value.trim(),
+                    email: el.querySelector('.email-value')?.value.trim(),
+                    password: el.querySelector('.email-pass')?.value.trim()
+                })).filter(e => e.tipo || e.email)
             },
             note: document.getElementById('note-azienda')?.value.trim(),
             qrConfig,
@@ -350,7 +505,7 @@ async function saveAzienda() {
         data.allegati = [...existingAttachments, ...newAtt];
 
         await updateDoc(doc(db, "users", currentUid, "aziende", currentAziendaId), data);
-        showToast(t('success_save'), "success");
+        showToast(t('success_save') || "Azienda salvata con successo!", "success");
         setTimeout(() => window.location.href = `dati_azienda.html?id=${currentAziendaId}`, 1000);
     } catch (e) {
         logError("Save", e);

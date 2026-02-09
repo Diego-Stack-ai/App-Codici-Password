@@ -46,7 +46,7 @@ async function initProtocolUI() {
         clearElement(fCenter);
         setChildren(fCenter, createElement('button', {
             id: 'footer-btn-edit',
-            className: 'btn-floating-add !bg-amber-500',
+            className: 'btn-floating-add',
             title: t('edit') || 'Modifica',
             onclick: () => window.location.href = `modifica_azienda.html?id=${currentAziendaId}`
         }, [
@@ -62,6 +62,15 @@ function setupEventListeners() {
         if (e.target.id === 'qr-zoom-modal') closeQRZoom();
     });
 
+    document.getElementById('toggle-referente-btn')?.addEventListener('click', () => {
+        const container = document.getElementById('referente-container');
+        const chevron = document.getElementById('referente-chevron');
+        if (container) {
+            const isHidden = container.classList.toggle('hidden');
+            if (chevron) chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    });
+
     document.getElementById('toggle-allegati-btn')?.addEventListener('click', () => {
         const container = document.getElementById('allegati-container');
         const chevron = document.getElementById('allegati-chevron');
@@ -69,6 +78,34 @@ function setupEventListeners() {
             const isHidden = container.classList.toggle('hidden');
             if (chevron) chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
         }
+    });
+
+    document.getElementById('toggle-fiscal-btn')?.addEventListener('click', () => {
+        const container = document.getElementById('fiscal-container');
+        const chevron = document.getElementById('fiscal-chevron');
+        if (container) {
+            const isHidden = container.classList.toggle('hidden');
+            if (chevron) chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    });
+
+    document.getElementById('toggle-email-btn')?.addEventListener('click', () => {
+        const container = document.getElementById('email-list-container');
+        const chevron = document.getElementById('email-chevron');
+        if (container) {
+            const isHidden = container.classList.toggle('hidden');
+            if (chevron) chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    });
+
+    document.getElementById('btn-add-email')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = `modifica_azienda.html?id=${currentAziendaId}#section-email`;
+    });
+
+    document.getElementById('btn-edit-fiscal')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = `modifica_azienda.html?id=${currentAziendaId}`;
     });
 
     // Edit Note
@@ -129,7 +166,16 @@ async function loadData(uid) {
 }
 
 function populateFields(data) {
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.value = val || '';
+            } else {
+                el.textContent = val || '-';
+            }
+        }
+    };
 
     // Aggiorna titolo Header (quello creato da initComponents)
     const hTitle = document.querySelector('.base-header .header-title');
@@ -187,11 +233,11 @@ function setupLocations(data) {
     if (!tabs) return;
 
     const btns = currentLocations.map((l, i) => createElement('button', {
-        className: `location-tab-btn flex-center-col gap-1 min-w-[70px] p-2 rounded-xl transition-all border ${i === 0 ? 'bg-blue-500/20 border-blue-500/30 text-blue-400' : 'bg-white/5 border-white/5 text-white/40'}`,
+        className: `location-tab-btn flex-center-col gap-0.5 min-w-[55px] p-1 rounded-xl transition-all border outline-none ${i === 0 ? 'bg-white text-blue-600 border-transparent shadow-sm' : 'bg-white/5 border-white/5 text-white/40'}`,
         onclick: () => switchLocation(i)
     }, [
-        createElement('span', { className: 'material-symbols-outlined text-lg', textContent: l.icon }),
-        createElement('span', { className: 'text-[9px] font-black uppercase tracking-tighter truncate w-full text-center', textContent: l.tipo })
+        createElement('span', { className: 'material-symbols-outlined text-xs', textContent: l.icon }),
+        createElement('span', { className: 'text-3xs font-medium uppercase tracking-tight truncate w-full text-center', textContent: l.tipo })
     ]));
 
     setChildren(tabs, btns);
@@ -209,32 +255,29 @@ function switchLocation(index) {
     set('indirizzo-completo', fullAddr || 'Indirizzo non specificato');
     set('citta-cap-prov', cityFull || '-');
 
-    const btnMap = document.getElementById('btn-vedi-mappa');
-    if (btnMap) {
-        btnMap.onclick = () => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddr + ' ' + cityFull)}`, '_blank');
-        btnMap.disabled = !fullAddr && !cityFull;
-    }
 
     document.querySelectorAll('.location-tab-btn').forEach((btn, i) => {
         const isActive = i === index;
-        btn.classList.toggle('bg-blue-500/20', isActive);
-        btn.classList.toggle('border-blue-500/30', isActive);
-        btn.classList.toggle('text-blue-400', isActive);
+        btn.classList.toggle('bg-white', isActive);
+        btn.classList.toggle('text-blue-600', isActive);
+        btn.classList.toggle('border-transparent', isActive);
+        btn.classList.toggle('shadow-sm', isActive);
+
         btn.classList.toggle('bg-white/5', !isActive);
         btn.classList.toggle('border-white/5', !isActive);
         btn.classList.toggle('text-white/40', !isActive);
+
+        // Forza rimozione outline e border neri se presenti
+        if (isActive) {
+            btn.style.borderColor = 'transparent';
+            btn.style.outline = 'none';
+            btn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        } else {
+            btn.style.borderColor = '';
+            btn.style.boxShadow = '';
+        }
     });
 
-    const thumb = document.getElementById('location-map-thumbnail');
-    if (thumb && (fullAddr || cityFull)) {
-        const query = encodeURIComponent(`${fullAddr}, ${cityFull}, Italy`);
-        clearElement(thumb);
-        setChildren(thumb, createElement('iframe', {
-            style: "width:300px; height:300px; border:0; position:absolute; top:-100px; left:-100px; pointer-events:none;",
-            loading: "lazy",
-            src: `https://maps.google.com/maps?q=${query}&z=15&output=embed`
-        }));
-    }
 }
 
 function renderEmailCategories(data) {
@@ -242,34 +285,84 @@ function renderEmailCategories(data) {
     const container = document.getElementById('email-list-container');
     if (!container) return;
 
-    const cats = [
-        { id: 'pec', label: 'PEC', icon: 'verified_user', email: data.aziendaEmail || data.emails?.pec?.email },
-        { id: 'amministrazione', label: 'Amm.ne', icon: 'payments', email: data.emails?.amministrazione?.email },
-        { id: 'personale', label: 'Personale', icon: 'group', email: data.emails?.personale?.email },
-        { id: 'manutenzione', label: 'Manutenz.', icon: 'build_circle', email: data.emails?.manutenzione?.email },
-        { id: 'attrezzatura', label: 'Attrezzat.', icon: 'precision_manufacturing', email: data.emails?.attrezzatura?.email },
-        { id: 'magazzino', label: 'Magazzino', icon: 'inventory_2', email: data.emails?.magazzino?.email }
+    const emailEntries = [
+        { id: 'pec', label: 'PEC', icon: 'verified_user', email: data.aziendaEmail || data.emails?.pec?.email, password: data.emails?.pec?.password || data.aziendaEmailPassword },
+        { id: 'amministrazione', label: 'Amm.ne', icon: 'payments', email: data.emails?.amministrazione?.email, password: data.emails?.amministrazione?.password },
+        { id: 'personale', label: 'Personale', icon: 'group', email: data.emails?.personale?.email, password: data.emails?.personale?.password },
+        { id: 'manutenzione', label: 'Manutenz.', icon: 'build_circle', email: data.emails?.manutenzione?.email, password: data.emails?.manutenzione?.password },
+        { id: 'attrezzatura', label: 'Attrezzat.', icon: 'precision_manufacturing', email: data.emails?.attrezzatura?.email, password: data.emails?.attrezzatura?.password },
+        { id: 'magazzino', label: 'Magazzino', icon: 'inventory_2', email: data.emails?.magazzino?.email, password: data.emails?.magazzino?.password }
     ].filter(c => c.email);
 
-    if (cats.length > 0) {
+    if (emailEntries.length > 0) {
         wrap?.classList.remove('hidden');
-        const items = cats.map(c => createElement('div', { className: 'glass-card flex items-center justify-between p-4 group' }, [
-            createElement('div', { className: 'flex items-center gap-3' }, [
-                createElement('div', { className: 'size-10 rounded-xl bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10 shrink-0' }, [
-                    createElement('span', { className: 'material-symbols-outlined text-xl', textContent: c.icon })
+        clearElement(container);
+
+        // Grouping all in one box as requested
+        const mainBox = createElement('div', { className: 'glass-card p-4 flex flex-col gap-4' });
+
+        emailEntries.forEach((c, idx) => {
+            const item = createElement('div', { className: `flex flex-col gap-2 ${idx > 0 ? 'border-t border-white/5 pt-4' : ''}` }, [
+                createElement('div', { className: 'flex items-center justify-between' }, [
+                    createElement('div', { className: 'flex items-center gap-3' }, [
+                        createElement('div', { className: 'size-8 rounded-lg bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10 shrink-0' }, [
+                            createElement('span', { className: 'material-symbols-outlined text-base', textContent: c.icon })
+                        ]),
+                        createElement('span', { className: 'text-[9px] font-medium uppercase text-secondary tracking-widest', textContent: c.label })
+                    ])
                 ]),
-                createElement('div', { className: 'flex flex-col min-w-0' }, [
-                    createElement('span', { className: 'text-[9px] font-black uppercase text-white/40 tracking-widest', textContent: c.label }),
-                    createElement('a', { href: `mailto:${c.email}`, className: 'text-sm font-bold text-white truncate break-all', textContent: c.email })
-                ])
-            ]),
-            createElement('span', {
-                className: 'material-symbols-outlined text-xs opacity-20 group-hover:opacity-100 transition-opacity cursor-pointer',
-                textContent: 'content_copy',
-                onclick: () => { navigator.clipboard.writeText(c.email).then(() => showToast(t('copied'), 'success')); }
-            })
-        ]));
-        setChildren(container, items);
+                // Email Field
+                createElement('div', { className: 'glass-container flex items-center justify-between bg-black/20 rounded-xl p-2 px-3 border border-white/5 group' }, [
+                    createElement('span', { className: 'text-xs font-bold text-primary truncate min-w-0 flex-1', textContent: c.email }),
+                    createElement('div', { className: 'flex items-center gap-2 ml-2' }, [
+                        createElement('button', {
+                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1',
+                            onclick: () => { navigator.clipboard.writeText(c.email).then(() => showToast(t('copied'), 'success')); }
+                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'content_copy' })]),
+                        createElement('a', {
+                            href: `mailto:${c.email}`,
+                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1'
+                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'mail' })])
+                    ])
+                ]),
+                // Password Field (if exists)
+                c.password ? createElement('div', { className: 'glass-container flex items-center justify-between bg-black/20 rounded-xl p-2 px-3 border border-white/5 group' }, [
+                    createElement('div', { className: 'flex items-center gap-2 flex-1 min-w-0' }, [
+                        createElement('span', { className: 'material-symbols-outlined text-xs text-amber-500/60', textContent: 'key' }),
+                        createElement('span', {
+                            id: `pwd-${c.id}`,
+                            className: 'text-xs font-mono text-primary truncate field-password',
+                            dataset: { password: c.password, hidden: 'true' },
+                            textContent: '••••••••'
+                        })
+                    ]),
+                    createElement('div', { className: 'flex items-center gap-2 ml-2' }, [
+                        createElement('button', {
+                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1',
+                            onclick: (e) => togglePwd(c.id, e.currentTarget)
+                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'visibility' })]),
+                        createElement('button', {
+                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1',
+                            onclick: () => { navigator.clipboard.writeText(c.password).then(() => showToast(t('copied'), 'success')); }
+                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'content_copy' })])
+                    ])
+                ]) : null
+            ].filter(Boolean));
+            mainBox.appendChild(item);
+        });
+
+        container.appendChild(mainBox);
+    }
+}
+
+function togglePwd(id, btn) {
+    const el = document.getElementById(`pwd-${id}`);
+    const icon = btn.querySelector('span');
+    if (el && icon) {
+        const isHidden = el.dataset.hidden === 'true';
+        el.textContent = isHidden ? el.dataset.password : '••••••••';
+        el.dataset.hidden = isHidden ? 'false' : 'true';
+        icon.textContent = isHidden ? 'visibility_off' : 'visibility';
     }
 }
 
@@ -304,24 +397,12 @@ function buildVCard(data) {
 
 function openQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.add('opacity-100');
-            modal.children[1].classList.remove('scale-90');
-            modal.children[1].classList.add('scale-100');
-        }, 10);
-    }
+    if (modal) modal.classList.add('active');
 }
 
 function closeQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');
-    if (modal) {
-        modal.classList.remove('opacity-100');
-        modal.children[1].classList.remove('scale-100');
-        modal.children[1].classList.add('scale-90');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
+    if (modal) modal.classList.remove('active');
 }
 
 function renderAllegati(allegati) {

@@ -36,7 +36,8 @@
                         </div>
                         <div
                             class="absolute -bottom-2 -right-2 size-8 rounded-full bg-blue-500 flex-center border-4 border-[#0a0a14] text-white shadow-lg">
-                            <span class="material-symbols-outlined text-xs">edit</span> </div>
+                            <span class="material-symbols-outlined text-xs">edit</span>
+                        </div>
                     </div> <input type="file" id="logo-input" accept="image/*" class="hidden" />
                 </div> <!-- 1. Identificazione Group -->
                 <div class="flex-col-gap-4">
@@ -66,7 +67,8 @@
                                 autocomplete="off" /> </div>
                         <div class="base-input-group"> <span class="material-symbols-outlined">folder_shared</span>
                             <input id="account" name="account_code" type="text" placeholder="Codice Account"
-                                autocomplete="off" /> </div>
+                                autocomplete="off" />
+                        </div>
                         <div class="base-input-group"> <span class="material-symbols-outlined">key</span> <input
                                 id="password" name="account_password" type="password" class="base-shield"
                                 placeholder="Password" autocomplete="new-password" />
@@ -101,22 +103,26 @@
                             <div class="base-input-group"> <span class="material-symbols-outlined">call</span> <input
                                     id="referente-telefono" type="tel" placeholder="Ufficio" /> </div>
                             <div class="base-input-group"> <span class="material-symbols-outlined">smartphone</span>
-                                <input id="referente-cellulare" type="tel" placeholder="Mobile" /> </div>
+                                <input id="referente-cellulare" type="tel" placeholder="Mobile" />
+                            </div>
                         </div>
                     </div>
                 </div> <!-- 5. Note & Opzioni -->
                 <div class="flex-col-gap-4 mt-6">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1"
-                        data-t="ext_options">Note & Opzioni</h3>
-                    <div class="glass-card flex-col-gap-4 overflow-hidden"> <textarea id="note"
-                            class="w-full min-h-[120px] p-5 bg-transparent border-none text-sm text-white/80 outline-none resize-none leading-relaxed"
-                            placeholder="Note aggiuntive..."></textarea> </div> <!-- Toggles -->
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1" data-t="notes">Note
+                    </h3>
+                    <div class="glass-field-container">
+                        <textarea id="note"
+                            class="glass-field w-full min-h-[120px] p-5 text-sm text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-white/5 outline-none border-none resize-none rounded-2xl leading-relaxed"
+                            placeholder="Note aggiuntive..."></textarea>
+                    </div>
                     <div class="glass-card p-5 flex-col-gap-6">
                         <div class="flex items-center justify-between">
                             <div class="flex-col text-left"> <span
                                     class="text-xs font-black text-white uppercase tracking-widest">Condiviso</span>
                                 <span class="text-[10px] text-white/30 font-bold uppercase mt-0.5">Visibile agli
-                                    invitati</span> </div> <input type="checkbox" id="flag-shared" class="base-toggle">
+                                    invitati</span>
+                            </div> <input type="checkbox" id="flag-shared" class="base-toggle">
                         </div> <!-- Management Area (Conditional) -->
                         <div id="shared-management" class="hidden flex-col gap-4 pl-4 border-l border-white/5 pb-2">
                             <div id="guests-list" class="flex-col gap-2"> <!-- Guests here --> </div>
@@ -134,8 +140,8 @@
                             <div class="flex-col text-left"> <span
                                     class="text-xs font-black text-white uppercase tracking-widest">Memorandum</span>
                                 <span class="text-[10px] text-white/30 font-bold uppercase mt-0.5">Metti in
-                                    evidenza</span> </div> <input type="checkbox" id="flag-memo"
-                                class="base-toggle-amber">
+                                    evidenza</span>
+                            </div> <input type="checkbox" id="flag-memo" class="base-toggle-amber">
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex-col text-left"> <span
@@ -158,5 +164,3 @@
 </body>
 
 </html>
-
-

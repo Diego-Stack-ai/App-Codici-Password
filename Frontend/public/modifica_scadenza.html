@@ -36,10 +36,12 @@
                     </h3>
                     <div class="glass-card p-5 flex-col-gap-4">
                         <div class="base-input-group"> <span class="material-symbols-outlined">edit_document</span>
-                            <input id="edit-title" type="text" placeholder="Titolo (es. Bollo Auto)" /> </div>
+                            <input id="edit-title" type="text" placeholder="Titolo (es. Bollo Auto)" />
+                        </div>
                         <div class="base-input-group"> <span class="material-symbols-outlined">person</span> <input
                                 id="edit-holder" list="names-list" type="text" placeholder="Intestatario / Referente" />
-                            <datalist id="names-list"></datalist> </div>
+                            <datalist id="names-list"></datalist>
+                        </div>
                     </div>
                 </div> <!-- 2. Pianificazione & Categoria -->
                 <div class="flex-col-gap-4 mt-8">
@@ -48,7 +50,8 @@
                     <div class="glass-card p-5 flex-col-gap-4">
                         <div class="base-input-group"> <span class="material-symbols-outlined">calendar_clock</span>
                             <input id="edit-date" type="date"
-                                class="w-full bg-transparent border-none text-white outline-none" /> </div>
+                                class="w-full bg-transparent border-none text-white outline-none" />
+                        </div>
                         <div class="base-input-group"> <span class="material-symbols-outlined">category</span> <select
                                 id="edit-category"
                                 class="w-full bg-transparent border-none text-white outline-none cursor-pointer">
@@ -59,30 +62,14 @@
                                 <option value="Documenti">Documenti</option>
                             </select> <span class="material-symbols-outlined text-white/20">expand_more</span> </div>
                     </div>
-                </div> <!-- 3. Note & Allegati -->
+                </div> <!-- 3. Note -->
                 <div class="flex-col-gap-4 mt-8">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Note & Allegati</h3>
-                    <div class="glass-card flex-col-gap-4 overflow-hidden"> <textarea id="edit-notes"
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Note Aggiuntive</h3>
+                    <div class="glass-card flex-col-gap-4 overflow-hidden">
+                        <textarea id="edit-notes"
                             class="w-full min-h-[120px] p-5 bg-transparent border-none text-sm text-white/80 outline-none resize-none leading-relaxed"
-                            placeholder="Note aggiuntive su questa scadenza..."></textarea> </div> <a
-                        id="btn-manage-attachments" href="#"
-                        class="glass-card p-4 flex items-center justify-between group hover:bg-white/5 transition-all">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="size-10 rounded-xl bg-blue-500/10 flex-center border border-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
-                                <span class="material-symbols-outlined filled">attach_file</span> </div>
-                            <div class="flex-col"> <span
-                                    class="text-[11px] font-black uppercase tracking-widest text-white">Gestisci
-                                    Allegati</span> <span
-                                    class="text-[9px] font-bold text-white/20 uppercase tracking-widest">Foto e
-                                    Documenti caricati</span> </div>
-                        </div>
-                        <div class="flex items-center gap-3"> <span id="attachments-count"
-                                class="bg-blue-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full hidden">0</span>
-                            <span
-                                class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-transform">chevron_right</span>
-                        </div>
-                    </a>
+                            placeholder="Note aggiuntive su questa scadenza..."></textarea>
+                    </div>
                 </div>
                 <div class="h-20"></div>
             </div>
@@ -95,5 +82,3 @@
 </body>
 
 </html>
-
-

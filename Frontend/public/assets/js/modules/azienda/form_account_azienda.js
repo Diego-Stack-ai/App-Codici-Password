@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setChildren(fCenter, createElement('button', {
                     id: 'btn-save-footer',
                     className: 'btn-floating-add bg-accent-blue',
-                    onclick: () => window.saveChanges()
+                    onclick: saveChanges
                 }, [
                     createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
                 ]));
@@ -379,12 +379,11 @@ function renderCardEntry(bankIdx, cardIdx, card) {
             createInputField('Nome Carta', card.cardType, (val) => bankAccounts[bankIdx].cards[cardIdx].cardType = val, 'credit_card'),
             createInputField('Titolare', card.titolare, (val) => bankAccounts[bankIdx].cards[cardIdx].titolare = val, 'person'),
             createInputField('Numero Carta', card.cardNumber, (val) => bankAccounts[bankIdx].cards[cardIdx].cardNumber = val, 'numbers'),
-            createInputField('SCAD | PIN | CCV', `${card.expiry} | ${card.pin} | ${card.ccv}`, (val) => {
-                const parts = val.split('|');
-                bankAccounts[bankIdx].cards[cardIdx].expiry = parts[0]?.trim() || '';
-                bankAccounts[bankIdx].cards[cardIdx].pin = parts[1]?.trim() || '';
-                bankAccounts[bankIdx].cards[cardIdx].ccv = parts[2]?.trim() || '';
-            }, 'encrypted')
+            createElement('div', { className: 'grid grid-cols-3 gap-3' }, [
+                createInputField('Scadenza', card.expiry, (val) => bankAccounts[bankIdx].cards[cardIdx].expiry = val, 'calendar_month'),
+                createInputField('PIN', card.pin, (val) => bankAccounts[bankIdx].cards[cardIdx].pin = val, 'pin'),
+                createInputField('CCV', card.ccv, (val) => bankAccounts[bankIdx].cards[cardIdx].ccv = val, 'shield')
+            ])
         ]) : null
     ]);
 }
@@ -497,7 +496,7 @@ async function saveChanges() {
             }
         }
 
-        showToast(isEditing ? t('success_save') : "Account creato!");
+        showToast(isEditing ? (t('success_save') || "Dati salvati con successo!") : "Account creato con successo!", "success");
         setTimeout(() => window.location.href = `dettaglio_account_azienda.html?id=${tid}&aziendaId=${currentAziendaId}`, 1000);
     } catch (e) { logError("Save", e); showToast(t('error_save'), "error"); if (btn) btn.disabled = false; }
 }

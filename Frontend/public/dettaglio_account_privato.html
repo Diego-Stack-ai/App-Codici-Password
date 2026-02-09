@@ -229,44 +229,46 @@
     <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden">
 
     <!-- Source Selector Modal -->
-    <div id="source-selector-modal" class="modal-overlay">
-        <div class="modal-box max-w-[320px] !p-0 overflow-hidden">
-            <div class="p-6">
-                <h3 class="text-sm font-black uppercase tracking-widest text-center mb-6 opacity-40">Seleziona Sorgente
-                </h3>
+    <!-- Source Selector Modal -->
+    <div id="source-selector-modal"
+        class="modal-overlay backdrop-blur-md bg-black/80 flex items-center justify-center fixed inset-0 z-50 invisible opacity-0 transition-opacity">
+        <div
+            class="glass-card w-[280px] p-5 !bg-[#0f172a] border border-white/10 shadow-2xl rounded-2xl overflow-hidden">
+            <h3 class="text-[10px] font-extrabold uppercase tracking-widest text-center mb-4 opacity-40 text-white">
+                Seleziona Sorgente</h3>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <button
-                        class="flex-center-col gap-3 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group"
-                        data-source="camera">
-                        <span
-                            class="material-symbols-outlined text-4xl text-blue-400 group-hover:scale-110 transition-transform">photo_camera</span>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-white/80">Fotocamera</span>
-                    </button>
+            <div class="grid grid-cols-2 gap-3">
+                <button
+                    class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group bg-transparent"
+                    data-source="camera">
+                    <span
+                        class="material-symbols-outlined text-2xl text-blue-400 group-hover:scale-110 transition-transform">photo_camera</span>
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Camera</span>
+                </button>
 
-                    <button
-                        class="flex-center-col gap-3 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-purple-500/10 hover:border-purple-500/30 transition-all group"
-                        data-source="gallery">
-                        <span
-                            class="material-symbols-outlined text-4xl text-purple-400 group-hover:scale-110 transition-transform">collections</span>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-white/80">Galleria</span>
-                    </button>
+                <button
+                    class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group bg-transparent"
+                    data-source="gallery">
+                    <span
+                        class="material-symbols-outlined text-2xl text-purple-400 group-hover:scale-110 transition-transform">collections</span>
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Galleria</span>
+                </button>
 
-                    <button
-                        class="col-span-2 flex-center gap-3 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-amber-500/10 hover:border-amber-500/30 transition-all group"
-                        data-source="file">
-                        <span
-                            class="material-symbols-outlined text-3xl text-amber-400 group-hover:scale-110 transition-transform">description</span>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-white/80">Documento (PDF,
-                            DOC, etc)</span>
-                    </button>
-                </div>
+                <button
+                    class="col-span-2 flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group bg-transparent"
+                    data-source="file">
+                    <span
+                        class="material-symbols-outlined text-xl text-amber-400 group-hover:scale-110 transition-transform">description</span>
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Documento</span>
+                </button>
             </div>
 
-            <button type="button" id="btn-cancel-source"
-                class="w-full py-5 border-t border-white/5 text-[11px] font-black uppercase tracking-[0.2em] text-white/30 hover:text-white hover:bg-white/5 transition-all">
-                Annulla
-            </button>
+            <div class="mt-4 border-t border-white/5 pt-2 text-center">
+                <button type="button" onclick="closeSelector()"
+                    class="py-2 text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors bg-transparent border-none">
+                    Annulla
+                </button>
+            </div>
         </div>
     </div>
 

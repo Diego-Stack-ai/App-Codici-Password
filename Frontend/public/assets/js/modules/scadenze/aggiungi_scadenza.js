@@ -299,9 +299,7 @@ function updateAttachmentsUI() {
     if (editingScadenzaId) {
         placeholder?.classList.add('hidden');
         linkDiv?.classList.remove('hidden');
-        if (btnManage) {
-            btnManage.href = `gestione_allegati.html?id=${editingScadenzaId}&context=scadenza&ownerId=${currentUser.uid}`;
-        }
+
     } else {
         placeholder?.classList.remove('hidden');
         linkDiv?.classList.add('hidden');
@@ -374,22 +372,8 @@ function setupSaveLogic() {
     });
 }
 
-async function showSuccessModal(newId) {
-    if (window.showConfirmModal) {
-        const confirmed = await window.showConfirmModal(
-            "SALVATA!",
-            "Vuoi caricare degli allegati per questa scadenza?",
-            "SÌ, GESTISCI",
-            "NO, LISTA"
-        );
-        if (confirmed) {
-            window.location.href = `gestione_allegati.html?id=${newId}&context=scadenza&ownerId=${currentUser.uid}`;
-        } else {
-            window.location.href = 'scadenze.html';
-        }
-    } else {
-        window.location.href = 'scadenze.html';
-    }
+async function showSuccessModal() {
+    window.location.href = 'scadenze.html';
 }
 
 async function loadScadenzaForEdit(id) {
