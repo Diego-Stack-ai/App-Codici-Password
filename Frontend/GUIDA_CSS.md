@@ -31,6 +31,12 @@ L'estetica si basa su interfacce trasparenti che poggiano su uno sfondo fisso.
 - **Header (Fascia Alta)**: Layout "Balanced" con 3 aree (SX: Back/Avatar, C: Titolo, DX: Home/Logout).
 - **Footer (Fascia Bassa)**: Layout "Balanced" (SX: Theme Switcher, DX: Settings).
 
+### 2.3) Convenzione Prefissi: Protocollo "auth-" (V3.9)
+Per evitare conflitti con codebase legacy (es. residui in `operatore.css` o `font.css`), ogni nuova classe dedicata esclusivamente al flusso di accesso deve utilizzare il prefisso `auth-`.
+- **Scopo**: Isolare lo stile del login/registrazione dal resto dell'app.
+- **Utilizzo**: Usare per contenitori di link (`.auth-footer-links`), stati di progresso (`.is-auth-progress`) o elementi strutturali specifici del vault.
+- **Divieto Legacy**: Non fare mai riferimento a classi che iniziano per `auth-` presenti in `operatore.css`, in quanto appartenenti a logiche obsolete e non conformi al sistema Glassmorphism V3.9.
+
 ---
 
 ## 3) Gestione Multilingua (Protocollo Cleanup V3.9)
