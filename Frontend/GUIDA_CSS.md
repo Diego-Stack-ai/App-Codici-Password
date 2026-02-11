@@ -87,4 +87,15 @@ Per mantenere coerenza, utilizzare sempre queste chiavi nel dizionario:
 4. **Mobile**: Le icone sono cliccabili con feedback trasparente (`-webkit-tap-highlight-color: transparent`)?
 
 ---
+
+ ## 7) Purezza HTML & Centralizzazione (Standard Tassativo V3.9)
+ 
+ Per garantire la massima manutenibilità e prestazioni "Zero-Bloat", il protocollo impone la totale separazione tra struttura e stile:
+ 
+ - **Divieto Tassativo**: È vietato l'uso di **Tailwind CSS**, stili inline (`style="..."`) o definizioni di classi personalizzate all'interno dei tag HTML. 
+ - **Centralizzazione Totale**: Ogni singola proprietà estetica (colori, padding, allineamenti, ombre) deve risiedere esclusivamente nei file CSS centralizzati (`core.css`, `core_pagine.css`, `core_fascie.css`).
+ - **HTML Puro**: I file HTML devono contenere solo struttura semantica e classi semantiche (es. `.glass-card`, `.matrix-grid`). L'utilizzo di utility classes è proibito.
+ - **Deroghe ed Eccezioni**: Non sono ammesse eccezioni, salvo autorizzazione espressa dell'Amministratore di Sistema. In caso di deroga autorizzata, l'elemento deve essere nominato e giustificato in questa sezione (ad oggi: **Nessuna Eccezione Autorizzata**).
+
+---
 *Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.9 (Centralized Logic & Glassmorphism Design)*

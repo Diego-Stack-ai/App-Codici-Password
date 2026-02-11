@@ -2,7 +2,6 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { auth } from './firebase-config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
-import { showLogoutModal } from './ui-core.js';
 
 /**
  * Inizializza i componenti condivisi (Header/Footer)
@@ -29,15 +28,14 @@ export async function initComponents() {
             const headerRight = createElement('div', { id: 'header-right', className: 'header-right' });
 
             if (isHome) {
-                // EXCEPTION 2.1: Home Page Left -> Avatar Utente
+                // EXCEPTION 2.1: Home Page Left -> Avatar Utente (V3.9 Standard)
                 const avatarLink = createElement('div', {
                     id: 'header-user-avatar',
-                    className: 'w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-white/5 cursor-pointer',
+                    className: 'header-avatar-box cursor-pointer',
                     onclick: () => window.location.href = 'profilo_privato.html'
                 }, [
                     createElement('img', {
                         id: 'user-avatar-img',
-                        className: 'w-full h-full object-cover',
                         src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00czLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYy04LTIuNjYtOC00LTh6Ii8+PC9zdmc+'
                     })
                 ]);
@@ -86,8 +84,18 @@ export async function initComponents() {
                         id: 'header-logout-btn',
                         className: 'btn-icon-header',
                         onclick: async () => {
-                            const confirmed = await showLogoutModal();
-                            if (confirmed) { await signOut(auth); window.location.href = 'index.html'; }
+                            if (typeof window.showLogoutModal === 'function') {
+                                const confirmed = await window.showLogoutModal();
+                                if (confirmed) {
+                                    await signOut(auth);
+                                    window.location.href = 'index.html';
+                                }
+                            } else {
+                                if (confirm(t('logout_confirm') || "Vuoi uscire?")) {
+                                    await signOut(auth);
+                                    window.location.href = 'index.html';
+                                }
+                            }
                         }
                     }, [
                         createElement('span', { className: 'material-symbols-outlined', textContent: 'logout' })
@@ -143,9 +151,14 @@ export async function initComponents() {
                 footerRight.appendChild(settLink);
             }
 
+            // Inseriamo lo spacer prima del footer per spingere il contenuto su
+            const spacer = createElement('div', { className: 'spacer-footer' });
+            footerPh.parentNode.insertBefore(spacer, footerPh);
+
             const footerContent = createElement('div', { id: 'footer-content', className: 'header-balanced-container' }, [
                 footerLeft, footerCenter, footerRight
             ]);
+            setChildren(footerPh, footerContent); // Moved this line here
 
             const footer = createElement('footer', { className: 'base-footer' }, [footerContent]);
             footerPh.appendChild(footer);

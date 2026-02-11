@@ -43,37 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * Gestisce i click e gli eventi della Home Page (No Inline JS)
  */
 function initHomeListeners() {
-    // 1. Logout (Modal Protocollo Centralizzata)
-    const logoutBtn = document.getElementById('header-logout-btn');
-
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            // Usa la funzione globale definita in ui-core.js
-            if (typeof window.showLogoutModal === 'function') {
-                const confirmed = await window.showLogoutModal();
-                if (confirmed) {
-                    await signOut(auth);
-                    window.location.href = 'index.html';
-                }
-            } else {
-                // Fallback di sicurezza se ui-core non è caricato
-                if (confirm("Vuoi uscire?")) {
-                    await signOut(auth);
-                    window.location.href = 'index.html';
-                }
-            }
-        });
-    }
-
-    // 2. Toggle Tema (Sostituisce l'inline on click)
-    const themeBtn = document.getElementById('theme-toggle-home');
-    if (themeBtn) {
-        themeBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-        });
-    }
-
-    // 3. Avatar Fallback (Sostituisce onerror inline)
+    // 1. Avatar Fallback (Sostituisce onerror inline)
     const avatarImg = document.getElementById('user-avatar-img');
     if (avatarImg) {
         avatarImg.addEventListener('error', function () {
@@ -142,20 +112,15 @@ async function renderHeaderUser(user) {
     }
 }
 
-// Helper per impostare l'immagine avatar (Versione Tag IMG)
+// Helper per impostare l'immagine avatar
 function setAvatarImage(element, url) {
     if (!url) return;
 
-    let img = element.querySelector('img');
-    if (!img) {
-        img = document.getElementById('user-avatar-img');
-    }
+    // Se element è l'ID header-user-avatar o simile
+    const img = element.querySelector('img') || document.getElementById('user-avatar-img');
 
     if (img) {
         img.src = url;
-    } else {
-        // Fallback robusto via classe se possibile, o semplicemente log
-        console.warn("Elemento img avatar non trovato");
     }
 }
 

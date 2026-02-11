@@ -44,7 +44,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/fi
 import { doc, getDoc, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from './ui-core.js';
 import { createElement } from './dom-utils.js';
-import { t } from './translations.js';
+import { t, applyGlobalTranslations } from './translations.js';
 import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 
@@ -170,14 +170,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathName = window.location.pathname;
     const isHomePage = pathName.endsWith('home_page.html') || pathName.endsWith('/');
 
-    // initComponents handles checks for existing placeholders.
-    // However, if home.js handles heavily custom header logic, we might need coordination.
-    // Based on previous code, main.js was responsible for loading components unless specifically excluded.
-    // We entrust initComponents to do the right thing based on placeholder existence.
+    // 5. LOAD SHARED COMPONENTS (Header/Footer)
     initComponents();
+
+    // 6. TRADUZIONE & REVEAL (V3.9 Protocol)
+    // Applica le traduzioni a tutti i data-t e imposta data-i18n="ready"
+    applyGlobalTranslations();
 
     console.log("PROTOCOLLO BASE Initialized (v4.4)");
 
-    // Force reveal content to avoid black screen
+    // Force reveal content to avoid black screen (Backup Safety)
     setTimeout(() => document.body.classList.add('revealed'), 100);
 });

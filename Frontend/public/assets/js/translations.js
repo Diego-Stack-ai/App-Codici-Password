@@ -2258,3 +2258,42 @@ export function t(key) {
     const lang = getCurrentLanguage();
     return translations[lang]?.[key] || translations['it'][key] || key;
 }
+
+/**
+ * Applica le traduzioni globali agli elementi con attributi data-t*
+ */
+export function applyGlobalTranslations() {
+    // 1. Traduzione Testi
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.dataset.t;
+        if (!key) return;
+        const val = t(key);
+        if (val && val !== key) {
+            // Se è un input con placeholder definito via data-t, gestiamolo separatamente se serve, 
+            // ma solitamente data-t è per textContent
+            el.textContent = val;
+        }
+    });
+
+    // 2. Traduzione Placeholders
+    document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+        const key = el.dataset.tPlaceholder;
+        if (!key) return;
+        const val = t(key);
+        if (val && val !== key) el.placeholder = val;
+    });
+
+    // 3. Traduzione ARIA Labels
+    document.querySelectorAll('[data-t-aria]').forEach(el => {
+        const key = el.dataset.tAria;
+        if (!key) return;
+        const val = t(key);
+        if (val && val !== key) el.setAttribute('aria-label', val);
+    });
+
+    // 4. SBLOCCO INTERFACCIA (Reveal)
+    document.documentElement.setAttribute("data-i18n", "ready");
+}
+
+// Wrapper per compatibilità con vecchi moduli
+window.applyLocalTranslations = applyGlobalTranslations;
