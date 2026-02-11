@@ -30,7 +30,7 @@ html[data-i18n="ready"] body {
     --card-border: rgba(0, 0, 0, 0.1);
     --card-shadow: rgba(0, 0, 0, 0.5);
     --accent: #137fec;
-    --base-box-gradient: linear-gradient(135deg, #1c2733 0%, #137fec 100%);
+    --base-box-gradient: linear-gradient(135deg, #e0f2fe 0%, #60a5fa 100%);
     --glow-color: radial-gradient(ellipse at 50% 0%, rgba(14, 165, 233, 0.45) 0%, rgba(14, 165, 233, 0.1) 50%, transparent 70%);
     --saetta-color: rgba(14, 165, 233, 0.1);
     /* INPUT E LABEL */
@@ -41,7 +41,6 @@ html[data-i18n="ready"] body {
     --input-shadow: rgba(59, 130, 246, 0.08);
     /* LINK */
     --link-color: rgba(255, 255, 255, 0.5);
-    --footer-color: rgba(255, 255, 255, 0.4);
 }
 
 /* MODALITÀ DARK (per pagine di accesso o dark-only) */
@@ -51,7 +50,7 @@ html[data-i18n="ready"] body {
     --card-bg: rgba(15, 25, 50, 0.4);
     --card-border: rgba(255, 255, 255, 0.1);
     --card-shadow: rgba(0, 0, 0, 0.7);
-    --base-box-gradient: linear-gradient(135deg, #054483 0%, #101922 100%);
+    --base-box-gradient: linear-gradient(135deg, #2563eb 0%, #030712 100%);
     --glow-color: radial-gradient(ellipse at 50% 0%, rgba(80, 150, 255, 0.6) 0%, rgba(80, 150, 255, 0.2) 25%, rgba(80, 150, 255, 0.05) 50%, transparent 75%);
     --saetta-color: rgba(80, 150, 255, 0.08);
     --input-bg: rgba(255, 255, 255, 0.05);
@@ -298,14 +297,6 @@ body,
 .link-register {
     margin-top: 2rem;
     font-weight: 600;
-}
-
-/* Footer */
-.legal-footer {
-    margin-top: 2rem;
-    color: var(--footer-color);
-    font-size: 0.75rem;
-    text-align: center;
 }
 
 /* -----------------------

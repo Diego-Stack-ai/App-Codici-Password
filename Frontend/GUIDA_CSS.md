@@ -97,7 +97,7 @@ Ogni nuova pagina deve iniziare con questa struttura nell' `<head>`:
 
 Ogni pagina deve includere le misure di protezione previste dal Protocollo V3.8:
 
-- **CSP (Content Security Policy)**: Presente in testata come tag `<meta>`. Definisce le sorgenti autorizzate per script, stili e dati (Firebase/Google). È tassativo non rimuoverlo o indebolirlo.
+- **CSP (Content Security Policy)**: Presente in testata come tag `<meta>`, ma tenuto in **standby** (commentato `<!-- -->`) durante la fase di sviluppo per evitare blocchi dei tool di debug. Deve essere presente e pronto per l'attivazione pre-produzione.
 - **Iconografia di Sicurezza**: Nelle pagine di servizio (Login/Reset), l'uso dell'icona `security` all'interno di `.icon-box` è lo standard visivo per indicare l'accesso al Vault.
 - **Attributi Input**: Obbligo di usare `autocomplete="current-password"` o `new-password` e `type="password"`. 
 - **Mapping Credenziali**: Nelle pagine di impostazione nuova password, inserire sempre un campo `<input name="username" style="display:none">` per permettere ai Password Manager di associare correttamente la password all'account.

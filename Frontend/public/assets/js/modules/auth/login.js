@@ -28,9 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             isAuthPage: isAuthPage
         };
 
-        // 2. TRADUZIONI 
-        applyLocalTranslations();
-        document.documentElement.setAttribute("data-i18n", "ready");
+        // 2. INIZIALIZZAZIONE COMPONENTI UI
 
         // 3. INIZIALIZZAZIONE COMPONENTI UI
         initComponents().catch(e => console.log("Info: index ui elements initialized"));
@@ -50,44 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
- * Traduzioni locali della pagina
+ * Selettore Lingua Flottante
  */
-function applyLocalTranslations() {
-    document.querySelectorAll('[data-t], [data-t-placeholder], [data-t-aria]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        const placeholderKey = el.getAttribute('data-t-placeholder');
-        const ariaKey = el.getAttribute('data-t-aria');
-
-        if (key) {
-            const translated = t(key);
-            if (translated && translated !== key) {
-                // Preserva icone Material symbols
-                const icon = el.querySelector('.material-symbols-outlined');
-                if (icon) {
-                    let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
-                    if (textNode) textNode.textContent = translated;
-                    else el.appendChild(document.createTextNode(translated));
-                } else {
-                    el.textContent = translated;
-                }
-            }
-        }
-
-        if (placeholderKey) {
-            const translated = t(placeholderKey);
-            if (translated && translated !== placeholderKey) {
-                el.setAttribute('placeholder', translated);
-            }
-        }
-
-        if (ariaKey) {
-            const translated = t(ariaKey);
-            if (translated && translated !== ariaKey) {
-                el.setAttribute('aria-label', translated);
-            }
-        }
-    });
-}
 
 /**
  * Selettore Lingua Flottante

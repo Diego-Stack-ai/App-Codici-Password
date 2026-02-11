@@ -20,9 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             language: localStorage.getItem('app_language') || 'it'
         };
 
-        // 2. TRADUZIONI 
-        applyLocalTranslations();
-        document.documentElement.setAttribute("data-i18n", "ready");
+        // 2. SETUP FUNZIONALITÀ
 
         // 3. SETUP FUNZIONALITÀ
         setupRegisterForm();
@@ -36,44 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
- * Traduzioni locali
+ * Gestione Form Registrazione
  */
-function applyLocalTranslations() {
-    document.querySelectorAll('[data-t], [data-t-placeholder], [data-t-aria]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        const placeholderKey = el.getAttribute('data-t-placeholder');
-        const ariaKey = el.getAttribute('data-t-aria');
-
-        if (key) {
-            const translated = t(key);
-            if (translated && translated !== key) {
-                // Preserva icone Material symbols
-                const icon = el.querySelector('.material-symbols-outlined');
-                if (icon) {
-                    let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
-                    if (textNode) textNode.textContent = translated;
-                    else el.appendChild(document.createTextNode(translated));
-                } else {
-                    el.textContent = translated;
-                }
-            }
-        }
-
-        if (placeholderKey) {
-            const translated = t(placeholderKey);
-            if (translated && translated !== placeholderKey) {
-                el.setAttribute('placeholder', translated);
-            }
-        }
-
-        if (ariaKey) {
-            const translated = t(ariaKey);
-            if (translated && translated !== ariaKey) {
-                el.setAttribute('aria-label', translated);
-            }
-        }
-    });
-}
 
 /**
  * Gestione Form Registrazione

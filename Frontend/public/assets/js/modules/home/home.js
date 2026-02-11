@@ -8,6 +8,7 @@ import { auth, db } from '../../firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { t } from '../../translations.js';
 
 // Stato Globale
 let currentUser = null;
@@ -32,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Inizializza Listeners (Logout, Tema, Avatar Fallback)
         initHomeListeners();
+
+        // 4. SBLOCCO VISIBILITÀ (Anti-Flicker Ready)
+        document.documentElement.setAttribute("data-i18n", "ready");
     });
 });
 
@@ -262,4 +266,3 @@ function renderMiniItem(item, today) {
         createElement('span', { className: 'item-badge', textContent: labelText })
     ]);
 }
-

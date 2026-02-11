@@ -144,11 +144,39 @@ function initGlobalDelegation() {
  */
 function initTranslations() {
     const translate = () => {
-        document.querySelectorAll('[data-t]').forEach(el => {
+        document.querySelectorAll('[data-t], [data-t-placeholder], [data-t-aria]').forEach(el => {
             const key = el.getAttribute('data-t');
-            const translation = t(key);
-            if (translation && translation !== key) {
-                el.textContent = translation;
+            const placeholderKey = el.getAttribute('data-t-placeholder');
+            const ariaKey = el.getAttribute('data-t-aria');
+
+            if (key) {
+                const translated = t(key);
+                if (translated && translated !== key) {
+                    // Protezione Icone: Se c'è uno span con l'icona, preservalo
+                    const icon = el.querySelector('.material-symbols-outlined');
+                    if (icon) {
+                        // Cerca il nodo di testo esistente
+                        let textNode = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim() !== "");
+                        if (textNode) textNode.textContent = translated;
+                        else el.appendChild(document.createTextNode(translated));
+                    } else {
+                        el.textContent = translated;
+                    }
+                }
+            }
+
+            if (placeholderKey) {
+                const translated = t(placeholderKey);
+                if (translated && translated !== placeholderKey) {
+                    el.setAttribute('placeholder', translated);
+                }
+            }
+
+            if (ariaKey) {
+                const translated = t(ariaKey);
+                if (translated && translated !== ariaKey) {
+                    el.setAttribute('aria-label', translated);
+                }
             }
         });
     };

@@ -1,0 +1,218 @@
+/* ==========================================================================
+   CORE PAGINE (Home Page Matrix & Widgets) - V3.8
+   ========================================================================== */
+
+/* --- 1. MATRIX GRID SYSTEM --- */
+.matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "privato azienda"
+        "scadenze scadenze"
+        "urgenze urgenze";
+    gap: 2rem;
+    width: 100%;
+    padding: 0 0 1.5rem 0;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.area-privato {
+    grid-area: privato;
+}
+
+.area-azienda {
+    grid-area: azienda;
+}
+
+.area-scadenze {
+    grid-area: scadenze;
+}
+
+.area-urgenze {
+    grid-area: urgenze;
+}
+
+@media (max-width:480px) {
+    .matrix-grid {
+        padding: 0 14px;
+        gap: 1.25rem;
+    }
+}
+
+/* --- 2. MATRIX CARD CORE --- */
+.matrix-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 24px;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    text-decoration: none;
+    color: var(--text-primary);
+    padding: 1.5rem;
+    min-height: 180px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    position: relative;
+}
+
+.matrix-card:active {
+    transform: scale(0.96) translateY(2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+}
+
+.matrix-icon-box {
+    margin-bottom: 0.5rem;
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.matrix-card:active .matrix-icon-box {
+    transform: scale(0.9);
+}
+
+.matrix-icon-box span {
+    font-size: 32px;
+}
+
+.matrix-card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+/* Shadow adattiva */
+.adaptive-shadow {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, filter 0.2s ease;
+}
+
+.adaptive-shadow:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--accent-rgb, 255, 255, 255), 0.2);
+}
+
+/* --- 3. DASHBOARD WIDGETS (Scadenze/Urgenze) --- */
+.badge-count {
+    padding: 2px 10px;
+    background: rgba(var(--accent-rgb, 255, 255, 255), 0.25);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #fff;
+    border: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 0.5s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.badge-initial-hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.micro-dashboard-list {
+    width: 100%;
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 10;
+}
+
+.dashboard-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+.dashboard-list-item .item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-list-item .item-icon-box span {
+    font-size: 18px;
+}
+
+.dashboard-list-item .item-badge {
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+/* --- 4. COLORI TEMATICI (Gradienti) --- */
+.card-blue {
+    --accent-rgb: 0, 210, 255;
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.5), rgba(0, 120, 230, 0.3)) !important;
+}
+
+.card-green {
+    --accent-rgb: 50, 255, 50;
+    background: linear-gradient(135deg, rgba(50, 255, 50, 0.5), rgba(10, 80, 20, 0.3)) !important;
+}
+
+.card-orange {
+    --accent-rgb: 255, 120, 0;
+    background: linear-gradient(135deg, rgba(255, 120, 0, 0.5), rgba(180, 70, 0, 0.3)) !important;
+}
+
+.card-red {
+    --accent-rgb: 255, 30, 0;
+    background: linear-gradient(135deg, rgba(255, 30, 0, 0.5), rgba(80, 0, 0, 0.3)) !important;
+}
+
+/* LIGHT MODE OVERRIDES */
+html:not(.dark) .card-blue {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(0, 190, 255, 0.4)) !important;
+}
+
+html:not(.dark) .card-green {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(50, 255, 50, 0.4)) !important;
+}
+
+html:not(.dark) .card-orange {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 120, 0, 0.4)) !important;
+}
+
+html:not(.dark) .card-red {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 30, 0, 0.4)) !important;
+}
+
+html:not(.dark) .matrix-icon-box {
+    color: var(--text-primary);
+}
+
+html:not(.dark) .badge-count {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .dashboard-list-item {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
