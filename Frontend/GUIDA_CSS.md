@@ -1,20 +1,22 @@
-# GUIDA RAPIDA CLASSI CSS E STANDARD CORE (V3.8 - Immersive Update)
+# GUIDA RAPIDA CLASSI CSS E STANDARD CORE (V3.9 - Centralized Logic)
 
-Questa guida definisce le regole fondamentali di struttura, navigazione e classi CSS del **Design System Master V3.8**. Tutte le pagine devono attenersi a questi standard.
+Questa guida definisce le regole di struttura, navigazione e logica del **Design System Master V3.9**. Tutte le pagine devono attenersi a questi standard per garantire velocità, sicurezza e coerenza.
 
 ---
 
 ## 1) Fondamenti del Sistema (Immersive Architecture)
 
-### 1.1) Background Universale & Immersivo
-Tutte le pagine condividono lo stesso sfondo con gradiente gestito dalla classe `.base-bg` (Body).
-- **Tassativo**: Il gradiente deve avere `background-attachment: fixed`. Lo sfondo non scorre, creando profondità mentre la card si muove sopra di esso.
-- **Container**: La classe `.base-container` deve essere sempre **trasparente** (`background: transparent`) per mostrare lo sfondo del body.
+### 1.1) Background & Glassmorphism (V3.9 Standard)
+L'estetica si basa su interfacce trasparenti che poggiano su uno sfondo fisso.
+- **Sfondo**: Classe `.base-bg` nel body con `background-attachment: fixed`.
+- **Matrix Card**: Per grid interattive, usare il design Glassmorphism:
+  - `backdrop-filter: blur(12px)`
+  - Sfumature `rgba(255, 255, 255, 0.05)` (Dark) e contrasto adattivo.
+  - **Icone Adattive**: In modalità Light, le icone devono ereditare `var(--text-primary)` per garantire leggibilità.
 
-### 1.2) Scorrimento Nativo (Zero Space Ghost)
-Per evitare spazi vuoti in fondo alla pagina o tagli di contenuto in alto:
+### 1.2) Scorrimento Nativo
 - **Tassativo**: Lo scorrimento deve avvenire esclusivamente tramite il `body`.
-- **Divieto**: È vietato l'uso di `overflow-y: auto` o `scroll` all'interno di `.base-container` o `.vault`.
+- **Divieto**: È vietato l'uso di `overflow-y: auto` o `scroll` all'interno di `.base-container`.
 
 ---
 
@@ -22,109 +24,67 @@ Per evitare spazi vuoti in fondo alla pagina o tagli di contenuto in alto:
 
 ### 2.1) Pagine "Servizio" (Autenticazione)
 *Pagine: index.html, registrati.html, reset_password.html, imposta_nuova_password.html*
-
-- **Modalità**: Dark fissa (Nero).
-- **Layout**: Centratura dinamica (Centred if short, scroll if long).
-- **Centratura Robusta (Mobile)**: Sotto i 480px, la centratura è affidata a `margin-block: auto` sulla classe `.vault`. Questo garantisce che la card non venga mai "tagliata" in alto.
-- **Saetta System (Premium)**: Ogni card deve contenere il doppio effetto:
-  1. `.saetta-master` (Shimmer metallico di sfondo).
-  2. `.saetta-drop` (Linea verticale blu che cade).
-- **Faro (Glow)**: La classe `.base-glow` deve essere `position: fixed` per rimanere sempre visibile in alto mentre l'utente scorre.
+- **Layout**: Centratura tramite `.vault` con `margin-block: auto` (Mobile Friendly).
+- **Effetti**: Devono includere `.saetta-master` (shimmer) e `.saetta-drop` (animazione verticale).
 
 ### 2.2) Pagine "Contenuto" (Applicazione)
-*Tutte le altre pagine (Home, Liste, Dettagli, Form, Impostazioni, ecc.)*
-
-- **Modalità**: Adaptive (Switch Chiaro/Scuro).
-- **Layout**: Struttura a fasce obbligatoria con Header e Footer.
-
-#### A) Layout Header (Fascia Alta)
-- **Sinistra**: Solo icona "Freccia" (`arrow_back`). La logica di ritorno deve essere lineare (es: Form -> Dettaglio -> Lista -> Home).
-- **Centro**: Nome della pagina o Saluto Dinamico. Il titolo assume il colore del tema o del brand.
-- **Destra**: Icona "Home" (`home`) sempre presente (tranne in Home).
-
-#### B) Layout Footer (Fascia Bassa)
-- **Sinistra**: Switch per modalità Chiaro/Scuro (`dark_mode` / `light_mode`).
-- **Centro**: Icone funzionali specifiche della pagina (es: Aggiungi, Salva).
-- **Destra**: Icona "Impostazioni" (`tune`) sempre presente (tranne in Impostazioni).
-
-#### C) Stile Icone e Colori
-- **Minimalismo**: Icone "nude", senza bordi o cerchi di sfondo.
-- **Colore Dinamico**: Titoli e icone cambiano colore (Bianco/Deep Slate) in base al tema selezionato.
+- **Header (Fascia Alta)**: Layout "Balanced" con 3 aree (SX: Back/Avatar, C: Titolo, DX: Home/Logout).
+- **Footer (Fascia Bassa)**: Layout "Balanced" (SX: Theme Switcher, DX: Settings).
 
 ---
 
-## 3) Eccezioni e Casi Specifici
+## 3) Gestione Multilingua (Protocollo Cleanup V3.9)
 
-### 3.1) Home Page (`home_page.html`)
-- **Header SX**: Avatar utente (link a Profilo Privato). Niente freccia "Back".
-- **Header DX**: Pulsante Logout. Niente icona "Home".
-- **Titolo**: Saluto dinamico (es: "Ciao, Nome"), centrato.
+L'applicazione utilizza un motore di traduzione **completamente centralizzato**. Non è ammesso scrivere logica di traduzione nei file JS delle singole pagine.
 
-### 3.2) Profilo & Impostazioni
-- **Layout SX/C/DX**: Standard (Back, Titolo, Home).
-- **Footer DX**: Nella pagina Impostazioni, l'icona `tune` deve apparire opaca o disabilitata per indicare lo stato "Current Page".
+### 3.1) Automatizzazione
+Grazie all'unione di `main.js` e `cleanup.js`, la traduzione avviene automaticamente al caricamento del DOM per tutti gli elementi con:
+- `data-t="chiave"`: Contenuto testuale.
+- `data-t-placeholder="chiave"`: Testo segnaposto negli input.
+- `data-t-aria="chiave"`: Etichette di accessibilità.
+
+### 3.2) Protezione Icone
+Il motore di traduzione è istruito per preservare gli elementi `<span>` con classe `.material-symbols-outlined`. Questo permette di tradurre testi accanto alle icone senza cancellare l'aspetto visivo dei pulsanti.
 
 ---
 
-## 4) Tipografia & Performance (TASSATIVO V3.8)
+## 4) Tipografia & Performance
 
-Per eliminare i warning del browser ("preload not used") e garantire velocità massima:
-
-- **Caricamento**: Usare esclusivamente `core_fonts.css`.
-- **Preload**: Inserire SEMPRE i tag di preload prima di qualsiasi CSS.
-- **Anti-Flicker**: Inserire `data-i18n="loading"` nel tag `<html>` per evitare sbalzi di testo durante la traduzione.
-
-### 4.1) Blocco Standard Testata (Copia & Incolla)
-Ogni nuova pagina deve iniziare con questa struttura nell' `<head>`:
+### 4.1) Testata Standard (TASSATIVO)
+Utilizzare esclusivamente la modularità V3.8/3.9 per caricare solo il CSS necessario:
 
 ```html
-<!-- 1. Preload Font (Velocità) -->
+<!-- 1. Preload Font -->
 <link rel="preload" href="assets/fonts/manrope/manrope-11.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/material-symbols/material-symbols-0.woff2" as="font" type="font/woff2" crossorigin>
 
-<!-- 2. Core Fonts (Forzatura Body & Icone) -->
+<!-- 2. Core (Sempre necessari) -->
 <link rel="stylesheet" href="assets/css/core_fonts.css">
-
-<!-- 3. Design System (Layout & Temi) -->
 <link rel="stylesheet" href="assets/css/core.css?v=3.8">
+<link rel="stylesheet" href="assets/css/core_fascie.css">
+
+<!-- 3. Pagina specifica -->
+<link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
 ```
 
-- **Zero Nuovi Font**: Non è ammesso l'uso di font esterni o file `fonts.css` obsoleti nelle nuove pagine standardizzate.
+---
+
+## 5) Chiavi ARIA Standard (Accessibilità Universale)
+
+Per mantenere coerenza, utilizzare sempre queste chiavi nel dizionario:
+- `select_language`: Per il pulsante del selettore lingua.
+- `show_hide_data`: Per il toggle visibilità password (occhio).
+- `aria_profile`: Per il link all'utente nell'header.
+- `aria_logout`: Per il pulsante di uscita.
+- `aria_settings`: Per l'icona ingranaggio/tune.
 
 ---
 
-## 5) Sicurezza & Integrità (Protocollo Security)
-
-Ogni pagina deve includere le misure di protezione previste dal Protocollo V3.8:
-
-- **CSP (Content Security Policy)**: Presente in testata come tag `<meta>`, ma tenuto in **standby** (commentato `<!-- -->`) durante la fase di sviluppo per evitare blocchi dei tool di debug. Deve essere presente e pronto per l'attivazione pre-produzione.
-- **Iconografia di Sicurezza**: Nelle pagine di servizio (Login/Reset), l'uso dell'icona `security` all'interno di `.icon-box` è lo standard visivo per indicare l'accesso al Vault.
-- **Attributi Input**: Obbligo di usare `autocomplete="current-password"` o `new-password` e `type="password"`. 
-- **Mapping Credenziali**: Nelle pagine di impostazione nuova password, inserire sempre un campo `<input name="username" style="display:none">` per permettere ai Password Manager di associare correttamente la password all'account.
-- **Viewport Protection**: Utilizzo di `viewport-fit=cover` e restrizioni allo zoom per evitare "break" visivi su dispositivi mobili durante l'inserimento dati.
+## 6) Audit di Consolidamento (Checklist Finale)
+1. **Traduzione**: Ogni stringa testuale, placeholder e label ARIA usa un attributo `data-t`?
+2. **Modularità**: I file JS della pagina sono privi di logica `applyLocalTranslations`?
+3. **Design**: Il blur nelle Matrix Card è impostato a 12px?
+4. **Mobile**: Le icone sono cliccabili con feedback trasparente (`-webkit-tap-highlight-color: transparent`)?
 
 ---
-
-## 6) Gestione Multilingua (Protocollo Translations)
-
-L'applicazione utilizza un sistema di traduzione centralizzato in `assets/js/translations.js`.
-
-- **Attributi Tassativi**:
-  - `data-t="chiave"`: Per tradurre il contenuto testuale (`textContent`).
-  - `data-t-placeholder="chiave"`: Per tradurre il placeholder degli input.
-  - `data-t-aria="chiave"`: Per tradurre gli attributi `aria-label` (accessibilità).
-- **Metodo Tassativo**: È vietato inserire stringhe di testo fisse nell'HTML. Ogni parola deve passare dal dizionario.
-- **Pulizia**: Rimuovere sempre le chiavi obsolete (es. `login_hint`) per mantenere il sistema leggero ed evitare confusione.
-- **Integrità**: In caso di aggiunta di una nuova chiave, questa deve essere replicata in tutte le lingue supportate (IT, EN, ES, FR, DE).
-
----
-
-## 7) Protocollo di Consolidamento Pagina (Audit V3.8)
-
-Ogni pagina completata deve superare i seguenti controlli:
-1. **Audit Immersivo**: Lo sfondo è fisso? Il container è trasparente?
-2. **Audit Scroll**: Lo scorrimento è delegato al body? Non ci sono overflow interni?
-3. **Audit Lingua**: Ogni stringa è mappata? Placeholder e ARIA inclusi?
-
----
-*Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.8 (Immersive Architecture & Mobile Robustness)*
+*Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.9 (Centralized Logic & Glassmorphism Design)*
