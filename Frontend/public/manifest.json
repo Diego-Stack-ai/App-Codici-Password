@@ -1,6 +1,6 @@
 {
     "name": "App Codici & Password",
-    "short_name": "App Codici",
+    "short_name": "Codici & Password",
     "description": "Cassaforte sicura per le tue credenziali e scadenze.",
     "start_url": "/",
     "display": "standalone",

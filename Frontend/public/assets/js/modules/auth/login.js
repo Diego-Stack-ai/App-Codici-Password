@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupLoginForm();
         setupLanguageSelector();
         setupPasswordToggle();
-        setupPasswordRecovery();
 
         console.log("[LOGIN] System Ready.");
     } catch (err) {
@@ -53,9 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Traduzioni locali della pagina
  */
 function applyLocalTranslations() {
-    document.querySelectorAll('[data-t], [data-t-placeholder]').forEach(el => {
+    document.querySelectorAll('[data-t], [data-t-placeholder], [data-t-aria]').forEach(el => {
         const key = el.getAttribute('data-t');
         const placeholderKey = el.getAttribute('data-t-placeholder');
+        const ariaKey = el.getAttribute('data-t-aria');
 
         if (key) {
             const translated = t(key);
@@ -76,6 +76,13 @@ function applyLocalTranslations() {
             const translated = t(placeholderKey);
             if (translated && translated !== placeholderKey) {
                 el.setAttribute('placeholder', translated);
+            }
+        }
+
+        if (ariaKey) {
+            const translated = t(ariaKey);
+            if (translated && translated !== ariaKey) {
+                el.setAttribute('aria-label', translated);
             }
         }
     });
@@ -229,38 +236,5 @@ function setupPasswordToggle() {
     });
 }
 
-/**
- * Recupero Password via Modale Premium
- */
-function setupPasswordRecovery() {
-    const link = document.getElementById('link-forgot-password');
-    if (!link) return;
 
-    link.onclick = async (e) => {
-        e.preventDefault();
-
-        const email = await showInputModal(
-            t('forgot_password') || "Recupero Password",
-            "",
-            "Inserisci la tua email..."
-        );
-
-        if (email) {
-            // Validazione base
-            if (!email.includes('@')) {
-                showToast("Inserisci un'email valida per il recupero.", "error");
-                return;
-            }
-
-            showToast("Invio istruzioni in corso...", "info");
-
-            // Qui andrebbe la chiamata Firebase Auth per reset password
-            // await sendPasswordResetEmail(auth, email);
-
-            setTimeout(() => {
-                showToast("Se l'email esiste, riceverai un link a breve.", "success");
-            }, 1500);
-        }
-    };
-}
 

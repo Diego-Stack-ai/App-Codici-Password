@@ -75,4 +75,41 @@ Tutte le pagine condividono lo stesso sfondo con gradiente e l'effetto dinamico 
 - **Zero Nuovi Font**: Non è ammesso l'uso di font esterni non censiti nel sistema.
 
 ---
-*Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.7 (Full Architecture)*
+
+## 5) Sicurezza & Integrità (Protocollo Security)
+
+Ogni pagina deve includere le misure di protezione previste dal Protocollo V3.7:
+
+- **CSP (Content Security Policy)**: Presente in testata come tag `<meta>`. Definisce le sorgenti autorizzate per script, stili e dati (Firebase/Google). È tassativo non rimuoverlo o indebolirlo.
+- **Iconografia di Sicurezza**: Nelle pagine di servizio (Login/Reset), l'uso dell'icona `security` all'interno di `.icon-box` è lo standard visivo per indicare l'accesso al Vault.
+- **Attributi Input**: Obbligo di usare `autocomplete="current-password"` o `new-password` e `type="password"` per la gestione sicura del portachiavi del browser.
+- **Viewport Protection**: Utilizzo di `viewport-fit=cover` e restrizioni allo zoom per evitare "break" visivi su dispositivi mobili durante l'inserimento dati.
+
+---
+
+## 6) Gestione Multilingua (Protocollo Translations)
+
+L'applicazione utilizza un sistema di traduzione centralizzato in `assets/js/translations.js`.
+
+- **Attributi Tassativi**:
+  - `data-t="chiave"`: Per tradurre il contenuto testuale (`textContent`).
+  - `data-t-placeholder="chiave"`: Per tradurre il placeholder degli input.
+  - `data-t-aria="chiave"`: Per tradurre gli attributi `aria-label` (accessibilità).
+- **Metodo Tassativo**: È vietato inserire stringhe di testo fisse nell'HTML. Ogni parola deve passare dal dizionario.
+- **Pulizia**: Rimuovere sempre le chiavi obsolete (es. `login_hint`) per mantenere il sistema leggero ed evitare confusione.
+- **Integrità**: In caso di aggiunta di una nuova chiave, questa deve essere replicata in tutte le lingue supportate (IT, EN, ES, FR, DE).
+
+---
+
+## 7) Protocollo di Consolidamento Pagina (Revisione Atomica)
+
+Il consolidamento dell'applicazione avviene secondo un processo **atomico per singola pagina**. Non è ammesso passare alla revisione di una nuova pagina se quella attuale non è conforme al 100%.
+
+- **Check-list di Consolidamento**:
+  1. **Audit CSS**: Allineamento completo al sistema di classi V3.7 (rimozione vecchi prefissi).
+  2. **Audit Lingua**: Controllo che ogni stringa (testo, placeholder, aria-label) sia mappata in `translations.js`.
+  3. **Audit Performance**: Verifica dei tag `preload` e dell'ordine di caricamento dei font.
+- **Workflow**: Si lavora su una pagina alla volta su indicazione dell'utente. Ogni pagina completata deve essere considerata un "prodotto finito" e non deve richiedere ulteriori interventi strutturali.
+
+---
+*Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.7 (Full Architecture, Security & Multilingua)*

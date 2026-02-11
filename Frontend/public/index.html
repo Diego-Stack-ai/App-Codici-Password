@@ -38,7 +38,8 @@
             <div class="card border-glow">
                 <!-- Language Selector (Anchor to Card) -->
                 <div class="lang-selector-container">
-                    <button id="lang-toggle-btn" class="lang-btn" aria-label="Cambia Lingua">
+                    <button id="lang-toggle-btn" class="lang-btn" aria-label="Cambia Lingua"
+                        data-t-aria="aria_lang_selector">
                         <span class="material-symbols-outlined">language</span>
                     </button>
                     <div id="lang-dropdown" class="lang-dropdown">
@@ -57,7 +58,7 @@
 
                 <!-- Titoli -->
                 <h1 class="title" data-t="login_title">Accedi</h1>
-                <p class="subtitle" data-t="login_subtitle">Inserisci le tue credenziali</p>
+                <p class="subtitle" data-t="login_subtitle">Accesso Sicuro</p>
 
                 <!-- Form Autenticazione -->
                 <form id="login-form">
@@ -76,7 +77,7 @@
                             <input id="password" name="password" type="password" autocomplete="current-password"
                                 required class="input" placeholder="********">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
-                                aria-label="Mostra Password">
+                                aria-label="Mostra Password" data-t-aria="aria_toggle_password">
                                 <span class="material-symbols-outlined">visibility</span>
                             </button>
                         </div>

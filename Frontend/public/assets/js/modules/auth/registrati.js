@@ -38,13 +38,15 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Traduzioni locali
  */
 function applyLocalTranslations() {
-    document.querySelectorAll('[data-t], [data-t-placeholder]').forEach(el => {
+    document.querySelectorAll('[data-t], [data-t-placeholder], [data-t-aria]').forEach(el => {
         const key = el.getAttribute('data-t');
         const placeholderKey = el.getAttribute('data-t-placeholder');
+        const ariaKey = el.getAttribute('data-t-aria');
 
         if (key) {
             const translated = t(key);
             if (translated && translated !== key) {
+                // Preserva icone Material symbols
                 const icon = el.querySelector('.material-symbols-outlined');
                 if (icon) {
                     let textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== "");
@@ -60,6 +62,13 @@ function applyLocalTranslations() {
             const translated = t(placeholderKey);
             if (translated && translated !== placeholderKey) {
                 el.setAttribute('placeholder', translated);
+            }
+        }
+
+        if (ariaKey) {
+            const translated = t(ariaKey);
+            if (translated && translated !== ariaKey) {
+                el.setAttribute('aria-label', translated);
             }
         }
     });
@@ -90,13 +99,13 @@ function setupRegisterForm() {
 
         // 2. Controllo Corrispondenza Password
         if (password !== confirmPass) {
-            showToast(t('password_mismatch') || "Le password non coincidono", "error");
+            showToast(t('error_password_mismatch'), "error");
             return;
         }
 
-        // 3. Password Strength (Min 6 per Firebase, V4.1 richiede 12 caratteri per sicurezza consigliata)
+        // 3. Password Strength (Min 12 caratteri come da standard sicurezza)
         if (password.length < 12) {
-            showToast("La password deve avere almeno 12 caratteri.", "warning");
+            showToast(t('error_password_too_short'), "warning");
             return;
         }
 
@@ -113,7 +122,7 @@ function setupRegisterForm() {
             console.log("[REGISTER] Creating account...");
             await register(nome, cognome, email, password);
 
-            showToast(t('verify_email_title') || "Controlla la tua email per verificare l'account.", "success");
+            showToast(t('success_registration'), "success");
 
             // Redirect al login dopo successo
             setTimeout(() => {
@@ -127,14 +136,14 @@ function setupRegisterForm() {
             setChildren(submitBtn, originalContent);
             document.body.classList.remove('is-auth-progress');
 
-            let errorMsg = t('error_generic') || "Impossibile completare la registrazione.";
+            let errorKey = 'error_registration_failed';
             if (err.code === 'auth/email-already-in-use') {
-                errorMsg = "Questa email è già registrata.";
+                errorKey = 'error_email_in_use';
             } else if (err.code === 'auth/invalid-email') {
-                errorMsg = "Formato email non valido.";
+                errorKey = 'error_invalid_email';
             }
 
-            showToast(errorMsg, "error");
+            showToast(t(errorKey), "error");
         }
     });
 }

@@ -37,9 +37,10 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Traduzioni locali
  */
 function applyLocalTranslations() {
-    document.querySelectorAll('[data-t], [data-t-placeholder]').forEach(el => {
+    document.querySelectorAll('[data-t], [data-t-placeholder], [data-t-aria]').forEach(el => {
         const key = el.getAttribute('data-t');
         const placeholderKey = el.getAttribute('data-t-placeholder');
+        const ariaKey = el.getAttribute('data-t-aria');
 
         if (key) {
             const translated = t(key);
@@ -59,6 +60,13 @@ function applyLocalTranslations() {
             const translated = t(placeholderKey);
             if (translated && translated !== placeholderKey) {
                 el.setAttribute('placeholder', translated);
+            }
+        }
+
+        if (ariaKey) {
+            const translated = t(ariaKey);
+            if (translated && translated !== ariaKey) {
+                el.setAttribute('aria-label', translated);
             }
         }
     });
@@ -97,14 +105,14 @@ function setupResetForm() {
             console.log("[RESET] Sending recovery email to:", email);
             await resetPassword(email);
 
-            showToast(t('success_reset_sent') || "Istruzioni inviate! Controlla la tua email.", "success");
+            showToast(t('success_reset_sent'), "success");
 
             emailEl.value = '';
 
-            // Redirect opzionale al login dopo successo
+            // Redirect al login dopo successo per migliorare la UX
             setTimeout(() => {
                 window.location.href = "index.html";
-            }, 5000);
+            }, 3000);
 
         } catch (err) {
             console.error("[RESET] Failure:", err);
@@ -113,12 +121,14 @@ function setupResetForm() {
             setChildren(submitBtn, originalContent);
             document.body.classList.remove('is-auth-progress');
 
-            let errorMsg = t('error_auth_failed') || "Impossibile inviare l'email di recupero.";
+            let errorKey = 'error_generic';
             if (err.code === 'auth/user-not-found') {
-                errorMsg = "Nessun account associato a questa email.";
+                errorKey = 'error_user_not_found';
+            } else if (err.code === 'auth/invalid-email') {
+                errorKey = 'error_invalid_email';
             }
 
-            showToast(errorMsg, "error");
+            showToast(t(errorKey), "error");
         }
     });
 }
