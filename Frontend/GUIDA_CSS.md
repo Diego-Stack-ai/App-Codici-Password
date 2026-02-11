@@ -1,131 +1,78 @@
-GUIDA RAPIDA CLASSI CSS E STANDARD BASE (REVISIONATA)
+# GUIDA RAPIDA CLASSI CSS E STANDARD CORE (V3.7)
 
-Questa guida raccoglie le regole fondamentali di struttura e le principali classi CSS del progetto. Aggiorna questa guida ogni volta che aggiungi nuove classi o vuoi documentare uno stile.
+Questa guida definisce le regole fondamentali di struttura, navigazione e classi CSS del **Design System Master V3.7**. Tutte le pagine devono attenersi a questi standard.
 
-1) Gestione della base pagine
-1.1) Pagine di accesso (solo tema scuro)
+---
 
-Pagine:
+## 1) Fondamenti del Sistema
 
-index.html (login)
+### 1.1) Background Universale
+Tutte le pagine condividono lo stesso sfondo con gradiente e l'effetto dinamico garantito dalla classe `.base-bg`. È vietato sovrascrivere lo sfondo globalmente nelle singole pagine.
 
-registrati.html
+### 1.2) Reset Globale & Box Model
+```css
+* { margin: 0; padding: 0; box-sizing: border-box; }
+```
 
-reset_password.html
+---
 
-imposta_nuova_password.html
+## 2) Categorie di Pagine
 
-Classi CSS principali (dark-only):
+### 2.1) Pagine "Servizio" (Autenticazione)
+*Pagine: index.html, registrati.html, reset_password.html, imposta_nuova_password.html*
 
-Classe	Funzione
-base-bg	Sfondo principale della pagina (full viewport, dark).
-padding	Contenitore full screen che centra verticalmente e orizzontalmente il vault. Serve anche per dare lo sfondo alla pagina.
-auth-vault	Wrapper interno del padding: contiene la card, i pulsanti o i box, centrato e separato dallo sfondo. Può avere proprietà responsive per mobile/tablet.
-base-glow	Faro/effetto glow dietro la card/pulsanti. Animazione sempre visibile e sopra lo sfondo ma sotto la card.
-auth-card	Card principale di login/registrazione. Bordo arrotondato, padding interno e shadow. Solo dove serve (accesso o dati personali).
-border-glow	Bordo luminoso attorno alla card (effetto glow extra).
-saetta-master / saetta-drop	Linea di luce animata, da usare sempre insieme per effetto dinamico “saetta”.
-auth-icon-box	Contiene l’icona centrale della card (lucchetto, chiave, ecc.).
-auth-title, auth-subtitle	Titolo e sottotitolo della card.
-auth-form-group, auth-label, auth-input	Gruppi, etichette e campi input del form.
-auth-btn-primary	Pulsante principale (Accedi, Registrati).
+- **Modalità**: Dark fissa (Nero).
+- **Layout**: Nessun header/footer standard. Impossibilità di cambiare tema.
+- **Container**: Obbligo di utilizzo classe `.card` con `.border-glow`.
+- **Saetta System (Premium)**: Ogni card deve contenere il doppio effetto:
+  1. `.saetta-master` (Shimmer metallico di sfondo, intensità ~8%).
+  2. `.saetta-drop` (Linea verticale blu che cade).
+- **Selettore Lingua**: Deve essere ancorato **dentro** la card in alto a destra (`.lang-selector-container` inside `.card`).
+- **Responsive**: Sotto i 480px, la card si adatta a `width: 90%` con `max-width: 360px` per mantenere l’estetica "compatta" e centrata.
 
-Nota: In queste pagine non esiste il tema chiaro. Tutto dark.
+### 2.2) Pagine "Contenuto" (Applicazione)
+*Tutte le altre pagine (Home, Liste, Dettagli, Form, Impostazioni, ecc.)*
 
-1.2) Restanti pagine (tema chiaro/scuro, layout a fasce)
+- **Modalità**: Adaptive (Switch Chiaro/Scuro).
+- **Layout**: Struttura a fasce obbligatoria con Header e Footer.
 
-Classi principali per la base:
+#### A) Layout Header (Fascia Alta)
+- **Sinistra**: Solo icona "Freccia" (`arrow_back`). La logica di ritorno deve essere lineare (es: Form -> Dettaglio -> Lista -> Home).
+- **Centro**: Nome della pagina o Saluto Dinamico. Il titolo assume il colore del tema o del brand.
+- **Destra**: Icona "Home" (`home`) sempre presente (tranne in Home).
 
-Classe	Funzione
-base-bg	Sfondo della pagina (light/dark).
-base-container	Contenitore principale per la parte centrale della pagina.
+#### B) Layout Footer (Fascia Bassa)
+- **Sinistra**: Switch per modalità Chiaro/Scuro (`dark_mode` / `light_mode`).
+- **Centro**: Icone funzionali specifiche della pagina (es: Aggiungi, Salva).
+- **Destra**: Icona "Impostazioni" (`tune`) sempre presente (tranne in Impostazioni).
 
-Header:
+#### C) Stile Icone e Colori
+- **Minimalismo**: Icone "nude", senza bordi o cerchi di sfondo.
+- **Colore Dinamico**: Titoli e icone cambiano colore (Bianco/Deep Slate) in base al tema selezionato.
 
-header-balanced-container, header-left, header-center, header-right
+---
 
-header-avatar-box, profile-header-link, header-user-info
+## 3) Eccezioni e Casi Specifici
 
-header-title, header-greeting-text
+### 3.1) Home Page (`home_page.html`)
+- **Header SX**: Avatar utente (link a Profilo Privato). Niente freccia "Back".
+- **Header DX**: Pulsante Logout. Niente icona "Home".
+- **Titolo**: Saluto dinamico (es: "Ciao, Nome"), centrato.
 
-btn-icon-header
+### 3.2) Profilo & Impostazioni
+- **Layout SX/C/DX**: Standard (Back, Titolo, Home).
+- **Footer DX**: Nella pagina Impostazioni, l'icona `tune` deve apparire opaca o disabilitata per indicare lo stato "Current Page".
 
-Footer:
+---
 
-footer-balanced-container, footer-left, footer-center, footer-right
+## 4) Tipografia & Performance (TASSATIVO)
 
-btn-theme-switch, btn-footer-icon
+- **Caricamento**: Usare esclusivamente `core_fonts.css` e i tag di `preload` per Manrope e Material Symbols.
+- **Ordine**: 
+  1. `<link rel="preload" ...>`
+  2. `core_fonts.css`
+  3. `core.css?v=3.7`
+- **Zero Nuovi Font**: Non è ammesso l'uso di font esterni non censiti nel sistema.
 
-Utility:
-
-flex, flex-col, flex-center, flex-center-col
-
-items-center, justify-center, justify-between
-
-w-full, h-full, p-0, p-3, p-4, px-4, py-2, mt-2, mt-4, mb-2
-
-rounded-xl, border-glow
-
-bg-primary, bg-accent-blue, text-accent-blue, font-bold, ecc.
-
-Nota: Qui si usano pulsanti o box anche al posto delle card. Gli effetti glow e saetta possono essere applicati solo se serve dinamismo.
-
-2) Struttura e gerarchia padding / vault / card / pulsanti
-
-Padding → occupa tutto lo schermo, sfondo principale. Centra il vault verticalmente e orizzontalmente. Non deve mai essere visibile come bordo.
-
-Vault (auth-vault) → contenitore interno al padding, gestisce larghezza, responsive e centramento dei contenuti (card, box, pulsanti). Può avere padding interno se serve.
-
-Card / Box / Pulsanti → contenuti reali dell’app. Possono essere card (accesso/dati personali) o box/pulsanti normali. Hanno z-index superiore a vault e glow/faro.
-
-Effetti → base-glow e saetta-master/drop sempre dietro il contenitore reale (card o box).
-
-In sintesi: padding = sfondo e centratura dello schermo, vault = wrapper centrato dei contenuti, card/box/pulsanti = contenuto reale.
-
-3) Standard di Layout: Header e Footer
-
-Header: SX = Back/Avatar, C = Titolo, DX = Home/Impostazioni
-
-Footer: SX = Tema, C = Icone funzionali, DX = Impostazioni/Logout
-
-Icone minimal, colore dinamico secondo tema
-
-Eccezioni:
-
-Home: SX = avatar, DX = logout, nessun Home
-
-Profilo/Impostazioni: standard, ma tasto settings DX opaco/disabilitato
-
-4) Consigli pratici
-
-Riutilizza sempre le classi della guida per coerenza grafica.
-
-Nuove classi → solo in operatore.css / core.css, documentare nella guida.
-
-Dark-only: login, registrazione, reset password, nuova password.
-
-Dark/light: tutte le altre pagine.
-
-5) Font (core_fonts.css)
-
-Manrope → testi principali, pesi 400 e 700.
-
-Material Symbols Outlined → icone, peso variabile 100–700.
-
-Regola: mai inserire font in altri CSS o HTML. Modifiche → approvazione responsabile.
-
-Sempre includere core_fonts.css prima del core.css.
-
-6) Migrazione e istruzioni operative
-
-Aggiornare ogni pagina HTML:
-
-Includere core_fonts.css e core.css
-
-Sostituire vecchie classi con nuove (vedi tabella guida)
-
-Verificare compatibilità visiva dark/light
-
-Dopo ogni modifica: commit + push Git
-
-Al termine della migrazione: rimuovere classi vecchie e operatore.css non più necessarie
+---
+*Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.7 (Full Architecture)*
