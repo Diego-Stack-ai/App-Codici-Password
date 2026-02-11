@@ -1,6 +1,13 @@
 /* =======================
-   CORE CSS - layout & effetti
+   ANTI-FLICKER SYSTEM (V3.8)
    ======================= */
+html[data-i18n="loading"] body {
+    visibility: hidden;
+}
+
+html[data-i18n="ready"] body {
+    visibility: visible;
+}
 
 * {
     margin: 0;
@@ -57,21 +64,14 @@
    BASE SFONDO E CENTRATURA
    ----------------------- */
 .base-bg {
-    background: var(--bg-primary);
+    background: var(--base-box-gradient);
+    background-attachment: fixed;
+    /* Lo sfondo non scorre, la card sì */
     color: var(--text-primary);
     min-height: 100dvh;
     overflow-x: hidden;
     position: relative;
     font-family: 'Manrope', sans-serif;
-}
-
-.padding {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1.5rem;
-    min-height: 100vh;
-    position: relative;
 }
 
 /* NASCONDI BARRA DI SCORRIMENTO */
@@ -90,17 +90,15 @@ body,
 .base-container {
     position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100dvh;
     width: 100%;
     max-width: 60rem;
     margin: 0 auto;
-    background: var(--base-box-gradient);
-    overflow: hidden;
-    padding: 2rem 1.5rem;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
-    font-family: 'Manrope', sans-serif;
+    background: transparent;
+    /* Trasparente per mostrare lo sfondo immersivo del body */
 }
 
 /* -----------------------
@@ -108,7 +106,8 @@ body,
    ----------------------- */
 
 .base-glow {
-    position: absolute;
+    position: fixed;
+    /* Il bagliore rimane fisso in alto mentre scorri */
     top: 0;
     left: 50%;
     width: 150%;
@@ -365,71 +364,34 @@ body,
     }
 }
 
-/* Responsive: Tablet e Mobile */
-@media (max-width: 768px) {
+/* Responsive: Desktop / Tablet */
+@media (min-width: 481px) {
     .base-container {
-        max-width: 100vw;
-        margin: 0 auto;
-        padding: 0 1.5rem;
-        min-height: 100vh;
-        overflow-y: auto;
-    }
-
-    .vault {
-        max-width: 100vw;
-        margin: 0 auto;
-    }
-
-    .card {
-        padding: 2rem 1.5rem;
-        margin: 1rem auto;
-        max-width: 95vw;
-    }
-
-    .icon-box {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 1rem;
-    }
-
-    .base-glow {
-        width: 100vw;
-        height: 200vw;
-        filter: blur(60px);
+        padding: 2.5rem 1.5rem;
+        /* Zona di rispetto Premium */
     }
 }
 
+/* Responsive: Mobile */
 @media (max-width: 480px) {
     .base-container {
-        padding: 0 0.75rem;
-        min-height: 100vh;
-        overflow-y: auto;
-        /* Assicura lo scroll se serve */
-    }
-
-    .card {
-        width: 90%;
-        max-width: 340px;
-        padding: 1.25rem 1rem;
-        margin: 0 auto;
-    }
-
-    .title {
-        font-size: 1.5rem;
-    }
-
-    .icon-box {
-        width: 50px;
-        height: 50px;
-        margin-bottom: 0.75rem;
-    }
-
-    .icon-box .material-symbols-outlined {
-        font-size: 28px;
+        padding: 1.25rem 0.75rem;
+        flex-direction: column;
+        justify-content: center;
+        /* Centratura preservata */
     }
 
     .vault {
+        width: 100%;
         max-width: 100vw;
+        margin-block: auto;
+        /* Trucco Premium: centra se corto, scrolla se lungo */
+    }
+
+    .card {
+        width: 100%;
+        max-width: 340px;
+        padding: 1.5rem 1.25rem;
         margin: 0 auto;
     }
 }

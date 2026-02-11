@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 2. TRADUZIONI 
         applyLocalTranslations();
+        document.documentElement.setAttribute("data-i18n", "ready");
 
         // 3. SETUP 
         setupNewPasswordForm();
@@ -40,9 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Traduzioni locali
  */
 function applyLocalTranslations() {
-    document.querySelectorAll('[data-t], [data-t-placeholder]').forEach(el => {
+    document.querySelectorAll('[data-t], [data-t-placeholder], [data-t-aria]').forEach(el => {
         const key = el.getAttribute('data-t');
         const placeholderKey = el.getAttribute('data-t-placeholder');
+        const ariaKey = el.getAttribute('data-t-aria');
 
         if (key) {
             const translated = t(key);
@@ -62,6 +64,13 @@ function applyLocalTranslations() {
             const translated = t(placeholderKey);
             if (translated && translated !== placeholderKey) {
                 el.setAttribute('placeholder', translated);
+            }
+        }
+
+        if (ariaKey) {
+            const translated = t(ariaKey);
+            if (translated && translated !== ariaKey) {
+                el.setAttribute('aria-label', translated);
             }
         }
     });
@@ -85,7 +94,7 @@ function setupNewPasswordForm() {
 
         // 1. Validazione Protocollo 12-3-3 (Regola Sicurezza)
         if (newPassword.length < 12) {
-            showToast("Minimo 12 caratteri richiesti!", "error");
+            showToast(t('error_password_too_short') || "Minimo 12 caratteri richiesti!", "error");
             return;
         }
 
@@ -93,12 +102,12 @@ function setupNewPasswordForm() {
         const symbolCount = (newPassword.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length;
 
         if (upperCount < 3 || symbolCount < 3) {
-            showToast("Servono almeno 3 MAIUSCOLE e 3 Simboli!", "warning");
+            showToast(t('error_weak_pass_complex') || "Servono almeno 3 MAIUSCOLE e 3 Simboli!", "warning");
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            showToast("Le password non coincidono!", "error");
+            showToast(t('error_password_mismatch') || "Le password non coincidono!", "error");
             return;
         }
 
@@ -118,11 +127,11 @@ function setupNewPasswordForm() {
             if (oobCode) {
                 // CASO RESET ESTERNO
                 await confirmPasswordReset(auth, oobCode, newPassword);
-                showToast("Password ripristinata! Ora puoi accedere.", "success");
+                showToast(t('password_success') || "Password ripristinata! Ora puoi accedere.", "success");
             } else if (auth.currentUser) {
                 // CASO CAMBIO INTERNO
                 await updatePassword(auth.currentUser, newPassword);
-                showToast("Password aggiornata con successo.", "success");
+                showToast(t('password_success') || "Password aggiornata con successo.", "success");
             } else {
                 throw new Error("Sessione non valida o link scaduto.");
             }
@@ -139,11 +148,11 @@ function setupNewPasswordForm() {
             setChildren(submitBtn, originalContent);
             document.body.classList.remove('is-auth-progress');
 
-            let msg = "Impossibile aggiornare la password.";
+            let msg = t('error_generic') || "Impossibile aggiornare la password.";
             if (err.code === 'auth/requires-recent-login') {
-                msg = "Rieffettua il login per motivi di sicurezza.";
+                msg = t('error_reauth_required') || "Rieffettua il login per motivi di sicurezza.";
             } else if (err.code === 'auth/expired-action-code') {
-                msg = "Il link di recupero è scaduto.";
+                msg = t('error_link_expired') || "Il link di recupero è scaduto.";
             }
 
             showToast(msg, "error");

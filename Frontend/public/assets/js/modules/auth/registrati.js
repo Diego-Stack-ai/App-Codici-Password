@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 2. TRADUZIONI 
         applyLocalTranslations();
+        document.documentElement.setAttribute("data-i18n", "ready");
 
         // 3. SETUP FUNZIONALITÀ
         setupRegisterForm();

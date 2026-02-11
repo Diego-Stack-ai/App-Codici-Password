@@ -6,7 +6,7 @@ Protocollo – Istruzioni Base Pagine – Core + Performance & Sicurezza
 1. Istruzioni per la Base delle Pagine
 1.1 Background Universale
 
-Effetto unico: tutte le pagine condividono lo stesso sfondo con gradiente e l’effetto "Diffusion".
+Effetto unico: tutte le pagine condividono lo stesso sfondo con gradiente e l’effetto 
 
 1.2 Categorie di Pagine
 1.2.1 Pagine “Servizio”
@@ -17,9 +17,7 @@ Modalità Dark fissa (Nero).
 
 Nessun header/footer standard e impossibilità di cambiare tema.
 
-Standard UX Auth
-
-Container: obbligo di utilizzo classe .auth-card con .border-glow.
+Container: obbligo di utilizzo classe .card con .border-glow.
 
 Saetta System (Premium): ogni card deve contenere il doppio effetto:
 
@@ -27,27 +25,50 @@ Saetta System (Premium): ogni card deve contenere il doppio effetto:
 
 .saetta-drop (La linea verticale blu che cade, 3s).
 
-Selettore Lingua: nelle pagine di accesso (index, registrati), il selettore lingua deve essere ancorato dentro la card in alto a destra (.lang-selector-container inside .auth-card).
+Selettore Lingua: nelle pagine di accesso (index, registrati), il selettore lingua deve essere ancorato dentro la card in alto a destra (.lang-selector-container inside .card).
 
-Responsive: sotto i 480px, la card si adatta a width: 90% con max-width: 360px per mantenere l’estetica "compatta".
+Responsive: sotto i 480px, la card si adatta a width: 90% con max-width: 360px per mantenere l’estetica "compatta". Da aggiornare ?
 
 1.2.2 Pagine “Contenuto”
 
 Tutte le altre pagine come:
-
-home_page.html, privacy.html, area_privata.html, profilo_privato.html, account_privati.html, dettaglio_account_privato.html, form_account_privato.html, archivio_account.html, lista_aziende.html, dati_azienda.html, account_azienda.html, aggiungi_nuova_azienda.html, modifica_azienda.html, aggiungi_account_azienda.html, dettaglio_account_azienda.html, modifica_account_azienda.html, scadenze.html, aggiungi_scadenza.html, dettaglio_scadenza.html, modifica_scadenza.html, regole_scadenze.html, impostazioni.html, configurazione_generali.html, configurazione_documenti.html, configurazione_automezzi.html, gestione_allegati.html, notifiche_storia.html
+home_page.html
+area_privata.html
+lista_aziende.html
+dati_azienda.html
+account_azienda.html
+account_privati.html
+dettaglio_account_azienda.html
+dettaglio_account_privato.html
+aggiungi_nuova_azienda.html
+modifica_azienda.html
+form_account_azienda.html
+form_account_privato.html
+modifica_account_azienda.html
+scadenze.html
+dettaglio_scadenza.html
+modifica_scadenza.html
+aggiungi_scadenza.html
+archivio_account.html
+regole_scadenze.html
+configurazione_generali.html
+configurazione_automezzi.html
+configurazione_documenti.html
+impostazioni.html
+profilo_privato.html
+notifiche_storia.html
+privacy.html
 
 Layout a fasce (header e footer) e possibilità di switch tra Chiaro e Scuro.
 
 Layout Header (Fascia Alta)
 
-Sinistra: solo icona "Freccia" (back).
+Sinistra: solo icona "Freccia" (back).la freccia serve per andare da una pagina all’altra con una sola logica di questo tipo (form_account_azienda.html torna a dettaglio_account_azienda.html torna a account_azienda.html torna a lista_aziende.html torna a home_page.html. 
 
 Centro: Nome della pagina (o Saluto Dinamico in Home). Se pagina a tema, il titolo assume il colore del tema.
 
 Destra: Icona "Home" sempre presente (tranne nella Home stessa).
 
-Extra: tra titolo e Home, pulsante di ordinamento (A-Z o Data) dove richiesto.
 
 Layout Footer (Fascia Bassa)
 
@@ -63,7 +84,6 @@ Minimalismo: icone senza bordi, cerchi o sfondi, “nude”.
 
 Colore dinamico: icone e titolo diventano bianche o scure in base al tema.
 
-Eccezioni tematiche: se una pagina ha tema colorato, icone e titolo adottano quel colore.
 
 2. Eccezioni Layout Specifiche
 2.1 Home Page (home_page.html)
@@ -81,6 +101,7 @@ Titolo: Saluto dinamico (es: "Ciao, Nome"), centrato.
 Header standard: Back SX, Titolo C, Home DX.
 
 Footer standard: Tema SX, Icone C, Settings DX (su Impostazioni, Settings DX opaco/disabilitato per indicare “sei qui”).
+
 
 3. Regole di Architettura Comune
 

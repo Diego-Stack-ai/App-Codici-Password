@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 2. TRADUZIONI 
         applyLocalTranslations();
+        document.documentElement.setAttribute("data-i18n", "ready");
 
         // 3. INIZIALIZZAZIONE COMPONENTI UI
         initComponents().catch(e => console.log("Info: index ui elements initialized"));

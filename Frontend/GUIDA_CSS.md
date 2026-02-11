@@ -1,18 +1,20 @@
-# GUIDA RAPIDA CLASSI CSS E STANDARD CORE (V3.7)
+# GUIDA RAPIDA CLASSI CSS E STANDARD CORE (V3.8 - Immersive Update)
 
-Questa guida definisce le regole fondamentali di struttura, navigazione e classi CSS del **Design System Master V3.7**. Tutte le pagine devono attenersi a questi standard.
+Questa guida definisce le regole fondamentali di struttura, navigazione e classi CSS del **Design System Master V3.8**. Tutte le pagine devono attenersi a questi standard.
 
 ---
 
-## 1) Fondamenti del Sistema
+## 1) Fondamenti del Sistema (Immersive Architecture)
 
-### 1.1) Background Universale
-Tutte le pagine condividono lo stesso sfondo con gradiente e l'effetto dinamico garantito dalla classe `.base-bg`. È vietato sovrascrivere lo sfondo globalmente nelle singole pagine.
+### 1.1) Background Universale & Immersivo
+Tutte le pagine condividono lo stesso sfondo con gradiente gestito dalla classe `.base-bg` (Body).
+- **Tassativo**: Il gradiente deve avere `background-attachment: fixed`. Lo sfondo non scorre, creando profondità mentre la card si muove sopra di esso.
+- **Container**: La classe `.base-container` deve essere sempre **trasparente** (`background: transparent`) per mostrare lo sfondo del body.
 
-### 1.2) Reset Globale & Box Model
-```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
-```
+### 1.2) Scorrimento Nativo (Zero Space Ghost)
+Per evitare spazi vuoti in fondo alla pagina o tagli di contenuto in alto:
+- **Tassativo**: Lo scorrimento deve avvenire esclusivamente tramite il `body`.
+- **Divieto**: È vietato l'uso di `overflow-y: auto` o `scroll` all'interno di `.base-container` o `.vault`.
 
 ---
 
@@ -22,13 +24,12 @@ Tutte le pagine condividono lo stesso sfondo con gradiente e l'effetto dinamico 
 *Pagine: index.html, registrati.html, reset_password.html, imposta_nuova_password.html*
 
 - **Modalità**: Dark fissa (Nero).
-- **Layout**: Nessun header/footer standard. Impossibilità di cambiare tema.
-- **Container**: Obbligo di utilizzo classe `.card` con `.border-glow`.
+- **Layout**: Centratura dinamica (Centred if short, scroll if long).
+- **Centratura Robusta (Mobile)**: Sotto i 480px, la centratura è affidata a `margin-block: auto` sulla classe `.vault`. Questo garantisce che la card non venga mai "tagliata" in alto.
 - **Saetta System (Premium)**: Ogni card deve contenere il doppio effetto:
-  1. `.saetta-master` (Shimmer metallico di sfondo, intensità ~8%).
+  1. `.saetta-master` (Shimmer metallico di sfondo).
   2. `.saetta-drop` (Linea verticale blu che cade).
-- **Selettore Lingua**: Deve essere ancorato **dentro** la card in alto a destra (`.lang-selector-container` inside `.card`).
-- **Responsive**: Sotto i 480px, la card si adatta a `width: 90%` con `max-width: 360px` per mantenere l’estetica "compatta" e centrata.
+- **Faro (Glow)**: La classe `.base-glow` deve essere `position: fixed` per rimanere sempre visibile in alto mentre l'utente scorre.
 
 ### 2.2) Pagine "Contenuto" (Applicazione)
 *Tutte le altre pagine (Home, Liste, Dettagli, Form, Impostazioni, ecc.)*
@@ -65,24 +66,41 @@ Tutte le pagine condividono lo stesso sfondo con gradiente e l'effetto dinamico 
 
 ---
 
-## 4) Tipografia & Performance (TASSATIVO)
+## 4) Tipografia & Performance (TASSATIVO V3.8)
 
-- **Caricamento**: Usare esclusivamente `core_fonts.css` e i tag di `preload` per Manrope e Material Symbols.
-- **Ordine**: 
-  1. `<link rel="preload" ...>`
-  2. `core_fonts.css`
-  3. `core.css?v=3.7`
-- **Zero Nuovi Font**: Non è ammesso l'uso di font esterni non censiti nel sistema.
+Per eliminare i warning del browser ("preload not used") e garantire velocità massima:
+
+- **Caricamento**: Usare esclusivamente `core_fonts.css`.
+- **Preload**: Inserire SEMPRE i tag di preload prima di qualsiasi CSS.
+- **Anti-Flicker**: Inserire `data-i18n="loading"` nel tag `<html>` per evitare sbalzi di testo durante la traduzione.
+
+### 4.1) Blocco Standard Testata (Copia & Incolla)
+Ogni nuova pagina deve iniziare con questa struttura nell' `<head>`:
+
+```html
+<!-- 1. Preload Font (Velocità) -->
+<link rel="preload" href="assets/fonts/manrope/manrope-11.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/material-symbols/material-symbols-0.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- 2. Core Fonts (Forzatura Body & Icone) -->
+<link rel="stylesheet" href="assets/css/core_fonts.css">
+
+<!-- 3. Design System (Layout & Temi) -->
+<link rel="stylesheet" href="assets/css/core.css?v=3.8">
+```
+
+- **Zero Nuovi Font**: Non è ammesso l'uso di font esterni o file `fonts.css` obsoleti nelle nuove pagine standardizzate.
 
 ---
 
 ## 5) Sicurezza & Integrità (Protocollo Security)
 
-Ogni pagina deve includere le misure di protezione previste dal Protocollo V3.7:
+Ogni pagina deve includere le misure di protezione previste dal Protocollo V3.8:
 
 - **CSP (Content Security Policy)**: Presente in testata come tag `<meta>`. Definisce le sorgenti autorizzate per script, stili e dati (Firebase/Google). È tassativo non rimuoverlo o indebolirlo.
 - **Iconografia di Sicurezza**: Nelle pagine di servizio (Login/Reset), l'uso dell'icona `security` all'interno di `.icon-box` è lo standard visivo per indicare l'accesso al Vault.
-- **Attributi Input**: Obbligo di usare `autocomplete="current-password"` o `new-password` e `type="password"` per la gestione sicura del portachiavi del browser.
+- **Attributi Input**: Obbligo di usare `autocomplete="current-password"` o `new-password` e `type="password"`. 
+- **Mapping Credenziali**: Nelle pagine di impostazione nuova password, inserire sempre un campo `<input name="username" style="display:none">` per permettere ai Password Manager di associare correttamente la password all'account.
 - **Viewport Protection**: Utilizzo di `viewport-fit=cover` e restrizioni allo zoom per evitare "break" visivi su dispositivi mobili durante l'inserimento dati.
 
 ---
@@ -101,15 +119,12 @@ L'applicazione utilizza un sistema di traduzione centralizzato in `assets/js/tra
 
 ---
 
-## 7) Protocollo di Consolidamento Pagina (Revisione Atomica)
+## 7) Protocollo di Consolidamento Pagina (Audit V3.8)
 
-Il consolidamento dell'applicazione avviene secondo un processo **atomico per singola pagina**. Non è ammesso passare alla revisione di una nuova pagina se quella attuale non è conforme al 100%.
-
-- **Check-list di Consolidamento**:
-  1. **Audit CSS**: Allineamento completo al sistema di classi V3.7 (rimozione vecchi prefissi).
-  2. **Audit Lingua**: Controllo che ogni stringa (testo, placeholder, aria-label) sia mappata in `translations.js`.
-  3. **Audit Performance**: Verifica dei tag `preload` e dell'ordine di caricamento dei font.
-- **Workflow**: Si lavora su una pagina alla volta su indicazione dell'utente. Ogni pagina completata deve essere considerata un "prodotto finito" e non deve richiedere ulteriori interventi strutturali.
+Ogni pagina completata deve superare i seguenti controlli:
+1. **Audit Immersivo**: Lo sfondo è fisso? Il container è trasparente?
+2. **Audit Scroll**: Lo scorrimento è delegato al body? Non ci sono overflow interni?
+3. **Audit Lingua**: Ogni stringa è mappata? Placeholder e ARIA inclusi?
 
 ---
-*Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.7 (Full Architecture, Security & Multilingua)*
+*Ultimo aggiornamento: 11 Febbraio 2026 - Standard V3.8 (Immersive Architecture & Mobile Robustness)*
