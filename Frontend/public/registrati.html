@@ -21,10 +21,10 @@
     <link rel="preload" href="assets/fonts/material-symbols/material-symbols-0.woff2" as="font" type="font/woff2"
         crossorigin>
 
-    <!-- Fonts -->
+    <!-- 2. Core (Fonts & Protocollo Base V3.9) -->
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.8) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=3.8">
+    <link rel="stylesheet" href="assets/css/core.css?v=3.9">
+    <link rel="stylesheet" href="assets/css/core_fascie.css">
 </head>
 
 <body class="base-bg">
@@ -67,13 +67,13 @@
                 <form id="register-form">
 
                     <!-- Nome & Cognome -->
-                    <div class="flex-row gap-2">
-                        <div class="form-group flex-1">
+                    <div class="form-row">
+                        <div class="form-group">
                             <label class="label" for="nome" data-t="label_name">Nome</label>
                             <input id="nome" name="nome" type="text" required class="input"
                                 data-t-placeholder="label_name" placeholder="Mario">
                         </div>
-                        <div class="form-group flex-1">
+                        <div class="form-group">
                             <label class="label" for="cognome" data-t="label_surname">Cognome</label>
                             <input id="cognome" name="cognome" type="text" required class="input"
                                 data-t-placeholder="label_surname" placeholder="Rossi">
@@ -117,7 +117,7 @@
                 </form>
 
                 <!-- Login Link -->
-                <div class="flex-row items-center justify-center gap-2 mt-4 text-sm">
+                <div class="auth-footer-links">
                     <span data-t="have_account_text">Hai già un account?</span>
                     <a href="index.html" class="link-register" data-t="login_now_link">
                         Accedi ora
