@@ -113,3 +113,17 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     color: #b45309 !important;
     background: rgba(217, 119, 6, 0.15) !important;
 }
+
+/* 4. OTTIMIZZAZIONE DROPDOWN (Look Compatto V4.5) */
+.base-dropdown-item {
+    font-size: 0.8rem !important;
+    /* Più piccolo e raffinato */
+    padding: 0.61rem 1rem !important;
+    /* Più compatto verticalmente */
+    font-weight: 800 !important;
+}
+
+.base-dropdown-menu {
+    min-width: 180px !important;
+    padding: 0.4rem !important;
+}
