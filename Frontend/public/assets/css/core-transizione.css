@@ -116,3 +116,24 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     min-width: 180px !important;
     padding: 0.4rem !important;
 }
+
+/* 5. OTTIMIZZAZIONE FILTRI SCADENZE (Look Compact V4.5) */
+.filter-container {
+    gap: 0.35rem !important;
+    /* Selettori più vicini */
+    padding: 0.5rem 0 !important;
+    /* Rimosso padding laterale per centratura */
+    justify-content: center !important;
+    /* Centrati se avanzasse spazio */
+    margin: 0 !important;
+    overflow: visible !important;
+    /* Evitiamo scroll se possibile */
+}
+
+.filter-chip {
+    padding: 0.4rem 0.65rem !important;
+    /* Più stretti */
+    font-size: 0.65rem !important;
+    /* Leggermente più piccoli per farli stare in riga */
+    border-radius: 10px !important;
+}
