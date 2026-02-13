@@ -9,7 +9,9 @@
     margin: 0 auto !important;
 }
 
-/* RIMOZIONE VECCHIO STILE (Bordo laterale sinistro) */
+/* UNIFICAZIONE BASE CARD (Stile Pure Titanium) 
+   Rimuoviamo ogni tinta di sfondo per avere una lista coerente. 
+   La distinzione avviene solo tramite Icone e Badge. */
 .deadline-card,
 .deadline-card-expired,
 .deadline-card-upcoming,
@@ -19,8 +21,11 @@
     margin-right: 2px !important;
     border-radius: 20px !important;
     border: 1px solid var(--card-border) !important;
+
+    /* SFONDO UNIFORME PER TUTTE LE CARD */
     background: var(--card-bg) !important;
     backdrop-filter: blur(20px) !important;
+
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden;
 }
@@ -30,7 +35,7 @@
     padding-right: 8px !important;
 }
 
-/* Effetto di sospensione per le card */
+/* Effetto di sospensione (Hover) - Resta uniforme */
 .deadline-card:hover {
     transform: translateY(-4px) scale(1.01) !important;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
@@ -65,21 +70,46 @@
     margin-top: 2px !important;
 }
 
-/* 3. FIX VISIBILITÀ GIALLO (Tema Chiaro V4.5) */
-html:not(.dark) .deadline-card-upcoming {
-    border-left-color: transparent !important;
-    /* Forza trasparente */
-    background: rgba(217, 119, 6, 0.08) !important;
+/* 3. COERENZA COLORI ACCENTO (Tema Chiaro/Scuro V4.5) */
+
+/* STATO: SCADUTO (ROSSO) */
+.deadline-card-expired .deadline-icon-box {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
 }
 
+.deadline-card-expired .deadline-date-badge {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* STATO: IN SCADENZA (AMBRA / GIALLO) */
+/* Unifichiamo il fondo della card anche qui per coerenza visiva totale */
+.deadline-card-upcoming {
+    background: var(--card-bg) !important;
+}
+
+/* Solo gli accenti cambiano colore */
+.deadline-card-upcoming .deadline-icon-box {
+    color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.12) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Fix specifico per il contrasto Ambra nel tema Chiaro */
 html:not(.dark) .deadline-card-upcoming .deadline-icon-box {
     color: #b45309 !important;
-    background: rgba(217, 119, 6, 0.12) !important;
-    border-color: rgba(217, 119, 6, 0.3) !important;
+    /* Più scuro per leggibilità */
+    background: rgba(217, 119, 6, 0.15) !important;
+}
+
+.deadline-card-upcoming .deadline-date-badge {
+    color: #f59e0b !important;
+    background: rgba(245, 158, 11, 0.12) !important;
 }
 
 html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     color: #b45309 !important;
-    background: rgba(217, 119, 6, 0.12) !important;
-    border: 1px solid rgba(217, 119, 6, 0.3) !important;
+    background: rgba(217, 119, 6, 0.15) !important;
 }
