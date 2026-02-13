@@ -48,7 +48,7 @@ export async function initComponents() {
                 const aziendaId = urlParams.get('aziendaId');
 
                 // Mapping Logico Navigazione STRETTO (Solo Ciclo Azienda)
-                if (path.endsWith('lista_aziende.html')) {
+                if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
                     backFn = () => window.location.href = 'home_page.html';
                 } else if (path.endsWith('impostazioni.html')) {
                     backFn = () => window.location.href = 'home_page.html';

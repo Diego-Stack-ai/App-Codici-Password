@@ -123,6 +123,15 @@
     }
 }
 
+/* --- PAGE LAYOUT (Constraint per look Premium) --- */
+.page-container {
+    max-width: 500px !important;
+    /* Più stretto per focus maggiore */
+    padding: 0 1rem;
+    box-sizing: border-box;
+    width: 100%;
+}
+
 /* --- TOOLBAR & CONTROLS --- */
 
 .deadline-toolbar {
@@ -131,7 +140,8 @@
     justify-content: space-between;
     padding: 0.5rem 0.25rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    /* Ridotto per stare sopra la ricerca */
 }
 
 .deadline-count-badge {
@@ -222,20 +232,21 @@
 }
 
 .search-bar-animated {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    z-index: 90;
-    padding: 0.75rem 1rem;
-    background: var(--surface-vault);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
-    transform: translateY(-100%);
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
+    position: relative;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+    padding: 0.25rem 0rem;
+    /* Ridotto padding */
+    background: transparent;
+    backdrop-filter: none;
+    border-bottom: none;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+    margin-bottom: 1.25rem;
 }
+
 
 .search-bar-animated.active {
     transform: translateY(0);

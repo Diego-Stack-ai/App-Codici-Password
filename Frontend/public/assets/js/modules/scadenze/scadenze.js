@@ -44,41 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else chip.classList.remove('active');
     });
 
-    // Footer Actions Injection
-    const injectFooterActions = () => {
-        const footerCenter = document.getElementById('footer-center-actions');
-        const footerRight = document.getElementById('footer-right-actions');
 
-        if (footerCenter) {
-            clearElement(footerCenter);
-            const toggleBtn = createElement('button', { id: 'toggle-search', className: 'btn-icon-header' }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'search' })
-            ]);
-
-            if (searchBarContainer) {
-                const handleSearchToggle = () => {
-                    searchBarContainer.classList.toggle('active');
-                    if (searchBarContainer.classList.contains('active') && searchInput) {
-                        searchInput.focus();
-                    }
-                };
-                toggleBtn.addEventListener('click', handleSearchToggle);
-            }
-            setChildren(footerCenter, toggleBtn);
-        }
-
-        if (footerRight) {
-            const addBtn = createElement('a', {
-                href: 'aggiungi_scadenza.html',
-                className: 'btn-icon-header'
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
-            ]);
-            setChildren(footerRight, addBtn);
-        }
-    };
-
-    setTimeout(injectFooterActions, 500);
 
     // Filter Chips
     filterChips.forEach(chip => {
