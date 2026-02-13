@@ -2,29 +2,31 @@
 <html lang="it" data-i18n="loading">
 
 <head>
-  <!-- <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;"> -->
+  <!-- Anti-flicker & Theme Master (V3.9) -->
+  <script src="assets/js/theme-init.js"></script>
+  <!-- CSP (Content Security Policy) - V3.9 Standard -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Home Page</title>
 
-  <link rel="manifest" href="manifest.json?v=3.8" />
+  <!-- PWA / Mobile Capable -->
+  <link rel="manifest" href="manifest.json?v=3.9.1" />
   <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- 1. Preload Font (Velocità) -->
-  <link rel="preload" href="assets/fonts/manrope/manrope-11.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="assets/fonts/material-symbols/material-symbols-0.woff2" as="font" type="font/woff2"
-    crossorigin>
-
-  <!-- 2. Core Fonts (Forzatura Body & Icone) -->
-  <link rel="stylesheet" href="assets/css/core_fonts.css">
-
-  <!-- 3. Design System Master (PROTOCOLLO BASE V3.9) -->
+  <!-- CSS Modular System V3.9 -->
+  <!-- 1. Core System (Variabili & Reset) -->
   <link rel="stylesheet" href="assets/css/core.css?v=3.9">
+  <!-- 2. Fonts -->
+  <link rel="stylesheet" href="assets/css/core_fonts.css">
+  <!-- 3. Fascie (Header & Footer) -->
   <link rel="stylesheet" href="assets/css/core_fascie.css">
-
-  <!-- 4. Pagine specifiche (Standard V3.8) -->
+  <!-- 4. Shared Library (Componenti comuni) -->
   <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
 
   <!-- CORE JS -->

@@ -1,0 +1,259 @@
+/* ==========================================================================
+   CORE MODULI (V3.9) - Stili per Gestione (Archivio e Configurazioni)
+   Usato da: archivio_account.html, configurazione_generali.html, 
+             configurazione_documenti.html, configurazione_automezzi.html, 
+             regole_scadenze.html
+   ========================================================================== */
+
+/* --- 1. ELEMENTI STRUTTURALI CONDIVISI --- */
+
+/* Saetta Master (Override per sottopagine) */
+.saetta-master {
+    height: 10px;
+    margin-bottom: -1rem;
+}
+
+/* Watermark di sfondo (Icona colossale) */
+.archive-watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.archive-watermark span {
+    font-size: 600px;
+    color: var(--text-primary);
+    font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 48;
+}
+
+/* Container Righe "Glass" (Linguaggio Comune V3.9) */
+.archive-row-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.archive-row-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.05));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* --- 2. LOGICA ARCHIVIO (Swipe & Actions) --- */
+
+.archive-item-content {
+    position: relative;
+    z-index: 10;
+    background: transparent;
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.archive-item-content h4 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-primary);
+}
+
+.swipe-action-bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    z-index: 1;
+}
+
+.bg-restore {
+    justify-content: flex-start;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, transparent 100%);
+    color: #10b981;
+}
+
+.bg-delete {
+    justify-content: flex-end;
+    background: linear-gradient(270deg, rgba(239, 68, 68, 0.2) 0%, transparent 100%);
+    color: #ef4444;
+}
+
+.btn-trash-archive {
+    height: 3rem;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.archive-hint-wrap {
+    padding-top: 1rem;
+    padding-bottom: 5rem;
+}
+
+/* --- 3. LOGICA CONFIGURAZIONI (Lists & Items) --- */
+
+.config-list-item {
+    padding: 1rem;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+}
+
+.config-list-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.config-item-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.config-item-name {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.config-item-desc {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+/* --- 4. COMPONENTI SEMANTICI (Badge & Utility) --- */
+
+.config-badge {
+    font-size: 9px;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.config-badge-standard {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-secondary);
+}
+
+.dark .config-badge-standard {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.config-badge-blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #1d4ed8;
+}
+
+.config-badge-amber {
+    background: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+}
+
+.config-badge-purple {
+    background: rgba(168, 85, 247, 0.1);
+    color: #7e22ce;
+}
+
+.config-badge-emerald {
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+}
+
+.dark .config-badge-blue {
+    color: #93c5fd;
+}
+
+.dark .config-badge-amber {
+    color: #fcd34d;
+}
+
+.dark .config-badge-purple {
+    color: #d8b4fe;
+}
+
+.dark .config-badge-emerald {
+    color: #6ee7b7;
+}
+
+.btn-delete-item-semantic {
+    color: #ef4444 !important;
+}
+
+.dark .btn-delete-item-semantic {
+    color: #f87171 !important;
+}
+
+/* --- 5. UI DYNAMICS (Loading & Empty States) --- */
+
+.archive-loading-container,
+.archive-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 0;
+    opacity: 0.5;
+}
+
+.archive-spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--accent);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.archive-loading-text,
+.archive-empty-text {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 800;
+}
+
+/* Accordion Helpers */
+.collapsible-header .arrow-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

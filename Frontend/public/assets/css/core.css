@@ -13,6 +13,7 @@ html[data-i18n="ready"] body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* -----------------------
@@ -26,6 +27,8 @@ html[data-i18n="ready"] body {
     /* sfondo chiaro */
     --text-primary: #0f172a;
     /* testo principale */
+    --text-secondary: #475569;
+    /* testo secondario */
     --card-bg: rgba(255, 255, 255, 0.7);
     --card-border: rgba(0, 0, 0, 0.1);
     --card-shadow: rgba(0, 0, 0, 0.5);
@@ -41,13 +44,17 @@ html[data-i18n="ready"] body {
     --input-shadow: rgba(59, 130, 246, 0.08);
     /* LINK */
     --link-color: rgba(255, 255, 255, 0.5);
+
+    /* ANIMATIONS */
+    --transition-base: 0.2s ease;
 }
 
 /* MODALITÀ DARK (per pagine di accesso o dark-only) */
 .dark {
     --bg-primary: #0a0f1e;
     --text-primary: #fff;
-    --card-bg: rgba(15, 25, 50, 0.4);
+    --text-secondary: #94a3b8;
+    --card-bg: rgba(255, 255, 255, 0.02);
     --card-border: rgba(255, 255, 255, 0.1);
     --card-shadow: rgba(0, 0, 0, 0.7);
     --base-box-gradient: linear-gradient(135deg, #2563eb 0%, #030712 100%);
@@ -147,23 +154,34 @@ body,
 }
 
 /* -----------------------
-   CARD (accesso, dati personali)
+   CARD SYSTEM (Shared Visuals)
    ----------------------- */
-.card {
+.card,
+.card-hero {
     background: var(--card-bg);
     backdrop-filter: blur(20px);
     border: 1px solid var(--card-border);
     border-radius: 24px;
     padding: 2rem 1.5rem;
     width: 100%;
-    max-width: 380px;
-    min-width: 280px;
-    margin: 0 auto;
-    text-align: center;
     box-shadow: 0 25px 50px -12px var(--card-shadow);
     z-index: 10;
     position: relative;
     color: var(--text-primary);
+}
+
+/* AUTH CARD SPECIFIC (Login/Register) */
+.card {
+    max-width: 380px;
+    min-width: 280px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* HERO CARD SPECIFIC (Profile/Settings) */
+.card-hero {
+    /* Fluid width, flexible alignment */
+    text-align: left;
 }
 
 /* Bordo con glow */
@@ -611,6 +629,7 @@ body,
     align-items: center;
     gap: 10px;
 }
+
 /* -----------------------
    LAYOUT UTILITIES (V3.9 Semantic)
    ----------------------- */
@@ -636,17 +655,55 @@ body,
 }
 
 /* Helper Utilities (Pure HTML Standard) */
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.gap-2 { gap: 0.5rem; }
-.mt-4 { margin-top: 1rem; }
-.text-sm { font-size: 0.85rem; }
-.flex-1 { flex: 1; }
-.flex-row { display: flex; flex-direction: row; }
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.text-sm {
+    font-size: 0.85rem;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
 
 @media (max-width: 480px) {
     .form-row {
         flex-direction: column;
         gap: 0;
     }
+}
+
+/* Global Section Spacing */
+.mt-section {
+    margin-top: 2rem;
+}
+
+.mb-section {
+    margin-bottom: 2rem;
+}
+
+.text-red {
+    color: #ef4444;
+}
+
+.hidden {
+    display: none !important;
 }

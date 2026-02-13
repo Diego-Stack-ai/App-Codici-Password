@@ -9,6 +9,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/f
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
+import { t } from '../../translations.js';
 
 const DEFAULT_CONFIG = {
     deadlineTypes: [],
@@ -22,8 +23,8 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', () => {
     // Buttons Listeners
     document.getElementById('btn-add-type')?.addEventListener('click', () => addTypeItem());
-    document.getElementById('btn-add-model')?.addEventListener('click', () => addItem('models', 'Dati Documento (Numero - Tipo - Proprietario):'));
-    document.getElementById('btn-add-template')?.addEventListener('click', () => addItem('emailTemplates', 'Nuovo Testo Email:'));
+    document.getElementById('btn-add-model')?.addEventListener('click', () => addItem('models', t('prompt_new_doc_detail')));
+    document.getElementById('btn-add-template')?.addEventListener('click', () => addItem('emailTemplates', t('prompt_new_email_text')));
 
     // Delegated actions for list items
     ['container-types', 'container-models', 'container-templates'].forEach(id => {
@@ -72,11 +73,11 @@ async function loadConfig() {
 async function saveConfig() {
     try {
         await setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), currentConfig);
-        showToast("Configurazione salvata", "success");
+        showToast(t('success_config_saved'), "success");
         renderAll();
     } catch (e) {
         console.error(e);
-        showToast("Errore salvataggio", "error");
+        showToast(t('error_config_save'), "error");
     }
 }
 
@@ -93,10 +94,9 @@ function renderTypes() {
     clearElement(container);
 
     if (currentConfig.deadlineTypes.length === 0) {
-        container.appendChild(createElement('p', {
-            className: 'text-[10px] text-white/30 uppercase text-center py-4',
-            textContent: 'Nessun tipo configurato'
-        }));
+        container.appendChild(createElement('div', { className: 'archive-loading-container' }, [
+            createElement('p', { className: 'archive-loading-text', textContent: t('no_data_configured') })
+        ]));
         return;
     }
 
@@ -107,33 +107,33 @@ function renderTypes() {
         }
 
         return createElement('div', {
-            className: 'p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group'
+            className: 'config-list-item'
         }, [
-            createElement('div', { className: 'flex-1' }, [
-                createElement('span', { className: 'block text-sm font-bold text-white mb-1', textContent: item.name }),
-                createElement('div', { className: 'flex gap-2' }, [
+            createElement('div', { className: 'config-item-main' }, [
+                createElement('span', { className: 'config-item-name', textContent: item.name }),
+                createElement('div', { className: 'config-badge-group' }, [
                     createElement('span', {
-                        className: 'text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold uppercase tracking-widest',
-                        textContent: `Preavviso ${item.period}gg`
+                        className: 'config-badge config-badge-blue',
+                        textContent: `${t('text_notice')} ${item.period}gg`
                     }),
                     createElement('span', {
-                        className: 'text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/40 font-bold uppercase tracking-widest',
-                        textContent: `Frequenza ${item.freq}gg`
+                        className: 'config-badge config-badge-amber',
+                        textContent: `${t('text_replica')} ${item.freq}gg`
                     })
                 ])
             ]),
-            createElement('div', { className: 'flex gap-1 opacity-0 group-hover:opacity-100 transition-all' }, [
+            createElement('div', { className: 'config-item-actions' }, [
                 createElement('button', {
-                    className: 'btn-edit-item glass-btn-sm',
+                    className: 'btn-edit-item btn-manage-account-semantic',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'edit' })
                 ]),
                 createElement('button', {
-                    className: 'btn-delete-item glass-btn-sm text-red-400',
+                    className: 'btn-delete-item btn-manage-account-semantic btn-delete-item-semantic',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'delete' })
                 ])
             ])
         ]);
@@ -148,29 +148,28 @@ function renderSimpleList(containerId, data, listKey) {
     clearElement(container);
 
     if (!data || data.length === 0) {
-        container.appendChild(createElement('p', {
-            className: 'text-[10px] text-white/30 uppercase text-center py-4',
-            textContent: 'Nessun dato'
-        }));
+        container.appendChild(createElement('div', { className: 'archive-loading-container' }, [
+            createElement('p', { className: 'archive-loading-text', textContent: t('no_data') })
+        ]));
         return;
     }
 
     const items = data.map((item, index) => createElement('div', {
-        className: 'p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group'
+        className: 'config-list-item'
     }, [
-        createElement('span', { className: 'text-xs text-white/80 truncate pr-4', textContent: item }),
-        createElement('div', { className: 'flex gap-1 opacity-0 group-hover:opacity-100 transition-all' }, [
+        createElement('span', { className: 'config-item-desc truncate pr-4', textContent: item }),
+        createElement('div', { className: 'config-item-actions' }, [
             createElement('button', {
-                className: 'btn-edit-item glass-btn-sm',
+                className: 'btn-edit-item btn-manage-account-semantic',
                 dataset: { list: listKey, index: index.toString() }
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
+                createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'edit' })
             ]),
             createElement('button', {
-                className: 'btn-delete-item glass-btn-sm text-red-400',
+                className: 'btn-delete-item btn-manage-account-semantic btn-delete-item-semantic',
                 dataset: { list: listKey, index: index.toString() }
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'delete' })
             ])
         ])
     ]));
@@ -178,11 +177,11 @@ function renderSimpleList(containerId, data, listKey) {
 }
 
 async function addTypeItem() {
-    const name = await window.showInputModal("TIPO DOCUMENTO", "", "Es. Patente");
+    const name = await window.showInputModal(t('prompt_new_doc_type'), "", t('placeholder_type_doc'));
     if (!name) return;
-    const period = await window.showInputModal("GIORNI PREAVVISO", "14");
+    const period = await window.showInputModal(t('prompt_days_notice'), "14");
     if (period === null) return;
-    const freq = await window.showInputModal("FREQUENZA NOTIFICA", "7");
+    const freq = await window.showInputModal(t('prompt_freq_days'), "7");
     if (freq === null) return;
 
     currentConfig.deadlineTypes.push({ name: name.trim(), period: parseInt(period) || 14, freq: parseInt(freq) || 7 });
@@ -191,11 +190,11 @@ async function addTypeItem() {
 
 async function editType(index) {
     const item = currentConfig.deadlineTypes[index];
-    const name = await window.showInputModal("MODIFICA", item.name);
+    const name = await window.showInputModal(t('prompt_edit_item'), item.name);
     if (name === null) return;
-    const period = await window.showInputModal("GIORNI PREAVVISO", item.period.toString());
+    const period = await window.showInputModal(t('prompt_days_notice'), item.period.toString());
     if (period === null) return;
-    const freq = await window.showInputModal("FREQUENZA NOTIFICA", item.freq.toString());
+    const freq = await window.showInputModal(t('prompt_freq_days'), item.freq.toString());
     if (freq === null) return;
 
     currentConfig.deadlineTypes[index] = { name: name.trim(), period: parseInt(period) || 14, freq: parseInt(freq) || 7 };
@@ -203,7 +202,7 @@ async function editType(index) {
 }
 
 async function addItem(listKey, prompt) {
-    const val = await window.showInputModal("AGGIUNGI", "", prompt);
+    const val = await window.showInputModal(t('modal_title_add'), "", prompt);
     if (!val || !val.trim()) return;
     currentConfig[listKey].push(val.trim());
     saveConfig();
@@ -211,14 +210,14 @@ async function addItem(listKey, prompt) {
 
 async function editItem(listKey, index) {
     const current = currentConfig[listKey][index];
-    const val = await window.showInputModal("MODIFICA", current);
+    const val = await window.showInputModal(t('modal_title_edit'), current);
     if (val === null || !val.trim()) return;
     currentConfig[listKey][index] = val.trim();
     saveConfig();
 }
 
 async function deleteItem(listKey, index) {
-    const confirmed = await window.showConfirmModal("ELIMINA", "Confermi?");
+    const confirmed = await window.showConfirmModal(t('confirm_delete_title'), t('confirm_delete_item'));
     if (!confirmed) return;
     currentConfig[listKey].splice(index, 1);
     saveConfig();

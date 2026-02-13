@@ -65,10 +65,9 @@ async function renderHeaderUser(user) {
 
     // 1. Calcolo Saluto
     const h = new Date().getHours();
-    let timeGreeting = "Benvenuto";
-    if (h >= 5 && h < 13) timeGreeting = "Buongiorno";
-    else if (h >= 13 && h < 18) timeGreeting = "Buon pomeriggio";
-    else timeGreeting = "Buonasera";
+    let timeGreeting = t('greeting_evening');
+    if (h >= 6 && h < 13) timeGreeting = t('greeting_morning');
+    else if (h >= 13 && h < 18) timeGreeting = t('greeting_afternoon');
 
     if (uGreeting) uGreeting.textContent = timeGreeting;
 
@@ -216,9 +215,9 @@ function renderMiniItem(item, today) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     let labelText = "";
-    if (diffDays < 0) labelText = "Scaduto";
-    else if (diffDays === 0) labelText = "Oggi";
-    else if (diffDays === 1) labelText = "Domani";
+    if (diffDays < 0) labelText = t('expired');
+    else if (diffDays === 0) labelText = t('today');
+    else if (diffDays === 1) labelText = t('tomorrow');
     else labelText = `${diffDays}g`;
 
     return createElement('div', { className: 'dashboard-list-item' }, [

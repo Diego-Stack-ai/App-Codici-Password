@@ -49,18 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 const text = btnCopy.dataset.copy;
                 navigator.clipboard.writeText(text).then(() => {
-                    showToast("Copiato!", "success");
+                    showToast(t('copied') || "Copiato!", "success");
                 });
                 return;
             }
 
-            // Visibility Action
-            const btnEye = e.target.closest('.btn-toggle-eye');
-            if (btnEye) {
-                e.stopPropagation();
-                toggleTripleVisibility(btnEye.dataset.id);
-                return;
-            }
 
             // Restore Action
             const btnRestore = e.target.closest('.btn-restore-acc');
@@ -108,10 +101,10 @@ async function loadArchived() {
 
     clearElement(container);
     // Loading State
-    const loading = createElement('div', { className: 'flex-center-col py-10 opacity-50' }, [
-        createElement('div', { className: 'size-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4' }),
+    const loading = createElement('div', { className: 'archive-loading-container' }, [
+        createElement('div', { className: 'archive-spinner' }),
         createElement('span', {
-            className: 'text-xs uppercase tracking-widest font-bold',
+            className: 'archive-loading-text',
             dataset: { t: 'searching_archives' },
             textContent: t('searching_archives') || 'Ricerca archivi...'
         })
@@ -141,7 +134,7 @@ async function loadArchived() {
         filterAndRender();
     } catch (e) {
         console.error(e);
-        showToast("Errore caricamento", "error");
+        showToast(t('error_generic') || "Errore caricamento", "error");
     }
 }
 
@@ -158,10 +151,10 @@ function filterAndRender() {
     clearElement(container);
 
     if (filtered.length === 0) {
-        const emptyState = createElement('div', { className: 'flex-center-col py-16 opacity-30 text-center' }, [
-            createElement('span', { className: 'material-symbols-outlined text-5xl mb-4', textContent: 'inventory_2' }),
+        const emptyState = createElement('div', { className: 'archive-empty-state' }, [
+            createElement('span', { className: 'material-symbols-outlined archive-empty-icon', textContent: 'archive' }),
             createElement('p', {
-                className: 'text-xs font-bold uppercase tracking-widest',
+                className: 'archive-empty-text',
                 dataset: { t: 'no_accounts_found' },
                 textContent: t('no_accounts_found') || 'Nessun account trovato'
             })
@@ -171,73 +164,47 @@ function filterAndRender() {
     }
 
     const items = filtered.map(acc => {
-        const avatar = acc.logo || acc.avatar || 'assets/images/google-avatar.png';
+        // 1. BACKGROUND AZIONI (Sotto la card)
 
-        // Swipe Backgrounds -> Delete
-        const bgDelete = createElement('div', { className: 'absolute inset-y-0 left-0 w-full flex items-center pl-6 bg-red-500/20 opacity-0 swipe-bg-delete' }, [
-            createElement('span', { className: 'material-symbols-outlined text-red-500', textContent: 'delete_forever' })
+        // A SINISTRA (Compare swippando verso DESTRA) -> RIPRISTINA
+        const bgRestore = createElement('div', {
+            className: 'swipe-action-bg bg-restore'
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'restore_from_trash' })
         ]);
 
-        // Swipe Backgrounds -> Restore
-        const bgRestore = createElement('div', { className: 'absolute inset-y-0 right-0 w-full flex items-center justify-end pr-6 bg-emerald-500/20 opacity-0 swipe-bg-restore' }, [
-            createElement('span', { className: 'material-symbols-outlined text-emerald-500', textContent: 'restore_from_trash' })
+        // A DESTRA (Compare swippando verso SINISTRA) -> ELIMINA
+        const bgDelete = createElement('div', {
+            className: 'swipe-action-bg bg-delete'
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
         ]);
 
-        // Card Content
-        const img = createElement('img', {
-            src: avatar,
-            className: 'size-10 rounded-xl object-cover bg-white/5 border border-white/10 shrink-0'
-        });
-
-        // Info Block
-        const headerTitle = createElement('div', { className: 'flex justify-between items-start gap-2 mb-3' }, [
-            createElement('h4', { className: 'text-sm font-bold truncate text-white', textContent: acc.nomeAccount || 'Senza Nome' })
+        // 2. CONTENUTO VISIBILE (Sopra)
+        const titleRow = createElement('div', { className: 'archive-item-content-header' }, [
+            createElement('h4', {
+                textContent: acc.nomeAccount || t('without_name') || 'Senza Nome'
+            })
         ]);
 
         if (acc.businessName) {
-            headerTitle.appendChild(createElement('span', {
-                className: 'text-[8px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-black uppercase',
+            titleRow.appendChild(createElement('span', {
+                className: 'archive-badge-context',
                 textContent: acc.businessName
             }));
         }
 
-        const dataRows = createElement('div', { className: 'flex-col-gap-2' }, [
-            renderDataRow(acc.id, 'User', acc.username || acc.utente, 'username'),
-            renderDataRow(acc.id, 'Acc', acc.account, 'account'),
-            renderDataRow(acc.id, 'Pass', acc.password, 'password')
-        ].filter(Boolean)); // filter out nulls
-
-        const infoBlock = createElement('div', { className: 'flex-1 min-w-0' }, [headerTitle, dataRows]);
-
-        // Actions Block
-        const btnRestore = createElement('button', {
-            className: 'btn-restore-acc size-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/20 hover:bg-emerald-500/20 transition-all',
-            dataset: { id: acc.id, title: 'Ripristina' }
-        }, [
-            createElement('span', { className: 'material-symbols-outlined text-lg', textContent: 'restore_from_trash' })
-        ]);
-
-        const btnEye = createElement('button', {
-            className: 'btn-toggle-eye size-8 rounded-lg bg-white/5 text-white/40 flex-center border border-white/10 hover:bg-white/10 transition-all',
-            dataset: { id: acc.id, title: 'Mostra/Nascondi' }
-        }, [
-            createElement('span', { id: `pass-eye-${acc.id}`, className: 'material-symbols-outlined text-lg', textContent: 'visibility' })
-        ]);
-
-        const actionsBlock = createElement('div', { className: 'flex-center-col gap-2 shrink-0' }, [btnRestore, btnEye]);
-
-        // Swipe Content Wrapper
+        // Wrapper del contenuto che si sposta
         const swipeContent = createElement('div', {
-            className: 'swipe-content relative z-10 bg-[#0f172a] p-4 flex gap-4 transition-transform border-l-4 border-blue-500/50'
-        }, [img, infoBlock, actionsBlock]);
+            className: 'archive-item-content swipe-content'
+        }, [titleRow]);
 
-        // Initial Card
+        // Contenitore principale della riga
         const card = createElement('div', {
-            className: 'glass-card swipe-row overflow-hidden relative',
+            className: 'archive-row-container swipe-row',
             id: `arch-${acc.id}`,
-            dataset: { id: acc.id },
-            style: 'padding:0;'
-        }, [bgDelete, bgRestore, swipeContent]);
+            dataset: { id: acc.id }
+        }, [bgRestore, bgDelete, swipeContent]);
 
         return card;
     });
@@ -246,63 +213,16 @@ function filterAndRender() {
     setupSwipe();
 }
 
-function renderDataRow(id, label, value, type) {
-    if (!value) return null;
-
-    const row = createElement('div', { className: 'flex items-center gap-2 bg-white/5 px-2 py-1 rounded-lg border border-white/5' }, [
-        createElement('span', { className: 'text-[9px] font-black text-white/30 uppercase w-8', textContent: label }),
-        createElement('span', {
-            id: `${type}-text-${id}`,
-            className: 'text-xs font-mono text-white/80 truncate flex-1',
-            textContent: '••••••••'
-        }),
-        createElement('button', {
-            className: 'copy-btn-dynamic text-white/20 hover:text-blue-400 transition-colors',
-            title: 'Copia',
-            dataset: { copy: value } // dom-utils handles attributes safely, innerHTML replacement not needed here provided we don't inject value into HTML
-        }, [
-            createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'content_copy' })
-        ])
-    ]);
-
-    return row;
-}
 
 function setupSwipe() {
     if (currentSwipeList) currentSwipeList = null;
-    currentSwipeList = new SwipeList('.swipe-row', {
+    currentSwipeList = new SwipeList('.archive-row-container', {
         threshold: 0.2,
-        onSwipeLeft: (item) => handleRestore(item.dataset.id),
-        onSwipeRight: (item) => handleDeleteForever(item.dataset.id)
+        onSwipeRight: (item) => handleRestore(item.dataset.id), // Swippa a DESTRA -> Ripristina
+        onSwipeLeft: (item) => handleDeleteForever(item.dataset.id) // Swippa a SINISTRA -> Elimina
     });
 }
 
-function toggleTripleVisibility(id) {
-    const eye = document.getElementById(`pass-eye-${id}`);
-    const rows = ['username', 'account', 'password'];
-    if (!eye) return;
-
-    const isHidden = eye.textContent === 'visibility';
-    eye.textContent = isHidden ? 'visibility_off' : 'visibility';
-
-    rows.forEach(type => {
-        const textEl = document.getElementById(`${type}-text-${id}`);
-        if (!textEl) return;
-
-        if (isHidden) {
-            // Reveal: find value in copy btn
-            const btn = textEl.parentElement.querySelector('.copy-btn-dynamic');
-            safeSetText(textEl, btn ? btn.dataset.copy : '---');
-            textEl.classList.remove('text-white/80');
-            textEl.classList.add('text-blue-300');
-        } else {
-            // Hide
-            safeSetText(textEl, '••••••••');
-            textEl.classList.add('text-white/80');
-            textEl.classList.remove('text-blue-300');
-        }
-    });
-}
 
 async function handleRestore(id) {
     const item = allArchived.find(a => a.id === id);
@@ -311,19 +231,18 @@ async function handleRestore(id) {
     try {
         const ref = getCollectionRef(id, item.context);
         await updateDoc(ref, { isArchived: false });
-        showToast("Ripristinato", "success");
+        showToast(t('success_restored') || "Ripristinato", "success");
         allArchived = allArchived.filter(a => a.id !== id);
         const el = document.getElementById(`arch-${id}`);
         if (el) {
-            el.style.transform = 'scale(0.9)';
-            el.style.opacity = '0';
+            el.classList.add('is-removing');
             setTimeout(() => filterAndRender(), 300);
         } else {
             filterAndRender();
         }
     } catch (e) {
         console.error(e);
-        showToast("Errore", "error");
+        showToast(t('error_generic') || "Errore", "error");
     }
 }
 
@@ -335,26 +254,30 @@ async function handleDeleteForever(id) {
     // but ideally we should move it to ui-core export.
 
     if (!window.showInputModal) {
-        // Fallback if not available
-        if (!confirm("ELIMINA PER SEMPRE?")) {
+        if (!confirm(t('confirm_delete_forever_title') || "ELIMINA PER SEMPRE?")) {
             filterAndRender();
             return;
         }
     } else {
-        const confirmReq = await window.showInputModal("ELIMINA PER SEMPRE", "", "Scrivi 'SI' per confermare l'eliminazione definitiva.");
-        if (confirmReq !== 'SI') return filterAndRender(); // Reset swipe
+        const confirmReq = await window.showInputModal(
+            t('confirm_delete_forever_title') || "ELIMINA PER SEMPRE",
+            "",
+            t('confirm_delete_forever_msg') || "Scrivi 'SI' per confermare l'eliminazione definitiva."
+        );
+        // Accetta 'SI' o 'YES' in base alla lingua (o entrambi per sicurezza)
+        if (confirmReq !== 'SI' && confirmReq !== 'YES') return filterAndRender();
     }
 
     try {
         const item = allArchived.find(a => a.id === id);
         const ref = getCollectionRef(id, item.context);
         await deleteDoc(ref);
-        showToast("Eliminato definitivamente", "success");
+        showToast(t('success_deleted_forever') || "Eliminato definitivamente", "success");
         allArchived = allArchived.filter(a => a.id !== id);
         filterAndRender();
     } catch (e) {
         console.error(e);
-        showToast("Errore", "error");
+        showToast(t('error_generic') || "Errore", "error");
     }
 }
 
@@ -363,12 +286,16 @@ async function handleEmptyTrash() {
 
     let confirmReq;
     if (window.showInputModal) {
-        confirmReq = await window.showInputModal("SVUOTA CESTINO", "", "Scrivi 'SVUOTA' per eliminare tutto definitivamente.");
+        confirmReq = await window.showInputModal(
+            t('confirm_empty_trash_title') || "SVUOTA CESTINO",
+            "",
+            t('confirm_empty_trash_msg') || "Scrivi 'SVUOTA' per eliminare tutto definitivamente."
+        );
     } else {
-        confirmReq = prompt("Scrivi 'SVUOTA' per eliminare tutto:");
+        confirmReq = prompt(t('confirm_empty_trash_msg') || "Scrivi 'SVUOTA' per eliminare tutto:");
     }
 
-    if (confirmReq !== 'SVUOTA') return;
+    if (confirmReq !== 'SVUOTA' && confirmReq !== 'EMPTY') return;
 
     try {
         const batch = writeBatch(db);
@@ -376,12 +303,12 @@ async function handleEmptyTrash() {
             batch.delete(getCollectionRef(acc.id, acc.context));
         });
         await batch.commit();
-        showToast("Cestino svuotato", "success");
+        showToast(t('success_trash_emptied') || "Cestino svuotato", "success");
         allArchived = [];
         filterAndRender();
     } catch (e) {
         console.error(e);
-        showToast("Errore", "error");
+        showToast(t('error_generic') || "Errore", "error");
     }
 }
 

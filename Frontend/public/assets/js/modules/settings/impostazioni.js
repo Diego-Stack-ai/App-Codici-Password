@@ -15,7 +15,7 @@ import { initComponents } from '../../components.js';
 
 // Carica QRCode library locale
 const qrcodeScript = document.createElement('script');
-qrcodeScript.src = '../../vendor/qrcode.min.js';
+qrcodeScript.src = 'assets/js/vendor/qrcode.min.js';
 document.head.appendChild(qrcodeScript);
 
 let currentUserData = null;
@@ -64,9 +64,18 @@ async function loadUserData(user) {
         const langLabel = document.getElementById('current-lang-label');
         if (langLabel) {
             const cur = getCurrentLanguage();
-            if (cur === 'it') safeSetText(langLabel, 'Italiano');
-            else if (cur === 'en') safeSetText(langLabel, 'English');
-            else if (cur === 'ro') safeSetText(langLabel, 'Română');
+            const langMap = {
+                'it': 'Italiano',
+                'en': 'English',
+                'es': 'Español',
+                'fr': 'Français',
+                'de': 'Deutsch',
+                'zh': '中文',
+                'hi': 'हिन्दी',
+                'pt': 'Português',
+                'ro': 'Română'
+            };
+            safeSetText(langLabel, langMap[cur] || 'Italiano');
         }
 
     } catch (e) {
@@ -115,7 +124,7 @@ function initSettingsEvents() {
     });
 
     // QR Zoom
-    document.getElementById('btn-zoom-qr')?.addEventListener('click', openQRZoom);
+    document.getElementById('qrcode-preview')?.addEventListener('click', openQRZoom);
     document.getElementById('btn-close-qr')?.addEventListener('click', closeQRZoom);
 
     // Logout
@@ -200,9 +209,22 @@ function generateVCard(user, data) {
     v.push("END:VCARD");
     const vcardStr = v.join("\n");
 
+    // QR Preview (Small)
+    const previewDest = document.getElementById('qrcode-preview');
+    if (previewDest && typeof QRCode !== 'undefined') {
+        // Keep the lens icon, clear only canvas/images if present
+        const existingCanvas = previewDest.querySelector('canvas');
+        const existingImg = previewDest.querySelector('img');
+        if (existingCanvas) existingCanvas.remove();
+        if (existingImg) existingImg.remove();
+
+        new QRCode(previewDest, { text: vcardStr, width: 80, height: 80, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.L });
+    }
+
+    // QR Zoom (Large)
     const dest = document.getElementById('qrcode-zoom');
     if (dest && typeof QRCode !== 'undefined') {
-        clearElement(dest); // Refactored to use safe clearing
+        clearElement(dest);
         new QRCode(dest, { text: vcardStr, width: 250, height: 250, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
     }
 }
@@ -211,21 +233,19 @@ function openQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');
     if (modal) {
         modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.add('opacity-100');
-            modal.children[1].classList.remove('scale-90');
-            modal.children[1].classList.add('scale-100');
-        }, 10);
+        // Force reflow
+        void modal.offsetWidth;
+        modal.classList.add('is-visible');
     }
 }
 
 function closeQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');
     if (modal) {
-        modal.classList.remove('opacity-100');
-        modal.children[1].classList.remove('scale-100');
-        modal.children[1].classList.add('scale-90');
-        setTimeout(() => modal.classList.add('hidden'), 300);
+        modal.classList.remove('is-visible');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300); // Wait for transition
     }
 }
 
@@ -234,15 +254,16 @@ function setupAppInfo() {
     if (!p) return;
 
     // Create elements securely instead of using innerHTML
-    const container = createElement('div', { className: 'flex-col-gap-2' }, [
+    const container = createElement('div', { className: 'info-stack' }, [
         createElement('p', {}, [
-            createElement('strong', {}, ['App Codici Password']),
-            ' è la soluzione PWA per la gestione sicura di credenziali personali e aziendali.'
+            createElement('strong', {}, [t('app_info_system_name')]),
+            ` ${t('app_info_system_sub')}`
         ]),
-        createElement('p', {}, ['Sviluppata per offrire massima crittografia e facilità di condivisione tramite standard base.']),
+        createElement('p', {}, [t('app_info_overview_p1')]),
+        createElement('p', {}, [t('app_info_security_desc')]),
         createElement('div', {
-            className: 'mt-2 text-[10px] font-black opacity-30',
-            textContent: 'VERSIONE 4.4 • base CORE'
+            className: 'app-version-info',
+            textContent: `${t('version_label') || 'VERSIONE'} 4.4 • base CORE`
         })
     ]);
 

@@ -17,7 +17,7 @@ export async function initComponents() {
         const isAuth = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
 
         const h = new Date().getHours();
-        const timeGreeting = (h >= 5 && h < 13) ? "Buongiorno" : (h >= 13 && h < 18) ? "Buon pomeriggio" : "Buonasera";
+        const timeGreeting = (h >= 6 && h < 13) ? t('greeting_morning') : (h >= 13 && h < 18) ? t('greeting_afternoon') : t('greeting_evening');
 
         // 1. SETUP HEADER
         const headerPh = document.getElementById('header-placeholder');
@@ -50,6 +50,14 @@ export async function initComponents() {
                 // Mapping Logico Navigazione STRETTO (Solo Ciclo Azienda)
                 if (path.endsWith('lista_aziende.html')) {
                     backFn = () => window.location.href = 'home_page.html';
+                } else if (path.endsWith('impostazioni.html')) {
+                    backFn = () => window.location.href = 'home_page.html';
+                } else if (path.endsWith('regole_scadenze.html')) {
+                    backFn = () => window.location.href = 'impostazioni.html';
+                } else if (path.endsWith('configurazione_automezzi.html') || path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
+                    backFn = () => window.location.href = 'regole_scadenze.html';
+                } else if (path.endsWith('archivio_account.html')) {
+                    backFn = () => window.location.href = 'impostazioni.html';
                 } else if (path.endsWith('account_azienda.html')) {
                     backFn = () => window.location.href = 'lista_aziende.html';
                 } else if (path.endsWith('dettaglio_account_azienda.html')) {
@@ -74,7 +82,16 @@ export async function initComponents() {
                 ]);
                 headerCenter.appendChild(greetingCont);
             } else {
-                headerCenter.appendChild(createElement('h1', { className: 'header-title', textContent: pageTitle }));
+                let displayTitle = pageTitle;
+                if (path.includes('impostazioni.html')) displayTitle = t('settings_title');
+                else if (path.includes('archivio_account.html')) displayTitle = t('account_archive');
+                else if (path.includes('profilo_privato.html')) displayTitle = t('page_title_profile');
+                else if (path.includes('regole_scadenze.html')) displayTitle = t('expiry_rules_title_page');
+                else if (path.includes('configurazione_automezzi.html')) displayTitle = t('vehicles_config_title');
+                else if (path.includes('configurazione_documenti.html')) displayTitle = t('documents_config_title');
+                else if (path.includes('configurazione_generali.html')) displayTitle = t('general_config_title');
+
+                headerCenter.appendChild(createElement('h1', { className: 'header-title', textContent: displayTitle }));
             }
 
             // Home Button / Logout
@@ -121,16 +138,21 @@ export async function initComponents() {
         const footerPh = document.getElementById('footer-placeholder');
         if (footerPh) {
             clearElement(footerPh);
-            const footerLeft = createElement('div', { className: 'header-left' }, [
-                createElement('button', {
-                    id: isHome ? 'theme-toggle-home' : 'theme-toggle-standard',
-                    className: 'btn-icon-header',
-                    title: 'Cambia Tema',
-                    onclick: () => document.documentElement.classList.toggle('dark')
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'contrast' })
-                ])
-            ]);
+            const isOnSettings = path.includes('impostazioni.html');
+            const footerLeft = createElement('div', { className: 'header-left' });
+
+            if (!isOnSettings) {
+                footerLeft.appendChild(
+                    createElement('button', {
+                        id: isHome ? 'theme-toggle-home' : 'theme-toggle-standard',
+                        className: 'btn-icon-header',
+                        title: 'Cambia Tema',
+                        onclick: () => document.documentElement.classList.toggle('dark')
+                    }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'contrast' })
+                    ])
+                );
+            }
 
             const footerCenter = createElement('div', { id: 'footer-center-actions', className: 'header-center' });
             const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });
@@ -138,17 +160,19 @@ export async function initComponents() {
             // Settings Link
             if (!isAuth) {
                 const isOnSettings = path.includes('impostazioni.html');
-                const settLink = createElement('div', { id: 'footer-settings-link' });
-                settLink.appendChild(
-                    createElement('a', {
-                        href: isOnSettings ? '#' : 'impostazioni.html',
-                        className: `btn-icon-header footer-settings-link ${isOnSettings ? 'opacity-30 pointer-events-none' : ''}`,
-                        title: isOnSettings ? 'Sei qui' : 'Impostazioni'
-                    }, [
-                        createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
-                    ])
-                );
-                footerRight.appendChild(settLink);
+                if (!isOnSettings) {
+                    const settLink = createElement('div', { id: 'footer-settings-link' });
+                    settLink.appendChild(
+                        createElement('a', {
+                            href: 'impostazioni.html',
+                            className: 'btn-icon-header footer-settings-link',
+                            title: 'Impostazioni'
+                        }, [
+                            createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
+                        ])
+                    );
+                    footerRight.appendChild(settLink);
+                }
             }
 
             // Inseriamo lo spacer prima del footer per spingere il contenuto su

@@ -1,84 +1,127 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 
 <head>
+    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <script src="assets/js/theme-init.js"></script>
+    <!-- CSP (Content Security Policy) - V3.9 Standard -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' ; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Archivio Account - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.3" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Archivio Account - PROTOCOLLO BASE V3.9</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.9.1" />
+    <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css"> <!-- Design System Master (PROTOCOLLO BASE V3.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.3"> <!-- CORE JS -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- CSS Modular System V3.9 -->
+    <link rel="stylesheet" href="assets/css/core.css?v=3.9">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
+    <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/core_moduli.css?v=1.0">
+
+    <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
     <script type="module" src="assets/js/ui-core.js"></script>
-    <script src="assets/js/translations.js"></script>
 </head>
 
 <body class="base-bg">
-    <div class="base-container"> <!-- Faro Estetico -->
-        <div class="base-glow"></div> <!-- HEADER FISSO -->
-        <header class="base-header">
-            <div class="header-balanced-container"> <!-- ZONA SINISTRA: Navigazione (1 icona) -->
-                <div class="header-left"> <a href="impostazioni.html" class="btn-icon-header"> <span
-                            class="material-symbols-outlined">arrow_back</span> </a> </div>
-                <!-- ZONA CENTRO: Titolo con Wrap Intelligente -->
-                <div class="header-center">
-                    <h1 class="header-title" data-t="account_archive"> Archivio Account </h1>
-                </div> <!-- ZONA DESTRA: Home (1 icona - dispari, extra a dx) -->
-                <div class="header-right"> <a href="home_page.html" class="btn-icon-header"> <span
-                            class="material-symbols-outlined">home</span> </a> </div>
-            </div>
-        </header>
-        <main class="settings-container no-select pt-20 gap-4"> <!-- Context Selector & Search Area -->
-            <div class="settings-group mb-2 gap-2"> <!-- Selector -->
-                <div class="settings-item p-3 mb-0">
-                    <div class="settings-item-header">
-                        <div class="settings-icon-box size-8 text-lg bg-blue-glass-10 icon-accent-blue"> <span
-                                class="material-symbols-outlined">filter_list</span> </div> <select
-                            id="archive-context-select"
-                            class="w-full bg-transparent border-none text-white font-semibold text-sm outline-none ml-2 cursor-pointer">
-                            <option value="all" class="bg-black-90 text-white" data-t="archive_all">Tutti gli archiviati
-                            </option>
-                            <option value="privato" class="bg-black-90 text-white" data-t="archive_private_only">Solo
-                                Archivio Privato </option>
-                        </select>
+    <div class="base-container">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
+
+        <!-- Background Watermark (Global) -->
+        <div class="archive-watermark">
+            <span class="material-symbols-outlined">archive</span>
+        </div>
+
+        <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
+
+        <div class="spacer-header"></div>
+
+        <!-- Main Content -->
+        <main class="base-main">
+            <div class="page-container archive-page-content">
+
+                <div class="saetta-master"></div>
+
+                <div class="settings-group">
+
+                    <!-- Context Selector -->
+                    <div class="settings-item">
+                        <div class="settings-icon-box icon-blue">
+                            <span class="material-symbols-outlined">filter_list</span>
+                        </div>
+                        <div class="settings-item-info">
+                            <select id="archive-context-select" class="settings-select-semantic">
+                                <option value="all" data-t="archive_all">Tutti gli archiviati</option>
+                                <option value="privato" data-t="archive_private_only">Solo Archivio Privato</option>
+                            </select>
+                        </div>
                     </div>
-                </div> <!-- Search -->
-                <div class="relative"> <input type="search" placeholder="Cerca nell'archivio..."
-                        class="settings-item w-full pl-12 mb-0 bg-slate-900-60 text-sm"
-                        data-t-placeholder="archive_search_placeholder"> <span
-                        class="material-symbols-outlined absolute left-4 top-50-percent-y opacity-50 pointer-events-none">search</span>
+
+                    <!-- Search Input -->
+                    <div class="settings-item no-hover">
+                        <div class="settings-icon-box icon-purple">
+                            <span class="material-symbols-outlined">search</span>
+                        </div>
+                        <div class="settings-item-info">
+                            <input type="search" id="archive-search" class="settings-input-semantic"
+                                placeholder="Cerca nell'archivio..." data-t-placeholder="archive_search_placeholder">
+                        </div>
+                    </div>
+
                 </div>
-            </div> <!-- Action Bar: Empty Trash -->
-            <div class="flex justify-end px-2"> <button id="btn-empty-trash"
-                    class="auth-btn w-auto py-2 px-4 bg-red-glass-10 border-red-30 text-red-500 text-sm flex items-center gap-2">
-                    <span class="material-symbols-outlined text-lg">delete_forever</span> <span
-                        data-t="empty_trash">Svuota Cestino</span> </button> </div> <!-- Hint Swipe -->
-            <div class="flex justify-center gap-4 opacity-40 text-07 font-bold all-caps"> <span
-                    class="flex items-center gap-1"><span class="material-symbols-outlined text-14">swipe_left</span>
-                    <span data-t="restore">Ripristina</span></span> <span class="flex items-center gap-1"><span
-                        data-t="delete">Elimina</span> <span
-                        class="material-symbols-outlined text-14">swipe_right</span></span> </div>
-            <!-- List Container -->
-            <div id="accounts-container" class="flex flex-col gap-3"> <!-- Loading State -->
-                <div class="flex flex-col items-center opacity-60 py-10">
-                    <div class="size-6 border-2 border-white border-t-transparent rounded-full animate-spin mb-2">
-                    </div> <span class="text-sm" data-t="loading">Caricamento...</span>
+
+                <!-- List Container -->
+                <div id="accounts-container" class="settings-group archive-list-group">
+                    <!-- Loading State -->
+                    <div class="archive-loading-container">
+                        <div class="archive-spinner"></div>
+                        <span class="archive-loading-text" data-t="loading">Caricamento...</span>
+                    </div>
                 </div>
+
+                <!-- Hint Swipe (Moved below list) -->
+                <div class="page-footer-info archive-hint-wrap">
+                    <div class="swipe-hint-container">
+                        <span class="swipe-hint"><span class="material-symbols-outlined">swipe_right</span> <span
+                                data-t="restore">Ripristina</span></span>
+                        <span class="swipe-hint"><span data-t="delete">Elimina</span> <span
+                                class="material-symbols-outlined">swipe_left</span></span>
+                    </div>
+                </div>
+
+                <!-- Bottom Action: Empty Trash (Moved to bottom) -->
+                <div class="settings-group archive-action-group">
+                    <div class="settings-item no-hover">
+                        <div class="settings-controls-row">
+                            <button id="btn-empty-trash" class="btn-logout-semantic btn-trash-archive">
+                                <span class="material-symbols-outlined">delete_forever</span>
+                                <span class="btn-logout-text" data-t="empty_trash">Svuota Cestino</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="spacer-footer"></div>
             </div>
-            <div class="spacer-footer"></div> <!-- FOOTER PREMIUM -->
-            <footer id="footer-placeholder" class="base-footer"></footer>
-    </div> <!-- Scripts -->
+        </main>
+
+        <!-- FOOTER PLACEHOLDER -->
+        <footer id="footer-placeholder" class="base-footer"></footer>
+    </div>
+
+    <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/modules/settings/archivio_account.js"></script>
 </body>
 
 </html>
-
-
-

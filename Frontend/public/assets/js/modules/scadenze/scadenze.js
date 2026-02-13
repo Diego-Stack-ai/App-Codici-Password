@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             logError("Scadenze Page", error);
             if (scadenzeContainer) {
-                const p = createElement('p', { className: 'text-center p-4 text-red-500', textContent: `Errore: ${error.message}` });
+                const p = createElement('p', { className: 'hero-page-subtitle text-center mt-4', textContent: `Errore: ${error.message}` });
                 setChildren(scadenzeContainer, p);
             }
         }
@@ -209,10 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render
         clearElement(scadenzeContainer);
         if (filtered.length === 0) {
-            const empty = createElement('div', { className: 'flex flex-col items-center justify-center py-20 opacity-30' }, [
-                createElement('span', { className: 'material-symbols-outlined text-6xl mb-4', textContent: 'event_busy' }),
+            const empty = createElement('div', { className: 'archive-empty-state' }, [
+                createElement('span', { className: 'material-symbols-outlined archive-empty-icon', textContent: 'event_busy' }),
                 createElement('p', {
-                    className: 'font-bold uppercase tracking-widest text-xs',
+                    className: 'archive-empty-text',
                     dataset: { t: 'no_deadlines_found' },
                     textContent: 'Nessuna scadenza trovata'
                 })
@@ -234,22 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const expired = dueDate < now;
         const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
 
-        let borderColor = 'border-accent-blue-30';
-        let bgColor = 'bg-accent-blue-5';
-        let iconColor = 'text-accent-blue-400';
-
-        if (expired) {
-            borderColor = 'border-accent-red-30';
-            bgColor = 'bg-accent-red-5';
-            iconColor = 'text-accent-red';
-        } else if (isUpcoming) {
-            borderColor = 'border-accent-amber-30';
-            bgColor = 'bg-accent-amber-5';
-            iconColor = 'text-accent-amber';
-        }
+        let stateClass = 'deadline-card-info';
+        if (expired) stateClass = 'deadline-card-expired';
+        else if (isUpcoming) stateClass = 'deadline-card-upcoming';
 
         const card = createElement('div', {
-            className: `glass-card p-4 border-l-4 ${borderColor} ${bgColor} cursor-pointer hover:bg-white/5 transition-all active:scale-95 animate-in slide-in-from-bottom-2 duration-300`,
+            className: `deadline-card ${stateClass}`,
             dataset: {
                 action: 'navigate',
                 href: `dettaglio_scadenza.html?id=${scadenza.id}`
@@ -257,17 +247,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }, [
             createElement('div', { className: 'flex items-start justify-between gap-4' }, [
                 createElement('div', { className: 'flex items-center gap-4 min-w-0' }, [
-                    createElement('div', { className: `size-12 rounded-2xl ${bgColor} border ${borderColor} ${iconColor} flex-center shrink-0` }, [
+                    createElement('div', { className: 'deadline-icon-box' }, [
                         createElement('span', { className: 'material-symbols-outlined filled text-2xl', textContent: scadenza.icon || 'event_note' })
                     ]),
                     createElement('div', { className: 'flex-col min-w-0' }, [
-                        createElement('span', { className: 'text-[9px] font-black uppercase text-white/20 tracking-widest', textContent: scadenza.category || 'SCADENZA' }),
-                        createElement('h4', { className: 'text-sm font-black text-white uppercase tracking-wider truncate', textContent: scadenza.title }),
-                        createElement('p', { className: 'text-[10px] font-medium text-white/40 uppercase', textContent: `Ref: ${scadenza.name || 'Generale'}` })
+                        createElement('span', { className: 'deadline-card-category', textContent: scadenza.category || 'SCADENZA' }),
+                        createElement('h4', { className: 'deadline-card-title', textContent: scadenza.title }),
+                        createElement('p', { className: 'deadline-card-subtitle', textContent: `Ref: ${scadenza.name || 'Generale'}` })
                     ])
                 ]),
                 createElement('span', {
-                    className: `px-3 py-1 rounded-lg ${bgColor} border ${borderColor} text-[10px] font-black uppercase tracking-widest ${iconColor} shrink-0`,
+                    className: 'deadline-date-badge',
                     textContent: dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).toUpperCase()
                 })
             ])

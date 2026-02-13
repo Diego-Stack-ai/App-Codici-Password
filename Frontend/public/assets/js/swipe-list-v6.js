@@ -98,7 +98,7 @@ export class SwipeList {
         }
 
         // Prevent vertical scrolling if horizontal swipe is detected (only for touch)
-        if (!e.type.includes('mouse') && Math.abs(diff) > 10) {
+        if (!e.type.includes('mouse') && Math.abs(diff) > 10 && e.cancelable) {
             e.preventDefault();
         }
 

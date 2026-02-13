@@ -1,25 +1,29 @@
 <!DOCTYPE html>
-<html lang="it" class="dark">
+<html lang="it" class="dark" data-i18n="loading">
 
 <head>
+    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <script src="assets/js/theme-init.js"></script>
+    <!-- CSP (Content Security Policy) - V3.9 Standard -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Privacy Policy - PROTOCOLLO BASE V3.6</title>
+    <title>Privacy Policy - PROTOCOLLO BASE V3.9</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.6" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <link rel="manifest" href="manifest.json?v=3.9.1" />
+    <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
+    <!-- CSS Modular System V3.9 -->
+    <link rel="stylesheet" href="assets/css/core.css?v=3.9">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
+    <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
 
     <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
@@ -27,7 +31,7 @@
 </head>
 
 <body class="base-bg">
-    <div class="base-container relative">
+    <div class="base-container">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
@@ -37,120 +41,153 @@
         <div class="spacer-header"></div>
 
         <!-- Main Content -->
-        <main class="base-main min-h-screen">
-            <div class="detail-content-wrap pb-20">
+        <main class="base-main">
+            <div class="page-container">
 
-                <div class="mb-8 px-1">
-                    <h2 class="text-2xl font-black text-white leading-tight uppercase" data-t="privacy_policy_title">
-                        Privacy Policy</h2>
-                    <p class="text-xs font-bold text-white/40 uppercase tracking-[0.2em] mt-1"
-                        data-t="privacy_extended_title">Informativa Estesa</p>
+                <div class="hero-page-header">
+                    <div class="saetta-master"></div>
+                    <div class="saetta-drop"></div>
+
+                    <div class="hero-page-icon-box border-glow">
+                        <span class="material-symbols-outlined filled">security</span>
+                    </div>
+
+                    <h2 class="hero-page-title" data-t="privacy_policy_title">Privacy Policy</h2>
+                    <p class="hero-page-subtitle" data-t="privacy_extended_title">Informativa Estesa</p>
                 </div>
 
-                <div class="flex-col-gap-5">
+                <div class="settings-group">
 
                     <!-- 1. Titolare -->
-                    <div class="glass-card p-6 border-white/5 animate-in slide-in-from-bottom-2">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div
-                                class="size-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex-center">
-                                <span class="material-symbols-outlined filled text-xl">shield_person</span>
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-emerald">
+                                <span class="material-symbols-outlined filled">shield_person</span>
                             </div>
-                            <h3 class="text-xs font-black uppercase tracking-widest text-white/80"
-                                data-t="privacy_1_title">1. Titolare del Trattamento</h3>
+                            <div class="settings-item-info">
+                                <h3 class="settings-label" data-t="privacy_1_title">1. Titolare del Trattamento</h3>
+                                <p class="settings-desc" data-t="privacy_1_subtitle">Informativa Legale</p>
+                            </div>
                         </div>
-                        <p class="text-xs font-medium text-white/40 leading-relaxed" data-t="privacy_1_text">
-                            Il Titolare del trattamento dei dati Ã¨ <strong class="text-white/80">Boschetto
-                                Diego</strong>.
-                            L'applicazione Ã¨ concepita per garantire la massima sicurezza e riservatezza.
-                        </p>
+                        <div class="settings-item-description">
+                            <p data-t="privacy_1_text">
+                                Il Titolare del trattamento dei dati è <strong class="text-accent">Boschetto
+                                    Diego</strong>.
+                                L'applicazione è concepita per garantire la massima sicurezza e riservatezza.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- 2. Dati Trattati -->
-                    <div class="glass-card p-6 border-white/5 animate-in slide-in-from-bottom-2 duration-300">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div
-                                class="size-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex-center">
-                                <span class="material-symbols-outlined filled text-xl">source</span>
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-blue">
+                                <span class="material-symbols-outlined filled">source</span>
                             </div>
-                            <h3 class="text-xs font-black uppercase tracking-widest text-white/80"
-                                data-t="privacy_2_title">2. Dati Trattati</h3>
+                            <div class="settings-item-info">
+                                <h3 class="settings-label" data-t="privacy_2_title">2. Dati Trattati</h3>
+                                <p class="settings-desc" data-t="privacy_2_subtitle">Tipologia di Informazioni</p>
+                            </div>
                         </div>
-                        <ul class="flex-col-gap-3 border-l border-white/10 pl-4 ml-5">
-                            <li class="flex-col gap-1">
-                                <strong class="text-[10px] font-black uppercase text-white/60">Registrazione</strong>
-                                <span class="text-xs text-white/30" data-t="privacy_2_li1">Email, nome, avatar (per
-                                    autenticazione).</span>
-                            </li>
-                            <li class="flex-col gap-1">
-                                <strong class="text-[10px] font-black uppercase text-white/60">Volontari</strong>
-                                <span class="text-xs text-white/30" data-t="privacy_2_li2">Credenziali, password, note
-                                    (crittografati).</span>
-                            </li>
-                            <li class="flex-col gap-1">
-                                <strong class="text-[10px] font-black uppercase text-white/60">Tecnici</strong>
-                                <span class="text-xs text-white/30" data-t="privacy_2_li3">Log di sistema gestiti da
-                                    Google Firebase.</span>
-                            </li>
-                        </ul>
+                        <div class="settings-item-description">
+                            <ul class="settings-list">
+                                <li>
+                                    <strong class="settings-list-label">Registrazione</strong>
+                                    <span class="settings-list-text" data-t="privacy_2_li1">Email, nome, avatar (per
+                                        autenticazione).</span>
+                                </li>
+                                <li>
+                                    <strong class="settings-list-label">Volontari</strong>
+                                    <span class="settings-list-text" data-t="privacy_2_li2">Credenziali, password, note
+                                        (crittografati).</span>
+                                </li>
+                                <li>
+                                    <strong class="settings-list-label">Tecnici</strong>
+                                    <span class="settings-list-text" data-t="privacy_2_li3">Log di sistema gestiti da
+                                        Google Firebase.</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
                     <!-- 3. Sicurezza -->
-                    <div class="glass-card p-6 border-white/5 animate-in slide-in-from-bottom-2 duration-500">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div
-                                class="size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex-center">
-                                <span class="material-symbols-outlined filled text-xl">lock</span>
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-purple">
+                                <span class="material-symbols-outlined filled">lock</span>
                             </div>
-                            <h3 class="text-xs font-black uppercase tracking-widest text-white/80"
-                                data-t="privacy_3_title">3. Sicurezza e Storage</h3>
+                            <div class="settings-item-info">
+                                <h3 class="settings-label" data-t="privacy_3_title">3. Sicurezza e Storage</h3>
+                                <p class="settings-desc" data-t="privacy_3_subtitle">Infrastruttura Cloud</p>
+                            </div>
                         </div>
-                        <p class="text-xs font-medium text-white/40 leading-relaxed" data-t="privacy_3_text">
-                            Utilizziamo l'infrastruttura sicura di <strong class="text-white/80">Google
-                                Firebase</strong>.
-                            Connessioni SSL/TLS e database protetti. I dati sensibili sono accessibili solo all'utente
-                            proprietario.
-                        </p>
+                        <div class="settings-item-description">
+                            <p data-t="privacy_3_text">
+                                Utilizziamo l'infrastruttura sicura di <strong class="text-accent">Google
+                                    Firebase</strong>.
+                                Connessioni SSL/TLS e database protetti. I dati sensibili sono accessibili solo
+                                all'utente proprietario.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- 4. Condivisione -->
-                    <div class="glass-card p-6 border-white/5 animate-in slide-in-from-bottom-2 duration-700">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div
-                                class="size-10 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 flex-center">
-                                <span class="material-symbols-outlined filled text-xl">share</span>
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-red">
+                                <span class="material-symbols-outlined filled">share</span>
                             </div>
-                            <h3 class="text-xs font-black uppercase tracking-widest text-white/80"
-                                data-t="privacy_4_title">4. Condivisione Dati</h3>
+                            <div class="settings-item-info">
+                                <h3 class="settings-label" data-t="privacy_4_title">4. Condivisione Dati</h3>
+                                <p class="settings-desc" data-t="privacy_4_subtitle">Politiche Terze Parti</p>
+                            </div>
                         </div>
-                        <p class="text-xs font-medium text-white/40 leading-relaxed" data-t="privacy_4_text">
-                            Nessun dato viene venduto a terzi. La condivisione avviene <strong
-                                class="text-white/80">solo su tua esplicita azione</strong> tramite la funzione
-                            "Condividi".
-                        </p>
+                        <div class="settings-item-description">
+                            <p data-t="privacy_4_text">
+                                Nessun dato viene venduto a terzi. La condivisione avviene <strong
+                                    class="text-accent">solo su tua esplicita azione</strong> tramite la funzione
+                                "Condividi".
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 5. Diritti -->
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-amber">
+                                <span class="material-symbols-outlined filled">gavel</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <h3 class="settings-label" data-t="privacy_5_title">5. Diritti Utente (GDPR)</h3>
+                                <p class="settings-desc" data-t="privacy_5_subtitle">I tuoi diritti</p>
+                            </div>
+                        </div>
+                        <div class="settings-item-description">
+                            <ul class="settings-list">
+                                <li data-t="privacy_5_li1">Diritto di accesso ai propri dati.</li>
+                                <li data-t="privacy_5_li2">Diritto alla cancellazione ("Oblio") eliminando l'account.
+                                </li>
+                                <li data-t="privacy_5_li3">Diritto di rettifica delle informazioni.</li>
+                            </ul>
+                        </div>
                     </div>
 
                 </div>
 
-                <div class="text-center py-10">
-                    <p class="text-[9px] font-bold text-white/10 uppercase tracking-[0.3em]"
-                        data-t="privacy_update_text">Ultimo aggiornamento: Gennaio 2026</p>
+                <div class="page-footer-info">
+                    <p class="app-version-info" data-t="privacy_update_text">Ultimo aggiornamento: Gennaio 2026</p>
                 </div>
 
-                <div class="h-10"></div>
-
+                <div class="spacer-footer"></div>
             </div>
         </main>
 
         <!-- FOOTER PLACEHOLDER -->
-        <footer id="footer-placeholder" class="base-header"></footer>
+        <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
     <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/modules/settings/privacy.js"></script>
 </body>
 
 </html>
-
-

@@ -1,0 +1,211 @@
+/* ==========================================================================
+   SCADENZE CSS (V3.9) - Stili Specifici per scadenze.html
+   ========================================================================== */
+
+/* Riduzione spazio testata per alzare il selettore */
+.saetta-master {
+    height: 10px;
+    /* Quasi invisibile ma presente per i riflessi */
+    margin-bottom: -1rem;
+}
+
+
+/* --- DEADLINE CARDS --- */
+
+.deadline-card {
+    position: relative;
+    padding: 1rem;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    animation: slideInUp 0.3s ease-out backwards;
+}
+
+.deadline-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.deadline-card:active {
+    transform: scale(0.98);
+}
+
+.deadline-card-expired {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.deadline-card-upcoming {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.deadline-card-info {
+    border-left-color: var(--accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.deadline-icon-box {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--accent);
+}
+
+.deadline-card-expired .deadline-icon-box {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.deadline-card-upcoming .deadline-icon-box {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.deadline-card-info .deadline-icon-box {
+    color: var(--accent);
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.deadline-date-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+}
+
+.deadline-card-expired .deadline-date-badge {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.deadline-card-upcoming .deadline-date-badge {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.deadline-card-info .deadline-date-badge {
+    color: var(--accent);
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- FILTERS & SEARCH --- */
+
+.filter-container {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin: 0 -1rem;
+    /* Full width scroll */
+}
+
+.filter-container::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-chip {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.filter-chip.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.search-bar-animated {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    padding: 0.75rem 1rem;
+    background: var(--surface-vault);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.search-bar-animated.active {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0 1rem;
+    height: 44px;
+}
+
+.search-input-wrapper span {
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.search-input-wrapper input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    width: 100%;
+    outline: none;
+}

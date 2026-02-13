@@ -2,23 +2,24 @@
     "name": "App Codici & Password",
     "short_name": "Codici & Password",
     "description": "Cassaforte sicura per le tue credenziali e scadenze.",
-    "start_url": "/",
+    "start_url": "index.html",
+    "scope": "./",
     "display": "standalone",
     "background_color": "#0a0f1e",
     "theme_color": "#0a0f1e",
     "orientation": "portrait",
     "icons": [
         {
-            "src": "assets/images/app-icon.png",
+            "src": "./assets/images/app-icon.png",
             "sizes": "192x192",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         },
         {
-            "src": "assets/images/app-icon.png",
+            "src": "./assets/images/app-icon.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         }
     ]
 }

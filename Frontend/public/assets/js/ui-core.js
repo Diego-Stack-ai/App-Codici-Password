@@ -1,5 +1,6 @@
 import { initComponents } from './components.js';
 import { createElement, setChildren, safeSetText } from './dom-utils.js';
+import { t } from './translations.js';
 
 /**
  * [CORE UI] INITIALIZATION
@@ -10,6 +11,9 @@ function init() {
 
     // Inizializza UX bloccata
     initLockedUX();
+
+    // Inizializza Collapsibles (Accordion System V3.9)
+    initCollapsibles();
 }
 
 // Esegui al caricamento
@@ -99,7 +103,7 @@ export function showWarningModal(title, message, callback = null) {
     const btnOk = createElement('button', {
         id: 'modal-ok-btn',
         className: 'btn-modal btn-primary',
-        textContent: 'Ho Capito'
+        textContent: t('ok') || 'Ho Capito'
     });
 
     const content = createElement('div', { className: 'modal-box' }, [
@@ -137,13 +141,13 @@ export async function showLogoutModal() {
 
         modal = createElement('div', { id: modalId, className: 'modal-overlay' });
 
-        const btnCancel = createElement('button', { id: 'btn-cancel-logout', className: 'btn-modal btn-secondary', textContent: 'Annulla' });
-        const btnConfirm = createElement('button', { id: 'btn-confirm-logout', className: 'btn-modal btn-danger', textContent: 'Esci' });
+        const btnCancel = createElement('button', { id: 'btn-cancel-logout', className: 'btn-modal btn-secondary', textContent: t('cancel') || 'Annulla' });
+        const btnConfirm = createElement('button', { id: 'btn-confirm-logout', className: 'btn-modal btn-danger', textContent: t('logout') || 'Esci' });
 
         const content = createElement('div', { className: 'modal-box' }, [
             createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-orange', textContent: 'logout' }),
-            createElement('h3', { className: 'modal-title', textContent: 'Vuoi uscire?' }),
-            createElement('p', { className: 'modal-text', textContent: 'Dovrai effettuare nuovamente il login per accedere.' }),
+            createElement('h3', { className: 'modal-title', textContent: t('logout_confirm_title') || 'Vuoi uscire?' }),
+            createElement('p', { className: 'modal-text', textContent: t('logout_confirm_msg') || 'Dovrai effettuare nuovamente il login per accedere.' }),
             createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
         ]);
 
@@ -173,7 +177,7 @@ window.showLogoutModal = showLogoutModal;
 /**
  * [CORE UI] CONFIRM MODAL
  */
-export async function showConfirmModal(title, message, confirmText = 'Conferma', cancelText = 'Annulla') {
+export async function showConfirmModal(title, message, confirmText = t('confirm') || 'Conferma', cancelText = t('cancel') || 'Annulla') {
     return new Promise((resolve) => {
         const modalId = 'protocol-confirm-modal';
         let modal = document.getElementById(modalId);
@@ -232,8 +236,8 @@ export function showInputModal(title, initialValue = '', placeholder = '') {
             className: 'glass-field modal-input-glass'
         });
 
-        const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: 'Annulla' }, []);
-        const btnConfirm = createElement('button', { id: 'modal-confirm-btn', className: 'btn-modal btn-primary', textContent: 'Conferma' }, []);
+        const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: t('cancel') || 'Annulla' }, []);
+        const btnConfirm = createElement('button', { id: 'modal-confirm-btn', className: 'btn-modal btn-primary', textContent: t('confirm') || 'Conferma' }, []);
 
         // Listener per chiusura
         const closeModal = (val) => {
@@ -309,4 +313,33 @@ export function toggleTripleVisibility(id) {
 }
 
 window.toggleTripleVisibility = toggleTripleVisibility;
+
+/**
+ * [CORE UI] COLLAPSIBLE SYSTEM (Accordion)
+ * Gestisce l'apertura/chiusura delle sezioni con classe .collapsible-header
+ */
+export function initCollapsibles() {
+    document.addEventListener('click', (e) => {
+        const header = e.target.closest('.collapsible-header');
+        if (!header) return;
+
+        // Se clicchiamo su un pulsante interno (es. 'Aggiungi'), non chiudiamo/apriamo l'accordion
+        if (e.target.closest('button') || e.target.closest('.config-item-actions')) return;
+
+        const targetId = header.dataset.target;
+        if (!targetId) return;
+
+        const targetEl = document.getElementById(targetId);
+        if (!targetEl) return;
+
+        // Toggle della sezione
+        const isHidden = targetEl.classList.toggle('hidden');
+
+        // Animazione freccia (se presente)
+        const arrow = header.querySelector('.arrow-icon');
+        if (arrow) {
+            arrow.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    });
+}
 

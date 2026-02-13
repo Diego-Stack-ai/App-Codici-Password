@@ -1,216 +1,289 @@
 <!DOCTYPE html>
-<html lang="it" class="dark">
+<html lang="it">
 
 <head>
+    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <script src="assets/js/theme-init.js"></script>
+    <!-- CSP (Content Security Policy) - V3.9 Standard -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Impostazioni - PROTOCOLLO BASE V3.6</title> <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.6" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <title>Impostazioni - PROTOCOLLO BASE V3.9</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=3.9.1" />
+    <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css"> <!-- Design System Master (PROTOCOLLO BASE V3.6) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6"> <!-- CORE JS -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+    <!-- CSS Modular System V3.9 -->
+    <!-- 1. Core System -->
+    <link rel="stylesheet" href="assets/css/core.css?v=3.9">
+    <!-- 2. Fonts -->
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
+    <!-- 3. Fascie (Header & Footer) -->
+    <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <!-- 4. Shared Library -->
+    <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
+
+    <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
     <script type="module" src="assets/js/ui-core.js"></script>
 </head>
 
 <body class="base-bg">
-    <div class="base-container relative"> <!-- Ambient Glow -->
-        <div class="base-glow"></div> <!-- Automated Header -->
+    <div class="base-container">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
+
+        <!-- Automated Header -->
         <header id="header-placeholder" class="base-header"></header>
-        <div class="spacer-header"></div> <!-- Main Content -->
+        <div class="spacer-header"></div>
+
+        <!-- Main Content -->
         <main class="base-main">
-            <div class="detail-content-wrap"> <!-- Hero Profile Header -->
-                <div class="hero-profile-header">
-                    <div class="avatar-manager relative">
-                        <div id="user-avatar-settings"
-                            class="detail-avatar bg-cover bg-center border-2 border-white/10 shadow-xl"></div>
-                        <div class="qr-shortcut-badge border-glow" id="btn-zoom-qr"> <span
-                                class="material-symbols-outlined text-xs">qr_code_2</span> </div>
+            <div class="page-container">
+
+                <!-- Hero Profile Header (V3.9 Refactored) -->
+                <div class="card-hero border-glow hero-card-variant">
+                    <!-- Visual Effects (V3.9 Saette) -->
+                    <div class="saetta-master"></div>
+                    <div class="saetta-drop"></div>
+
+                    <div class="hero-content-layout">
+                        <!-- Top Row: Avatar + QR -->
+                        <div class="hero-top-row">
+                            <div class="hero-avatar-container">
+                                <div id="user-avatar-settings" class="hero-avatar bg-cover bg-center"></div>
+                            </div>
+
+                            <div id="qrcode-preview" class="qr-preview-box">
+                                <div class="qr-lens-icon">
+                                    <span class="material-symbols-outlined">zoom_in</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Info: Name + Button -->
+                        <div class="hero-info-col">
+                            <h1 id="user-name-settings" class="hero-user-name" data-t="loading">Caricamento...</h1>
+                            <button id="btn-manage-account" class="btn-manage-account-semantic">
+                                <span class="material-symbols-outlined">manage_accounts</span>
+                                <span data-t="manage_account_data">Gestisci Account</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="hero-title-container">
-                        <h1 id="user-name-settings" class="hero-title" data-t="loading">Caricamento...</h1> <button
-                            id="btn-manage-account"
-                            class="hero-category-badge mt-1 flex items-center gap-1 hover:bg-white/10 transition-colors">
-                            <span class="material-symbols-outlined text-[10px]">manage_accounts</span> <span
-                                data-t="manage_account_data">Gestisci Account</span> </button>
-                    </div>
-                </div> <!-- Hidden QR for data access -->
-                <div id="qrcode-settings" class="hidden"></div> <!-- General Settings Group -->
-                <div class="flex-col-gap-3">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1"
-                        data-t="general_settings">Impostazioni Generali</h3> <!-- Lingua -->
-                    <div class="glass-card flex items-center justify-between p-4 group cursor-pointer"
-                        id="btn-toggle-lang">
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="size-10 rounded-xl bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10 shrink-0 group-hover:bg-purple-500/20 transition-all">
+
+                    <!-- Hidden QR for data access -->
+                    <div id="qrcode-settings" class="hidden"></div>
+                </div>
+
+                <!-- Impostazioni Generali -->
+                <div class="settings-container">
+                    <h3 class="settings-desc" data-t="general_settings">Impostazioni Generali</h3>
+
+                    <!-- Lingua -->
+                    <div class="settings-item settings-item-stack" id="btn-toggle-lang">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-purple">
                                 <span class="material-symbols-outlined">translate</span>
                             </div>
-                            <div class="flex flex-col"> <span class="text-sm font-bold text-white"
-                                    data-t="language_title">Lingua App</span> <span id="current-lang-label"
-                                    class="text-[10px] text-white/40 font-bold uppercase tracking-widest">Italiano</span>
+                            <div class="settings-item-info">
+                                <span class="settings-label" data-t="language_title">Lingua App</span>
+                                <span id="current-lang-label" class="settings-desc">Italiano</span>
                             </div>
-                        </div> <span id="lang-chevron"
-                            class="material-symbols-outlined text-white/10 transition-transform">expand_more</span>
+                            <span id="lang-chevron" class="material-symbols-outlined arrow-icon">expand_more</span>
+                        </div>
                     </div>
-                    <div id="lang-dropdown"
-                        class="hidden flex-col gap-1 px-4 py-2 mt-[-12px] glass-card rounded-t-none border-t-0 animate-in slide-in-from-top-2">
-                        <button
-                            class="lang-option flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all text-xs font-medium text-white/70"
-                            data-code="it"> <span class="text-base">ðŸ‡®ðŸ‡¹</span> Italiano </button> <button
-                            class="lang-option flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all text-xs font-medium text-white/70"
-                            data-code="en"> <span class="text-base">ðŸ‡ºðŸ‡¸</span> English </button> <button
-                            class="lang-option flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all text-xs font-medium text-white/70"
-                            data-code="ro"> <span class="text-base">ðŸ‡·ðŸ‡´</span> RomÃ¢nÄƒ </button>
-                    </div> <!-- Tema -->
-                    <div class="glass-card p-4">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div
-                                class="size-10 rounded-xl bg-blue-500/10 text-blue-400 flex-center border border-blue-500/10">
+                    <div id="lang-dropdown" class="settings-dropdown-panel hidden">
+                        <button class="settings-dropdown-btn lang-option" data-code="it">
+                            <span>🇮🇹</span> Italiano
+                        </button>
+                        <button class="settings-dropdown-btn lang-option" data-code="en">
+                            <span>🇺🇸</span> English
+                        </button>
+                        <button class="settings-dropdown-btn lang-option" data-code="es">
+                            <span>🇪🇸</span> Español
+                        </button>
+                        <button class="settings-dropdown-btn lang-option" data-code="fr">
+                            <span>🇫🇷</span> Français
+                        </button>
+                        <button class="settings-dropdown-btn lang-option" data-code="de">
+                            <span>🇩🇪</span> Deutsch
+                        </button>
+                        <button class="settings-dropdown-btn lang-option" data-code="zh">
+                            <span>🇨🇳</span> 中文
+                        </button>
+                        <button class="settings-dropdown-btn lang-option" data-code="hi">
+                            <span>🇮🇳</span> हिन्दी
+                        </button>
+                        <button class="settings-dropdown-btn lang-option" data-code="pt">
+                            <span>🇵🇹</span> Português
+                        </button>
+                    </div>
+
+                    <!-- Tema -->
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-blue">
                                 <span class="material-symbols-outlined">palette</span>
                             </div>
-                            <div class="flex flex-col"> <span class="text-sm font-bold text-white"
-                                    data-t="theme_title">Tema Visivo</span> <span
-                                    class="text-[10px] text-white/40 font-bold uppercase tracking-widest"
-                                    data-t="theme_desc">Look & Feel</span> </div>
+                            <div class="settings-item-info">
+                                <span class="settings-label" data-t="theme_title">Tema Visivo</span>
+                                <span class="settings-desc" data-t="theme_desc">Look & Feel</span>
+                            </div>
                         </div>
-                        <div class="flex gap-2" id="theme-selector"> <button class="timer-btn flex-1 theme-btn"
-                                data-theme="light" data-t="theme_light">Chiaro</button> <button
-                                class="timer-btn flex-1 theme-btn" data-theme="auto" data-t="theme_auto">Auto</button>
+                        <div class="settings-controls-row" id="theme-selector">
+                            <button class="timer-btn flex-1 theme-btn" data-theme="light"
+                                data-t="theme_light">Chiaro</button>
+                            <button class="timer-btn flex-1 theme-btn" data-theme="auto"
+                                data-t="theme_auto">Auto</button>
                             <button class="timer-btn flex-1 theme-btn" data-theme="dark"
                                 data-t="theme_dark">Scuro</button>
                         </div>
-                    </div> <!-- Link Rapidi -->
-                    <div class="flex-col-gap-2"> <button class="glass-card flex items-center justify-between p-4 group"
-                            id="btn-expiry-rules">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="size-10 rounded-xl bg-amber-500/10 text-amber-500 flex-center border border-amber-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">calendar_month</span>
-                                </div> <span class="text-sm font-bold text-white"
-                                    data-t="expiry_rules_title_page">Regole invio
-                                    scadenze</span>
-                            </div> <span
-                                class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-all">chevron_right</span>
-                        </button> <button class="glass-card flex items-center justify-between p-4 group"
-                            id="btn-account-archive">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="size-10 rounded-xl bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">archive</span>
-                                </div> <span class="text-sm font-bold text-white" data-t="account_archive">Archivio
-                                    Account</span>
-                            </div> <span
-                                class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-all">chevron_right</span>
-                        </button> </div>
-                </div> <!-- Security Group -->
-                <div class="flex-col-gap-3 mt-4">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1"
-                        data-t="section_security">Sicurezza e Accesso</h3> <!-- Password --> <button
-                        class="glass-card flex items-center justify-between p-4 group" id="btn-change-password">
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="size-10 rounded-xl bg-red-500/10 text-red-400 flex-center border border-red-500/10 shrink-0">
+                    </div>
+
+                    <!-- Link Rapidi -->
+                    <button class="settings-item group" id="btn-expiry-rules">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-amber">
+                                <span class="material-symbols-outlined">calendar_month</span>
+                            </div>
+                            <span class="settings-label" data-t="expiry_rules_title_page">Regole invio scadenze</span>
+                        </div>
+                        <span class="material-symbols-outlined text-secondary arrow-icon">chevron_right</span>
+                    </button>
+
+                    <button class="settings-item group" id="btn-account-archive">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-purple">
+                                <span class="material-symbols-outlined">archive</span>
+                            </div>
+                            <span class="settings-label" data-t="account_archive">Archivio Account</span>
+                        </div>
+                        <span class="material-symbols-outlined text-secondary arrow-icon">chevron_right</span>
+                    </button>
+                </div>
+
+                <!-- Sicurezza e Accesso -->
+                <div class="settings-container mt-section">
+                    <h3 class="settings-desc" data-t="section_security">Sicurezza e Accesso</h3>
+
+                    <!-- Password -->
+                    <button class="settings-item group" id="btn-change-password">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-red">
                                 <span class="material-symbols-outlined">lock_reset</span>
                             </div>
-                            <div class="flex flex-col text-left"> <span class="text-sm font-bold text-white"
-                                    data-t="change_password">Cambio Password</span> <span
-                                    class="text-[10px] text-white/40 font-bold uppercase tracking-widest"
-                                    data-t="change_password_desc">Aggiorna le chiavi</span> </div>
-                        </div> <span
-                            class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-all">chevron_right</span>
-                    </button> <!-- Biometric / 2FA -->
-                    <div class="flex-col-gap-2">
-                        <div class="glass-card flex items-center justify-between p-4">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">verified_user</span>
-                                </div> <span class="text-sm font-bold text-white" data-t="two_factor_auth">2FA</span>
-                            </div> <input type="checkbox" id="2fa-toggle" class="base-toggle">
+                            <div class="settings-item-info">
+                                <span class="settings-label" data-t="change_password">Cambio Password</span>
+                                <span class="settings-desc" data-t="change_password_desc">Aggiorna le chiavi</span>
+                            </div>
                         </div>
-                        <div class="glass-card flex items-center justify-between p-4">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="size-10 rounded-xl bg-blue-500/10 text-blue-400 flex-center border border-blue-500/10 shrink-0">
-                                    <span class="material-symbols-outlined">face</span>
-                                </div> <span class="text-sm font-bold text-white" data-t="face_id">Biometrico</span>
-                            </div> <input type="checkbox" id="face-id-toggle" class="base-toggle">
+                        <span class="material-symbols-outlined text-secondary arrow-icon">chevron_right</span>
+                    </button>
+
+                    <!-- 2FA -->
+                    <div class="settings-item">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-emerald">
+                                <span class="material-symbols-outlined">verified_user</span>
+                            </div>
+                            <span class="settings-label" data-t="two_factor_auth">2FA</span>
                         </div>
-                    </div> <!-- Inactivity Lock -->
-                    <div class="glass-card p-4">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div
-                                class="size-10 rounded-xl bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10">
+                        <input type="checkbox" id="2fa-toggle" class="settings-toggle">
+                    </div>
+
+                    <!-- Biometrico -->
+                    <div class="settings-item">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-blue">
+                                <span class="material-symbols-outlined">face</span>
+                            </div>
+                            <span class="settings-label" data-t="face_id">Biometrico</span>
+                        </div>
+                        <input type="checkbox" id="face-id-toggle" class="settings-toggle">
+                    </div>
+
+                    <!-- Blocco Inattività -->
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-purple">
                                 <span class="material-symbols-outlined">timer</span>
                             </div>
-                            <div class="flex flex-col"> <span class="text-sm font-bold text-white"
-                                    data-t="lock_inactivity">Blocco InattivitÃ </span> <span
-                                    class="text-[10px] text-white/40 font-bold uppercase tracking-widest"
-                                    data-t="lock_inactivity_desc">Autolock schermo</span> </div>
+                            <div class="settings-item-info">
+                                <span class="settings-label" data-t="lock_inactivity">Blocco Inattività</span>
+                                <span class="settings-desc" data-t="lock_inactivity_desc">Autolock schermo</span>
+                            </div>
                         </div>
-                        <div class="flex gap-2" id="lock-timer-selector"> <button class="timer-btn flex-1" data-val="0"
-                                data-t="lock_immediately">Subito</button> <button class="timer-btn flex-1"
-                                data-val="1">1'</button> <button class="timer-btn flex-1" data-val="3">3'</button>
+                        <div class="settings-controls-row" id="lock-timer-selector">
+                            <button class="timer-btn flex-1" data-val="0" data-t="lock_immediately">Subito</button>
+                            <button class="timer-btn flex-1" data-val="1">1'</button>
+                            <button class="timer-btn flex-1" data-val="3">3'</button>
                             <button class="timer-btn flex-1" data-val="5">5'</button>
                         </div>
                     </div>
-                </div> <!-- Info Group -->
-                <div class="flex-col-gap-3 mt-4">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1"
-                        data-t="section_support">Supporto e Info</h3> <!-- Accordion App Info -->
-                    <div class="glass-card overflow-hidden"> <button
-                            class="w-full flex items-center justify-between p-4 group" id="btn-toggle-app-info">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="size-10 rounded-xl bg-blue-500/10 text-blue-400 flex-center border border-blue-500/10 shrink-0 group-hover:bg-blue-500/20 transition-all">
-                                    <span class="material-symbols-outlined">info</span>
-                                </div> <span class="text-sm font-bold text-white" data-t="app_info_title">Informazioni
-                                    App</span>
-                            </div> <span id="info-chevron"
-                                class="material-symbols-outlined text-white/10 transition-transform">expand_more</span>
-                        </button>
-                        <div id="info-app-content"
-                            class="hidden p-4 border-t border-white/5 bg-white-2 animate-in slide-in-from-top-2">
-                            <div id="info-app-text-placeholder" class="text-xs text-white/60 leading-relaxed italic">
+                </div>
+
+                <!-- Supporto e Info -->
+                <div class="settings-container mt-section">
+                    <h3 class="settings-desc" data-t="section_support">Supporto e Info</h3>
+
+                    <!-- App Info -->
+                    <button class="settings-item group" id="btn-toggle-app-info">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-blue">
+                                <span class="material-symbols-outlined">info</span>
                             </div>
+                            <span class="settings-label" data-t="app_info_title">Informazioni App</span>
                         </div>
-                    </div> <!-- Privacy --> <button class="glass-card flex items-center justify-between p-4 group"
-                        id="btn-privacy">
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="size-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex-center border border-emerald-500/10 shrink-0">
-                                <span class="material-symbols-outlined">shield</span>
-                            </div> <span class="text-sm font-bold text-white" data-t="privacy_policy_title">Privacy &
-                                Dati</span>
-                        </div> <span
-                            class="material-symbols-outlined text-white/10 group-hover:translate-x-1 transition-all">chevron_right</span>
+                        <span id="info-chevron" class="material-symbols-outlined arrow-icon">expand_more</span>
                     </button>
-                </div> <!-- Logout -->
-                <div class="mt-12 pb-12"> <button id="logout-btn-settings"
-                        class="w-full h-14 rounded-2xl bg-red-500/5 border border-red-500/20 flex-center gap-3 text-red-500 transition-all active:scale-[0.98]">
-                        <span class="material-symbols-outlined text-lg">logout</span> <span
-                            class="text-sm font-bold uppercase tracking-widest" data-t="logout">Esci dall'account</span>
-                    </button> </div>
+                    <div id="info-app-content" class="settings-dropdown-panel hidden">
+                        <div id="info-app-text-placeholder"></div>
+                    </div>
+
+                    <!-- Privacy -->
+                    <button class="settings-item group" id="btn-privacy">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-emerald">
+                                <span class="material-symbols-outlined">shield</span>
+                            </div>
+                            <span class="settings-label" data-t="privacy_policy_title">Privacy & Dati</span>
+                        </div>
+                        <span class="material-symbols-outlined text-secondary arrow-icon">chevron_right</span>
+                    </button>
+                </div>
+
+                <!-- Logout -->
+                <div class="logout-btn-container">
+                    <button id="logout-btn-settings" class="btn-logout-semantic">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span class="btn-logout-text" data-t="logout">Esci dall'account</span>
+                    </button>
+                </div>
+
             </div>
-        </main> <!-- QR Zoom Modal -->
-        <div id="qr-zoom-modal" class="fixed inset-0 flex-center z-[9999] hidden opacity-0 transition-all duration-300">
-            <div class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
-            <div class="relative flex-center-col gap-8 scale-90 transition-transform duration-300">
-                <div class="p-6 bg-white rounded-3xl shadow-2xl overflow-hidden" id="qrcode-zoom"></div> <button
-                    id="btn-close-qr"
-                    class="base-btn-secondary py-3 px-12 rounded-full font-black uppercase tracking-widest text-[10px]">Chiudi</button>
+        </main>
+
+        <!-- QR Zoom Modal (Semantic V3.9) -->
+        <div id="qr-zoom-modal" class="zoom-modal hidden">
+            <div class="zoom-backdrop"></div>
+            <div class="zoom-content">
+                <div id="qrcode-zoom" class="zoom-qr-box"></div>
+                <button id="btn-close-qr" class="zoom-close-btn">Chiudi</button>
             </div>
         </div>
+
         <div class="spacer-footer"></div>
         <footer id="footer-placeholder" class="base-footer"></footer>
-    </div> <!-- Scripts -->
+    </div>
+
+    <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/modules/settings/impostazioni.js"></script>
 </body>
