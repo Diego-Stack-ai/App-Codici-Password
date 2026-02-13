@@ -57,3 +57,24 @@
     opacity: 0.8 !important;
     margin-top: 2px !important;
 }
+
+/* 3. FIX VISIBILITÀ GIALLO (Tema Chiaro V4.5) */
+/* In modalità chiara, usiamo un Ambra più scuro e saturo per il contrasto */
+html:not(.dark) .deadline-card-upcoming {
+    border-left-color: #d97706 !important;
+    /* Amber 600 */
+    background: rgba(217, 119, 6, 0.08) !important;
+}
+
+html:not(.dark) .deadline-card-upcoming .deadline-icon-box {
+    color: #b45309 !important;
+    /* Amber 700 per massima leggibilità */
+    background: rgba(217, 119, 6, 0.12) !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
+    color: #b45309 !important;
+    background: rgba(217, 119, 6, 0.12) !important;
+    border: 1px solid rgba(217, 119, 6, 0.3) !important;
+}
