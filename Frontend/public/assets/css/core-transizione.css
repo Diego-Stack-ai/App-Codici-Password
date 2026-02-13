@@ -1,0 +1,164 @@
+/* ==========================================================================
+   CORE TRANSIZIONE (V1.0 - Protocollo Migrazione)
+   Questo file ospita i componenti migrati da operatore.css prima del 
+   consolidamento finale nei file core definitivi.
+   ========================================================================== */
+
+/* 1. UTILITIES DI SUPPORTO (V4.5) */
+.flex {
+    display: flex !important;
+}
+
+.flex-col {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.justify-between {
+    justify-content: space-between !important;
+}
+
+.items-center {
+    align-items: center !important;
+}
+
+.w-full {
+    width: 100% !important;
+}
+
+.h-11 {
+    height: 2.75rem !important;
+}
+
+.h-12 {
+    height: 3rem !important;
+}
+
+.px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+.px-5 {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+}
+
+.rounded-xl {
+    border-radius: 0.75rem !important;
+}
+
+.rounded-2xl {
+    border-radius: 1rem !important;
+}
+
+.font-bold {
+    font-weight: 700 !important;
+}
+
+.font-black {
+    font-weight: 900 !important;
+}
+
+.text-sm {
+    font-size: 0.85rem !important;
+}
+
+.uppercase {
+    text-transform: uppercase !important;
+}
+
+.tracking-widest {
+    letter-spacing: 0.1em !important;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* 2. DROPDOWN SYSTEM (Premium Standard) */
+.base-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.base-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 18px;
+    padding: 0.6rem;
+    min-width: 200px;
+    display: none;
+    z-index: 1100;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.base-dropdown-menu.show {
+    display: block !important;
+}
+
+.base-dropdown-item {
+    padding: 0.8rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-align: left;
+}
+
+.base-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    transform: translateX(4px);
+}
+
+.base-dropdown-item.active {
+    color: #fff;
+    background: var(--accent);
+}
+
+/* 3. SETTINGS COMPONENTS (Migrazione da Operatore.css) */
+.settings-group {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.settings-item {
+    position: relative;
+    background: var(--card-bg);
+    /* Risolve il problema del 'grigio' usando il tema */
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* 4. BOTTONI SECONDARI (Premium Blue Titanium) */
+.base-btn-secondary {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.base-btn-secondary:hover {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    transform: translateY(-1px);
+}
