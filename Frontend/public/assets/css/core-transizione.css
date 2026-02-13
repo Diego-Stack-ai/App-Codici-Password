@@ -3,10 +3,27 @@
    ========================================================================== */
 
 /* 1. OTTIMIZZAZIONE SPAZI SCADENZE (Look arioso V4.5) */
+.spacer-header {
+    height: 55px !important;
+    /* Via di mezzo: né troppo alto né troppo schiacciato */
+}
+
+.base-main {
+    padding-top: 1rem !important;
+    /* Respiro bilanciato per la testata */
+}
+
 .page-container {
     max-width: 440px !important;
     padding: 0 28px !important;
     margin: 0 auto !important;
+}
+
+.deadline-toolbar {
+    margin-top: 5px !important;
+    /* Leggero distacco armonioso */
+    padding-left: 8px !important;
+    padding-right: 8px !important;
 }
 
 /* UNIFICAZIONE BASE CARD (Stile Pure Titanium) */
