@@ -18,12 +18,37 @@ let currentSwipeList = null;
 let currentContext = 'all';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Context Selector
-    const selector = document.getElementById('archive-context-select');
-    if (selector) {
-        selector.addEventListener('change', (e) => {
-            currentContext = e.target.value;
-            loadArchived();
+    // 1. Context Selector (Premium Dropdown V4.5)
+    const filterBtn = document.getElementById('archive-filter-btn');
+    const filterMenu = document.getElementById('archive-context-menu');
+    const activeLabel = document.getElementById('active-context-label');
+
+    if (filterBtn && filterMenu) {
+        filterBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            filterMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => filterMenu.classList.remove('show'));
+
+        filterMenu.addEventListener('click', async (e) => {
+            const item = e.target.closest('.base-dropdown-item');
+            if (item) {
+                currentContext = item.dataset.value;
+
+                // Update UI
+                filterMenu.querySelectorAll('.base-dropdown-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                if (activeLabel) {
+                    activeLabel.textContent = item.textContent;
+                    if (item.dataset.t) activeLabel.setAttribute('data-t', item.dataset.t);
+                    else activeLabel.removeAttribute('data-t');
+                }
+
+                filterMenu.classList.remove('show');
+                await loadArchived();
+            }
         });
     }
 
@@ -77,21 +102,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadCompanies() {
-    const selector = document.getElementById('archive-context-select');
-    if (!selector) return;
+    const filterMenu = document.getElementById('archive-context-menu');
+    if (!filterMenu) return;
 
     try {
         const snap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
         snap.forEach(docSnap => {
             const data = docSnap.data();
-            const option = createElement('option', {
-                value: docSnap.id,
+            const item = createElement('div', {
+                className: 'base-dropdown-item',
+                dataset: { value: docSnap.id },
                 textContent: data.ragioneSociale || docSnap.id
             });
-            selector.appendChild(option);
+            filterMenu.appendChild(item);
         });
     } catch (e) {
-        console.error(e);
+        console.error("Errore caricamento aziende:", e);
     }
 }
 

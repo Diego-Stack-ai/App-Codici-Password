@@ -54,16 +54,26 @@
 
                 <div class="settings-group">
 
-                    <!-- Context Selector -->
+                    <!-- Context Selector (Premium Dropdown V4.5) -->
                     <div class="settings-item">
                         <div class="settings-icon-box icon-blue">
                             <span class="material-symbols-outlined">filter_list</span>
                         </div>
                         <div class="settings-item-info">
-                            <select id="archive-context-select" class="settings-select-semantic">
-                                <option value="all" data-t="archive_all">Tutti gli archiviati</option>
-                                <option value="privato" data-t="archive_private_only">Solo Archivio Privato</option>
-                            </select>
+                            <div class="base-dropdown w-full">
+                                <button id="archive-filter-btn"
+                                    class="base-btn-secondary w-full flex justify-between items-center h-11 px-4 rounded-xl">
+                                    <span id="active-context-label" data-t="archive_all">Tutti gli archiviati</span>
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </button>
+                                <div id="archive-context-menu" class="base-dropdown-menu w-full">
+                                    <div class="base-dropdown-item active" data-value="all" data-t="archive_all">Tutti
+                                        gli archiviati</div>
+                                    <div class="base-dropdown-item" data-value="privato" data-t="archive_private_only">
+                                        Solo Archivio Privato</div>
+                                    <!-- Dynamic companies injection -->
+                                </div>
+                            </div>
                         </div>
                     </div>
 
