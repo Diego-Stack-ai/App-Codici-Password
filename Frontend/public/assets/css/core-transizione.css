@@ -1,21 +1,32 @@
 /* ==========================================================================
    CORE TRANSIZIONE (V1.1 - Protocollo Migrazione)
-   Questo file ospita i componenti in fase di test o migrazione prima del 
-   consolidamento finale nei file core definitivi.
    ========================================================================== */
 
 /* 1. OTTIMIZZAZIONE SPAZI SCADENZE (Look arioso V4.5) */
 .page-container {
-    padding: 0 24px !important;
-    /* Più spazio dai bordi dello schermo */
+    max-width: 440px !important;
+    /* Stringe la lista per un look più 'Vault' */
+    padding: 0 28px !important;
+    /* Aumenta lo spazio dai bordi fisici */
+    margin: 0 auto !important;
 }
 
 .deadline-card {
     margin-left: 2px;
     margin-right: 2px;
+    border-radius: 24px !important;
+    /* Più arrotondato per un feeling premium */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .deadline-toolbar {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+/* Effetto di sospensione per le card */
+.deadline-card:hover {
+    transform: translateY(-4px) scale(1.01) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
 }
