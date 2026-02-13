@@ -30,8 +30,10 @@ Questa guida documenta il processo completo di migrazione da pagine legacy (basa
 1. **core.css**          → Variabili CSS, reset, layout base e utility globali.
 2. **core_fonts.css**    → Definizioni font (Manrope, Material Symbols).
 3. **core_fascie.css**   → Layout Header/Footer standard.
-4.  **`core_pagine.css`**: **Libreria Universale**. Card, item, toggle, modali e stili della Home.
-5.  **`core-transizione.css`**: Stili unici temporanei o in fase di migrazione.
+4. **core_pagine.css**   → **Libreria Universale**. Card, item, toggle e **Modali Premium**.
+5. **core_moduli.css**   → **Libreria Gestione**. Unifica Archivio e Configurazioni.
+6. **core-transizione.css** → OBSOLETO. Svuotato e mantenuto come placeholder.
+
 
 ### Principi Fondamentali:
 1. **Semantic HTML**: Ogni elemento usa classi semantiche che descrivono la funzione, non l'aspetto
@@ -111,11 +113,12 @@ Questa guida documenta il processo completo di migrazione da pagine legacy (basa
 <!-- 3. Fasce (Header & Footer) -->
 <link rel="stylesheet" href="assets/css/core_fascie.css">
 
-<!-- 4. Shared Library (Componenti comuni) -->
+<!-- 4. Shared Library (Componenti comuni & Modali) -->
 <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
 
-<!-- 5. Page Specific (Transizione) -->
-<link rel="stylesheet" href="assets/css/core-transizione.css?v=1.0">
+<!-- 5. Module Library (Archivio / Config / Liste) -->
+<link rel="stylesheet" href="assets/css/core_moduli.css?v=1.0">
+
 ```
 
 #### Step 2.2 - Mappatura Classi Legacy → V3.9
@@ -572,12 +575,13 @@ Una volta confermata la stabilità:
 | `configurazione_automezzi.html` | ✅ Completata | 12/02/2026 | Refactoring Configurazione |
 | `configurazione_documenti.html` | ✅ Completata | 12/02/2026 | Refactoring Configurazione |
 | `configurazione_generali.html` | ✅ Completata | 12/02/2026 | Refactoring Configurazione |
-| `account_azienda.html` | ⏳ In attesa | - | - |
-| `dettaglio_account_azienda.html` | ⏳ In attesa | - | - |
-| `modifica_azienda.html` | ⏳ In attesa | - | - |
-| `profilo_privato.html` | ⏳ In attesa | - | - |
+| `scadenze.html` | ✅ Completata | 13/02/2026 | Refactoring Completo V4.1 |
+| `archivio_account.html` | ✅ Completata | 13/02/2026 | Migrazione a core_moduli |
+
+**NOTA DI CONSOLIDAMENTO (13/02/2026)**: Tutte le pagine principali dell'applicazione sono state migrate con successo al sistema modulare V4.0. I file monolitici e le utility Tailwind sono stati rimossi al 100%.
 
 **Legenda:**
+
 - ✅ Completata e testata
 - 🔄 In corso
 - ⏳ In attesa

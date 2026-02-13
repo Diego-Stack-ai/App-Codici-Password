@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" class="dark" data-i18n="loading">
+<html lang="it" data-i18n="loading">
 
 <head>
     <!-- Anti-flicker & Theme Master (V3.9) -->
@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
     <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/core_moduli.css?v=1.0">
     <link rel="stylesheet" href="assets/css/scadenze.css?v=1.0">
 
     <!-- CORE JS -->
@@ -54,24 +55,21 @@
             <div class="page-container">
 
                 <!-- Toolbar: Count + Sort -->
-                <div class="archive-action-group flex items-center justify-between px-1 py-2 border-b border-white/5">
+                <div class="deadline-toolbar">
                     <!-- Left: Count -->
-                    <div class="flex items-center gap-2">
-                        <span id="deadline-count"
-                            class="size-7 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex-center text-[10px] font-black">0</span>
-                        <span data-t="deadlines_total"
-                            class="text-[10px] font-black uppercase tracking-widest text-white/40">Scadenze</span>
+                    <div class="flex-row items-center gap-2">
+                        <span id="deadline-count" class="deadline-count-badge">0</span>
+                        <span data-t="deadlines_total" class="deadline-count-label">Scadenze</span>
                     </div>
 
                     <!-- Right: Sort Dropdown -->
                     <div class="base-dropdown">
-                        <button id="sort-btn" class="base-btn-secondary h-10 px-4 rounded-xl flex items-center gap-2">
-                            <span class="material-symbols-outlined text-base">sort</span>
-                            <span data-t="sort_by"
-                                class="text-xs font-bold uppercase tracking-widest opacity-70">Ordina</span>
-                            <span class="material-symbols-outlined text-base">expand_more</span>
+                        <button id="sort-btn" class="base-btn-secondary deadline-sort-btn">
+                            <span class="material-symbols-outlined">sort</span>
+                            <span data-t="sort_by" class="deadline-sort-label">Ordina</span>
+                            <span class="material-symbols-outlined">expand_more</span>
                         </button>
-                        <div id="sort-menu" class="base-dropdown-menu right-0 origin-tr min-w-140">
+                        <div id="sort-menu" class="base-dropdown-menu deadline-sort-menu">
                             <div class="base-dropdown-item active" data-t="sort_date_near" data-value="date-asc">DATA
                                 (VICINA)</div>
                             <div class="base-dropdown-item" data-t="sort_date_far" data-value="date-desc">DATA (LONTANA)

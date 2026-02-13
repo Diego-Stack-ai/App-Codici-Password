@@ -61,6 +61,16 @@
     pointer-events: none;
 }
 
+/* Gruppo lista (Container per card/righe) */
+.archive-list-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.15rem;
+    /* Gap minimo tra gli elementi */
+}
+
+
 /* --- 2. LOGICA ARCHIVIO (Swipe & Actions) --- */
 
 .archive-item-content {

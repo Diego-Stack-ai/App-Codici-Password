@@ -123,6 +123,65 @@
     }
 }
 
+/* --- TOOLBAR & CONTROLS --- */
+
+.deadline-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.deadline-count-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.deadline-count-label {
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.4;
+    color: var(--text-primary);
+}
+
+.deadline-sort-btn {
+    height: 40px;
+    padding: 0 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.deadline-sort-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+}
+
+.deadline-sort-menu {
+    right: 0 !important;
+    transform-origin: top right !important;
+    min-width: 140px !important;
+}
+
+
+
 /* --- FILTERS & SEARCH --- */
 
 .filter-container {

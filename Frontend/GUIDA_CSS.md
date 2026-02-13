@@ -17,15 +17,18 @@ Questa guida definisce lo standard architettonico per la separazione tra struttu
 
 ## 2) Architettura dei File
 
-### 2.1) Struttura Modulare (V3.9)
+### 2.1) Struttura Modulare (V4.0)
 
-I CSS sono suddivisi in 5 livelli gerarchici caricati in questo ordine preciso:
+I CSS sono suddivisi in livelli gerarchici caricati in questo ordine preciso:
 
-1.  **`core.css`**: Variabili di sistema, Reset, Utility globali (es. `.hidden`).
+1.  **`core.css`**: Variabili di sistema, Reset, Utility globali.
 2.  **`core_fonts.css`**: Definizioni dei font (Manrope) e icone.
 3.  **`core_fascie.css`**: Strutture fisse condivise (Header e Footer).
-4.  **`core_pagine.css`**: **Libreria Universale**. Card, item, toggle, modali e stili della Home.
-5.  **`core-transizione.css`**: Stili unici temporanei o in fase di migrazione.
+4.  **`core_pagine.css`**: **Libreria Universale**. Card, item, toggle e **Popup (Modal) Premium**.
+5.  **`core_moduli.css`**: **Libreria Gestione**. Unifica Archivio e Configurazioni (liste, swipe, badge).
+6.  **`scadenze.css`**: **Pagina Specifica**. Layout complesso per la lista scadenze e filtri.
+7.  **`core-transizione.css`**: OBSOLETO. Svuotato e mantenuto solo come placeholder.
+
 
 ### 2.2) Pagine "Contenuto" (Applicazione)
 - **Header (Fascia Alta)**: Layout "Balanced" con 3 aree (SX: Back/Avatar, C: Titolo, DX: Home/Logout).
@@ -67,12 +70,16 @@ Utilizzare esclusivamente la modularità V3.9 per caricare solo il CSS necessari
 <!-- 3. Fasce (Header & Footer) -->
 <link rel="stylesheet" href="assets/css/core_fascie.css">
 
-<!-- 4. Shared Library (Componenti comuni) -->
+<!-- 4. Shared Library (Componenti comuni & Modali) -->
 <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
 
-<!-- 5. Page Specific (Transizione) -->
-<link rel="stylesheet" href="assets/css/core-transizione.css?v=1.0">
+<!-- 5. Module Library (Archivio / Config / Liste) -->
+<link rel="stylesheet" href="assets/css/core_moduli.css?v=1.0">
+
+<!-- 6. Page Specific (Solo se necessario, es. scadenze) -->
+<link rel="stylesheet" href="assets/css/scadenze.css?v=1.0">
 ```
+
 
 ### 4.2) Animazioni & Routine CSP (TASSATIVO)
 Per rispettare le policy di sicurezza (CSP) ed evitare blocchi del browser:
@@ -89,6 +96,24 @@ In produzione questo hash è superfluo ma innocuo. Non rimuovere se si vuole man
 
 ---
 
+## 5) Componenti Premium V4.0
+
+### 5.1) Modal Input "Titanium Glass"
+I popup di inserimento dati sono centralizzati in `core_pagine.css` per garantire uniformità:
+- **Classe**: `.modal-input-glass`
+- **Caratteristiche**: Arrotondamento 18px, padding generoso, font 1.1rem extra-bold (800).
+- **Dark Mode**: Sfondo schiarito (`rgba(45, 60, 100, 0.95)`) e bagliore blu per massima leggibilità.
+
+### 5.2) Sistema Badge Moduli
+Gestito in `core_moduli.css` per liste e configurazioni:
+- `.config-badge-blue`: Notifiche / Info.
+- `.config-badge-amber`: Avvisi / Repliche.
+- `.config-badge-emerald`: Success / Attivi.
+- `.config-badge-purple`: Categorie speciali.
+
+### 5.3) Watermark Dinamico
+Icona colossale semitrasparente (`opacity: 0.08`) ruotata di -10 gradi, usata come sfondo negli strumenti di gestione.
+- Classe: `.archive-watermark`.
 
 ---
 
@@ -188,21 +213,18 @@ L'ordine di caricamento influenza la cascata CSS. **NON** invertire mai:
 
 ---
 
-## 8) Pagine Migrate e Verificate (V3.9 Compliant)
-
-Le seguenti pagine sono state auditate e certificate conformi al Protocollo V3.9:
+Le seguenti pagine sono state certificate conformi al Protocollo V4.0 dopo l'ottimizzazione totale:
 
 - ✅ `home_page.html`
 - ✅ `impostazioni.html`
 - ✅ `privacy.html`
 - ✅ `archivio_account.html`
 - ✅ `regole_scadenze.html`
+- ✅ `scadenze.html`
 - ✅ `configurazione_automezzi.html`
 - ✅ `configurazione_documenti.html`
 - ✅ `configurazione_generali.html`
 
-**Pagine Legacy (Richiedono Migrazione)**:
-- ⚠️ `account_azienda.html` (usa `operatore.css`)
-- ⚠️ `dettaglio_account_azienda.html` (usa `operatore.css`)
-- ⚠️ `modifica_azienda.html` (usa `operatore.css`)
+**RISULTATO FINALE**: 100% delle pagine principali ottimizzate. CSS inutilizzato rimosso.
+
 
