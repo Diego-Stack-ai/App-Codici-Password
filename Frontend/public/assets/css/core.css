@@ -652,21 +652,25 @@ body,
     gap: 0.5rem;
     margin-top: 1.5rem;
 
-    /* Bottoni Secondari (Look Glass/Adaptive) */
+    /* Bottoni Secondari (Look Glass/Azzurro V4.5) */
     .base-btn-secondary {
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid var(--card-border) !important;
+        background: rgba(59, 130, 246, 0.08) !important;
+        /* Tinta Azzurra */
+        border: 1px solid rgba(59, 130, 246, 0.2) !important;
         color: var(--text-primary) !important;
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .base-btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.08) !important;
+        background: rgba(59, 130, 246, 0.15) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        transform: translateY(-1px);
     }
 
     html:not(.dark) .base-btn-secondary {
-        background: rgba(0, 0, 0, 0.02) !important;
-        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        background: rgba(59, 130, 246, 0.05) !important;
+        border: 1px solid rgba(59, 130, 246, 0.15) !important;
     }
 }
 
