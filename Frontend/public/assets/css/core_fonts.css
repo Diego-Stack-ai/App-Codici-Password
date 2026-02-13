@@ -2,6 +2,22 @@
    CORE FONTS (V3.8) - GLOBAL PERFORMANCE OPTIMIZATION
    ========================================================================== */
 
+:root {
+    /* SCALA TIPOGRAFICA PREMIUM (Design Tokens) */
+    --fs-xs: 0.75rem;
+    /* 12px - Menu compatti, Badge, Categorie */
+    --fs-sm: 0.85rem;
+    /* 13.6px - Sottotitoli, Testi secondari */
+    --fs-base: 1rem;
+    /* 16px - Testo standard, Input */
+    --fs-md: 1.1rem;
+    /* 17.6px - Titoli Card, Pulsanti principali */
+    --fs-lg: 1.25rem;
+    /* 20px - Titoli di sezione */
+    --fs-xl: 1.5rem;
+    /* 24px - Hero titles */
+}
+
 /* 1. DEFINIZIONI @FONT-FACE */
 
 /* MANROPE - Font Principale */

@@ -9,9 +9,7 @@
     margin: 0 auto !important;
 }
 
-/* UNIFICAZIONE BASE CARD (Stile Pure Titanium) 
-   Rimuoviamo ogni tinta di sfondo per avere una lista coerente. 
-   La distinzione avviene solo tramite Icone e Badge. */
+/* UNIFICAZIONE BASE CARD (Stile Pure Titanium) */
 .deadline-card,
 .deadline-card-expired,
 .deadline-card-upcoming,
@@ -21,11 +19,8 @@
     margin-right: 2px !important;
     border-radius: 20px !important;
     border: 1px solid var(--card-border) !important;
-
-    /* SFONDO UNIFORME PER TUTTE LE CARD */
     background: var(--card-bg) !important;
     backdrop-filter: blur(20px) !important;
-
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden;
 }
@@ -35,7 +30,6 @@
     padding-right: 8px !important;
 }
 
-/* Effetto di sospensione (Hover) - Resta uniforme */
 .deadline-card:hover {
     transform: translateY(-4px) scale(1.01) !important;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
@@ -43,9 +37,10 @@
     background: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* 2. TIPOGRAFIA PREMIUM SCADENZE (Gerarchia V4.5) */
+/* 2. TIPOGRAFIA PREMIUM SCADENZE (Uso Variabili Centralizzate) */
 .deadline-card-category {
-    font-size: 10px !important;
+    font-size: var(--fs-xs) !important;
+    /* Usiamo la variabile centralizzata */
     font-weight: 800 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.1em !important;
@@ -55,7 +50,8 @@
 }
 
 .deadline-card-title {
-    font-size: 0.95rem !important;
+    font-size: var(--fs-sm) !important;
+    /* Ristretto per coerenza */
     font-weight: 800 !important;
     color: var(--text-primary) !important;
     margin: 0 !important;
@@ -63,16 +59,15 @@
 }
 
 .deadline-card-subtitle {
-    font-size: 0.8rem !important;
+    font-size: var(--fs-xs) !important;
+    /* Ristretto per coerenza */
     font-weight: 500 !important;
     color: var(--text-secondary) !important;
     opacity: 0.8 !important;
     margin-top: 2px !important;
 }
 
-/* 3. COERENZA COLORI ACCENTO (Tema Chiaro/Scuro V4.5) */
-
-/* STATO: SCADUTO (ROSSO) */
+/* 3. COERENZA COLORI ACCENTO */
 .deadline-card-expired .deadline-icon-box {
     color: #ef4444 !important;
     background: rgba(239, 68, 68, 0.12) !important;
@@ -84,23 +79,18 @@
     background: rgba(239, 68, 68, 0.12) !important;
 }
 
-/* STATO: IN SCADENZA (AMBRA / GIALLO) */
-/* Unifichiamo il fondo della card anche qui per coerenza visiva totale */
 .deadline-card-upcoming {
     background: var(--card-bg) !important;
 }
 
-/* Solo gli accenti cambiano colore */
 .deadline-card-upcoming .deadline-icon-box {
     color: #f59e0b !important;
     background: rgba(245, 158, 11, 0.12) !important;
     border-color: rgba(245, 158, 11, 0.3) !important;
 }
 
-/* Fix specifico per il contrasto Ambra nel tema Chiaro */
 html:not(.dark) .deadline-card-upcoming .deadline-icon-box {
     color: #b45309 !important;
-    /* Più scuro per leggibilità */
     background: rgba(217, 119, 6, 0.15) !important;
 }
 
@@ -114,12 +104,11 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     background: rgba(217, 119, 6, 0.15) !important;
 }
 
-/* 4. OTTIMIZZAZIONE DROPDOWN (Look Compatto V4.5) */
+/* 4. OTTIMIZZAZIONE DROPDOWN (Uso Variabili Centralizzate) */
 .base-dropdown-item {
-    font-size: 0.75rem !important;
-    /* Ancora più piccolo e raffinato */
+    font-size: var(--fs-xs) !important;
+    /* Legatissimo al sistema centrale */
     padding: 0.5rem 1rem !important;
-    /* Leggermente più compatto verticalmente */
     font-weight: 800 !important;
 }
 
