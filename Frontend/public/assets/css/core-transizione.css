@@ -5,18 +5,24 @@
 /* 1. OTTIMIZZAZIONE SPAZI SCADENZE (Look arioso V4.5) */
 .page-container {
     max-width: 440px !important;
-    /* Stringe la lista per un look più 'Vault' */
     padding: 0 28px !important;
-    /* Aumenta lo spazio dai bordi fisici */
     margin: 0 auto !important;
 }
 
-.deadline-card {
-    margin-left: 2px;
-    margin-right: 2px;
-    border-radius: 24px !important;
-    /* Più arrotondato per un feeling premium */
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+/* RIMOZIONE VECCHIO STILE (Bordo laterale sinistro) */
+.deadline-card,
+.deadline-card-expired,
+.deadline-card-upcoming,
+.deadline-card-info {
+    border-left: none !important;
+    margin-left: 2px !important;
+    margin-right: 2px !important;
+    border-radius: 20px !important;
+    border: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(20px) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow: hidden;
 }
 
 .deadline-toolbar {
@@ -29,6 +35,7 @@
     transform: translateY(-4px) scale(1.01) !important;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
     border-color: rgba(59, 130, 246, 0.3) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* 2. TIPOGRAFIA PREMIUM SCADENZE (Gerarchia V4.5) */
@@ -59,16 +66,14 @@
 }
 
 /* 3. FIX VISIBILITÀ GIALLO (Tema Chiaro V4.5) */
-/* In modalità chiara, usiamo un Ambra più scuro e saturo per il contrasto */
 html:not(.dark) .deadline-card-upcoming {
-    border-left-color: #d97706 !important;
-    /* Amber 600 */
+    border-left-color: transparent !important;
+    /* Forza trasparente */
     background: rgba(217, 119, 6, 0.08) !important;
 }
 
 html:not(.dark) .deadline-card-upcoming .deadline-icon-box {
     color: #b45309 !important;
-    /* Amber 700 per massima leggibilità */
     background: rgba(217, 119, 6, 0.12) !important;
     border-color: rgba(217, 119, 6, 0.3) !important;
 }
