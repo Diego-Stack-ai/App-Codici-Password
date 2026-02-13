@@ -652,30 +652,25 @@ body,
     gap: 0.5rem;
     margin-top: 1.5rem;
 
-    /* Bottoni Secondari (Premium Blue Titanium V4.5) */
+    /* Bottoni Secondari (Look Glass/Azzurro V4.5) */
     .base-btn-secondary {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
-        border: 1px solid rgba(59, 130, 246, 0.3) !important;
-        color: #fff !important;
-        font-weight: 800 !important;
-        letter-spacing: 0.02em;
+        background: rgba(59, 130, 246, 0.08) !important;
+        /* Tinta Azzurra */
+        border: 1px solid rgba(59, 130, 246, 0.2) !important;
+        color: var(--text-primary) !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .base-btn-secondary:hover {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.1) 100%) !important;
-        border-color: rgba(59, 130, 246, 0.5) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+        background: rgba(59, 130, 246, 0.15) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        transform: translateY(-1px);
     }
 
     html:not(.dark) .base-btn-secondary {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
-        border-color: rgba(59, 130, 246, 0.2) !important;
-        color: var(--accent) !important;
+        background: rgba(59, 130, 246, 0.05) !important;
+        border: 1px solid rgba(59, 130, 246, 0.15) !important;
     }
 }
 
