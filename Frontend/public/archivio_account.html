@@ -56,35 +56,28 @@
                 <div class="settings-group">
 
                     <!-- Context Selector (Premium Dropdown V4.5) -->
-                    <div class="settings-item">
-                        <div class="settings-item-info">
-                            <div class="base-dropdown w-full">
-                                <button id="archive-filter-btn"
-                                    class="base-btn-secondary w-full flex justify-between items-center h-11 px-4 rounded-xl">
-                                    <span id="active-context-label" class="font-bold text-sm" data-t="archive_all">Tutti
-                                        gli archiviati</span>
-                                    <span class="material-symbols-outlined">expand_more</span>
-                                </button>
-                                <div id="archive-context-menu" class="base-dropdown-menu w-full">
-                                    <div class="base-dropdown-item active" data-value="all" data-t="archive_all">Tutti
-                                        gli archiviati</div>
-                                    <div class="base-dropdown-item" data-value="privato" data-t="archive_private_only">
-                                        Solo Archivio Privato</div>
-                                    <!-- Dynamic companies injection -->
-                                </div>
-                            </div>
+                    <div class="base-dropdown w-full mb-6">
+                        <button id="archive-filter-btn"
+                            class="base-btn-secondary w-full flex justify-between items-center h-12 px-5 rounded-2xl">
+                            <span id="active-context-label" class="font-black text-sm uppercase tracking-widest"
+                                data-t="archive_all">Tutti
+                                gli archiviati</span>
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </button>
+                        <div id="archive-context-menu" class="base-dropdown-menu w-full">
+                            <div class="base-dropdown-item active" data-value="all" data-t="archive_all">Tutti
+                                gli archiviati</div>
+                            <div class="base-dropdown-item" data-value="privato" data-t="archive_private_only">
+                                Solo Archivio Privato</div>
+                            <!-- Dynamic companies injection -->
                         </div>
                     </div>
 
-                    <!-- Search Input -->
-                    <div class="settings-item no-hover">
-                        <div class="settings-icon-box icon-purple">
-                            <span class="material-symbols-outlined">search</span>
-                        </div>
-                        <div class="settings-item-info">
-                            <input type="search" id="archive-search" class="settings-input-semantic"
-                                placeholder="Cerca nell'archivio..." data-t-placeholder="archive_search_placeholder">
-                        </div>
+                    <!-- Search Input (Vibrant Glass Wrapper) -->
+                    <div class="archive-search-wrapper no-hover">
+                        <span class="material-symbols-outlined archive-search-icon">search</span>
+                        <input type="search" id="archive-search" class="settings-input-semantic"
+                            placeholder="Cerca nell'archivio..." data-t-placeholder="archive_search_placeholder">
                     </div>
 
                 </div>

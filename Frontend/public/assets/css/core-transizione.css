@@ -125,7 +125,8 @@
     background: var(--accent);
 }
 
-/* 3. SETTINGS COMPONENTS (Migrazione da Operatore.css) */
+/* 3. SETTINGS COMPONENTS (Protocollo Transizione)
+   NON ridefiniamo .settings-item per non entrare in conflitto con core_pagine.css. */
 .settings-group {
     margin-bottom: 2rem;
     display: flex;
@@ -133,32 +134,56 @@
     gap: 0.75rem;
 }
 
-.settings-item {
-    position: relative;
-    background: var(--card-bg);
-    /* Risolve il problema del 'grigio' usando il tema */
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-}
-
-/* 4. BOTTONI SECONDARI (Premium Blue Titanium) */
+/* 4. BOTTONI & INPUT PREMIUM (Blue Titanium) */
 .base-btn-secondary {
-    background: rgba(59, 130, 246, 0.1) !important;
-    border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    background: rgba(59, 130, 246, 0.12) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
     color: var(--text-primary) !important;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
 }
 
 .base-btn-secondary:hover {
-    background: rgba(59, 130, 246, 0.15) !important;
-    border-color: rgba(59, 130, 246, 0.4) !important;
-    transform: translateY(-1px);
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Fix specifico per input ricerca in Archivio */
+.archive-search-wrapper {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 0 1.25rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+}
+
+.dark .archive-search-wrapper {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.archive-search-wrapper:focus-within {
+    border-color: var(--accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.settings-input-semantic {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    height: 100% !important;
+    color: var(--text-primary) !important;
+    font-size: 0.9rem !important;
+    width: 100%;
+    outline: none;
+}
+
+.archive-search-icon {
+    color: var(--text-secondary);
+    opacity: 0.6;
 }
