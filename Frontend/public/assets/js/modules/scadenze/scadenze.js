@@ -211,12 +211,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 href: `dettaglio_scadenza.html?id=${scadenza.id}`
             }
         }, [
-            createElement('div', { className: 'flex items-start justify-between gap-4' }, [
-                createElement('div', { className: 'flex items-center gap-4 min-w-0' }, [
+            createElement('div', { className: 'deadline-card-layout' }, [
+                createElement('div', { className: 'deadline-card-left' }, [
                     createElement('div', { className: 'deadline-icon-box' }, [
-                        createElement('span', { className: 'material-symbols-outlined filled text-2xl', textContent: scadenza.icon || 'event_note' })
+                        createElement('span', { className: 'material-symbols-outlined filled', textContent: scadenza.icon || 'event_note' })
                     ]),
-                    createElement('div', { className: 'flex-col min-w-0' }, [
+                    createElement('div', { className: 'deadline-card-info-group' }, [
                         createElement('span', { className: 'deadline-card-category', textContent: scadenza.category || 'SCADENZA' }),
                         createElement('h4', { className: 'deadline-card-title', textContent: scadenza.title }),
                         createElement('p', { className: 'deadline-card-subtitle', textContent: `Ref: ${scadenza.name || 'Generale'}` })

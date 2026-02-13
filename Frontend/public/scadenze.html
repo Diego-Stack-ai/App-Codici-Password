@@ -26,7 +26,6 @@
     <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
     <link rel="stylesheet" href="assets/css/core_moduli.css?v=1.0">
     <link rel="stylesheet" href="assets/css/scadenze.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/core-transizione.css?v=1.1">
 
     <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
@@ -49,7 +48,7 @@
                 <!-- Toolbar: Count + Sort (Ora SOPRA la ricerca) -->
                 <div class="deadline-toolbar">
                     <!-- Left: Count -->
-                    <div class="flex-row items-center gap-2">
+                    <div class="deadline-count-wrapper">
                         <span id="deadline-count" class="deadline-count-badge">0</span>
                         <span data-t="deadlines_total" class="deadline-count-label">Scadenze</span>
                     </div>
@@ -83,7 +82,7 @@
                 </div>
 
                 <!-- Filter Chips -->
-                <div class="filter-container mt-4">
+                <div class="filter-container">
                     <button class="filter-chip active" data-t="filter_all">Tutte</button>
                     <button class="filter-chip" data-t="filter_urgent">Urgenti</button>
                     <button class="filter-chip" data-t="filter_expiring">In scadenza</button>

@@ -575,7 +575,7 @@ Una volta confermata la stabilità:
 | `configurazione_automezzi.html` | ✅ Completata | 12/02/2026 | Refactoring Configurazione |
 | `configurazione_documenti.html` | ✅ Completata | 12/02/2026 | Refactoring Configurazione |
 | `configurazione_generali.html` | ✅ Completata | 12/02/2026 | Refactoring Configurazione |
-| `scadenze.html` | ✅ Completata | 13/02/2026 | Refactoring Completo V4.1 |
+| `scadenze.html` | ✅ Completata | 13/02/2026 | Refactoring Completo V4.1 (Consolidato) |
 | `archivio_account.html` | ✅ Completata | 13/02/2026 | Migrazione a core_moduli |
 
 **NOTA DI CONSOLIDAMENTO (13/02/2026)**: Tutte le pagine principali dell'applicazione sono state migrate con successo al sistema modulare V4.0. I file monolitici e le utility Tailwind sono stati rimossi al 100%.

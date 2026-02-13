@@ -1146,8 +1146,8 @@ html:not(.dark) .hero-card-variant .saetta-drop {
     -webkit-backdrop-filter: blur(25px);
     border: 1px solid var(--card-border);
     border-radius: 18px;
-    padding: 0.6rem;
-    min-width: 200px;
+    padding: 0.4rem;
+    min-width: 180px;
     display: none;
     z-index: 1100;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
@@ -1158,10 +1158,10 @@ html:not(.dark) .hero-card-variant .saetta-drop {
 }
 
 .base-dropdown-item {
-    padding: 0.8rem 1rem;
+    padding: 0.5rem 1rem;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: var(--fs-xs);
+    font-weight: 800;
     border-radius: 12px;
     transition: all 0.2s ease;
     cursor: pointer;
