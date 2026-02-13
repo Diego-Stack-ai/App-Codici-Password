@@ -30,3 +30,30 @@
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
     border-color: rgba(59, 130, 246, 0.3) !important;
 }
+
+/* 2. TIPOGRAFIA PREMIUM SCADENZE (Gerarchia V4.5) */
+.deadline-card-category {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    opacity: 0.6 !important;
+    margin-bottom: 2px !important;
+    display: inline-block !important;
+}
+
+.deadline-card-title {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    color: var(--text-primary) !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+.deadline-card-subtitle {
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary) !important;
+    opacity: 0.8 !important;
+    margin-top: 2px !important;
+}
