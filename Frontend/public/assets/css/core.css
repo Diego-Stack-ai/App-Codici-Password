@@ -651,7 +651,23 @@ body,
     justify-content: center;
     gap: 0.5rem;
     margin-top: 1.5rem;
-    font-size: 0.85rem;
+
+    /* Bottoni Secondari (Look Glass/Adaptive) */
+    .base-btn-secondary {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid var(--card-border) !important;
+        color: var(--text-primary) !important;
+        transition: all 0.2s ease;
+    }
+
+    .base-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    html:not(.dark) .base-btn-secondary {
+        background: rgba(0, 0, 0, 0.02) !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
 }
 
 /* Helper Utilities (Pure HTML Standard) */
