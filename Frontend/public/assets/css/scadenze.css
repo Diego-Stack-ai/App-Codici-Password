@@ -123,11 +123,12 @@
     }
 }
 
-/* --- PAGE LAYOUT (Constraint per look Premium) --- */
+/* --- PAGE LAYOUT (Centratura & Padding V4.5) --- */
 .page-container {
-    max-width: 500px !important;
-    /* Più stretto per focus maggiore */
-    padding: 0 1rem;
+    max-width: 500px;
+    /* Centratura Vault */
+    padding: 0 20px;
+    /* Padding laterale di cortesia */
     box-sizing: border-box;
     width: 100%;
 }
@@ -163,7 +164,8 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    opacity: 0.4;
+    opacity: 0.7;
+    /* Aumentata visibilità */
     color: var(--text-primary);
 }
 
