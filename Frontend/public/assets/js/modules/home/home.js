@@ -34,8 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inizializza Listeners (Logout, Tema, Avatar Fallback)
         initHomeListeners();
 
+
         // 4. SBLOCCO VISIBILITÀ (Anti-Flicker Ready)
         document.documentElement.setAttribute("data-i18n", "ready");
+
+        // 5. FAB Group (Footer)
+        setupFABGroup();
     });
 });
 
@@ -229,4 +233,81 @@ function renderMiniItem(item, today) {
         ]),
         createElement('span', { className: 'item-badge', textContent: labelText })
     ]);
+}
+
+// --- FAB GROUP (Quick Add Actions) ---
+function setupFABGroup() {
+    // Cerca il footer per 2 secondi max
+    let attempts = 0;
+    const interval = setInterval(() => {
+        attempts++;
+        // Nota: In Home Page il footer è iniettato da main.js o è statico? 
+        // Se è placeholder, main.js lo riempie. Dobbiamo agganciarci al centro.
+        // Ma wait... Home Page ha un footer-placeholder vuoto alla riga 95.
+        // main.js caricherà il componente footer standard.
+        // Dobbiamo trovare #footer-center-actions DOPO che il footer è stato caricato.
+
+        const footerCenter = document.getElementById('footer-center-actions');
+
+        if (footerCenter) {
+            clearInterval(interval);
+            clearElement(footerCenter);
+
+            // Container Gruppo
+            const fabGroup = createElement('div', { className: 'fab-group' });
+
+            // 1. Privato (SX)
+            const btnPrivato = createElement('button', {
+                className: 'btn-fab-action btn-fab-privato',
+                title: 'Nuovo Privato',
+                dataset: { label: 'Privato' },
+                onclick: () => window.location.href = 'form_account_privato.html'
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'person_add' })
+            ]);
+
+            // 2. Scadenza (Centro - Principale)
+            const btnScadenza = createElement('button', {
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: 'Nuova Scadenza',
+                dataset: { label: 'Scadenza' },
+                onclick: () => window.location.href = 'aggiungi_scadenza.html'
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'event' })
+            ]);
+
+            // 3. Azienda (DX)
+            const btnAzienda = createElement('button', {
+                className: 'btn-fab-action btn-fab-azienda',
+                title: 'Nuova Azienda',
+                dataset: { label: 'Azienda' },
+                onclick: () => window.location.href = 'form_account_azienda.html'
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'domain_add' })
+            ]);
+
+            // Assemblaggio
+            fabGroup.appendChild(btnPrivato);
+            fabGroup.appendChild(btnScadenza);
+            fabGroup.appendChild(btnAzienda);
+
+            footerCenter.appendChild(fabGroup);
+
+            // Animazione Entrata Sequenziale
+            const buttons = [btnPrivato, btnScadenza, btnAzienda];
+            buttons.forEach((btn, index) => {
+                btn.animate([
+                    { transform: 'scale(0) translateY(20px)', opacity: 0 },
+                    { transform: 'scale(1) translateY(0)', opacity: 1 }
+                ], {
+                    duration: 400,
+                    delay: 500 + (index * 100), // Delay extra per aspettare caricamento footer
+                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    fill: 'backwards'
+                });
+            });
+        }
+
+        if (attempts > 50) clearInterval(interval); // Timeout 5s esteso per attesa fetch
+    }, 100);
 }

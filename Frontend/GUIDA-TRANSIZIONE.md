@@ -577,6 +577,9 @@ Una volta confermata la stabilità:
 | `configurazione_generali.html` | ✅ Completata | 12/02/2026 | Refactoring Configurazione |
 | `scadenze.html` | ✅ Completata | 13/02/2026 | Refactoring Completo V4.1 (Consolidato) |
 | `archivio_account.html` | ✅ Completata | 13/02/2026 | Migrazione a core_moduli |
+| `dettaglio_scadenza.html` | ✅ Completata | 13/02/2026 | Refactoring V3.9 - Layout Naked & Clean |
+| `modifica_scadenza.html` | ✅ Completata | 14/02/2026 | Refactoring Totale (Form riscritto, No Legacy) |
+| `privacy.html` | ✅ Completata | 14/02/2026 | Rimozione Spacer, Standard V4.0 |
 
 **NOTA DI CONSOLIDAMENTO (13/02/2026)**: Tutte le pagine principali dell'applicazione sono state migrate con successo al sistema modulare V4.0. I file monolitici e le utility Tailwind sono stati rimossi al 100%.
 

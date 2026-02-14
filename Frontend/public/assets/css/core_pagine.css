@@ -35,7 +35,8 @@
 
 @media (max-width:480px) {
     .matrix-grid {
-        padding: 0 14px;
+        padding: 0;
+        /* Padding laterale rimosso: gestito da .page-container (20px) */
         gap: 1.25rem;
     }
 }

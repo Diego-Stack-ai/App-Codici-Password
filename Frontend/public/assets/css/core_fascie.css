@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CORE FASCIE (Header, Footer & Spacers) - Standard V3.8
+   CORE FASCIE (Header, Footer & Spacers) - Standard V3.9 (Updated)
    ========================================================================== */
 
 :root {
@@ -127,18 +127,9 @@
     justify-content: center;
 }
 
-/* --- 4. DISTANZIATORI (Spacers) --- */
-.spacer-header {
-    height: 80px;
-}
+/* --- UTILITY GESTIONE SPAZI --- */
+/* (Header e Footer Spacer HTML sono stati deprecati e rimossi nello standard V3.9) */
 
-.spacer-footer {
-    height: 100px;
-}
-
-.footer-spacer {
-    flex: 1;
-}
 
 /* --- 5. TESTO LEGALE (Login/Auth) --- */
 .legal-footer {
@@ -146,4 +137,15 @@
     color: var(--footer-color);
     font-size: 0.75rem;
     text-align: center;
+}
+
+/* --- 6. UTILITY SPACER (Footer & Header Safety) --- */
+.pb-footer-extra {
+    padding-bottom: 120px !important;
+    /* Spazio sicuro per evitare overlap col footer fisso */
+}
+
+.pt-header-extra {
+    padding-top: 100px !important;
+    /* Spazio sicuro per evitare overlap col header fisso */
 }

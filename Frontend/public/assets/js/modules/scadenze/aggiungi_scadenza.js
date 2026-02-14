@@ -4,8 +4,9 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth } from '../../firebase-config.js';
+import { db, auth, storage } from '../../firebase-config.js';
 import { collection, addDoc, Timestamp, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { EMAILS, buildEmailSubject } from './scadenza_templates.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -23,6 +24,8 @@ let currentUser = null;
 let currentRule = null;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
+let selectedFiles = [];
+let existingAttachments = [];
 
 let dynamicConfig = {
     deadlineTypes: [],
@@ -59,22 +62,60 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(id)?.addEventListener('change', updatePreview);
     });
 
-    // Footer Save Button Injection
+    initProxyDropdowns();
+    initAttachmentSystem();
+
+    // Footer Actions Injection (V4.1 Style)
     const interval = setInterval(() => {
         const footerRight = document.getElementById('footer-right-actions');
-        if (footerRight) {
+        const footerCenter = document.getElementById('footer-center-actions');
+
+        if (footerRight && footerCenter) {
             clearInterval(interval);
-            const saveBtn = createElement('button', {
-                id: 'save-btn',
-                className: 'base-btn-primary flex-center-gap',
-                title: 'Salva Scadenza'
+
+            // --- A. IMPOSTAZIONI (Sempre visibile a dx) ---
+            const settLink = createElement('div', { id: 'footer-settings-link' });
+            settLink.appendChild(
+                createElement('a', {
+                    href: 'impostazioni.html',
+                    className: 'btn-icon-header footer-settings-link',
+                    title: 'Impostazioni'
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
+                ])
+            );
+            clearElement(footerRight);
+            footerRight.appendChild(settLink);
+
+            // --- B. AZIONI CENTRALI (Annulla & Salva) ---
+            const cancelBtn = createElement('button', {
+                className: 'btn-fab-action',
+                style: 'background: #64748b; width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);',
+                title: 'Annulla',
+                onclick: () => {
+                    if (editingScadenzaId) window.location.href = `dettaglio_scadenza.html?id=${editingScadenzaId}`;
+                    else window.location.href = 'scadenze.html';
+                }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'save' }),
-                createElement('span', { dataset: { t: 'save_deadline' }, textContent: 'Salva' })
+                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'close' })
             ]);
 
-            clearElement(footerRight);
-            setChildren(footerRight, saveBtn);
+            const saveBtn = createElement('button', {
+                id: 'save-btn',
+                className: 'btn-fab-action btn-fab-scadenza', // Stile FAB Blu Standard
+                style: 'width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);',
+                title: 'Salva Scadenza'
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'save' })
+            ]);
+
+            const fabWrapper = createElement('div', {
+                className: 'flex items-center gap-4',
+                style: 'display: flex; gap: 16px; align-items: center;'
+            }, [cancelBtn, saveBtn]);
+
+            clearElement(footerCenter);
+            footerCenter.appendChild(fabWrapper);
             setupSaveLogic();
         }
     }, 100);
@@ -126,11 +167,9 @@ function updateUIButtons(activeMode) {
         const btn = document.getElementById(`mode-${mode}`);
         if (btn) {
             if (mode === activeMode) {
-                btn.classList.add('bg-white/20', 'text-white');
-                btn.classList.remove('opacity-50');
+                btn.classList.add('active');
             } else {
-                btn.classList.remove('bg-white/20', 'text-white');
-                btn.classList.add('opacity-50');
+                btn.classList.remove('active');
             }
         }
     });
@@ -195,21 +234,25 @@ function populateTypeSelect() {
     clearElement(typeSelect);
     typeSelect.appendChild(new Option('Scegli categoria...', ''));
 
-    const addGroup = (label, items) => {
+    const addItems = (items) => {
         if (!items || items.length === 0) return;
-        const group = createElement('optgroup', { label });
         items.forEach(item => {
             const key = (typeof item === 'object') ? item.name : item;
-            group.appendChild(new Option(key, key));
+            typeSelect.appendChild(new Option(key, key));
         });
-        typeSelect.appendChild(group);
     };
 
-    addGroup("AUTOMEZZI", unifiedConfigs.automezzi?.deadlineTypes);
-    addGroup("DOCUMENTI", unifiedConfigs.documenti?.deadlineTypes);
-    addGroup("GENERALI", unifiedConfigs.generali?.deadlineTypes);
+    if (currentMode === 'automezzi') addItems(unifiedConfigs.automezzi?.deadlineTypes);
+    else if (currentMode === 'documenti') addItems(unifiedConfigs.documenti?.deadlineTypes);
+    else if (currentMode === 'generali') addItems(unifiedConfigs.generali?.deadlineTypes);
 
-    if (currentVal) typeSelect.value = currentVal;
+    // Valida se il valore precedente appartiene ancora al nuovo set
+    const valExists = Array.from(typeSelect.options).some(opt => opt.value === currentVal);
+    if (currentVal && valExists) {
+        typeSelect.value = currentVal;
+    } else {
+        typeSelect.value = '';
+    }
 }
 
 function populateEmailSelect(select) {
@@ -335,7 +378,7 @@ function setupSaveLogic() {
             emails: [email1, email2].filter(e => e && e !== 'manual'),
             whatsappEnabled: document.getElementById('whatsapp_enable').checked,
             notificationDaysBefore: parseInt(notifDaysInput.value),
-            notificationFrequency: parseInt(notifFreqInput.value),
+            notificationFrequency: parseInt(notifFreqInput.value), // Corretto id variabile locale
             createdAt: Timestamp.now(),
             status: 'active',
             completed: false
@@ -343,33 +386,177 @@ function setupSaveLogic() {
 
         try {
             btnSave.disabled = true;
-            const originalContent = Array.from(btnSave.childNodes).map(n => n.cloneNode(true));
             clearElement(btnSave);
             setChildren(btnSave, [
                 createElement('span', { className: 'material-symbols-outlined animate-spin mr-2', textContent: 'progress_activity' }),
-                createElement('span', { dataset: { t: 'saving' }, textContent: 'Salvataggio...' })
+                createElement('span', { id: 'save-btn-text', textContent: 'Salvataggio...' })
             ]);
 
+            const btnText = document.getElementById('save-btn-text');
+            let finalDocId = editingScadenzaId;
+
+            // 1. Salvataggio Documento per ottenere l'ID
             if (editingScadenzaId) {
                 await updateDoc(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), data);
-                showToast("Aggiornato!", "success");
-                setTimeout(() => window.location.href = 'scadenze.html', 1000);
             } else {
                 const docRef = await addDoc(collection(db, "users", currentUser.uid, "scadenze"), data);
-                showSuccessModal(docRef.id);
+                finalDocId = docRef.id;
             }
+
+            // 2. Gestione Allegati (Upload sequenziale garantito)
+            const uploadedRef = [];
+            if (selectedFiles.length > 0) {
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    if (btnText) btnText.textContent = `Caricamento ${i + 1}/${selectedFiles.length}...`;
+
+                    const storagePath = `users/${currentUser.uid}/scadenze/${finalDocId}/${Date.now()}_${file.name}`;
+                    const sRef = ref(storage, storagePath);
+                    const snap = await uploadBytes(sRef, file);
+                    const url = await getDownloadURL(snap.ref);
+
+                    uploadedRef.push({
+                        name: file.name,
+                        url: url,
+                        type: file.type,
+                        size: file.size,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            }
+
+            // 3. Update finale con la lista allegati completa (Esistenti + Nuovi)
+            const finalAttachments = [...existingAttachments, ...uploadedRef];
+            await updateDoc(doc(db, "users", currentUser.uid, "scadenze", finalDocId), {
+                attachments: finalAttachments
+            });
+
+            if (btnText) btnText.textContent = "Completato!";
+            showToast(editingScadenzaId ? "Scadenza aggiornata!" : "Scadenza salvata!", "success");
+            setTimeout(() => window.location.href = `dettaglio_scadenza.html?id=${finalDocId}`, 1000);
+
         } catch (e) {
-            console.error(e);
-            showToast("Errore: " + e.message, "error");
+            console.error("Errore Salvatggio:", e);
+            showToast("Errore durante il salvataggio: " + e.message, "error");
             btnSave.disabled = false;
             // Restore button content
             clearElement(btnSave);
             setChildren(btnSave, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'save' }),
-                createElement('span', { dataset: { t: 'save_deadline' }, textContent: 'Salva' })
+                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'save' })
             ]);
         }
     });
+}
+
+/**
+ * SISTEMA ALLEGATI (V4.1)
+ * Gestione Modali, Picker e Render
+ */
+function initAttachmentSystem() {
+    const btnTrigger = document.getElementById('btn-trigger-upload');
+    const modal = document.getElementById('source-selector-modal');
+    const btnCancel = document.getElementById('btn-cancel-source');
+
+    if (!btnTrigger || !modal) return;
+
+    btnTrigger.onclick = () => {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    btnCancel.onclick = closeModal;
+
+    // Source Selection
+    modal.querySelectorAll('[data-source]').forEach(btn => {
+        btn.onclick = () => {
+            const type = btn.dataset.source;
+            const input = document.getElementById(`input-${type}`);
+            if (input) input.click();
+            closeModal();
+        };
+    });
+
+    // Inputs Change Listeners
+    ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                selectedFiles.push(...files);
+                renderAttachments();
+            }
+            e.target.value = ''; // Reset per permettere ricaricamento stesso file
+        });
+    });
+}
+
+function renderAttachments() {
+    const container = document.getElementById('attachments-list');
+    if (!container) return;
+
+    clearElement(container);
+
+    const all = [
+        ...existingAttachments.map((f, i) => ({ ...f, existing: true, idx: i })),
+        ...selectedFiles.map((f, i) => ({ name: f.name, existing: false, idx: i }))
+    ];
+
+    if (all.length === 0) {
+        container.appendChild(createElement('p', {
+            className: 'placeholder-text-standard',
+            textContent: 'Nessun allegato'
+        }));
+        return;
+    }
+
+    all.forEach(file => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        let icon = 'description';
+        let color = 'text-white/20';
+
+        if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) { icon = 'image'; color = 'text-purple-400/40'; }
+        else if (ext === 'pdf') { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
+
+        const item = createElement('div', {
+            className: 'flex items-center justify-between p-3 glass-card border-white/5 animate-in slide-in-from-left-2 transition-all'
+        }, [
+            createElement('div', { className: 'flex items-center gap-3' }, [
+                createElement('span', { className: `material-symbols-outlined ${color}`, textContent: icon }),
+                createElement('div', { className: 'flex flex-col' }, [
+                    createElement('span', {
+                        className: 'text-[10px] font-black text-white/80 uppercase truncate max-w-[180px]',
+                        textContent: file.name
+                    }),
+                    createElement('span', {
+                        className: 'text-[8px] font-bold text-white/20 uppercase tracking-widest',
+                        textContent: file.existing ? 'Caricato' : 'Nuovo'
+                    })
+                ])
+            ]),
+            createElement('button', {
+                type: 'button',
+                className: 'size-8 flex-center text-red-400/40 hover:text-red-400 transition-colors',
+                onclick: () => removeAttachment(file.idx, file.existing)
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'close' })
+            ])
+        ]);
+
+        container.appendChild(item);
+    });
+}
+
+function removeAttachment(idx, existing) {
+    if (existing) {
+        existingAttachments.splice(idx, 1);
+    } else {
+        selectedFiles.splice(idx, 1);
+    }
+    renderAttachments();
 }
 
 async function showSuccessModal() {
@@ -405,11 +592,108 @@ async function loadScadenzaForEdit(id) {
             if (data.emails?.[0]) emailPrimariaSelect.value = data.emails[0];
             if (data.emails?.[1]) emailSecondariaSelect.value = data.emails[1];
 
+            existingAttachments = data.attachments || [];
+            renderAttachments();
+
             updatePreview();
         }, 300);
 
     } catch (e) {
         console.error("Edit load error", e);
     }
+}
+
+/**
+ * CUSTOM PREMIUM DROPDOWNS (PROXY SYSTEM)
+ * Sincronizza i div 'base-dropdown' con i select nativi (hidden).
+ */
+function initProxyDropdowns() {
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.dropdown-trigger');
+        const container = trigger?.closest('[data-custom-select]');
+        const menu = container?.querySelector('.dropdown-menu');
+
+        // Chiudi tutti gli altri
+        document.querySelectorAll('.base-dropdown-menu.show').forEach(m => {
+            if (m !== menu) m.classList.remove('show');
+        });
+
+        if (trigger && menu) {
+            e.stopPropagation();
+            menu.classList.toggle('show');
+        } else {
+            document.querySelectorAll('.base-dropdown-menu.show').forEach(m => m.classList.remove('show'));
+        }
+    });
+
+    // Auto-Sync iniziale e osservazione cambiamenti
+    syncCustomDropdowns();
+}
+
+function syncCustomDropdowns() {
+    document.querySelectorAll('[data-custom-select]').forEach(container => {
+        const select = container.querySelector('select');
+        const trigger = container.querySelector('.dropdown-trigger');
+        const labelEl = container.querySelector('.dropdown-label');
+        const menu = container.querySelector('.dropdown-menu');
+
+        if (!select || !trigger || !menu) return;
+
+        // Reset menu
+        clearElement(menu);
+
+        // Build items
+        Array.from(select.children).forEach(child => {
+            if (child.tagName === 'OPTGROUP') {
+                menu.appendChild(createElement('div', { className: 'base-dropdown-group-label', textContent: child.label }));
+                Array.from(child.children).forEach(opt => createItem(opt, menu, select, labelEl));
+            } else {
+                createItem(child, menu, select, labelEl);
+            }
+        });
+
+        // Sync Label
+        const updateSelectionUI = () => {
+            const selectedOpt = select.options[select.selectedIndex];
+            if (selectedOpt) {
+                labelEl.textContent = selectedOpt.textContent;
+                if (selectedOpt.dataset.t) labelEl.setAttribute('data-t', selectedOpt.dataset.t);
+                else labelEl.removeAttribute('data-t');
+
+                // Sync Active Class in menu
+                menu.querySelectorAll('.base-dropdown-item').forEach(i => {
+                    i.classList.toggle('active', i.dataset.value === select.value);
+                });
+            }
+        };
+
+        updateSelectionUI();
+
+        // Ri-sincronizza se il select cambia (programmaticamente o via proxy)
+        if (!select._proxyInit) {
+            select.addEventListener('change', updateSelectionUI);
+            // Osserva se cambiano le opzioni (es. populateTypeSelect)
+            const observer = new MutationObserver(() => syncCustomDropdowns());
+            observer.observe(select, { childList: true });
+            select._proxyInit = true;
+        }
+
+        function createItem(opt, parent, sel, lab) {
+            const item = createElement('div', {
+                className: `base-dropdown-item ${opt.selected ? 'active' : ''}`,
+                textContent: opt.textContent,
+                dataset: { value: opt.value }
+            });
+            if (opt.dataset.t) item.setAttribute('data-t', opt.dataset.t);
+
+            item.onclick = (e) => {
+                e.stopPropagation();
+                sel.value = opt.value;
+                sel.dispatchEvent(new Event('change'));
+                parent.classList.remove('show');
+            };
+            parent.appendChild(item);
+        }
+    });
 }
 

@@ -127,20 +127,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const thirtyDaysLater = new Date();
         thirtyDaysLater.setDate(now.getDate() + 30);
 
-        // Apply Filter
-        if (activeFilter !== 'Tutte') {
-            filtered = filtered.filter(s => {
-                const dueDateValue = s.dueDate || s.date;
-                const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
-                const expired = dueDate < now;
-                const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
+        // Apply Filter (SEMPRE APPLICATO ORA)
+        filtered = filtered.filter(s => {
+            const dueDateValue = s.dueDate || s.date;
+            const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
+            const expired = dueDate < now;
+            const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
 
-                if (activeFilter === 'Urgenti') return expired;
-                if (activeFilter === 'In scadenza') return isUpcoming;
-                if (activeFilter === 'Completate') return s.completed;
-                return true;
-            });
-        }
+            // CASO SPECIFICO: COMPLETATE
+            if (activeFilter === 'Completate') {
+                return s.completed;
+            }
+
+            // PER TUTTI GLI ALTRI CASI (Tutte, Urgenti, In Scadenza)
+            // ESCLUDI LE COMPLETATE
+            if (s.completed) return false;
+
+            if (activeFilter === 'Urgenti') return expired;
+            if (activeFilter === 'In scadenza') return isUpcoming;
+
+            // Se siamo qui e activeFilter == 'Tutte', passa (perché non completata)
+            return true;
+        });
 
         // Apply Search
         if (searchQuery) {
@@ -201,8 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
 
         let stateClass = 'deadline-card-info';
-        if (expired) stateClass = 'deadline-card-expired';
-        else if (isUpcoming) stateClass = 'deadline-card-upcoming';
+
+        if (scadenza.completed) {
+            stateClass = 'deadline-card-completed';
+        } else if (expired) {
+            stateClass = 'deadline-card-expired';
+        } else if (isUpcoming) {
+            stateClass = 'deadline-card-upcoming';
+        }
 
         const card = createElement('div', {
             className: `deadline-card ${stateClass}`,
@@ -226,6 +240,53 @@ document.addEventListener('DOMContentLoaded', () => {
                     className: 'deadline-date-badge',
                     textContent: dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).toUpperCase()
                 })
+            ]),
+
+            // CHECKBOX COMPLETATO (Bottom Right)
+            createElement('div', {
+                className: `deadline-check-btn ${scadenza.completed ? 'checked' : ''}`,
+                title: scadenza.completed ? 'Segna come non completata' : 'Segna come completata',
+                onclick: async (e) => {
+                    e.stopPropagation(); // Evita apertura dettaglio
+                    const btn = e.currentTarget;
+                    const isCompleted = btn.classList.contains('checked');
+
+                    try {
+                        const newStatus = !isCompleted;
+
+                        // Aggiorna UI Locale
+                        if (newStatus) btn.classList.add('checked');
+                        else btn.classList.remove('checked');
+
+                        // Aggiorna Firebase
+                        const docRef = doc(db, "users", currentUser.uid, "scadenze", scadenza.id);
+                        await updateDoc(docRef, { completed: newStatus });
+
+                        // Aggiorna lista array locale e re-render immediato se necessario
+                        const idx = allScadenze.findIndex(s => s.id === scadenza.id);
+                        if (idx !== -1) allScadenze[idx].completed = newStatus;
+
+                        // Se siamo in un filtro che esclude i completati (o viceversa), anima l'uscita
+                        if (activeFilter !== 'Tutte') {
+                            const cardEl = btn.closest('.deadline-card');
+                            cardEl.style.transition = 'opacity 0.3s, transform 0.3s';
+                            cardEl.style.opacity = '0';
+                            cardEl.style.transform = 'scale(0.9)';
+                            setTimeout(() => renderFilteredScadenze(), 300);
+                        } else {
+                            // Se siamo in 'Tutte', aggiorna solo lo stile della card senza rimuoverla
+                            renderFilteredScadenze(); // Più semplice per aggiornare i colori
+                        }
+
+                        showToast(newStatus ? 'Scadenza completata' : 'Scadenza riattivata', 'success');
+
+                    } catch (err) {
+                        console.error("Errore update completed:", err);
+                        showToast("Errore aggiornamento stato", "error");
+                    }
+                }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
             ])
         ]);
 
@@ -234,6 +295,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         return card;
+    }
+
+    // --- FAB (Add Button) ---
+    setupFAB();
+
+    function setupFAB() {
+        // Cerca il footer per 2 secondi max
+        let attempts = 0;
+        const interval = setInterval(() => {
+            attempts++;
+            const footerCenter = document.getElementById('footer-center-actions');
+
+            if (footerCenter) {
+                clearInterval(interval);
+                clearElement(footerCenter);
+
+                // Crea il pulsante Aggiungi (+)
+                const addBtn = createElement('button', {
+                    className: 'btn-fab-action btn-fab-scadenza', // Stile aggiornato
+                    title: 'Aggiungi Scadenza',
+                    onclick: () => window.location.href = 'aggiungi_scadenza.html'
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+                ]);
+
+                footerCenter.appendChild(addBtn);
+
+                // Animazione Entrata
+                addBtn.animate([
+                    { transform: 'scale(0) rotate(-90deg)', opacity: 0 },
+                    { transform: 'scale(1) rotate(0deg)', opacity: 1 }
+                ], { duration: 400, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
+            }
+
+            if (attempts > 20) clearInterval(interval); // Timeout 2s
+        }, 100);
     }
 });
 

@@ -38,61 +38,61 @@
   <div class="base-container">
     <div class="base-glow"></div>
 
-    <!-- HEADER FISSO (V3.8 Balanced) -->
-    <!-- HEADER (Placeholder V3.9) -->
-    <div id="header-placeholder"></div>
-
-    <div class="spacer-header"></div>
+    <!-- HEADER (V3.9 Semantic) -->
+    <header id="header-placeholder" class="base-header"></header>
 
     <!-- MAIN -->
     <main class="base-main">
-      <div class="matrix-grid">
-        <a href="area_privata.html" class="matrix-card card-blue border-glow adaptive-shadow area-privato">
-          <div class="matrix-icon-box"><span class="material-symbols-outlined">lock</span></div>
-          <div class="card-text-block">
-            <h3 data-t="section_private_title">Privato</h3>
-          </div>
-        </a>
-        <a href="lista_aziende.html" class="matrix-card card-green border-glow adaptive-shadow area-azienda">
-          <div class="matrix-icon-box"><span class="material-symbols-outlined">apartment</span></div>
-          <div class="card-text-block">
-            <h3 data-t="section_company_title">Azienda</h3>
-          </div>
-        </a>
+      <div class="page-container pt-header-extra pb-footer-extra">
+        <div class="matrix-grid">
+          <a href="area_privata.html" class="matrix-card card-blue border-glow adaptive-shadow area-privato">
+            <div class="matrix-icon-box"><span class="material-symbols-outlined">lock</span></div>
+            <div class="card-text-block">
+              <h3 data-t="section_private_title">Privato</h3>
+            </div>
+          </a>
+          <a href="lista_aziende.html" class="matrix-card card-green border-glow adaptive-shadow area-azienda">
+            <div class="matrix-icon-box"><span class="material-symbols-outlined">apartment</span></div>
+            <div class="card-text-block">
+              <h3 data-t="section_company_title">Azienda</h3>
+            </div>
+          </a>
 
-        <a href="scadenze.html?filter=in_scadenza"
-          class="matrix-card card-orange border-glow adaptive-shadow area-scadenze">
-          <div class="matrix-card-top-row">
-            <div class="matrix-icon-box"><span class="material-symbols-outlined">calendar_month</span></div>
-            <span id="upcoming-count-badge" class="badge-count badge-initial-hide">
-              <span id="upcoming-count">0</span>
-            </span>
-          </div>
-          <div class="card-text-block">
-            <h3 data-t="section_deadlines_title">Scadenze</h3>
-          </div>
-          <!-- Mini List Dinamica -->
-          <div id="upcoming-list-container" class="micro-dashboard-list"></div>
-        </a>
+          <a href="scadenze.html?filter=in_scadenza"
+            class="matrix-card card-orange border-glow adaptive-shadow area-scadenze">
+            <div class="matrix-card-top-row">
+              <div class="matrix-icon-box"><span class="material-symbols-outlined">calendar_month</span></div>
+              <span id="upcoming-count-badge" class="badge-count badge-initial-hide">
+                <span id="upcoming-count">0</span>
+              </span>
+            </div>
+            <div class="card-text-block">
+              <h3 data-t="section_deadlines_title">Scadenze</h3>
+            </div>
+            <!-- Mini List Dinamica -->
+            <div id="upcoming-list-container" class="micro-dashboard-list"></div>
+          </a>
 
-        <a href="scadenze.html?filter=urgenti" class="matrix-card card-red border-glow adaptive-shadow area-urgenze">
-          <div class="matrix-card-top-row">
-            <div class="matrix-icon-box"><span class="material-symbols-outlined">warning</span></div>
-            <span id="expired-count-badge" class="badge-count badge-initial-hide">
-              <span id="expired-count">0</span>
-            </span>
-          </div>
-          <div class="card-text-block">
-            <h3 data-t="section_urgencies_title">Urgenze</h3>
-          </div>
-          <!-- Mini List Dinamica -->
-          <div id="expired-list-container" class="micro-dashboard-list"></div>
-        </a>
+          <a href="scadenze.html?filter=urgenti" class="matrix-card card-red border-glow adaptive-shadow area-urgenze">
+            <div class="matrix-card-top-row">
+              <div class="matrix-icon-box"><span class="material-symbols-outlined">warning</span></div>
+              <span id="expired-count-badge" class="badge-count badge-initial-hide">
+                <span id="expired-count">0</span>
+              </span>
+            </div>
+            <div class="card-text-block">
+              <h3 data-t="section_urgencies_title">Urgenze</h3>
+            </div>
+            <!-- Mini List Dinamica -->
+            <div id="expired-list-container" class="micro-dashboard-list"></div>
+          </a>
+        </div>
       </div>
-    </main>
+  </div>
+  </main>
 
-    <!-- FOOTER (Placeholder V3.9) -->
-    <div id="footer-placeholder"></div>
+  <!-- FOOTER (V3.9 Semantic) -->
+  <footer id="footer-placeholder" class="base-footer"></footer>
   </div>
 
   <!-- Scripts -->

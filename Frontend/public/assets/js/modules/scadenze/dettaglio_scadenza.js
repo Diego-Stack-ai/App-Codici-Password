@@ -43,72 +43,101 @@ async function loadScadenza(uid) {
     }
 }
 
+// --------------------------------------------------------------------------
+// 4. FOOTER & PAGE ACTIONS
+// --------------------------------------------------------------------------
+
 function setupFooterActions() {
     const interval = setInterval(() => {
-        const footerRight = document.getElementById('footer-right-actions');
-        if (footerRight && currentScadenza) {
-            clearInterval(interval);
-            const isCompleted = currentScadenza.status === 'completed' || currentScadenza.completed === true;
 
-            const archiveBtn = createElement('button', {
-                id: 'footer-btn-archive',
-                className: 'glass-btn-sm',
-                title: isCompleted ? 'Ripristina' : 'Archivia',
-                onclick: handleArchive
-            }, [
-                createElement('span', { className: 'material-symbols-outlined text-lg', textContent: isCompleted ? 'unarchive' : 'archive' })
-            ]);
+        // --- 1. FOOTER ACTIONS (Modifica & Elimina) ---
+        // Attendiamo che il footer sia renderizzato da core_fascie.js
+        const footerRight = document.getElementById('footer-right-actions'); // Container standard nel footer dx
+        const footerCenter = document.getElementById('footer-center-actions');
 
+        if (footerRight && footerCenter && currentScadenza) {
+            clearInterval(interval); // Stop polling
+
+            // --- A. IMPOSTAZIONI (Stile Classico components.js) ---
+            const settLink = createElement('div', { id: 'footer-settings-link' });
+            settLink.appendChild(
+                createElement('a', {
+                    href: 'impostazioni.html',
+                    className: 'btn-icon-header footer-settings-link',
+                    title: 'Impostazioni'
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
+                ])
+            );
+            clearElement(footerRight);
+            footerRight.appendChild(settLink);
+
+            // --- B. AZIONI CENTRALI (Elimina & Modifica - Stile FAB Home) ---
+            // Tasto ELIMINA
             const deleteBtn = createElement('button', {
-                id: 'footer-btn-delete',
-                className: 'glass-btn-sm text-red-400',
-                title: 'Elimina',
+                className: 'btn-fab-action',
+                style: 'background: #ef4444; width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);',
+                title: 'Elimina Scadenza',
                 onclick: handleDelete
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-lg', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'delete' })
             ]);
 
+            // B. Tasto MODIFICA (FAB Blu)
             const editBtn = createElement('button', {
-                id: 'footer-btn-edit',
-                className: 'base-btn-primary flex-center-gap',
-                onclick: () => window.location.href = `modifica_scadenza.html?id=${currentScadenzaId}`
+                className: 'btn-fab-action btn-fab-scadenza', // Stile FAB Blu Standard
+                style: 'width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);',
+                title: 'Modifica Scadenza',
+                onclick: () => window.location.href = `aggiungi_scadenza.html?id=${currentScadenzaId}`
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' }),
-                createElement('span', { dataset: { t: 'edit' }, textContent: 'Modifica' })
+                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'edit' })
             ]);
 
-            const container = createElement('div', { className: 'flex items-center gap-2' }, [
-                archiveBtn, deleteBtn, editBtn
-            ]);
+            const fabWrapper = createElement('div', {
+                className: 'flex items-center gap-4',
+                style: 'display: flex; gap: 16px; align-items: center;'
+            }, [deleteBtn, editBtn]);
 
-            clearElement(footerRight);
-            setChildren(footerRight, container);
+            clearElement(footerCenter);
+            footerCenter.appendChild(fabWrapper);
         }
+
     }, 100);
 }
 
 async function handleDelete() {
-    const ok = await showConfirmModal("ELIMINA SCADENZA", "Sei sicuro di voler eliminare definitivamente questa scadenza?", "Elimina", true);
-    if (ok) {
-        await deleteScadenza(auth.currentUser.uid, currentScadenzaId);
-        window.location.href = 'scadenze.html';
+    try {
+        const ok = await showConfirmModal("ELIMINA SCADENZA", "Sei sicuro di voler eliminare definitivamente questa scadenza?", "Elimina", true);
+        if (ok) {
+            await deleteScadenza(auth.currentUser.uid, currentScadenzaId);
+            window.location.href = 'scadenze.html';
+        }
+    } catch (error) {
+        console.error("Errore durante l'eliminazione:", error);
+        showToast("Errore durante l'eliminazione", "error");
     }
 }
 
 async function handleArchive() {
-    const isCompleted = currentScadenza.status === 'completed' || currentScadenza.completed === true;
-    const nextStatus = !isCompleted;
-    const ok = await showConfirmModal(
-        nextStatus ? "ARCHIVIA" : "RIPRISTINA",
-        nextStatus ? "Vuoi spostare questa scadenza nell'archivio?" : "Vuoi ripristinare questa scadenza?",
-        nextStatus ? "Archivia" : "Ripristina"
-    );
-    if (ok) {
-        await updateScadenza(auth.currentUser.uid, currentScadenzaId, {
-            status: nextStatus ? 'completed' : 'active',
-            completed: nextStatus
-        });
-        window.location.reload();
+    try {
+        const isCompleted = currentScadenza.status === 'completed' || currentScadenza.completed === true;
+        const nextStatus = !isCompleted;
+        const ok = await showConfirmModal(
+            nextStatus ? "ARCHIVIA" : "RIPRISTINA",
+            nextStatus ? "Vuoi spostare questa scadenza nell'archivio?" : "Vuoi ripristinare questa scadenza?",
+            nextStatus ? "Archivia" : "Ripristina"
+        );
+
+        if (ok) {
+            await updateScadenza(auth.currentUser.uid, currentScadenzaId, {
+                status: nextStatus ? 'completed' : 'active',
+                completed: nextStatus
+            });
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error("Errore modifica stato:", error);
+        showToast("Errore aggiornamento stato", "error");
     }
 }
 
@@ -118,13 +147,6 @@ function renderScadenza(scadenza) {
     // Basic Fields
     const titleEl = document.getElementById('detail-title');
     if (titleEl) titleEl.textContent = scadenza.title;
-
-    const statusEl = document.getElementById('status-label');
-    if (statusEl) {
-        statusEl.textContent = isCompleted ? 'Archiviata' : 'Attiva';
-        statusEl.classList.remove('text-emerald-500', 'text-blue-500');
-        statusEl.classList.add(isCompleted ? 'text-emerald-500' : 'text-blue-500');
-    }
 
     const holderEl = document.getElementById('detail-intestatario');
     if (holderEl) holderEl.textContent = scadenza.name || scadenza.holder || scadenza.intestatario || '---';
@@ -167,12 +189,12 @@ function renderScadenza(scadenza) {
     if (destCont) {
         clearElement(destCont);
         if (scadenza.emails && scadenza.emails.length > 0) {
-            const items = scadenza.emails.map(email => createElement('div', { className: 'glass-card flex items-center justify-between p-3 group' }, [
-                createElement('div', { className: 'flex items-center gap-3' }, [
-                    createElement('div', { className: 'size-8 rounded-lg bg-blue-500/10 text-blue-400 flex-center border border-blue-500/10 shrink-0' }, [
-                        createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'alternate_email' })
+            const items = scadenza.emails.map(email => createElement('div', { className: 'detail-list-item' }, [
+                createElement('div', { className: 'detail-list-item-left' }, [
+                    createElement('div', { className: 'detail-list-icon-box icon-blue' }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'alternate_email' })
                     ]),
-                    createElement('span', { className: 'text-xs font-bold text-white truncate', textContent: email })
+                    createElement('span', { className: 'detail-list-item-text', textContent: email })
                 ])
             ]));
             setChildren(destCont, items);
@@ -200,18 +222,18 @@ function renderScadenza(scadenza) {
                 return createElement('a', {
                     href: a.url,
                     target: '_blank',
-                    className: 'glass-card flex items-center justify-between p-3 group hover:bg-white/10 transition-all'
+                    className: 'detail-list-item clickable'
                 }, [
-                    createElement('div', { className: 'flex items-center gap-3' }, [
-                        createElement('div', { className: 'size-10 rounded-xl bg-white/5 flex-center border border-white/5' }, [
+                    createElement('div', { className: 'detail-list-item-left' }, [
+                        createElement('div', { className: 'detail-list-icon-box' }, [
                             createElement('span', { className: `material-symbols-outlined ${color}`, textContent: icon })
                         ]),
-                        createElement('div', { className: 'flex flex-col min-w-0' }, [
-                            createElement('span', { className: 'text-xs font-bold text-white truncate', textContent: a.name }),
-                            createElement('span', { className: 'text-[9px] font-black uppercase text-white/30 tracking-widest', textContent: ext })
+                        createElement('div', { className: 'detail-list-item-info' }, [
+                            createElement('span', { className: 'detail-list-item-title', textContent: a.name }),
+                            createElement('span', { className: 'detail-list-item-meta', textContent: ext })
                         ])
                     ]),
-                    createElement('span', { className: 'material-symbols-outlined text-sm opacity-20 group-hover:opacity-100 transition-opacity', textContent: 'open_in_new' })
+                    createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow', textContent: 'open_in_new' })
                 ]);
             });
             setChildren(attCont, items);

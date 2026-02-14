@@ -1,24 +1,14 @@
-/* ==========================================================================
-   SCADENZE CSS (V4.1) - Stili Consolidati V3.9 Standard
-   ========================================================================== */
-
+/* --- SCADENZE CSS (V4.1) --- */
 /* --- 1. LAYOUT PAGINA & SPAZI --- */
-.spacer-header {
-    height: 55px;
-    /* Bilanciamento testata */
-}
+/* .spacer-header rimosso: eredita 80px da core_fascie.css */
 
 .base-main {
-    padding-top: 1rem;
+    padding-top: 0;
+    /* Reset: gestiamo lo spazio col margine del primo elemento */
 }
 
-.page-container {
-    max-width: 440px;
-    padding: 0 28px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-}
+
+/* .page-container rimosso: usa standard core.css (v3.9) */
 
 /* --- 2. TOOLBAR & CONTROLLI --- */
 .deadline-toolbar {
@@ -28,37 +18,21 @@
     padding: 0.5rem 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     margin-bottom: 1rem;
-    margin-top: 5px;
+    margin-top: 1.5rem;
+    /* Distanza FISSA dall'header (80px + 1.5rem) */
+    flex-wrap: nowrap;
+    gap: 0.5rem;
 }
 
 .deadline-count-wrapper {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    flex-shrink: 0;
+    /* Non collassare */
 }
 
-.deadline-count-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    color: #60a5fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 900;
-}
-
-.deadline-count-label {
-    font-size: 10px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    opacity: 0.7;
-    color: var(--text-primary);
-}
+/* ... badge definitions ... */
 
 .deadline-sort-btn {
     height: 40px;
@@ -67,37 +41,54 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    white-space: nowrap;
+    /* Testo su una riga */
+    flex-shrink: 0;
 }
 
-.deadline-sort-label {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.7;
-}
-
-/* --- 3. FILTRI & RICERCA (Compact Design) --- */
+/* --- 3. FILTRI & RICERCA (Robust Horizontal Scroll) --- */
 .filter-container {
     display: flex;
-    gap: 0.35rem;
-    padding: 0.5rem 0;
-    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.25rem;
+    /* Padding laterale per scroll */
+    justify-content: flex-start;
+    /* Allinea a sinistra per scroll */
     margin-bottom: 1rem;
+    overflow-x: auto;
+    /* Scroll orizzontale se necessario */
+    white-space: nowrap;
+    scrollbar-width: none;
+    /* Nascondi scrollbar Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    mask-image: linear-gradient(to right, black 90%, transparent 100%);
+    /* Fade out a destra */
+}
+
+.filter-container::-webkit-scrollbar {
+    display: none;
+    /* Nascondi scrollbar Chrome/Safari */
 }
 
 .filter-chip {
-    padding: 0.4rem 0.65rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 10px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     color: var(--text-secondary);
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: all 0.3s ease;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
     cursor: pointer;
+    flex-shrink: 0;
+    /* Non schiacciarsi mai */
+}
+
+.filter-chip:active {
+    transform: scale(0.95);
 }
 
 .filter-chip.active {
@@ -269,6 +260,26 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     border-color: rgba(217, 119, 6, 0.2);
 }
 
+/* COMPLETATO (Smeraldo/Verde) */
+.deadline-card-completed .deadline-icon-box {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.1);
+}
+
+.deadline-card-completed .deadline-date-badge {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.1);
+    opacity: 0.8;
+    /* Leggermente meno evidente */
+}
+
+/* Opzionale: Diminuisci opacità per completati */
+.deadline-card-completed {
+    opacity: 0.85;
+}
+
 /* --- 5. ANIMAZIONI & UTILS --- */
 @keyframes slideInUp {
     from {
@@ -296,4 +307,755 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     50% {
         opacity: .5;
     }
+}
+
+/* --- CHECKBOX COMPLETAMENTO (Bottom Right) --- */
+.deadline-check-btn {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 2px solid var(--text-secondary);
+    /* Bordo neutro */
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    /* Sopra al link della card */
+    opacity: 0.4;
+}
+
+.deadline-check-btn:hover {
+    opacity: 1;
+    border-color: var(--accent);
+    transform: scale(1.1);
+}
+
+/* Tooltip "COMPLETATA" - SEMPRE VISIBILE */
+.deadline-check-btn::before {
+    content: "COMPLETATA";
+    position: absolute;
+    right: 34px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    /* Micro label */
+    font-weight: 800;
+    color: var(--text-primary);
+    /* Più scuro per leggibilità */
+    white-space: nowrap;
+    opacity: 0.7;
+    /* Aumentato contrasto */
+    pointer-events: none;
+    transition: opacity 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.deadline-check-btn:hover::before {
+    opacity: 1;
+    /* Piena visibilità su hover/click */
+    color: var(--accent);
+}
+
+.deadline-check-btn.checked::before {
+    content: "RIPRISTINA";
+    /* Cambia testo se già checked */
+    color: #10b981;
+    /* Verde se completato */
+    opacity: 0.8;
+}
+
+.deadline-check-btn.checked {
+    background: #10b981;
+    /* Smeraldo */
+    border-color: #10b981;
+    opacity: 1;
+    color: white;
+}
+
+.deadline-check-btn .material-symbols-outlined {
+    font-size: 20px;
+    font-weight: 800;
+    display: none;
+    /* Nascosto se vuoto */
+}
+
+.deadline-check-btn.checked .material-symbols-outlined {
+    display: block;
+    /* Visibile se checked */
+}
+
+/* --- 6. DETTAGLIO SCADENZA (Premium Layout V3.9) --- */
+
+/* --- DETAIL HEADER (Naked Message Style) --- */
+.detail-header-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.detail-page-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
+    margin-left: 2px;
+}
+
+.detail-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+}
+
+.detail-title-value {
+    font-size: 1rem;
+    /* Ulteriore riduzione per sobrietà */
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin: 0;
+}
+
+
+/* --- 5. DETTAGLIO SCADENZA (Pagina Dettaglio) --- */
+.detail-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.detail-info-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 60px;
+    /* Altezza minima uniforme */
+    transition: transform 0.2s;
+}
+
+.detail-info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex: 0 0 140px;
+    /* Larghezza fissa per la colonna Label */
+    white-space: nowrap;
+}
+
+.detail-info-value-group,
+.detail-info-value {
+    /* Compatto */
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.detail-info-value-group {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    justify-content: flex-end;
+    /* Allinea a destra nel contenitore */
+    text-align: right;
+    min-width: 0;
+    /* CRUCIALE: permette ellipse su testo lungo */
+    flex: 1;
+    /* Prende lo spazio rimanente */
+}
+
+.detail-info-day {
+    font-size: 1rem;
+    /* Ridotto da large a 1rem */
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.detail-info-year {
+    font-size: 0.65rem;
+    font-weight: 800;
+    opacity: 0.4;
+}
+
+/* Sections & Generic Lists */
+.detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* Gap ridotto */
+    margin-bottom: 1.5rem;
+}
+
+.detail-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 0.5rem;
+}
+
+.detail-section-title {
+    font-size: 0.70rem;
+    /* Ridotto: titolo sezione compatto */
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+    margin: 0;
+}
+
+.detail-email-preview,
+.detail-notes-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 1.25rem;
+    border-radius: 20px;
+}
+
+.detail-email-text,
+.detail-notes-text {
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    /* Spezza parole lunghe (URL, codici) */
+    overflow-wrap: anywhere;
+    /* Supporto aggiuntivo */
+}
+
+.detail-list-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-list-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 1rem;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.detail-list-item.clickable:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+    border-color: var(--accent);
+}
+
+.detail-list-item-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.detail-list-icon-box {
+    width: 32px;
+    /* Ridotto */
+    height: 32px;
+    /* Ridotto */
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detail-list-icon-box span {
+    font-size: 16px;
+}
+
+.detail-list-item-text {
+    font-size: 0.7rem;
+    /* Ridotto */
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.detail-list-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-list-item-title {
+    font-size: 0.75rem;
+    /* Ridotto */
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.detail-list-item-meta {
+    font-size: 0.55rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    opacity: 0.4;
+    letter-spacing: 0.1em;
+}
+
+.detail-list-item-arrow {
+    font-size: 14px;
+    opacity: 0.2;
+}
+
+/* Page Actions Panel (Moved from Footer) */
+.detail-actions-panel {
+    display: flex;
+    flex-direction: row;
+    /* Forza riga */
+    align-items: center;
+    justify-content: center;
+    /* Centrati orizzontalmente */
+    gap: 1rem;
+    /* Spazio uniforme tra i pulsanti */
+    padding: 1rem 0;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: nowrap;
+    /* Evita il wrap su schermi stretti */
+}
+
+/* Pulsanti Azioni Uniformati */
+.detail-action-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.05);
+    /* Sfondo comune */
+    color: var(--text-primary);
+    padding: 0;
+}
+
+.detail-action-btn:active {
+    transform: scale(0.95);
+}
+
+/* Modificatori solo per colore icona (opzionale) o hover */
+.detail-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Helper Icons */
+.detail-action-btn .icon-red,
+.detail-action-btn .icon-purple,
+.detail-action-btn .icon-emerald,
+.detail-action-btn .icon-blue,
+.detail-action-btn .icon-amber,
+.detail-action-btn .icon-dim {
+    background: transparent !important;
+}
+
+.icon-red {
+    color: #ef4444;
+}
+
+.icon-purple {
+    color: #a855f7;
+}
+
+.icon-emerald {
+    color: #10b981;
+}
+
+.icon-blue {
+    color: #3b82f6;
+}
+
+.icon-amber {
+    color: #f59e0b;
+}
+
+/* --- 7. FAB / ADD BUTTONS GROUP (Footer Action) --- */
+.fab-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    /* Spazio tra i bottoni */
+    margin-bottom: 4px;
+    /* Lift leggero */
+}
+
+/* Base FAB Style */
+.btn-fab-action {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    color: white;
+}
+
+.btn-fab-action:hover {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.btn-fab-action:active {
+    transform: scale(0.95);
+}
+
+.btn-fab-action .material-symbols-outlined {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Varianti Colore */
+.btn-fab-scadenza {
+    background: var(--accent);
+    /* Blu */
+    width: 56px;
+    /* Centrale leggermente più grande */
+    height: 56px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn-fab-scadenza .material-symbols-outlined {
+    font-size: 28px;
+}
+
+.btn-fab-azienda {
+    background: #f59e0b;
+    /* Ambra/Arancio */
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.btn-fab-privato {
+    background: #a855f7;
+    /* Viola */
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+}
+
+/* Labels sotto i bottoni (Opzionale, per chiarezza) */
+.btn-fab-action::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    /* Micro testo */
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    background: var(--card-bg);
+    /* Sfondo per leggibilità su glow */
+    padding: 1px 4px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.icon-dim {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* Utility Helper */
+.hidden {
+    display: none !important;
+}
+
+/* --- 8. COMPONI SCADENZA UI (V4.1) --- */
+
+/* Mode Selector Tabs */
+.mode-selector-tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 1rem;
+}
+
+.mode-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.mode-tab .material-symbols-outlined {
+    font-size: 1.25rem;
+    opacity: 0.7;
+}
+
+.mode-tab.active {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mode-tab.active .material-symbols-outlined {
+    opacity: 1;
+    color: var(--accent);
+}
+
+/* Planning Stat Boxes */
+.planning-grid-compact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.planning-info-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.planning-info-box:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.planning-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.planning-icon-box .material-symbols-outlined {
+    font-size: 1.25rem;
+}
+
+.planning-text-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.planning-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.4;
+}
+
+.planning-value {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* WhatsApp Toggle Card */
+.whatsapp-toggle-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* Base Form Refinements */
+.manage-docs-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 16px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.manage-docs-link:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    transform: translateX(4px);
+}
+
+.attachments-upload-placeholder {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px dashed rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* --- 9. CUSTOM DROPDOWN SELECT PROXY --- */
+.base-dropdown-menu.scrollable {
+    max-height: 250px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.base-dropdown-group-label {
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1rem 0.25rem 1rem;
+    opacity: 0.4;
+    color: var(--text-primary);
+}
+
+.dropdown-trigger .dropdown-label {
+    max-width: 100%;
+}
+/* --- 10. PREMIUM SOURCE SELECTOR MODAL --- */
+.source-modal-box {
+    background: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.6), 
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    padding: 1.75rem !important;
+    max-width: 320px !important;
+}
+
+.source-option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+    background-color: transparent !important;
+}
+
+.source-option-btn .material-symbols-outlined {
+    font-size: 2rem;
+    transition: transform 0.4s ease;
+}
+
+.source-option-btn[data-source='camera'] .material-symbols-outlined { color: #3b82f6 !important; }
+.source-option-btn[data-source='camera']:hover {
+    background: rgba(59, 130, 246, 0.08) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.source-option-btn[data-source='gallery'] .material-symbols-outlined { color: #a855f7 !important; }
+.source-option-btn[data-source='gallery']:hover {
+    background: rgba(168, 85, 247, 0.08) !important;
+    border-color: rgba(168, 85, 247, 0.3) !important;
+}
+
+.source-option-btn[data-source='file'] .material-symbols-outlined { color: #f59e0b !important; }
+.source-option-btn[data-source='file']:hover {
+    background: rgba(245, 158, 11, 0.08) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.source-btn-cancel {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.source-btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: white !important;
+}
+
+.placeholder-text-standard {
+    display: block;
+    width: 100%;
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    color: var(--text-secondary) !important;
+    opacity: 0.4 !important;
+    text-align: center;
+    padding: 2rem 0;
 }

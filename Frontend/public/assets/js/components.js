@@ -47,9 +47,15 @@ export async function initComponents() {
                 const accountId = urlParams.get('id');
                 const aziendaId = urlParams.get('aziendaId');
 
-                // Mapping Logico Navigazione STRETTO (Solo Ciclo Azienda)
+                // Mapping Logico Navigazione STRETTO (Solo Ciclo Azienda / Scadenze)
                 if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
                     backFn = () => window.location.href = 'home_page.html';
+                } else if (path.endsWith('dettaglio_scadenza.html')) {
+                    backFn = () => window.location.href = 'scadenze.html';
+                } else if (path.endsWith('aggiungi_scadenza.html')) {
+                    const id = urlParams.get('id');
+                    if (id) backFn = () => window.location.href = `dettaglio_scadenza.html?id=${id}`;
+                    else backFn = () => window.location.href = 'scadenze.html';
                 } else if (path.endsWith('impostazioni.html')) {
                     backFn = () => window.location.href = 'home_page.html';
                 } else if (path.endsWith('regole_scadenze.html')) {
