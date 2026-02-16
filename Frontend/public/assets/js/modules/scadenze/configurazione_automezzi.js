@@ -124,15 +124,15 @@ function renderTypes() {
                     })
                 ])
             ]),
-            createElement('div', { className: 'config-item-actions' }, [
+            createElement('div', { className: 'config-item-actions flex-align-center gap-1' }, [
                 createElement('button', {
-                    className: 'btn-edit-item btn-manage-account-semantic',
+                    className: 'btn-edit-item btn-icon-edit',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
                     createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'edit' })
                 ]),
                 createElement('button', {
-                    className: 'btn-delete-item btn-manage-account-semantic btn-delete-item-semantic',
+                    className: 'btn-delete-item btn-icon-delete',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
                     createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'delete' })

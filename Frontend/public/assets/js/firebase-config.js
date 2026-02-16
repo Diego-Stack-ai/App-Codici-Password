@@ -15,11 +15,14 @@ const firebaseConfig = {
   appId: "1:343696844738:web:3e62fa1fdd9375535b985b"
 };
 
+import { getMessaging } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const messaging = getMessaging(app);
 
-export { auth, db, storage };
+export { auth, db, storage, messaging };
 

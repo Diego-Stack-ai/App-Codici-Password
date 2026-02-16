@@ -6,7 +6,7 @@
 
 import { login, checkAuthState } from '../../auth.js';
 import { initComponents } from '../../components.js';
-import { t, supportedLanguages } from '../../translations.js';
+import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showInputModal } from '../../ui-core.js';
 
@@ -68,7 +68,7 @@ function setupLanguageSelector() {
                 const code = lang.code;
                 localStorage.setItem('app_language', code);
                 if (window.AppState) window.AppState.language = code;
-                applyLocalTranslations();
+                applyGlobalTranslations();
                 dropdown.classList.remove('show');
             }
         }, [

@@ -16,6 +16,7 @@ export const translations = {
         modal_title_edit: "MODIFICA",
         loading: "Caricamento...",
         loading_data: "Ricezione Dati...",
+        loading_notifications: "Sincronizzazione...",
         success_save: "Dati salvati con successo!",
         success_invite_sent: "Invito inviato con successo!",
         status_pending: "In attesa",
@@ -134,6 +135,8 @@ export const translations = {
         lock_5min: "5 Min",
 
         notifications_history: "Storico Notifiche",
+        notifications_history_title: "Storico Notifiche",
+        notifications_history_subtitle: "I tuoi avvisi recenti",
         notifications_history_desc: "Visualizza avvisi passati",
 
         resend_link_text: "Reinvia email con link",
@@ -518,6 +521,7 @@ export const translations = {
         modal_title_add: "ADD",
         modal_title_edit: "EDIT",
         loading: "Loading...",
+        loading_notifications: "Synchronizing...",
         success_save: "Data saved successfully!",
         error_generic: "An error occurred.",
         logout: "Log out",
@@ -621,6 +625,8 @@ export const translations = {
         lock_5min: "5 Min",
 
         notifications_history: "Notifications History",
+        notifications_history_title: "Notifications History",
+        notifications_history_subtitle: "Your recent alerts",
         notifications_history_desc: "View past alerts",
 
         resend_link_text: "Resend email link",

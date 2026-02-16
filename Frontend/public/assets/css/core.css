@@ -299,6 +299,30 @@ body,
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    padding: 0;
+}
+
+/* --- SAETTA & LANG SELECTOR MOVED TO ACCESSO.CSS --- */
+
+
 /* -----------------------
    BUTTONS
    ----------------------- */
@@ -327,26 +351,7 @@ body,
     transform: scale(0.98);
 }
 
-.link-forgot,
-.link-register {
-    display: block;
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    color: var(--link-color);
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.link-forgot:hover,
-.link-register:hover {
-    color: #3b82f6;
-}
-
-.link-register {
-    margin-top: 2rem;
-    font-weight: 600;
-}
+/* --- AUTH LINKS MOVED TO ACCESSO.CSS --- */
 
 /* -----------------------
    MODAL & TOAST
@@ -543,10 +548,11 @@ body,
 }
 
 .btn-fab-scadenza {
-    background: var(--accent);
+    background: #f59e0b;
+    /* Arancione/Ambra (non troppo acceso) per Scadenze */
     width: 56px;
     height: 56px;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
 }
 
 .btn-fab-scadenza .material-symbols-outlined {
@@ -554,14 +560,17 @@ body,
 }
 
 .btn-fab-azienda {
-    background: #f59e0b;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    background: #10b981;
+    /* Verde Emerald per Azienda */
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .btn-fab-privato {
-    background: #a855f7;
-    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+    background: #3b82f6;
+    /* Blu per Privato */
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
+
 
 .btn-fab-action::after {
     content: attr(data-label);

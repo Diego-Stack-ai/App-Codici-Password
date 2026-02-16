@@ -94,6 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             currentUser = user;
             await loadScadenze();
+
+            // Inizializzazione SwipeList (V6) - Sync con standard Archivio
+            new SwipeList('.deadline-card', {
+                threshold: 0.25,
+                onSwipeRight: (item) => archiveScadenza(item.dataset.id), // DESTRA -> ARCHIVIA (Verde)
+                onSwipeLeft: (item) => deleteScadenza(item.dataset.id)    // SINISTRA -> ELIMINA (RossO)
+            });
+
         } else {
             window.location.href = 'index.html';
         }
@@ -218,20 +226,24 @@ document.addEventListener('DOMContentLoaded', () => {
             stateClass = 'deadline-card-upcoming';
         }
 
-        const card = createElement('div', {
-            className: `deadline-card ${stateClass}`,
-            dataset: {
-                action: 'navigate',
-                href: `dettaglio_scadenza.html?id=${scadenza.id}`
-            }
-        }, [
+        // 1. BACKGROUND AZIONI (Sotto la card)
+        const bgArchive = createElement('div', { className: 'swipe-action-bg bg-restore' }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'archive' })
+        ]);
+
+        const bgDelete = createElement('div', { className: 'swipe-action-bg bg-delete' }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+        ]);
+
+        // 2. CONTENUTO VISIBILE (Sopra)
+        const swipeContent = createElement('div', { className: 'swipe-content' }, [
             createElement('div', { className: 'deadline-card-layout' }, [
                 createElement('div', { className: 'deadline-card-left' }, [
                     createElement('div', { className: 'deadline-icon-box' }, [
                         createElement('span', { className: 'material-symbols-outlined filled', textContent: scadenza.icon || 'event_note' })
                     ]),
                     createElement('div', { className: 'deadline-card-info-group' }, [
-                        createElement('span', { className: 'deadline-card-category', textContent: scadenza.category || 'SCADENZA' }),
+                        createElement('span', { className: 'deadline-card-category', textContent: (scadenza.category || 'SCADENZA').toUpperCase() }),
                         createElement('h4', { className: 'deadline-card-title', textContent: scadenza.title }),
                         createElement('p', { className: 'deadline-card-subtitle', textContent: `Ref: ${scadenza.name || 'Generale'}` })
                     ])
@@ -242,59 +254,88 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             ]),
 
-            // CHECKBOX COMPLETATO (Bottom Right)
             createElement('div', {
                 className: `deadline-check-btn ${scadenza.completed ? 'checked' : ''}`,
-                title: scadenza.completed ? 'Segna come non completata' : 'Segna come completata',
-                onclick: async (e) => {
-                    e.stopPropagation(); // Evita apertura dettaglio
-                    const btn = e.currentTarget;
-                    const isCompleted = btn.classList.contains('checked');
-
-                    try {
-                        const newStatus = !isCompleted;
-
-                        // Aggiorna UI Locale
-                        if (newStatus) btn.classList.add('checked');
-                        else btn.classList.remove('checked');
-
-                        // Aggiorna Firebase
-                        const docRef = doc(db, "users", currentUser.uid, "scadenze", scadenza.id);
-                        await updateDoc(docRef, { completed: newStatus });
-
-                        // Aggiorna lista array locale e re-render immediato se necessario
-                        const idx = allScadenze.findIndex(s => s.id === scadenza.id);
-                        if (idx !== -1) allScadenze[idx].completed = newStatus;
-
-                        // Se siamo in un filtro che esclude i completati (o viceversa), anima l'uscita
-                        if (activeFilter !== 'Tutte') {
-                            const cardEl = btn.closest('.deadline-card');
-                            cardEl.style.transition = 'opacity 0.3s, transform 0.3s';
-                            cardEl.style.opacity = '0';
-                            cardEl.style.transform = 'scale(0.9)';
-                            setTimeout(() => renderFilteredScadenze(), 300);
-                        } else {
-                            // Se siamo in 'Tutte', aggiorna solo lo stile della card senza rimuoverla
-                            renderFilteredScadenze(); // Più semplice per aggiornare i colori
-                        }
-
-                        showToast(newStatus ? 'Scadenza completata' : 'Scadenza riattivata', 'success');
-
-                    } catch (err) {
-                        console.error("Errore update completed:", err);
-                        showToast("Errore aggiornamento stato", "error");
-                    }
+                onclick: (e) => {
+                    e.stopPropagation();
+                    toggleCompleted(scadenza.id, !scadenza.completed);
                 }
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
             ])
         ]);
 
-        card.addEventListener('click', () => {
-            window.location.href = card.getAttribute('data-href');
-        });
+        const card = createElement('div', {
+            className: `deadline-card ${stateClass}`,
+            dataset: {
+                id: scadenza.id,
+                action: 'navigate',
+                href: `dettaglio_scadenza.html?id=${scadenza.id}`
+            }
+        }, [bgArchive, bgDelete, swipeContent]);
+
+        card.onclick = () => {
+            window.location.href = card.dataset.href;
+        };
 
         return card;
+    }
+
+    // --- ACTIONS HANDLERS ---
+    async function toggleCompleted(id, newStatus) {
+        if (!currentUser) return;
+        try {
+            const docRef = doc(db, "users", currentUser.uid, "scadenze", id);
+            await updateDoc(docRef, { completed: newStatus });
+
+            const idx = allScadenze.findIndex(s => s.id === id);
+            if (idx !== -1) allScadenze[idx].completed = newStatus;
+
+            renderFilteredScadenze();
+            showToast(newStatus ? 'Completata' : 'Riaperta', 'success');
+        } catch (error) {
+            console.error(error);
+            showToast("Errore aggiornamento", "error");
+        }
+    }
+
+    async function archiveScadenza(id) {
+        if (!currentUser) return;
+        try {
+            const docRef = doc(db, "users", currentUser.uid, "scadenze", id);
+            // Archivio nel contesto scadenza significa completata e tolta dalla vista principale
+            await updateDoc(docRef, { completed: true });
+
+            const idx = allScadenze.findIndex(s => s.id === id);
+            if (idx !== -1) {
+                allScadenze[idx].completed = true;
+            }
+            showToast("Scadenza archiviata", "success");
+            // Nota: Rerender post-animazione
+            setTimeout(() => renderFilteredScadenze(), 400);
+        } catch (error) {
+            console.error(error);
+            showToast("Errore archiviazione", "error");
+        }
+    }
+
+    async function deleteScadenza(id) {
+        if (!currentUser) return;
+        try {
+            // Qui potresti mettere un confirm, ma lo swipe è un'azione veloce.
+            // Se preferisci conferma, scommenta:
+            // if(!confirm("Eliminare definitivamente?")) { loadScadenze(); return; }
+
+            const docRef = doc(db, "users", currentUser.uid, "scadenze", id);
+            await deleteDoc(docRef);
+
+            allScadenze = allScadenze.filter(s => s.id !== id);
+            showToast("Scadenza eliminata", "error");
+            setTimeout(() => renderFilteredScadenze(), 400);
+        } catch (error) {
+            console.error(error);
+            showToast("Errore eliminazione", "error");
+        }
     }
 
     // --- FAB (Add Button) ---

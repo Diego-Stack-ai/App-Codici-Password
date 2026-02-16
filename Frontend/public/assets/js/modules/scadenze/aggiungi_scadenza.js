@@ -127,6 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAttachmentsUI();
 
             if (editingScadenzaId) {
+                // UI update immediately
+                const pageTitle = document.querySelector('.detail-title-value');
+                if (pageTitle) pageTitle.textContent = "Modifica Scadenza";
+
                 await loadScadenzaForEdit(editingScadenzaId);
             }
         } else {
@@ -566,40 +570,76 @@ async function showSuccessModal() {
 async function loadScadenzaForEdit(id) {
     try {
         const snap = await getDoc(doc(db, "users", currentUser.uid, "scadenze", id));
-        if (!snap.exists()) return;
+        if (!snap.exists()) {
+            showToast("Scadenza non trovata", "error");
+            return;
+        }
 
         const data = snap.data();
+
+        // 1. Identifica il Mode corretto in base al tipo salvato
+        let foundMode = 'automezzi';
+        if (unifiedConfigs.documenti?.deadlineTypes?.some(t => (t.name || t) === data.type)) foundMode = 'documenti';
+        else if (unifiedConfigs.generali?.deadlineTypes?.some(t => (t.name || t) === data.type)) foundMode = 'generali';
+
+        // 2. Imposta il Mode (popola i select nativi)
+        setMode(foundMode);
+
+        // 3. Riempi i campi base
         document.getElementById('nome_cognome').value = data.name || '';
         document.getElementById('dueDate').value = data.dueDate || '';
         document.getElementById('notes').value = data.notes || '';
         document.getElementById('whatsapp_enable').checked = data.whatsappEnabled || false;
 
+        // Notifiche
+        document.getElementById('notif_days_before').value = data.notificationDaysBefore || 14;
+        document.getElementById('notif_frequency').value = data.notificationFrequency || 7;
+        document.getElementById('display_notif_days').textContent = data.notificationDaysBefore || 14;
+        document.getElementById('display_notif_freq').textContent = data.notificationFrequency || 7;
+
+        // 4. Seleziona i valori nei Dropdown (Ora che sono popolati da setMode)
         typeSelect.value = data.type || '';
 
-        // Auto-switch mode based on type
-        let foundMode = 'automezzi';
-        if (unifiedConfigs.documenti?.deadlineTypes?.some(t => (t.name || t) === data.type)) foundMode = 'documenti';
-        else if (unifiedConfigs.generali?.deadlineTypes?.some(t => (t.name || t) === data.type)) foundMode = 'generali';
-        setMode(foundMode);
+        const modelSel = document.getElementById('modello_veicolo');
+        if (modelSel) modelSel.value = data.veicolo_modello || '';
 
-        setTimeout(() => {
-            const modelSel = document.getElementById('modello_veicolo');
-            if (modelSel) modelSel.value = data.veicolo_modello || '';
+        const textSel = document.getElementById('testo_email_select');
+        if (textSel) textSel.value = data.email_testo_selezionato || '';
 
-            const textSel = document.getElementById('testo_email_select');
-            if (textSel) textSel.value = data.email_testo_selezionato || '';
+        // 5. Gestione Email (Primaria e Secondaria) con supporto Manuale
+        const handleEmailEdit = (select, emailsArray, index, inputId) => {
+            if (!emailsArray || !emailsArray[index]) return;
+            const email = emailsArray[index];
+            const input = document.getElementById(inputId);
 
-            if (data.emails?.[0]) emailPrimariaSelect.value = data.emails[0];
-            if (data.emails?.[1]) emailSecondariaSelect.value = data.emails[1];
+            if (EMAILS.includes(email)) {
+                select.value = email;
+            } else {
+                select.value = 'manual';
+                if (input) {
+                    input.value = email;
+                    input.classList.remove('hidden');
+                    select.parentElement.classList.add('hidden');
+                }
+            }
+        };
 
-            existingAttachments = data.attachments || [];
-            renderAttachments();
+        handleEmailEdit(emailPrimariaSelect, data.emails, 0, 'email_primaria_input');
+        handleEmailEdit(emailSecondariaSelect, data.emails, 1, 'email_secondaria_input');
 
-            updatePreview();
-        }, 300);
+        // 6. Allegati esistenti
+        existingAttachments = data.attachments || [];
+        renderAttachments();
+
+        // 7. Sincronizzazione Dropdown Custom (V4.1 System)
+        syncCustomDropdowns();
+
+        // 8. Refresh Anteprima Oggetto
+        updatePreview();
 
     } catch (e) {
-        console.error("Edit load error", e);
+        console.error("Errore caricamento modifica:", e);
+        showToast("Errore nel caricamento dei dati", "error");
     }
 }
 

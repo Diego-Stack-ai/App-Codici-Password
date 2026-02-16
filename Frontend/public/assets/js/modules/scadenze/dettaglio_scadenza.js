@@ -205,6 +205,44 @@ function renderScadenza(scadenza) {
         }
     }
 
+    // WhatsApp / Notifications status
+    const notifCont = document.getElementById('display-notifications');
+    if (notifCont) {
+        clearElement(notifCont);
+        const wsEnabled = scadenza.whatsappEnabled || false;
+        const lastSent = scadenza.lastNotificationSent;
+        const lastSentStr = lastSent ? (lastSent.toDate ? lastSent.toDate().toLocaleString('it-IT') : new Date(lastSent).toLocaleString('it-IT')) : 'MAI INVIATA';
+
+        const item = createElement('div', { className: 'detail-list-item' }, [
+            createElement('div', { className: 'detail-list-item-left' }, [
+                createElement('div', { className: `detail-list-icon-box ${wsEnabled ? 'icon-emerald' : 'icon-dim'}` }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'chat' })
+                ]),
+                createElement('div', { className: 'detail-list-item-info' }, [
+                    createElement('span', { className: 'detail-list-item-title', textContent: 'WhatsApp Business' }),
+                    createElement('span', {
+                        className: `detail-list-item-meta ${wsEnabled ? 'text-emerald-400' : 'text-white/20'}`,
+                        textContent: wsEnabled ? 'STATO: ATTIVO' : 'STATO: DISATTIVATO'
+                    })
+                ])
+            ])
+        ]);
+
+        const mailReport = createElement('div', { className: 'detail-list-item' }, [
+            createElement('div', { className: 'detail-list-item-left' }, [
+                createElement('div', { className: `detail-list-icon-box ${scadenza.lastNotificationSent ? 'icon-amber' : 'icon-dim'}` }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'mark_email_read' })
+                ]),
+                createElement('div', { className: 'detail-list-item-info' }, [
+                    createElement('span', { className: 'detail-list-item-title', textContent: 'Ultimo Invio Email' }),
+                    createElement('span', { className: 'detail-list-item-meta', textContent: lastSentStr })
+                ])
+            ])
+        ]);
+
+        setChildren(notifCont, [item, mailReport]);
+    }
+
     // Attachments
     const attCont = document.getElementById('display-attachments');
     const attSec = document.getElementById('section-attachments');

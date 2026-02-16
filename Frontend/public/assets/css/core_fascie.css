@@ -21,11 +21,14 @@
     background: var(--card-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    box-sizing: border-box;
+    /* Essenziale per calcolo height + padding safe-area */
 }
 
 .base-header {
     top: 0;
-    height: 80px;
+    padding-top: env(safe-area-inset-top);
+    height: calc(80px + env(safe-area-inset-top));
     border-radius: 0;
     mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
@@ -34,7 +37,8 @@
 
 .base-footer {
     bottom: 0;
-    height: 80px;
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(80px + env(safe-area-inset-bottom));
     justify-content: space-between;
     border-radius: 0;
     mask-image: linear-gradient(to top, black 40%, transparent 100%);
@@ -44,6 +48,8 @@
 
 /* --- 2. BILANCIAMENTO CONTENUTI --- */
 .header-balanced-container {
+    height: 80px;
+    /* Altezza fissa del contenuto utile indipendentemente dalla notch */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -141,11 +147,10 @@
 
 /* --- 6. UTILITY SPACER (Footer & Header Safety) --- */
 .pb-footer-extra {
-    padding-bottom: 120px !important;
-    /* Spazio sicuro per evitare overlap col footer fisso */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
 }
 
 .pt-header-extra {
-    padding-top: 100px !important;
+    padding-top: calc(100px + env(safe-area-inset-top)) !important;
     /* Spazio sicuro per evitare overlap col header fisso */
 }

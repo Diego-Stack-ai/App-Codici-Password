@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Renderizza Scadenze e Urgenze
         await renderDashboardDeadlines(user);
 
+        // --- SETUP FLUSSO (V4.5) ---
+        const { initSetupFlusso } = await import('./setup_flusso.js');
+        await initSetupFlusso(user);
+
         // Inizializza Listeners (Logout, Tema, Avatar Fallback)
         initHomeListeners();
 
@@ -82,37 +86,27 @@ async function renderHeaderUser(user) {
         return name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
+    // 2. Fallback immediato Nome
     let displayName = toFriendlyName(user.displayName || user.email.split('@')[0]);
-    if (uName) uName.textContent = displayName; // Set preliminare
+    if (uName) uName.textContent = displayName;
 
-    // 3. Foto Utente (da Auth)
-    if (user.photoURL && uAvatar) {
-        setAvatarImage(uAvatar, user.photoURL);
-    }
+    // 3. Foto Utente (Auth)
+    if (user.photoURL && uAvatar) setAvatarImage(uAvatar, user.photoURL);
 
-    // 4. Recupero Dati Completi da Firestore (per nome completo e foto aggiornata)
+    // 4. Firestore Profile Sync
     try {
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
             const data = docSnap.data();
-
-            // Aggiorna Nome Completo
             const fullName = toFriendlyName(`${data.nome || ''} ${data.cognome || ''}`.trim());
-            if (fullName) {
-                uName.textContent = fullName;
-            }
+            if (fullName) uName.textContent = fullName;
 
-            // Aggiorna Foto (se presente in Firestore vince su Auth)
             const firestorePhoto = data.photoURL || data.avatar;
-            if (firestorePhoto && uAvatar) {
-                setAvatarImage(uAvatar, firestorePhoto);
-            }
+            if (firestorePhoto && uAvatar) setAvatarImage(uAvatar, firestorePhoto);
         }
-    } catch (e) {
-        console.warn("Errore recupero profilo Firestore:", e);
-    }
+    } catch (e) { console.warn("Errore profilo Firestore:", e); }
 }
 
 // Helper per impostare l'immagine avatar
@@ -174,10 +168,8 @@ async function renderDashboardDeadlines(user) {
         if (upBadge) {
             if (upcoming.length > 0) {
                 upBadge.classList.remove('badge-initial-hide');
-                upBadge.classList.add('opacity-100'); // Use class instead of inline style
             } else {
                 upBadge.classList.add('badge-initial-hide');
-                upBadge.classList.remove('opacity-100');
             }
         }
         if (upList) {
@@ -196,10 +188,8 @@ async function renderDashboardDeadlines(user) {
         if (exBadge) {
             if (expired.length > 0) {
                 exBadge.classList.remove('badge-initial-hide');
-                exBadge.classList.add('opacity-100');
             } else {
                 exBadge.classList.add('badge-initial-hide');
-                exBadge.classList.remove('opacity-100');
             }
         }
         if (exList) {

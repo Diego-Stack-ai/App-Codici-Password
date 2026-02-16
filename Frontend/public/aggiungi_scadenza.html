@@ -12,13 +12,11 @@
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
 
     <!-- CSS Modular System V4.1 -->
-    <link rel="stylesheet" href="assets/css/core.css?v=3.9">
+    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/core_moduli.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/scadenze.css?v=1.1">
-    <link rel="stylesheet" href="assets/css/core-transizione.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/core_moduli.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/scadenze.css?v=5.0">
 
     <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
@@ -68,7 +66,7 @@
                         <h3 class="detail-section-title" data-t="deadline_info">Dati Scadenza</h3>
                     </div>
 
-                    <div class="detail-list-group p-4 flex-col gap-4">
+                    <div class="detail-list-group p-4 flex-col-gap-4">
                         <!-- Intestatario / Nominativo -->
                         <div class="form-group">
                             <label class="label-sm" data-t="holder">Intestatario / Nominativo</label>
@@ -84,16 +82,15 @@
                         <div class="form-group">
                             <label class="label-sm" data-t="category_object">Categoria / Oggetto Scadenza</label>
                             <div class="base-dropdown w-full" data-custom-select="tipo_scadenza">
-                                <button type="button"
-                                    class="input w-full flex justify-between items-center h-12 px-5 rounded-2xl relative dropdown-trigger">
-                                    <div class="flex items-center gap-2 overflow-hidden">
+                                <button type="button" class="base-btn-secondary dropdown-trigger">
+                                    <div class="flex-align-center gap-2 overflow-hidden">
                                         <span class="material-symbols-outlined opacity-50 flex-shrink-0">category</span>
-                                        <span class="font-bold text-sm truncate dropdown-label"
-                                            data-t="select_category">Seleziona categoria...</span>
+                                        <span class="dropdown-label truncate" data-t="select_category">Seleziona
+                                            categoria...</span>
                                     </div>
                                     <span class="material-symbols-outlined arrow-icon flex-shrink-0">expand_more</span>
                                 </button>
-                                <div class="base-dropdown-menu w-full scrollable dropdown-menu"></div>
+                                <div class="base-dropdown-menu scrollable role-menu"></div>
                                 <select id="tipo_scadenza" class="hidden"></select>
                             </div>
                         </div>
@@ -103,17 +100,16 @@
                             <label class="label-sm" id="vehicle-label-text" data-t="vehicle_extra">Dettaglio Veicolo /
                                 Altro</label>
                             <div class="base-dropdown w-full" data-custom-select="modello_veicolo">
-                                <button type="button"
-                                    class="input w-full flex justify-between items-center h-12 px-5 rounded-2xl relative dropdown-trigger">
-                                    <div class="flex items-center gap-2 overflow-hidden">
+                                <button type="button" class="base-btn-secondary dropdown-trigger">
+                                    <div class="flex-align-center gap-2 overflow-hidden">
                                         <span class="material-symbols-outlined opacity-50 flex-shrink-0"
                                             id="vehicle-icon">directions_car</span>
-                                        <span class="font-bold text-sm truncate dropdown-label"
-                                            data-t="select_detail">Seleziona dettaglio...</span>
+                                        <span class="dropdown-label truncate" data-t="select_detail">Seleziona
+                                            dettaglio...</span>
                                     </div>
                                     <span class="material-symbols-outlined arrow-icon flex-shrink-0">expand_more</span>
                                 </button>
-                                <div class="base-dropdown-menu w-full scrollable dropdown-menu"></div>
+                                <div class="base-dropdown-menu scrollable role-menu"></div>
                                 <select id="modello_veicolo" class="hidden"></select>
                             </div>
                         </div>
@@ -122,17 +118,16 @@
                         <div id="testo_email_wrapper" class="form-group hidden">
                             <label class="label-sm" data-t="email_template">Template Messaggio</label>
                             <div class="base-dropdown w-full" data-custom-select="testo_email_select">
-                                <button type="button"
-                                    class="input w-full flex justify-between items-center h-12 px-5 rounded-2xl relative dropdown-trigger">
-                                    <div class="flex items-center gap-2 overflow-hidden">
+                                <button type="button" class="base-btn-secondary dropdown-trigger">
+                                    <div class="flex-align-center gap-2 overflow-hidden">
                                         <span
                                             class="material-symbols-outlined opacity-50 flex-shrink-0">description</span>
-                                        <span class="font-bold text-sm truncate dropdown-label"
-                                            data-t="select_template">Seleziona template...</span>
+                                        <span class="dropdown-label truncate" data-t="select_template">Seleziona
+                                            template...</span>
                                     </div>
                                     <span class="material-symbols-outlined arrow-icon flex-shrink-0">expand_more</span>
                                 </button>
-                                <div class="base-dropdown-menu w-full scrollable dropdown-menu"></div>
+                                <div class="base-dropdown-menu scrollable role-menu"></div>
                                 <select id="testo_email_select" class="hidden"></select>
                             </div>
                         </div>
@@ -146,7 +141,7 @@
                         <h3 class="detail-section-title" data-t="date_alerts">Pianificazione</h3>
                     </div>
 
-                    <div class="detail-list-group p-4 flex-col gap-4">
+                    <div class="detail-list-group p-4 flex-col-gap-4">
                         <div class="form-grid-2">
                             <!-- Data Scadenza -->
                             <div class="form-group">
@@ -160,17 +155,17 @@
                             <!-- Anteprima Oggetto -->
                             <div class="form-group">
                                 <label class="label-sm" data-t="email_subject_preview">Anteprima Oggetto</label>
-                                <div class="input-wrapper bg-white/5 opacity-60">
+                                <div class="input-wrapper bg-soft-glass opacity-60">
                                     <input id="oggetto_email" readonly type="text" class="input italic text-xs"
                                         placeholder="Oggetto automatico...">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Stat Grid for Preavviso e Frequenza (Compact Style) -->
-                        <div class="planning-grid-compact mt-2">
+                        <!-- Stat Grid for Preavviso e Frequenza (Semantic) -->
+                        <div class="form-grid-2 mt-2">
                             <div class="planning-info-box">
-                                <div class="planning-icon-box bg-blue-500/10 text-blue-500">
+                                <div class="planning-icon-box bg-blue-500/10">
                                     <span class="material-symbols-outlined">timer</span>
                                 </div>
                                 <div class="planning-text-box">
@@ -180,7 +175,7 @@
                                 </div>
                             </div>
                             <div class="planning-info-box">
-                                <div class="planning-icon-box bg-purple-500/10 text-purple-500">
+                                <div class="planning-icon-box bg-purple-500/10">
                                     <span class="material-symbols-outlined">update</span>
                                 </div>
                                 <div class="planning-text-box">
@@ -200,23 +195,22 @@
                         <h3 class="detail-section-title" data-t="notification_recipients">Destinatari Notifica</h3>
                     </div>
 
-                    <div class="detail-list-group p-4 flex-col gap-4">
+                    <div class="detail-list-group p-4 flex-col-gap-4">
                         <!-- Email Primaria (Custom Dropdown Proxy) -->
                         <div class="form-group">
                             <label class="label-sm" data-t="primary_email">Email Primaria</label>
-                            <div class="flex-col gap-2">
+                            <div class="flex-col-gap-2">
                                 <div class="base-dropdown w-full" data-custom-select="email_primaria_select">
-                                    <button type="button"
-                                        class="input w-full flex justify-between items-center h-12 px-5 rounded-2xl relative dropdown-trigger">
-                                        <div class="flex items-center gap-2 overflow-hidden">
+                                    <button type="button" class="base-btn-secondary dropdown-trigger">
+                                        <div class="flex-align-center gap-2 overflow-hidden">
                                             <span class="material-symbols-outlined opacity-50 flex-shrink-0">mail</span>
-                                            <span class="font-bold text-sm truncate dropdown-label"
+                                            <span class="dropdown-label truncate"
                                                 data-t="select_email">Seleziona...</span>
                                         </div>
                                         <span
                                             class="material-symbols-outlined arrow-icon flex-shrink-0">expand_more</span>
                                     </button>
-                                    <div class="base-dropdown-menu w-full scrollable dropdown-menu"></div>
+                                    <div class="base-dropdown-menu scrollable role-menu"></div>
                                     <select id="email_primaria_select" class="hidden"></select>
                                 </div>
                                 <input id="email_primaria_input" type="email" class="input hidden mt-2"
@@ -227,20 +221,19 @@
                         <!-- Email Secondaria (Custom Dropdown Proxy) -->
                         <div class="form-group">
                             <label class="label-sm" data-t="secondary_email">Email Secondaria (Opz.)</label>
-                            <div class="flex-col gap-2">
+                            <div class="flex-col-gap-2">
                                 <div class="base-dropdown w-full" data-custom-select="email_secondaria_select">
-                                    <button type="button"
-                                        class="input w-full flex justify-between items-center h-12 px-5 rounded-2xl relative dropdown-trigger">
-                                        <div class="flex items-center gap-2 overflow-hidden">
+                                    <button type="button" class="base-btn-secondary dropdown-trigger">
+                                        <div class="flex-align-center gap-2 overflow-hidden">
                                             <span
                                                 class="material-symbols-outlined opacity-50 flex-shrink-0">forward_to_inbox</span>
-                                            <span class="font-bold text-sm truncate dropdown-label"
+                                            <span class="dropdown-label truncate"
                                                 data-t="select_email">Seleziona...</span>
                                         </div>
                                         <span
                                             class="material-symbols-outlined arrow-icon flex-shrink-0">expand_more</span>
                                     </button>
-                                    <div class="base-dropdown-menu w-full scrollable dropdown-menu"></div>
+                                    <div class="base-dropdown-menu scrollable role-menu"></div>
                                     <select id="email_secondaria_select" class="hidden"></select>
                                 </div>
                                 <input id="email_secondaria_input" type="email" class="input hidden mt-2"
@@ -250,14 +243,14 @@
 
                         <!-- WhatsApp Beta Toggle -->
                         <div class="whatsapp-toggle-card mt-2">
-                            <div class="flex items-center gap-3">
-                                <div class="planning-icon-box bg-emerald-500/10 text-emerald-500">
+                            <div class="flex-align-center gap-3">
+                                <div class="planning-icon-box bg-emerald-500/10">
                                     <span class="material-symbols-outlined">chat</span>
                                 </div>
                                 <div>
                                     <span class="block text-sm font-bold" data-t="whatsapp_beta">WhatsApp (Beta)</span>
-                                    <span class="block text-[10px] text-white/40 uppercase"
-                                        data-t="whatsapp_desc">Notifica automatica</span>
+                                    <span class="block text-xs opacity-40 uppercase" data-t="whatsapp_desc">Notifica
+                                        automatica</span>
                                 </div>
                             </div>
                             <label class="cursor-pointer">
@@ -274,22 +267,21 @@
                         <h3 class="detail-section-title" data-t="attachments_notes">Allegati & Note</h3>
                     </div>
 
-                    <div class="detail-list-group p-4 flex-col gap-4">
+                    <div class="detail-list-group p-4 flex-col-gap-4">
                         <!-- Note -->
                         <div class="form-group">
                             <label class="label-sm" data-t="notes">Note Aggiuntive</label>
                             <div class="detail-notes-box">
-                                <textarea id="notes"
-                                    class="input w-full min-h-[100px] bg-transparent border-none resize-none leading-relaxed"
+                                <textarea id="notes" class="input-textarea"
                                     placeholder="Dettagli sulla scadenza..."></textarea>
                             </div>
                         </div>
 
                         <!-- Allegati Logic Wrapper (Premium V4.1) -->
-                        <div id="attachments-section" class="flex-col gap-4">
+                        <div id="attachments-section" class="flex-col-gap-4">
                             <!-- Premium Upload Trigger -->
-                            <button type="button" id="btn-trigger-upload" class="manage-docs-link w-full">
-                                <div class="flex items-center gap-3">
+                            <button type="button" id="btn-trigger-upload" class="btn-upload-trigger">
+                                <div class="flex-align-center gap-3 w-full">
                                     <span class="material-symbols-outlined text-blue-500">attach_file</span>
                                     <div class="text-left">
                                         <span class="block text-sm font-bold text-white">Aggiungi Allegato</span>
@@ -298,7 +290,7 @@
                             </button>
 
                             <!-- Attachments List (Sotto il pulsante) -->
-                            <div id="attachments-list" class="flex-col gap-2">
+                            <div id="attachments-list" class="flex-col-gap-2">
                                 <!-- Injected via JS -->
                                 <p class="placeholder-text-standard">
                                     Nessun allegato
@@ -322,27 +314,26 @@
     <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden"
         aria-label="Upload Documento">
 
-    <!-- Source Selector Modal (Premium V4.1) -->
-    <div id="source-selector-modal"
-        class="modal-overlay backdrop-blur-md bg-black/80 fixed inset-0 z-50 transition-all duration-300">
-        <div class="source-modal-box glass-card w-[300px] animate-in zoom-in-95 duration-200">
-            <h3 class="text-[10px] font-extrabold uppercase tracking-widest text-center mb-5 opacity-40 text-white">
+    <!-- Source Selector Modal (Semantic) -->
+    <div id="source-selector-modal" class="modal-overlay">
+        <div class="source-modal-box modal-box">
+            <h3 class="text-xs font-extra-bold uppercase tracking-widest text-center mb-5 opacity-40 text-white">
                 Seleziona Sorgente</h3>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="modal-grid">
                 <button type="button" class="source-option-btn" data-source="camera">
                     <span class="material-symbols-outlined">photo_camera</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Camera</span>
+                    <span class="text-xs font-bold uppercase tracking-wider opacity-60">Camera</span>
                 </button>
 
                 <button type="button" class="source-option-btn" data-source="gallery">
                     <span class="material-symbols-outlined">collections</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Galleria</span>
+                    <span class="text-xs font-bold uppercase tracking-wider opacity-60">Galleria</span>
                 </button>
 
-                <button type="button" class="source-option-btn col-span-2 flex-row gap-4" data-source="file">
+                <button type="button" class="source-option-btn full-width flex-align-center gap-4" data-source="file">
                     <span class="material-symbols-outlined">description</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Documento</span>
+                    <span class="text-xs font-bold uppercase tracking-wider opacity-60">Documento</span>
                 </button>
             </div>
 

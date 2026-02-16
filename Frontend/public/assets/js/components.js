@@ -62,7 +62,7 @@ export async function initComponents() {
                     backFn = () => window.location.href = 'impostazioni.html';
                 } else if (path.endsWith('configurazione_automezzi.html') || path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
                     backFn = () => window.location.href = 'regole_scadenze.html';
-                } else if (path.endsWith('archivio_account.html')) {
+                } else if (path.endsWith('archivio_account.html') || path.endsWith('notifiche_storia.html')) {
                     backFn = () => window.location.href = 'impostazioni.html';
                 } else if (path.endsWith('account_azienda.html')) {
                     backFn = () => window.location.href = 'lista_aziende.html';
@@ -82,7 +82,10 @@ export async function initComponents() {
 
             // Title / Greeting
             if (isHome) {
-                const greetingCont = createElement('div', { className: 'flex flex-col items-center' }, [
+                const greetingCont = createElement('div', {
+                    className: 'flex flex-col items-center cursor-pointer',
+                    onclick: () => window.location.href = 'profilo_privato.html'
+                }, [
                     createElement('span', { id: 'home-greeting-text', className: 'text-[9px] opacity-30 uppercase font-black tracking-widest', textContent: timeGreeting }),
                     createElement('h1', { id: 'home-user-name', className: 'header-title', textContent: 'Utente' })
                 ]);
@@ -96,6 +99,7 @@ export async function initComponents() {
                 else if (path.includes('configurazione_automezzi.html')) displayTitle = t('vehicles_config_title');
                 else if (path.includes('configurazione_documenti.html')) displayTitle = t('documents_config_title');
                 else if (path.includes('configurazione_generali.html')) displayTitle = t('general_config_title');
+                else if (path.includes('notifiche_storia.html')) displayTitle = t('notifications_history_title');
 
                 headerCenter.appendChild(createElement('h1', { className: 'header-title', textContent: displayTitle }));
             }

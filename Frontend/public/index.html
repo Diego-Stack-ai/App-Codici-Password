@@ -17,10 +17,11 @@
 
 
 
-    <!-- 2. Core (Fonts & Protocollo Base V3.9) -->
+    <!-- 2. Core (Fonts & Protocollo Base V5.0) -->
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/core.css?v=3.9">
-    <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <!-- 3. Stili Specifici Auth -->
+    <link rel="stylesheet" href="assets/css/accesso.css?v=5.0">
 
 </head>
 
@@ -75,7 +76,7 @@
                         <label class="label" for="password" data-t="password_label">Password</label>
                         <div class="password-wrapper">
                             <input id="password" name="password" type="password" autocomplete="current-password"
-                                required class="input" placeholder="********">
+                                required class="input" placeholder="********" data-t-placeholder="password_placeholder">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
                                 aria-label="Mostra Password" data-t-aria="show_hide_data">
                                 <span class="material-symbols-outlined">visibility</span>

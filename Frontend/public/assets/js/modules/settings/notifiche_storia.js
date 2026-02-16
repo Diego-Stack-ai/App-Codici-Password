@@ -30,6 +30,10 @@ function initEvents() {
     document.getElementById('btn-clear-history')?.addEventListener('click', clearHistory);
 }
 
+const CACHE_KEY = 'notifications_cache_data';
+const CACHE_TS_KEY = 'notifications_cache_timestamp';
+const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 ore (2 volte al giorno)
+
 async function loadNotifications(uid) {
     const list = document.getElementById('notifications-list');
     const loading = document.getElementById('loading-indicator');
@@ -37,7 +41,24 @@ async function loadNotifications(uid) {
 
     if (!list) return;
 
+    // 1. Controlla la Cache
+    const cachedData = localStorage.getItem(`${CACHE_KEY}_${uid}`);
+    const cachedTs = localStorage.getItem(`${CACHE_TS_KEY}_${uid}`);
+    const now = Date.now();
+
+    if (cachedData && cachedTs && (now - parseInt(cachedTs) < CACHE_DURATION)) {
+        console.log("PWA: Caricamento notifiche da cache locale.");
+        const data = JSON.parse(cachedData);
+        if (loading) loading.classList.add('hidden');
+        renderNotifications(data, list, empty);
+        return;
+    }
+
+    // 2. Se la cache è scaduta o mancante, scarica da Firestore
     try {
+        console.log("PWA: Sincronizzazione notifiche con il server...");
+        if (loading) loading.classList.remove('hidden'); // Forza visibilità all'inizio sync
+
         const q = query(
             collection(db, 'users', uid, 'notifications'),
             orderBy('timestamp', 'desc'),
@@ -45,83 +66,95 @@ async function loadNotifications(uid) {
         );
 
         const snap = await getDocs(q);
+        const notifications = [];
 
-        if (loading) loading.classList.add('hidden');
-
-        if (snap.empty) {
-            list.classList.add('hidden');
-            if (empty) empty.classList.remove('hidden');
-            return;
-        }
-
-        if (empty) empty.classList.add('hidden');
-        list.classList.remove('hidden');
-        clearElement(list);
-
-        const items = [];
         snap.forEach(docSnap => {
             const data = docSnap.data();
-            const date = data.timestamp ? new Date(data.timestamp.toDate()) : new Date();
-            const timeStr = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-            const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
-
-            const config = getNotificationConfig(data.type);
-
-            const item = createElement('div', {
-                className: 'glass-card p-4 flex items-center gap-4 animate-in slide-in-from-bottom-2 duration-300'
-            }, [
-                // Icon Box
-                createElement('div', {
-                    className: `size-12 rounded-2xl flex-center border ${config.border} ${config.bg} ${config.color} shadow-sm`
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined filled text-xl', textContent: config.icon })
-                ]),
-                // Content
-                createElement('div', { className: 'flex-1 min-w-0' }, [
-                    createElement('div', { className: 'flex items-center justify-between gap-2' }, [
-                        createElement('span', {
-                            className: 'text-[11px] font-black text-white/80 uppercase truncate',
-                            textContent: data.message || 'Avviso di Sistema'
-                        })
-                    ]),
-                    createElement('div', { className: 'flex items-center gap-2 mt-1' }, [
-                        createElement('span', {
-                            className: 'text-[9px] font-bold text-white/20 uppercase tracking-widest',
-                            textContent: config.label
-                        }),
-                        createElement('div', { className: 'size-1 rounded-full bg-white/5' }),
-                        createElement('span', {
-                            className: 'text-[9px] font-bold text-white/40 uppercase tracking-widest',
-                            textContent: `${dateStr} • ${timeStr}`
-                        })
-                    ])
-                ])
-            ]);
-            items.push(item);
+            notifications.push({
+                id: docSnap.id,
+                ...data,
+                timestamp: data.timestamp ? data.timestamp.toDate().getTime() : now
+            });
         });
 
-        setChildren(list, items);
+        // Aggiorna Cache
+        localStorage.setItem(`${CACHE_KEY}_${uid}`, JSON.stringify(notifications));
+        localStorage.setItem(`${CACHE_TS_KEY}_${uid}`, now.toString());
+
+        renderNotifications(notifications, list, empty);
 
     } catch (e) {
-        console.error(e);
-        if (loading) loading.classList.add('hidden');
-        showToast("Errore caricamento notifiche", "error");
+        console.error("Sync Error:", e);
+        showToast("Errore sincronizzazione", "error");
+        // Se fallisce il server, proviamo comunque a mostrare la vecchia cache se esiste
+        if (cachedData) renderNotifications(JSON.parse(cachedData), list, empty);
+    } finally {
+        if (loading) loading.classList.add('hidden'); // SPEGNIMENTO GARANTITO
     }
 }
 
+function renderNotifications(data, list, empty) {
+    if (!data || data.length === 0) {
+        list.classList.add('hidden');
+        if (empty) empty.classList.remove('hidden');
+        return;
+    }
+
+    if (empty) empty.classList.add('hidden');
+    list.classList.remove('hidden');
+    clearElement(list);
+
+    const items = [];
+    data.forEach(notif => {
+        const date = new Date(notif.timestamp);
+        const timeStr = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+
+        const config = getNotificationConfig(notif.type);
+
+        const item = createElement('div', { className: 'notification-item' }, [
+            createElement('div', { className: `notification-icon-wrapper ${config.variant}` }, [
+                createElement('span', { className: 'material-symbols-outlined filled', textContent: config.icon })
+            ]),
+            createElement('div', { className: 'notification-content' }, [
+                createElement('div', { className: 'notification-header' }, [
+                    createElement('span', {
+                        className: 'notification-message',
+                        textContent: notif.message || 'Avviso di Sistema'
+                    })
+                ]),
+                createElement('div', { className: 'notification-meta' }, [
+                    createElement('span', {
+                        className: 'notification-label',
+                        textContent: config.label
+                    }),
+                    createElement('div', { className: 'dot-separator' }),
+                    createElement('span', {
+                        className: 'notification-time',
+                        textContent: `${dateStr} • ${timeStr}`
+                    })
+                ])
+            ])
+        ]);
+        items.push(item);
+    });
+
+    setChildren(list, items);
+}
+
 function getNotificationConfig(type) {
-    const base = { icon: 'notifications', bg: 'bg-white/5', border: 'border-white/10', color: 'text-white/40', label: 'Sistema' };
+    const base = { icon: 'notifications', variant: 'notif-info', label: 'Sistema' };
 
     switch (type) {
         case 'invite_accepted':
-            return { icon: 'check_circle', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', color: 'text-emerald-400', label: 'Collaborazione' };
+            return { icon: 'check_circle', variant: 'notif-success', label: 'Collaborazione' };
         case 'invite_rejected':
         case 'share_revoked':
-            return { icon: 'cancel', bg: 'bg-red-500/10', border: 'border-red-500/20', color: 'text-red-400', label: 'Accesso' };
+            return { icon: 'cancel', variant: 'notif-error', label: 'Accesso' };
         case 'deadline':
-            return { icon: 'warning', bg: 'bg-amber-500/10', border: 'border-amber-500/20', color: 'text-amber-400', label: 'Scadenza' };
+            return { icon: 'warning', variant: 'notif-warning', label: 'Scadenza' };
         case 'security':
-            return { icon: 'shield', bg: 'bg-blue-500/10', border: 'border-blue-500/20', color: 'text-blue-400', label: 'Sicurezza' };
+            return { icon: 'shield', variant: 'notif-security', label: 'Sicurezza' };
         default:
             return base;
     }
@@ -147,6 +180,10 @@ async function clearHistory() {
         const batch = writeBatch(db);
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
+
+        // Pulisci Cache Locale
+        localStorage.removeItem(`${CACHE_KEY}_${currentUid}`);
+        localStorage.removeItem(`${CACHE_TS_KEY}_${currentUid}`);
 
         if (list) clearElement(list);
         if (empty) empty.classList.remove('hidden');

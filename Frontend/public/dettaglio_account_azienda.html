@@ -17,9 +17,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css?v=5.3">
-    <!-- Design System Master (PROTOCOLLO OPERATORE V5.3) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=5.3">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
+    <!-- Design System Master (PROTOCOLLO V5.0) -->
+    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_moduli.css?v=5.0">
 
     <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
@@ -50,8 +52,7 @@
                     </div>
                 </div>
                 <h1 id="hero-title" class="hero-title selectable">-</h1>
-                <div id="account-type-badge"
-                    class="mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest hidden mx-auto inline-block">
+                <div id="account-type-badge" class="config-badge config-badge-standard hidden">
                     Azienda
                 </div>
             </div>
@@ -151,7 +152,7 @@
                 </section>
 
                 <!-- Coordinate Bancarie (Sezione Dinamica) -->
-                <section id="section-banking" class="mt-8 hidden">
+                <section id="section-banking" class="profile-section hidden">
                     <div class="detail-section-header justify-between">
                         <div class="flex-center-gap">
                             <span
@@ -160,7 +161,7 @@
                         </div>
                         <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
                             <span id="banking-chevron"
-                                class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
+                                class="material-symbols-outlined text-secondary transition-transform">expand_more</span>
                         </button>
                     </div>
                     <div id="banking-content" class="flex-col-gap mt-4 hidden">
@@ -169,7 +170,7 @@
                 </section>
 
                 <!-- Referente (Specifico per Azienda) -->
-                <section id="section-referente" class="mt-8">
+                <section id="section-referente" class="profile-section">
                     <div class="detail-section-header">
                         <span
                             class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
@@ -213,7 +214,7 @@
                 </section>
 
                 <!-- ALLEGATI (Sezione Dinamica) -->
-                <section id="section-attachments" class="mt-8">
+                <section id="section-attachments" class="profile-section">
                     <div class="detail-section-header justify-between">
                         <div class="flex-center-gap">
                             <span
@@ -231,7 +232,7 @@
                 </section>
 
                 <!-- NOTE -->
-                <section class="mt-6">
+                <section class="profile-section">
                     <div class="detail-section-header">
                         <span
                             class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>

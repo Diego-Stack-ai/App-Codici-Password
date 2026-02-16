@@ -89,6 +89,7 @@ function initSettingsEvents() {
         'btn-manage-account': 'profilo_privato.html',
         'btn-expiry-rules': 'regole_scadenze.html',
         'btn-account-archive': 'archivio_account.html',
+        'btn-notifications-history': 'notifiche_storia.html',
         'btn-change-password': 'imposta_nuova_password.html',
         'btn-privacy': 'privacy.html'
     };

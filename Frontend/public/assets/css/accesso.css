@@ -1,0 +1,160 @@
+/* ==========================================================================
+   ACCESSO CSS (Auth Pages Only) - V5.0 Standard
+   Login, Registrazione, Reset Password
+   ========================================================================== */
+
+/* --- 1. SAETTA SYSTEM (PREMIUM) --- */
+.saetta-drop {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100px;
+    background: linear-gradient(to bottom, transparent, #3b82f6);
+    opacity: 0.5;
+    animation: saettaDrop 3s infinite;
+    z-index: 1;
+}
+
+@keyframes saettaDrop {
+    0% {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(200%);
+        opacity: 0;
+    }
+}
+
+.saetta-master {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.08) 50%, transparent 65%);
+    background-size: 200% 100%;
+    pointer-events: none;
+    z-index: 0;
+    animation: shimmer-master 4s infinite linear;
+    border-radius: inherit;
+}
+
+@keyframes shimmer-master {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* --- 2. LANGUAGE SELECTOR (Specifico Auth) --- */
+.lang-selector-container {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 50;
+}
+
+.lang-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    width: 160px;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+}
+
+.lang-dropdown.show {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.lang-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- 3. AUTH LINKS (Forgot/Register) --- */
+.link-forgot,
+.link-register {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.link-forgot:hover,
+.link-register:hover {
+    color: #3b82f6;
+}
+
+.link-register {
+    margin-top: 2rem;
+    font-weight: 600;
+}
+
+/* --- 4. AUTH FOOTER --- */
+.auth-footer-links {
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+.legal-footer {
+    margin-top: 2rem;
+    color: rgba(255, 255, 255, 0.4);
+    /* Specifico per dark auth */
+    font-size: 0.75rem;
+    text-align: center;
+}

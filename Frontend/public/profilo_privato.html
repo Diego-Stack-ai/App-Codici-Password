@@ -3,23 +3,31 @@
 
 <head>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Profilo Utente - PROTOCOLLO BASE V3.6</title>
+    <title>Profilo Utente - PROTOCOLLO BASE V3.9</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.6" />
+    <link rel="manifest" href="manifest.json?v=3.9" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/fonts.css">
-    <!-- Design Design System (PROTOCOLLO BASE V3.6) -->
-    <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
+    <!-- CSS Modular System V3.9 -->
+    <!-- 1. Core System (Variabili & Reset) -->
+    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <!-- 2. Fonts -->
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
+    <!-- 3. Fascie (Header & Footer) -->
+    <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <!-- 4. Specific Page Style -->
+    <link rel="stylesheet" href="assets/css/profilo.css?v=5.0">
+
+    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <script src="assets/js/theme-init.js"></script>
 
     <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
@@ -27,7 +35,7 @@
 </head>
 
 <body class="base-bg">
-    <div class="base-container relative">
+    <div class="base-container">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
 
@@ -37,8 +45,8 @@
         <div class="spacer-header"></div>
 
         <!-- Hero Profile Header -->
-        <div class="hero-profile-header animate-in fade-in zoom-in-95 duration-700">
-            <div class="relative group">
+        <div class="hero-profile-header">
+            <div class="avatar-group">
                 <div id="avatar-trigger" class="profile-avatar-xl border-glow cursor-pointer"
                     data-action="trigger-click" data-target="avatar-input">
                     <img id="profile-avatar" src="assets/images/user-avatar-5.png" alt="Profile">
@@ -48,13 +56,16 @@
                 </div>
                 <input type="file" id="avatar-input" class="hidden" accept="image/*">
             </div>
-            <div class="flex-center-col mt-5">
-                <h2 id="user-display-name" class="text-xl font-black text-white uppercase tracking-widest leading-none">
-                    -</h2>
-                <span id="user-role-badge" class="badge-base mt-2">OPERATORE PRO</span>
+
+            <div id="user-info-group">
+                <h2 id="user-display-name" class="user-display-name">-</h2>
+                <div class="flex-center-row">
+                    <span id="user-role-badge" class="user-role-badge">OPERATORE PRO</span>
+                </div>
             </div>
 
-            <div class="flex justify-center gap-2 mt-6">
+            <div class="flex-center-row">
+                <!-- Using generic core-like classes but styling via profilo.css or core -->
                 <button type="button" class="btn-icon-header accordion-header" data-target="guida-pane">
                     <span class="material-symbols-outlined">lightbulb</span>
                 </button>
@@ -64,121 +75,121 @@
             </div>
         </div>
 
-        <main class="base-main -mt-4">
-            <div class="detail-content-wrap pb-20">
+        <main class="base-main profile-main-offset">
+            <div class="detail-content-wrap">
 
                 <!-- PANE: GUIDA RAPIDA -->
                 <div id="guida-pane" class="accordion-content">
-                    <div class="glass-card p-6 mb-6 border-blue-500/20">
-                        <div class="flex items-center gap-3 mb-4 text-blue-400">
-                            <span class="material-symbols-outlined filled">info</span>
-                            <h3 class="text-xs font-black uppercase tracking-widest">Guida Profilo</h3>
+                    <div class="glass-card glass-card-guide">
+                        <div class="section-header-wrapper">
+                            <div class="icon-title-group">
+                                <span class="material-symbols-outlined filled guide-icon icon-md">info</span>
+                                <h3 class="section-title">Guida Profilo</h3>
+                            </div>
                         </div>
-                        <div class="flex-col-gap-4">
-                            <div class="flex items-start gap-3">
-                                <span
-                                    class="size-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex-center text-[10px] font-black shrink-0">1</span>
-                                <p class="text-xs font-medium text-white/40 leading-relaxed">Gestisci i tuoi dati (<span
-                                        class="text-white/60">Anagrafica, Residenza, Documenti</span>) selezionando le
+                        <div class="guide-content-wrapper">
+                            <div class="guide-step">
+                                <span class="guide-number">1</span>
+                                <p class="guide-text">Gestisci i tuoi dati (<span
+                                        class="text-primary-accent">Anagrafica, Residenza, Documenti</span>)
+                                    selezionando le
                                     varie sezioni.</p>
                             </div>
-                            <div class="flex items-start gap-3">
-                                <span
-                                    class="size-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex-center text-[10px] font-black shrink-0">2</span>
-                                <p class="text-xs font-medium text-white/40 leading-relaxed">Seleziona la <span
-                                        class="text-blue-400 bold">spunta QR</span> per scegliere quali dati mostrare
+                            <div class="guide-step">
+                                <span class="guide-number">2</span>
+                                <p class="guide-text">Seleziona la <span class="text-primary-accent">spunta QR</span>
+                                    per scegliere quali dati mostrare
                                     nella condivisione.</p>
                             </div>
                         </div>
-                        <button type="button" class="base-btn-primary w-full accordion-header mt-6 text-[10px]"
+                        <button type="button" class="base-btn-primary accordion-header btn-close-guide"
                             data-target="guida-pane">CHIUDI GUIDA</button>
                     </div>
                 </div>
 
                 <!-- 1. ANAGRAFICA -->
-                <div class="flex-col-gap-4">
-                    <div class="flex items-center justify-between px-1">
-                        <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40">Anagrafica Principale
-                        </h3>
-                        <button class="size-8 rounded-lg bg-white/5 flex-center text-white/40 hover:text-white"
-                            data-action="edit-section" data-target="dati-personali">
-                            <span class="material-symbols-outlined text-base">edit</span>
+                <div class="profile-section">
+                    <div class="section-header-wrapper">
+                        <h3 class="section-title">Anagrafica Principale</h3>
+                        <button class="btn-edit-section" data-action="edit-section" data-target="dati-personali">
+                            <span class="material-symbols-outlined icon-edit">edit</span>
                         </button>
                     </div>
 
-                    <div class="glass-card p-5 flex-col-gap-4">
-                        <div id="field-nome" class="flex-col gap-1">
-                            <label class="text-[9px] font-black uppercase text-white/20 tracking-widest">Nome &
-                                Cognome</label>
-                            <span id="nome-view" class="text-sm font-bold text-white uppercase">-</span>
+                    <div class="glass-card">
+                        <div id="field-nome" class="data-display-group">
+                            <label class="data-label">Nome & Cognome</label>
+                            <span id="nome-view" class="data-value">-</span>
                         </div>
-                        <div id="field-cf" class="flex-col gap-1">
-                            <label class="text-[9px] font-black uppercase text-white/20 tracking-widest">Codice
-                                Fiscale</label>
-                            <span id="cf-view" class="text-sm font-black text-white tracking-widest uppercase">-</span>
+                        <div id="field-cf" class="data-display-group">
+                            <label class="data-label">Codice Fiscale</label>
+                            <span id="cf-view" class="data-value">-</span>
                         </div>
-                        <div id="field-nascita" class="flex-col gap-1">
-                            <label class="text-[9px] font-black uppercase text-white/20 tracking-widest">Dati
-                                Nascita</label>
-                            <div class="flex flex-wrap gap-x-3">
-                                <span id="birth_date-view" class="text-xs font-bold text-white/60">-</span>
-                                <span id="birth_place-view" class="text-xs font-bold text-white/60">-</span>
+                        <div id="field-nascita" class="data-display-group">
+                            <label class="data-label">Dati Nascita</label>
+                            <div class="data-group-row">
+                                <span id="birth_date-view" class="data-value-sub">-</span>
+                                <span id="birth_place-view" class="data-value-sub">-</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. RESIDENZA & UTENZE -->
-                <div class="flex-col-gap-4 mt-8">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Indirizzi & Utenze
-                    </h3>
-                    <div id="indirizzi-view-container" class="flex-col-gap-3">
+                <div class="profile-section">
+                    <div class="section-header-wrapper">
+                        <h3 class="section-title">Indirizzi & Utenze</h3>
+                    </div>
+                    <div id="indirizzi-view-container" class="guide-content-wrapper">
                         <!-- Injected via JS -->
                     </div>
                 </div>
 
                 <!-- 3. CONTATTI -->
-                <div class="flex-col-gap-4 mt-8">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Contatti Telefonici
-                    </h3>
-                    <div id="telefoni-view-container" class="flex-col-gap-3">
+                <div class="profile-section">
+                    <div class="section-header-wrapper">
+                        <h3 class="section-title">Contatti Telefonici</h3>
+                    </div>
+                    <div id="telefoni-view-container" class="guide-content-wrapper">
                         <!-- Injected via JS -->
                     </div>
                 </div>
 
                 <!-- 4. EMAIL -->
-                <div class="flex-col-gap-4 mt-8">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Account Email</h3>
-                    <div id="email-view-container" class="flex-col-gap-3">
+                <div class="profile-section">
+                    <div class="section-header-wrapper">
+                        <h3 class="section-title">Account Email</h3>
+                    </div>
+                    <div id="email-view-container" class="guide-content-wrapper">
                         <!-- Injected via JS -->
                     </div>
                 </div>
 
                 <!-- 5. DOCUMENTI -->
-                <div class="flex-col-gap-4 mt-8">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 px-1">Documenti Digitali
-                    </h3>
-                    <div id="documenti-view-container" class="flex-col-gap-3">
+                <div class="profile-section">
+                    <div class="section-header-wrapper">
+                        <h3 class="section-title">Documenti Digitali</h3>
+                    </div>
+                    <div id="documenti-view-container" class="guide-content-wrapper">
                         <!-- Injected via JS -->
                     </div>
                 </div>
 
                 <!-- 6. NOTE -->
-                <div class="flex-col-gap-4 mt-8">
-                    <div class="flex items-center justify-between px-1">
-                        <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40">Note Anagrafica</h3>
-                        <button class="size-8 rounded-lg bg-white/5 flex-center text-white/40 hover:text-white"
-                            data-action="edit-section" data-target="note">
-                            <span class="material-symbols-outlined text-base">edit</span>
+                <div class="profile-section">
+                    <div class="section-header-wrapper">
+                        <h3 class="section-title">Note Anagrafica</h3>
+                        <button class="btn-edit-section" data-action="edit-section" data-target="note">
+                            <span class="material-symbols-outlined icon-edit">edit</span>
                         </button>
                     </div>
-                    <div class="glass-card p-5">
-                        <p id="note-view" class="text-xs font-medium text-white/50 leading-relaxed whitespace-pre-wrap">
+                    <div class="glass-card">
+                        <p id="note-view" class="text-xs font-medium opacity-50 leading-relaxed whitespace-pre-wrap">
                             -</p>
                     </div>
                 </div>
 
-                <div class="h-10"></div>
+                <div class="profile-spacer-end"></div>
 
             </div>
         </main>

@@ -20,11 +20,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- CSS Modular System V3.9 -->
-    <link rel="stylesheet" href="assets/css/core.css?v=3.9">
+    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/core_moduli.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/core_moduli.css?v=5.0">
 
     <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
@@ -70,17 +69,17 @@
                         </div>
                     </div>
 
-                    <!-- Search Input (Vibrant Glass Wrapper) -->
-                    <div class="archive-search-wrapper no-hover">
-                        <span class="material-symbols-outlined archive-search-icon">search</span>
-                        <input type="search" id="archive-search" class="settings-input-semantic"
+                    <!-- Search Input (Standardized V5.0) -->
+                    <div class="search-field-box mb-6">
+                        <span class="material-symbols-outlined text-secondary">search</span>
+                        <input type="search" id="archive-search" class="search-input-field"
                             placeholder="Cerca nell'archivio..." data-t-placeholder="archive_search_placeholder">
                     </div>
 
                 </div>
 
                 <!-- List Container -->
-                <div id="accounts-container" class="settings-group archive-list-group">
+                <div id="accounts-container" class="archive-list-group">
                     <!-- Loading State -->
                     <div class="archive-loading-container">
                         <div class="archive-spinner"></div>
@@ -98,16 +97,12 @@
                     </div>
                 </div>
 
-                <!-- Bottom Action: Empty Trash (Moved to bottom) -->
+                <!-- Bottom Action: Empty Trash (Standardized) -->
                 <div class="settings-group archive-action-group">
-                    <div class="settings-item no-hover">
-                        <div class="settings-controls-row">
-                            <button id="btn-empty-trash" class="btn-logout-semantic btn-trash-archive">
-                                <span class="material-symbols-outlined">delete_forever</span>
-                                <span class="btn-logout-text" data-t="empty_trash">Svuota Cestino</span>
-                            </button>
-                        </div>
-                    </div>
+                    <button id="btn-empty-trash" class="btn-action-danger">
+                        <span class="material-symbols-outlined">delete_forever</span>
+                        <span data-t="empty_trash">Svuota Cestino</span>
+                    </button>
                 </div>
 
                 <!-- Spacer rimosso: gestito da pb-footer-extra -->
