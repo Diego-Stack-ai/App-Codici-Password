@@ -4,7 +4,27 @@
     "playwright": "^1.57.0"
   },
   "devDependencies": {
+    "madge": "^8.0.0",
     "stylelint": "^17.1.0",
     "stylelint-config-standard": "^40.0.0"
-  }
+  },
+  "name": "appcodicipassword",
+  "version": "1.0.0",
+  "description": "",
+  "main": "css-audit-tool.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Diego-Stack-ai/App-Codici-Password.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Diego-Stack-ai/App-Codici-Password/issues"
+  },
+  "homepage": "https://github.com/Diego-Stack-ai/App-Codici-Password#readme"
 }
