@@ -299,14 +299,49 @@ html:not(.dark) .saetta-drop {
     border-radius: 12px;
     padding: 4px;
     position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .qr-lens-icon {
     position: absolute;
+    right: -8px;
+    bottom: -8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(30, 60, 120, 0.38);
+    z-index: 4;
+    pointer-events: auto;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    transition: color 0.2s, background 0.2s;
+    cursor: pointer;
+    padding: 0;
+    transform: translate(40%,40%);
+}
+.qr-lens-icon:hover {
+    color: #137fec;
+    background: rgba(19,127,236,0.10);
+}
+
+.qr-preview-box canvas,
+.qr-preview-box img {
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    width: 72px !important;
+    height: 72px !important;
+    border-radius: 8px;
+    background: transparent;
+    pointer-events: none;
 }
 
 .hero-info-col {

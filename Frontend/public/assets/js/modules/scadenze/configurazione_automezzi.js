@@ -21,6 +21,36 @@ let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+        // Toggle pannelli lista (come configurazione_documenti)
+        [
+            { header: '.settings-item.collapsible-header[data-target="container-types"]', panel: 'container-types' },
+            { header: '.settings-item.collapsible-header[data-target="container-models"]', panel: 'container-models' },
+            { header: '.settings-item.collapsible-header[data-target="container-templates"]', panel: 'container-templates' }
+        ].forEach(({ header, panel }) => {
+            const h = document.querySelector(header);
+            const p = document.getElementById(panel);
+            if (h && p) {
+                h.addEventListener('click', () => {
+                    p.classList.toggle('hidden');
+                });
+            }
+        });
+
+        // Delegated actions per lista (edit/delete)
+        ['container-types', 'container-models', 'container-templates'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', (e) => {
+                const btnEdit = e.target.closest('.btn-edit-item');
+                const btnDelete = e.target.closest('.btn-delete-item');
+                if (btnEdit) {
+                    const { list, index } = btnEdit.dataset;
+                    if (list === 'deadlineTypes') editType(parseInt(index));
+                    else editItem(list, parseInt(index));
+                } else if (btnDelete) {
+                    const { list, index } = btnDelete.dataset;
+                    deleteItem(list, parseInt(index));
+                }
+            });
+        });
     // Buttons Listeners
     document.getElementById('btn-add-type')?.addEventListener('click', () => addTypeItem());
     document.getElementById('btn-add-model')?.addEventListener('click', () => addItem('models', t('prompt_new_vehicle')));
@@ -29,21 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Delegated actions for list items
     ['container-types', 'container-models', 'container-templates'].forEach(id => {
         document.getElementById(id)?.addEventListener('click', (e) => {
-            const btnEdit = e.target.closest('.btn-edit-item');
-            const btnDelete = e.target.closest('.btn-delete-item');
-
-            if (btnEdit) {
-                const { list, index } = btnEdit.dataset;
-                if (list === 'deadlineTypes') editType(parseInt(index));
-                else editItem(list, parseInt(index));
-            } else if (btnDelete) {
-                const { list, index } = btnDelete.dataset;
-                deleteItem(list, parseInt(index));
-            }
-        });
-    });
-
-    onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             await loadConfig();
@@ -62,12 +77,6 @@ async function loadConfig() {
             if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
             if (!currentConfig.models) currentConfig.models = [];
             if (!currentConfig.emailTemplates) currentConfig.emailTemplates = [];
-        } else {
-            currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-        }
-        renderAll();
-    } catch (e) {
-        console.error(e);
     }
 }
 
@@ -83,6 +92,8 @@ async function saveConfig() {
 }
 
 function renderAll() {
+
+// Mostra un campo input inline sotto la lista della sezione
     renderTypes();
     renderSimpleList('container-models', currentConfig.models, 'models');
     renderSimpleList('container-templates', currentConfig.emailTemplates, 'emailTemplates');

@@ -1,3 +1,29 @@
+/* --- QR LENS ICON (Zoom) --- */
+.qr-preview-box {
+    position: relative;
+    display: inline-block;
+}
+.qr-lens-icon {
+    position: absolute;
+    right: 0.2rem;
+    bottom: 0.2rem;
+    background: rgba(0,0,0,0.18);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    color: #fff;
+    transition: background 0.2s;
+}
+.qr-lens-icon:hover {
+    background: rgba(59,130,246,0.25);
+    color: #137fec;
+}
 /* ==========================================================================
    CORE UI (V5.0) - Global Components (Modals, Toasts, Misc)
    ========================================================================== */

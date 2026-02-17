@@ -11,6 +11,7 @@ import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/fireba
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
+import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 
 function createCopyBtn(text) {
     return createElement('button', {
@@ -369,91 +370,20 @@ async function toggleQRInclusion(type, idx) {
  * QR CODE GENERATION
  */
 async function generateProfileQRCode() {
-    // Load QRCode library if not already loaded
-    if (typeof QRCode === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'assets/js/vendor/qrcode.min.js';
-        document.head.appendChild(script);
-        await new Promise(resolve => {
-            script.onload = resolve;
-            script.onerror = resolve;
-        });
-    }
-
-    if (typeof QRCode === 'undefined') return;
-
+    await ensureQRCodeLib();
     const container = document.getElementById('qrcode-header');
     if (!container) return;
-
+    // Build vCard string with only selected fields
+    const vcard = buildVCard(currentUserData, qrCodeInclusions, {
+        contactPhones,
+        contactEmails,
+        userAddresses
+    });
     // Clear previous QR code
     clearElement(container);
-
-    // Build vCard string with only selected fields
-    const fullName = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim();
-
-    let vcardLines = [
-        'BEGIN:VCARD',
-        'VERSION:3.0',
-        `FN:${fullName}`
-    ];
-
-    // Add personal data if selected
-    if (qrCodeInclusions.nome) {
-        const fullName = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim();
-        if (fullName) {
-            vcardLines.push(`N:${currentUserData.cognome || ''};${currentUserData.nome || ''};;;`);
-        }
-    }
-
-    if (qrCodeInclusions.cf && currentUserData.cf) {
-        vcardLines.push(`X-CF:${currentUserData.cf}`);
-    }
-
-    if (qrCodeInclusions.nascita && currentUserData.birth_date) {
-        vcardLines.push(`BDAY:${currentUserData.birth_date}`);
-        if (currentUserData.birth_place) {
-            vcardLines.push(`X-BIRTHPLACE:${currentUserData.birth_place}`);
-        }
-    }
-
-    // Add selected phones
-    qrCodeInclusions.phones.forEach(idx => {
-        if (contactPhones[idx]) {
-            vcardLines.push(`TEL:${contactPhones[idx].number}`);
-        }
-    });
-
-    // Add selected emails
-    qrCodeInclusions.emails.forEach(idx => {
-        if (contactEmails[idx]) {
-            vcardLines.push(`EMAIL:${contactEmails[idx].address}`);
-        }
-    });
-
-    // Add selected addresses
-    qrCodeInclusions.addresses.forEach(idx => {
-        if (userAddresses[idx]) {
-            const addr = userAddresses[idx];
-            vcardLines.push(`ADR:;;${addr.address} ${addr.civic};${addr.city};;${addr.cap};`);
-        }
-    });
-
-    vcardLines.push('END:VCARD');
-    const vcard = vcardLines.join('\n');
-
-    // Generate QR code
-    new QRCode(container, {
-        text: vcard,
-        width: 104,
-        height: 104,
-        colorDark: "#000000",
-        colorLight: "#E3F2FD",
-        correctLevel: QRCode.CorrectLevel.M
-    });
-
+    renderQRCode(container, vcard, { width: 104, height: 104, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 2 });
     // Add click handler to show enlarged QR
     container.onclick = () => showEnlargedQR(vcard);
-
     // Also make zoom icon clickable
     const zoomIcon = document.getElementById('qr-zoom-icon');
     if (zoomIcon) {
@@ -463,7 +393,6 @@ async function generateProfileQRCode() {
 
 function showEnlargedQR(vcard) {
     const qrSize = Math.min(window.innerWidth * 0.7, 300);
-
     const modal = createElement('div', { className: 'modal-overlay' }, [
         createElement('div', { className: 'modal-profile-box modal-box-qr' }, [
             createElement('h3', { className: 'modal-title', textContent: 'QR Code Profilo', dataset: { t: 'qr_code_profile' } }),
@@ -479,31 +408,16 @@ function showEnlargedQR(vcard) {
             })
         ])
     ]);
-
     document.body.appendChild(modal);
-
-    // Trigger animation
     setTimeout(() => modal.classList.add('active'), 10);
-
-    // Close on backdrop click
     modal.onclick = (e) => {
         if (e.target === modal) {
             modal.classList.remove('active');
             setTimeout(() => modal.remove(), 300);
         }
     };
-
-    // Generate enlarged QR
-    if (typeof QRCode !== 'undefined') {
-        new QRCode(document.getElementById('qr-enlarged'), {
-            text: vcard,
-            width: qrSize,
-            height: qrSize,
-            colorDark: "#000000",
-            colorLight: "#E3F2FD",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    }
+    // Use shared QR render
+    renderQRCode(document.getElementById('qr-enlarged'), vcard, { width: qrSize, height: qrSize, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 3 });
 }
 
 /**

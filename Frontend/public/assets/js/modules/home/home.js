@@ -215,12 +215,10 @@ function renderMiniItem(item, today) {
     else labelText = `${diffDays}g`;
 
     return createElement('div', { className: 'dashboard-list-item' }, [
-        createElement('div', { className: 'item-content' }, [
-            createElement('div', { className: 'item-icon-box' }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: item.icon || 'event' })
-            ]),
-            createElement('span', { className: 'item-title', textContent: item.title })
+        createElement('div', { className: 'item-icon-box' }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: item.icon || 'event' })
         ]),
+        createElement('span', { className: 'item-title', textContent: item.title }),
         createElement('span', { className: 'item-badge', textContent: labelText })
     ]);
 }

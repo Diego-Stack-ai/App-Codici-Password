@@ -12,13 +12,20 @@ import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast } from '../../ui-core.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { initComponents } from '../../components.js';
-
-// Carica QRCode library locale
-const qrcodeScript = document.createElement('script');
-qrcodeScript.src = 'assets/js/vendor/qrcode.min.js';
-document.head.appendChild(qrcodeScript);
+import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 
 let currentUserData = null;
+let userAddresses = [];
+let contactPhones = [];
+let contactEmails = [];
+let qrCodeInclusions = {
+    nome: false,
+    cf: false,
+    nascita: false,
+    phones: [],
+    emails: [],
+    addresses: []
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Inizializza Header e Footer secondo Protocollo Base
@@ -39,6 +46,17 @@ async function loadUserData(user) {
     try {
         const snap = await getDoc(doc(db, "users", user.uid));
         currentUserData = snap.exists() ? snap.data() : {};
+
+        // Sub-collections (come profilo_privato)
+        userAddresses = currentUserData.userAddresses || [];
+        contactPhones = currentUserData.contactPhones || [];
+        contactEmails = currentUserData.contactEmails || [];
+
+        // Preferenze QR inclusioni (come profilo_privato)
+        const qrSnap = await getDoc(doc(db, "users", user.uid, "settings", "qrCodeInclusions"));
+        if (qrSnap.exists()) {
+            qrCodeInclusions = { ...qrCodeInclusions, ...qrSnap.data() };
+        }
 
         // Avatar & Name
         const nameEl = document.getElementById('user-name-settings');
@@ -189,44 +207,30 @@ function setupTimeoutSelector(data) {
     });
 }
 
-function generateVCard(user, data) {
-    const config = data.qr_personal || {};
-    let v = ["BEGIN:VCARD", "VERSION:3.0"];
 
-    const n = config.nome ? (data.nome || '') : '';
-    const s = config.cognome ? (data.cognome || '') : '';
-    if (n || s) {
-        v.push(`N:${s};${n};;;`);
-        v.push(`FN:${n} ${s}`.trim());
-    }
-
-    if (data.contactPhones && Array.isArray(data.contactPhones)) {
-        data.contactPhones.forEach(p => { if (p.shareQr && p.number) v.push(`TEL;TYPE=CELL:${p.number}`); });
-    }
-    if (data.contactEmails && Array.isArray(data.contactEmails)) {
-        data.contactEmails.forEach(e => { if (e.shareQr && e.address) v.push(`EMAIL;TYPE=INTERNET:${e.address}`); });
-    }
-
-    v.push("END:VCARD");
-    const vcardStr = v.join("\n");
+async function generateVCard(user, data) {
+    await ensureQRCodeLib();
+    // Usa la stessa logica di profilo_privato: buildVCard con inclusioni e sub-collections
+    const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
+        contactPhones,
+        contactEmails,
+        userAddresses
+    });
 
     // QR Preview (Small)
     const previewDest = document.getElementById('qrcode-preview');
-    if (previewDest && typeof QRCode !== 'undefined') {
-        // Keep the lens icon, clear only canvas/images if present
-        const existingCanvas = previewDest.querySelector('canvas');
-        const existingImg = previewDest.querySelector('img');
-        if (existingCanvas) existingCanvas.remove();
-        if (existingImg) existingImg.remove();
-
-        new QRCode(previewDest, { text: vcardStr, width: 80, height: 80, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: QRCode.CorrectLevel.L });
+    if (previewDest) {
+        // Remove only QR canvases/images, not the lens
+        previewDest.querySelectorAll('canvas,img').forEach(el => el.remove());
+        // Render QR code directly into previewDest (canvas will be absolutely positioned by CSS)
+        renderQRCode(previewDest, vcardStr, { width: 72, height: 72, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 1 });
     }
 
     // QR Zoom (Large)
     const dest = document.getElementById('qrcode-zoom');
-    if (dest && typeof QRCode !== 'undefined') {
+    if (dest) {
         clearElement(dest);
-        new QRCode(dest, { text: vcardStr, width: 250, height: 250, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: QRCode.CorrectLevel.H });
+        renderQRCode(dest, vcardStr, { width: 250, height: 250, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 3 });
     }
 }
 
