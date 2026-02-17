@@ -1,0 +1,282 @@
+/* ==========================================================================
+   ACCOUNT AZIENDA LIST (V5.0) - CSS Isolation
+   ========================================================================== */
+
+/* --- 1. SEARCH SYSTEM --- */
+.search-container {
+    padding: 0 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.search-field-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.25rem;
+    backdrop-filter: blur(10px);
+}
+
+.search-input-field {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    width: 100%;
+    font-size: 1rem;
+}
+
+/* --- 2. LIST CONTAINER --- */
+.micro-account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 4rem;
+}
+
+/* --- 3. MICRO ACCOUNT CARD --- */
+.micro-account-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.micro-account-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.micro-account-card:active {
+    transform: scale(0.98);
+}
+
+.micro-account-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    position: relative;
+    z-index: 10;
+}
+
+.micro-account-avatar-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.micro-account-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Badge dot */
+.micro-item-badge-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #000;
+}
+
+.micro-account-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.micro-account-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.micro-account-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.micro-btn-utility {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.micro-btn-utility:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.micro-btn-utility.is-active,
+.micro-btn-utility.text-blue-400 {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* --- 4. DATA DISPLAY (Sub-rows) --- */
+.micro-data-display {
+    padding: 0 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.micro-data-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+}
+
+.micro-data-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.65rem;
+}
+
+.micro-data-value {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.micro-btn-copy-inline {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.3;
+    transition: all 0.2s;
+}
+
+.micro-btn-copy-inline:hover {
+    opacity: 1;
+    color: var(--accent);
+}
+
+.micro-btn-copy-inline span {
+    font-size: 16px !important;
+}
+
+/* --- 5. LOADING & EMPTY --- */
+.loading-full-box {
+    padding: 5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    opacity: 0.3;
+}
+
+.loading-spinner-icon {
+    font-size: 3rem !important;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- 6. SWIPE ACTIONS --- */
+.swipe-backgrounds {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    z-index: 1;
+}
+
+.swipe-bg-left {
+    flex: 1;
+    background: #ef4444;
+    display: flex;
+    align-items: center;
+    padding-left: 2rem;
+    color: white;
+}
+
+.swipe-bg-right {
+    flex: 1;
+    background: #3b82f6;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 2rem;
+    color: white;
+}
+
+.swipe-content {
+    background: var(--bg-primary);
+    /* For cover backgrounds */
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Floating Action Button (if needed) */
+.btn-floating-add {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-floating-add:active {
+    transform: scale(0.9);
+}
+
+.bg-accent-blue {
+    background: #3b82f6;
+}

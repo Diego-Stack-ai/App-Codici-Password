@@ -1,0 +1,21 @@
+{
+    "mappings": {
+        ".modal-overlay": "assets/css/core_ui.css",
+        ".modal-box": "assets/css/core_ui.css",
+        "#toast": "assets/css/core_ui.css",
+        ".qr-code-box": "assets/css/core_ui.css",
+        ".qr-code-display": "assets/css/core_ui.css",
+        ".btn-primary": "assets/css/moduli.css",
+        ".form-group": "assets/css/moduli.css",
+        ".input": "assets/css/moduli.css",
+        ".card": "assets/css/moduli.css",
+        ".card-hero": "assets/css/moduli.css",
+        ".border-glow": "assets/css/moduli.css",
+        ".vault": "assets/css/accesso.css",
+        ".fab-group": "assets/css/scadenze.css",
+        ".btn-fab-scadenza": "assets/css/scadenze.css",
+        ".btn-fab-azienda": "assets/css/scadenze.css",
+        ".btn-fab-privato": "assets/css/scadenze.css",
+        ".btn-fab-action": "assets/css/scadenze.css"
+    }
+}

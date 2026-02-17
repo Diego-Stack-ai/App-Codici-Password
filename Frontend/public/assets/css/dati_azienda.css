@@ -1,0 +1,251 @@
+/* ==========================================================================
+   DATI AZIENDA (V5.0) - CSS Isolation
+   ========================================================================== */
+
+/* --- 1. HERO HEADER --- */
+.hero-profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    margin-bottom: 2rem;
+    padding-top: 1rem;
+}
+
+.detail-avatar-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.detail-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: var(--surface-glass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.detail-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-status-dot {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 24px;
+    height: 24px;
+    background: #3b82f6;
+    border-radius: 50%;
+    border: 2px solid var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-status-dot span {
+    font-size: 14px;
+    color: white;
+}
+
+.hero-title-container {
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.hero-category-badge {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+/* --- 2. SECTIONS --- */
+.detail-content-wrap {
+    padding: 0 1.25rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.detail-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+
+.detail-section-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.detail-section-icon {
+    font-size: 20px;
+}
+
+/* --- 3. GLASS CARDS & TABS --- */
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 1.25rem;
+    backdrop-filter: blur(12px);
+}
+
+.tabs-scroll-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+}
+
+.tabs-scroll-row::-webkit-scrollbar {
+    display: none;
+}
+
+.location-tab-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.location-tab-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* --- 4. REFERENT --- */
+.referent-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.referent-avatar-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.referent-avatar-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.referent-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.referent-call-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    transition: all 0.2s;
+}
+
+/* --- 5. FIELDS --- */
+.glass-field-container {
+    margin-bottom: 1rem;
+}
+
+.view-label {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.detail-field-box {
+    display: flex;
+    align-items: center;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0 1rem;
+    height: 3.5rem;
+}
+
+.detail-field-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    width: 100%;
+}
+
+/* --- 6. UTILS --- */
+.flex-col-gap-xs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.icon-accent-blue {
+    color: #3b82f6;
+}
+
+.icon-accent-emerald {
+    color: #10b981;
+}
+
+.icon-accent-amber {
+    color: #f59e0b;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

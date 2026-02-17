@@ -12,127 +12,131 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css?v=5.0">
-    <script src="assets/js/core.js"></script>
-    <script type="module" src="assets/js/ui-core.js"></script>
+    <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/area_privata.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
 </head>
 
-<body class="base-bg"> <!-- 1. CONTENITORE PRINCIPALE -->
+<body class="base-bg">
+    <script src="assets/js/core.js"></script>
+    <script type="module" src="assets/js/ui-core.js"></script> <!-- 1. CONTENITORE PRINCIPALE -->
     <div class="base-container"> <!-- 2. FARO ANIMATO "VIVO" -->
         <div class="base-glow"></div> <!-- HEADER FISSO -->
         <header id="header-placeholder" class="base-header"></header>
-        <div class="spacer-header"></div> <!-- MAIN CONTENT -->
         <main class="base-main"> <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
-            <div class="content-matrix-grid relative z-50"> <!-- Account Standard --> <a
-                    href="account_privati.html?type=standard" class="matrix-card card-blue border-glow adaptive-shadow">
-                    <div class="matrix-card-header">
-                        <div class="matrix-icon-box"> <span
-                                class="material-symbols-outlined">account_balance_wallet</span> </div>
-                    </div>
-                    <div class="card-text-block">
-                        <div class="matrix-card-title-box">
-                            <h3 data-t="section_personal_accounts">Account Personali</h3> <span id="count-standard"
-                                class="badge-count"></span>
+            <div class="page-container pt-header-extra pb-footer-extra">
+                <div class="matrix-grid relative z-50"> <!-- Account Standard --> <a
+                        href="account_privati.html?type=standard"
+                        class="matrix-card card-blue border-glow adaptive-shadow">
+                        <div class="matrix-card-header">
+                            <div class="matrix-icon-box"> <span
+                                    class="material-symbols-outlined">account_balance_wallet</span> </div>
                         </div>
-                    </div>
-                </a> <!-- Condivisi --> <a href="account_privati.html?type=shared"
-                    class="matrix-card card-red border-glow adaptive-shadow">
-                    <div class="matrix-card-header">
-                        <div class="matrix-icon-box"> <span class="material-symbols-outlined">group</span> </div>
-                    </div>
-                    <div class="card-text-block">
-                        <div class="matrix-card-title-box">
-                            <h3 data-t="section_shared_accounts">Account Condivisi</h3> <span id="count-shared"
-                                class="badge-count"></span>
-                        </div>
-                    </div>
-                </a> <!-- Memorandum --> <a href="account_privati.html?type=memo"
-                    class="matrix-card card-orange border-glow adaptive-shadow">
-                    <div class="matrix-card-header">
-                        <div class="matrix-icon-box"> <span class="material-symbols-outlined">sticky_note_2</span>
-                        </div>
-                    </div>
-                    <div class="card-text-block">
-                        <div class="matrix-card-title-box">
-                            <h3 data-t="section_note">Note</h3> <span id="count-memo" class="badge-count"></span>
-                        </div>
-                    </div>
-                </a> <!-- Memo Condivisi --> <a href="account_privati.html?type=shared_memo"
-                    class="matrix-card card-green border-glow adaptive-shadow">
-                    <div class="matrix-card-header">
-                        <div class="matrix-icon-box"> <span class="material-symbols-outlined">folder_shared</span>
-                        </div>
-                    </div>
-                    <div class="card-text-block">
-                        <div class="matrix-card-title-box">
-                            <h3 data-t="section_shared_note">Note Condivise</h3> <span id="count-shared-memo"
-                                class="badge-count"></span>
-                        </div>
-                    </div>
-                </a> <!-- TOP 10 WIDGET SECTION -->
-                <div class="grid-span-2 relative z-40">
-                    <div class="flex items-center gap-2 mb-2 px-1"> <span
-                            class="material-symbols-outlined text-sm text-orange-400">star</span>
-                        <h3 class="text-xs font-bold text-white/60 uppercase tracking-widest" data-t="top_used_access">
-                            TOP 10 PIÃ™ USATI</h3>
-                    </div>
-                    <div id="top-accounts-list" class="flex flex-col gap-2"> <!-- Loading -->
-                        <div class="py-10 flex justify-center opacity-20"> <span
-                                class="material-symbols-outlined animate-spin-slow">sync</span> </div>
-                    </div>
-                </div> <!-- RUBRICA SECTION -->
-                <div class="grid-span-2 relative z-40 mt-4"> <!-- Bottone Toggle (Protocollo Rubrica V3.8) --> <button
-                        id="rubrica-toggle-btn" type="button"
-                        class="micro-account-card w-full flex items-center justify-between p-3 card-orange border-glow adaptive-shadow cursor-pointer hover:bg-white/5 transition-all active:scale-95">
-                        <div class="flex items-center gap-3">
-                            <div class="micro-account-avatar-box"> <span
-                                    class="material-symbols-outlined text-orange-400 bg-white/10 rounded-lg p-1.5 ">group</span>
+                        <div class="card-text-block">
+                            <div class="matrix-card-title-box">
+                                <h3 data-t="section_personal_accounts">Account Personali</h3> <span id="count-standard"
+                                    class="badge-count"></span>
                             </div>
-                            <div class="text-left">
-                                <h3 class="micro-account-name" data-t="rubrica_title">Rubrica Contatti</h3>
-                                <p class="micro-account-subtitle text-orange-400/70"> <span>Condivisi</span> <span
-                                        id="rubrica-counter">(0)</span> </p>
+                        </div>
+                    </a> <!-- Condivisi --> <a href="account_privati.html?type=shared"
+                        class="matrix-card card-red border-glow adaptive-shadow">
+                        <div class="matrix-card-header">
+                            <div class="matrix-icon-box"> <span class="material-symbols-outlined">group</span> </div>
+                        </div>
+                        <div class="card-text-block">
+                            <div class="matrix-card-title-box">
+                                <h3 data-t="section_shared_accounts">Account Condivisi</h3> <span id="count-shared"
+                                    class="badge-count"></span>
                             </div>
-                        </div> <span id="rubrica-chevron"
-                            class="material-symbols-outlined transition-transform opacity-40">expand_more</span>
-                    </button> <!-- Contenuto Rubrica (Protocollo Rubrica V3.8) -->
-                    <div id="rubrica-content" class="hidden rubrica-container rounded-3xl card-orange">
-                        <div class="p-4"> <!-- Pulsante Nuovo Contatto (Class-based) -->
-                            <div class="flex justify-center mb-6"> <button id="add-contact-btn" type="button"
-                                    class="card-orange border-glow rounded-2xl cursor-pointer transition-all active:scale-95 rubrica-btn-new">
-                                    NUOVO CONTATTO </button> </div>
-                            <!-- Form di Inserimento (Protocollo Rubrica V3.8) -->
-                            <div id="add-contact-form" class="hidden rubrica-form rounded-2xl p-5">
-                                <div class="rubrica-form-grid">
-                                    <div class="flex-col"> <label class="auth-label rubrica-label"
-                                            for="contact-nome">Nome</label> <input type="text" id="contact-nome"
-                                            placeholder="Mario" class="auth-input rubrica-input"> </div>
-                                    <div class="flex-col"> <label class="auth-label rubrica-label"
-                                            for="contact-cognome">Cognome</label> <input type="text"
-                                            id="contact-cognome" placeholder="Rossi" class="auth-input rubrica-input">
-                                    </div>
+                        </div>
+                    </a> <!-- Memorandum --> <a href="account_privati.html?type=memo"
+                        class="matrix-card card-orange border-glow adaptive-shadow">
+                        <div class="matrix-card-header">
+                            <div class="matrix-icon-box"> <span class="material-symbols-outlined">sticky_note_2</span>
+                            </div>
+                        </div>
+                        <div class="card-text-block">
+                            <div class="matrix-card-title-box">
+                                <h3 data-t="section_note">Note</h3> <span id="count-memo" class="badge-count"></span>
+                            </div>
+                        </div>
+                    </a> <!-- Memo Condivisi --> <a href="account_privati.html?type=shared_memo"
+                        class="matrix-card card-green border-glow adaptive-shadow">
+                        <div class="matrix-card-header">
+                            <div class="matrix-icon-box"> <span class="material-symbols-outlined">folder_shared</span>
+                            </div>
+                        </div>
+                        <div class="card-text-block">
+                            <div class="matrix-card-title-box">
+                                <h3 data-t="section_shared_note">Note Condivise</h3> <span id="count-shared-memo"
+                                    class="badge-count"></span>
+                            </div>
+                        </div>
+                    </a> <!-- TOP 10 WIDGET SECTION -->
+                    <div class="grid-span-2 relative z-40">
+                        <div class="flex items-center gap-2 mb-2 px-1"> <span
+                                class="material-symbols-outlined text-sm text-orange-400">star</span>
+                            <h3 class="text-xs font-bold text-white/60 uppercase tracking-widest"
+                                data-t="top_used_access">
+                                TOP 10 PIÃ™ USATI</h3>
+                        </div>
+                        <div id="top-accounts-list" class="flex flex-col gap-2"> <!-- Loading -->
+                            <div class="py-10 flex justify-center opacity-20"> <span
+                                    class="material-symbols-outlined animate-spin-slow">sync</span> </div>
+                        </div>
+                    </div> <!-- RUBRICA SECTION -->
+                    <div class="grid-span-2 relative z-40 mt-4"> <!-- Bottone Toggle (Protocollo Rubrica V3.8) -->
+                        <button id="rubrica-toggle-btn" type="button"
+                            class="micro-account-card w-full flex items-center justify-between p-3 card-orange border-glow adaptive-shadow cursor-pointer hover:bg-white/5 transition-all active:scale-95">
+                            <div class="flex items-center gap-3">
+                                <div class="micro-account-avatar-box"> <span
+                                        class="material-symbols-outlined text-orange-400 bg-white/10 rounded-lg p-1.5 ">group</span>
                                 </div>
-                                <div class="flex-col mt-4"> <label class="auth-label rubrica-label"
-                                        for="contact-email">Email Condivisione</label> <input type="email"
-                                        id="contact-email" placeholder="mario.rossi@email.com"
-                                        class="auth-input rubrica-input"> </div> <button id="btn-add-contact"
-                                    type="button" class="auth-btn-primary mt-4" data-t="save_contact">SALVA
-                                    CONTATTO</button>
-                            </div>
-                            <div id="contacts-list" class="flex flex-col gap-2 max-w-full overflow-hidden">
-                                <!-- JS Generated -->
+                                <div class="text-left">
+                                    <h3 class="micro-account-name" data-t="rubrica_title">Rubrica Contatti</h3>
+                                    <p class="micro-account-subtitle text-orange-400/70"> <span>Condivisi</span> <span
+                                            id="rubrica-counter">(0)</span> </p>
+                                </div>
+                            </div> <span id="rubrica-chevron"
+                                class="material-symbols-outlined transition-transform opacity-40">expand_more</span>
+                        </button> <!-- Contenuto Rubrica (Protocollo Rubrica V3.8) -->
+                        <div id="rubrica-content" class="hidden rubrica-container rounded-3xl card-orange">
+                            <div class="p-4"> <!-- Pulsante Nuovo Contatto (Class-based) -->
+                                <div class="flex justify-center mb-6"> <button id="add-contact-btn" type="button"
+                                        class="card-orange border-glow rounded-2xl cursor-pointer transition-all active:scale-95 rubrica-btn-new">
+                                        NUOVO CONTATTO </button> </div>
+                                <!-- Form di Inserimento (Protocollo Rubrica V3.8) -->
+                                <div id="add-contact-form" class="hidden rubrica-form rounded-2xl p-5">
+                                    <div class="rubrica-form-grid">
+                                        <div class="flex-col"> <label class="auth-label rubrica-label"
+                                                for="contact-nome">Nome</label> <input type="text" id="contact-nome"
+                                                placeholder="Mario" class="auth-input rubrica-input"> </div>
+                                        <div class="flex-col"> <label class="auth-label rubrica-label"
+                                                for="contact-cognome">Cognome</label> <input type="text"
+                                                id="contact-cognome" placeholder="Rossi"
+                                                class="auth-input rubrica-input">
+                                        </div>
+                                    </div>
+                                    <div class="flex-col mt-4"> <label class="auth-label rubrica-label"
+                                            for="contact-email">Email Condivisione</label> <input type="email"
+                                            id="contact-email" placeholder="mario.rossi@email.com"
+                                            class="auth-input rubrica-input"> </div> <button id="btn-add-contact"
+                                        type="button" class="auth-btn-primary mt-4" data-t="save_contact">SALVA
+                                        CONTATTO</button>
+                                </div>
+                                <div id="contacts-list" class="flex flex-col gap-2 max-w-full overflow-hidden">
+                                    <!-- JS Generated -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-        <div class="spacer-footer"></div>
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div> <!-- SCRIPTS MODULARI -->
     <script type="module" src="assets/js/main.js"></script>

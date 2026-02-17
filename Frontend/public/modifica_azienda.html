@@ -16,12 +16,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_moduli.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/modifica_azienda.css?v=5.0">
 
     <!-- CORE JS -->
     <script src="assets/js/core.js"></script>
@@ -36,432 +37,440 @@
         <!-- Automated Header -->
         <header id="header-placeholder" class="base-header"></header>
 
-        <div class="spacer-header"></div>
-
-        <!-- Main Content -->
         <main class="base-main">
-            <div class="detail-content-wrap pb-20">
+            <div class="page-container pt-header-extra pb-footer-extra">
+                <div class="detail-content-wrap">
 
-                <div class="hero-profile-header">
-                    <div class="header-action-row">
-                        <!-- Logo Azienda -->
-                        <div class="detail-avatar-container">
-                            <div id="btn-trigger-logo"
-                                class="detail-avatar border-glow bg-white/5 overflow-hidden cursor-pointer group relative">
-                                <img id="logo-preview" class="size-full object-cover hidden" src="" />
-                                <div id="logo-placeholder" class="flex-center-col text-white/20">
-                                    <span class="material-symbols-outlined text-4xl">add_a_photo</span>
+                    <div class="hero-profile-header">
+                        <div class="header-action-row">
+                            <!-- Logo Azienda -->
+                            <div class="detail-avatar-container">
+                                <div id="btn-trigger-logo"
+                                    class="detail-avatar border-glow bg-white/5 overflow-hidden cursor-pointer group relative">
+                                    <img id="logo-preview" class="size-full object-cover hidden" src="" />
+                                    <div id="logo-placeholder" class="flex-center-col text-white/20">
+                                        <span class="material-symbols-outlined text-4xl">add_a_photo</span>
+                                    </div>
+                                    <div class="qr-zoom-indicator">
+                                        <span class="material-symbols-outlined text-xs">edit</span>
+                                    </div>
                                 </div>
-                                <div class="qr-zoom-indicator">
-                                    <span class="material-symbols-outlined text-xs">edit</span>
+                                <input type="file" id="logo-upload" accept="image/*" class="hidden" />
+                                <div class="hero-status-dot">
+                                    <span class="material-symbols-outlined text-3xs">business</span>
                                 </div>
-                            </div>
-                            <input type="file" id="logo-upload" accept="image/*" class="hidden" />
-                            <div class="hero-status-dot">
-                                <span class="material-symbols-outlined text-3xs">business</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="flex-col-gap">
-                    <!-- 1. Anagrafica Principale -->
-                    <section class="mt-8">
-                        <div class="detail-section-header justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined detail-section-icon icon-accent-blue">info</span>
-                                <h3 class="detail-section-title">Anagrafica Principale</h3>
+                    <div class="flex-col-gap">
+                        <!-- 1. Anagrafica Principale -->
+                        <section class="mt-8">
+                            <div class="detail-section-header justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="material-symbols-outlined detail-section-icon icon-accent-blue">info</span>
+                                    <h3 class="detail-section-title">Anagrafica Principale</h3>
+                                </div>
+                                <span
+                                    class="text-3xs font-black uppercase tracking-widest text-blue-400 opacity-50">Obbligatorio</span>
                             </div>
+
+                            <div class="glass-card p-5 mt-4 flex-col-gap">
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="ragione-sociale">Ragione Sociale</label>
+                                    <div class="detail-field-box border-glow">
+                                        <span class="material-symbols-outlined ml-4 opacity-40">business</span>
+                                        <input id="ragione-sociale" type="text" class="detail-field-input"
+                                            placeholder="Ragione Sociale" />
+                                        <div class="detail-field-actions pr-4">
+                                            <input type="checkbox" data-qr-field="ragioneSociale" title="Includi in QR"
+                                                aria-label="Includi Ragione Sociale nel QR"
+                                                class="size-4 accent-blue-500" checked />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="glass-field-container">
+                                        <label class="view-label" for="piva">Partita IVA</label>
+                                        <div class="detail-field-box border-glow">
+                                            <span class="material-symbols-outlined ml-4 opacity-40">tag</span>
+                                            <input id="piva" type="tel" class="detail-field-input"
+                                                placeholder="Partita IVA" />
+                                            <div class="detail-field-actions pr-4">
+                                                <input type="checkbox" data-qr-field="partitaIva" title="Includi in QR"
+                                                    aria-label="Includi Partita IVA nel QR"
+                                                    class="size-4 accent-blue-500" checked />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-field-container">
+                                        <label class="view-label" for="codice-sdi">Codice SDI</label>
+                                        <div class="detail-field-box border-glow">
+                                            <span class="material-symbols-outlined ml-4 opacity-40">qr_code</span>
+                                            <input id="codice-sdi" type="text"
+                                                class="detail-field-input uppercase tracking-widest"
+                                                placeholder="Codice SDI" maxlength="7" />
+                                            <div class="detail-field-actions pr-4">
+                                                <input type="checkbox" data-qr-field="codiceSDI" title="Includi in QR"
+                                                    aria-label="Includi Codice SDI nel QR"
+                                                    class="size-4 accent-blue-500" checked />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                    </div>
+                    </section>
+
+                    <!-- 2. Referente Aziendale -->
+                    <section class="mt-8">
+                        <div class="detail-section-header">
                             <span
-                                class="text-3xs font-black uppercase tracking-widest text-blue-400 opacity-50">Obbligatorio</span>
+                                class="material-symbols-outlined detail-section-icon icon-accent-emerald">person</span>
+                            <h3 class="detail-section-title">Referente Aziendale</h3>
+                        </div>
+
+                        <div class="glass-card p-5 mt-4 flex-col-gap">
+                            <div class="referent-header">
+                                <div id="btn-trigger-ref-photo"
+                                    class="referent-avatar-box cursor-pointer group relative">
+                                    <img id="referente-photo-preview" class="size-full object-cover hidden rounded-full"
+                                        src="" />
+                                    <span id="referente-photo-placeholder"
+                                        class="material-symbols-outlined text-2xl opacity-20">person</span>
+                                    <div class="qr-zoom-indicator">
+                                        <span class="material-symbols-outlined text-[10px]">edit</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="referente-photo-upload" accept="image/*" class="hidden" />
+                                <div class="flex-1">
+                                    <div class="glass-field-container">
+                                        <label class="view-label" for="referente-titolo">Ruolo / Titolo</label>
+                                        <div class="detail-field-box border-glow h-11">
+                                            <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
+                                            <input id="referente-titolo" type="text" class="detail-field-input"
+                                                placeholder="es. Amministratore" />
+                                            <div class="detail-field-actions pr-4">
+                                                <input type="checkbox" data-qr-field="referenteTitolo"
+                                                    aria-label="Includi Ruolo nel QR" class="size-3.5 accent-purple-500"
+                                                    checked />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="referente-nome">Nome</label>
+                                    <div class="detail-field-box border-glow h-11">
+                                        <input id="referente-nome" type="text" class="detail-field-input"
+                                            placeholder="Nome" />
+                                        <div class="detail-field-actions pr-4">
+                                            <input type="checkbox" data-qr-field="referenteNome"
+                                                aria-label="Includi Nome nel QR" class="size-3.5 accent-purple-500"
+                                                checked />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="referente-cognome">Cognome</label>
+                                    <div class="detail-field-box border-glow h-11">
+                                        <input id="referente-cognome" type="text" class="detail-field-input"
+                                            placeholder="Cognome" />
+                                        <div class="detail-field-actions pr-4">
+                                            <input type="checkbox" data-qr-field="referenteCognome"
+                                                aria-label="Includi Cognome nel QR" class="size-3.5 accent-purple-500"
+                                                checked />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="glass-field-container">
+                                <label class="view-label" for="referente-cellulare">Cellulare / WhatsApp</label>
+                                <div class="detail-field-box border-glow h-11">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
+                                    <input id="referente-cellulare" type="tel" class="detail-field-input"
+                                        placeholder="Cellulare" />
+                                    <div class="detail-field-actions pr-4">
+                                        <input type="checkbox" data-qr-field="referenteCellulare"
+                                            aria-label="Includi Cellulare nel QR" class="size-3.5 accent-purple-500"
+                                            checked />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. Sedi & Localizzazioni -->
+                    <section class="mt-8">
+                        <div class="detail-section-header flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="material-symbols-outlined detail-section-icon icon-accent-blue">location_on</span>
+                                <h3 class="detail-section-title">Sedi & Localizzazioni</h3>
+                            </div>
+                            <button type="button" id="btn-add-sede"
+                                class="size-8 rounded-full bg-blue-500/10 flex-center border border-blue-500/20 active:scale-95 transition-all text-blue-400 hover:bg-blue-500/20">
+                                <span class="material-symbols-outlined text-lg">add</span>
+                            </button>
+                        </div>
+
+                        <div class="flex-col-gap mt-4">
+                            <!-- Sede Legale (Always present) -->
+                            <div class="glass-card overflow-hidden">
+                                <button class="accordion-trigger-premium group btn-toggle-section"
+                                    data-target="section-legale">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-blue-400">gavel</span>
+                                        <span class="text-2xs font-bold uppercase tracking-widest text-white">Sede
+                                            Legale</span>
+                                        <div class="flex items-center gap-1 ml-2 opacity-40">
+                                            <input type="checkbox" data-qr-field="qrLegale"
+                                                class="size-3.5 accent-blue-500" checked data-stop-propagation
+                                                aria-label="Includi Sede Legale nel QR" />
+                                            <span class="text-[8px] font-bold uppercase">QR</span>
+                                        </div>
+                                    </div>
+                                    <span id="arrow-section-legale"
+                                        class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
+                                </button>
+                                <div id="section-legale"
+                                    class="collapsible-section px-5 pb-5 pt-2 flex-col-gap overflow-hidden max-h-0 transition-all duration-300 ease-out">
+                                    <div class="grid grid-cols-[3fr_1fr] gap-3">
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="indirizzo">Indirizzo</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="indirizzo" type="text" class="detail-field-input"
+                                                    placeholder="Via / Piazza" />
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="civico">N.</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="civico" type="text" class="detail-field-input text-center"
+                                                    placeholder="Civico" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="citta">Città</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="citta" type="text" class="detail-field-input"
+                                                    placeholder="Città" />
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="provincia">Prov</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="provincia" type="text"
+                                                    class="detail-field-input text-center uppercase" placeholder="PR"
+                                                    maxlength="2" />
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="cap">CAP</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="cap" type="tel" class="detail-field-input text-center"
+                                                    placeholder="CAP" maxlength="5" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="numero-cciaa">CCIAA</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="numero-cciaa" type="text" class="detail-field-input"
+                                                    placeholder="REA..." />
+                                                <div class="detail-field-actions pr-4">
+                                                    <input type="checkbox" data-qr-field="numeroCCIAA"
+                                                        aria-label="Includi Numero CCIAA nel QR"
+                                                        class="size-3.5 accent-blue-500" checked />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="data-iscrizione">Data Iscrizione</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="data-iscrizione" type="date" class="detail-field-input" />
+                                                <div class="detail-field-actions pr-4">
+                                                    <input type="checkbox" data-qr-field="dataIscrizione"
+                                                        aria-label="Includi Data Iscrizione nel QR"
+                                                        class="size-3.5 accent-blue-500" checked />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Sedi Container -->
+                            <div id="altre-sedi-container" class="flex flex-col gap-4">
+                                <!-- Dynamic Content Here -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. Email Aziendali -->
+                    <section class="mt-8">
+                        <div class="detail-section-header">
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-emerald">mail</span>
+                            <h3 class="detail-section-title">Email & PEC</h3>
+                        </div>
+
+                        <div class="glass-card p-5 mt-4 flex-col-gap-5">
+                            <div id="section-email" class="flex-col-gap-5">
+                                <!-- PEC -->
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                    <div class="flex items-center justify-between mb-3 px-1">
+                                        <span
+                                            class="text-[9px] font-black uppercase tracking-widest text-emerald-400">PEC
+                                            Aziendale</span>
+                                        <div class="flex items-center gap-1 opacity-40">
+                                            <input type="checkbox" data-qr-field="aziendaEmail"
+                                                aria-label="Includi PEC nel QR" class="size-3 accent-emerald-500"
+                                                checked />
+                                            <span class="text-[8px] font-bold uppercase">QR</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-col-gap-3">
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="email-pec">Indirizzo PEC</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="email-pec" type="email" class="detail-field-input"
+                                                    placeholder="email@pec.it" />
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="email-pec-password">Password PEC</label>
+                                            <div class="detail-field-box border-glow h-10">
+                                                <input id="email-pec-password" type="text"
+                                                    class="detail-field-input base-shield" placeholder="Password PEC" />
+                                                <div class="detail-field-actions pr-2">
+                                                    <button class="btn-toggle-pass size-8 flex-center text-white/20"
+                                                        data-target="email-pec-password">
+                                                        <span
+                                                            class="material-symbols-outlined text-sm">visibility</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <label class="view-label" for="email-pec-note">Note Accesso</label>
+                                            <div
+                                                class="detail-field-box border-glow !block p-0 rounded-2xl min-h-[80px] overflow-hidden">
+                                                <textarea id="email-pec-note"
+                                                    class="w-full h-full p-3 bg-transparent appearance-none border-none text-xs text-white/70 outline-none focus:outline-none focus:ring-0 ring-0 resize-none leading-relaxed"
+                                                    placeholder="Note accesso PEC..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Grid Other Emails -->
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex-col-gap-3">
+                                        <span
+                                            class="text-[9px] font-black uppercase tracking-widest text-blue-400 px-1">Amministrazione</span>
+                                        <div class="glass-field-container">
+                                            <div class="detail-field-box border-glow h-9">
+                                                <input id="email-amministrazione" type="email"
+                                                    class="detail-field-input" aria-label="Email Amministrazione"
+                                                    placeholder="Email Amministrazione" />
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <div class="detail-field-box border-glow h-9">
+                                                <input id="email-amministrazione-password" type="text"
+                                                    aria-label="Password Amministrazione"
+                                                    class="detail-field-input base-shield"
+                                                    placeholder="Password Amministrazione" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex-col-gap-3">
+                                        <span
+                                            class="text-[9px] font-black uppercase tracking-widest text-purple-400 px-1">Personale</span>
+                                        <div class="glass-field-container">
+                                            <div class="detail-field-box border-glow h-9">
+                                                <input id="email-personale" type="email" class="detail-field-input"
+                                                    aria-label="Email Personale" placeholder="Email Personale" />
+                                            </div>
+                                        </div>
+                                        <div class="glass-field-container">
+                                            <div class="detail-field-box border-glow h-9">
+                                                <input id="email-personale-password" type="text"
+                                                    aria-label="Password Personale"
+                                                    class="detail-field-input base-shield"
+                                                    placeholder="Password Personale" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Extra Emails Container -->
+                                <div id="email-extra-container" class="flex-col-gap-4"></div>
+
+                                <button type="button" id="btn-add-email"
+                                    class="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors mt-2 self-start">
+                                    <span class="material-symbols-outlined text-lg">add_circle</span>
+                                    <span>Aggiungi Email</span>
+                                </button>
+                            </div>
+                    </section>
+
+                    <!-- 5. Note & Allegati -->
+                    <section class="mt-8 mb-10">
+                        <div class="detail-section-header">
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber">edit_note</span>
+                            <h3 class="detail-section-title">Note & Allegati</h3>
                         </div>
 
                         <div class="glass-card p-5 mt-4 flex-col-gap">
                             <div class="glass-field-container">
-                                <label class="view-label" for="ragione-sociale">Ragione Sociale</label>
-                                <div class="detail-field-box border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">business</span>
-                                    <input id="ragione-sociale" type="text" class="detail-field-input"
-                                        placeholder="Ragione Sociale" />
-                                    <div class="detail-field-actions pr-4">
-                                        <input type="checkbox" data-qr-field="ragioneSociale" title="Includi in QR"
-                                            aria-label="Includi Ragione Sociale nel QR" class="size-4 accent-blue-500"
-                                            checked />
-                                    </div>
+                                <label class="view-label" for="note-azienda">Note Aziendali</label>
+                                <div
+                                    class="detail-field-box border-glow !block p-0 rounded-2xl min-h-[120px] overflow-hidden">
+                                    <textarea id="note-azienda"
+                                        class="w-full h-full p-4 bg-transparent appearance-none border-none text-sm text-white/80 outline-none focus:outline-none focus:ring-0 ring-0 resize-none leading-relaxed"
+                                        placeholder="Dati aggiuntivi (Telefono, Fax, Note...)"></textarea>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="glass-field-container">
-                                    <label class="view-label" for="piva">Partita IVA</label>
-                                    <div class="detail-field-box border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">tag</span>
-                                        <input id="piva" type="tel" class="detail-field-input"
-                                            placeholder="Partita IVA" />
-                                        <div class="detail-field-actions pr-4">
-                                            <input type="checkbox" data-qr-field="partitaIva" title="Includi in QR"
-                                                aria-label="Includi Partita IVA nel QR" class="size-4 accent-blue-500"
-                                                checked />
-                                        </div>
-                                    </div>
+                            <div class="mt-2">
+                                <div id="attachments-list" class="flex-col-gap-2">
+                                    <!-- Injected via JS -->
+                                    <p class="text-[10px] text-white/10 uppercase text-center py-4 tracking-widest">
+                                        Nessun
+                                        allegato caricato</p>
                                 </div>
 
-                                <div class="glass-field-container">
-                                    <label class="view-label" for="codice-sdi">Codice SDI</label>
-                                    <div class="detail-field-box border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">qr_code</span>
-                                        <input id="codice-sdi" type="text"
-                                            class="detail-field-input uppercase tracking-widest"
-                                            placeholder="Codice SDI" maxlength="7" />
-                                        <div class="detail-field-actions pr-4">
-                                            <input type="checkbox" data-qr-field="codiceSDI" title="Includi in QR"
-                                                aria-label="Includi Codice SDI nel QR" class="size-4 accent-blue-500"
-                                                checked />
-                                        </div>
-                                    </div>
-                                </div>
+                                <button type="button" id="btn-trigger-upload"
+                                    class="w-full mt-4 py-5 bg-blue-500/5 border border-dashed border-blue-500/20 rounded-2xl flex-center gap-3 hover:bg-blue-500/10 transition-all group">
+                                    <span
+                                        class="material-symbols-outlined text-xl text-blue-400/40 group-hover:scale-110 transition-transform">add_circle</span>
+                                    <span class="text-2xs font-black uppercase text-blue-400 tracking-widest">Aggiungi
+                                        Documento o Foto</span>
+                                </button>
                             </div>
-
                         </div>
+                    </section>
+
                 </div>
-                </section>
-
-                <!-- 2. Referente Aziendale -->
-                <section class="mt-8">
-                    <div class="detail-section-header">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-emerald">person</span>
-                        <h3 class="detail-section-title">Referente Aziendale</h3>
-                    </div>
-
-                    <div class="glass-card p-5 mt-4 flex-col-gap">
-                        <div class="referent-header">
-                            <div id="btn-trigger-ref-photo" class="referent-avatar-box cursor-pointer group relative">
-                                <img id="referente-photo-preview" class="size-full object-cover hidden rounded-full"
-                                    src="" />
-                                <span id="referente-photo-placeholder"
-                                    class="material-symbols-outlined text-2xl opacity-20">person</span>
-                                <div class="qr-zoom-indicator">
-                                    <span class="material-symbols-outlined text-[10px]">edit</span>
-                                </div>
-                            </div>
-                            <input type="file" id="referente-photo-upload" accept="image/*" class="hidden" />
-                            <div class="flex-1">
-                                <div class="glass-field-container">
-                                    <label class="view-label" for="referente-titolo">Ruolo / Titolo</label>
-                                    <div class="detail-field-box border-glow h-11">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
-                                        <input id="referente-titolo" type="text" class="detail-field-input"
-                                            placeholder="es. Amministratore" />
-                                        <div class="detail-field-actions pr-4">
-                                            <input type="checkbox" data-qr-field="referenteTitolo"
-                                                aria-label="Includi Ruolo nel QR" class="size-3.5 accent-purple-500"
-                                                checked />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="glass-field-container">
-                                <label class="view-label" for="referente-nome">Nome</label>
-                                <div class="detail-field-box border-glow h-11">
-                                    <input id="referente-nome" type="text" class="detail-field-input"
-                                        placeholder="Nome" />
-                                    <div class="detail-field-actions pr-4">
-                                        <input type="checkbox" data-qr-field="referenteNome"
-                                            aria-label="Includi Nome nel QR" class="size-3.5 accent-purple-500"
-                                            checked />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="glass-field-container">
-                                <label class="view-label" for="referente-cognome">Cognome</label>
-                                <div class="detail-field-box border-glow h-11">
-                                    <input id="referente-cognome" type="text" class="detail-field-input"
-                                        placeholder="Cognome" />
-                                    <div class="detail-field-actions pr-4">
-                                        <input type="checkbox" data-qr-field="referenteCognome"
-                                            aria-label="Includi Cognome nel QR" class="size-3.5 accent-purple-500"
-                                            checked />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="glass-field-container">
-                            <label class="view-label" for="referente-cellulare">Cellulare / WhatsApp</label>
-                            <div class="detail-field-box border-glow h-11">
-                                <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
-                                <input id="referente-cellulare" type="tel" class="detail-field-input"
-                                    placeholder="Cellulare" />
-                                <div class="detail-field-actions pr-4">
-                                    <input type="checkbox" data-qr-field="referenteCellulare"
-                                        aria-label="Includi Cellulare nel QR" class="size-3.5 accent-purple-500"
-                                        checked />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 3. Sedi & Localizzazioni -->
-                <section class="mt-8">
-                    <div class="detail-section-header flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-blue">location_on</span>
-                            <h3 class="detail-section-title">Sedi & Localizzazioni</h3>
-                        </div>
-                        <button type="button" id="btn-add-sede"
-                            class="size-8 rounded-full bg-blue-500/10 flex-center border border-blue-500/20 active:scale-95 transition-all text-blue-400 hover:bg-blue-500/20">
-                            <span class="material-symbols-outlined text-lg">add</span>
-                        </button>
-                    </div>
-
-                    <div class="flex-col-gap mt-4">
-                        <!-- Sede Legale (Always present) -->
-                        <div class="glass-card overflow-hidden">
-                            <button class="accordion-trigger-premium group btn-toggle-section"
-                                data-target="section-legale">
-                                <div class="flex items-center gap-3">
-                                    <span class="material-symbols-outlined text-blue-400">gavel</span>
-                                    <span class="text-2xs font-bold uppercase tracking-widest text-white">Sede
-                                        Legale</span>
-                                    <div class="flex items-center gap-1 ml-2 opacity-40">
-                                        <input type="checkbox" data-qr-field="qrLegale" class="size-3.5 accent-blue-500"
-                                            checked data-stop-propagation aria-label="Includi Sede Legale nel QR" />
-                                        <span class="text-[8px] font-bold uppercase">QR</span>
-                                    </div>
-                                </div>
-                                <span id="arrow-section-legale"
-                                    class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
-                            </button>
-                            <div id="section-legale"
-                                class="collapsible-section px-5 pb-5 pt-2 flex-col-gap overflow-hidden max-h-0 transition-all duration-300 ease-out">
-                                <div class="grid grid-cols-[3fr_1fr] gap-3">
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="indirizzo">Indirizzo</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="indirizzo" type="text" class="detail-field-input"
-                                                placeholder="Via / Piazza" />
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="civico">N.</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="civico" type="text" class="detail-field-input text-center"
-                                                placeholder="Civico" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-3 gap-3">
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="citta">Città</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="citta" type="text" class="detail-field-input"
-                                                placeholder="Città" />
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="provincia">Prov</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="provincia" type="text"
-                                                class="detail-field-input text-center uppercase" placeholder="PR"
-                                                maxlength="2" />
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="cap">CAP</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="cap" type="tel" class="detail-field-input text-center"
-                                                placeholder="CAP" maxlength="5" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="numero-cciaa">CCIAA</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="numero-cciaa" type="text" class="detail-field-input"
-                                                placeholder="REA..." />
-                                            <div class="detail-field-actions pr-4">
-                                                <input type="checkbox" data-qr-field="numeroCCIAA"
-                                                    aria-label="Includi Numero CCIAA nel QR"
-                                                    class="size-3.5 accent-blue-500" checked />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="data-iscrizione">Data Iscrizione</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="data-iscrizione" type="date" class="detail-field-input" />
-                                            <div class="detail-field-actions pr-4">
-                                                <input type="checkbox" data-qr-field="dataIscrizione"
-                                                    aria-label="Includi Data Iscrizione nel QR"
-                                                    class="size-3.5 accent-blue-500" checked />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dynamic Sedi Container -->
-                        <div id="altre-sedi-container" class="flex flex-col gap-4">
-                            <!-- Dynamic Content Here -->
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 4. Email Aziendali -->
-                <section class="mt-8">
-                    <div class="detail-section-header">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-emerald">mail</span>
-                        <h3 class="detail-section-title">Email & PEC</h3>
-                    </div>
-
-                    <div class="glass-card p-5 mt-4 flex-col-gap-5">
-                        <div id="section-email" class="flex-col-gap-5">
-                            <!-- PEC -->
-                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
-                                <div class="flex items-center justify-between mb-3 px-1">
-                                    <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400">PEC
-                                        Aziendale</span>
-                                    <div class="flex items-center gap-1 opacity-40">
-                                        <input type="checkbox" data-qr-field="aziendaEmail"
-                                            aria-label="Includi PEC nel QR" class="size-3 accent-emerald-500" checked />
-                                        <span class="text-[8px] font-bold uppercase">QR</span>
-                                    </div>
-                                </div>
-                                <div class="flex-col-gap-3">
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="email-pec">Indirizzo PEC</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="email-pec" type="email" class="detail-field-input"
-                                                placeholder="email@pec.it" />
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="email-pec-password">Password PEC</label>
-                                        <div class="detail-field-box border-glow h-10">
-                                            <input id="email-pec-password" type="text"
-                                                class="detail-field-input base-shield" placeholder="Password PEC" />
-                                            <div class="detail-field-actions pr-2">
-                                                <button class="btn-toggle-pass size-8 flex-center text-white/20"
-                                                    data-target="email-pec-password">
-                                                    <span class="material-symbols-outlined text-sm">visibility</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <label class="view-label" for="email-pec-note">Note Accesso</label>
-                                        <div
-                                            class="detail-field-box border-glow !block p-0 rounded-2xl min-h-[80px] overflow-hidden">
-                                            <textarea id="email-pec-note"
-                                                class="w-full h-full p-3 bg-transparent appearance-none border-none text-xs text-white/70 outline-none focus:outline-none focus:ring-0 ring-0 resize-none leading-relaxed"
-                                                placeholder="Note accesso PEC..."></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Grid Other Emails -->
-                            <div class="grid grid-cols-1 gap-4">
-                                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex-col-gap-3">
-                                    <span
-                                        class="text-[9px] font-black uppercase tracking-widest text-blue-400 px-1">Amministrazione</span>
-                                    <div class="glass-field-container">
-                                        <div class="detail-field-box border-glow h-9">
-                                            <input id="email-amministrazione" type="email" class="detail-field-input"
-                                                aria-label="Email Amministrazione"
-                                                placeholder="Email Amministrazione" />
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <div class="detail-field-box border-glow h-9">
-                                            <input id="email-amministrazione-password" type="text"
-                                                aria-label="Password Amministrazione"
-                                                class="detail-field-input base-shield"
-                                                placeholder="Password Amministrazione" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex-col-gap-3">
-                                    <span
-                                        class="text-[9px] font-black uppercase tracking-widest text-purple-400 px-1">Personale</span>
-                                    <div class="glass-field-container">
-                                        <div class="detail-field-box border-glow h-9">
-                                            <input id="email-personale" type="email" class="detail-field-input"
-                                                aria-label="Email Personale" placeholder="Email Personale" />
-                                        </div>
-                                    </div>
-                                    <div class="glass-field-container">
-                                        <div class="detail-field-box border-glow h-9">
-                                            <input id="email-personale-password" type="text"
-                                                aria-label="Password Personale" class="detail-field-input base-shield"
-                                                placeholder="Password Personale" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Extra Emails Container -->
-                            <div id="email-extra-container" class="flex-col-gap-4"></div>
-
-                            <button type="button" id="btn-add-email"
-                                class="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors mt-2 self-start">
-                                <span class="material-symbols-outlined text-lg">add_circle</span>
-                                <span>Aggiungi Email</span>
-                            </button>
-                        </div>
-                </section>
-
-                <!-- 5. Note & Allegati -->
-                <section class="mt-8 mb-10">
-                    <div class="detail-section-header">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-amber">edit_note</span>
-                        <h3 class="detail-section-title">Note & Allegati</h3>
-                    </div>
-
-                    <div class="glass-card p-5 mt-4 flex-col-gap">
-                        <div class="glass-field-container">
-                            <label class="view-label" for="note-azienda">Note Aziendali</label>
-                            <div
-                                class="detail-field-box border-glow !block p-0 rounded-2xl min-h-[120px] overflow-hidden">
-                                <textarea id="note-azienda"
-                                    class="w-full h-full p-4 bg-transparent appearance-none border-none text-sm text-white/80 outline-none focus:outline-none focus:ring-0 ring-0 resize-none leading-relaxed"
-                                    placeholder="Dati aggiuntivi (Telefono, Fax, Note...)"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="mt-2">
-                            <div id="attachments-list" class="flex-col-gap-2">
-                                <!-- Injected via JS -->
-                                <p class="text-[10px] text-white/10 uppercase text-center py-4 tracking-widest">Nessun
-                                    allegato caricato</p>
-                            </div>
-
-                            <button type="button" id="btn-trigger-upload"
-                                class="w-full mt-4 py-5 bg-blue-500/5 border border-dashed border-blue-500/20 rounded-2xl flex-center gap-3 hover:bg-blue-500/10 transition-all group">
-                                <span
-                                    class="material-symbols-outlined text-xl text-blue-400/40 group-hover:scale-110 transition-transform">add_circle</span>
-                                <span class="text-2xs font-black uppercase text-blue-400 tracking-widest">Aggiungi
-                                    Documento o Foto</span>
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
             </div>
-    </div>
-    </main>
+        </main>
 
-    <div class="spacer-footer"></div>
-    <!-- FOOTER PLACEHOLDER -->
-    <footer id="footer-placeholder" class="base-footer"></footer>
+        <div class="spacer-footer"></div>
+        <!-- FOOTER PLACEHOLDER -->
+        <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
     <!-- Hidden File Inputs -->
@@ -514,8 +523,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Scripts -->
+    </main>
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/modules/azienda/modifica_azienda.js"></script>
 </body>

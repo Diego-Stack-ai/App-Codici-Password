@@ -1,0 +1,21 @@
+{
+    "removed_classes": [
+        ".modal-overlay",
+        ".modal-box",
+        "#toast",
+        ".btn-primary",
+        ".form-group",
+        ".input",
+        ".card",
+        ".card-hero",
+        ".border-glow",
+        ".vault",
+        ".fab-group",
+        ".btn-fab-scadenza",
+        ".btn-fab-azienda",
+        ".btn-fab-privato",
+        ".btn-fab-action",
+        ".qr-code-box",
+        ".qr-code-display"
+    ]
+}

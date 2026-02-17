@@ -219,14 +219,14 @@ function generateVCard(user, data) {
         if (existingCanvas) existingCanvas.remove();
         if (existingImg) existingImg.remove();
 
-        new QRCode(previewDest, { text: vcardStr, width: 80, height: 80, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.L });
+        new QRCode(previewDest, { text: vcardStr, width: 80, height: 80, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: QRCode.CorrectLevel.L });
     }
 
     // QR Zoom (Large)
     const dest = document.getElementById('qrcode-zoom');
     if (dest && typeof QRCode !== 'undefined') {
         clearElement(dest);
-        new QRCode(dest, { text: vcardStr, width: 250, height: 250, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+        new QRCode(dest, { text: vcardStr, width: 250, height: 250, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: QRCode.CorrectLevel.H });
     }
 }
 

@@ -147,10 +147,10 @@
 
 /* --- 6. UTILITY SPACER (Footer & Header Safety) --- */
 .pb-footer-extra {
-    padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
 }
 
 .pt-header-extra {
-    padding-top: calc(100px + env(safe-area-inset-top)) !important;
+    padding-top: calc(100px + env(safe-area-inset-top));
     /* Spazio sicuro per evitare overlap col header fisso */
 }

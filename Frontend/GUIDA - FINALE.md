@@ -1,8 +1,7 @@
-GUIDA DI TRANSIZIONE V4.0 (Consolidata e Aggiornata)
+GUIDA DI TRANSIZIONE V4.0 → V5.0 (Consolidata e Aggiornata)
 
-Questa guida documenta il processo completo di migrazione e standardizzazione delle pagine dell’applicazione, integrando la base consolidata e le best practice V4.0.
-
-⚠️ Nota: Questa versione aggiornata integra esempi completi, concetti chiave, stratificazione della base e logiche JS/CSS.
+Questa guida documenta il processo completo di migrazione e standardizzazione delle pagine dell’applicazione, integrando la base consolidata e le best practice V4.0/V5.0.
+⚠️ Include esempi, memo operativi, logiche JS/CSS e stratificazione aggiornata.
 
 1) Stato Iniziale (Pre-Migrazione)
 
@@ -12,16 +11,17 @@ Stili inline sparsi e classi generiche non semantiche.
 
 Nessuna stratificazione chiara della base visuale e del layout.
 
-File CSS caricati (esempio pre-migrazione)
+Esempio file CSS pre-migrazione:
+
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/operatore.css?v=3.6">
 
-2) Architettura Target V4.0
+2) Architettura Target V4.0 / V5.0
 2.1 Stratificazione della Base Consolidata
 
 Sfondo Pagina (.base-bg)
 
-Gradiente reagente al tema (Light/Dark).
+Gradiente reagente al tema (Light/Dark)
 
 Variabile CSS: --base-box-gradient
 
@@ -34,13 +34,11 @@ body.base-bg {
 
 Faro Decorativo (.base-glow)
 
-HTML: <div class="base-glow"></div> all’interno di .base-container, prima dell’header.
+HTML: <div class="base-glow"></div> dentro .base-container, prima dell’header
 
-Posizionamento: fixed, centrato orizzontalmente.
+Posizionamento: fixed, centrato orizzontalmente, z-index: 1
 
-Z-index: 1
-
-Dimensioni: width 150%, height 300%
+Dimensioni: width: 150%, height: 300%
 
 Animazione: glowFloat 5s infinite
 
@@ -54,7 +52,7 @@ Colore: --glow-color (Light/Dark)
     width: 150%;
     height: 300%;
     z-index: 1;
-    background: var(--glow-color); /* Gradiente reattivo */
+    background: var(--glow-color);
     pointer-events: none;
     animation: glowFloat 5s ease-in-out infinite;
 }
@@ -64,7 +62,7 @@ Contenitore Principale (.base-container)
 
 Layout: flex column
 
-Centratura: max-width 960px + margin: 0 auto
+Centratura: max-width: 960px + margin: 0 auto
 
 Padding responsivo:
 
@@ -82,95 +80,80 @@ Evita overlap con header/footer fissi
     </div>
 </main>
 
-2.2 Sistema CSS Modularizzato
-File	Contenuto/Scopo
-core.css	Base visiva, variabili CSS, reset globale
-core_fonts.css	Definizione font e simboli
-core_fascie.css	Header/Footer comuni, padding safe-area
-core_pagine.css	Componenti condivisi (card, item, toggle, dropdown)
-core_moduli.css	Componenti gestionali (liste, archivio, configurazioni)
-core-[pagina].css	Componenti dedicati alla pagina specifica
+2.2 Sistema CSS Modularizzato (Aggiornato V4.0 / V5.0)
+2.2.1 Regole Generali
+
+core.css
+Base visiva, dual-mode, solo struttura (~5KB). Non contiene bottoni, form, card.
+
+core_fonts.css
+Font e simboli comuni. Eliminato fonts.css.
+
+core_fascie.css
+Header/footer e padding safe-area. Caricato solo dove servono fasce (Core, Moduli Gestionali, Step 2).
+
+CSS dedicato per pagina
+Ogni pagina Step2 ha [pagina].css.
+Altri moduli: moduli.css, scadenze.css, accesso.css.
+
+2.2.2 Tabella Pagine e CSS di Riferimento
+Tipologia	Pagina	CSS di Riferimento
+Auth Pages	index.html	core.css + core_fonts.css + accesso.css
+	registrati.html	core.css + core_fonts.css + accesso.css
+	reset_password.html	core.css + core_fonts.css + accesso.css
+	imposta_nuova_password.html	core.css + core_fonts.css + accesso.css
+Core Pages Standard	impostazioni.html	core.css + core_fonts.css + core_fascie.css + core_pagine.css
+	privacy.html	core.css + core_fonts.css + core_fascie.css + core_pagine.css
+Moduli Gestionali	configurazione_generali.html	core.css + core_fonts.css + moduli.css
+	configurazione_documenti.html	core.css + core_fonts.css + moduli.css
+	configurazione_automezzi.html	core.css + core_fonts.css + moduli.css
+Scadenze	scadenze.html	core.css + core_fonts.css + scadenze.css
+	dettaglio_scadenza.html	core.css + core_fonts.css + scadenze.css
+	aggiungi_scadenza.html	core.css + core_fonts.css + scadenze.css
+Step 2 – Azienda / Account	profilo_privato.html	core.css + core_fonts.css + core_fascie.css + profilo_privato.css
+...	...	... (tutte le altre Step2 come da elenco originale)
+
+🔹 Nota: tutte le Auth Pages non caricano core_fascie.css.
+
+2.2.3 Note Operative
+
+Tutti i file CSS obsoleti (operatore.css, fonts.css) eliminati.
+
+Modifiche future a core.css devono non alterare le classi isolate in moduli o UI Core.
+
+Ogni modulo o pagina ha un file dedicato per evitare conflitti e garantire modularità.
+
 2.3 Script Loading / Bootstrap JS
-
 2.3.1 Concetto chiave
-Tutte le pagine devono avere un orchestratore JS: `main.js`.
-`main.js` decide cosa attivare in base al contesto: **Auth pages** (login, registrati, reset password) o **Core pages** (home, profilo, dashboard).
 
-Non è sempre necessario caricare manualmente `core.js` o `ui-core.js` se `main.js` li importa e inizializza, ma possono essere caricati esplicitamente per sicurezza in casi specifici (es. Core pages complesse).
+Tutte le pagine devono avere main.js (orchestratore).
 
-**Anti-flicker e tema**: `theme-init.js` deve essere sempre caricato bloccante nell'`<head>`, perché inizializza il tema prima del rendering della pagina evitando il flash bianco.
+core.js e ui-core.js caricate esplicitamente solo se necessario.
 
-2.3.2 Realtà attuale & Ruoli
+theme-init.js deve essere bloccante nell<head> per evitare flash bianco.
 
-Esempio reale (`profilo_privato.html`):
-```html
-<script src="assets/js/theme-init.js"></script>
-<script src="assets/js/core.js"></script>
-<script type="module" src="assets/js/ui-core.js"></script>
-<script type="module" src="assets/js/main.js"></script>
-```
+2.3.2 Ruoli Attuali
+Script	Ruolo
+theme-init.js	Anti-flicker, dual-mode, bloccante <head>
+core.js	Protezioni globali, reveal animato, logiche Core; opzionale sulle Auth
+ui-core.js	Utilities UI (modal, toast, locked UX); importato da main.js
+main.js	Orchestratore modulare, sempre in fondo <body>
+2.3.3 Regole per Tipologia Pagina
 
-Ruoli specifici:
-*   **`theme-init.js`**: (Bloccante) Gestisce Anti-flicker e inizializza il tema (Light/Dark) immediatemente.
-*   **`core.js`**: (IIFE) Gestisce protezioni globali, reveal animato e logiche di sistema. Caricabile prima di `main.js` per sicurezza. Necessario su Core pages; opzionale sulle Auth pages se `theme-init.js` già gestisce il tema.
-*   **`ui-core.js`**: (Modulo) Importato da `main.js`. Contiene utilities UI condivise (toast, modal, locked UX). Non serve inserirlo manualmente salvo test separati.
-*   **`main.js`**: (Modulo Orchestratore) Sempre caricato in fondo al body con `type="module"`. Gestisce:
-    *   Check pagina (Auth / Core)
-    *   Bootstrapping moduli (`ui-core`, `auth-shared`, ecc.)
-    *   Eventi comuni (toast, locked UX, ecc.)
+Auth Pages: theme-init.js + main.js
 
-2.3.3 Regole operative per Tipologia Pagina
+Core Pages: theme-init.js + core.js + main.js
 
-**Auth Pages** (login, registrati, reset password):
-*   Caricano `theme-init.js` (Head) + `main.js` (Body End).
-*   Non serve caricare `core.js` pesante o CSS non necessari.
-*   Devono essere leggere e veloci, con tema coerente già inizializzato da `theme-init.js`.
+Moduli Gestionali: core.js + main.js
 
-**Core Pages** (home, profilo, dashboard, ecc.):
-*   Caricano `theme-init.js` (Head) + `core.js` (Body Start/End) + `main.js` (Body End).
-*   Caricano CSS completi (`core_fascie.css`, `core_pagine.css`, etc).
-*   `core.js` è consigliato esplicitamente per garantire l'inizializzazione robusta del tema e delle protezioni extra.
+Scadenze: core.js + main.js
 
-2.3.4 Esempi HTML Consigliati
+Step 2: core.js + main.js
 
-**Auth Page (Login / Registrati)**
-```html
-<head>
-  <!-- Anti-flicker / Theme Init -->
-  <script src="assets/js/theme-init.js"></script>
-</head>
-<body>
-  <!-- Contenuto pagina -->
-
-  <!-- Scripts -->
-  <script type="module" src="assets/js/main.js"></script>
-</body>
-```
-
-**Core Page (Home / Profilo / Dashboard)**
-```html
-<head>
-  <!-- Anti-flicker / Theme Init -->
-  <script src="assets/js/theme-init.js"></script>
-</head>
-<body>
-  <!-- Contenuto pagina -->
-
-  <!-- Scripts -->
-  <script src="assets/js/core.js"></script>
-  <script type="module" src="assets/js/main.js"></script>
-</body>
-```
-
-2.3.5 Note Importanti
-*   **Ridondanza controllata**: Caricare esplicitamente `core.js` e `ui-core.js` non è un errore; serve sicurezza extra su Core pages complesse.
-*   **Flessibilità Dev vs Prod**: In Dev puoi lasciare tutto esplicito per debugging. In Prod, carica solo quello necessario, mantenendo `theme-init.js` bloccante e `main.js` alla fine.
-*   **Consistenza tema**: Tutte le pagine (Auth e Core) devono usare le stesse variabili CSS e logiche di `theme-init.js` per garantire uniformità Light/Dark.
+🔹 Ridondanza controllata: caricare esplicitamente core.js e ui-core.js non è errore.
 
 3) HTML Refactoring e Classi Semantiche
-
-Esempio login (Auth page):
-
+Auth Page (Login / Registrati)
 <body class="base-bg">
     <div class="base-container">
         <div class="base-glow"></div>
@@ -193,18 +176,7 @@ Esempio login (Auth page):
     </div>
 </body>
 
-
-.vault → contenitore centrale della card
-
-.card → card standard, semantica
-
-.icon-box → icona centrale
-
-.lang-selector-container → Language Selector
-
-.saetta-master / .saetta-drop → decorazioni
-
-3.1 Pagine Core (es. home_page.html)
+Core Page (Home / Profilo / Dashboard)
 <body class="base-bg home-page">
     <div class="base-container">
         <div class="base-glow"></div>
@@ -222,9 +194,9 @@ Esempio login (Auth page):
 </body>
 
 
-#header-placeholder / #footer-placeholder popolati da components.js
+.page-container gestisce safe-area padding
 
-.page-container gestisce safe-area padding e layout centrato
+#header-placeholder / #footer-placeholder popolati da components.js
 
 4) Componenti UI
 
@@ -232,7 +204,7 @@ Card / Item: .settings-item, .item-stack
 
 Toggle: .settings-toggle
 
-Dropdown: .settings-dropdown-panel / .settings-dropdown-btn
+Dropdown: .settings-dropdown-panel, .settings-dropdown-btn
 
 Hero Card: .auth-card + varianti .hero-card-variant
 
@@ -240,72 +212,103 @@ Matrix Cards: .matrix-card con icone, badge, micro-list
 
 5) Dual-Mode (Light / Dark)
 
-Tutti i colori usano CSS variables (var(--card-bg), var(--accent))
+Tutti i colori via CSS variables (var(--card-bg), var(--accent))
 
 .base-bg e .base-glow reagiscono al tema
 
 Header/Footer ereditano colori da variabili globali
 
-6) i18n
+6) i18n & Accessibilità
 
-Tutti i testi devono usare attributi `data-t` per le chiavi di traduzione.
+Tutti i testi con data-t (i18n)
 
-Attributi aria/accessibilità: usare `data-t-aria`.
+Tutti gli attributi ARIA con data-t-aria
 
-**Language Selector**:
-*   Centralizzato nel modulo `assets/js/modules/auth/auth-shared.js`.
-*   Tutte le pagine Auth (`login`, `registrati`, `reset`) devono importare `setupLanguageSelector` da questo modulo.
-*   Evitare duplicazioni della logica di cambio lingua nei singoli file JS.
+Language Selector centralizzato: assets/js/modules/auth/auth-shared.js
 
 7) CSP / Anti-Flicker
 
-Dev: theme-init.js caricato per evitare errori live-server
+Dev: theme-init.js caricato per live-server
 
-Prod: usare core.js o theme-init.js + meta CSP completo
+Prod: core.js o theme-init.js + meta CSP
 
-Live-server richiede momentaneo override hash per evitare blocco
+Override temporaneo hash solo per dev/live-server
 
-8) Checklist di Migrazione
-Pre-Migrazione
+8) Checklist di Migrazione Post-Migrazione
 
- Audit completo della pagina
+Audit completo pagina ✅
 
- Creazione file CSS dedicato se serve (core-[pagina].css)
+File CSS dedicato creato se necessario ✅
 
-HTML Refactoring
+<head> aggiornato con CSS modulare ✅
 
- Aggiornamento <head> con CSS modulare
+Header/Footer placeholder presenti ✅
 
- Header/Footer placeholder
+Safe area padding con .pt-header-extra / .pb-footer-extra ✅
 
- Safe area padding con .pt-header-extra / .pb-footer-extra
+Classi Card, Toggle, Dropdown refattorizzate ✅
 
- Conversione card, toggle, dropdown
+main.js presente in tutte le pagine ✅
 
-JS / Funzionalità
+Eventuali moduli JS specifici importati correttamente ✅
 
- main.js presente in tutte le pagine
+Verifica dual-mode e i18n ✅
 
- auth.js per Auth pages
+Nessun CSS Core modificato ✅
 
- UI modules specifici (login.js, registrati.js)
+Nessun file obsoleto caricato (fonts.css, operatore.css) ✅
 
-Testing
+9) Diagramma Stratificazione Base e CSS (Aggiornato)
+Tutte le pagine condividono
+├─ core.css ⚠️ → Base visiva generale (non sovrascrivere)
+├─ core_fonts.css ⚠️ → Font e simboli comuni (non sovrascrivere)
 
- Visual desktop/mobile
+Pagine Accesso
+├─ accesso.css → Regole specifiche
+└─ HTML BODY
+   └─ body.base-bg
+       └─ div.base-container
+           └─ div.base-glow
+           └─ Contenuto pagina (card, form, toggle, ecc.)
 
- Funzionale click/toggle/dropdown
+Core Pages Standard
+├─ core_fascie.css ⚠️ → Header/Footer (non sovrascrivere)
+├─ core_pagine.css → Componenti condivisi
+└─ HTML BODY
+   └─ body.base-bg
+       └─ div.base-container
+           └─ div.base-glow
+           ├─ header.base-header
+           ├─ main.base-main
+           │  └─ div.page-container.pt-header-extra.pb-footer-extra
+           │     └─ Contenuto pagina
+           └─ footer.base-footer
 
- Dual-mode check
+Moduli Gestionali
+├─ moduli.css → Regole dedicate
+└─ HTML BODY → body.base-bg + div.base-container + div.base-glow + header/main/footer
 
- Traduzioni / i18n
+Scadenze
+├─ scadenze.css → Regole dedicate
+└─ HTML BODY → body.base-bg + div.base-container + div.base-glow + header/main/footer
 
-9) Diagramma Stratificazione Base
-BODY.base-bg
- └─ DIV.base-container
-     ├─ DIV.base-glow
-     ├─ HEADER#header-placeholder.base-header
-     ├─ MAIN.base-main
-     │   └─ DIV.page-container.pt-header-extra.pb-footer-extra
-     │       └─ Contenuto pagina
-     └─ FOOTER#footer-placeholder.base-footer
+Step 2 – Aziende / Account
+├─ [pagina].css → Regole dedicate
+└─ HTML BODY → body.base-bg + div.base-container + div.base-glow + header/main/footer
+
+🔹 Note Finali
+
+Core CSS e Font – Base Inviolabile:
+core.css, core_fonts.css e core_fascie.css non devono essere modificati.
+
+Modularità:
+
+Auth → accesso.css
+
+Moduli → moduli.css
+
+Scadenze → scadenze.css
+
+Step2 → [pagina].css
+
+Tutti i file obsoleti eliminati, aggiornamento centralizzato possibile tramite moduli.css o core_ui.css.

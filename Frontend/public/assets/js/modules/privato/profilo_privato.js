@@ -5,14 +5,28 @@
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
+
+function createCopyBtn(text) {
+    return createElement('button', {
+        className: 'btn-action-mini',
+        title: 'Copia',
+        onclick: (e) => {
+            e.stopPropagation();
+            if (!text || text === '-') return;
+            navigator.clipboard.writeText(text);
+            showToast(t('copied') || 'Copiato!', 'success');
+        }
+    }, [
+        createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
+    ]);
+}
 import { logError, formatDateToIT } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUserUid = null;
@@ -21,21 +35,39 @@ let contactEmails = [];
 let userAddresses = [];
 let contactPhones = [];
 let userDocuments = [];
+let profileLabels = {
+    addressTypes: ['Residenza', 'Domicilio', 'Ufficio', 'Altro'],
+    utilityTypes: ['Codice POD', 'Contatore Acqua', 'Contatore Metano', 'Fibra', 'Altro'],
+    phoneLabels: ['Cellulare', 'Fisso', 'Principale', 'Altro'],
+    emailLabels: ['Personale', 'Lavoro', 'Principale', 'Altro'],
+    documentTypes: ['Carta Identità', 'Patente', 'Codice Fiscale', 'Passaporto', 'Altro']
+};
+
+// QR Code inclusion preferences (which fields to include in vCard)
+let qrCodeInclusions = {
+    nome: false,
+    cf: false,
+    nascita: false,
+    phones: [], // array of indices
+    emails: [], // array of indices
+    addresses: [] // array of indices
+};
 
 // --- DOM CACHE ---
 const avatarImg = document.getElementById('profile-avatar');
 const nameDisplay = document.getElementById('user-display-name');
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // Inizializza Header e Footer secondo Protocollo Base
-    await initComponents();
-
-    observeAuth(async (user) => {
+document.addEventListener('DOMContentLoaded', () => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUserUid = user.uid;
             await loadUserData(user);
             setupAvatarEdit();
             setupDelegation();
+            setupPersonalDataCopy();
+            initProxyDropdowns();
+            setupCollapsibleSections();
+            setupQRToggles();
         }
     });
 });
@@ -58,7 +90,15 @@ async function loadUserData(user) {
         // View Population
         const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
         set('nome-view', fullName);
-        set('cf-view', (currentUserData.cf || currentUserData.codiceFiscale || '').toUpperCase());
+
+        // CF Mapping: Always derived from Documents list (as requested)
+        let cf = '';
+        if (currentUserData.documenti) {
+            const cfDoc = currentUserData.documenti.find(d => d.type && d.type.toLowerCase().includes('fiscale'));
+            if (cfDoc) cf = cfDoc.cf_value || cfDoc.num_serie || cfDoc.id_number || '';
+        }
+        set('cf-view', cf.toUpperCase() || '-');
+
         set('birth_date-view', formatDateToIT(currentUserData.birth_date));
         set('birth_place-view', `${currentUserData.birth_place || ''} ${currentUserData.birth_province ? '(' + currentUserData.birth_province + ')' : ''}`.trim());
         set('note-view', currentUserData.note);
@@ -69,7 +109,20 @@ async function loadUserData(user) {
         contactEmails = currentUserData.contactEmails || [];
         userDocuments = currentUserData.documenti || [];
 
+        // Load Custom Labels
+        const labelsSnap = await getDoc(doc(db, "users", user.uid, "settings", "profileLabels"));
+        if (labelsSnap.exists()) {
+            profileLabels = { ...profileLabels, ...labelsSnap.data() };
+        }
+
+        // Load QR Code Inclusions
+        const qrSnap = await getDoc(doc(db, "users", user.uid, "settings", "qrCodeInclusions"));
+        if (qrSnap.exists()) {
+            qrCodeInclusions = { ...qrCodeInclusions, ...qrSnap.data() };
+        }
+
         renderAllSections();
+        generateProfileQRCode();
     } catch (e) {
         logError("LoadProfile", e);
         showToast(t('error_generic'), "error");
@@ -82,6 +135,104 @@ function renderAllSections() {
     renderEmailsView();
     renderDocumentiView();
 }
+
+/**
+ * PHONES
+ */
+function renderPhonesView() {
+    const container = document.getElementById('telefoni-view-container');
+    if (!container) return;
+    clearElement(container);
+
+    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
+        createElement('span', { className: 'material-symbols-outlined', textContent: 'add_call' }),
+        createElement('span', { textContent: t('add_phone') || 'Aggiungi Telefono' })
+    ]);
+    btnAdd.onclick = () => window.addPhone();
+    container.appendChild(btnAdd);
+
+    const cards = contactPhones.map((phone, idx) => createPhoneCard(phone, idx));
+    setChildren(container, [btnAdd, ...cards]);
+}
+
+function createPhoneCard(phone, idx) {
+    const card = createElement('div', { className: 'form-card' }, [
+        createElement('div', { className: 'card-header-row' }, [
+            createElement('div', { className: 'card-icon-stack' }, [
+                createElement('div', { className: 'card-icon-box' }, [
+                    createElement('span', { className: 'material-symbols-outlined filled', textContent: 'call' })
+                ]),
+                createElement('span', { className: 'card-title-accent', textContent: phone.label || 'Telefono' })
+            ]),
+            createElement('div', { className: 'card-actions-row' }, [
+                createElement('button', { className: 'btn-edit-section', onclick: () => window.editPhone(idx) }, [
+                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                ]),
+                createElement('button', { className: 'btn-edit-section btn-delete', onclick: () => window.deletePhone(idx) }, [
+                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                ])
+            ])
+        ]),
+        createElement('div', { className: 'card-fields-container' }, [
+            createElement('div', { className: 'card-field-group' }, [
+                createElement('div', { className: 'field-header' }, [
+                    createElement('input', {
+                        type: 'checkbox',
+                        className: 'qr-checkbox',
+                        checked: qrCodeInclusions.phones.includes(idx),
+                        onclick: (e) => { e.stopPropagation(); toggleQRInclusion('phones', idx); }
+                    }),
+                    createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
+                    createElement('span', { className: 'data-label', textContent: 'Numero' })
+                ]),
+                createElement('div', { className: 'field-value-row' }, [
+                    createElement('span', { className: 'data-value', textContent: phone.number || '-' }),
+                    createCopyBtn(phone.number)
+                ])
+            ])
+        ])
+    ]);
+    return card;
+}
+
+window.addPhone = async () => {
+    const fields = [
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
+        { key: 'number', label: 'Numero', icon: 'call' }
+    ];
+    showProfileModal('Aggiungi Telefono', fields, {}, async (newData) => {
+        contactPhones.push(newData);
+        await updateDoc(doc(db, "users", currentUserUid), { contactPhones });
+        renderPhonesView();
+        showToast(t('success_save'), "success");
+    });
+};
+
+window.editPhone = async (idx) => {
+    const phone = contactPhones[idx];
+    // Ensure label exists
+    if (!phone.label) {
+        phone.label = profileLabels.phoneLabels[0];
+    }
+    const fields = [
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
+        { key: 'number', label: 'Numero', icon: 'call' }
+    ];
+    showProfileModal('Modifica Telefono', fields, phone, async (newData) => {
+        contactPhones[idx] = newData;
+        await updateDoc(doc(db, "users", currentUserUid), { contactPhones });
+        renderPhonesView();
+        showToast(t('success_save'), "success");
+    });
+};
+
+window.deletePhone = async (idx) => {
+    if (!confirm(t('confirm_delete') || 'Eliminare questo telefono?')) return;
+    contactPhones.splice(idx, 1);
+    await updateDoc(doc(db, "users", currentUserUid), { contactPhones });
+    renderPhonesView();
+    showToast(t('success_delete') || 'Telefono eliminato', "success");
+};
 
 /**
  * AVATAR
@@ -109,6 +260,397 @@ function setupAvatarEdit() {
     };
 }
 
+function setupPersonalDataCopy() {
+    const bind = (btnId, viewId) => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+            btn.onclick = () => {
+                const text = document.getElementById(viewId)?.textContent;
+                if (text && text !== '-') {
+                    navigator.clipboard.writeText(text);
+                    showToast(t('copied') || 'Copiato!', 'success');
+                }
+            };
+        }
+    };
+    bind('copy-nome', 'nome-view');
+    bind('copy-cf', 'cf-view');
+    bind('copy-nascita', 'birth_date-view'); // Default to date for birth
+}
+
+async function saveProfileLabels() {
+    if (!currentUserUid) return;
+    try {
+        await updateDoc(doc(db, "users", currentUserUid, "settings", "profileLabels"), profileLabels);
+    } catch (e) {
+        // Se il doc non esiste, usa setDoc
+        const { setDoc } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
+        await setDoc(doc(db, "users", currentUserUid, "settings", "profileLabels"), profileLabels);
+    }
+}
+
+/**
+ * QR CODE TOGGLES
+ */
+function setupQRToggles() {
+    // Personal data toggles
+    const toggles = [
+        { id: 'qr-toggle-nome', field: 'nome' },
+        { id: 'qr-toggle-cf', field: 'cf' },
+        { id: 'qr-toggle-nascita', field: 'nascita' }
+    ];
+
+    toggles.forEach(({ id, field }) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            // Set initial state
+            btn.checked = qrCodeInclusions[field];
+
+            // Add click handler
+            btn.onclick = async () => {
+                qrCodeInclusions[field] = btn.checked;
+                await saveQRInclusions();
+                generateProfileQRCode();
+            };
+        }
+    });
+}
+
+function updateToggleState(btn, isActive) {
+    if (btn.type === 'checkbox') {
+        btn.checked = isActive;
+    } else {
+        // Toggle logical state via classes or attributes if needed, or keep for now if it's a legacy behavior
+        // But for "Pure HTML", we should avoid direct style injection
+        if (isActive) {
+            btn.classList.add('active');
+            btn.title = 'Rimuovi dal QR Code';
+        } else {
+            btn.classList.remove('active');
+            btn.title = 'Aggiungi al QR Code';
+        }
+    }
+}
+
+async function saveQRInclusions() {
+    if (!currentUserUid) return;
+    try {
+        await updateDoc(doc(db, "users", currentUserUid, "settings", "qrCodeInclusions"), qrCodeInclusions);
+    } catch (e) {
+        const { setDoc } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
+        await setDoc(doc(db, "users", currentUserUid, "settings", "qrCodeInclusions"), qrCodeInclusions);
+    }
+}
+
+async function toggleQRInclusion(type, idx) {
+    const array = qrCodeInclusions[type];
+    const index = array.indexOf(idx);
+
+    if (index > -1) {
+        // Remove from QR
+        array.splice(index, 1);
+    } else {
+        // Add to QR
+        array.push(idx);
+    }
+
+    await saveQRInclusions();
+
+    // Re-render the section to update button state
+    if (type === 'emails') renderEmailsView();
+    else if (type === 'phones') renderPhonesView();
+    else if (type === 'addresses') renderAddressesView();
+
+    // Regenerate QR code
+    generateProfileQRCode();
+}
+
+/**
+ * QR CODE GENERATION
+ */
+async function generateProfileQRCode() {
+    // Load QRCode library if not already loaded
+    if (typeof QRCode === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'assets/js/vendor/qrcode.min.js';
+        document.head.appendChild(script);
+        await new Promise(resolve => {
+            script.onload = resolve;
+            script.onerror = resolve;
+        });
+    }
+
+    if (typeof QRCode === 'undefined') return;
+
+    const container = document.getElementById('qrcode-header');
+    if (!container) return;
+
+    // Clear previous QR code
+    clearElement(container);
+
+    // Build vCard string with only selected fields
+    const fullName = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim();
+
+    let vcardLines = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `FN:${fullName}`
+    ];
+
+    // Add personal data if selected
+    if (qrCodeInclusions.nome) {
+        const fullName = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim();
+        if (fullName) {
+            vcardLines.push(`N:${currentUserData.cognome || ''};${currentUserData.nome || ''};;;`);
+        }
+    }
+
+    if (qrCodeInclusions.cf && currentUserData.cf) {
+        vcardLines.push(`X-CF:${currentUserData.cf}`);
+    }
+
+    if (qrCodeInclusions.nascita && currentUserData.birth_date) {
+        vcardLines.push(`BDAY:${currentUserData.birth_date}`);
+        if (currentUserData.birth_place) {
+            vcardLines.push(`X-BIRTHPLACE:${currentUserData.birth_place}`);
+        }
+    }
+
+    // Add selected phones
+    qrCodeInclusions.phones.forEach(idx => {
+        if (contactPhones[idx]) {
+            vcardLines.push(`TEL:${contactPhones[idx].number}`);
+        }
+    });
+
+    // Add selected emails
+    qrCodeInclusions.emails.forEach(idx => {
+        if (contactEmails[idx]) {
+            vcardLines.push(`EMAIL:${contactEmails[idx].address}`);
+        }
+    });
+
+    // Add selected addresses
+    qrCodeInclusions.addresses.forEach(idx => {
+        if (userAddresses[idx]) {
+            const addr = userAddresses[idx];
+            vcardLines.push(`ADR:;;${addr.address} ${addr.civic};${addr.city};;${addr.cap};`);
+        }
+    });
+
+    vcardLines.push('END:VCARD');
+    const vcard = vcardLines.join('\n');
+
+    // Generate QR code
+    new QRCode(container, {
+        text: vcard,
+        width: 104,
+        height: 104,
+        colorDark: "#000000",
+        colorLight: "#E3F2FD",
+        correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Add click handler to show enlarged QR
+    container.onclick = () => showEnlargedQR(vcard);
+
+    // Also make zoom icon clickable
+    const zoomIcon = document.getElementById('qr-zoom-icon');
+    if (zoomIcon) {
+        zoomIcon.onclick = () => showEnlargedQR(vcard);
+    }
+}
+
+function showEnlargedQR(vcard) {
+    const qrSize = Math.min(window.innerWidth * 0.7, 300);
+
+    const modal = createElement('div', { className: 'modal-overlay' }, [
+        createElement('div', { className: 'modal-profile-box modal-box-qr' }, [
+            createElement('h3', { className: 'modal-title', textContent: 'QR Code Profilo', dataset: { t: 'qr_code_profile' } }),
+            createElement('div', { id: 'qr-enlarged', className: 'qr-zoom-container' }),
+            createElement('button', {
+                className: 'btn-modal btn-secondary',
+                textContent: 'Chiudi',
+                dataset: { t: 'close' },
+                onclick: () => {
+                    modal.classList.remove('active');
+                    setTimeout(() => modal.remove(), 300);
+                }
+            })
+        ])
+    ]);
+
+    document.body.appendChild(modal);
+
+    // Trigger animation
+    setTimeout(() => modal.classList.add('active'), 10);
+
+    // Close on backdrop click
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    };
+
+    // Generate enlarged QR
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(document.getElementById('qr-enlarged'), {
+            text: vcard,
+            width: qrSize,
+            height: qrSize,
+            colorDark: "#000000",
+            colorLight: "#E3F2FD",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+}
+
+/**
+ * COLLAPSIBLE SECTIONS
+ */
+function setupCollapsibleSections() {
+    const headers = document.querySelectorAll('.collapsible-header');
+
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const sectionName = header.dataset.section;
+            const container = document.getElementById(`${sectionName}-view-container`);
+
+            if (!container) return;
+
+            // Toggle collapsed state
+            const isCollapsed = header.classList.contains('collapsed');
+
+            if (isCollapsed) {
+                // Expand
+                header.classList.remove('collapsed');
+                container.classList.remove('collapsed');
+            } else {
+                // Collapse
+                header.classList.add('collapsed');
+                container.classList.add('collapsed');
+            }
+        });
+    });
+}
+
+/**
+ * CUSTOM DROPDOWNS ENGINE
+ */
+function initProxyDropdowns() {
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.dropdown-trigger');
+        const container = trigger?.closest('[data-custom-select]');
+        const menu = container?.querySelector('.base-dropdown-menu');
+
+        // Chiudi tutti gli altri
+        document.querySelectorAll('.base-dropdown-menu.show').forEach(m => {
+            if (m !== menu) m.classList.remove('show');
+        });
+
+        if (trigger && menu) {
+            e.stopPropagation();
+            menu.classList.toggle('show');
+        } else if (!e.target.closest('.base-dropdown-menu')) {
+            document.querySelectorAll('.base-dropdown-menu.show').forEach(m => m.classList.remove('show'));
+        }
+    });
+}
+
+function syncCustomDropdowns(container, configKey = null) {
+    const select = container.querySelector('select');
+    const labelEl = container.querySelector('.dropdown-label');
+    const menu = container.querySelector('.base-dropdown-menu');
+
+    if (!select || !labelEl || !menu) return;
+
+    clearElement(menu);
+    Array.from(select.options).forEach(opt => {
+        const item = createElement('div', {
+            className: `base-dropdown-item ${opt.selected ? 'active' : ''}`,
+            dataset: { value: opt.value },
+            style: 'display: flex; justify-content: space-between; align-items: center;'
+        }, [
+            createElement('span', { textContent: opt.textContent }),
+            (configKey && opt.value !== '') ? createElement('div', { className: 'flex-center-row', style: 'gap: 4px;' }, [
+                createElement('button', {
+                    className: 'btn-action-mini',
+                    style: 'width: 20px; height: 20px; border-radius: 4px; background: rgba(0,0,0,0.05); color: #000;',
+                    onclick: async (ev) => {
+                        ev.stopPropagation();
+                        const newName = prompt("Rinomina voce:", opt.value);
+                        if (newName && newName.trim() && newName !== opt.value) {
+                            const idx = profileLabels[configKey].indexOf(opt.value);
+                            if (idx > -1) {
+                                profileLabels[configKey][idx] = newName.trim();
+                                await saveProfileLabels();
+                                // Re-render logic needed or just re-open the current master modal
+                                showToast("Voce aggiornata!");
+                                // Trigger Refresh
+                                if (window._currentModalRefresh) window._currentModalRefresh();
+                            }
+                        }
+                    }
+                }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 12px;', textContent: 'edit' })]),
+                createElement('button', {
+                    className: 'btn-action-mini',
+                    style: 'width: 20px; height: 20px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); color: #ef4444;',
+                    onclick: async (ev) => {
+                        ev.stopPropagation();
+                        if (confirm(`Eliminare "${opt.value}"?`)) {
+                            profileLabels[configKey] = profileLabels[configKey].filter(v => v !== opt.value);
+                            await saveProfileLabels();
+                            showToast("Voce eliminata!");
+                            if (window._currentModalRefresh) window._currentModalRefresh();
+                        }
+                    }
+                }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 12px;', textContent: 'delete' })])
+            ]) : null
+        ]);
+
+        item.onclick = (e) => {
+            if (e.target.closest('button')) return; // Avoid selection when clicking actions
+            e.stopPropagation();
+            select.value = opt.value;
+            select.dispatchEvent(new Event('change'));
+            labelEl.textContent = opt.textContent;
+            menu.classList.remove('show');
+            menu.querySelectorAll('.base-dropdown-item').forEach(i => i.classList.toggle('active', i.dataset.value === select.value));
+        };
+        menu.appendChild(item);
+    });
+
+    // Add "Manage/New" button
+    if (configKey) {
+        const btnAdd = createElement('div', {
+            className: 'base-dropdown-item',
+            style: 'border-top: 1px dashed rgba(0,0,0,0.1); margin-top: 4px; color: var(--accent); font-weight: 800; display: flex; align-items: center; gap: 8px;',
+            onclick: async (e) => {
+                e.stopPropagation();
+                const newLabel = prompt("Aggiungi nuova voce:");
+                if (newLabel && newLabel.trim()) {
+                    if (!profileLabels[configKey].includes(newLabel.trim())) {
+                        profileLabels[configKey].push(newLabel.trim());
+                        await saveProfileLabels();
+                        showToast("Vode aggiunta!");
+                        if (window._currentModalRefresh) window._currentModalRefresh();
+                    } else {
+                        showToast("Voce già esistente", "info");
+                    }
+                }
+            }
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 18px;', textContent: 'add_circle' }),
+            createElement('span', { textContent: 'Aggiungi voce...' })
+        ]);
+        menu.appendChild(btnAdd);
+    }
+
+    const initialOpt = select.options[select.selectedIndex];
+    if (initialOpt) labelEl.textContent = initialOpt.textContent;
+}
+
 /**
  * ADDRESSES
  */
@@ -117,9 +659,9 @@ function renderAddressesView() {
     if (!container) return;
     clearElement(container);
 
-    const btnAdd = createElement('button', { className: 'glass-card p-4 w-full flex-center gap-2 text-blue-400 mb-4' }, [
+    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
         createElement('span', { className: 'material-symbols-outlined', textContent: 'add_location_alt' }),
-        createElement('span', { className: 'text-[10px] font-black uppercase', textContent: t('add_address') || 'Aggiungi Indirizzo' })
+        createElement('span', { textContent: t('add_address') })
     ]);
     btnAdd.onclick = () => window.editAddress(-1);
     container.appendChild(btnAdd);
@@ -129,38 +671,61 @@ function renderAddressesView() {
 }
 
 function createAddressCard(addr, idx) {
-    const card = createElement('div', { className: 'glass-card p-5 animate-in slide-in-from-bottom-2 duration-300' }, [
-        createElement('div', { className: 'flex items-start justify-between gap-4' }, [
-            createElement('div', { className: 'flex items-center gap-4 min-w-0' }, [
-                createElement('div', { className: 'size-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex-center shrink-0' }, [
+    const card = createElement('div', { className: 'form-card' }, [
+        createElement('div', { className: 'card-header-row' }, [
+            createElement('div', { className: 'card-icon-stack' }, [
+                createElement('div', { className: 'card-icon-box' }, [
                     createElement('span', { className: 'material-symbols-outlined filled', textContent: addr.type === 'Lavoro' ? 'work' : 'home' })
                 ]),
-                createElement('div', { className: 'flex-col min-w-0' }, [
-                    createElement('span', { className: 'text-[9px] font-black uppercase text-white/20 tracking-widest', textContent: addr.type || 'Indirizzo' }),
-                    createElement('span', { className: 'text-xs font-bold text-white uppercase truncate', textContent: `${addr.address} ${addr.civic}` }),
-                    createElement('span', { className: 'text-[10px] font-medium text-white/40 uppercase', textContent: `${addr.cap} ${addr.city} (${addr.province})` })
+                createElement('span', { className: 'card-title-accent', textContent: addr.type || t('profile_addresses') })
+            ]),
+            createElement('div', { className: 'card-actions-row' }, [
+                createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-address', idx } }, [
+                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                ]),
+                createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-address', idx } }, [
+                    createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                ])
+            ])
+        ]),
+        createElement('div', { className: 'card-fields-container' }, [
+            createElement('div', { className: 'card-field-group' }, [
+                createElement('div', { className: 'field-header' }, [
+                    createElement('input', {
+                        type: 'checkbox',
+                        className: 'qr-checkbox',
+                        checked: qrCodeInclusions.addresses.includes(idx),
+                        onclick: (e) => { e.stopPropagation(); toggleQRInclusion('addresses', idx); }
+                    }),
+                    createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
+                    createElement('span', { className: 'data-label', textContent: t('label_address') })
+                ]),
+                createElement('div', { className: 'field-value-row' }, [
+                    createElement('span', { className: 'data-value', textContent: `${addr.address}, ${addr.civic}` }),
+                    createCopyBtn(`${addr.address}, ${addr.civic}`)
                 ])
             ]),
-            createElement('div', { className: 'flex items-center gap-1' }, [
-                createElement('button', { className: 'size-8 rounded-lg bg-white/5 flex-center text-white/20 hover:text-white', dataset: { action: 'edit-address', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
-                ]),
-                createElement('button', { className: 'size-8 rounded-lg bg-red-500/5 flex-center text-red-400/40 hover:text-red-400', dataset: { action: 'delete-address', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+            createElement('div', { className: 'card-field-group' }, [
+                createElement('span', { className: 'data-label', textContent: t('label_locality') }),
+                createElement('div', { className: 'field-value-row' }, [
+                    createElement('span', { className: 'data-value', textContent: `${addr.cap} ${addr.city} (${addr.province})` }),
+                    createCopyBtn(`${addr.cap} ${addr.city} (${addr.province})`)
                 ])
             ])
         ])
     ]);
 
-    const utilsList = createElement('div', { className: 'mt-4 pt-4 border-t border-white/5 flex flex-col gap-2' });
+    const utilsList = createElement('div', { className: 'card-utility-list' });
     renderUtilitiesInCard(addr.utilities || [], utilsList, idx);
     card.appendChild(utilsList);
 
     const btnAddUtil = createElement('button', {
-        className: 'mt-3 w-full py-2 rounded-lg bg-white/5 text-[9px] font-black uppercase text-blue-400 tracking-widest',
-        dataset: { action: 'add-utility', idx },
-        textContent: '+ Utenza'
-    });
+        className: 'btn-upload-trigger',
+        dataset: { action: 'add-utility', idx }
+    }, [
+        createElement('span', { className: 'material-symbols-outlined', textContent: 'add_circle' }),
+        createElement('span', { textContent: t('add_utility') })
+    ]);
     card.appendChild(btnAddUtil);
 
     return card;
@@ -168,66 +733,29 @@ function createAddressCard(addr, idx) {
 
 function renderUtilitiesInCard(utils, list, addrIdx) {
     if (utils.length === 0) {
-        setChildren(list, createElement('span', { className: 'text-[9px] font-black uppercase text-white/10 text-center block', textContent: t('no_utilities') || 'Nessuna utenza' }));
+        setChildren(list, createElement('span', { className: 'card-no-data', textContent: t('no_utilities') }));
         return;
     }
     const items = utils.map((u, uIdx) => {
-        return createElement('div', { className: 'flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5' }, [
-            createElement('div', { className: 'flex flex-col' }, [
-                createElement('span', { className: 'text-[8px] font-black uppercase text-white/20', textContent: u.type }),
-                createElement('span', { className: 'text-[10px] font-bold text-white/60 tracking-wider', textContent: u.value })
-            ]),
-            createElement('div', { className: 'flex items-center gap-1' }, [
-
-                createElement('button', { className: 'size-6 text-white/20 hover:text-white', dataset: { action: 'edit-utility', idx: addrIdx, uidx: uIdx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
-                ]),
-                createElement('button', { className: 'size-6 text-red-500/40 hover:text-red-400', dataset: { action: 'delete-utility', idx: addrIdx, uidx: uIdx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+        return createElement('div', { className: 'card-utility-item' }, [
+            createElement('div', { className: 'card-utility-header' }, [
+                createElement('span', { className: 'data-label', textContent: u.type }),
+                createElement('div', { className: 'card-actions-row' }, [
+                    createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-utility', idx: addrIdx, uidx: uIdx } }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                    ]),
+                    createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-utility', idx: addrIdx, uidx: uIdx } }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                    ])
                 ])
+            ]),
+            createElement('div', { className: 'field-value-row' }, [
+                createElement('span', { className: 'data-value', textContent: u.value }),
+                createCopyBtn(u.value)
             ])
         ]);
     });
     setChildren(list, items);
-}
-
-/**
- * PHONES
- */
-function renderPhonesView() {
-    const container = document.getElementById('telefoni-view-container');
-    if (!container) return;
-    clearElement(container);
-
-    const btnAdd = createElement('button', { className: 'glass-card p-4 w-full flex-center gap-2 text-blue-400 mb-4' }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: 'add_call' }),
-        createElement('span', { className: 'text-[10px] font-black uppercase', textContent: t('add_phone') || 'Aggiungi Numero' })
-    ]);
-    btnAdd.onclick = () => window.editPhone(-1);
-
-    const items = contactPhones.map((p, idx) => {
-        return createElement('div', { className: 'glass-card p-4 flex items-center justify-between mb-2 animate-in slide-in-from-bottom-2' }, [
-            createElement('div', { className: 'flex items-center gap-4' }, [
-                createElement('div', { className: 'size-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex-center' }, [
-                    createElement('span', { className: 'material-symbols-outlined filled', textContent: 'call' })
-                ]),
-                createElement('div', { className: 'flex flex-col' }, [
-                    createElement('span', { className: 'text-[8px] font-black uppercase text-white/20 tracking-widest', textContent: p.type }),
-                    createElement('span', { className: 'text-xs font-black text-white tracking-widest', textContent: p.number })
-                ])
-            ]),
-            createElement('div', { className: 'flex items-center gap-1' }, [
-                createElement('button', { className: 'size-8 rounded-lg bg-white/5 flex-center text-white/20 hover:text-white', dataset: { action: 'edit-phone', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
-                ]),
-                createElement('button', { className: 'size-8 rounded-lg bg-red-500/5 flex-center text-red-400/40 hover:text-red-400', dataset: { action: 'delete-phone', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-                ])
-            ])
-        ]);
-    });
-
-    setChildren(container, [btnAdd, ...items]);
 }
 
 /**
@@ -238,36 +766,108 @@ function renderEmailsView() {
     if (!container) return;
     clearElement(container);
 
-    const btnAdd = createElement('button', { className: 'glass-card p-4 w-full flex-center gap-2 text-blue-400 mb-4' }, [
+    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
         createElement('span', { className: 'material-symbols-outlined', textContent: 'alternate_email' }),
-        createElement('span', { className: 'text-[10px] font-black uppercase', textContent: t('add_email') || 'Aggiungi Email' })
+        createElement('span', { textContent: t('add_email') })
     ]);
     btnAdd.onclick = () => window.editEmail(-1);
 
     const items = contactEmails.map((e, idx) => {
-        return createElement('div', { className: 'glass-card p-4 flex items-center justify-between mb-2 animate-in slide-in-from-bottom-2' }, [
-            createElement('div', { className: 'flex items-center gap-4 min-w-0' }, [
-                createElement('div', { className: 'size-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex-center' }, [
-                    createElement('span', { className: 'material-symbols-outlined filled', textContent: 'mail' })
+        return createElement('div', { className: 'form-card' }, [
+            createElement('div', { className: 'card-header-row' }, [
+                createElement('div', { className: 'field-header' }, [
+                    createElement('input', {
+                        type: 'checkbox',
+                        className: 'qr-checkbox',
+                        checked: qrCodeInclusions.emails.includes(idx),
+                        onclick: (ev) => { ev.stopPropagation(); toggleQRInclusion('emails', idx); }
+                    }),
+                    createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
+                    createElement('span', { className: 'card-title-accent', textContent: e.label || 'Email' })
                 ]),
-                createElement('div', { className: 'flex flex-col min-w-0' }, [
-                    createElement('span', { className: 'text-[8px] font-black uppercase text-white/20 tracking-widest', textContent: 'Account' }),
-                    createElement('span', { className: 'text-xs font-bold text-white truncate', textContent: e.address }),
-                    createElement('span', { className: 'text-[10px] font-medium text-white/40', textContent: e.password ? '••••••••' : 'No PWD' })
+                createElement('div', { className: 'card-actions-row' }, [
+                    createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-email', idx } }, [
+                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                    ]),
+                    createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-email', idx } }, [
+                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                    ])
                 ])
             ]),
-            createElement('div', { className: 'flex items-center gap-1' }, [
-                createElement('button', { className: 'size-8 rounded-lg bg-white/5 flex-center text-white/20 hover:text-white', dataset: { action: 'edit-email', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
+            createElement('div', { className: 'card-fields-container' }, [
+                createElement('div', { className: 'field-value-row' }, [
+                    createElement('span', { className: 'data-value', textContent: e.address || '-' }),
+                    createCopyBtn(e.address)
                 ]),
-                createElement('button', { className: 'size-8 rounded-lg bg-red-500/5 flex-center text-red-400/40 hover:text-red-400', dataset: { action: 'delete-email', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-                ])
+                e.password ? createElement('div', { className: 'field-value-row' }, [
+                    createElement('span', { className: 'data-value-sub', textContent: '••••••••', dataset: { pwd: e.password, visible: 'false' } }),
+                    createElement('div', { className: 'flex-center-row', style: 'gap: 0.5rem;' }, [
+                        createElement('button', {
+                            className: 'btn-action-mini',
+                            onclick: (event) => {
+                                event.stopPropagation();
+                                const span = event.currentTarget.parentElement.parentElement.querySelector('.data-value-sub');
+                                const isVisible = span.dataset.visible === 'true';
+                                span.textContent = isVisible ? '••••••••' : span.dataset.pwd;
+                                span.dataset.visible = !isVisible;
+                                event.currentTarget.querySelector('span').textContent = isVisible ? 'visibility' : 'visibility_off';
+                            }
+                        }, [
+                            createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'visibility' })
+                        ]),
+                        createCopyBtn(e.password)
+                    ])
+                ]) : createElement('span', { className: 'data-value-sub', textContent: 'No PWD' })
             ])
         ]);
     });
     setChildren(container, [btnAdd, ...items]);
 }
+
+window.addEmail = async () => {
+    const fields = [
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
+        { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
+        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' }
+    ];
+    showProfileModal('Aggiungi Email', fields, { label: profileLabels.emailLabels[0] }, async (newData) => {
+        contactEmails.push(newData);
+        await updateDoc(doc(db, "users", currentUserUid), { contactEmails });
+        renderEmailsView();
+        showToast(t('success_save'), "success");
+    });
+};
+
+window.editEmail = async (idx) => {
+    if (idx === -1) {
+        window.addEmail();
+        return;
+    }
+    const email = contactEmails[idx];
+    // Ensure label exists
+    if (!email.label) {
+        email.label = profileLabels.emailLabels[0];
+    }
+    const fields = [
+        { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
+        { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
+        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' }
+    ];
+    showProfileModal('Modifica Email', fields, email, async (newData) => {
+        contactEmails[idx] = newData;
+        await updateDoc(doc(db, "users", currentUserUid), { contactEmails });
+        renderEmailsView();
+        showToast(t('success_save'), "success");
+    });
+};
+
+window.deleteEmail = async (idx) => {
+    if (!confirm(t('confirm_delete') || 'Eliminare questa email?')) return;
+    contactEmails.splice(idx, 1);
+    await updateDoc(doc(db, "users", currentUserUid), { contactEmails });
+    renderEmailsView();
+    showToast(t('success_delete') || 'Email eliminata', "success");
+};
 
 /**
  * DOCUMENTS
@@ -277,32 +877,38 @@ function renderDocumentiView() {
     if (!container) return;
     clearElement(container);
 
-    const btnAdd = createElement('button', { className: 'glass-card p-4 w-full flex-center gap-2 text-blue-400 mb-4' }, [
+    const btnAdd = createElement('button', { className: 'btn-upload-trigger' }, [
         createElement('span', { className: 'material-symbols-outlined', textContent: 'add_card' }),
-        createElement('span', { className: 'text-[10px] font-black uppercase', textContent: t('add_doc') || 'Aggiungi Documento' })
+        createElement('span', { textContent: t('add_doc') })
     ]);
     btnAdd.onclick = () => window.editUserDocument(-1);
 
     const items = userDocuments.map((docItem, idx) => {
-        const num = docItem.num_serie || docItem.id_number || docItem.cf || '-';
-        return createElement('div', { className: 'glass-card p-4 flex items-center justify-between mb-2 animate-in slide-in-from-bottom-2' }, [
-            createElement('div', { className: 'flex items-center gap-4 min-w-0' }, [
-                createElement('div', { className: 'size-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex-center' }, [
-                    createElement('span', { className: 'material-symbols-outlined filled', textContent: 'description' })
+        const num = docItem.num_serie || docItem.cf_value || docItem.id_number || docItem.license_number || docItem.cf || '-';
+        return createElement('div', { className: 'form-card' }, [
+            createElement('div', { className: 'card-header-row' }, [
+                createElement('div', { className: 'card-icon-stack' }, [
+                    createElement('div', { className: 'card-icon-box' }, [
+                        createElement('span', { className: 'material-symbols-outlined filled', textContent: 'description' })
+                    ]),
+                    createElement('span', { className: 'data-label', textContent: docItem.type })
                 ]),
-                createElement('div', { className: 'flex flex-col min-w-0' }, [
-                    createElement('span', { className: 'text-[8px] font-black uppercase text-white/20 tracking-widest', textContent: docItem.type }),
-                    createElement('span', { className: 'text-xs font-black text-white truncate uppercase', textContent: num }),
-                    createElement('span', { className: 'text-[10px] text-white/40', textContent: docItem.expiry_date ? formatDateToIT(docItem.expiry_date) : '' })
+                createElement('div', { className: 'card-actions-row' }, [
+                    createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-doc', idx } }, [
+                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
+                    ]),
+                    createElement('button', { className: 'btn-edit-section btn-delete', dataset: { action: 'delete-doc', idx } }, [
+                        createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
+                    ])
                 ])
             ]),
-            createElement('div', { className: 'flex items-center gap-1' }, [
-
-                createElement('button', { className: 'size-8 rounded-lg bg-white/5 flex-center text-white/20 hover:text-white', dataset: { action: 'edit-doc', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'edit' })
-                ]),
-                createElement('button', { className: 'size-8 rounded-lg bg-red-500/5 flex-center text-red-400/40 hover:text-red-400', dataset: { action: 'delete-doc', idx } }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+            createElement('div', { className: 'card-fields-container' }, [
+                createElement('div', { className: 'card-field-group' }, [
+                    createElement('div', { className: 'field-value-row' }, [
+                        createElement('span', { className: 'data-value', textContent: num }),
+                        createCopyBtn(num)
+                    ]),
+                    createElement('span', { className: 'data-value-sub', textContent: docItem.expiry_date ? formatDateToIT(docItem.expiry_date) : '' })
                 ])
             ])
         ]);
@@ -322,6 +928,7 @@ function setupDelegation() {
         const uIdx = parseInt(target.dataset.uidx);
 
         switch (action) {
+            case 'edit-section': editSection(target.dataset.target); break;
             case 'edit-address': window.editAddress(idx); break;
             case 'delete-address': deleteAddress(idx); break;
             case 'add-utility': window.addUtility(idx); break;
@@ -333,7 +940,6 @@ function setupDelegation() {
             case 'delete-email': deleteEmail(idx); break;
             case 'edit-doc': window.editUserDocument(idx); break;
             case 'delete-doc': deleteDocumento(idx); break;
-
         }
     });
 }
@@ -379,11 +985,220 @@ async function deleteDocumento(idx) {
 }
 
 // Global exposure for Modal Handlers (Simulated as legacy window pattern but inside module)
+/**
+ * MODAL ENGINE (Specific for Profile)
+ */
+function showProfileModal(title, fields, currentValues, onSave) {
+    const modalId = 'profile-edit-modal';
+    let modal = document.getElementById(modalId);
+    if (modal) modal.remove();
+
+    modal = createElement('div', { id: modalId, className: 'modal-overlay' });
+    const modalBox = createElement('div', { className: 'modal-box modal-profile-box' });
+
+    const header = createElement('div', { className: 'modal-header' }, [
+        createElement('h3', { className: 'modal-title', textContent: title }),
+        createElement('div', { className: 'modal-accent-bar' })
+    ]);
+
+    const form = createElement('div', { className: 'flex-col-gap' });
+    const inputs = {};
+
+    fields.forEach(f => {
+        const val = currentValues[f.key] || '';
+        let inputEl;
+
+        const fieldContainer = createElement('div', { className: 'glass-field-container' }, [
+            createElement('label', { className: 'view-label', textContent: f.label }),
+            createElement('div', { className: 'glass-field-box' }, [
+                createElement('span', { className: 'material-symbols-outlined glass-field-icon', textContent: f.icon || 'edit' }),
+                inputEl = (f.type === 'select')
+                    ? createElement('div', { className: 'base-dropdown', dataset: { customSelect: 'true' } }, [
+                        createElement('div', { className: 'dropdown-trigger' }, [
+                            createElement('span', { className: 'dropdown-label', textContent: 'Seleziona...' }),
+                            createElement('span', { className: 'material-symbols-outlined arrow-icon', textContent: 'expand_more' })
+                        ]),
+                        createElement('div', { className: 'base-dropdown-menu scrollable' }),
+                        createElement('select', { className: 'hidden' },
+                            (f.options || []).map(opt => createElement('option', { value: opt, textContent: opt, selected: opt === val }))
+                        )
+                    ])
+                    : createElement('input', {
+                        type: f.type || 'text',
+                        className: 'glass-field-input',
+                        value: val,
+                        placeholder: f.label
+                    })
+            ])
+        ]);
+
+        if (f.type === 'select') {
+            inputs[f.key] = inputEl.querySelector('select');
+            syncCustomDropdowns(inputEl, f.configKey);
+            window._currentModalRefresh = () => {
+                const select = inputEl.querySelector('select');
+                if (select && f.configKey) {
+                    const newOptions = profileLabels[f.configKey];
+                    clearElement(select);
+                    newOptions.forEach(opt => select.appendChild(createElement('option', { value: opt, textContent: opt, selected: opt === select.value })));
+                    syncCustomDropdowns(inputEl, f.configKey);
+                }
+            };
+        } else {
+            inputs[f.key] = inputEl;
+        }
+
+        form.appendChild(fieldContainer);
+    });
+
+    const actions = createElement('div', { className: 'modal-actions' }, [
+        createElement('button', {
+            className: 'btn-modal btn-secondary',
+            textContent: t('cancel') || 'Annulla',
+            onclick: () => closeModal()
+        }),
+        createElement('button', {
+            className: 'btn-modal btn-primary',
+            textContent: t('save') || 'Salva',
+            onclick: async () => {
+                const newData = {};
+                fields.forEach(f => newData[f.key] = inputs[f.key].value.trim());
+                await onSave(newData);
+                closeModal();
+            }
+        })
+    ]);
+
+    function closeModal() {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+
+    setChildren(modalBox, [header, form, actions]);
+    modal.appendChild(modalBox);
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Implementazione Azioni
+async function editSection(sectionId) {
+    if (sectionId === 'dati-personali') {
+        const fields = [
+            { key: 'nome', label: 'Nome', icon: 'person' },
+            { key: 'cognome', label: 'Cognome', icon: 'person' },
+            { key: 'birth_date', label: 'Data di Nascita', type: 'date', icon: 'calendar_today' },
+            { key: 'birth_place', label: 'Luogo di Nascita', icon: 'location_city' },
+            { key: 'birth_province', label: 'Provincia Nascita (es. PD)', icon: 'map' }
+        ];
+        showProfileModal('Dati Personali', fields, currentUserData, async (newData) => {
+            try {
+                await updateDoc(doc(db, "users", currentUserUid), newData);
+                Object.assign(currentUserData, newData);
+                await loadUserData(auth.currentUser);
+                showToast(t('success_save'), "success");
+            } catch (e) { logError("EditSection", e); showToast(t('error_generic'), "error"); }
+        });
+    } else if (sectionId === 'note') {
+        const fields = [{ key: 'note', label: 'Note', icon: 'description' }];
+        showProfileModal('Note Anagrafica', fields, currentUserData, async (newData) => {
+            try {
+                await updateDoc(doc(db, "users", currentUserUid), newData);
+                currentUserData.note = newData.note;
+                await loadUserData(auth.currentUser);
+                showToast(t('success_save'), "success");
+            } catch (e) { logError("EditSectionNotice", e); showToast(t('error_generic'), "error"); }
+        });
+    }
+}
+
 window.editAddress = async (idx) => {
-    // Implement showFormModal call here...
+    const isNew = idx === -1;
+    const addr = isNew ? { type: profileLabels.addressTypes[0], address: '', civic: '', cap: '', city: '', province: '', utilities: [] } : userAddresses[idx];
+    const fields = [
+        { key: 'type', label: 'Tipo', icon: 'label', type: 'select', options: profileLabels.addressTypes, configKey: 'addressTypes' },
+        { key: 'address', label: 'Indirizzo', icon: 'home' },
+        { key: 'civic', label: 'Civico', icon: 'numbers' },
+        { key: 'cap', label: 'CAP', icon: 'mail_outline' },
+        { key: 'city', label: 'Città', icon: 'location_city' },
+        { key: 'province', label: 'Provincia', icon: 'map' }
+    ];
+    showProfileModal(isNew ? 'Nuovo Indirizzo' : 'Modifica Indirizzo', fields, addr, async (newData) => {
+        if (isNew) {
+            newData.utilities = [];
+            userAddresses.push(newData);
+        } else {
+            Object.assign(userAddresses[idx], newData);
+        }
+        await syncData();
+        renderAddressesView();
+    });
 };
-window.editPhone = async (idx) => {
-    // Implement showFormModal call here...
+
+
+
+window.editUserDocument = async (idx) => {
+    const isNew = idx === -1;
+    const docItem = isNew ? { type: profileLabels.documentTypes[0], num_serie: '', expiry_date: '' } : userDocuments[idx];
+
+    // Ensure type exists for old documents
+    if (!docItem.type) {
+        docItem.type = profileLabels.documentTypes[0];
+    }
+
+    // Supporto per carichi legacy o mappature diverse
+    const currentNum = docItem.num_serie || docItem.cf_value || docItem.license_number || docItem.id_number || '';
+
+    const fields = [
+        { key: 'type', label: 'Tipo Documento', icon: 'badge', type: 'select', options: profileLabels.documentTypes, configKey: 'documentTypes' },
+        { key: 'num_serie', label: 'Numero / Codice', icon: 'numbers' },
+        { key: 'expiry_date', label: 'Scadenza', type: 'date', icon: 'calendar_today' }
+    ];
+
+    // Preparazione valori correnti per il modal (normalizzazione temporanea)
+    const modalValues = { ...docItem, num_serie: currentNum };
+
+    showProfileModal(isNew ? 'Nuovo Documento' : 'Modifica Documento', fields, modalValues, async (newData) => {
+        // Normalizzazione chiavi per compatibilità Firebase
+        if (newData.type && newData.type.toLowerCase().includes('patente')) {
+            newData.license_number = newData.num_serie;
+        }
+        if (newData.type && newData.type.toLowerCase().includes('fiscale')) {
+            newData.cf_value = newData.num_serie;
+        }
+
+        if (isNew) {
+            userDocuments.push(newData);
+        } else {
+            Object.assign(userDocuments[idx], newData);
+        }
+        await syncData();
+        renderDocumentiView();
+    });
 };
-// ... other handlers similarly ...
+
+window.addUtility = async (addrIdx) => {
+    const fields = [
+        { key: 'type', label: 'Tipo', icon: 'bolt', type: 'select', options: profileLabels.utilityTypes, configKey: 'utilityTypes' },
+        { key: 'value', label: 'Codice / Identificativo', icon: 'vpn_key' }
+    ];
+    showProfileModal('Aggiungi Utenza', fields, {}, async (newData) => {
+        if (!userAddresses[addrIdx].utilities) userAddresses[addrIdx].utilities = [];
+        userAddresses[addrIdx].utilities.push(newData);
+        await syncData();
+        renderAddressesView();
+    });
+};
+
+window.editUtility = async (addrIdx, uIdx) => {
+    const util = userAddresses[addrIdx].utilities[uIdx];
+    const fields = [
+        { key: 'type', label: 'Tipo', icon: 'bolt', type: 'select', options: profileLabels.utilityTypes, configKey: 'utilityTypes' },
+        { key: 'value', label: 'Codice / Identificativo', icon: 'vpn_key' }
+    ];
+    showProfileModal('Modifica Utenza', fields, util, async (newData) => {
+        Object.assign(userAddresses[addrIdx].utilities[uIdx], newData);
+        await syncData();
+        renderAddressesView();
+    });
+};
 

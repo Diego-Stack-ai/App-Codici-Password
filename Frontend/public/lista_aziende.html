@@ -16,20 +16,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Fonts -->
-    <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_moduli.css?v=5.0">
-
-    <!-- CORE JS -->
-    <script src="assets/js/core.js"></script>
-    <script type="module" src="assets/js/ui-core.js"></script>
+    <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/lista_aziende.css?v=5.0">
 </head>
 
 <body class="base-bg">
+    <script src="assets/js/core.js"></script>
+    <script type="module" src="assets/js/ui-core.js"></script>
     <div class="base-container relative">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
@@ -37,24 +36,22 @@
         <!-- Automated Header -->
         <header id="header-placeholder" class="base-header"></header>
 
-        <div class="spacer-header"></div>
-
-        <!-- Main Content -->
         <main class="base-main">
-            <div class="flex-col-gap-6">
-                <!-- Companies List Container -->
-                <div id="aziende-list-container" class="content-matrix-grid aziende-grid-gap">
-                    <!-- Loading Spinner -->
-                    <div class="col-span-full flex-center-col py-20 opacity-20">
-                        <span class="material-symbols-outlined text-4xl animate-pulse">sync</span>
-                        <p class="text-[10px] font-black uppercase tracking-widest mt-4" data-t="loading_data">Ricezione
-                            Dati...</p>
+            <div class="page-container pt-header-extra pb-footer-extra">
+                <div class="flex-col-gap-6">
+                    <!-- Companies List Container -->
+                    <div id="aziende-list-container" class="matrix-grid aziende-grid-gap">
+                        <!-- Loading Spinner -->
+                        <div class="col-span-full flex-center-col py-20 opacity-20">
+                            <span class="material-symbols-outlined text-4xl animate-pulse">sync</span>
+                            <p class="text-[10px] font-black uppercase tracking-widest mt-4" data-t="loading_data">
+                                Ricezione
+                                Dati...</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
-
-        <div class="spacer-footer"></div>
 
         <!-- FOOTER PLACEHOLDER -->
         <footer id="footer-placeholder" class="base-footer"></footer>

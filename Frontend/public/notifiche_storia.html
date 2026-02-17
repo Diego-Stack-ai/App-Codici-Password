@@ -15,27 +15,22 @@
     <!-- PWA / Mobile Capable -->
     <link rel="manifest" href="manifest.json?v=5.0" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_moduli.css?v=5.0">
-
-    <!-- CORE JS -->
-    <script src="assets/js/core.js"></script>
-    <script type="module" src="assets/js/ui-core.js"></script>
+    <link rel="stylesheet" href="assets/css/notifiche_storia.css?v=5.0">
 </head>
 
 <body class="base-bg">
-    <div class="base-container relative"> <!-- Ambient Glow -->
-        <div class="base-glow"></div> <!-- Automated Header -->
+    <div class="base-container">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
+
+        <!-- Automated Header -->
         <header id="header-placeholder" class="base-header"></header>
-        <div class="spacer-header"></div> <!-- Main Content -->
+
         <main class="base-main">
             <div class="page-container pt-header-extra pb-footer-extra">
 
@@ -59,7 +54,8 @@
                     </div>
                     <h3 class="hero-page-subtitle" style="font-size: 0.9rem; color: var(--text-primary);">Nessuna
                         Notifica</h3>
-                    <p class="text-secondary text-center" style="font-size: 0.75rem; max-width: 250px;">Il tuo archivio
+                    <p class="text-secondary text-center" style="font-size: 0.75rem; max-width: 250px;"
+                        data-t="no_notifications_desc">Il tuo archivio
                         è vuoto. Gli avvisi futuri appariranno qui.</p>
                 </div>
 
@@ -69,9 +65,14 @@
                 </div>
 
             </div>
-        </main> <!-- FOOTER PLACEHOLDER -->
+        </main>
+
+        <!-- FOOTER PLACEHOLDER -->
         <footer id="footer-placeholder" class="base-footer"></footer>
-    </div> <!-- Scripts -->
+    </div>
+
+    <!-- Scripts (V5.0 Ordering) -->
+    <script src="assets/js/core.js"></script>
     <script type="module" src="assets/js/main.js"></script>
     <script type="module" src="assets/js/modules/settings/notifiche_storia.js"></script>
 </body>

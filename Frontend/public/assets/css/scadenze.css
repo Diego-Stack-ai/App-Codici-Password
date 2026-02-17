@@ -1,102 +1,10 @@
-/* --- SCADENZE CSS (V4.1) --- */
-/* --- 1. LAYOUT PAGINA & SPAZI --- */
-/* .spacer-header rimosso: eredita 80px da core_fascie.css */
+/* ==========================================================================
+   SCADENZE LISTA (V5.0) - CSS Isolation
+   ========================================================================== */
 
-.base-main {
-    padding-top: 0;
-    /* Reset: gestiamo lo spazio col margine del primo elemento */
-}
-
-
-/* .page-container rimosso: usa standard core.css (v3.9) */
-
-/* --- 2. TOOLBAR & CONTROLLI --- */
-.deadline-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 1rem;
-    margin-top: 1.5rem;
-    /* Distanza FISSA dall'header (80px + 1.5rem) */
-    flex-wrap: nowrap;
-    gap: 0.5rem;
-}
-
-.deadline-count-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-shrink: 0;
-    /* Non collassare */
-}
-
-/* ... badge definitions ... */
-
-.deadline-sort-btn {
-    height: 40px;
-    padding: 0 1rem;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    white-space: nowrap;
-    /* Testo su una riga */
-    flex-shrink: 0;
-}
-
-/* --- 3. FILTRI & RICERCA (Robust Horizontal Scroll) --- */
-.filter-container {
-    display: flex;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    justify-content: flex-start;
-    margin-bottom: 1rem;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.filter-container::-webkit-scrollbar {
-    display: none;
-}
-
-.filter-chip {
-    padding: 0.35rem 0.55rem;
-    /* Più compatti */
-    border-radius: 10px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    color: var(--text-secondary);
-    font-size: 0.62rem;
-    /* Leggermente più piccolo */
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    /* Spazio ridotto per accorciare i testi */
-    transition: all 0.2s ease;
-    cursor: pointer;
-    flex: 1;
-    /* Permette ai chip di occupare lo spazio equamente */
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.filter-chip:active {
-    transform: scale(0.95);
-}
-
-.filter-chip.active {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.search-bar-animated {
-    width: 100%;
+/* --- 1. SEARCH & FILTERS --- */
+.search-bar-container {
+    padding: 0 0.5rem;
     margin-bottom: 1.25rem;
 }
 
@@ -121,34 +29,38 @@
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: var(--fs-sm);
+    font-size: 0.85rem;
     width: 100%;
     outline: none;
 }
 
-/* --- 4. DEADLINE CARDS (Pure Titanium Style) --- */
+/* --- 2. DEADLINE CARDS --- */
 .deadline-card {
     position: relative;
-    padding: 1.25rem 1rem;
+    margin-bottom: 0.75rem;
+    animation: slideInUp 0.3s ease-out backwards;
+}
+
+/* Swipe Content Support */
+.deadline-card .swipe-content {
     background: var(--card-bg);
     backdrop-filter: blur(20px);
     border: 1px solid var(--card-border);
     border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 0.75rem;
-    animation: slideInUp 0.3s ease-out backwards;
-    overflow: hidden;
+    padding: 1.25rem 1rem;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.deadline-card:hover {
+.deadline-card:hover .swipe-content {
     transform: translateY(-4px) scale(1.01);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
     border-color: rgba(59, 130, 246, 0.3);
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* Layout Interno Semantico */
 .deadline-card-layout {
     display: flex;
     align-items: flex-start;
@@ -164,13 +76,6 @@
     min-width: 0;
 }
 
-.deadline-card-info-group {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-/* Componenti Card */
 .deadline-icon-box {
     width: 3rem;
     height: 3rem;
@@ -184,17 +89,22 @@
     color: var(--accent);
 }
 
+.deadline-card-info-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
 .deadline-card-category {
-    font-size: var(--fs-xs);
+    font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     opacity: 0.6;
-    margin-bottom: 2px;
 }
 
 .deadline-card-title {
-    font-size: var(--fs-sm);
+    font-size: 0.85rem;
     font-weight: 800;
     color: var(--text-primary);
     margin: 0;
@@ -202,11 +112,10 @@
 }
 
 .deadline-card-subtitle {
-    font-size: var(--fs-xs);
+    font-size: 0.65rem;
     font-weight: 500;
     color: var(--text-secondary);
     opacity: 0.8;
-    margin-top: 2px;
 }
 
 .deadline-date-badge {
@@ -222,8 +131,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Varianti di Stato */
-/* SCADUTO */
+/* Status Variants */
 .deadline-card-expired .deadline-icon-box {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.12);
@@ -236,7 +144,6 @@
     border-color: rgba(239, 68, 68, 0.2);
 }
 
-/* IN SCADENZA (Ambra/Giallo) */
 .deadline-card-upcoming .deadline-icon-box {
     color: #f59e0b;
     background: rgba(245, 158, 11, 0.12);
@@ -249,15 +156,6 @@
     border-color: rgba(245, 158, 11, 0.1);
 }
 
-/* Fix Contrasto Tema Chiaro */
-html:not(.dark) .deadline-card-upcoming .deadline-icon-box,
-html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
-    color: #b45309;
-    background: rgba(217, 119, 6, 0.15);
-    border-color: rgba(217, 119, 6, 0.2);
-}
-
-/* COMPLETATO (Smeraldo/Verde) */
 .deadline-card-completed .deadline-icon-box {
     color: #10b981;
     background: rgba(16, 185, 129, 0.12);
@@ -268,45 +166,13 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     color: #10b981;
     background: rgba(16, 185, 129, 0.12);
     border-color: rgba(16, 185, 129, 0.1);
-    opacity: 0.8;
-    /* Leggermente meno evidente */
 }
 
-/* Opzionale: Diminuisci opacità per completati */
 .deadline-card-completed {
-    opacity: 0.85;
+    opacity: 0.8;
 }
 
-/* --- 5. ANIMAZIONI & UTILS --- */
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.loading-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: .5;
-    }
-}
-
-/* --- CHECKBOX COMPLETAMENTO (Bottom Right) --- */
+/* --- 3. CHECKBOX COMPLETAMENTO --- */
 .deadline-check-btn {
     position: absolute;
     bottom: 0.75rem;
@@ -315,7 +181,6 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     height: 28px;
     border-radius: 8px;
     border: 2px solid var(--text-secondary);
-    /* Bordo neutro */
     background: transparent;
     display: flex;
     align-items: center;
@@ -323,7 +188,6 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 10;
-    /* Sopra al link della card */
     opacity: 0.4;
 }
 
@@ -333,394 +197,22 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     transform: scale(1.1);
 }
 
-/* Tooltip "COMPLETATA" - SEMPRE VISIBILE */
-.deadline-check-btn::before {
-    content: "COMPLETATA";
-    position: absolute;
-    right: 34px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 8px;
-    /* Micro label */
-    font-weight: 800;
-    color: var(--text-primary);
-    /* Più scuro per leggibilità */
-    white-space: nowrap;
-    opacity: 0.7;
-    /* Aumentato contrasto */
-    pointer-events: none;
-    transition: opacity 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-.deadline-check-btn:hover::before {
-    opacity: 1;
-    /* Piena visibilità su hover/click */
-    color: var(--accent);
-}
-
-.deadline-check-btn.checked::before {
-    content: "RIPRISTINA";
-    /* Cambia testo se già checked */
-    color: #10b981;
-    /* Verde se completato */
-    opacity: 0.8;
-}
-
 .deadline-check-btn.checked {
     background: #10b981;
-    /* Smeraldo */
     border-color: #10b981;
     opacity: 1;
     color: white;
 }
 
-.deadline-check-btn .material-symbols-outlined {
-    font-size: 20px;
-    font-weight: 800;
-    display: none;
-    /* Nascosto se vuoto */
-}
-
-.deadline-check-btn.checked .material-symbols-outlined {
-    display: block;
-    /* Visibile se checked */
-}
-
-/* --- 6. DETTAGLIO SCADENZA (Premium Layout V3.9) --- */
-
-/* --- DETAIL HEADER (Naked Message Style) --- */
-.detail-header-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.5rem 0.5rem 1.5rem 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.detail-page-label {
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.5;
-    margin-left: 2px;
-}
-
-.detail-header-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-}
-
-.detail-title-value {
-    font-size: 1rem;
-    /* Ulteriore riduzione per sobrietà */
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.3;
-    margin: 0;
-}
-
-
-/* --- 5. DETTAGLIO SCADENZA (Pagina Dettaglio) --- */
-.detail-info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.detail-info-item {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    padding: 1rem 1.25rem;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    min-height: 60px;
-    /* Altezza minima uniforme */
-    transition: transform 0.2s;
-}
-
-.detail-info-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--text-secondary);
-    font-weight: 700;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    flex: 0 0 140px;
-    white-space: nowrap;
-}
-
-/* Pulizia Icone: Rimuove background/bordi/basi residue in tutta la pagina dettaglio */
-.page-container span.material-symbols-outlined[class*="icon-"] {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-}
-
-.detail-info-value-group,
-.detail-info-value {
-    /* Compatto */
-    font-weight: 700;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.detail-info-value-group {
-    display: flex;
-    align-items: baseline;
-    gap: 0.25rem;
-    justify-content: flex-end;
-    /* Allinea a destra nel contenitore */
-    text-align: right;
-    min-width: 0;
-    /* CRUCIALE: permette ellipse su testo lungo */
-    flex: 1;
-    /* Prende lo spazio rimanente */
-}
-
-.detail-info-day {
-    font-size: 1rem;
-    /* Ridotto da large a 1rem */
-    font-weight: 800;
-    color: var(--text-primary);
-}
-
-.detail-info-year {
-    font-size: 0.65rem;
-    font-weight: 800;
-    opacity: 0.4;
-}
-
-/* Sections & Generic Lists */
-.detail-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    /* Gap ridotto */
-    margin-bottom: 1.5rem;
-}
-
-.detail-section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0 0.5rem;
-}
-
-.detail-section-title {
-    font-size: 0.70rem;
-    /* Ridotto: titolo sezione compatto */
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.6;
-    margin: 0;
-}
-
-.detail-email-preview,
-.detail-notes-box {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    padding: 1.25rem;
-    border-radius: 20px;
-}
-
-.detail-email-text,
-.detail-notes-text {
-    font-size: var(--fs-xs);
-    line-height: 1.6;
-    color: var(--text-secondary);
-    font-style: italic;
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    /* Spezza parole lunghe (URL, codici) */
-    overflow-wrap: anywhere;
-    /* Supporto aggiuntivo */
-}
-
-.detail-list-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.detail-list-item {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    padding: 1rem;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.detail-list-item.clickable:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateX(4px);
-    border-color: var(--accent);
-}
-
-.detail-list-item-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    min-width: 0;
-}
-
-.detail-list-icon-box {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: transparent;
-    /* Rimosso background per un look più pulito */
-    border: none;
-    /* Rimosso bordo come richiesto */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.detail-list-icon-box span {
-    font-size: 16px;
-}
-
-.detail-list-item-text {
-    font-size: 0.7rem;
-    /* Ridotto */
-    font-weight: 700;
-    color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.detail-list-item-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.detail-list-item-title {
-    font-size: 0.75rem;
-    /* Ridotto */
-    font-weight: 800;
-    color: var(--text-primary);
-}
-
-.detail-list-item-meta {
-    font-size: 0.55rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    opacity: 0.4;
-    letter-spacing: 0.1em;
-}
-
-.detail-list-item-arrow {
-    font-size: 14px;
-    opacity: 0.2;
-}
-
-/* Page Actions Panel (Moved from Footer) */
-.detail-actions-panel {
-    display: flex;
-    flex-direction: row;
-    /* Forza riga */
-    align-items: center;
-    justify-content: center;
-    /* Centrati orizzontalmente */
-    gap: 1rem;
-    /* Spazio uniforme tra i pulsanti */
-    padding: 1rem 0;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: nowrap;
-    /* Evita il wrap su schermi stretti */
-}
-
-/* Pulsanti Azioni Uniformati */
-.detail-action-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-    border: 1px solid var(--card-border);
-    background: rgba(255, 255, 255, 0.05);
-    /* Sfondo comune */
-    color: var(--text-primary);
-    padding: 0;
-}
-
-.detail-action-btn:active {
-    transform: scale(0.95);
-}
-
-/* Modificatori solo per colore icona (opzionale) o hover */
-.detail-action-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* Helper Icons */
-.detail-action-btn .icon-red,
-.detail-action-btn .icon-purple,
-.detail-action-btn .icon-emerald,
-.detail-action-btn .icon-blue,
-.detail-action-btn .icon-amber,
-.detail-action-btn .icon-dim {
-    background: transparent !important;
-}
-
-.icon-red {
-    color: #ef4444;
-}
-
-.icon-purple {
-    color: #a855f7;
-}
-
-.icon-emerald {
-    color: #10b981;
-}
-
-.icon-blue {
-    color: #3b82f6;
-}
-
-.icon-amber {
-    color: #f59e0b;
-}
-
-/* --- 7. FAB / ADD BUTTONS GROUP (Footer Action) --- */
+/* --- 4. FAB BUTTONS --- */
 .fab-group {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    /* Spazio tra i bottoni */
     margin-bottom: 4px;
-    /* Lift leggero */
 }
 
-/* Base FAB Style */
 .btn-fab-action {
     width: 48px;
     height: 48px;
@@ -732,666 +224,37 @@ html:not(.dark) .deadline-card-upcoming .deadline-date-badge {
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
     color: white;
 }
 
-.btn-fab-action:hover {
-    transform: translateY(-2px) scale(1.1);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-}
-
-.btn-fab-action:active {
-    transform: scale(0.95);
-}
-
-.btn-fab-action .material-symbols-outlined {
-    font-size: 24px;
-    font-weight: 700;
-}
-
-/* Varianti Colore */
 .btn-fab-scadenza {
     background: var(--accent);
-    /* Blu */
     width: 56px;
-    /* Centrale leggermente più grande */
     height: 56px;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
-.btn-fab-scadenza .material-symbols-outlined {
-    font-size: 28px;
-}
-
 .btn-fab-azienda {
     background: #f59e0b;
-    /* Ambra/Arancio */
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
 }
 
 .btn-fab-privato {
     background: #a855f7;
-    /* Viola */
-    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
 }
 
-/* Labels sotto i bottoni (Opzionale, per chiarezza) */
-.btn-fab-action::after {
-    content: attr(data-label);
-    position: absolute;
-    bottom: -18px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 8px;
-    /* Micro testo */
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    opacity: 0.6;
-    letter-spacing: 0.05em;
-    pointer-events: none;
-    background: var(--card-bg);
-    /* Sfondo per leggibilità su glow */
-    padding: 1px 4px;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-.icon-dim {
-    color: var(--text-secondary);
-    opacity: 0.5;
-}
-
-/* Utility Helper */
+/* Helpers */
 .hidden {
     display: none !important;
 }
 
-/* --- 8. COMPONI SCADENZA UI (V4.1) --- */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 
-/* Mode Selector Tabs */
-.mode-selector-tabs {
-    display: flex;
-    gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 4px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: 1rem;
-}
-
-.mode-tab {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.6rem;
-    border-radius: 10px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.mode-tab .material-symbols-outlined {
-    font-size: 1.25rem;
-    opacity: 0.7;
-}
-
-.mode-tab.active {
-    background: var(--card-bg);
-    color: var(--text-primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.mode-tab.active .material-symbols-outlined {
-    opacity: 1;
-    color: var(--accent);
-}
-
-/* Planning Stat Boxes */
-.planning-grid-compact {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    width: 100%;
-}
-
-.planning-info-box {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    transition: all 0.3s ease;
-}
-
-.planning-info-box:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.planning-icon-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.planning-icon-box .material-symbols-outlined {
-    font-size: 1.25rem;
-}
-
-.planning-text-box {
-    display: flex;
-    flex-direction: column;
-}
-
-.planning-label {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.4;
-}
-
-.planning-value {
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: var(--text-primary);
-}
-
-/* WhatsApp Toggle Card */
-.whatsapp-toggle-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 0.75rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-/* Base Form Refinements */
-.manage-docs-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    background: rgba(59, 130, 246, 0.05);
-    border: 1px solid rgba(59, 130, 246, 0.1);
-    border-radius: 16px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.manage-docs-link:hover {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.2);
-    transform: translateX(4px);
-}
-
-.attachments-upload-placeholder {
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 2px dashed rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    opacity: 0.5;
-}
-
-/* --- 9. CUSTOM DROPDOWN SELECT PROXY --- */
-.base-dropdown-menu.scrollable {
-    max-height: 250px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-}
-
-.base-dropdown-group-label {
-    font-size: 10px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0.75rem 1rem 0.25rem 1rem;
-    opacity: 0.4;
-    color: var(--text-primary);
-}
-
-.dropdown-trigger .dropdown-label {
-    max-width: 100%;
-}
-
-/* --- 10. PREMIUM SOURCE SELECTOR MODAL --- */
-.source-modal-box {
-    background: rgba(15, 23, 42, 0.8) !important;
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 28px !important;
-    box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.6),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-    padding: 1.75rem !important;
-    max-width: 320px !important;
-}
-
-.source-option-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 1.25rem;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    text-decoration: none;
-    outline: none;
-    background-color: transparent !important;
-}
-
-.source-option-btn .material-symbols-outlined {
-    font-size: 2rem;
-    transition: transform 0.4s ease;
-}
-
-.source-option-btn[data-source='camera'] .material-symbols-outlined {
-    color: #3b82f6 !important;
-}
-
-.source-option-btn[data-source='camera']:hover {
-    background: rgba(59, 130, 246, 0.08) !important;
-    border-color: rgba(59, 130, 246, 0.3) !important;
-}
-
-.source-option-btn[data-source='gallery'] .material-symbols-outlined {
-    color: #a855f7 !important;
-}
-
-.source-option-btn[data-source='gallery']:hover {
-    background: rgba(168, 85, 247, 0.08) !important;
-    border-color: rgba(168, 85, 247, 0.3) !important;
-}
-
-.source-option-btn[data-source='file'] .material-symbols-outlined {
-    color: #f59e0b !important;
-}
-
-.source-option-btn[data-source='file']:hover {
-    background: rgba(245, 158, 11, 0.08) !important;
-    border-color: rgba(245, 158, 11, 0.3) !important;
-}
-
-.source-btn-cancel {
-    width: 100%;
-    margin-top: 1.5rem;
-    padding: 1rem;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    color: rgba(255, 255, 255, 0.4) !important;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.source-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: white !important;
-}
-
-.placeholder-text-standard {
-    display: block;
-    width: 100%;
-    font-size: 0.65rem !important;
-    font-weight: 800 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
-    color: var(--text-secondary) !important;
-    opacity: 0.4 !important;
-    text-align: center;
-    padding: 2rem 0;
-}
-
-
-/* --- SWIPE GESTURES OVERRIDE --- */
-.deadline-card {
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-    backdrop-filter: none !important;
-    overflow: hidden !important;
-}
-
-.deadline-card .swipe-content {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 1.25rem 1rem;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    z-index: 10;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.deadline-card:hover .swipe-content {
-    border-color: rgba(59, 130, 246, 0.3);
-    background: rgba(255, 255, 255, 0.05);
-}
-/* ==========================================================================
-   MERGED TRANSITION STYLES (Formerly core-transizione.css)
-   ========================================================================== */
-
-/* --- FORM STYLES (Moduli Scadenze e Altri) --- */
-.input-wrapper {
-   position: relative;
-   width: 100%;
-   display: flex;
-   align-items: center;
-}
-
-/* Icona Sinistra (Default) */
-.input-wrapper .material-symbols-outlined {
-   position: absolute;
-   left: 1rem;
-   color: var(--text-secondary);
-   pointer-events: none;
-   font-size: 20px;
-   z-index: 2;
-}
-
-/* Icona Destra (es. Select Arrow) */
-.input-wrapper .arrow-icon {
-   left: auto;
-   right: 1rem;
-   pointer-events: none;
-}
-
-/* Padding per input standard con icone */
-.input-wrapper .input {
-   padding-left: 3rem;
-   /* Spazio per icona sinistra */
-   padding-right: 1rem;
-}
-
-/* Padding per Select (spazio per freccia destra) */
-.input-wrapper select.input {
-   padding-right: 3rem;
-   appearance: none;
-   /* Rimuove stile nativo browser */
-   -webkit-appearance: none;
-}
-
-/* Label Small (Compatta) */
-.label-sm {
-   display: block;
-   margin-bottom: 0.4rem;
-   margin-left: 0.25rem;
-   font-size: 0.65rem;
-   font-weight: 800;
-   text-transform: uppercase;
-   letter-spacing: 0.1em;
-   color: var(--text-secondary);
-   opacity: 0.6;
-}
-
-/* Placeholder Styling */
-.input::placeholder {
-   color: var(--text-secondary);
-   opacity: 0.5;
-   font-weight: 500;
-}
-
-
-/* --- 8. SEMANTIC COMPONENTS (Replacing Tailwind) --- */
-
-/* Layout & Grid System */
-.form-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    width: 100%;
-}
-
-@media (min-width: 768px) {
-    .form-grid-2 {
-        grid-template-columns: 1fr 1fr;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
-
-.flex-col-gap-4 {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.flex-col-gap-2 {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.w-full {
-    width: 100%;
-}
-
-/* Icon Box Variants (Semantic Colors) */
-.planning-info-box {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.planning-icon-box {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.planning-icon-box.bg-blue-500\/10 {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-}
-
-.planning-icon-box.bg-purple-500\/10 {
-    background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
-}
-
-.planning-icon-box.bg-emerald-500\/10 {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-}
-
-.planning-text-box {
-    display: flex;
-    flex-direction: column;
-}
-
-.planning-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    opacity: 0.6;
-}
-
-.planning-value {
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: var(--text-primary);
-}
-
-/* Textarea Semantic */
-.input-textarea {
-    width: 100%;
-    min-height: 100px;
-    background: transparent;
-    border: none;
-    resize: none;
-    line-height: 1.6;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    outline: none;
-    padding: 0;
-}
-
-/* WhatsApp Toggle Card */
-.whatsapp-toggle-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem;
-    background: rgba(16, 185, 129, 0.05);
-    border: 1px solid rgba(16, 185, 129, 0.1);
-    border-radius: 16px;
-    margin-top: 0.5rem;
-}
-
-/* Source Selection Modal (Semantic) */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.modal-box {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 1.5rem;
-    width: 300px;
-    max-width: 90vw;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    transform: scale(0.95);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.modal-overlay.active .modal-box {
-    transform: scale(1);
-}
-
-.modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-}
-
-.source-option-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text-secondary);
-}
-
-.source-option-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-    color: var(--text-primary);
-}
-
-.source-option-btn.full-width {
-    grid-column: span 2;
-    flex-direction: row;
-}
-
-.source-btn-cancel {
-    width: 100%;
-    padding: 0.75rem;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-weight: 700;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    cursor: pointer;
-    margin-top: 0.5rem;
-}
-
-.source-btn-cancel:hover {
-    color: var(--text-primary);
-    text-decoration: underline;
-}
-
-/* Upload Trigger Button */
-.btn-upload-trigger {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-}
-
-
-/* --- 9. HELPERS (Small utilities) --- */
-.flex-align-center {
-    display: flex;
-    align-items: center;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.bg-soft-glass {
-   background: rgba(255, 255, 255, 0.05);
-}
-

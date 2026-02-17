@@ -170,6 +170,15 @@ export const translations = {
         profile_emails_desc: "Account e password",
         profile_utilities: "Utenze",
         profile_utilities_desc: "Luce, Gas, Acqua",
+        profile_guide_title: "Guida Profilo",
+        profile_guide_step1: "Gestisci i tuoi dati (Anagrafica, Residenza, Documenti) selezionando le varie sezioni.",
+        profile_guide_step2: "Seleziona la spunta QR per scegliere quali dati mostrare nella condivisione.",
+        label_name_surname: "Nome & Cognome",
+        label_cf: "Codice Fiscale",
+        label_birth_data: "Dati Nascita",
+        profile_addresses_utilities: "Indirizzi & Utenze",
+        profile_docs_digital: "Documenti Digitali",
+        profile_notes: "Note Anagrafica",
         expiry_help_text: "Seleziona una categoria per configurare le regole di invio automatico.",
 
         // ARCHIVE PAGE
@@ -190,6 +199,16 @@ export const translations = {
         confirm_empty_trash_title: "SVUOTA CESTINO",
         confirm_empty_trash_msg: "Scrivi 'SVUOTA' per eliminare tutto definitivamente.",
         copied: "Copiato!",
+        add_address: "Aggiungi Indirizzo",
+        add_phone: "Aggiungi Numero",
+        add_email: "Aggiungi Email",
+        add_doc: "Aggiungi Documento",
+        add_utility: "Aggiungi Utenza",
+        label_account: "Account",
+        label_addr_type: "Tipo Indirizzo",
+        label_address: "Indirizzo",
+        label_locality: "Località",
+        no_utilities: "Nessuna utenza registrata",
 
         // SETTINGS - INFO APP
         app_info_title: "Informazioni sull'App",
@@ -660,6 +679,15 @@ export const translations = {
         profile_emails_desc: "Account and password",
         profile_utilities: "Utilities",
         profile_utilities_desc: "Electricity, Gas, Water",
+        profile_guide_title: "Profile Guide",
+        profile_guide_step1: "Manage your data (Personal, Residence, Documents) by selecting the various sections.",
+        profile_guide_step2: "Select the QR check to choose which data to show in sharing.",
+        label_name_surname: "Name & Surname",
+        label_cf: "Tax Code",
+        label_birth_data: "Birth Data",
+        profile_addresses_utilities: "Addresses & Utilities",
+        profile_docs_digital: "Digital Documents",
+        profile_notes: "Profile Notes",
         expiry_help_text: "Select a category to configure automatic sending rules.",
 
         // ARCHIVE PAGE

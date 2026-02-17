@@ -68,6 +68,7 @@ body,
     --border-color: rgba(0, 0, 0, 0.12);
 
     --transition-base: 0.2s ease;
+    --qr-bg: #E3F2FD;
 }
 
 /* -----------------------
@@ -141,7 +142,7 @@ body,
 }
 
 /* -----------------------
-   RESPONSIVE
+   RESPONSIVE BASE
    ----------------------- */
 @media (min-width: 481px) {
     .base-container {
@@ -159,14 +160,8 @@ body,
     }
 }
 
-@media (max-width: 1024px) {
-    .vault {
-        padding: 0 2rem;
-    }
-}
-
 /* -----------------------
-   FARO / GLOW
+   FARO / GLOW (V4.0)
    ----------------------- */
 .base-glow {
     position: fixed;
@@ -197,304 +192,10 @@ body,
 }
 
 /* -----------------------
-   VAULT MODULE
+   GENERIC UTILITIES
    ----------------------- */
-.vault {
-    width: 100%;
-    max-width: 448px;
-    position: relative;
-    z-index: 10;
-    box-sizing: border-box;
-    margin: auto auto;
-}
-
-/* -----------------------
-   CARD SYSTEM
-   ----------------------- */
-.card,
-.card-hero {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 2rem 1.5rem;
-    width: 100%;
-    box-shadow: 0 25px 50px -12px var(--card-shadow);
-    color: var(--text-primary);
-    position: relative;
-    z-index: 10;
-}
-
-.card {
-    max-width: 380px;
-    min-width: 280px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.card-hero {
-    text-align: left;
-}
-
-/* Border glow */
-.border-glow {
-    position: relative;
-    border: none;
-}
-
-.border-glow::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: var(--premium-border-width);
-    background: var(--premium-border-gradient);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    -webkit-mask-composite: xor;
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* -----------------------
-   FORM
-   ----------------------- */
-.form-group {
-    margin-bottom: 1.5rem;
-    text-align: left;
-}
-
-.label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-}
-
-.input {
-    width: 100%;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 16px;
-    padding: 1rem 1.25rem;
-    color: var(--input-text);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.input option {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-}
-
-.input:focus {
-    background: var(--input-bg-focus);
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-.password-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 1.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    padding: 0;
-}
-
-/* --- SAETTA & LANG SELECTOR MOVED TO ACCESSO.CSS --- */
-
-
-/* -----------------------
-   BUTTONS
-   ----------------------- */
-.btn-primary {
-    width: 100%;
-    padding: 1rem;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 16px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
-    margin-top: 1rem;
-    box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
-}
-
-.btn-primary:active {
-    transform: scale(0.98);
-}
-
-/* --- AUTH LINKS MOVED TO ACCESSO.CSS --- */
-
-/* -----------------------
-   MODAL & TOAST
-   ----------------------- */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.modal-box {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 2.5rem 2rem;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    transform: scale(0.9);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.modal-overlay.active .modal-box {
-    transform: scale(1);
-}
-
-.modal-icon {
-    font-size: 48px !important;
-    margin-bottom: 1.5rem;
-    display: block;
-}
-
-.modal-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-}
-
-.modal-text {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
-    line-height: 1.5;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.btn-modal {
-    flex: 1;
-    padding: 1rem;
-    border-radius: 16px;
-    border: none;
-    font-weight: 800;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
-}
-
-.btn-modal:active {
-    transform: scale(0.96);
-}
-
-.btn-modal.btn-secondary {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
-    border: 1px solid var(--card-border);
-}
-
-.btn-modal.btn-danger {
-    background: #ef4444;
-    color: white;
-}
-
-/* Toast */
-#toast {
-    position: fixed;
-    left: 50%;
-    bottom: 120px;
-    transform: translate(-50%, 20px);
-    background: #ffffff;
-    color: #0a0f1e;
-    padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    pointer-events: none;
-    z-index: 999999;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0;
-}
-
-#toast.active {
-    opacity: 1;
-    transform: translate(-50%, 0);
-}
-
-.toast-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* -----------------------
-   LAYOUT UTILITIES
-   ----------------------- */
-.form-row {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    width: 100%;
-}
-
-.form-row .form-group {
-    flex: 1;
-}
-
-@media (max-width:480px) {
-    .form-row {
-        flex-direction: column;
-        gap: 0;
-    }
+.hidden {
+    display: none !important;
 }
 
 .mt-section {
@@ -509,88 +210,12 @@ body,
     color: #ef4444;
 }
 
-.fab-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 4px;
+.flex-1 {
+    flex: 1;
 }
 
-.btn-fab-action {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    color: white;
-}
-
-.btn-fab-action:hover {
-    transform: translateY(-2px) scale(1.1);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-}
-
-.btn-fab-action:active {
-    transform: scale(0.95);
-}
-
-.btn-fab-action .material-symbols-outlined {
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.btn-fab-scadenza {
-    background: #f59e0b;
-    /* Arancione/Ambra (non troppo acceso) per Scadenze */
-    width: 56px;
-    height: 56px;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-}
-
-.btn-fab-scadenza .material-symbols-outlined {
-    font-size: 28px;
-}
-
-.btn-fab-azienda {
-    background: #10b981;
-    /* Verde Emerald per Azienda */
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-}
-
-.btn-fab-privato {
-    background: #3b82f6;
-    /* Blu per Privato */
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-
-.btn-fab-action::after {
-    content: attr(data-label);
-    position: absolute;
-    bottom: -18px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 8px;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    opacity: 0.6;
-    letter-spacing: 0.05em;
-    pointer-events: none;
-    background: var(--card-bg);
-    padding: 1px 4px;
-    border-radius: 4px;
+.truncate {
     white-space: nowrap;
-}
-
-.hidden {
-    display: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

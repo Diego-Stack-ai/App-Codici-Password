@@ -65,6 +65,9 @@ export function setupAccountDetailView() {
             text: dataToEncode,
             width: 128,
             height: 128,
+            colorDark: "#000000",
+            colorLight: "#E3F2FD",
+            correctLevel: QRCode.CorrectLevel.M
         });
     }
 }

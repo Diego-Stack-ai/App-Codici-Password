@@ -386,7 +386,7 @@ async function handleLogoAndQR(data) {
     await qrcodeReady;
     if (typeof QRCode === 'undefined') return;
 
-    const options = { width: 100, height: 100, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M };
+    const options = { width: 100, height: 100, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: QRCode.CorrectLevel.M };
 
     const qrCont = document.getElementById('qrcode-container');
     if (qrCont) { clearElement(qrCont); new QRCode(qrCont, { ...options, text: vcard }); }

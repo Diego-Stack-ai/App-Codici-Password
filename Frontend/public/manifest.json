@@ -1,6 +1,6 @@
 {
     "name": "App Codici & Password",
-    "short_name": "Codici & Password",
+    "short_name": "Codex",
     "description": "Cassaforte sicura per le tue credenziali e scadenze.",
     "start_url": "index.html",
     "scope": "./",

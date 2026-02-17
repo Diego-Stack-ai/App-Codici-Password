@@ -1,0 +1,89 @@
+/* ==========================================================================
+   LISTA AZIENDE (V4.0) - Isolamento Totale Step 2
+   ========================================================================== */
+
+/* --- 1. LIST STRUCTURE --- */
+.archive-list-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.15rem;
+}
+
+.archive-row-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    margin-bottom: 0.75rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.archive-row-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.05));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* --- 2. SEARCH SYSTEM --- */
+.search-container {
+    padding: 0 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-field-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.25rem;
+}
+
+.search-input-field {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    width: 100%;
+    font-size: 1rem;
+}
+
+/* --- 3. FLOATING ACTION --- */
+.fab-container {
+    position: fixed;
+    bottom: 100px;
+    right: 1.5rem;
+    z-index: 100;
+}
+
+.btn-fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 20px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-fab:active {
+    transform: scale(0.9);
+}

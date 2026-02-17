@@ -19,23 +19,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- CSS Modular System V3.9 -->
-  <!-- 1. Core System (Variabili & Reset) -->
+  <!-- Design System Master (PROTOCOLLO V5.0) -->
   <link rel="stylesheet" href="assets/css/core.css?v=5.0">
-  <!-- 2. Fonts -->
   <link rel="stylesheet" href="assets/css/core_fonts.css">
-  <!-- 3. Fascie (Header & Footer) -->
   <link rel="stylesheet" href="assets/css/core_fascie.css">
-  <!-- 4. Shared Library (Componenti comuni) -->
-  <!-- 4. Specific Page Style -->
-  <link rel="stylesheet" href="assets/css/dashboard.css?v=5.0">
-
-  <!-- CORE JS -->
-  <script src="assets/js/core.js"></script>
-  <script type="module" src="assets/js/ui-core.js"></script>
+  <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
+  <link rel="stylesheet" href="assets/css/home_page.css?v=5.0">
+  <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
 </head>
 
 <body class="base-bg home-page">
+  <script src="assets/js/core.js"></script>
+  <script type="module" src="assets/js/ui-core.js"></script>
   <div class="base-container">
     <div class="base-glow"></div>
 
@@ -46,14 +41,7 @@
     <main class="base-main">
       <div class="page-container pt-header-extra pb-footer-extra">
 
-        <!-- Saluto Dinamico -->
-        <div class="home-welcome-header">
-          <h1 class="welcome-title">
-            <span id="home-greeting-text" data-t="greeting_default">Buongiorno</span>,
-            <span id="home-user-name" class="text-gradient">Utente</span>
-          </h1>
-          <p class="welcome-subtitle" data-t="home_subtitle">Ecco il riepilogo delle tue attività</p>
-        </div>
+
 
         <div class="matrix-grid">
           <a href="area_privata.html" class="matrix-card card-blue border-glow adaptive-shadow area-privato">

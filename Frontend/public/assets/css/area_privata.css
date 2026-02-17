@@ -1,0 +1,87 @@
+/* ==========================================================================
+   AREA PRIVATA (V5.0) - Dashboard Specific Styles
+   ========================================================================== */
+
+/* 
+   NOTE: Matrix Grid and Card Core styles moved to core_pagine.css 
+   Unique styles for Area Privata (Rubrica, Top Used, etc.)
+*/
+
+/* --- 1. RUBRICA (Contacts) --- */
+.rubrica-container {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+}
+
+.rubrica-btn-new {
+    padding: 0.75rem 1.5rem;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.rubrica-form {
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rubrica-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 480px) {
+    .rubrica-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.rubrica-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.rubrica-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.75rem;
+    color: #fff;
+    outline: none;
+}
+
+/* --- 2. TOP USED WIDGET --- */
+.micro-account-card {
+    border-radius: 20px;
+}
+
+.micro-account-avatar-box {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.micro-account-name {
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.micro-account-subtitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
