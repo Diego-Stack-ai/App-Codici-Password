@@ -133,6 +133,124 @@
     transform: scale(0.98);
 }
 
+/* --- 5. SYNTAX INFO SYSTEM (V5.0) --- */
+.text-accent {
+    color: var(--accent);
+}
+
+.archive-row-container {
+    width: 100%;
+}
+
+.syntax-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+}
+
+.syntax-header span.material-symbols-outlined {
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.syntax-header .syntax-title {
+    font-size: 0.70rem !important;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+}
+
+.syntax-inline-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    width: 100%;
+}
+
+.syntax-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+}
+
+.syntax-row .config-item-desc {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.syntax-row .config-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+}
+
+@media (max-width: 480px) {
+    .syntax-inline-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
+
+/* --- 6. BADGES SYSTEM --- */
+.config-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.config-badge-blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.config-badge-amber {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.config-badge-purple {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.config-badge-emerald {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+/* --- 7. EMPTY & LOADING STATES --- */
+.archive-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    gap: 1rem;
+    opacity: 0.6;
+}
+
+.archive-loading-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+
 /* Auth Aliases (Compatibility) */
 .auth-label {
     cursor: pointer;
@@ -177,4 +295,115 @@
     transition: all 0.2s;
     margin-top: 1rem;
     box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+}
+
+/* --- 8. DROPDOWN SYSTEM (V5.0 Premium) --- */
+.base-dropdown {
+    position: relative;
+    width: fit-content;
+}
+
+.base-dropdown-full {
+    width: 100% !important;
+}
+
+.base-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.25rem;
+    height: 3.5rem;
+    /* Standard V5.0 Height */
+    border-radius: 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.base-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.base-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 20px;
+    padding: 0.5rem;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    max-height: 300px;
+    overflow-y: auto;
+    animation: dropdownFadeIn 0.3s ease-out;
+}
+
+.dark .base-dropdown-menu {
+    background: rgba(30, 41, 59, 0.98);
+    /* Deep Slate Blue */
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.base-dropdown-menu.show {
+    display: block;
+}
+
+.base-dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-radius: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin-bottom: 2px;
+}
+
+.base-dropdown-item:last-child {
+    margin-bottom: 0;
+}
+
+.base-dropdown-item:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent);
+}
+
+.base-dropdown-item.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar Dropdown */
+.base-dropdown-menu::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+}
+
+.base-dropdown-menu::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 10px;
 }

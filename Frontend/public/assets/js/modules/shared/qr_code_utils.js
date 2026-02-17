@@ -81,12 +81,41 @@ export function renderQRCode(container, text, options = {}) {
     if (!container || typeof QRCode === 'undefined') return;
     // Remove previous QR canvases/images
     container.querySelectorAll('canvas,img').forEach(el => el.remove());
-    new QRCode(container, {
-        text,
-        width: options.width || 104,
-        height: options.height || 104,
-        colorDark: options.colorDark || '#000000',
-        colorLight: options.colorLight || '#E3F2FD',
-        correctLevel: options.correctLevel || (QRCode.CorrectLevel ? QRCode.CorrectLevel.M : 1)
-    });
+
+    // HACK: Aggiungi padding alla fine dei dati per forzare la libreria a scegliere una Versione QR più grande (TypeNumber maggiore).
+    // La libreria qrcode.js attuale sottostima l'overhead binario, causando overflow se il Type scelto è 'giusto giusto'.
+    // Aggiungendo spazi (che sono safe dopo END:VCARD), forziamo il calcolo preliminare a salire di livello.
+    let safeText = text;
+    if (safeText.length > 50) {
+        safeText += " ".repeat(150); // +150 char buffer to force next Version
+    }
+
+    try {
+        new QRCode(container, {
+            text: safeText,
+            width: options.width || 104,
+            height: options.height || 104,
+            colorDark: options.colorDark || '#000000',
+            colorLight: options.colorLight || '#E3F2FD',
+            correctLevel: options.correctLevel || (typeof QRCode.CorrectLevel !== 'undefined' ? QRCode.CorrectLevel.M : 1)
+        });
+    } catch (e) {
+        console.error("QR Code Render Error (Overflow) with padding:", e);
+
+        // Fallback estremo: Riduci ancora correzione e aumenta padding
+        try {
+            new QRCode(container, {
+                text: safeText + "   ", // Try minimal change
+                width: options.width || 104,
+                height: options.height || 104,
+                colorDark: options.colorDark || '#000000',
+                colorLight: options.colorLight || '#E3F2FD',
+                correctLevel: (typeof QRCode.CorrectLevel !== 'undefined' ? QRCode.CorrectLevel.L : 3)
+            });
+        } catch (retryError) {
+            console.error("QR Code Retry Failed:", retryError);
+            container.innerHTML = '<div style="color:red; font-size:0.75rem; text-align:center; padding:10px;">Dati eccessivi<br>per il QR Code</div>';
+            if (window.showToast) window.showToast("Dati eccessivi. Riduci i campi.", "warning");
+        }
+    }
 }

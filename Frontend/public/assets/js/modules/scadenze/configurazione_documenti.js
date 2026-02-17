@@ -19,6 +19,7 @@ const DEFAULT_CONFIG = {
 
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentUser = null;
+let editingState = { list: null, index: null };
 
 document.addEventListener('DOMContentLoaded', () => {
     // Buttons Listeners
@@ -28,17 +29,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Delegated actions for list items
     ['container-types', 'container-models', 'container-templates'].forEach(id => {
-        document.getElementById(id)?.addEventListener('click', (e) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', (e) => {
             const btnEdit = e.target.closest('.btn-edit-item');
             const btnDelete = e.target.closest('.btn-delete-item');
+            const btnSave = e.target.closest('.btn-save-inline');
+            const btnCancel = e.target.closest('.btn-cancel-inline');
 
             if (btnEdit) {
                 const { list, index } = btnEdit.dataset;
-                if (list === 'deadlineTypes') editType(parseInt(index));
-                else editItem(list, parseInt(index));
+                startInlineEdit(list, parseInt(index));
             } else if (btnDelete) {
                 const { list, index } = btnDelete.dataset;
                 deleteItem(list, parseInt(index));
+            } else if (btnSave) {
+                saveInlineEdit();
+            } else if (btnCancel) {
+                cancelInlineEdit();
             }
         });
     });
@@ -87,6 +95,40 @@ function renderAll() {
     renderSimpleList('container-templates', currentConfig.emailTemplates, 'emailTemplates');
 }
 
+function startInlineEdit(list, index) {
+    editingState = { list, index };
+    renderAll();
+}
+
+function cancelInlineEdit() {
+    editingState = { list: null, index: null };
+    renderAll();
+}
+
+async function saveInlineEdit() {
+    const { list, index } = editingState;
+    if (list === 'deadlineTypes') {
+        const name = document.getElementById('edit-type-name')?.value;
+        const period = document.getElementById('edit-type-period')?.value;
+        const freq = document.getElementById('edit-type-freq')?.value;
+
+        if (!name || !name.trim()) return;
+
+        currentConfig.deadlineTypes[index] = {
+            name: name.trim(),
+            period: parseInt(period) || 14,
+            freq: parseInt(freq) || 7
+        };
+    } else {
+        const val = document.getElementById(`edit-item-${list}-${index}`)?.value;
+        if (val === undefined || !val.trim()) return;
+        currentConfig[list][index] = val.trim();
+    }
+
+    editingState = { list: null, index: null };
+    saveConfig();
+}
+
 function renderTypes() {
     const container = document.getElementById('container-types');
     if (!container) return;
@@ -104,6 +146,48 @@ function renderTypes() {
         if (typeof item === 'string') {
             item = { name: item, period: 14, freq: 7 };
             currentConfig.deadlineTypes[index] = item;
+        }
+
+        const isEditing = editingState.list === 'deadlineTypes' && editingState.index === index;
+
+        if (isEditing) {
+            return createElement('div', { className: 'config-list-item' }, [
+                createElement('div', { className: 'inline-edit-container' }, [
+                    createElement('div', { className: 'inline-edit-row' }, [
+                        createElement('input', {
+                            id: 'edit-type-name',
+                            type: 'text',
+                            value: item.name,
+                            placeholder: t('placeholder_type_doc'),
+                            className: 'inline-input-glass w-full'
+                        })
+                    ]),
+                    createElement('div', { className: 'inline-edit-row' }, [
+                        createElement('span', { className: 'config-item-desc', textContent: t('text_notice') }),
+                        createElement('input', {
+                            id: 'edit-type-period',
+                            type: 'number',
+                            value: item.period,
+                            className: 'inline-input-glass w-24'
+                        }),
+                        createElement('span', { className: 'config-item-desc', textContent: t('text_replica') }),
+                        createElement('input', {
+                            id: 'edit-type-freq',
+                            type: 'number',
+                            value: item.freq,
+                            className: 'inline-input-glass w-24'
+                        })
+                    ])
+                ]),
+                createElement('div', { className: 'config-item-actions' }, [
+                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
+                    ]),
+                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+                    ])
+                ])
+            ]);
         }
 
         return createElement('div', {
@@ -127,13 +211,13 @@ function renderTypes() {
                     className: 'btn-edit-item btn-icon-edit',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'edit' })
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
                 ]),
                 createElement('button', {
                     className: 'btn-delete-item btn-icon-delete',
                     dataset: { list: 'deadlineTypes', index: index.toString() }
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'delete' })
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
                 ])
             ])
         ]);
@@ -154,25 +238,50 @@ function renderSimpleList(containerId, data, listKey) {
         return;
     }
 
-    const items = data.map((item, index) => createElement('div', {
-        className: 'config-list-item'
-    }, [
-        createElement('span', { className: 'config-item-desc truncate pr-4', textContent: item }),
-        createElement('div', { className: 'config-item-actions' }, [
-            createElement('button', {
-                className: 'btn-edit-item btn-manage-account-semantic',
-                dataset: { list: listKey, index: index.toString() }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'edit' })
-            ]),
-            createElement('button', {
-                className: 'btn-delete-item btn-manage-account-semantic btn-delete-item-semantic',
-                dataset: { list: listKey, index: index.toString() }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined icon-size-sm', textContent: 'delete' })
+    const items = data.map((item, index) => {
+        const isEditing = editingState.list === listKey && editingState.index === index;
+
+        if (isEditing) {
+            return createElement('div', { className: 'config-list-item' }, [
+                createElement('div', { className: 'inline-edit-row w-full' }, [
+                    createElement('input', {
+                        id: `edit-item-${listKey}-${index}`,
+                        type: 'text',
+                        value: item,
+                        className: 'inline-input-glass w-full'
+                    })
+                ]),
+                createElement('div', { className: 'config-item-actions' }, [
+                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
+                    ]),
+                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+                    ])
+                ])
+            ]);
+        }
+
+        return createElement('div', {
+            className: 'config-list-item'
+        }, [
+            createElement('span', { className: 'config-item-desc truncate pr-4', textContent: item }),
+            createElement('div', { className: 'config-item-actions' }, [
+                createElement('button', {
+                    className: 'btn-edit-item btn-icon-edit',
+                    dataset: { list: listKey, index: index.toString() }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                ]),
+                createElement('button', {
+                    className: 'btn-delete-item btn-icon-delete',
+                    dataset: { list: listKey, index: index.toString() }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                ])
             ])
-        ])
-    ]));
+        ]);
+    });
     setChildren(container, items);
 }
 
@@ -188,31 +297,10 @@ async function addTypeItem() {
     saveConfig();
 }
 
-async function editType(index) {
-    const item = currentConfig.deadlineTypes[index];
-    const name = await window.showInputModal(t('prompt_edit_item'), item.name);
-    if (name === null) return;
-    const period = await window.showInputModal(t('prompt_days_notice'), item.period.toString());
-    if (period === null) return;
-    const freq = await window.showInputModal(t('prompt_freq_days'), item.freq.toString());
-    if (freq === null) return;
-
-    currentConfig.deadlineTypes[index] = { name: name.trim(), period: parseInt(period) || 14, freq: parseInt(freq) || 7 };
-    saveConfig();
-}
-
 async function addItem(listKey, prompt) {
     const val = await window.showInputModal(t('modal_title_add'), "", prompt);
     if (!val || !val.trim()) return;
     currentConfig[listKey].push(val.trim());
-    saveConfig();
-}
-
-async function editItem(listKey, index) {
-    const current = currentConfig[listKey][index];
-    const val = await window.showInputModal(t('modal_title_edit'), current);
-    if (val === null || !val.trim()) return;
-    currentConfig[listKey][index] = val.trim();
     saveConfig();
 }
 

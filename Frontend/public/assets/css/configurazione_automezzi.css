@@ -98,7 +98,43 @@
 .settings-header-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.btn-icon-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.btn-icon-add:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+    color: #3b82f6;
+    transform: scale(1.05);
+}
+
+.btn-icon-add span {
+    font-size: 1.25rem;
+}
+
+.arrow-icon {
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+.collapsible-header[aria-expanded="true"] .arrow-icon {
+    transform: rotate(180deg);
 }
 
 .settings-dropdown-panel {
@@ -113,47 +149,140 @@
     display: none;
 }
 
-/* --- 3. CONFIG ITEMS --- */
-.config-item-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.config-item-row {
+/* --- 3. CONFIG ITEMS (LIST RENDERING) --- */
+.config-list-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
 }
 
-/* --- 4. BADGES --- */
-.config-badge {
-    padding: 0.25rem 0.6rem;
-    border-radius: 8px;
-    font-size: 0.65rem;
-    font-weight: 800;
+.config-list-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.config-item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    text-align: left;
+}
+
+.config-item-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.config-item-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.config-badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+}
+
+.config-item-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+/* --- 4. ACTION BUTTONS (IN-LIST) --- */
+.btn-icon-edit,
+.btn-icon-delete,
+.btn-icon-save,
+.btn-icon-cancel,
+.btn-manage-account-semantic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: var(--input-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.btn-manage-account-semantic {
+    width: auto;
+    height: auto;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 700;
     text-transform: uppercase;
 }
 
-.config-badge-blue {
-    background: rgba(59, 130, 246, 0.1);
+.btn-icon-edit:hover,
+.btn-icon-save:hover,
+.btn-manage-account-semantic:not(.btn-delete-item-semantic):hover {
+    background: rgba(59, 130, 246, 0.15);
     color: #3b82f6;
+    border-color: #3b82f6;
 }
 
-.config-badge-amber {
-    background: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
+.btn-icon-delete:hover,
+.btn-icon-cancel:hover,
+.btn-delete-item-semantic:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: #ef4444;
 }
 
-.config-badge-purple {
-    background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
+/* --- 5. INLINE EDITING --- */
+.inline-edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
 }
 
-/* --- 5. ANIMATIONS --- */
+.inline-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.inline-input-glass {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.inline-input-glass:focus {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+.w-24 {
+    width: 3.5rem;
+}
+
+/* --- 6. ANIMATIONS --- */
 @keyframes fadeIn {
     from {
         opacity: 0;

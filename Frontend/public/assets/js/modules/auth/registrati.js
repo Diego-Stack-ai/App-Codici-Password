@@ -127,14 +127,16 @@ function setupLanguageSelector() {
             onclick: () => {
                 const code = lang.code;
                 localStorage.setItem('app_language', code);
-                if (window.AppState) window.AppState.language = code;
-                applyGlobalTranslations();
-                dropdown.classList.remove('show');
+                window.location.reload(); // Forza reload per coerenza globale
             }
         }, [
             createElement('span', { className: 'flag', textContent: lang.flag }),
             document.createTextNode(` ${lang.name}`)
         ]);
+
+        const currentLang = localStorage.getItem('app_language') || 'it';
+        if (lang.code === currentLang) opt.classList.add('active');
+
         dropdown.appendChild(opt);
     });
 

@@ -2,30 +2,29 @@
 <html lang="it">
 
 <head>
-    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <!-- Anti-flicker & Theme Master (V5.0) -->
     <script src="assets/js/theme-init.js"></script>
-    <!-- CSP (Content Security Policy) - V3.9 Standard -->
+    <!-- CSP (Content Security Policy) - V5.0 Standard -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Impostazioni - PROTOCOLLO BASE V3.9</title>
+    <title data-t="title_settings">Impostazioni - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.9.1" />
-    <link rel="apple-touch-icon" sizes="192x192" href="./assets/images/app-icon.png">
+    <link rel="manifest" href="manifest.json?v=5.0" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
+
     <link rel="stylesheet" href="assets/css/impostazioni.css?v=5.0">
 </head>
 
@@ -35,6 +34,11 @@
     <div class="base-container">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
+
+        <!-- Background Watermark (Global) -->
+        <div class="archive-watermark">
+            <span class="material-symbols-outlined">settings</span>
+        </div>
 
         <!-- Automated Header -->
         <header id="header-placeholder" class="base-header"></header>
@@ -254,15 +258,40 @@
                     </div>
 
                     <!-- Privacy -->
-                    <button class="settings-item group" id="btn-privacy">
+                    <button class="settings-item group" id="btn-toggle-privacy">
                         <div class="row-layout">
                             <div class="settings-icon-box icon-emerald">
                                 <span class="material-symbols-outlined">shield</span>
                             </div>
-                            <span class="settings-label" data-t="privacy_policy_title">Privacy & Dati</span>
+                            <span class="settings-label" data-t="privacy_short_title">Informativa Privacy</span>
                         </div>
-                        <span class="material-symbols-outlined text-secondary arrow-icon">chevron_right</span>
+                        <span id="privacy-chevron" class="material-symbols-outlined arrow-icon">expand_more</span>
                     </button>
+                    <div id="privacy-dropdown-content" class="settings-dropdown-panel hidden">
+                        <div id="privacy-short-text-placeholder"></div>
+                        <div class="mt-4 text-center">
+                            <a href="privacy.html" class="btn-link-accent" data-t="privacy_short_details_link">📌 Per i
+                                dettagli completi: leggi l’Informativa Estesa.</a>
+                        </div>
+                    </div>
+
+                    <!-- Termini e Condizioni -->
+                    <button class="settings-item group" id="btn-toggle-terms">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-purple">
+                                <span class="material-symbols-outlined">gavel</span>
+                            </div>
+                            <span class="settings-label" data-t="terms_short_title">Termini e Condizioni</span>
+                        </div>
+                        <span id="terms-chevron" class="material-symbols-outlined arrow-icon">expand_more</span>
+                    </button>
+                    <div id="terms-dropdown-content" class="settings-dropdown-panel hidden">
+                        <div id="terms-short-text-placeholder"></div>
+                        <div class="mt-4 text-center">
+                            <a href="termini.html" class="btn-link-accent" data-t="terms_short_details_link">📌 Leggi i
+                                Termini e Condizioni completi.</a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Logout -->
@@ -281,7 +310,7 @@
             <div class="zoom-backdrop"></div>
             <div class="zoom-content">
                 <div id="qrcode-zoom" class="zoom-qr-box"></div>
-                <button id="btn-close-qr" class="zoom-close-btn">Chiudi</button>
+                <button id="btn-close-qr" class="zoom-close-btn" data-t="btn_close">Chiudi</button>
             </div>
         </div>
 

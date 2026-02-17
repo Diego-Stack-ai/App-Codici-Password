@@ -54,6 +54,156 @@
     }
 }
 
+/* --- SHARED COMPONENTS PORTED FROM MODULI (For Auth Independence) --- */
+
+/* CARD */
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 2rem 1.5rem;
+    width: 100%;
+    box-shadow: 0 25px 50px -12px var(--card-shadow);
+    color: var(--text-primary);
+    position: relative;
+    z-index: 10;
+    text-align: center;
+}
+
+/* BORDER GLOW */
+.border-glow {
+    position: relative;
+    border: none;
+}
+
+.border-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--premium-border-width);
+    background: var(--premium-border-gradient);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* TYPOGRAPHY */
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+/* FORM ELEMENTS */
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    color: var(--input-text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.input:focus {
+    background: var(--input-bg-focus);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.form-row {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    width: 100%;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+@media (max-width:480px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+/* BUTTONS */
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    margin-top: 1rem;
+    box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* ICON BOX */
+.icon-box {
+    width: 64px;
+    height: 64px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    color: #3b82f6;
+}
+
+.icon-box .material-symbols-outlined {
+    font-size: 32px;
+}
+
 /* --- 2. LANGUAGE SELECTOR (Specifico Auth) --- */
 .lang-selector-container {
     position: absolute;
@@ -122,6 +272,11 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
+.lang-option.active {
+    background: var(--accent);
+    color: white;
+}
+
 /* --- 3. AUTH LINKS (Forgot/Register) --- */
 .link-forgot,
 .link-register {
@@ -177,7 +332,8 @@
 }
 
 .password-wrapper .input[type="password"] {
-    padding-right: 3rem; /* spazio per il toggle */
+    padding-right: 3rem;
+    /* spazio per il toggle */
 }
 
 .toggle-password {

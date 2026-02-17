@@ -343,3 +343,37 @@ export function initCollapsibles() {
     });
 }
 
+/**
+ * [CORE UI] GUIDE MODAL
+ */
+export function showGuideModal(title, steps) {
+    const modalId = 'guide-modal';
+    let current = document.getElementById(modalId);
+    if (current) current.remove();
+
+    const modal = createElement('div', { id: modalId, className: 'modal-overlay' });
+    const content = createElement('div', { className: 'modal-box' }, [
+        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
+        createElement('h3', { className: 'modal-title', textContent: title }),
+        createElement('div', { className: 'modal-text text-left w-full mt-4 mb-4 space-y-2' },
+            steps.map((step, i) => createElement('p', { className: 'flex items-start text-sm text-secondary' }, [
+                createElement('strong', { className: 'text-accent mr-2 min-w-[20px]', textContent: `${i + 1}.` }),
+                createElement('span', { textContent: step })
+            ]))
+        ),
+        createElement('div', { className: 'modal-actions' }, [
+            createElement('button', {
+                className: 'btn-modal btn-primary w-full',
+                textContent: t('close') || 'Chiudi',
+                onclick: () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); }
+            })
+        ])
+    ]);
+
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add('active'));
+    modal.onclick = (e) => { if (e.target === modal) modal.querySelector('button').click(); };
+}
+window.showGuideModal = showGuideModal;
+

@@ -60,6 +60,8 @@ export async function initComponents() {
                     backFn = () => window.location.href = 'home_page.html';
                 } else if (path.endsWith('regole_scadenze.html')) {
                     backFn = () => window.location.href = 'impostazioni.html';
+                } else if (path.endsWith('privacy.html') || path.endsWith('termini.html')) {
+                    backFn = () => window.location.href = 'impostazioni.html';
                 } else if (path.endsWith('configurazione_automezzi.html') || path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
                     backFn = () => window.location.href = 'regole_scadenze.html';
                 } else if (path.endsWith('archivio_account.html') || path.endsWith('notifiche_storia.html')) {
@@ -165,6 +167,25 @@ export async function initComponents() {
             }
 
             const footerCenter = createElement('div', { id: 'footer-center-actions', className: 'header-center' });
+
+            // GUIDA RAPIDA (Icona Centrale - Solo Profilo)
+            if (path.includes('profilo_privato.html')) {
+                const guideBtn = createElement('button', {
+                    className: 'btn-icon-header',
+                    title: 'Guida Profilo',
+                    onclick: () => {
+                        openGuideModal(t('profile_guide_title') || 'Guida Profilo', [
+                            t('profile_guide_step1') || 'Gestisci i tuoi dati (Anagrafica, Residenza, Documenti).',
+                            t('profile_guide_step2') || 'Usa la spunta QR per decidere cosa condividere.',
+                            t('profile_guide_step3') || 'Clicca sul QR Code per ingrandirlo.'
+                        ]);
+                    }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'info' })
+                ]);
+                footerCenter.appendChild(guideBtn);
+            }
+
             const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });
 
             // Settings Link
@@ -203,4 +224,52 @@ export async function initComponents() {
     } catch (e) {
         console.error("Errore inizializzazione componenti:", e);
     }
+}
+
+/**
+ * Helper locale per aprire il modale guida (evita dipendenze cicliche)
+ */
+function openGuideModal(title, steps) {
+    // Rimuovi modali esistenti
+    const existing = document.getElementById('guide-modal-local');
+    if (existing) existing.remove();
+
+    const modal = createElement('div', { id: 'guide-modal-local', className: 'modal-overlay' });
+
+    // Contenuto passaggi
+    const stepsContent = steps.map((step, i) => createElement('div', {
+        className: 'flex-start-row mb-3',
+        style: 'display: flex; align-items: flex-start; margin-bottom: 0.75rem;'
+    }, [
+        createElement('strong', { className: 'text-accent mr-2', style: 'margin-right: 0.5rem; color: var(--accent); white-space: nowrap;', textContent: `${i + 1}.` }),
+        createElement('span', { className: 'text-secondary text-sm', style: 'color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;', textContent: step })
+    ]));
+
+    const btnClose = createElement('button', {
+        className: 'btn-modal btn-primary',
+        style: 'width: 100%; margin-top: 1rem;',
+        textContent: t('close') || 'Chiudi',
+        onclick: () => {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    });
+
+    const content = createElement('div', { className: 'modal-box' }, [
+        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
+        createElement('h3', { className: 'modal-title', textContent: title }),
+        createElement('div', { className: 'modal-body mt-4 mb-4 text-left w-full' }, stepsContent),
+        createElement('div', { className: 'modal-actions' }, [btnClose])
+    ]);
+
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    // Animazione apertura
+    requestAnimationFrame(() => modal.classList.add('active'));
+
+    // Chiusura al click fuori
+    modal.onclick = (e) => {
+        if (e.target === modal) btnClose.click();
+    };
 }

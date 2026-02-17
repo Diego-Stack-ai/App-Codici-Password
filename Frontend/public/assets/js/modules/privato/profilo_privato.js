@@ -1,7 +1,6 @@
 /**
- * PROFILO PRIVATO MODULE (V4.2)
+ * PROFILO PRIVATO MODULE (V4.3 - Consolidated)
  * Gestione profilo con form dinamici e protocollo DOM sicuro.
- * V4.2: Aggiunto initComponents() per header/footer standard.
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
@@ -9,9 +8,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/fi
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
+import { logError, formatDateToIT } from '../../utils.js';
 
 function createCopyBtn(text) {
     return createElement('button', {
@@ -27,7 +27,6 @@ function createCopyBtn(text) {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
     ]);
 }
-import { logError, formatDateToIT } from '../../utils.js';
 
 // --- STATE ---
 let currentUserUid = null;
@@ -121,6 +120,9 @@ async function loadUserData(user) {
         if (qrSnap.exists()) {
             qrCodeInclusions = { ...qrCodeInclusions, ...qrSnap.data() };
         }
+
+        // Memo Personale
+        // Rimossa logica memo
 
         renderAllSections();
         generateProfileQRCode();
@@ -902,96 +904,143 @@ async function deleteDocumento(idx) {
 /**
  * MODAL ENGINE (Specific for Profile)
  */
+// Global exposure for Modal Handlers (Simulated as legacy window pattern but inside module)
+/**
+ * MODAL ENGINE (Specific for Profile)
+ */
 function showProfileModal(title, fields, currentValues, onSave) {
-    const modalId = 'profile-edit-modal';
-    let modal = document.getElementById(modalId);
-    if (modal) modal.remove();
+    try {
+        const modalId = 'profile-edit-modal';
+        let modal = document.getElementById(modalId);
+        if (modal) modal.remove();
 
-    modal = createElement('div', { id: modalId, className: 'modal-overlay' });
-    const modalBox = createElement('div', { className: 'modal-box modal-profile-box' });
+        modal = createElement('div', { id: modalId, className: 'modal-overlay' });
+        const modalBox = createElement('div', { className: 'modal-box modal-profile-box' });
 
-    const header = createElement('div', { className: 'modal-header' }, [
-        createElement('h3', { className: 'modal-title', textContent: title }),
-        createElement('div', { className: 'modal-accent-bar' })
-    ]);
-
-    const form = createElement('div', { className: 'flex-col-gap' });
-    const inputs = {};
-
-    fields.forEach(f => {
-        const val = currentValues[f.key] || '';
-        let inputEl;
-
-        const fieldContainer = createElement('div', { className: 'glass-field-container' }, [
-            createElement('label', { className: 'view-label', textContent: f.label }),
-            createElement('div', { className: 'glass-field-box' }, [
-                createElement('span', { className: 'material-symbols-outlined glass-field-icon', textContent: f.icon || 'edit' }),
-                inputEl = (f.type === 'select')
-                    ? createElement('div', { className: 'base-dropdown', dataset: { customSelect: 'true' } }, [
-                        createElement('div', { className: 'dropdown-trigger' }, [
-                            createElement('span', { className: 'dropdown-label', textContent: 'Seleziona...' }),
-                            createElement('span', { className: 'material-symbols-outlined arrow-icon', textContent: 'expand_more' })
-                        ]),
-                        createElement('div', { className: 'base-dropdown-menu scrollable' }),
-                        createElement('select', { className: 'hidden' },
-                            (f.options || []).map(opt => createElement('option', { value: opt, textContent: opt, selected: opt === val }))
-                        )
-                    ])
-                    : createElement('input', {
-                        type: f.type || 'text',
-                        className: 'glass-field-input',
-                        value: val,
-                        placeholder: f.label
-                    })
-            ])
+        const header = createElement('div', { className: 'modal-header' }, [
+            createElement('h3', { className: 'modal-title', textContent: title }),
+            createElement('div', { className: 'modal-accent-bar' })
         ]);
 
-        if (f.type === 'select') {
-            inputs[f.key] = inputEl.querySelector('select');
-            syncCustomDropdowns(inputEl, f.configKey);
-            window._currentModalRefresh = () => {
-                const select = inputEl.querySelector('select');
-                if (select && f.configKey) {
-                    const newOptions = profileLabels[f.configKey];
-                    clearElement(select);
-                    newOptions.forEach(opt => select.appendChild(createElement('option', { value: opt, textContent: opt, selected: opt === select.value })));
-                    syncCustomDropdowns(inputEl, f.configKey);
+        const form = createElement('div', { className: 'flex-col-gap' });
+        const inputs = {};
+
+        fields.forEach(f => {
+            const val = currentValues[f.key] || '';
+            let finalInputEl; // Elemento DOM da visualizzare
+            let valueInput;   // Elemento DOM da cui leggere il valore (input o hidden select)
+
+            if (f.type === 'select') {
+                // --- CUSTOM SELECT LOGIC (Rounded & Styled) ---
+                const hiddenSelect = createElement('select', { className: 'hidden-select', style: 'display:none;' },
+                    (f.options || []).map(opt => createElement('option', { value: opt, textContent: opt, selected: opt === val }))
+                );
+                valueInput = hiddenSelect;
+
+                finalInputEl = createElement('div', { className: 'custom-select-wrapper', style: 'position: relative; width: 100%;' }, [
+                    hiddenSelect,
+                    // Trigger
+                    createElement('div', {
+                        className: 'glass-field-input custom-select-trigger',
+                        style: 'cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 0.5rem;',
+                        onclick: (e) => {
+                            e.stopPropagation();
+                            const currentMenu = e.currentTarget.nextElementSibling;
+                            // Chiudi tutti gli altri
+                            document.querySelectorAll('.custom-select-menu.show').forEach(m => {
+                                if (m !== currentMenu) m.classList.remove('show');
+                            });
+                            currentMenu.classList.toggle('show');
+                        }
+                    }, [
+                        createElement('span', { className: 'selected-text', textContent: val || 'Seleziona...' }),
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'expand_more' })
+                    ]),
+                    // Menu Dropdown
+                    createElement('div', { className: 'custom-select-menu vertical-scroll' },
+                        (f.options || []).map(opt => createElement('div', {
+                            className: 'custom-option',
+                            textContent: opt,
+                            onclick: (e) => {
+                                e.stopPropagation();
+                                const wrapper = e.currentTarget.closest('.custom-select-wrapper');
+                                const sel = wrapper.querySelector('select');
+                                const txt = wrapper.querySelector('.selected-text');
+                                const menu = wrapper.querySelector('.custom-select-menu');
+
+                                sel.value = opt;
+                                txt.textContent = opt;
+                                menu.classList.remove('show');
+                            }
+                        }))
+                    )
+                ]);
+            } else {
+                // --- STANDARD INPUT LOGIC ---
+                valueInput = createElement('input', {
+                    type: f.type || 'text',
+                    className: 'glass-field-input',
+                    value: val,
+                    placeholder: f.label,
+                    style: 'width: 100%; border: none; background: transparent; color: inherit; padding: 0;'
+                });
+                finalInputEl = valueInput;
+            }
+
+            // Container
+            const fieldContainer = createElement('div', { className: 'glass-field-container' }, [
+                createElement('label', { className: 'view-label', textContent: f.label }),
+                createElement('div', { className: 'glass-field-box', style: 'padding-left: 1rem;' }, [
+                    finalInputEl
+                ])
+            ]);
+
+            // Map for saving
+            inputs[f.key] = valueInput;
+
+            form.appendChild(fieldContainer);
+        });
+
+        const actions = createElement('div', { className: 'modal-actions' }, [
+            createElement('button', {
+                className: 'btn-modal btn-secondary',
+                textContent: t('cancel') || 'Annulla',
+                onclick: () => closeModal()
+            }),
+            createElement('button', {
+                className: 'btn-modal btn-primary',
+                textContent: t('save') || 'Salva',
+                onclick: async () => {
+                    try {
+                        const newData = {};
+                        fields.forEach(f => {
+                            if (inputs[f.key]) newData[f.key] = inputs[f.key].value.trim();
+                        });
+                        await onSave(newData);
+                        closeModal();
+                    } catch (e) {
+                        console.error("Save Error:", e);
+                        showToast(t('error_generic'), "error");
+                    }
                 }
-            };
-        } else {
-            inputs[f.key] = inputEl;
+            })
+        ]);
+
+        function closeModal() {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
         }
 
-        form.appendChild(fieldContainer);
-    });
-
-    const actions = createElement('div', { className: 'modal-actions' }, [
-        createElement('button', {
-            className: 'btn-modal btn-secondary',
-            textContent: t('cancel') || 'Annulla',
-            onclick: () => closeModal()
-        }),
-        createElement('button', {
-            className: 'btn-modal btn-primary',
-            textContent: t('save') || 'Salva',
-            onclick: async () => {
-                const newData = {};
-                fields.forEach(f => newData[f.key] = inputs[f.key].value.trim());
-                await onSave(newData);
-                closeModal();
-            }
-        })
-    ]);
-
-    function closeModal() {
-        modal.classList.remove('active');
-        setTimeout(() => modal.remove(), 300);
+        setChildren(modalBox, [header, form, actions]);
+        modal.appendChild(modalBox);
+        document.body.appendChild(modal);
+        // Force reflow
+        void modal.offsetWidth;
+        setTimeout(() => modal.classList.add('active'), 10);
+    } catch (e) {
+        console.error("ShowProfileModal Error:", e);
+        showToast("Errore interfaccia: " + e.message, "error");
     }
-
-    setChildren(modalBox, [header, form, actions]);
-    modal.appendChild(modalBox);
-    document.body.appendChild(modal);
-    setTimeout(() => modal.classList.add('active'), 10);
 }
 
 // Implementazione Azioni

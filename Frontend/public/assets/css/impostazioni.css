@@ -1,103 +1,128 @@
 /* ==========================================================================
-   IMPOSTAZIONI (V5.0) - CSS Isolation
+   IMPOSTAZIONI (V5.0) - Premium Design Protocol
    ========================================================================== */
 
-/* --- 1. LAYOUT CONTAINERS --- */
+/* --- 1. DECOR & WATERMARK --- */
+.archive-watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.05;
+}
+
+.archive-watermark span {
+    font-size: 600px;
+    color: var(--text-primary);
+}
+
+/* --- 2. LAYOUT CONTAINERS --- */
 .settings-container {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
 .settings-item-header-row {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
     width: 100%;
 }
 
 .settings-controls-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     width: 100%;
 }
 
-.settings-controls-row .timer-btn,
-.settings-controls-row .theme-btn {
-    flex: 1;
-}
-
-/* --- 2. ITEMS & CARDS --- */
+/* --- 3. ITEMS & CARDS (Premium Glass) --- */
 .settings-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1rem;
-    background: transparent;
-    border: none;
-    border-radius: 16px;
+    padding: 0.85rem 1.15rem;
+    /* Ridotto padding per compattezza */
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    /* Leggermente più piccolo */
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     text-decoration: none;
     color: inherit;
     outline: none;
     width: 100%;
+    backdrop-filter: blur(10px);
 }
 
 .settings-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .settings-item-stack {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
-/* --- 3. ICON BOX SYSTEM --- */
+/* --- 4. ICON BOX SYSTEM --- */
 .settings-icon-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s;
+}
+
+.settings-item:hover .settings-icon-box {
+    transform: scale(1.1) rotate(-5deg);
 }
 
 .icon-purple {
-    background: rgba(168, 85, 247, 0.15);
     color: #a855f7;
+    background: rgba(168, 85, 247, 0.1);
 }
 
 .icon-blue {
-    background: rgba(59, 130, 246, 0.15);
     color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
 }
 
 .icon-red {
-    background: rgba(239, 68, 68, 0.15);
     color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
 }
 
 .icon-emerald {
-    background: rgba(16, 185, 129, 0.15);
     color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
 }
 
 .icon-amber {
-    background: rgba(245, 158, 11, 0.15);
     color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
 }
 
-/* --- 4. TEXT COMPONENTS --- */
+/* --- 5. TEXT COMPONENTS --- */
 .settings-item-info {
     display: flex;
     flex-direction: column;
@@ -106,68 +131,79 @@
 }
 
 .settings-label {
-    font-size: 0.875rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .settings-desc {
-    font-size: 0.625rem;
+    font-size: 0.7rem;
     color: var(--text-secondary);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0 0.25rem;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
 }
 
-/* --- 5. INTERACTIVE ELEMENTS (Toggle/Buttons) --- */
+h3.settings-desc {
+    margin: 1rem 0 0.5rem 0.5rem;
+    /* Ridotto margine sezione */
+    opacity: 0.5;
+}
+
+/* --- 6. INTERACTIVE ELEMENTS --- */
 .settings-toggle {
     appearance: none;
-    width: 44px;
-    height: 24px;
+    width: 48px;
+    height: 26px;
     border-radius: 99px;
-    background: var(--input-bg);
+    background: rgba(255, 255, 255, 0.05);
     position: relative;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s;
     border: 1px solid var(--card-border);
-    flex-shrink: 0;
 }
 
 .settings-toggle:checked {
     background: var(--accent);
+    border-color: transparent;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
 .settings-toggle::after {
     content: '';
     position: absolute;
-    top: 2px;
-    left: 2px;
+    top: 3px;
+    left: 3px;
     width: 18px;
     height: 18px;
     border-radius: 50%;
     background: #fff;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .settings-toggle:checked::after {
-    transform: translateX(20px);
+    transform: translateX(22px);
 }
 
 .timer-btn,
 .theme-btn {
     appearance: none;
-    background: var(--input-bg);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
     color: var(--text-secondary);
-    border-radius: 99px;
-    padding: 0.5rem 1rem;
-    font-size: 0.75rem;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
+}
+
+.timer-btn:hover,
+.theme-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .timer-btn.active,
@@ -175,47 +211,56 @@
     background: var(--accent);
     color: white;
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
 }
 
-/* --- 6. HERO CARD --- */
+/* --- 7. HERO CARD (Premium Overhaul) --- */
 .card-hero {
-    margin-bottom: 2rem;
-    padding: 2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    /* Ridotto da 2.5rem */
+    padding: 1.75rem 1.25rem;
+    /* Ridotto padding */
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--card-border);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 28px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
 }
 
-/* Saette system */
+.hero-content-layout {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.hero-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+}
+
 .saetta-master {
     position: absolute;
-    top: -150px;
+    top: -100px;
     left: 50%;
     transform: translateX(-50%);
     width: 2px;
-    height: 150px;
+    height: 100px;
     background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), #fff);
     opacity: 0;
-    animation: saettaStrike 3s infinite ease-in-out;
-}
-
-.saetta-drop {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 100%;
-    height: 1px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, transparent 70%);
-    opacity: 0;
-    animation: saettaDrop 3s infinite ease-out;
+    animation: saettaStrike 4s infinite ease-in-out;
 }
 
 @keyframes saettaStrike {
@@ -241,209 +286,229 @@
     }
 }
 
-@keyframes saettaDrop {
-
-    0%,
-    91% {
-        opacity: 0;
-        transform: translateX(-50%) scaleX(0);
-    }
-
-    92% {
-        opacity: 1;
-        transform: translateX(-50%) scaleX(0.2);
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) scaleX(1.5);
-    }
-}
-
-html:not(.dark) .saetta-master,
-html:not(.dark) .saetta-drop {
-    display: none;
-}
-
-.hero-content-layout {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    width: 100%;
-}
-
-.hero-top-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    width: 100%;
-}
-
 .hero-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
+    width: 90px;
+    height: 90px;
+    border-radius: 24px;
     background-size: cover;
-    border: 1px solid var(--card-border);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s;
+}
+
+.hero-avatar:hover {
+    transform: scale(1.05) rotate(2deg);
 }
 
 .qr-preview-box {
-    width: 80px;
-    height: 80px;
-    background: white;
-    border-radius: 12px;
-    padding: 4px;
+    width: 90px;
+    height: 90px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 8px;
     position: relative;
-    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    overflow: visible;
+    /* Permette alla lente di sporgere */
 }
 
 .qr-lens-icon {
     position: absolute;
     right: -8px;
+    /* Più nell'angolo */
     bottom: -8px;
-    width: 28px;
-    height: 28px;
+    /* Più nell'angolo */
+    width: 32px;
+    /* Un po' più grande per facilità di click */
+    height: 32px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(30, 60, 120, 0.38);
-    z-index: 4;
-    pointer-events: auto;
-    background: rgba(255,255,255,0.85);
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-    transition: color 0.2s, background 0.2s;
+    font-size: 18px;
+    z-index: 20;
     cursor: pointer;
-    padding: 0;
-    transform: translate(40%,40%);
+    border: 2px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
 }
+
 .qr-lens-icon:hover {
-    color: #137fec;
-    background: rgba(19,127,236,0.10);
-}
-
-.qr-preview-box canvas,
-.qr-preview-box img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    width: 72px !important;
-    height: 72px !important;
-    border-radius: 8px;
-    background: transparent;
-    pointer-events: none;
-}
-
-.hero-info-col {
-    text-align: center;
+    transform: scale(1.1);
+    background: #137fec;
 }
 
 .hero-user-name {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+    /* Un filo più piccolo */
     font-weight: 900;
-    text-transform: uppercase;
+    letter-spacing: -0.02em;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin: 1rem 0 0.75rem;
+    /* Ridotti margini nome */
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* --- 7. BUTTONS & ACTIONS --- */
 .btn-manage-account-semantic {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem 1rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 99px;
-    background: var(--input-bg);
-    border: 1px solid var(--card-border);
-    color: var(--text-secondary);
-    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    margin: 0 auto;
+    transition: all 0.3s;
 }
 
+.btn-manage-account-semantic:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+}
+
+/* --- 8. LOGOUT & FOOTER --- */
 .logout-btn-container {
-    margin-top: 3rem;
-    padding: 0 1rem;
+    margin-top: 3.5rem;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .btn-logout-semantic {
     width: 100%;
-    height: 3.5rem;
-    border-radius: 1rem;
+    height: 4rem;
+    border-radius: 20px;
     background: rgba(239, 68, 68, 0.05);
     border: 1px solid rgba(239, 68, 68, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 1rem;
     color: #ef4444;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    transition: all 0.3s;
 }
 
-/* --- 8. DROPDOWNS & PANELS --- */
+.btn-logout-semantic:hover {
+    background: #ef4444;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(239, 68, 68, 0.3);
+}
+
+/* --- 9. DROPDOWNS & MODALS --- */
 .settings-dropdown-panel {
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    padding: 0.5rem;
-    margin-top: 0.25rem;
+    background: rgba(30, 41, 59, 0.7);
+    /* Vetro slate blu coordinato con moduli.css */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 0.4rem;
+    margin: 0.25rem 0.25rem 0.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 2px;
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(15px);
+}
+
+.dark .settings-dropdown-panel {
+    background: rgba(15, 23, 42, 0.6);
+    /* Più scuro in dark mode per contrasto */
 }
 
 .settings-dropdown-btn {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.7rem 1rem;
     text-align: left;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    border-radius: 8px;
+    gap: 0.85rem;
+    border-radius: 12px;
+    transition: all 0.2s;
 }
 
 .settings-dropdown-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent);
+    transform: translateX(4px);
 }
 
-/* --- 9. MODALS --- */
+.settings-dropdown-btn.active {
+    background: var(--accent);
+    color: white;
+}
+
+.settings-dropdown-btn.active span {
+    opacity: 1;
+}
+
+.settings-dropdown-btn span {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.btn-link-accent {
+    display: inline-block;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-link-accent:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+/* ZOOM MODAL (Ripristinato) */
 .zoom-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2000;
+    z-index: 3000;
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.zoom-modal.is-visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .zoom-backdrop {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.92);
     backdrop-filter: blur(10px);
 }
 
@@ -453,19 +518,24 @@ html:not(.dark) .saetta-drop {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 2.5rem;
+    transform: scale(0.8);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.zoom-modal.is-visible .zoom-content {
+    transform: scale(1);
 }
 
 .zoom-qr-box {
     background: #E3F2FD;
-    /* Light Blue for QR Readability */
-    padding: 1rem;
-    border-radius: 20px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    padding: 1.5rem;
+    border-radius: 28px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 
 .zoom-close-btn {
-    padding: 0.75rem 2rem;
+    padding: 0.85rem 2.5rem;
     background: white;
     color: black;
     border-radius: 99px;
@@ -473,17 +543,53 @@ html:not(.dark) .saetta-drop {
     font-weight: 800;
     text-transform: uppercase;
     cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.zoom-close-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.zoom-content {
+    animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Utils */
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .mt-section {
-    margin-top: 2rem;
+    margin-top: 1.25rem;
 }
 
+/* Ridotto da 2rem */
 .row-layout {
     display: flex;
     align-items: center;

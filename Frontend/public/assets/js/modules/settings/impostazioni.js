@@ -36,6 +36,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             await loadUserData(user);
             initSettingsEvents();
             setupAppInfo();
+            setupPrivacyShort();
+            setupTermsShort();
         } else {
             window.location.href = 'index.html';
         }
@@ -94,6 +96,11 @@ async function loadUserData(user) {
                 'ro': 'Română'
             };
             safeSetText(langLabel, langMap[cur] || 'Italiano');
+
+            // Highlight active lang in dropdown
+            document.querySelectorAll('.lang-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.code === cur);
+            });
         }
 
     } catch (e) {
@@ -108,8 +115,7 @@ function initSettingsEvents() {
         'btn-expiry-rules': 'regole_scadenze.html',
         'btn-account-archive': 'archivio_account.html',
         'btn-notifications-history': 'notifiche_storia.html',
-        'btn-change-password': 'imposta_nuova_password.html',
-        'btn-privacy': 'privacy.html'
+        'btn-change-password': 'imposta_nuova_password.html'
     };
 
     for (const [id, url] of Object.entries(navMap)) {
@@ -129,6 +135,22 @@ function initSettingsEvents() {
         const chev = document.getElementById('info-chevron');
         const isHidden = content.classList.toggle('hidden');
         if (chev) chev.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+
+    document.getElementById('btn-toggle-privacy')?.addEventListener('click', () => {
+        const content = document.getElementById('privacy-dropdown-content');
+        const chev = document.getElementById('privacy-chevron');
+        const isHidden = content.classList.toggle('hidden');
+        if (chev) chev.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        if (!isHidden) setupPrivacyShort();
+    });
+
+    document.getElementById('btn-toggle-terms')?.addEventListener('click', () => {
+        const content = document.getElementById('terms-dropdown-content');
+        const chev = document.getElementById('terms-chevron');
+        const isHidden = content.classList.toggle('hidden');
+        if (chev) chev.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        if (!isHidden) setupTermsShort();
     });
 
     // Language change
@@ -161,18 +183,36 @@ function setupToggles(data) {
     const tFace = document.getElementById('face-id-toggle');
 
     if (t2fa) {
-        t2fa.checked = false;
-        t2fa.addEventListener('change', () => {
-            t2fa.checked = false;
-            showConfirmModal("BETA", "Funzionalità in fase di sviluppo. Sarà disponibile a breve.", "OK", false);
+        t2fa.checked = data.settings_2fa || false;
+        t2fa.addEventListener('change', async () => {
+            const val = t2fa.checked;
+            try {
+                if (auth.currentUser) {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_2fa: val });
+                    showToast(val ? t('2fa_enabled') || "2FA Attivata" : t('2fa_disabled') || "2FA Disattivata");
+                }
+            } catch (e) {
+                console.error("Error saving 2FA:", e);
+                t2fa.checked = !val; // Revert on error
+                showToast(t('error_config_save') || "Errore salvataggio", "error");
+            }
         });
     }
 
     if (tFace) {
-        tFace.checked = false;
-        tFace.addEventListener('change', () => {
-            tFace.checked = false;
-            showConfirmModal("BETA", "Funzionalità in fase di sviluppo. Sarà disponibile a breve.", "OK", false);
+        tFace.checked = data.settings_biometric || false;
+        tFace.addEventListener('change', async () => {
+            const val = tFace.checked;
+            try {
+                if (auth.currentUser) {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_biometric: val });
+                    showToast(val ? t('biometric_enabled') || "Biometrico Attivato" : t('biometric_disabled') || "Biometrico Disattivato");
+                }
+            } catch (e) {
+                console.error("Error saving Biometric:", e);
+                tFace.checked = !val; // Revert on error
+                showToast(t('error_config_save') || "Errore salvataggio", "error");
+            }
         });
     }
 }
@@ -209,38 +249,46 @@ function setupTimeoutSelector(data) {
 
 
 async function generateVCard(user, data) {
-    await ensureQRCodeLib();
-    // Usa la stessa logica di profilo_privato: buildVCard con inclusioni e sub-collections
-    const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
-        contactPhones,
-        contactEmails,
-        userAddresses
-    });
-
-    // QR Preview (Small)
-    const previewDest = document.getElementById('qrcode-preview');
-    if (previewDest) {
-        // Remove only QR canvases/images, not the lens
-        previewDest.querySelectorAll('canvas,img').forEach(el => el.remove());
-        // Render QR code directly into previewDest (canvas will be absolutely positioned by CSS)
-        renderQRCode(previewDest, vcardStr, { width: 72, height: 72, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 1 });
-    }
-
-    // QR Zoom (Large)
-    const dest = document.getElementById('qrcode-zoom');
-    if (dest) {
-        clearElement(dest);
-        renderQRCode(dest, vcardStr, { width: 250, height: 250, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 3 });
-    }
+    // V5.0 OPTIMIZATION: Lazy Preview
+    // Evita blocchi al load (Violation handler took >150ms).
+    // Genera un QR minimale ritardato.
+    setTimeout(async () => {
+        const previewDest = document.getElementById('qrcode-preview');
+        if (previewDest) {
+            await ensureQRCodeLib();
+            // Stringa fissa leggerissima per preview immediata
+            renderQRCode(previewDest, "PREVIEW", { width: 72, height: 72, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 0 }); // L
+        }
+    }, 600);
 }
 
-function openQRZoom() {
+async function openQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');
     if (modal) {
         modal.classList.remove('hidden');
         // Force reflow
         void modal.offsetWidth;
         modal.classList.add('is-visible');
+
+        // Genera QR Full HD al volo (Lazy Load)
+        const dest = document.getElementById('qrcode-zoom');
+        if (dest) {
+            // Mostra un indicatore di caricamento se vuoto
+            if (!dest.querySelector('canvas') && !dest.querySelector('img')) {
+                dest.innerHTML = '<div style="padding:20px; text-align:center;">Generazione in corso...</div>';
+            }
+
+            // Esegui generazione in next tick per permettere rendering modale
+            requestAnimationFrame(async () => {
+                await ensureQRCodeLib();
+                const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
+                    contactPhones,
+                    contactEmails,
+                    userAddresses
+                });
+                renderQRCode(dest, vcardStr, { width: 250, height: 250, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 0 }); // Low correction per max capacity
+            });
+        }
     }
 }
 
@@ -270,6 +318,55 @@ function setupAppInfo() {
             className: 'app-version-info',
             textContent: `${t('version_label') || 'VERSIONE'} 4.4 • base CORE`
         })
+    ]);
+
+    setChildren(p, container);
+}
+function setupPrivacyShort() {
+    const p = document.getElementById('privacy-short-text-placeholder');
+    if (!p) return;
+
+    const sections = [
+        { title: t('privacy_short_owner_title'), text: t('privacy_short_owner_text') },
+        { title: t('privacy_short_data_title'), text: t('privacy_short_data_text') },
+        { title: t('privacy_short_storage_title'), text: t('privacy_short_storage_text') },
+        { title: t('privacy_short_security_title'), text: t('privacy_short_security_text') },
+        { title: '', text: t('privacy_short_security_note'), isNote: true },
+        { title: t('privacy_short_share_title'), text: t('privacy_short_share_text') },
+        { title: t('privacy_short_rights_title'), text: t('privacy_short_rights_text') }
+    ];
+
+    const container = createElement('div', { className: 'info-stack' }, [
+        createElement('p', { className: 'mb-4 text-secondary italic' }, [t('privacy_short_intro')]),
+        createElement('p', { className: 'mb-4 border-l-2 border-accent pl-2' }, [t('privacy_short_compliance')]),
+        ...sections.map(s => createElement('div', { className: 'mb-3' }, [
+            s.title ? createElement('strong', { className: 'block text-accent mb-1' }, [s.title]) : null,
+            createElement('p', { className: s.isNote ? 'text-xs opacity-70 mt-1' : '' }, [s.text])
+        ].filter(Boolean))),
+        createElement('div', { className: 'app-version-info mt-4 opacity-50', textContent: t('privacy_update_text') || 'Ultimo aggiornamento: Gennaio 2026' })
+    ]);
+
+    setChildren(p, container);
+}
+
+function setupTermsShort() {
+    const p = document.getElementById('terms-short-text-placeholder');
+    if (!p) return;
+
+    const sections = [
+        { title: t('terms_1_title'), text: t('terms_1_text') },
+        { title: t('terms_2_title'), text: t('terms_2_text') },
+        { title: t('terms_3_title'), text: t('terms_3_text') },
+        { title: t('terms_5_title'), text: t('terms_5_text') }
+    ];
+
+    const container = createElement('div', { className: 'info-stack' }, [
+        createElement('p', { className: 'mb-4 text-secondary italic' }, [t('terms_short_intro')]),
+        ...sections.map(s => createElement('div', { className: 'mb-3' }, [
+            s.title ? createElement('strong', { className: 'block text-accent mb-1' }, [s.title]) : null,
+            createElement('p', {}, [s.text])
+        ].filter(Boolean))),
+        createElement('div', { className: 'app-version-info mt-4 opacity-50', textContent: t('terms_update_text') || 'Ultimo aggiornamento: Gennaio 2026' })
     ]);
 
     setChildren(p, container);

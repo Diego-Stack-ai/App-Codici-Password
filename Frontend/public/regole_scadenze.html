@@ -2,18 +2,18 @@
 <html lang="it" data-i18n="loading">
 
 <head>
-    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <!-- Anti-flicker & Theme Master (V5.0) -->
     <script src="assets/js/theme-init.js"></script>
-    <!-- CSP (Content Security Policy) - V3.9 Standard -->
+    <!-- CSP (Content Security Policy) - V5.0 Standard -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Regole Scadenze - PROTOCOLLO BASE V3.9</title>
+    <title data-t="title_deadline_rules">Regole Scadenze - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.9.1" />
+    <link rel="manifest" href="manifest.json?v=5.0" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,14 +23,15 @@
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
     <link rel="stylesheet" href="assets/css/regole_scadenze.css?v=5.0">
-
-    <!-- CORE JS -->
-    <script src="assets/js/core.js"></script>
-    <script type="module" src="assets/js/ui-core.js"></script>
 </head>
 
 <body class="base-bg">
+    <!-- CORE JS (Body-Start) -->
+    <script src="assets/js/core.js"></script>
+    <script type="module" src="assets/js/ui-core.js"></script>
     <div class="base-container">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
@@ -53,43 +54,56 @@
                 <div class="settings-group">
 
                     <!-- 1. AUTOMEZZI -->
-                    <a href="configurazione_automezzi.html" class="settings-item">
-                        <div class="settings-icon-box icon-blue">
-                            <span class="material-symbols-outlined">directions_car</span>
-                        </div>
-                        <div class="settings-item-info text-left">
-                            <h4 class="settings-label" data-t="card_vehicles_title">Automezzi</h4>
-                            <p class="settings-desc" data-t="card_vehicles_desc">Configura periodi e frequenze per
-                                veicoli</p>
-                        </div>
-                        <span class="material-symbols-outlined arrow-icon text-secondary">chevron_right</span>
-                    </a>
+                    <div class="settings-card-wrapper">
+                        <a href="configurazione_automezzi.html" class="settings-item">
+                            <div class="settings-icon-box icon-blue">
+                                <span class="material-symbols-outlined">directions_car</span>
+                            </div>
+                            <div class="settings-item-info text-left">
+                                <h4 class="settings-label" data-t="card_vehicles_title">Automezzi</h4>
+                                <p class="settings-desc" data-t="card_vehicles_desc">Configura periodi e frequenze per
+                                    veicoli</p>
+                            </div>
+                            <span class="material-symbols-outlined arrow-icon text-secondary">chevron_right</span>
+                        </a>
+                        <p class="settings-item-note" data-t="card_vehicles_note">Definisci giorni di preavviso e
+                            frequenza per Assicurazioni, Bolli e scadenze dei mezzi.</p>
+                    </div>
 
                     <!-- 2. DOCUMENTI -->
-                    <a href="configurazione_documenti.html" class="settings-item">
-                        <div class="settings-icon-box icon-emerald">
-                            <span class="material-symbols-outlined">description</span>
-                        </div>
-                        <div class="settings-item-info text-left">
-                            <h4 class="settings-label" data-t="card_documents_title">Documenti</h4>
-                            <p class="settings-desc" data-t="card_documents_desc">Gestione avvisi per Documenti e
-                                Scadenze Varie</p>
-                        </div>
-                        <span class="material-symbols-outlined arrow-icon text-secondary">chevron_right</span>
-                    </a>
+                    <div class="settings-card-wrapper">
+                        <a href="configurazione_documenti.html" class="settings-item">
+                            <div class="settings-icon-box icon-emerald">
+                                <span class="material-symbols-outlined">description</span>
+                            </div>
+                            <div class="settings-item-info text-left">
+                                <h4 class="settings-label" data-t="card_documents_title">Documenti</h4>
+                                <p class="settings-desc" data-t="card_documents_desc">Gestione avvisi per Documenti e
+                                    Scadenze Varie</p>
+                            </div>
+                            <span class="material-symbols-outlined arrow-icon text-secondary">chevron_right</span>
+                        </a>
+                        <p class="settings-item-note" data-t="card_documents_note">Imposta i criteri di avviso
+                            automatico per Documenti d'Identità, Patenti e scadenze personali.</p>
+                    </div>
 
                     <!-- 3. GENERICHE -->
-                    <a href="configurazione_generali.html" class="settings-item">
-                        <div class="settings-icon-box icon-amber">
-                            <span class="material-symbols-outlined">settings_applications</span>
-                        </div>
-                        <div class="settings-item-info text-left">
-                            <h4 class="settings-label" data-t="card_general_title">Regole Generali</h4>
-                            <p class="settings-desc" data-t="card_general_desc">Configura oggetti e testi per scadenze
-                                generiche</p>
-                        </div>
-                        <span class="material-symbols-outlined arrow-icon text-secondary">chevron_right</span>
-                    </a>
+                    <div class="settings-card-wrapper">
+                        <a href="configurazione_generali.html" class="settings-item">
+                            <div class="settings-icon-box icon-amber">
+                                <span class="material-symbols-outlined">settings_applications</span>
+                            </div>
+                            <div class="settings-item-info text-left">
+                                <h4 class="settings-label" data-t="card_general_title">Regole Generali</h4>
+                                <p class="settings-desc" data-t="card_general_desc">Configura oggetti e testi per
+                                    scadenze
+                                    generiche</p>
+                            </div>
+                            <span class="material-symbols-outlined arrow-icon text-secondary">chevron_right</span>
+                        </a>
+                        <p class="settings-item-note" data-t="card_general_note">Configura le regole per scadenze varie
+                            non categorizzate (Corsi, Affitti, Abbonamenti).</p>
+                    </div>
 
                 </div>
 

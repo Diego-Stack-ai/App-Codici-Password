@@ -8,7 +8,7 @@ import { auth, db } from '../../firebase-config.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDocs, collection, query, where, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showToast } from '../../ui-core.js';
+import { showToast, showInputModal } from '../../ui-core.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 
@@ -191,48 +191,49 @@ function filterAndRender() {
 
     const items = filtered.map(acc => {
         // 1. BACKGROUND AZIONI (Sotto la card)
-
-        // A SINISTRA (Compare swippando verso DESTRA) -> RIPRISTINA
-        const bgRestore = createElement('div', {
-            className: 'swipe-action-bg bg-restore'
-        }, [
+        const bgRestore = createElement('div', { className: 'swipe-action-bg bg-restore' }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'restore_from_trash' })
         ]);
 
-        // A DESTRA (Compare swippando verso SINISTRA) -> ELIMINA
-        const bgDelete = createElement('div', {
-            className: 'swipe-action-bg bg-delete'
-        }, [
+        const bgDelete = createElement('div', { className: 'swipe-action-bg bg-delete' }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
         ]);
 
         // 2. CONTENUTO VISIBILE (Sopra)
-        const titleRow = createElement('div', { className: 'archive-item-content-header' }, [
-            createElement('h4', {
+        // Icona differenziata per contesto
+        const iconBox = createElement('div', { className: 'archive-icon-box' }, [
+            createElement('span', {
+                className: 'material-symbols-outlined',
+                textContent: acc.context === 'privato' ? 'person' : 'account_balance'
+            })
+        ]);
+
+        // Info Account
+        const infoCol = createElement('div', { className: 'archive-item-info' }, [
+            createElement('span', {
+                className: 'archive-item-name',
                 textContent: acc.nomeAccount || t('without_name') || 'Senza Nome'
             })
         ]);
 
         if (acc.businessName) {
-            titleRow.appendChild(createElement('span', {
+            infoCol.appendChild(createElement('span', {
                 className: 'archive-badge-context',
                 textContent: acc.businessName
             }));
         }
 
-        // Wrapper del contenuto che si sposta
+        // Content Wrapper
         const swipeContent = createElement('div', {
             className: 'archive-item-content swipe-content'
-        }, [titleRow]);
+        }, [iconBox, infoCol]);
 
-        // Contenitore principale della riga
-        const card = createElement('div', {
+        // Riga principale
+        return createElement('div', {
             className: 'archive-row-container swipe-row',
             id: `arch-${acc.id}`,
             dataset: { id: acc.id }
         }, [bgRestore, bgDelete, swipeContent]);
-
-        return card;
     });
 
     setChildren(container, items);
@@ -279,20 +280,13 @@ async function handleDeleteForever(id) {
     // I'll assume window.showInputModal exists for now as it was in legacy code, 
     // but ideally we should move it to ui-core export.
 
-    if (!window.showInputModal) {
-        if (!confirm(t('confirm_delete_forever_title') || "ELIMINA PER SEMPRE?")) {
-            filterAndRender();
-            return;
-        }
-    } else {
-        const confirmReq = await window.showInputModal(
-            t('confirm_delete_forever_title') || "ELIMINA PER SEMPRE",
-            "",
-            t('confirm_delete_forever_msg') || "Scrivi 'SI' per confermare l'eliminazione definitiva."
-        );
-        // Accetta 'SI' o 'YES' in base alla lingua (o entrambi per sicurezza)
-        if (confirmReq !== 'SI' && confirmReq !== 'YES') return filterAndRender();
-    }
+    const confirmReq = await showInputModal(
+        t('confirm_delete_forever_title') || "ELIMINA PER SEMPRE",
+        "",
+        t('confirm_delete_forever_msg') || "Scrivi 'SI' per confermare l'eliminazione definitiva."
+    );
+    // Accetta 'SI' o 'YES' in base alla lingua (o entrambi per sicurezza)
+    if (confirmReq !== 'SI' && confirmReq !== 'YES') return filterAndRender();
 
     try {
         const item = allArchived.find(a => a.id === id);
@@ -310,16 +304,11 @@ async function handleDeleteForever(id) {
 async function handleEmptyTrash() {
     if (allArchived.length === 0) return;
 
-    let confirmReq;
-    if (window.showInputModal) {
-        confirmReq = await window.showInputModal(
-            t('confirm_empty_trash_title') || "SVUOTA CESTINO",
-            "",
-            t('confirm_empty_trash_msg') || "Scrivi 'SVUOTA' per eliminare tutto definitivamente."
-        );
-    } else {
-        confirmReq = prompt(t('confirm_empty_trash_msg') || "Scrivi 'SVUOTA' per eliminare tutto:");
-    }
+    const confirmReq = await showInputModal(
+        t('confirm_empty_trash_title') || "SVUOTA CESTINO",
+        "",
+        t('confirm_empty_trash_msg') || "Scrivi 'SVUOTA' per eliminare tutto definitivamente."
+    );
 
     if (confirmReq !== 'SVUOTA' && confirmReq !== 'EMPTY') return;
 

@@ -2,18 +2,18 @@
 <html lang="it" data-i18n="loading">
 
 <head>
-    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <!-- Anti-flicker & Theme Master (V5.0) -->
     <script src="assets/js/theme-init.js"></script>
-    <!-- CSP (Content Security Policy) - V3.9 Standard -->
+    <!-- CSP (Content Security Policy) - V5.0 Standard -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Configurazione Generali - PROTOCOLLO BASE V3.9</title>
+    <title data-t="title_config_general">Configurazione Generali - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.9.1" />
+    <link rel="manifest" href="manifest.json?v=5.0" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,14 +23,16 @@
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
     <link rel="stylesheet" href="assets/css/configurazione_generali.css?v=5.0">
-
-    <!-- CORE JS -->
-    <script src="assets/js/core.js"></script>
-    <script type="module" src="assets/js/ui-core.js"></script>
 </head>
 
 <body class="base-bg">
+    <!-- CORE JS (Body-Start) -->
+    <script src="assets/js/core.js"></script>
+    <script type="module" src="assets/js/ui-core.js"></script>
+
     <div class="base-container">
         <!-- Ambient Glow -->
         <div class="base-glow"></div>
@@ -51,7 +53,8 @@
 
                 <!-- 1. Tipi Scadenza -->
                 <div class="settings-group">
-                    <div class="settings-item collapsible-header" data-target="container-types">
+                    <div class="settings-item collapsible-header" data-target="container-types" role="button"
+                        aria-expanded="false" data-t-aria="aria_toggle_section">
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-blue">
                                 <span class="material-symbols-outlined">rule</span>
@@ -60,7 +63,8 @@
                                 <h3 class="settings-label" data-t="general_deadline_types">Tipi Scadenza</h3>
                             </div>
                             <div class="settings-header-actions">
-                                <button type="button" id="btn-add-type" class="btn-icon-add">
+                                <button type="button" id="btn-add-type" class="btn-icon-add"
+                                    data-t-aria="aria_add_new_type">
                                     <span class="material-symbols-outlined">add</span>
                                 </button>
                                 <span class="material-symbols-outlined arrow-icon">expand_more</span>
@@ -73,8 +77,9 @@
                 </div>
 
                 <!-- 2. Template Email -->
-                <div class="settings-group mt-4">
-                    <div class="settings-item collapsible-header" data-target="container-templates">
+                <div class="settings-group mt-section">
+                    <div class="settings-item collapsible-header" data-target="container-templates" role="button"
+                        aria-expanded="false" data-t-aria="aria_toggle_section">
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-purple">
                                 <span class="material-symbols-outlined">description</span>
@@ -82,8 +87,9 @@
                             <div class="settings-item-info">
                                 <h3 class="settings-label" data-t="email_templates">Template Messaggi</h3>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <button type="button" id="btn-add-template" class="btn-manage-account-semantic">
+                            <div class="settings-header-actions">
+                                <button type="button" id="btn-add-template" class="btn-icon-add"
+                                    data-t-aria="aria_add_new_template">
                                     <span class="material-symbols-outlined">add</span>
                                 </button>
                                 <span class="material-symbols-outlined arrow-icon">expand_more</span>
@@ -95,24 +101,23 @@
                     </div>
                 </div>
 
-                <!-- Syntax Info (V3.9 Standard) -->
+                <!-- Syntax Info (V5.0 Standard) -->
                 <div class="page-footer-info">
-                    <div class="archive-row-container p-4 flex-col gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined icon-blue">info</span>
-                            <span class="deadline-card-category" data-t="section_syntax_title">Sintassi
-                                Automatica</span>
+                    <div class="archive-row-container">
+                        <div class="syntax-header">
+                            <span class="material-symbols-outlined text-accent">info</span>
+                            <span class="syntax-title" data-t="section_syntax_title">Sintassi Automatica</span>
                         </div>
-                        <div class="bg-black/20 p-4 rounded-2xl flex flex-col gap-2 text-[10px] font-mono">
-                            <p class="flex items-start gap-2 justify-center">
+                        <div class="syntax-inline-container font-mono">
+                            <div class="syntax-row">
                                 <span class="config-item-desc" data-t="subject_label">Oggetto:</span>
                                 <span class="config-badge config-badge-blue" data-t="object_tag">[Oggetto]</span>
-                            </p>
-                            <p class="flex items-start gap-2 justify-center">
+                            </div>
+                            <div class="syntax-row">
                                 <span class="config-item-desc" data-t="body_label">Corpo:</span>
                                 <span class="config-badge config-badge-blue" data-t="object_tag">[Oggetto]</span>
                                 <span class="config-badge config-badge-amber" data-t="data_tag">[Data]</span>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>

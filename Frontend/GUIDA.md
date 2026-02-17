@@ -93,7 +93,11 @@ core_fascie.css
 Header/footer e padding safe-area. Caricato solo dove servono fasce (Core, Moduli Gestionali, Step 2).
 
 CSS dedicato per pagina
-Ogni pagina Step2 ha [pagina].css.
+Ogni pagina complessa ha [pagina].css.
+Step 2: [pagina].css.
+Impostazioni: impostazioni.css.
+Privacy/Termini: privacy.css.
+Home/Dashboard: core_pagine.css (condiviso).
 Altri moduli: moduli.css, scadenze.css, accesso.css.
 
 2.2.2 Tabella Pagine e CSS di Riferimento
@@ -102,8 +106,9 @@ Auth Pages	index.html	core.css + core_fonts.css + accesso.css
 	registrati.html	core.css + core_fonts.css + accesso.css
 	reset_password.html	core.css + core_fonts.css + accesso.css
 	imposta_nuova_password.html	core.css + core_fonts.css + accesso.css
-Core Pages Standard	impostazioni.html	core.css + core_fonts.css + core_fascie.css + core_pagine.css
-	privacy.html	core.css + core_fonts.css + core_fascie.css + core_pagine.css
+Core Pages Standard	impostazioni.html	core.css + core_fonts.css + core_fascie.css + impostazioni.css + core_ui.css
+	privacy.html	core.css + core_fonts.css + core_fascie.css + privacy.css
+	termini.html	core.css + core_fonts.css + core_fascie.css + privacy.css
 Moduli Gestionali	configurazione_generali.html	core.css + core_fonts.css + moduli.css
 	configurazione_documenti.html	core.css + core_fonts.css + moduli.css
 	configurazione_automezzi.html	core.css + core_fonts.css + moduli.css
@@ -151,6 +156,7 @@ Scadenze: core.js + main.js
 Step 2: core.js + main.js
 
 🔹 Ridondanza controllata: caricare esplicitamente core.js e ui-core.js non è errore.
+🔹 Per Impostazioni e Privacy: usare CSS specifici (impostazioni.css, privacy.css) invece di core_pagine.css.
 
 3) HTML Refactoring e Classi Semantiche
 Auth Page (Login / Registrati)
@@ -312,3 +318,20 @@ Scadenze → scadenze.css
 Step2 → [pagina].css
 
 Tutti i file obsoleti eliminati, aggiornamento centralizzato possibile tramite moduli.css o core_ui.css.
+
+10) Standard UI & Componenti V5.0 (Aggiornamenti Recenti)
+
+10.1 Custom Select Dropdown
+- I tag `<select>` nativi sono deprecati per l'UI principale.
+- Utilizzare la struttura `Custom Dropdown` (`.custom-select-wrapper` + `.custom-select-trigger` + `.custom-select-menu`).
+- Stile: Bordi arrotondati (16px), animazioni flush, contesto cromatico (Dark Mode usa sfondo `#1e3a8a` identico al modale).
+- CSS Centralizzato: `core_ui.css` (classi `.custom-select-menu`, `.custom-option`).
+
+10.2 Modal System
+- Light Mode Background: `#E3F2FD` (Azzurro Chiaro).
+- Dark Mode Background: `#1e3a8a` (Blue 900 - Blu Intenso).
+- Label Campi: Colore Slate 400 (`#94a3b8`) e allineamento a sinistra.
+
+10.3 QR Code Generation (Fix Overflow)
+- La generazione QR (vCard) deve usare `qr_code_utils.js`.
+- È stato implementato un "Padding Hack" automatico per prevenire l'errore `code length overflow` su dataset medi/grandi, forzando la libreria a scegliere una versione QR più capiente.
