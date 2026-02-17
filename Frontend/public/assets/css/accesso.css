@@ -169,6 +169,46 @@
     margin: auto auto;
 }
 
+/* --- 6. PASSWORD FIELD (Auth) --- */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper .input[type="password"] {
+    padding-right: 3rem; /* spazio per il toggle */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--text-secondary, #888);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.toggle-password:active,
+.toggle-password:focus {
+    background: rgba(59, 130, 246, 0.08);
+    outline: none;
+}
+
+.toggle-password .material-symbols-outlined {
+    font-size: 1.5rem;
+    pointer-events: none;
+}
+
 @media (max-width: 1024px) {
     .vault {
         padding: 0 2rem;
