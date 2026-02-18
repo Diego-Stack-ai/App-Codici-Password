@@ -168,9 +168,8 @@ function initSettingsEvents() {
         });
     });
 
-    // QR Zoom
+    // QR Zoom (modal dinamico, stile profilo privato)
     document.getElementById('qrcode-preview')?.addEventListener('click', openQRZoom);
-    document.getElementById('btn-close-qr')?.addEventListener('click', closeQRZoom);
 
     // Logout
     document.getElementById('logout-btn-settings')?.addEventListener('click', async () => {
@@ -271,44 +270,57 @@ async function generateVCard(user, data) {
 }
 
 async function openQRZoom() {
-    const modal = document.getElementById('qr-zoom-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        // Force reflow
-        void modal.offsetWidth;
-        modal.classList.add('is-visible');
+    // Rimuovi eventuali modali QR già aperti
+    document.getElementById('qr-zoom-modal-dynamic')?.remove();
 
-        // Genera QR Full HD al volo (Lazy Load)
-        const dest = document.getElementById('qrcode-zoom');
-        if (dest) {
-            // Mostra un indicatore di caricamento se vuoto
-            if (!dest.querySelector('canvas') && !dest.querySelector('img')) {
-                dest.innerHTML = '<div style="padding:20px; text-align:center;">Generazione in corso...</div>';
-            }
+    const qrSize = Math.min(window.innerWidth * 0.7, 300);
 
-            // Esegui generazione in next tick per permettere rendering modale
-            requestAnimationFrame(async () => {
-                await ensureQRCodeLib();
-                const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
-                    contactPhones,
-                    contactEmails,
-                    userAddresses
-                });
-                renderQRCode(dest, vcardStr, { width: 250, height: 250, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 0 }); // Low correction per max capacity
-            });
+    const modal = createElement('div', { id: 'qr-zoom-modal-dynamic', className: 'modal-overlay' }, [
+        createElement('div', { className: 'modal-profile-box modal-box-qr' }, [
+            createElement('h3', {
+                className: 'modal-title',
+                textContent: 'QR Code',
+                dataset: { t: 'qr_code_profile' }
+            }),
+            createElement('div', { id: 'qrcode-zoom-dynamic', className: 'qr-zoom-container' }),
+            createElement('button', {
+                className: 'btn-modal btn-secondary',
+                textContent: 'Chiudi',
+                dataset: { t: 'close' },
+                onclick: () => {
+                    modal.classList.remove('active');
+                    setTimeout(() => modal.remove(), 300);
+                }
+            })
+        ])
+    ]);
+
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+
+    // Chiusura al click fuori
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
         }
-    }
+    };
+
+    // Genera QR reale al volo
+    await ensureQRCodeLib();
+    const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
+        contactPhones,
+        contactEmails,
+        userAddresses
+    });
+    renderQRCode(
+        document.getElementById('qrcode-zoom-dynamic'),
+        vcardStr,
+        { width: qrSize, height: qrSize, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 3 }
+    );
 }
 
-function closeQRZoom() {
-    const modal = document.getElementById('qr-zoom-modal');
-    if (modal) {
-        modal.classList.remove('is-visible');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300); // Wait for transition
-    }
-}
+
 
 function setupAppInfo() {
     const p = document.getElementById('info-app-text-placeholder');
