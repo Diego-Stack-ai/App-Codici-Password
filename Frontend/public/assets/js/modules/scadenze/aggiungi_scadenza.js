@@ -545,7 +545,20 @@ function setupSaveLogic() {
 
         const name = document.getElementById('nome_cognome').value.trim();
         const type = typeSelect.value;
-        const date = document.getElementById('dueDate').value;
+        const dateInput = document.getElementById('dueDate');
+        let date = dateInput.dataset.isoValue;
+
+        // Fallback or Manual Parse if isoValue missing
+        if (!date && dateInput.value) {
+            const v = dateInput.value;
+            if (v.includes('/')) {
+                // Convert DD/MM/YYYY to YYYY-MM-DD
+                const parts = v.split('/');
+                if (parts.length === 3) date = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            } else {
+                date = v; // Assume ISO
+            }
+        }
         const email1 = (emailPrimariaSelect.value === 'manual') ? document.getElementById('email_primaria_input').value.trim() : emailPrimariaSelect.value;
         const email2 = (emailSecondariaSelect.value === 'manual') ? document.getElementById('email_secondaria_input').value.trim() : emailSecondariaSelect.value;
 
@@ -770,7 +783,40 @@ async function loadScadenzaForEdit(id) {
 
         // 3. Riempi i campi base
         document.getElementById('nome_cognome').value = data.name || '';
-        document.getElementById('dueDate').value = data.dueDate || '';
+        // Date Formatting for V5.0 Custom Datepicker
+        // Date Formatting for V5.0 Custom Datepicker & Robust Parsing
+        const dateInput = document.getElementById('dueDate');
+        if (data.dueDate) {
+            let d = new Date(data.dueDate);
+            let isValid = !isNaN(d.getTime());
+
+            // Tentativo caricamento fallback se data salvata come DD/MM/YYYY string
+            if (!isValid && typeof data.dueDate === 'string' && data.dueDate.includes('/')) {
+                const parts = data.dueDate.split('/');
+                if (parts.length === 3) {
+                    // Try DD/MM/YYYY -> YYYY-MM-DD
+                    const isoFix = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    d = new Date(isoFix);
+                    isValid = !isNaN(d.getTime());
+                }
+            }
+
+            if (isValid) {
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+
+                dateInput.value = `${day}/${month}/${year}`;
+                dateInput.dataset.isoValue = d.toISOString().split('T')[0];
+            } else {
+                console.warn("Invalid Date found:", data.dueDate);
+                dateInput.value = data.dueDate || ''; // Show raw
+                dateInput.dataset.isoValue = '';
+            }
+        } else {
+            dateInput.value = '';
+            dateInput.dataset.isoValue = '';
+        }
         document.getElementById('notes').value = data.notes || '';
         document.getElementById('whatsapp_enable').checked = data.whatsappEnabled || false;
 

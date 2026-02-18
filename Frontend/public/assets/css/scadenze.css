@@ -42,7 +42,8 @@
 
 .search-bar-container {
     padding: 0 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
+    /* Increased spacing */
 }
 
 .search-input-wrapper {

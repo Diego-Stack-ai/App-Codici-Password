@@ -261,7 +261,7 @@ function createScadenzaCard(scadenza) {
             ]),
             createElement('span', {
                 className: 'deadline-date-badge',
-                textContent: dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }).toUpperCase()
+                textContent: dueDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: '2-digit' }).toUpperCase()
             })
         ]),
 
