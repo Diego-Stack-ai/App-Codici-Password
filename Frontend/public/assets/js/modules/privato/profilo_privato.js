@@ -404,10 +404,18 @@ async function generateProfileQRCode() {
 }
 
 function showEnlargedQR(vcard) {
+    // Rimuovi eventuali modali QR già aperti
+    document.getElementById('qr-zoom-modal-dynamic')?.remove();
+
     const qrSize = Math.min(window.innerWidth * 0.7, 300);
-    const modal = createElement('div', { className: 'modal-overlay' }, [
+
+    const modal = createElement('div', { id: 'qr-zoom-modal-dynamic', className: 'modal-overlay' }, [
         createElement('div', { className: 'modal-profile-box modal-box-qr' }, [
-            createElement('h3', { className: 'modal-title', textContent: 'QR Code Profilo', dataset: { t: 'qr_code_profile' } }),
+            createElement('h3', {
+                className: 'modal-title',
+                textContent: 'QR Code Profilo',
+                dataset: { t: 'qr_code_profile' }
+            }),
             createElement('div', { id: 'qr-enlarged', className: 'qr-zoom-container' }),
             createElement('button', {
                 className: 'btn-modal btn-secondary',
@@ -420,17 +428,22 @@ function showEnlargedQR(vcard) {
             })
         ])
     ]);
+
     document.body.appendChild(modal);
     setTimeout(() => modal.classList.add('active'), 10);
+
+    // Chiusura al click fuori
     modal.onclick = (e) => {
         if (e.target === modal) {
             modal.classList.remove('active');
             setTimeout(() => modal.remove(), 300);
         }
     };
-    // Use shared QR render
+
+    // Render QR
     renderQRCode(document.getElementById('qr-enlarged'), vcard, { width: qrSize, height: qrSize, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 3 });
 }
+
 
 /**
  * COLLAPSIBLE SECTIONS
