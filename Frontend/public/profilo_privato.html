@@ -25,7 +25,6 @@
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <!-- 3. Stile di Pagina -->
     <link rel="stylesheet" href="assets/css/profilo_privato.css?v=5.0">
-    <script src="assets/js/core.js"></script>
 </head>
 
 <body class="base-bg">
@@ -76,7 +75,12 @@
                     <!-- 1. ANAGRAFICA -->
                     <div class="form-section">
                         <div class="form-section-header">
-                            <h3 class="form-section-title" data-t="profile_personal">Anagrafica Principale</h3>
+                            <div class="flex-center-row">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">person</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_personal">Anagrafica Principale</h3>
+                            </div>
                             <button class="btn-edit-section" data-action="edit-section" data-target="dati-personali">
                                 <span class="material-symbols-outlined icon-edit">edit</span>
                             </button>
@@ -84,11 +88,12 @@
 
                         <div class="form-card">
                             <div id="field-nome" class="data-display-group">
-                                <div class="field-header">
-                                    <input type="checkbox" id="qr-toggle-nome" class="qr-checkbox"
-                                        title="Includi nel QR Code" data-t-title="include_in_qr">
-                                    <label for="qr-toggle-nome" class="qr-mini-label" data-t="label_qr">QR</label>
+                                <div class="field-header flex-between-align-center">
                                     <label class="data-label" data-t="label_name_surname">Nome & Cognome</label>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-nome" class="qr-checkbox">
+                                        <label for="qr-toggle-nome" class="qr-mini-label">QR</label>
+                                    </div>
                                 </div>
                                 <div class="field-value-row">
                                     <span id="nome-view" class="data-value">-</span>
@@ -99,11 +104,12 @@
                             </div>
 
                             <div id="field-cf" class="data-display-group">
-                                <div class="field-header">
-                                    <input type="checkbox" id="qr-toggle-cf" class="qr-checkbox"
-                                        title="Includi nel QR Code" data-t-title="include_in_qr">
-                                    <label for="qr-toggle-cf" class="qr-mini-label" data-t="label_qr">QR</label>
+                                <div class="field-header flex-between-align-center">
                                     <label class="data-label" data-t="label_cf">Codice Fiscale</label>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-cf" class="qr-checkbox">
+                                        <label for="qr-toggle-cf" class="qr-mini-label">QR</label>
+                                    </div>
                                 </div>
                                 <div class="field-value-row">
                                     <span id="cf-view" class="data-value">-</span>
@@ -114,11 +120,12 @@
                             </div>
 
                             <div id="field-nascita" class="data-display-group">
-                                <div class="field-header">
-                                    <input type="checkbox" id="qr-toggle-nascita" class="qr-checkbox"
-                                        title="Includi nel QR Code" data-t-title="include_in_qr">
-                                    <label for="qr-toggle-nascita" class="qr-mini-label" data-t="label_qr">QR</label>
+                                <div class="field-header flex-between-align-center">
                                     <label class="data-label" data-t="label_birth_data">Dati Nascita</label>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-nascita" class="qr-checkbox">
+                                        <label for="qr-toggle-nascita" class="qr-mini-label">QR</label>
+                                    </div>
                                 </div>
                                 <div class="field-value-row">
                                     <div class="data-group-row">
@@ -136,7 +143,13 @@
                     <!-- 2. RESIDENZA & UTENZE -->
                     <div class="form-section">
                         <div class="form-section-header collapsible-header collapsed" data-section="indirizzi">
-                            <h3 class="form-section-title" data-t="profile_addresses_utilities">Indirizzi & Utenze</h3>
+                            <div class="flex-center-row">
+                                <div class="settings-icon-box icon-amber">
+                                    <span class="material-symbols-outlined">home</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_addresses_utilities">Indirizzi & Utenze
+                                </h3>
+                            </div>
                             <span class="material-symbols-outlined expand-icon">expand_more</span>
                         </div>
                         <div id="indirizzi-view-container" class="guide-content-wrapper collapsed">
@@ -147,7 +160,12 @@
                     <!-- 3. CONTATTI -->
                     <div class="form-section">
                         <div class="form-section-header collapsible-header collapsed" data-section="telefoni">
-                            <h3 class="form-section-title" data-t="profile_phones">Contatti Telefonici</h3>
+                            <div class="flex-center-row">
+                                <div class="settings-icon-box icon-emerald">
+                                    <span class="material-symbols-outlined">call</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_phones">Contatti Telefonici</h3>
+                            </div>
                             <span class="material-symbols-outlined expand-icon">expand_more</span>
                         </div>
                         <div id="telefoni-view-container" class="guide-content-wrapper collapsed">
@@ -158,7 +176,12 @@
                     <!-- 4. EMAIL -->
                     <div class="form-section">
                         <div class="form-section-header collapsible-header collapsed" data-section="email">
-                            <h3 class="form-section-title" data-t="profile_emails">Account Email</h3>
+                            <div class="flex-center-row">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">mail</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_emails">Account Email</h3>
+                            </div>
                             <span class="material-symbols-outlined expand-icon">expand_more</span>
                         </div>
                         <div id="email-view-container" class="guide-content-wrapper collapsed">
@@ -169,7 +192,12 @@
                     <!-- 5. DOCUMENTI -->
                     <div class="form-section">
                         <div class="form-section-header collapsible-header collapsed" data-section="documenti">
-                            <h3 class="form-section-title" data-t="profile_docs_digital">Documenti Digitali</h3>
+                            <div class="flex-center-row">
+                                <div class="settings-icon-box icon-purple">
+                                    <span class="material-symbols-outlined">description</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_docs_digital">Documenti Digitali</h3>
+                            </div>
                             <span class="material-symbols-outlined expand-icon">expand_more</span>
                         </div>
                         <div id="documenti-view-container" class="guide-content-wrapper collapsed">
@@ -181,7 +209,12 @@
                     <!-- 8. NOTE ANAGRAFICA -->
                     <div class="form-section">
                         <div class="form-section-header">
-                            <h3 class="form-section-title" data-t="profile_notes">Note Anagrafica</h3>
+                            <div class="flex-center-row">
+                                <div class="settings-icon-box icon-red">
+                                    <span class="material-symbols-outlined">notes</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_notes">Note Anagrafica</h3>
+                            </div>
                             <button class="btn-edit-section" data-action="edit-section" data-target="note">
                                 <span class="material-symbols-outlined icon-edit">edit</span>
                             </button>

@@ -85,6 +85,7 @@ function getCurrentPage() {
 
     // Azienda & Allegati
     if (path.includes('lista_aziende')) return 'lista_aziende';
+    if (path.includes('aggiungi_nuova_azienda')) return 'aggiungi_nuova_azienda';
     if (path.includes('aggiungi_azienda')) return 'aggiungi_azienda';
     if (path.includes('modifica_azienda')) return 'modifica_azienda';
     if (path.includes('dati_azienda')) return 'dati_azienda';
@@ -93,7 +94,7 @@ function getCurrentPage() {
     if (path.includes('modifica_account_azienda')) return 'modifica_account_azienda';
     if (path.includes('dettaglio_account_azienda')) return 'dettaglio_account_azienda';
     if (path.includes('form_account_azienda')) return 'form_account_azienda';
-    if (path.endsWith('account_azienda.html')) return 'account_azienda_list';
+    if (path.endsWith('account_azienda.html')) return 'account_azienda';
     if (path.includes('gestione_allegati')) return 'gestione_allegati';
 
     if (path.includes('privacy')) return 'privacy';
@@ -168,9 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'storico': await Pages.initStoricoNotifiche(user); break;
 
                     case 'lista_aziende': await Pages.initListaAziende(user); break;
+                    case 'aggiungi_nuova_azienda': await Pages.initAggiungiNuovaAzienda(user); break;
                     case 'aggiungi_azienda': await Pages.initAggiungiAzienda(user); break;
                     case 'modifica_azienda': await Pages.initModificaAzienda(user); break;
                     case 'dati_azienda': await Pages.initDatiAzienda(user); break;
+                    case 'account_azienda': await Pages.initAccountAziendaList(user); break;
                     case 'account_azienda_list': await Pages.initAccountAziendaList(user); break;
                     case 'aggiungi_account_azienda': await Pages.initAggiungiAccountAzienda(user); break;
                     case 'modifica_account_azienda': await Pages.initModificaAccountAzienda(user); break;

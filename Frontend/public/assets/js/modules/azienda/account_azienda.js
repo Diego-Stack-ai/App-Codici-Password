@@ -4,11 +4,10 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components.js';
@@ -20,39 +19,40 @@ let currentSwipeList = null;
 let sortOrder = 'asc';
 let currentAziendaId = null;
 
-// --- INITIALIZATION ---
-observeAuth(async (user) => {
-    if (user) {
-        currentUser = user;
-        const urlParams = new URLSearchParams(window.location.search);
-        currentAziendaId = urlParams.get('id');
-
-        if (!currentAziendaId) {
-            window.location.href = 'lista_aziende.html';
-            return;
-        }
-
-        try {
-            await initComponents();
-            await Promise.all([
-                initProtocolUI(),
-                loadAccounts()
-            ]);
-        } catch (error) {
-            logError("Initialization", error);
-            const container = document.getElementById('accounts-container');
-            if (container) {
-                clearElement(container);
-                setChildren(container, createElement('p', {
-                    className: 'text-center text-red-500 py-10',
-                    textContent: t('error_loading_accounts') || "Errore durante il caricamento degli account."
-                }));
-            }
-        }
-    } else {
+// --- INITIALIZATION (V5.0 Passive) ---
+export async function initAccountAziendaList(user) {
+    if (!user) {
         window.location.href = 'index.html';
+        return;
     }
-});
+
+    currentUser = user;
+    const urlParams = new URLSearchParams(window.location.search);
+    currentAziendaId = urlParams.get('id');
+
+    if (!currentAziendaId) {
+        window.location.href = 'lista_aziende.html';
+        return;
+    }
+
+    try {
+        await initComponents();
+        await Promise.all([
+            initProtocolUI(),
+            loadAccounts()
+        ]);
+    } catch (error) {
+        logError("Initialization", error);
+        const container = document.getElementById('accounts-container');
+        if (container) {
+            clearElement(container);
+            setChildren(container, createElement('p', {
+                className: 'text-center text-red-500 py-10',
+                textContent: t('error_loading_accounts') || "Errore durante il caricamento degli account."
+            }));
+        }
+    }
+}
 
 async function initProtocolUI() {
     try {

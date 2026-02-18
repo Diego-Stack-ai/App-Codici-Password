@@ -361,7 +361,7 @@ async function editConfigItem(selectId, oldValue) {
 }
 
 async function deleteConfigItem(selectId, value) {
-    const confirm = await window.showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirà sulle scadenze esistenti, ma la voce non sarà più disponibile per le nuove.`);
+    const confirm = await showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirà sulle scadenze esistenti, ma la voce non sarà più disponibile per le nuove.`);
     if (!confirm) return;
 
     try {

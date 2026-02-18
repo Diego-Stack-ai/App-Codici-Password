@@ -11,15 +11,7 @@ import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 
-// Carica QRCode library locale con Promise
-const qrcodeReady = new Promise((resolve) => {
-    if (window.QRCode) return resolve();
-    const script = document.createElement('script');
-    script.src = 'assets/js/vendor/qrcode.min.js';
-    script.onload = () => resolve();
-    script.onerror = () => { console.error("Failed to load QRCode lib"); resolve(); };
-    document.head.appendChild(script);
-});
+import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 
 // --- STATE ---
 let currentAziendaId = null;
@@ -30,6 +22,9 @@ let currentLocations = [];
 export async function initDatiAzienda(user) {
     console.log("[DATI-AZIENDA] Init V5.0...");
     if (!user) return;
+
+    // Assicura caricamento libreria QR in modo passivo
+    await ensureQRCodeLib();
 
     currentAziendaId = new URLSearchParams(window.location.search).get('id');
     if (!currentAziendaId) {
@@ -388,17 +383,27 @@ async function handleLogoAndQR(data) {
 
     const vcard = buildVCard(data);
 
-    // Wait for lib
-    await qrcodeReady;
-    if (typeof QRCode === 'undefined') return;
-
-    const options = { width: 100, height: 100, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: QRCode.CorrectLevel.M };
-
+    // Render Preview
     const qrCont = document.getElementById('qrcode-container');
-    if (qrCont) { clearElement(qrCont); new QRCode(qrCont, { ...options, text: vcard }); }
+    if (qrCont) {
+        renderQRCode(qrCont, vcard, {
+            width: 104,
+            height: 104,
+            colorDark: "#000000",
+            colorLight: "#E3F2FD"
+        });
+    }
 
+    // Render Zoom (Lazy ideally, but kept here for stability if already present)
     const qrZoom = document.getElementById('qrcode-zoom-container');
-    if (qrZoom) { clearElement(qrZoom); new QRCode(qrZoom, { ...options, width: 300, height: 300, text: vcard }); }
+    if (qrZoom) {
+        renderQRCode(qrZoom, vcard, {
+            width: 300,
+            height: 300,
+            colorDark: "#000000",
+            colorLight: "#E3F2FD"
+        });
+    }
 }
 
 function buildVCard(data) {

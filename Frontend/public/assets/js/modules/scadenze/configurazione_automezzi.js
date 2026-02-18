@@ -6,9 +6,8 @@
 
 import { db, auth } from '../../firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 
 const DEFAULT_CONFIG = {
@@ -42,12 +41,10 @@ export async function initConfigurazioneAutomezzi(user) {
     const btnAddTemplate = document.getElementById('btn-add-template');
     if (btnAddTemplate) btnAddTemplate.onclick = () => addItem('emailTemplates', t('prompt_new_email_text'));
 
-    // Delegated actions for list items
+    // Delegated actions
     ['container-types', 'container-models', 'container-templates'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        // Remove old listener if any (not possible with anonymous, so rely on new listener being fresh or unique)
-        // Better: use onclick on container for delegation to ensure single handler
         el.onclick = (e) => {
             const btnEdit = e.target.closest('.btn-edit-item');
             const btnDelete = e.target.closest('.btn-delete-item');
@@ -77,7 +74,6 @@ async function loadConfig() {
         const snap = await getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"));
         if (snap.exists()) {
             currentConfig = snap.data();
-            // Ensure defaults
             if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
             if (!currentConfig.models) currentConfig.models = [];
             if (!currentConfig.emailTemplates) currentConfig.emailTemplates = [];
@@ -103,8 +99,8 @@ async function saveConfig() {
 
 function renderAll() {
     renderTypes();
-    renderSimpleList('container-models', currentConfig.models, 'models');
-    renderSimpleList('container-templates', currentConfig.emailTemplates, 'emailTemplates');
+    renderSimpleList('container-models', currentConfig.models, 'models', t('text_vehicle'));
+    renderSimpleList('container-templates', currentConfig.emailTemplates, 'emailTemplates', t('text_email_text'));
 }
 
 function startInlineEdit(list, index) {
@@ -144,7 +140,6 @@ async function saveInlineEdit() {
 function renderTypes() {
     const container = document.getElementById('container-types');
     if (!container) return;
-
     clearElement(container);
 
     if (currentConfig.deadlineTypes.length === 0) {
@@ -154,8 +149,7 @@ function renderTypes() {
         return;
     }
 
-    const items = currentConfig.deadlineTypes.map((item, index) => {
-        // Handle migration from string to object
+    currentConfig.deadlineTypes.forEach((item, index) => {
         if (typeof item === 'string') {
             item = { name: item, period: 14, freq: 7 };
             currentConfig.deadlineTypes[index] = item;
@@ -164,84 +158,44 @@ function renderTypes() {
         const isEditing = editingState.list === 'deadlineTypes' && editingState.index === index;
 
         if (isEditing) {
-            return createElement('div', { className: 'config-list-item' }, [
+            container.appendChild(createElement('div', { className: 'config-list-item' }, [
                 createElement('div', { className: 'inline-edit-container' }, [
                     createElement('div', { className: 'inline-edit-row' }, [
-                        createElement('input', {
-                            id: 'edit-type-name',
-                            type: 'text',
-                            value: item.name,
-                            placeholder: t('placeholder_type_vehicle'),
-                            className: 'inline-input-glass detail-input'
-                        })
+                        createElement('input', { id: 'edit-type-name', type: 'text', value: item.name, placeholder: t('placeholder_type_vehicle'), className: 'inline-input-glass detail-input' })
                     ]),
                     createElement('div', { className: 'inline-edit-row' }, [
                         createElement('span', { className: 'config-item-desc', textContent: t('text_notice') }),
-                        createElement('input', {
-                            id: 'edit-type-period',
-                            type: 'number',
-                            value: item.period,
-                            className: 'inline-input-glass short-code-input'
-                        }),
+                        createElement('input', { id: 'edit-type-period', type: 'number', value: item.period, className: 'inline-input-glass short-code-input' }),
                         createElement('span', { className: 'config-item-desc', textContent: t('text_replica') }),
-                        createElement('input', {
-                            id: 'edit-type-freq',
-                            type: 'number',
-                            value: item.freq,
-                            className: 'inline-input-glass short-code-input'
-                        })
+                        createElement('input', { id: 'edit-type-freq', type: 'number', value: item.freq, className: 'inline-input-glass short-code-input' })
                     ])
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [
-                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
-                    ]),
-                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })]),
+                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })])
+                ])
+            ]));
+        } else {
+            container.appendChild(createElement('div', { className: 'config-list-item' }, [
+                createElement('div', { className: 'config-item-main' }, [
+                    createElement('span', { className: 'config-item-name', textContent: item.name }),
+                    createElement('div', { className: 'config-badge-group' }, [
+                        createElement('span', { className: 'config-badge config-badge-blue', textContent: `${t('text_notice')} ${item.period}gg` }),
+                        createElement('span', { className: 'config-badge config-badge-amber', textContent: `${t('text_replica')} ${item.freq}gg` })
                     ])
-                ])
-            ]);
-        }
-
-        return createElement('div', {
-            className: 'config-list-item'
-        }, [
-            createElement('div', { className: 'config-item-main' }, [
-                createElement('span', { className: 'config-item-name', textContent: item.name }),
-                createElement('div', { className: 'config-badge-group' }, [
-                    createElement('span', {
-                        className: 'config-badge config-badge-blue',
-                        textContent: `${t('text_notice')} ${item.period}gg`
-                    }),
-                    createElement('span', {
-                        className: 'config-badge config-badge-amber',
-                        textContent: `${t('text_replica')} ${item.freq}gg`
-                    })
-                ])
-            ]),
-            createElement('div', { className: 'config-item-actions flex-align-center gap-1' }, [
-                createElement('button', {
-                    className: 'btn-edit-item btn-icon-edit',
-                    dataset: { list: 'deadlineTypes', index: index.toString() }
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
                 ]),
-                createElement('button', {
-                    className: 'btn-delete-item btn-icon-delete',
-                    dataset: { list: 'deadlineTypes', index: index.toString() }
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                createElement('div', { className: 'config-item-actions flex-align-center gap-1' }, [
+                    createElement('button', { className: 'btn-edit-item btn-icon-edit', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })]),
+                    createElement('button', { className: 'btn-delete-item btn-icon-delete', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
                 ])
-            ])
-        ]);
+            ]));
+        }
     });
-    setChildren(container, items);
 }
 
-function renderSimpleList(containerId, data, listKey) {
+function renderSimpleList(containerId, data, listKey, itemLabel) {
     const container = document.getElementById(containerId);
     if (!container) return;
-
     clearElement(container);
 
     if (!data || data.length === 0) {
@@ -251,74 +205,51 @@ function renderSimpleList(containerId, data, listKey) {
         return;
     }
 
-    const items = data.map((item, index) => {
+    data.forEach((item, index) => {
         const isEditing = editingState.list === listKey && editingState.index === index;
-
         if (isEditing) {
-            return createElement('div', { className: 'config-list-item' }, [
+            container.appendChild(createElement('div', { className: 'config-list-item' }, [
                 createElement('div', { className: 'inline-edit-row' }, [
-                    createElement('input', {
-                        id: `edit-item-${listKey}-${index}`,
-                        type: 'text',
-                        value: item,
-                        className: 'inline-input-glass detail-input'
-                    })
+                    createElement('input', { id: `edit-item-${listKey}-${index}`, type: 'text', value: item, className: 'inline-input-glass detail-input' })
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [
-                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })
-                    ]),
-                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
-                    ])
+                    createElement('button', { className: 'btn-save-inline btn-icon-save' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'check' })]),
+                    createElement('button', { className: 'btn-cancel-inline btn-icon-cancel' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })])
                 ])
-            ]);
+            ]));
+        } else {
+            container.appendChild(createElement('div', { className: 'config-list-item' }, [
+                createElement('span', { className: 'config-item-desc truncate pr-4', textContent: item }),
+                createElement('div', { className: 'config-item-actions' }, [
+                    createElement('button', { className: 'btn-edit-item btn-icon-edit', dataset: { list: listKey, index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })]),
+                    createElement('button', { className: 'btn-delete-item btn-icon-delete', dataset: { list: listKey, index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
+                ])
+            ]));
         }
-
-        return createElement('div', {
-            className: 'config-list-item'
-        }, [
-            createElement('span', { className: 'config-item-desc truncate pr-4', textContent: item }),
-            createElement('div', { className: 'config-item-actions' }, [
-                createElement('button', {
-                    className: 'btn-edit-item btn-icon-edit',
-                    dataset: { list: listKey, index: index.toString() }
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
-                ]),
-                createElement('button', {
-                    className: 'btn-delete-item btn-icon-delete',
-                    dataset: { list: listKey, index: index.toString() }
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
-                ])
-            ])
-        ]);
     });
-    setChildren(container, items);
 }
 
 async function addTypeItem() {
-    const name = await window.showInputModal(t('prompt_new_subject'), "", t('placeholder_type_vehicle'));
+    const name = await showInputModal(t('prompt_new_subject'), "", t('placeholder_type_vehicle'));
     if (!name) return;
-    const period = await window.showInputModal(t('prompt_days_notice'), "14", t('desc_notice_period'));
+    const period = await showInputModal(t('prompt_days_notice'), "14");
     if (period === null) return;
-    const freq = await window.showInputModal(t('prompt_freq_days'), "7", t('desc_frequency'));
+    const freq = await showInputModal(t('prompt_freq_days'), "7");
     if (freq === null) return;
 
     currentConfig.deadlineTypes.push({ name: name.trim(), period: parseInt(period) || 14, freq: parseInt(freq) || 7 });
     saveConfig();
 }
 
-async function addItem(listKey, prompt) {
-    const val = await window.showInputModal(t('modal_title_add'), "", prompt);
+async function addItem(listKey, promptText) {
+    const val = await showInputModal(t('modal_title_add'), "", promptText);
     if (!val || !val.trim()) return;
     currentConfig[listKey].push(val.trim());
     saveConfig();
 }
 
 async function deleteItem(listKey, index) {
-    const confirmed = await window.showConfirmModal(t('confirm_delete_title'), t('confirm_delete_item'));
+    const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_item'));
     if (!confirmed) return;
     currentConfig[listKey].splice(index, 1);
     saveConfig();

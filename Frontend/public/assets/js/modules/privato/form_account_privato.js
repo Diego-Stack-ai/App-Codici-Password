@@ -336,7 +336,7 @@ function renderBankAccounts() {
                     className: 'bg-transparent border-none text-red-500/20 hover:text-red-500 transition-all p-1 flex items-center justify-center',
                     onclick: async (e) => {
                         e.stopPropagation();
-                        const ok = await window.showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
+                        const ok = await showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
                         if (ok) {
                             bankAccounts.splice(idx, 1);
                             renderBankAccounts();
@@ -422,7 +422,7 @@ function renderCardEntry(bankIdx, cardIdx, card) {
             onclick: async (e) => {
                 e.stopPropagation();
                 const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
-                const ok = await window.showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
+                const ok = await showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
                 if (ok) {
                     bankAccounts[bankIdx].cards.splice(cardIdx, 1);
                     renderBankAccounts();

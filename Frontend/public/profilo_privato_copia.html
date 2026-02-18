@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it" class="dark" data-i18n="loading">
+
+<head>
+    <!-- Anti-flicker & Theme Master (V5.0) -->
+    <script src="assets/js/theme-init.js"></script>
+    <!-- CSP (Content Security Policy) - V5.0 Standard -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-t="page_title_profile">Profilo Utente (Copia) - PROTOCOLLO BASE V5.0</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=5.0" />
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+
+    <!-- CSS Modular System V5.0 -->
+    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
+    <!-- Stile di Pagina Migliorato -->
+    <link rel="stylesheet" href="assets/css/profilo_privato_copia.css?v=5.0">
+</head>
+
+<body class="base-bg">
+    <div class="base-container">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
+
+        <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
+
+        <main class="base-main">
+            <div class="page-container pt-header-extra pb-footer-extra">
+
+                <!-- Hero Profile Header (V5.0 Hybrid Style) -->
+                <div class="card-hero border-glow hero-card-variant">
+                    <div class="saetta-master"></div>
+                    <div class="saetta-drop"></div>
+
+                    <div class="hero-content-layout">
+                        <!-- Top Row: Avatar + QR -->
+                        <div class="hero-top-row">
+                            <div class="avatar-group">
+                                <div id="avatar-trigger" class="hero-avatar border-glow cursor-pointer">
+                                    <img id="profile-avatar" src="assets/images/user-avatar-5.png" alt="Profile">
+                                    <div class="hero-avatar-overlay">
+                                        <span class="material-symbols-outlined">photo_camera</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                            </div>
+
+                            <div id="qrcode-preview" class="qr-preview-box">
+                                <div id="qrcode-header" class="qr-code-canvas"></div>
+                                <div class="qr-lens-icon">
+                                    <span class="material-symbols-outlined">zoom_in</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Info -->
+                        <div class="hero-info-col">
+                            <h1 id="user-display-name" class="hero-user-name" data-t="loading">Caricamento...</h1>
+                            <p id="user-display-email" class="hero-user-email">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Hidden QR for data access -->
+                    <div id="qrcode-settings" class="hidden"></div>
+                </div>
+
+                <!-- Dati Profilo in Formato Settings (Configurazione) -->
+                <div class="settings-container">
+                    <h3 class="settings-desc" data-t="profile_personal">Anagrafica Principale</h3>
+
+                    <!-- Campo: Nome e Cognome -->
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-blue">
+                                <span class="material-symbols-outlined">person</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <div class="flex-between-align-center">
+                                    <span class="settings-label" data-t="label_name_surname">Nome & Cognome</span>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-nome" class="qr-checkbox">
+                                        <label for="qr-toggle-nome" class="qr-mini-label">QR</label>
+                                    </div>
+                                </div>
+                                <div class="field-value-row">
+                                    <span id="nome-view" class="data-value">-</span>
+                                    <button id="copy-nome" class="btn-action-mini">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campo: Codice Fiscale -->
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-emerald">
+                                <span class="material-symbols-outlined">badge</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <div class="flex-between-align-center">
+                                    <span class="settings-label" data-t="label_cf">Codice Fiscale</span>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-cf" class="qr-checkbox">
+                                        <label for="qr-toggle-cf" class="qr-mini-label">QR</label>
+                                    </div>
+                                </div>
+                                <div class="field-value-row">
+                                    <span id="cf-view" class="data-value font-mono">-</span>
+                                    <button id="copy-cf" class="btn-action-mini">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottoni di Azione Sezione (come in Configurazione) -->
+                    <div class="section-actions-row">
+                        <button class="btn-edit-section-full" data-action="edit-section" data-target="dati-personali">
+                            <span class="material-symbols-outlined">edit</span>
+                            <span data-t="edit">Modifica</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sezione Indirizzi (Collapsibile come Configurazione) -->
+                <div class="settings-group mt-section">
+                    <div class="settings-item collapsible-header" data-target="indirizzi-view-container" role="button">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-amber">
+                                <span class="material-symbols-outlined">home</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <h3 class="settings-label" data-t="profile_addresses_utilities">Indirizzi & Utenze</h3>
+                            </div>
+                            <div class="settings-header-actions">
+                                <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="indirizzi-view-container" class="settings-dropdown-panel hidden">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Sezione Documenti -->
+                <div class="settings-group mt-section">
+                    <div class="settings-item collapsible-header" data-target="documenti-view-container" role="button">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-purple">
+                                <span class="material-symbols-outlined">description</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <h3 class="settings-label" data-t="profile_docs_digital">Documenti Digitali</h3>
+                            </div>
+                            <div class="settings-header-actions">
+                                <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="documenti-view-container" class="settings-dropdown-panel hidden">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Note -->
+                <div class="settings-container mt-section">
+                    <h3 class="settings-desc" data-t="profile_notes">Note Anagrafica</h3>
+                    <div class="settings-item">
+                        <p id="note-view" class="note-text-glass">-</p>
+                    </div>
+                    <div class="section-actions-row">
+                        <button class="btn-edit-section-full" data-action="edit-section" data-target="note">
+                            <span class="material-symbols-outlined">edit</span>
+                            <span data-t="edit">Modifica</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- FOOTER PLACEHOLDER -->
+        <footer id="footer-placeholder" class="base-footer"></footer>
+    </div>
+
+    <!-- Scripts (V5.0 Ordering) -->
+    <script type="module" src="assets/js/main.js"></script>
+</body>
+
+</html>

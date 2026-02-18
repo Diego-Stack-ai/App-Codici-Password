@@ -6,9 +6,8 @@
 
 import { db, auth } from '../../firebase-config.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 
 const DEFAULT_CONFIG = {
@@ -289,11 +288,11 @@ function renderSimpleList(containerId, data, listKey) {
 }
 
 async function addTypeItem() {
-    const name = await window.showInputModal(t('prompt_new_general_type'), "", t('placeholder_type_general'));
+    const name = await showInputModal(t('prompt_new_general_type'), "", t('placeholder_type_general'));
     if (!name) return;
-    const period = await window.showInputModal(t('prompt_days_notice'), "14");
+    const period = await showInputModal(t('prompt_days_notice'), "14");
     if (period === null) return;
-    const freq = await window.showInputModal(t('prompt_freq_days'), "7");
+    const freq = await showInputModal(t('prompt_freq_days'), "7");
     if (freq === null) return;
 
     currentConfig.deadlineTypes.push({ name: name.trim(), period: parseInt(period) || 14, freq: parseInt(freq) || 7 });
@@ -301,16 +300,15 @@ async function addTypeItem() {
 }
 
 async function addItem(listKey, prompt) {
-    const val = await window.showInputModal(t('modal_title_add'), "", prompt);
+    const val = await showInputModal(t('modal_title_add'), "", prompt);
     if (!val || !val.trim()) return;
     currentConfig[listKey].push(val.trim());
     saveConfig();
 }
 
 async function deleteItem(listKey, index) {
-    const confirmed = await window.showConfirmModal(t('confirm_delete_title'), t('confirm_delete_item'));
+    const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_item'));
     if (!confirmed) return;
     currentConfig[listKey].splice(index, 1);
     saveConfig();
 }
-

@@ -140,8 +140,13 @@ export async function initDatiAzienda(user) {
 }
 
 export async function initAccountAziendaList(user) {
-    const module = await import('./modules/azienda/account_azienda_list.js');
+    const module = await import('./modules/azienda/account_azienda.js');
     if (module.initAccountAziendaList) await module.initAccountAziendaList(user);
+}
+
+export async function initAggiungiNuovaAzienda(user) {
+    const module = await import('./modules/azienda/aggiungi_azienda.js');
+    if (module.initAggiungiAzienda) await module.initAggiungiAzienda(user);
 }
 
 export async function initAggiungiAccountAzienda(user) {
@@ -166,6 +171,6 @@ export async function initFormAccountAzienda(user) {
 
 // --- 6. UTILITIES ---
 export async function initGestioneAllegati(user) {
-    const module = await import('./gestione_allegati.js');
+    const module = await import('./modules/azienda/gestione_allegati.js');
     if (module.initGestioneAllegati) await module.initGestioneAllegati(user);
 }

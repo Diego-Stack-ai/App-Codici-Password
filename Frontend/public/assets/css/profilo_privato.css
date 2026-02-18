@@ -39,13 +39,17 @@ html body .qr-zoom-container {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem 0 1.5rem 0;
+    padding: 1.5rem;
     position: relative;
     z-index: 10;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 0 auto 1.5rem auto;
     width: 100%;
     overflow: hidden;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Saette Visibility Control */
@@ -297,11 +301,63 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .form-section-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 800;
     color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    text-transform: capitalize;
+    letter-spacing: 0.05em;
+}
+
+/* --- SETTINGS STYLE ICON BOXES --- */
+.settings-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.settings-icon-box .material-symbols-outlined {
+    font-size: 22px;
+}
+
+.icon-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: #fff;
+}
+
+.icon-emerald {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+}
+
+.icon-amber {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+}
+
+.icon-purple {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    color: #fff;
+}
+
+.icon-red {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+}
+
+.qr-check-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .guide-content-wrapper {
@@ -367,19 +423,18 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .form-card {
-    background: var(--surface-glass);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 0.85rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 24px;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
     transition: all 0.3s ease;
 }
 
 .form-card:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .data-display-group {
@@ -400,11 +455,11 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 .data-label {
     font-size: 0.72rem;
     font-weight: 800;
-    text-transform: uppercase;
+    text-transform: capitalize;
     color: #1e3a8a;
     /* Darker Blue (Indigo-900) */
     opacity: 0.85;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
     margin: 0;
 }
 
@@ -758,6 +813,37 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     margin: 0;
 }
 
+/* --- FIELD CONTAINERS FOR MODALS --- */
+.glass-field-container {
+    width: 100%;
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.glass-field-box {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.dark .glass-field-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.glass-field-box:focus-within {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color, #3b82f6);
+}
+
 /* --- Modal Form Specifics (Added) --- */
 .view-label {
     font-size: 0.8rem;
@@ -766,7 +852,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     /* Slate 400 - Grigio più marcato */
     margin-bottom: 0.25rem;
     display: block;
-    text-transform: uppercase;
+    text-transform: capitalize;
     letter-spacing: 0.05em;
 }
 
