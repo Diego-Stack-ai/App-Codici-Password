@@ -44,10 +44,8 @@ export async function initComponents() {
                 // Back Button (Solo se non siamo su Auth o Home)
                 let backFn = () => window.history.back();
                 const urlParams = new URLSearchParams(window.location.search);
-                const accountId = urlParams.get('id');
-                const aziendaId = urlParams.get('aziendaId');
 
-                // Mapping Logico Navigazione STRETTO (Solo Ciclo Azienda / Scadenze)
+                // Mapping Logico Navigazione
                 if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
                     backFn = () => window.location.href = 'home_page.html';
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
@@ -69,7 +67,7 @@ export async function initComponents() {
                 } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html')) {
                     backFn = () => window.location.href = 'lista_aziende.html';
                 } else if (path.endsWith('dettaglio_account_azienda.html')) {
-                    const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda'); // Robustezza
+                    const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda');
                     backFn = () => window.location.href = `account_azienda.html?id=${aziendaId}`;
                 } else if (path.endsWith('form_account_azienda.html')) {
                     const accountId = urlParams.get('id');
@@ -96,8 +94,10 @@ export async function initComponents() {
                         createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
                     ])
                 );
+            }
 
-                // Title / Greeting
+            // Title / Greeting (per tutte le pagine non-auth)
+            if (!isAuth) {
                 if (isHome) {
                     const greetingCont = createElement('div', {
                         className: 'flex flex-col items-center cursor-pointer',
@@ -145,146 +145,145 @@ export async function initComponents() {
                             createElement('span', { className: 'material-symbols-outlined', textContent: 'logout' })
                         ])
                     );
-                } else if (!isAuth) {
+                } else {
                     headerRight.appendChild(
                         createElement('a', { href: 'home_page.html', className: 'btn-icon-header' }, [
                             createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
                         ])
                     );
                 }
-
-                const headerContent = createElement('div', { id: 'header-content', className: 'header-balanced-container' }, [
-                    headerLeft, headerCenter, headerRight
-                ]);
-
-                const header = createElement('header', { className: 'base-header' }, [headerContent]);
-                headerPh.appendChild(header);
             }
 
-            // 2. SETUP FOOTER
-            const footerPh = document.getElementById('footer-placeholder');
-            if (footerPh) {
-                clearElement(footerPh);
-                const isOnSettings = path.includes('impostazioni.html');
-                const footerLeft = createElement('div', { className: 'header-left' });
+            const headerContent = createElement('div', { id: 'header-content', className: 'header-balanced-container' }, [
+                headerLeft, headerCenter, headerRight
+            ]);
+            const header = createElement('header', { className: 'base-header' }, [headerContent]);
+            headerPh.appendChild(header);
+        }
 
+        // 2. SETUP FOOTER
+        const footerPh = document.getElementById('footer-placeholder');
+        if (footerPh) {
+            clearElement(footerPh);
+            const isOnSettings = path.includes('impostazioni.html');
+            const footerLeft = createElement('div', { className: 'header-left' });
+
+            if (!isOnSettings) {
+                footerLeft.appendChild(
+                    createElement('button', {
+                        id: isHome ? 'theme-toggle-home' : 'theme-toggle-standard',
+                        className: 'btn-icon-header',
+                        title: 'Cambia Tema',
+                        onclick: () => document.documentElement.classList.toggle('dark')
+                    }, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'contrast' })
+                    ])
+                );
+            }
+
+            const footerCenter = createElement('div', { id: 'footer-center-actions', className: 'header-center' });
+
+            // GUIDA RAPIDA (Icona Centrale - Solo Profilo)
+            if (path.includes('profilo_privato.html')) {
+                const guideBtn = createElement('button', {
+                    className: 'btn-icon-header',
+                    title: 'Guida Profilo',
+                    onclick: () => {
+                        openGuideModal(t('profile_guide_title') || 'Guida Profilo', [
+                            t('profile_guide_step1') || 'Gestisci i tuoi dati (Anagrafica, Residenza, Documenti).',
+                            t('profile_guide_step2') || 'Usa la spunta QR per decidere cosa condividere.',
+                            t('profile_guide_step3') || 'Clicca sul QR Code per ingrandirlo.'
+                        ]);
+                    }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'info' })
+                ]);
+                footerCenter.appendChild(guideBtn);
+            }
+
+            const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });
+
+            // Settings Link
+            if (!isAuth) {
                 if (!isOnSettings) {
-                    footerLeft.appendChild(
-                        createElement('button', {
-                            id: isHome ? 'theme-toggle-home' : 'theme-toggle-standard',
-                            className: 'btn-icon-header',
-                            title: 'Cambia Tema',
-                            onclick: () => document.documentElement.classList.toggle('dark')
+                    const settLink = createElement('div', { id: 'footer-settings-link' });
+                    settLink.appendChild(
+                        createElement('a', {
+                            href: 'impostazioni.html',
+                            className: 'btn-icon-header footer-settings-link',
+                            title: 'Impostazioni'
                         }, [
-                            createElement('span', { className: 'material-symbols-outlined', textContent: 'contrast' })
+                            createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
                         ])
                     );
+                    footerRight.appendChild(settLink);
                 }
-
-                const footerCenter = createElement('div', { id: 'footer-center-actions', className: 'header-center' });
-
-                // GUIDA RAPIDA (Icona Centrale - Solo Profilo)
-                if (path.includes('profilo_privato.html')) {
-                    const guideBtn = createElement('button', {
-                        className: 'btn-icon-header',
-                        title: 'Guida Profilo',
-                        onclick: () => {
-                            openGuideModal(t('profile_guide_title') || 'Guida Profilo', [
-                                t('profile_guide_step1') || 'Gestisci i tuoi dati (Anagrafica, Residenza, Documenti).',
-                                t('profile_guide_step2') || 'Usa la spunta QR per decidere cosa condividere.',
-                                t('profile_guide_step3') || 'Clicca sul QR Code per ingrandirlo.'
-                            ]);
-                        }
-                    }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'info' })
-                    ]);
-                    footerCenter.appendChild(guideBtn);
-                }
-
-                const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });
-
-                // Settings Link
-                if (!isAuth) {
-                    const isOnSettings = path.includes('impostazioni.html');
-                    if (!isOnSettings) {
-                        const settLink = createElement('div', { id: 'footer-settings-link' });
-                        settLink.appendChild(
-                            createElement('a', {
-                                href: 'impostazioni.html',
-                                className: 'btn-icon-header footer-settings-link',
-                                title: 'Impostazioni'
-                            }, [
-                                createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
-                            ])
-                        );
-                        footerRight.appendChild(settLink);
-                    }
-                }
-
-                // Inseriamo lo spacer prima del footer per spingere il contenuto su
-                const spacer = createElement('div', { className: 'spacer-footer' });
-                footerPh.parentNode.insertBefore(spacer, footerPh);
-
-                const footerContent = createElement('div', { id: 'footer-content', className: 'header-balanced-container' }, [
-                    footerLeft, footerCenter, footerRight
-                ]);
-                setChildren(footerPh, footerContent); // Moved this line here
-
-                const footer = createElement('footer', { className: 'base-footer' }, [footerContent]);
-                footerPh.appendChild(footer);
             }
 
-            console.log("PROTOCOLLO BASE Components Initialized (DOM Safe) V4.5");
+            // Inseriamo lo spacer prima del footer per spingere il contenuto su
+            const spacer = createElement('div', { className: 'spacer-footer' });
+            footerPh.parentNode.insertBefore(spacer, footerPh);
 
-        } catch (e) {
-            console.error("Errore inizializzazione componenti:", e);
+            const footerContent = createElement('div', { id: 'footer-content', className: 'header-balanced-container' }, [
+                footerLeft, footerCenter, footerRight
+            ]);
+            setChildren(footerPh, footerContent);
+
+            const footer = createElement('footer', { className: 'base-footer' }, [footerContent]);
+            footerPh.appendChild(footer);
         }
+
+        console.log("PROTOCOLLO BASE Components Initialized (DOM Safe) V4.5");
+
+    } catch (e) {
+        console.error("Errore inizializzazione componenti:", e);
     }
+}
 
 /**
  * Helper locale per aprire il modale guida (evita dipendenze cicliche)
  */
 function openGuideModal(title, steps) {
-        // Rimuovi modali esistenti
-        const existing = document.getElementById('guide-modal-local');
-        if (existing) existing.remove();
+    // Rimuovi modali esistenti
+    const existing = document.getElementById('guide-modal-local');
+    if (existing) existing.remove();
 
-        const modal = createElement('div', { id: 'guide-modal-local', className: 'modal-overlay' });
+    const modal = createElement('div', { id: 'guide-modal-local', className: 'modal-overlay' });
 
-        // Contenuto passaggi
-        const stepsContent = steps.map((step, i) => createElement('div', {
-            className: 'flex-start-row mb-3',
-            style: 'display: flex; align-items: flex-start; margin-bottom: 0.75rem;'
-        }, [
-            createElement('strong', { className: 'text-accent mr-2', style: 'margin-right: 0.5rem; color: var(--accent); white-space: nowrap;', textContent: `${i + 1}.` }),
-            createElement('span', { className: 'text-secondary text-sm', style: 'color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;', textContent: step })
-        ]));
+    // Contenuto passaggi
+    const stepsContent = steps.map((step, i) => createElement('div', {
+        className: 'flex-start-row mb-3',
+        style: 'display: flex; align-items: flex-start; margin-bottom: 0.75rem;'
+    }, [
+        createElement('strong', { className: 'text-accent mr-2', style: 'margin-right: 0.5rem; color: var(--accent); white-space: nowrap;', textContent: `${i + 1}.` }),
+        createElement('span', { className: 'text-secondary text-sm', style: 'color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;', textContent: step })
+    ]));
 
-        const btnClose = createElement('button', {
-            className: 'btn-modal btn-primary',
-            style: 'width: 100%; margin-top: 1rem;',
-            textContent: t('close') || 'Chiudi',
-            onclick: () => {
-                modal.classList.remove('active');
-                setTimeout(() => modal.remove(), 300);
-            }
-        });
+    const btnClose = createElement('button', {
+        className: 'btn-modal btn-primary',
+        style: 'width: 100%; margin-top: 1rem;',
+        textContent: t('close') || 'Chiudi',
+        onclick: () => {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    });
 
-        const content = createElement('div', { className: 'modal-box' }, [
-            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
-            createElement('h3', { className: 'modal-title', textContent: title }),
-            createElement('div', { className: 'modal-body mt-4 mb-4 text-left w-full' }, stepsContent),
-            createElement('div', { className: 'modal-actions' }, [btnClose])
-        ]);
+    const content = createElement('div', { className: 'modal-box' }, [
+        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
+        createElement('h3', { className: 'modal-title', textContent: title }),
+        createElement('div', { className: 'modal-body mt-4 mb-4 text-left w-full' }, stepsContent),
+        createElement('div', { className: 'modal-actions' }, [btnClose])
+    ]);
 
-        modal.appendChild(content);
-        document.body.appendChild(modal);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
 
-        // Animazione apertura
-        requestAnimationFrame(() => modal.classList.add('active'));
+    // Animazione apertura
+    requestAnimationFrame(() => modal.classList.add('active'));
 
-        // Chiusura al click fuori
-        modal.onclick = (e) => {
-            if (e.target === modal) btnClose.click();
-        };
-    }
+    // Chiusura al click fuori
+    modal.onclick = (e) => {
+        if (e.target === modal) btnClose.click();
+    };
+}
