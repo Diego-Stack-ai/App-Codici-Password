@@ -1,10 +1,10 @@
 /**
- * ACCOUNT AZIENDA LIST (V4.1)
+ * ACCOUNT AZIENDA LIST (V5.0 ADAPTER)
  * Gestione liste account per una specifica azienda.
+ * - Entry Point: initAccountAziendaList(user)
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { doc, getDoc, collection, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
@@ -16,14 +16,18 @@ let allAccounts = [];
 let companyData = null;
 let sortOrder = 'asc';
 let currentUser = null;
-const urlParams = new URLSearchParams(window.location.search);
-const companyId = urlParams.get('id');
+let companyId = null;
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+export async function initAccountAziendaList(user) {
+    console.log("[ACCOUNT-AZIENDA-LIST] Init V5.0...");
+    if (!user) return;
+    currentUser = user;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    companyId = urlParams.get('id');
+
     const listContainer = document.querySelector('.flex.flex-col.gap-4.mt-2');
-    const searchInput = document.querySelector('input[type="text"]');
-    const sortBtn = document.getElementById('sort-btn');
 
     if (!companyId) {
         showToast("ID Azienda mancante", "error");
@@ -31,34 +35,48 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    observeAuth(async (user) => {
-        if (user) {
-            currentUser = user;
-            await loadCompanyAndAccounts();
-        } else {
-            if (listContainer) {
-                clearElement(listContainer);
-                setChildren(listContainer, [
-                    createElement('p', { className: 'text-center py-10 opacity-50', textContent: t('login_required') || 'Effettua il login.' })
-                ]);
-            }
-        }
-    });
+    setupEventListeners();
+    setupFooterActions();
+    await loadCompanyAndAccounts();
 
-    // Event Listeners
+    console.log("[ACCOUNT-AZIENDA-LIST] Ready.");
+}
+
+function setupEventListeners() {
+    const searchInput = document.querySelector('input[type="text"]');
+    const sortBtn = document.getElementById('sort-btn');
+
     if (sortBtn) {
-        sortBtn.addEventListener('click', () => {
+        sortBtn.onclick = () => {
             sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
             sortBtn.classList.toggle('bg-primary/10', sortOrder === 'desc');
             showToast(`${t('sorting') || 'Ordinamento'}: ${sortOrder.toUpperCase()}`);
             renderAccounts();
-        });
+        };
     }
 
     if (searchInput) {
-        searchInput.addEventListener('input', () => renderAccounts());
+        searchInput.oninput = () => renderAccounts();
     }
-});
+}
+
+function setupFooterActions() {
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter && companyId) {
+        clearElement(fCenter);
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+            createElement('button', {
+                id: 'add-account-btn',
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: t('add_account') || 'Nuovo Account',
+                dataset: { label: t('add_short') || 'Aggiungi' },
+                onclick: () => window.location.href = `form_account_azienda.html?aziendaId=${companyId}`
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+            ])
+        ]));
+    }
+}
 
 async function loadCompanyAndAccounts() {
     const listContainer = document.querySelector('.flex.flex-col.gap-4.mt-2');

@@ -1,39 +1,35 @@
 /**
- * AGGIUNGI AZIENDA MODULE (V4.1)
+ * AGGIUNGI AZIENDA MODULE (V5.0 ADAPTER)
  * Creazione di un nuovo profilo aziendale con gestione logo e sezioni collassabili.
+ * - Entry Point: initAggiungiAzienda(user)
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUser = null;
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
-    initProtocolUI();
+export async function initAggiungiAzienda(user) {
+    console.log("[ADD-AZIENDA] Init V5.0...");
+    if (!user) return;
+    currentUser = user;
+
+    await initProtocolUI();
     setupUI();
-
-    observeAuth((user) => {
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            currentUser = user;
-        }
-    });
-
     setupCollapsibles();
     setupPasswordToggles();
-});
+
+    console.log("[ADD-AZIENDA] Ready.");
+}
 
 async function initProtocolUI() {
-    await initComponents();
+    // Nota: initComponents() rimosso (gestito da main.js)
 
     // Header Left
     const hLeft = document.getElementById('header-left');
@@ -69,17 +65,47 @@ async function initProtocolUI() {
         ]));
     }
 
-    // Footer Right
+    // Footer Center Actions (Annulla & Salva)
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        clearElement(fCenter);
+
+        const cancelBtn = createElement('button', {
+            className: 'btn-fab-action btn-fab-neutral',
+            title: t('cancel') || 'Annulla',
+            dataset: { label: t('cancel_short') || 'Annulla' },
+            onclick: () => history.back()
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+        ]);
+
+        const saveBtn = createElement('button', {
+            id: 'btn-save-azienda',
+            className: 'btn-fab-action btn-fab-scadenza',
+            title: t('save_company') || 'Salva Azienda',
+            dataset: { label: t('save_short') || 'Salva' },
+            onclick: saveAzienda
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+        ]);
+
+        const fabWrapper = createElement('div', {
+            className: 'fab-group'
+        }, [cancelBtn, saveBtn]);
+
+        fCenter.appendChild(fabWrapper);
+    }
+
+    // Settings Link on the right
     const fRight = document.getElementById('footer-right-actions');
     if (fRight) {
         clearElement(fRight);
-        setChildren(fRight, createElement('button', {
-            id: 'btn-save-azienda',
-            className: 'base-btn-primary flex-center-gap',
-            onclick: saveAzienda
+        setChildren(fRight, createElement('a', {
+            href: 'impostazioni.html',
+            className: 'btn-icon-header',
+            title: 'Impostazioni'
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' }),
-            createElement('span', { textContent: t('save_company') || 'Salva Azienda' })
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'tune' })
         ]));
     }
 }

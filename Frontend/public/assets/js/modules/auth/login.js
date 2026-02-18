@@ -10,46 +10,45 @@ import { t, supportedLanguages, applyGlobalTranslations } from '../../translatio
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showInputModal } from '../../ui-core.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("[LOGIN] Application Boot V4.1...");
+/**
+ * LOGIN MODULE (V5.0 ADAPTER)
+ * Gestisce l'autenticazione e l'interfaccia della pagina di accesso.
+ * - Entry Point: initLogin() (chiamato da main.js)
+ */
+
+export async function initLogin() {
+    console.log("[LOGIN] Init V5.0...");
 
     try {
-        // 1. AppState di base (Protocollo Comune)
+        // 1. AppState di base (Local Scope o Global se necessario per compatibilità)
         let savedLang = 'it';
         try { savedLang = localStorage.getItem('app_language') || 'it'; } catch (e) { }
 
-        const path = window.location.pathname.toLowerCase();
-        const isAuthPage = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.includes(p)) || path === '/' || path.endsWith('/');
-
+        // window.AppState legacy support (se altri moduli lo usano)
         window.AppState = window.AppState || {
             user: null,
             theme: 'dark',
             language: savedLang,
-            isAuthPage: isAuthPage
+            isAuthPage: true
         };
 
         // 2. INIZIALIZZAZIONE COMPONENTI UI
+        // initComponents() è già stato chiamato da main.js, ma per sicurezza su auth pages:
+        // (Nota: main.js salta setupPasswordToggles su auth pages, quindi qui dobbiamo attivarli specificamente per il login)
 
-        // 3. INIZIALIZZAZIONE COMPONENTI UI
-        initComponents().catch(e => console.log("Info: index ui elements initialized"));
+        // 3. CHECK AUTH STATE (Redirect se già loggato)
+        checkAuthState(); // Importato da auth.js
 
-        // 4. CHECK AUTH STATE (Proactive Redirect)
-        checkAuthState();
-
-        // 5. SETUP FUNZIONALITÀ PAGINA
+        // 4. SETUP FUNZIONALITÀ PAGINA
         setupLoginForm();
         setupLanguageSelector();
-        setupPasswordToggle();
+        setupPasswordToggle(); // Funzione locale definita sotto
 
         console.log("[LOGIN] System Ready.");
     } catch (err) {
-        console.error("[LOGIN] Critical Init Error:", err);
+        console.error("[LOGIN] Init Error:", err);
     }
-});
-
-/**
- * Selettore Lingua Flottante
- */
+}
 
 /**
  * Selettore Lingua Flottante
@@ -188,17 +187,11 @@ function setupPasswordToggle() {
             input.classList.remove('base-shield');
         } else {
             input.type = 'password';
-            // Non aggiungiamo base-shield qui se è di tipo password, il browser lo maschera già
         }
 
         const icon = btn.querySelector('.material-symbols-outlined');
         if (icon) {
-            // Se lo rendiamo visibile (text), mostriamo occhio sbarrato per "nascondi"
-            // Se lo rendiamo segreto (password), mostriamo occhio aperto per "mostra"
             icon.textContent = isSecret ? 'visibility_off' : 'visibility';
         }
     });
 }
-
-
-

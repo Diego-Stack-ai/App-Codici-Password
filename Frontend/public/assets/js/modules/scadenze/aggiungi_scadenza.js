@@ -12,6 +12,9 @@ import { EMAILS, buildEmailSubject } from './scadenza_templates.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 
+import { t } from '../../translations.js';
+import { initDatePickerV5 } from '../../datepicker_v5.js';
+
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
 const emailSubjectInput = document.getElementById('oggetto_email');
@@ -40,14 +43,32 @@ let unifiedConfigs = {
     generali: null
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * AGGIUNGI SCADENZA MODULE (V5.0 ADAPTER)
+ * Gestisce l'aggiunta o la modifica di scadenze.
+ * - Entry Point: initAggiungiScadenza(user)
+ */
+
+export async function initAggiungiScadenza(user) {
+    console.log("[ADD-SCADENZA] Init V5.0...");
+    if (!user) return;
+    currentUser = user;
+
+    editingScadenzaId = new URLSearchParams(window.location.search).get('id');
+
     // Mode Switching Listeners
     ['automezzi', 'documenti', 'generali'].forEach(mode => {
         const btn = document.getElementById(`mode-${mode}`);
         if (btn) {
             btn.addEventListener('click', () => setMode(mode));
         }
+        if (btn) {
+            btn.addEventListener('click', () => setMode(mode));
+        }
     });
+
+    // Custom Datepicker V5.0
+    initDatePickerV5('dueDate');
 
     // Toggle Manual Email Inputs
     setupEmailToggle(emailPrimariaSelect, 'email_primaria_input');
@@ -65,15 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initProxyDropdowns();
     initAttachmentSystem();
 
-    // Footer Actions Injection (V4.1 Style)
+    // --- FOOTER ACTIONS SYSTEM (Home Page Style) ---
     const interval = setInterval(() => {
-        const footerRight = document.getElementById('footer-right-actions');
         const footerCenter = document.getElementById('footer-center-actions');
+        const footerRight = document.getElementById('footer-right-actions');
 
-        if (footerRight && footerCenter) {
+        if (footerCenter && footerRight) {
             clearInterval(interval);
 
-            // --- A. IMPOSTAZIONI (Sempre visibile a dx) ---
+            // 1. Settings Link (Right)
             const settLink = createElement('div', { id: 'footer-settings-link' });
             settLink.appendChild(
                 createElement('a', {
@@ -81,65 +102,86 @@ document.addEventListener('DOMContentLoaded', () => {
                     className: 'btn-icon-header footer-settings-link',
                     title: 'Impostazioni'
                 }, [
-                    createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'tune' })
                 ])
             );
             clearElement(footerRight);
             footerRight.appendChild(settLink);
 
-            // --- B. AZIONI CENTRALI (Annulla & Salva) ---
+            // 2. Main Actions (Center)
+            clearElement(footerCenter);
+
             const cancelBtn = createElement('button', {
-                className: 'btn-fab-action',
-                style: 'background: #64748b; width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);',
-                title: 'Annulla',
+                className: 'btn-fab-action btn-fab-neutral',
+                title: t('cancel') || 'Annulla',
+                dataset: { label: t('cancel_short') || 'Annulla' },
                 onclick: () => {
                     if (editingScadenzaId) window.location.href = `dettaglio_scadenza.html?id=${editingScadenzaId}`;
                     else window.location.href = 'scadenze.html';
                 }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'close' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
             ]);
 
             const saveBtn = createElement('button', {
                 id: 'save-btn',
-                className: 'btn-fab-action btn-fab-scadenza', // Stile FAB Blu Standard
-                style: 'width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);',
-                title: 'Salva Scadenza'
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: t('save') || 'Salva Scadenza',
+                dataset: { label: t('save_short') || 'Salva' }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'save' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
             ]);
 
             const fabWrapper = createElement('div', {
-                className: 'flex items-center gap-4',
-                style: 'display: flex; gap: 16px; align-items: center;'
+                className: 'fab-group'
             }, [cancelBtn, saveBtn]);
 
-            clearElement(footerCenter);
             footerCenter.appendChild(fabWrapper);
             setupSaveLogic();
+
+            // 3. Animations (Home Page Style)
+            [cancelBtn, saveBtn].forEach((btn, index) => {
+                btn.animate([
+                    { transform: 'scale(0) translateY(20px)', opacity: 0 },
+                    { transform: 'scale(1) translateY(0)', opacity: 1 }
+                ], {
+                    duration: 400,
+                    delay: index * 100,
+                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    fill: 'forwards'
+                });
+            });
         }
     }, 100);
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            await loadDynamicConfig();
-            updateAttachmentsUI();
+    // Timeout safety
+    setTimeout(() => { if (interval) clearInterval(interval); }, 5000);
 
-            if (editingScadenzaId) {
-                // UI update immediately
-                const pageTitle = document.querySelector('.detail-title-value');
-                if (pageTitle) pageTitle.textContent = "Modifica Scadenza";
-
-                await loadScadenzaForEdit(editingScadenzaId);
+    // LIST MANAGEMENT SYSTEM (Dynamic Config)
+    document.querySelectorAll('.btn-manage-config-inline').forEach(btn => {
+        btn.onclick = async (e) => {
+            e.stopPropagation();
+            const configId = btn.dataset.configId;
+            const newVal = await window.showInputModal(`Aggiungi Nuovo`, '', `Inserisci nuovo valore...`);
+            if (newVal && newVal.trim()) {
+                await addConfigItem(configId, newVal.trim());
             }
-        } else {
-            window.location.href = 'index.html';
-        }
+        };
     });
 
     initialStaticLoad();
-});
+    await loadDynamicConfig();
+    updateAttachmentsUI();
+
+    if (editingScadenzaId) {
+        // UI update immediately
+        const pageTitle = document.querySelector('.detail-title-value');
+        if (pageTitle) pageTitle.textContent = "Modifica Scadenza";
+        await loadScadenzaForEdit(editingScadenzaId);
+    }
+
+    console.log("[ADD-SCADENZA] Ready.");
+}
 
 function setMode(mode) {
     currentMode = mode;
@@ -147,16 +189,22 @@ function setMode(mode) {
 
     // Update labels and visibility
     const vehicleSection = document.getElementById('vehicle_fields_wrapper');
-    const vehicleLabel = vehicleSection?.querySelector('.view-label');
+    const vehicleLabel = vehicleSection?.querySelector('.label-sm');
     const vehicleIcon = document.getElementById('vehicle-icon');
 
     if (mode === 'automezzi') {
         vehicleSection?.classList.remove('hidden');
-        if (vehicleLabel) vehicleLabel.textContent = "Dettaglio Veicolo";
+        if (vehicleLabel) {
+            vehicleLabel.textContent = "Dettaglio Veicolo";
+            vehicleLabel.setAttribute('data-t', 'vehicle_extra');
+        }
         if (vehicleIcon) vehicleIcon.textContent = 'directions_car';
     } else if (mode === 'documenti') {
         vehicleSection?.classList.remove('hidden');
-        if (vehicleLabel) vehicleLabel.textContent = "Intestatario / Dettagli";
+        if (vehicleLabel) {
+            vehicleLabel.textContent = "Intestatario / Dettagli";
+            vehicleLabel.setAttribute('data-t', 'holder_details');
+        }
         if (vehicleIcon) vehicleIcon.textContent = 'badge';
     } else if (mode === 'generali') {
         vehicleSection?.classList.add('hidden');
@@ -217,6 +265,141 @@ function updateCurrentDynamicConfig() {
         ...(unifiedConfigs.generali?.names || [])
     ]);
     dynamicConfig.names = [...allNames].sort();
+}
+
+async function addConfigItem(selectId, value) {
+    if (!currentUser) return;
+    try {
+        let field = '';
+        let docName = '';
+
+        if (selectId === 'tipo_scadenza') {
+            field = 'deadlineTypes';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+            else docName = 'generalConfig';
+        } else if (selectId === 'modello_veicolo') {
+            field = 'models';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+        } else if (selectId === 'testo_email_select') {
+            field = 'emailTemplates';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+            else docName = 'generalConfig';
+        }
+
+        if (!docName || !field) return;
+
+        // Update local state
+        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
+            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
+
+        if (!configToUpdate[field]) configToUpdate[field] = [];
+        if (configToUpdate[field].includes(value)) return showToast("Valore già esistente", "info");
+
+        configToUpdate[field].push(value);
+        configToUpdate[field].sort();
+
+        // Save to Firestore
+        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), configToUpdate, { merge: true });
+
+        showToast("Lista aggiornata!", "success");
+        updateCurrentDynamicConfig();
+        finishLoad(); // Re-populate and sync
+    } catch (e) {
+        console.error("Add Config Error", e);
+        showToast("Errore durante l'aggiornamento", "error");
+    }
+}
+
+async function editConfigItem(selectId, oldValue) {
+    if (!currentUser) return;
+    try {
+        const newValue = await window.showInputModal(`Modifica Voce`, oldValue, `Inserisci nuovo valore...`);
+        if (!newValue || !newValue.trim() || newValue === oldValue) return;
+
+        let field = '';
+        let docName = '';
+
+        if (selectId === 'tipo_scadenza') {
+            field = 'deadlineTypes';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+            else docName = 'generalConfig';
+        } else if (selectId === 'modello_veicolo') {
+            field = 'models';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+        } else if (selectId === 'testo_email_select') {
+            field = 'emailTemplates';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+            else docName = 'generalConfig';
+        }
+
+        if (!docName || !field) return;
+
+        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
+            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
+
+        const idx = configToUpdate[field].indexOf(oldValue);
+        if (idx !== -1) {
+            configToUpdate[field][idx] = newValue.trim();
+            configToUpdate[field].sort();
+        }
+
+        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), configToUpdate, { merge: true });
+
+        showToast("Voce modificata!", "success");
+        updateCurrentDynamicConfig();
+        finishLoad();
+    } catch (e) {
+        console.error("Edit Config Error", e);
+        showToast("Errore durante la modifica", "error");
+    }
+}
+
+async function deleteConfigItem(selectId, value) {
+    const confirm = await window.showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirà sulle scadenze esistenti, ma la voce non sarà più disponibile per le nuove.`);
+    if (!confirm) return;
+
+    try {
+        let field = '';
+        let docName = '';
+
+        if (selectId === 'tipo_scadenza') {
+            field = 'deadlineTypes';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+            else docName = 'generalConfig';
+        } else if (selectId === 'modello_veicolo') {
+            field = 'models';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+        } else if (selectId === 'testo_email_select') {
+            field = 'emailTemplates';
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+            else docName = 'generalConfig';
+        }
+
+        if (!docName || !field) return;
+
+        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
+            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
+
+        configToUpdate[field] = configToUpdate[field].filter(v => v !== value);
+
+        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), configToUpdate, { merge: true });
+
+        showToast("Voce eliminata", "success");
+        updateCurrentDynamicConfig();
+        finishLoad();
+    } catch (e) {
+        console.error("Delete Config Error", e);
+        showToast("Errore durante l'eliminazione", "error");
+    }
 }
 
 function finishLoad() {
@@ -651,7 +834,7 @@ function initProxyDropdowns() {
     document.addEventListener('click', (e) => {
         const trigger = e.target.closest('.dropdown-trigger');
         const container = trigger?.closest('[data-custom-select]');
-        const menu = container?.querySelector('.dropdown-menu');
+        const menu = container?.querySelector('.base-dropdown-menu');
 
         // Chiudi tutti gli altri
         document.querySelectorAll('.base-dropdown-menu.show').forEach(m => {
@@ -675,7 +858,7 @@ function syncCustomDropdowns() {
         const select = container.querySelector('select');
         const trigger = container.querySelector('.dropdown-trigger');
         const labelEl = container.querySelector('.dropdown-label');
-        const menu = container.querySelector('.dropdown-menu');
+        const menu = container.querySelector('.base-dropdown-menu');
 
         if (!select || !trigger || !menu) return;
 
@@ -721,9 +904,47 @@ function syncCustomDropdowns() {
         function createItem(opt, parent, sel, lab) {
             const item = createElement('div', {
                 className: `base-dropdown-item ${opt.selected ? 'active' : ''}`,
-                textContent: opt.textContent,
                 dataset: { value: opt.value }
-            });
+            }, [
+                createElement('span', { textContent: opt.textContent, className: 'truncate' })
+            ]);
+
+            // Add delete button for user-defined items (skip placeholders or manual triggers)
+            const isUserItem = opt.value && !['manual', ''].includes(opt.value);
+            const isManageable = ['tipo_scadenza', 'modello_veicolo', 'testo_email_select'].includes(sel.id);
+
+            if (isUserItem && isManageable) {
+                const actions = createElement('div', { className: 'dropdown-item-actions' });
+
+                const editBtn = createElement('button', {
+                    type: 'button',
+                    className: 'btn-edit-opt',
+                    title: 'Modifica voce',
+                    onclick: (e) => {
+                        e.stopPropagation();
+                        editConfigItem(sel.id, opt.value);
+                    }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+                ]);
+
+                const delBtn = createElement('button', {
+                    type: 'button',
+                    className: 'btn-delete-opt',
+                    title: 'Elimina voce',
+                    onclick: (e) => {
+                        e.stopPropagation();
+                        deleteConfigItem(sel.id, opt.value);
+                    }
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                ]);
+
+                actions.appendChild(editBtn);
+                actions.appendChild(delBtn);
+                item.appendChild(actions);
+            }
+
             if (opt.dataset.t) item.setAttribute('data-t', opt.dataset.t);
 
             item.onclick = (e) => {

@@ -1,36 +1,148 @@
 /* ==========================================================================
-   AREA PRIVATA (V5.0) - Dashboard Specific Styles
+   AREA PRIVATA (V5.0) - Dedicated Widget Styles
    ========================================================================== */
 
-/* 
-   NOTE: Matrix Grid and Card Core styles moved to core_pagine.css 
-   Unique styles for Area Privata (Rubrica, Top Used, etc.)
-*/
+/* --- 1. LAYOUT OVERRIDE --- */
+.matrix-grid {
+    grid-template-areas: none;
+    /* Rimuove layout Home */
+    grid-auto-flow: row;
+}
 
-/* --- 1. RUBRICA (Contacts) --- */
+/* --- 2. TOP 10 WIDGET --- */
+.top10-widget-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.25rem;
+}
+
+.star-icon {
+    font-size: 0.875rem;
+    /* text-sm */
+    color: #fb923c;
+    /* orange-400 */
+}
+
+.top10-title {
+    font-size: 0.75rem;
+    /* text-xs */
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    /* tracking-widest */
+}
+
+.top10-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.loading-box {
+    padding: 2.5rem 0;
+    display: flex;
+    justify-content: center;
+    opacity: 0.2;
+}
+
+/* --- 3. RUBRICA WIDGET --- */
+/* Toggle Button */
+.rubrica-toggle-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rubrica-toggle-btn:active {
+    transform: scale(0.98);
+}
+
+.rubrica-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.rubrica-toggle-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: left;
+}
+
+.rubrica-icon {
+    color: #fb923c;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.375rem;
+}
+
+.rubrica-subtitle {
+    font-size: 0.75rem;
+    color: rgba(251, 146, 60, 0.7);
+    /* orange-400/70 */
+    font-weight: 600;
+}
+
+.chevron-icon {
+    transition: transform 0.3s ease;
+    opacity: 0.4;
+}
+
+/* Content Container */
 .rubrica-container {
-    margin-top: 1rem;
-    padding: 1.5rem;
+    margin-top: 0.5rem;
+    /* mt-2 */
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     backdrop-filter: blur(20px);
     transition: all 0.3s ease;
+    overflow: hidden;
 }
 
+.rubrica-inner-padding {
+    padding: 1rem;
+}
+
+.rubrica-actions-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+/* New Contact Button */
 .rubrica-btn-new {
     padding: 0.75rem 1.5rem;
     font-weight: 800;
     font-size: 0.8rem;
     letter-spacing: 0.1em;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
     cursor: pointer;
+    border-radius: 1rem;
+    transition: transform 0.1s ease;
 }
 
+.rubrica-btn-new:active {
+    transform: scale(0.95);
+}
+
+/* Form Styles */
 .rubrica-form {
     background: rgba(255, 255, 255, 0.05);
-    margin-bottom: 2rem;
+    /* bg-white/5 */
+    margin-bottom: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+}
+
+.p-form {
+    padding: 1.25rem;
 }
 
 .rubrica-form-grid {
@@ -45,25 +157,50 @@
     }
 }
 
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.mt-form {
+    margin-top: 1rem;
+}
+
 .rubrica-label {
     font-size: 0.75rem;
+    /* text-xs */
     font-weight: 700;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.25rem;
     color: var(--text-secondary);
     text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
 }
 
 .rubrica-input {
     width: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 0.75rem;
-    color: #fff;
-    outline: none;
+    /* Stili base input sono in glass-input di core_ui, qui aggiungiamo se serve */
 }
 
-/* --- 2. TOP USED WIDGET --- */
+.rubrica-btn-save {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.5rem 0;
+    border-radius: 0.5rem;
+    font-weight: bold;
+}
+
+/* List Styles */
+.rubrica-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 100%;
+    overflow: hidden;
+    padding-bottom: 0.5rem;
+}
+
+/* Micro Account Card (Base) - Se usata altrove, definirla, altrimenti è nel css rubrica */
 .micro-account-card {
     border-radius: 20px;
 }
@@ -79,9 +216,4 @@
 .micro-account-name {
     font-size: 0.9rem;
     font-weight: 800;
-}
-
-.micro-account-subtitle {
-    font-size: 0.7rem;
-    font-weight: 600;
 }

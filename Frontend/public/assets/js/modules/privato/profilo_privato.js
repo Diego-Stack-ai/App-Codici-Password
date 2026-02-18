@@ -57,20 +57,30 @@ let qrCodeInclusions = {
 const avatarImg = document.getElementById('profile-avatar');
 const nameDisplay = document.getElementById('user-display-name');
 
-document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUserUid = user.uid;
-            await loadUserData(user);
-            setupAvatarEdit();
-            setupDelegation();
-            setupPersonalDataCopy();
-            initProxyDropdowns();
-            setupCollapsibleSections();
-            setupQRToggles();
-        }
-    });
-});
+/**
+ * PROFILO PRIVATO MODULE (V5.0 ADAPTER)
+ * Gestione profilo utente.
+ * - Entry Point: initProfiloPrivato(user)
+ */
+
+export async function initProfiloPrivato(user) {
+    console.log("[PROFILO] Init V5.0...");
+    if (!user) return;
+
+    currentUserUid = user.uid;
+
+    await loadUserData(user);
+
+    // Setup UI Handlers
+    setupAvatarEdit();
+    setupDelegation();
+    setupPersonalDataCopy();
+    initProxyDropdowns();
+    setupCollapsibleSections();
+    setupQRToggles();
+
+    console.log("[PROFILO] Ready.");
+}
 
 /**
  * Caricamento Dati

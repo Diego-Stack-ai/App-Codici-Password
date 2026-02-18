@@ -1,5 +1,10 @@
+/**
+ * GESTIONE ALLEGATI MODULE (V5.0 ADAPTER)
+ * Gestione centralizzata o specifica degli allegati.
+ * - Entry Point: initGestioneAllegati(user)
+ */
+
 import { db, auth, storage } from './firebase-config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
     collection, doc, getDoc, getDocs, addDoc, deleteDoc,
     serverTimestamp, query, orderBy
@@ -23,72 +28,115 @@ const DOC_TYPES = [
     "Firma", "Isola Ecologica"
 ].sort();
 
-let currentId = new URLSearchParams(window.location.search).get('id');
-let ownerId = new URLSearchParams(window.location.search).get('ownerId');
-let aziendaId = new URLSearchParams(window.location.search).get('aziendaId');
-let context = new URLSearchParams(window.location.search).get('context');
-let docType = new URLSearchParams(window.location.search).get('docType');
+// --- STATE ---
+let currentId = null;
+let ownerId = null;
+let aziendaId = null;
+let context = null;
+let docType = null;
 
 let currentFilter = 'all';
 let cachedAttachments = [];
 let pendingFile = null;
+let initialized = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+// --- INITIALIZATION ---
+export async function initGestioneAllegati(user) {
+    console.log("[GESTIONE-ALLEGATI] Init V5.0...");
+    if (!user) return;
+
+    // Reset & Load State
+    const p = new URLSearchParams(window.location.search);
+    currentId = p.get('id');
+    ownerId = p.get('ownerId') || user.uid;
+    aziendaId = p.get('aziendaId');
+    context = p.get('context');
+    docType = p.get('docType');
+
+    currentFilter = 'all';
+    cachedAttachments = [];
+    pendingFile = null;
+
     initUI();
+    setupEventListeners();
+    await loadAttachments();
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            if (!ownerId) ownerId = user.uid;
-            await loadAttachments();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
+    console.log("[GESTIONE-ALLEGATI] Ready.");
+}
 
-    // Event Listeners
-    document.getElementById('search-input')?.addEventListener('input', renderList);
-    document.getElementById('btn-trigger-upload')?.addEventListener('click', () => document.getElementById('file-upload').click());
-    document.getElementById('file-upload')?.addEventListener('change', (e) => handleFileUpload(e.target));
-    document.getElementById('btn-cancel-upload')?.addEventListener('click', closeUploadModal);
-    document.getElementById('btn-confirm-upload')?.addEventListener('click', confirmUpload);
-    document.getElementById('doc-type')?.addEventListener('change', (e) => {
-        const custom = document.getElementById('doc-custom-type');
-        if (e.target.value === 'custom') {
-            custom.classList.remove('hidden');
-            custom.focus();
-        } else {
-            custom.classList.add('hidden');
-        }
-    });
+function setupEventListeners() {
+    // Search
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.oninput = renderList;
 
-    document.getElementById('filter-chips')?.addEventListener('click', (e) => {
-        const btn = e.target.closest('.chip-btn');
-        if (btn) {
-            document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentFilter = btn.dataset.filter;
-            renderList();
-        }
-    });
+    // Upload Triggers
+    const btnTrigger = document.getElementById('btn-trigger-upload');
+    if (btnTrigger) btnTrigger.onclick = () => document.getElementById('file-upload')?.click();
 
-    // Delegated actions for list
-    document.getElementById('attachments-list')?.addEventListener('click', (e) => {
-        const btnDelete = e.target.closest('.btn-delete-att');
-        const btnShare = e.target.closest('.btn-share-att');
+    const fileInput = document.getElementById('file-upload');
+    if (fileInput) fileInput.onchange = (e) => handleFileUpload(e.target);
 
-        if (btnDelete) {
-            e.stopPropagation();
-            deleteAttachment(btnDelete.dataset.id, btnDelete.dataset.name);
-        } else if (btnShare) {
-            e.stopPropagation();
-            shareAttachment(btnShare.dataset.url, btnShare.dataset.name);
-        } else {
-            const card = e.target.closest('.att-card');
-            if (card) window.open(card.dataset.url, '_blank');
-        }
-    });
-});
+    const btnCancel = document.getElementById('btn-cancel-upload');
+    if (btnCancel) btnCancel.onclick = closeUploadModal;
 
+    const btnConfirm = document.getElementById('btn-confirm-upload');
+    if (btnConfirm) btnConfirm.onclick = confirmUpload;
+
+    // Doc Type Custom Toggle
+    const docTypeSel = document.getElementById('doc-type');
+    if (docTypeSel) {
+        docTypeSel.onchange = (e) => {
+            const custom = document.getElementById('doc-custom-type');
+            if (custom) {
+                if (e.target.value === 'custom') {
+                    custom.classList.remove('hidden');
+                    custom.focus();
+                } else {
+                    custom.classList.add('hidden');
+                }
+            }
+        };
+    }
+
+    // Filters
+    const filterChips = document.getElementById('filter-chips');
+    if (filterChips) {
+        filterChips.onclick = (e) => {
+            const btn = e.target.closest('.chip-btn');
+            if (btn) {
+                document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderList();
+            }
+        };
+    }
+
+    // Delegated actions for list - One time or idempotent check
+    // Since we are in MPA structure (reload on nav), we can attach to body or specific container.
+    // Ideally attach to container which is reset on reload.
+    const listContainer = document.getElementById('attachments-list');
+    if (listContainer) {
+        // Remove old listener if possible? No, element is fresh on reload.
+        listContainer.onclick = handleListClick;
+    }
+}
+
+function handleListClick(e) {
+    const btnDelete = e.target.closest('.btn-delete-att');
+    const btnShare = e.target.closest('.btn-share-att');
+
+    if (btnDelete) {
+        e.stopPropagation();
+        deleteAttachment(btnDelete.dataset.id, btnDelete.dataset.name);
+    } else if (btnShare) {
+        e.stopPropagation();
+        shareAttachment(btnShare.dataset.url, btnShare.dataset.name);
+    } else {
+        const card = e.target.closest('.att-card');
+        if (card) window.open(card.dataset.url, '_blank');
+    }
+}
 function initUI() {
     const select = document.getElementById('doc-type');
     if (select) {

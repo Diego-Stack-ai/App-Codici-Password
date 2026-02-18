@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/account_azienda.css?v=5.0">
+    <script src="assets/js/theme-init.js" defer></script>
 </head>
 
 <body class="base-bg">
@@ -28,17 +29,21 @@
         <div class="base-glow"></div> <!-- HEADER FISSO (Protocollo v3.1 Balanced) -->
         <header id="header-placeholder" class="base-header"></header>
         <div class="spacer-header"></div> <!-- Main Content (PROTOCOLLO BASE Main Strategy) -->
-        <main class="base-main"> <!-- SEARCH BAR (Standard PROTOCOLLO BASE UI) -->
-            <div class="search-container"> <label for="account-search" class="sr-only">Cerca account</label>
-                <div class="glass-field search-field-box"> <span
-                        class="material-symbols-outlined opacity-50">search</span> <input type="search"
-                        id="account-search" placeholder="Cerca account o credenziali..."
-                        data-t-placeholder="search_placeholder" autocomplete="off" class="search-input-field"> </div>
-            </div> <!-- ACCOUNTS CONTAINER -->
-            <div id="accounts-container" class="micro-account-list"> <!-- Loading Spinner -->
-                <div class="loading-full-box"> <span
-                        class="material-symbols-outlined animate-spin loading-spinner-icon">sync</span>
-                    <p data-t="loading_data">Caricamento...</p>
+        <main class="base-main">
+            <div class="page-container pt-header-extra pb-footer-extra">
+                <!-- SEARCH BAR (Standard PROTOCOLLO BASE UI) -->
+                <div class="search-container"> <label for="account-search" class="sr-only">Cerca account</label>
+                    <div class="glass-field search-field-box"> <span
+                            class="material-symbols-outlined opacity-50">search</span> <input type="search"
+                            id="account-search" placeholder="Cerca account o credenziali..."
+                            data-t-placeholder="search_placeholder" autocomplete="off" class="search-input-field">
+                    </div>
+                </div> <!-- ACCOUNTS CONTAINER -->
+                <div id="accounts-container" class="micro-account-list"> <!-- Loading Spinner -->
+                    <div class="loading-full-box"> <span
+                            class="material-symbols-outlined animate-spin loading-spinner-icon">sync</span>
+                        <p data-t="loading_data">Caricamento...</p>
+                    </div>
                 </div>
             </div>
         </main>
@@ -46,7 +51,7 @@
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div> <!-- SCRIPTS MODULARI -->
     <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/modules/azienda/account_azienda.js"></script>
+
 </body>
 
 </html>

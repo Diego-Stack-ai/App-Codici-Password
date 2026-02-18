@@ -1,37 +1,63 @@
 /**
- * AREA PRIVATA MODULE (V4.1)
- * Dashboard per account personali, condivisi e rubrica.
+ * AREA PRIVATA MODULE (V5.0 - Single Orchestrator Compliant)
+ * Logica specifica per la dashboard privata (Counters, Top 10, Rubrica).
+ * 
+ * REFACTOR NOTE:
+ * - Rimossa auto-inizializzazione (osserveAuth).
+ * - Rimossa chiamata a initComponents() (gestita da main.js).
+ * - Rimossa logica inviti (gestita da main.js).
+ * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
-import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { db } from '../../firebase-config.js';
+import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
-// --- INITIALIZATION ---
-observeAuth(async (user) => {
-    if (user) {
-        // Inizializza Header e Footer secondo Protocollo Base
-        await initComponents();
-
-        // Load Data
-        loadCounters(user.uid, user.email);
-        loadTopAccounts(user.uid);
-        loadRubrica(user.uid);
-        loadRubrica(user.uid);
-        setupEventListeners(user.uid);
-
-        // Check for pending invites
-        checkForPendingInvites(user.email);
-    }
-});
+// State locale per evitare reload inutili
+let _isInitialized = false;
+let _currentUserStart = null;
 
 /**
+ * ENTRY POINT UNICO
+ * Chiamato da main.js dopo che l'autenticazione è confermata e il layout base è pronto.
+ * @param {Object} user - Oggetto User di Firebase Auth
+ */
+export async function initAreaPrivata(user) {
+    if (!user) return;
+
+    // Evita re-inizializzazione se l'utente è lo stesso
+    // (Nota: se serve refresh forzato, passare force=true o gestire a parte)
+    if (_isInitialized && _currentUserStart === user.uid) {
+        console.log("[AreaPrivata] Già inizializzato per questo utente.");
+        return;
+    }
+
+    _currentUserStart = user.uid;
+    _isInitialized = true;
+
+    console.log("[AreaPrivata] Inizializzazione Modulo...");
+
+    // 1. Caricamento Dati Parallelo (Performance V5.0)
+    await Promise.all([
+        loadCounters(user.uid, user.email),
+        loadTopAccounts(user.uid),
+        loadRubrica(user.uid)
+    ]);
+
+    // 2. Setup Event Listeners (Idempotente)
+    setupEventListeners(user.uid);
+
+    console.log("[AreaPrivata] Modulo Pronto.");
+}
+
+/**
+ * ------------------------------------------------------------------
  * COUNTERS ENGINE
+ * Calcola e aggiorna i badge dei contatori nella dashboard.
+ * ------------------------------------------------------------------
  */
 async function loadCounters(uid, email) {
     try {
@@ -54,7 +80,7 @@ async function loadCounters(uid, email) {
             }
         });
 
-        // Invites Accepted
+        // Controlla inviti accettati (per conteggio condivisi)
         const invitesQ = query(collection(db, "invites"),
             where("recipientEmail", "==", email),
             where("status", "==", "accepted")
@@ -65,7 +91,11 @@ async function loadCounters(uid, email) {
             if (inv.type === 'privato') counts.shared++;
         });
 
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = `(${val})`; };
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = `(${val})`;
+        };
+
         setVal('count-standard', counts.standard);
         setVal('count-memo', counts.memo);
         setVal('count-shared', counts.shared);
@@ -75,7 +105,10 @@ async function loadCounters(uid, email) {
 }
 
 /**
+ * ------------------------------------------------------------------
  * TOP 10 WIDGET
+ * Mostra gli account più utilizzati.
+ * ------------------------------------------------------------------
  */
 async function loadTopAccounts(uid) {
     const list = document.getElementById('top-accounts-list');
@@ -108,11 +141,10 @@ function createMicroAccountCard(id, data) {
     const isMemo = !!data.hasMemo || data.type === 'memorandum';
     const isShared = !!data.shared || !!data.isMemoShared;
 
-    let badgeClass = '';
+    let badgeClass = 'bg-blue-500';
     if (isShared && isMemo) badgeClass = 'badge-shared-memo bg-emerald-500';
     else if (isShared) badgeClass = 'badge-shared bg-purple-500';
     else if (isMemo) badgeClass = 'badge-memo bg-amber-500';
-    else badgeClass = 'bg-blue-500';
 
     const card = createElement('div', {
         className: 'micro-account-card cursor-pointer hover:bg-white/5 transition-all active:scale-95',
@@ -152,7 +184,11 @@ function createMicroAccountCard(id, data) {
 function createDataRow(label, displayValue, copyValue = null, isPassword = false) {
     return createElement('div', { className: 'micro-data-row' }, [
         createElement('span', { className: 'micro-data-label', textContent: `${label}:` }),
-        createElement('span', { className: 'micro-data-value', textContent: displayValue }),
+        createElement('span', {
+            className: 'micro-data-value',
+            id: isPassword ? `pass-text-${Math.random().toString(36).substr(2, 9)}` : undefined, // Genera ID casuale se serve per visibilità
+            textContent: displayValue
+        }),
         createElement('button', {
             className: 'micro-btn-copy-inline relative z-10',
             onclick: (e) => {
@@ -167,7 +203,10 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
 }
 
 /**
+ * ------------------------------------------------------------------
  * RUBRICA ENGINE
+ * Gestione contatti condivisi.
+ * ------------------------------------------------------------------
  */
 async function loadRubrica(uid) {
     const listContainer = document.getElementById('contacts-list');
@@ -214,115 +253,83 @@ function createContactItem(uid, c) {
 }
 
 async function deleteContact(uid, id) {
+    // Usa showConfirmModal di ui-core (esportata)
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) return;
     try {
         await deleteDoc(doc(db, "users", uid, "contacts", id));
         showToast(t('contact_removed'));
-        loadRubrica(uid);
+        loadRubrica(uid); // Ricarica rubrica
     } catch (e) { logError("RubricaDelete", e); }
 }
 
 /**
- * EVENT LISTENERS
+ * ------------------------------------------------------------------
+ * EVENT LISTENERS (Idempotent)
+ * Assicura che i listener siano attaccati una sola volta.
+ * ------------------------------------------------------------------
  */
 function setupEventListeners(uid) {
-    const toggleBtn = document.getElementById('rubrica-toggle-btn');
-    if (toggleBtn) {
-        toggleBtn.onclick = () => {
-            const content = document.getElementById('rubrica-content');
-            const chevron = document.getElementById('rubrica-chevron');
+    // Helper per attaccare listener una volta sola
+    const addListenerOnce = (id, event, handler) => {
+        const el = document.getElementById(id);
+        if (el && !el.dataset.listenerAttached) {
+            el.addEventListener(event, handler);
+            el.dataset.listenerAttached = 'true';
+        }
+    };
+
+    // Toggle Rubrica
+    addListenerOnce('rubrica-toggle-btn', 'click', () => {
+        const content = document.getElementById('rubrica-content');
+        const chevron = document.getElementById('rubrica-chevron');
+        if (content) {
             const isHidden = content.classList.toggle('hidden');
             if (chevron) chevron.classList.toggle('rotate-180', !isHidden);
-        };
-    }
-
-    const addBtn = document.getElementById('add-contact-btn');
-    if (addBtn) {
-        addBtn.onclick = (e) => {
-            e.stopPropagation();
-            document.getElementById('add-contact-form').classList.toggle('hidden');
-        };
-    }
-
-    const saveBtn = document.getElementById('btn-add-contact');
-    if (saveBtn) {
-        saveBtn.onclick = async () => {
-            const nome = document.getElementById('contact-nome').value.trim();
-            const cognome = document.getElementById('contact-cognome').value.trim();
-            const email = document.getElementById('contact-email').value.trim();
-            if (!email) return;
-
-            try {
-                const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
-                await addDoc(collection(db, "users", uid, "contacts"), { nome, cognome, email, createdAt: new Date().toISOString() });
-                showToast(t('identity_registered'));
-                document.querySelectorAll('#add-contact-form input').forEach(i => i.value = '');
-                document.getElementById('add-contact-form').classList.add('hidden');
-                loadRubrica(uid);
-            } catch (e) { logError("RubricaAdd", e); }
-        };
-    }
-}
-
-/**
- * INVITE SYSTEM (Receiver Side)
- */
-async function checkForPendingInvites(email) {
-    if (!email) return;
-
-    try {
-        const q = query(collection(db, "invites"),
-            where("recipientEmail", "==", email),
-            where("status", "==", "pending")
-        );
-        const snap = await getDocs(q);
-
-        if (!snap.empty) {
-            // Processing one invite at a time for simplicity
-            const inviteDoc = snap.docs[0];
-            const inviteData = inviteDoc.data();
-            showInviteModal(inviteDoc.id, inviteData);
         }
-    } catch (e) { logError("CheckInvites", e); }
-}
+    });
 
-function showInviteModal(inviteId, data) {
-    // Prevent duplicates
-    if (document.getElementById('invite-modal')) return;
+    // Toggle Form Aggiungi
+    addListenerOnce('add-contact-btn', 'click', (e) => {
+        e.stopPropagation();
+        const form = document.getElementById('add-contact-form');
+        if (form) form.classList.toggle('hidden');
+    });
 
-    const modal = createElement('div', { id: 'invite-modal', className: 'modal-overlay active' }, [
-        createElement('div', { className: 'modal-box' }, [
-            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-purple', textContent: 'mail' }),
-            createElement('h3', { className: 'modal-title', textContent: t('invite_received_title') || 'Nuovo Invito' }),
-            createElement('p', { className: 'modal-text', textContent: `${data.senderEmail} ${t('invite_received_msg') || 'ha condiviso un account con te:'}` }),
-            createElement('p', { className: 'text-sm font-bold text-white mt-2 mb-4', textContent: data.accountName }),
-            createElement('div', { className: 'modal-actions' }, [
-                createElement('button', {
-                    className: 'btn-modal btn-secondary',
-                    textContent: t('invite_reject') || 'Rifiuta',
-                    onclick: () => handleInviteResponse(inviteId, 'rejected')
-                }),
-                createElement('button', {
-                    className: 'btn-modal btn-primary',
-                    textContent: t('invite_accept') || 'Accetta',
-                    onclick: () => handleInviteResponse(inviteId, 'accepted')
-                })
-            ])
-        ])
-    ]);
-    document.body.appendChild(modal);
-}
+    // Salva Contatto
+    addListenerOnce('btn-add-contact', 'click', async () => {
+        const nomeEl = document.getElementById('contact-nome');
+        const cognomeEl = document.getElementById('contact-cognome');
+        const emailEl = document.getElementById('contact-email');
 
-async function handleInviteResponse(inviteId, status) {
-    const modal = document.getElementById('invite-modal');
-    if (modal) modal.remove();
+        if (!nomeEl || !emailEl) return;
 
-    try {
-        await updateDoc(doc(db, "invites", inviteId), { status: status, respondedAt: new Date().toISOString() });
-        showToast(status === 'accepted' ? "Invito accettato!" : "Invito rifiutato", status === 'accepted' ? 'success' : 'info');
+        const nome = nomeEl.value.trim();
+        const cognome = cognomeEl ? cognomeEl.value.trim() : '';
+        const email = emailEl.value.trim();
 
-        if (status === 'accepted') {
-            setTimeout(() => window.location.reload(), 1000); // Reload to show new data
+        if (!email) {
+            showToast(t('email_required') || 'Email obbligatoria', 'error');
+            return;
         }
-    } catch (e) { logError("InviteResponse", e); showToast(t('error_generic'), 'error'); }
+
+        try {
+            await addDoc(collection(db, "users", uid, "contacts"), {
+                nome,
+                cognome,
+                email,
+                createdAt: new Date().toISOString()
+            });
+
+            showToast(t('identity_registered'));
+
+            // Reset Form
+            nomeEl.value = '';
+            if (cognomeEl) cognomeEl.value = '';
+            emailEl.value = '';
+            document.getElementById('add-contact-form').classList.add('hidden');
+
+            // Reload
+            loadRubrica(uid);
+        } catch (e) { logError("RubricaAdd", e); }
+    });
 }

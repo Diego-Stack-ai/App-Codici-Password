@@ -1,29 +1,19 @@
 /**
- * AGGIUNGI ACCOUNT AZIENDA MODULE (V4.1)
+ * AGGIUNGI ACCOUNT AZIENDA MODULE (V5.0 ADAPTER)
  * Creazione di un nuovo account (credenziali) all'interno di un'azienda.
+ * - Entry Point: initAggiungiAccountAzienda(user)
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
-let currentAziendaId = new URLSearchParams(window.location.search).get('aziendaId');
-let bankAccounts = [{
-    iban: '',
-    cards: [],
-    passwordDispositiva: '',
-    referenteNome: '',
-    referenteCognome: '',
-    referenteTelefono: '',
-    referenteCellulare: '',
-    nota: ''
-}];
+let currentAziendaId = null;
+let bankAccounts = [];
 
 const companyPalettes = [
     { from: '#10b981', to: '#047857', name: 'Green' },
@@ -39,24 +29,38 @@ const companyPalettes = [
 ];
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
-    initProtocolUI();
+export async function initAggiungiAccountAzienda(user) {
+    console.log("[ADD-ACCOUNT-AZIENDA] Init V5.0...");
+    if (!user) return;
+
+    currentAziendaId = new URLSearchParams(window.location.search).get('aziendaId');
+    if (!currentAziendaId) {
+        showToast("ID Azienda mancante", "error");
+        setTimeout(() => window.location.href = 'lista_aziende.html', 1500);
+        return;
+    }
+
+    // Reset State
+    bankAccounts = [{
+        iban: '',
+        cards: [],
+        passwordDispositiva: '',
+        referenteNome: '',
+        referenteCognome: '',
+        referenteTelefono: '',
+        referenteCellulare: '',
+        nota: ''
+    }];
+
+    await initProtocolUI();
     setupStaticListeners();
-
-    observeAuth(async (user) => {
-        if (!user) {
-            window.location.href = 'index.html';
-        } else if (currentAziendaId) {
-            await loadAziendaTheme(user.uid);
-        }
-    });
-
+    await loadAziendaTheme(user.uid);
     renderBankAccounts();
-});
+
+    console.log("[ADD-ACCOUNT-AZIENDA] Ready.");
+}
 
 async function initProtocolUI() {
-    await initComponents();
-
     // Header Left
     const hLeft = document.getElementById('header-left');
     if (hLeft) {
@@ -95,24 +99,33 @@ async function initProtocolUI() {
 }
 
 function setupStaticListeners() {
-    document.getElementById('btn-toggle-password')?.addEventListener('click', () => {
-        const input = document.getElementById('password');
-        const icon = document.querySelector('#btn-toggle-password span');
-        if (input) {
-            const isShield = input.classList.toggle('base-shield');
-            if (icon) icon.textContent = isShield ? 'visibility' : 'visibility_off';
-        }
-    });
+    const btnToggle = document.getElementById('btn-toggle-password');
+    if (btnToggle) {
+        btnToggle.onclick = () => {
+            const input = document.getElementById('password');
+            const icon = btnToggle.querySelector('span');
+            if (input) {
+                const isShield = input.classList.toggle('base-shield');
+                if (icon) icon.textContent = isShield ? 'visibility' : 'visibility_off';
+            }
+        };
+    }
 
-    document.getElementById('btn-copy-password')?.addEventListener('click', () => {
-        const val = document.getElementById('password')?.value;
-        if (val) navigator.clipboard.writeText(val).then(() => showToast(t('copied'), "success"));
-    });
+    const btnCopy = document.getElementById('btn-copy-password');
+    if (btnCopy) {
+        btnCopy.onclick = () => {
+            const val = document.getElementById('password')?.value;
+            if (val) navigator.clipboard.writeText(val).then(() => showToast(t('copied'), "success"));
+        };
+    }
 
-    document.getElementById('btn-add-iban')?.addEventListener('click', () => {
-        bankAccounts.push({ iban: '', cards: [], passwordDispositiva: '', referenteNome: '', referenteCognome: '', referenteTelefono: '', referenteCellulare: '', nota: '' });
-        renderBankAccounts();
-    });
+    const btnAdd = document.getElementById('btn-add-iban');
+    if (btnAdd) {
+        btnAdd.onclick = () => {
+            bankAccounts.push({ iban: '', cards: [], passwordDispositiva: '', referenteNome: '', referenteCognome: '', referenteTelefono: '', referenteCellulare: '', nota: '' });
+            renderBankAccounts();
+        };
+    }
 }
 
 async function loadAziendaTheme(uid) {

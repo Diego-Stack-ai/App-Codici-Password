@@ -27,22 +27,26 @@ let qrCodeInclusions = {
     addresses: []
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // Inizializza Header e Footer secondo Protocollo Base
-    await initComponents();
+/**
+ * IMPOSTAZIONI MODULE (V5.0 ADAPTER)
+ * Gestione preferenze globali.
+ * - Entry Point: initImpostazioni(user)
+ */
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            await loadUserData(user);
-            initSettingsEvents();
-            setupAppInfo();
-            setupPrivacyShort();
-            setupTermsShort();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-});
+export async function initImpostazioni(user) {
+    console.log("[IMPOSTAZIONI] Init V5.0...");
+    if (!user) return;
+
+    // Nota: initComponents() rimosso (gestito da main.js)
+
+    await loadUserData(user);
+    initSettingsEvents();
+    setupAppInfo();
+    setupPrivacyShort();
+    setupTermsShort();
+
+    console.log("[IMPOSTAZIONI] Ready.");
+}
 
 async function loadUserData(user) {
     try {

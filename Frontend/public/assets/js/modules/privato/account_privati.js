@@ -27,18 +27,23 @@ const THEMES = {
     shared_memo: { accent: 'bg-emerald-500', text: 'text-emerald-400' }
 };
 
-// --- INITIALIZATION ---
-observeAuth(async (user) => {
-    if (user) {
-        currentUser = user;
+/**
+ * ACCOUNT PRIVATI MODULE (V5.0 ADAPTER)
+ * Gestione liste account: personali, condivisi, memorandum.
+ * - Entry Point: initAccountPrivati(user)
+ */
 
-        // Inizializza Header e Footer secondo Protocollo Base
-        await initComponents();
+export async function initAccountPrivati(user) {
+    console.log("[ACCOUNTS] Init V5.0...");
+    if (!user) return;
+    currentUser = user;
 
-        setupUI();
-        await loadAccounts();
-    }
-});
+    // Nota: initComponents() rimosso (gestito da main.js)
+
+    setupUI();
+    await loadAccounts();
+    console.log("[ACCOUNTS] Ready.");
+}
 
 function setupUI() {
     const searchInput = document.getElementById('account-search');
@@ -51,12 +56,16 @@ function setupUI() {
     if (fCenter) {
         clearElement(fCenter);
         const type = new URLSearchParams(window.location.search).get('type') || 'standard';
-        setChildren(fCenter, createElement('button', {
-            id: 'add-account-btn',
-            className: 'btn-floating-add bg-accent-blue',
-            onclick: () => window.location.href = `form_account_privato.html?type=${type}`
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+            createElement('button', {
+                id: 'add-account-btn',
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: t('add_account') || 'Nuovo Account',
+                dataset: { label: t('add_short') || 'Aggiungi' },
+                onclick: () => window.location.href = `form_account_privato.html?type=${type}`
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+            ])
         ]));
     }
 }

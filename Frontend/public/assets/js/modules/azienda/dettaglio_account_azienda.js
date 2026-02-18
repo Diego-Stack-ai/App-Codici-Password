@@ -1,10 +1,10 @@
 /**
- * DETTAGLIO ACCOUNT AZIENDA MODULE (V4.1)
+ * DETTAGLIO ACCOUNT AZIENDA MODULE (V5.0 ADAPTER)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
+ * - Entry Point: initDettaglioAccountAzienda(user)
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import {
     doc, getDoc, updateDoc, increment,
     collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp, where
@@ -16,7 +16,6 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -24,7 +23,12 @@ let currentId = null;
 let currentAziendaId = null;
 let originalData = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+// --- INITIALIZATION ---
+export async function initDettaglioAccountAzienda(user) {
+    console.log("[DETTAGLIO-ACCOUNT-AZIENDA] Init V5.0...");
+    if (!user) return;
+    currentUid = user.uid;
+
     const urlParams = new URLSearchParams(window.location.search);
     currentId = urlParams.get('id');
     currentAziendaId = urlParams.get('aziendaId');
@@ -35,37 +39,34 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    initBaseUI();
+    // Expose globals for HTML onclicks if needed (legacy compat)
+    window.openSourceSelector = openSourceSelector;
+    window.closeSourceSelector = closeSourceSelector;
 
-    observeAuth(async (user) => {
-        if (user) {
-            currentUid = user.uid;
-
-            // Inizializza Header e Footer (Protocollo Base)
-            await initComponents();
-
-            // Pulsante Edit nel Footer Center (Floating Action Button)
-            const fCenter = document.getElementById('footer-center-actions');
-            if (fCenter) {
-                clearElement(fCenter);
-                setChildren(fCenter, createElement('button', {
-                    id: 'btn-edit-footer',
-                    className: 'btn-floating-add bg-accent-blue',
-                    onclick: () => window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
-                ]));
-            }
-
-            await loadAccount(currentId);
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-
+    initProtocolUI(); // Sync UI setup
     setupActions();
-});
+    await loadAccount(currentId);
 
+    console.log("[DETTAGLIO-ACCOUNT-AZIENDA] Ready.");
+}
+
+function initProtocolUI() {
+    // Pulsante Edit nel Footer Center (Floating Action Button)
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        clearElement(fCenter);
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+            createElement('button', {
+                id: 'btn-edit-footer',
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: t('edit') || 'Modifica',
+                onclick: () => window.location.href = `modifica_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+            ])
+        ]));
+    }
+}
 function initBaseUI() {
     console.log('[dettaglio_account_azienda] UI Base gestita da main.js');
 }

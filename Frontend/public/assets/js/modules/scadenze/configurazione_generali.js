@@ -20,16 +20,29 @@ let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 let currentUser = null;
 let editingState = { list: null, index: null };
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Buttons Listeners
-    document.getElementById('btn-add-type')?.addEventListener('click', () => addTypeItem());
-    document.getElementById('btn-add-template')?.addEventListener('click', () => addItem('emailTemplates', t('prompt_new_email_text')));
+/**
+ * CONFIGURAZIONE GENERALI MODULE (V5.0 ADAPTER)
+ * Gestione configurazione scadenze generali.
+ * - Entry Point: initConfigurazioneGenerali(user)
+ */
 
-    // Delegated actions for list items
+export async function initConfigurazioneGenerali(user) {
+    console.log("[CONF-GEN] Init V5.0...");
+    if (!user) return;
+    currentUser = user;
+
+    // Buttons Listeners
+    const btnAddType = document.getElementById('btn-add-type');
+    if (btnAddType) btnAddType.onclick = () => addTypeItem();
+
+    const btnAddTemplate = document.getElementById('btn-add-template');
+    if (btnAddTemplate) btnAddTemplate.onclick = () => addItem('emailTemplates', t('prompt_new_email_text'));
+
+    // Delegated actions
     ['container-types', 'container-templates'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.addEventListener('click', (e) => {
+        el.onclick = (e) => {
             const btnEdit = e.target.closest('.btn-edit-item');
             const btnDelete = e.target.closest('.btn-delete-item');
             const btnSave = e.target.closest('.btn-save-inline');
@@ -46,18 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (btnCancel) {
                 cancelInlineEdit();
             }
-        });
+        };
     });
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            await loadConfig();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-});
+    await loadConfig();
+    console.log("[CONF-GEN] Ready.");
+}
 
 async function loadConfig() {
     try {
@@ -155,7 +162,7 @@ function renderTypes() {
                             type: 'text',
                             value: item.name,
                             placeholder: t('placeholder_type_general'),
-                            className: 'inline-input-glass w-full'
+                            className: 'inline-input-glass detail-input'
                         })
                     ]),
                     createElement('div', { className: 'inline-edit-row' }, [
@@ -164,14 +171,14 @@ function renderTypes() {
                             id: 'edit-type-period',
                             type: 'number',
                             value: item.period,
-                            className: 'inline-input-glass w-24'
+                            className: 'inline-input-glass short-code-input'
                         }),
                         createElement('span', { className: 'config-item-desc', textContent: t('text_replica') }),
                         createElement('input', {
                             id: 'edit-type-freq',
                             type: 'number',
                             value: item.freq,
-                            className: 'inline-input-glass w-24'
+                            className: 'inline-input-glass short-code-input'
                         })
                     ])
                 ]),
@@ -239,12 +246,12 @@ function renderSimpleList(containerId, data, listKey) {
 
         if (isEditing) {
             return createElement('div', { className: 'config-list-item' }, [
-                createElement('div', { className: 'inline-edit-row w-full' }, [
+                createElement('div', { className: 'inline-edit-row' }, [
                     createElement('input', {
                         id: `edit-item-${listKey}-${index}`,
                         type: 'text',
                         value: item,
-                        className: 'inline-input-glass w-full'
+                        className: 'inline-input-glass detail-input'
                     })
                 ]),
                 createElement('div', { className: 'config-item-actions' }, [

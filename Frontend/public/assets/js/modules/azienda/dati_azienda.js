@@ -1,16 +1,15 @@
 /**
- * DATI AZIENDA MODULE (V4.2)
+ * DATI AZIENDA MODULE (V5.0 ADAPTER)
  * Visualizzazione dettagliata anagrafica aziendale, QR vCard, sedi e allegati.
+ * - Entry Point: initDatiAzienda(user)
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // Carica QRCode library locale con Promise
 const qrcodeReady = new Promise((resolve) => {
@@ -23,23 +22,27 @@ const qrcodeReady = new Promise((resolve) => {
 });
 
 // --- STATE ---
-let currentAziendaId = new URLSearchParams(window.location.search).get('id');
+let currentAziendaId = null;
 let currentAziendaData = null;
 let currentLocations = [];
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+export async function initDatiAzienda(user) {
+    console.log("[DATI-AZIENDA] Init V5.0...");
+    if (!user) return;
+
+    currentAziendaId = new URLSearchParams(window.location.search).get('id');
+    if (!currentAziendaId) {
+        window.location.href = 'lista_aziende.html';
+        return;
+    }
+
     initProtocolUI();
     setupEventListeners();
+    await loadData(user.uid);
 
-    observeAuth(async (user) => {
-        if (user && currentAziendaId) {
-            await loadData(user.uid);
-        } else if (!user) {
-            window.location.href = 'index.html';
-        }
-    });
-});
+    console.log("[DATI-AZIENDA] Ready.");
+}
 
 async function initProtocolUI() {
     console.log('[dati_azienda] UI Base gestita da main.js');
@@ -49,14 +52,17 @@ async function initProtocolUI() {
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         clearElement(fCenter);
-        setChildren(fCenter, createElement('button', {
+        const editBtn = createElement('button', {
             id: 'footer-btn-edit',
-            className: 'btn-floating-add',
+            className: 'btn-fab-action btn-fab-scadenza',
             title: t('edit') || 'Modifica',
+            dataset: { label: t('edit_short') || 'Edita' },
             onclick: () => window.location.href = `modifica_azienda.html?id=${currentAziendaId}`
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
-        ]));
+        ]);
+
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [editBtn]));
     }
 }
 

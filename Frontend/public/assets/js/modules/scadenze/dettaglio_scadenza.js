@@ -10,25 +10,32 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/fi
 import { buildEmailBody } from './scadenza_templates.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
+import { t } from '../../translations.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
 
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * DETTAGLIO SCADENZA MODULE (V5.0 ADAPTER)
+ * Gestisce la visualizzazione del dettaglio di una scadenza.
+ * - Entry Point: initDettaglioScadenza(user)
+ */
+
+export async function initDettaglioScadenza(user) {
+    console.log("[DETT-SCADENZA] Init V5.0...");
+    if (!user) return;
+
+    currentScadenzaId = new URLSearchParams(window.location.search).get('id');
+
     if (!currentScadenzaId) {
         window.location.href = 'scadenze.html';
         return;
     }
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            await loadScadenza(user.uid);
-            setupFooterActions();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-});
+    await loadScadenza(user.uid);
+    setupFooterActions();
+    console.log("[DETT-SCADENZA] Ready.");
+}
 
 async function loadScadenza(uid) {
     try {
@@ -73,33 +80,43 @@ function setupFooterActions() {
             footerRight.appendChild(settLink);
 
             // --- B. AZIONI CENTRALI (Elimina & Modifica - Stile FAB Home) ---
-            // Tasto ELIMINA
             const deleteBtn = createElement('button', {
-                className: 'btn-fab-action',
-                style: 'background: #ef4444; width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);',
-                title: 'Elimina Scadenza',
+                className: 'btn-fab-action btn-fab-danger',
+                title: t('delete_deadline') || 'Elimina Scadenza',
+                dataset: { label: t('delete_short') || 'Elimina' },
                 onclick: handleDelete
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
             ]);
 
-            // B. Tasto MODIFICA (FAB Blu)
             const editBtn = createElement('button', {
-                className: 'btn-fab-action btn-fab-scadenza', // Stile FAB Blu Standard
-                style: 'width: 44px; height: 44px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);',
-                title: 'Modifica Scadenza',
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: t('modify') || 'Modifica',
+                dataset: { label: t('edit_short') || 'Edita' },
                 onclick: () => window.location.href = `aggiungi_scadenza.html?id=${currentScadenzaId}`
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'edit' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
             ]);
 
             const fabWrapper = createElement('div', {
-                className: 'flex items-center gap-4',
-                style: 'display: flex; gap: 16px; align-items: center;'
+                className: 'fab-group'
             }, [deleteBtn, editBtn]);
 
             clearElement(footerCenter);
             footerCenter.appendChild(fabWrapper);
+
+            // Animazione Entrata (Home Page Style)
+            [deleteBtn, editBtn].forEach((btn, index) => {
+                btn.animate([
+                    { transform: 'scale(0) translateY(20px)', opacity: 0 },
+                    { transform: 'scale(1) translateY(0)', opacity: 1 }
+                ], {
+                    duration: 400,
+                    delay: index * 100,
+                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    fill: 'forwards'
+                });
+            });
         }
 
     }, 100);
@@ -216,10 +233,10 @@ function renderScadenza(scadenza) {
         const item = createElement('div', { className: 'detail-list-item' }, [
             createElement('div', { className: 'detail-list-item-left' }, [
                 createElement('div', { className: `detail-list-icon-box ${wsEnabled ? 'icon-emerald' : 'icon-dim'}` }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'chat' })
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'notifications_active' })
                 ]),
                 createElement('div', { className: 'detail-list-item-info' }, [
-                    createElement('span', { className: 'detail-list-item-title', textContent: 'WhatsApp Business' }),
+                    createElement('span', { className: 'detail-list-item-title', textContent: 'Notifica' }),
                     createElement('span', {
                         className: `detail-list-item-meta ${wsEnabled ? 'text-emerald-400' : 'text-white/20'}`,
                         textContent: wsEnabled ? 'STATO: ATTIVO' : 'STATO: DISATTIVATO'

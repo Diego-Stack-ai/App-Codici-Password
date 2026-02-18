@@ -83,12 +83,16 @@ async function initProtocolUI() {
         const fCenter = document.getElementById('footer-center-actions');
         if (fCenter && currentAziendaId) {
             clearElement(fCenter);
-            setChildren(fCenter, createElement('button', {
-                id: 'add-account-btn',
-                className: 'btn-floating-add bg-accent-blue',
-                onclick: () => window.location.href = `form_account_azienda.html?aziendaId=${currentAziendaId}`
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+            setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+                createElement('button', {
+                    id: 'add-account-btn',
+                    className: 'btn-fab-action btn-fab-scadenza',
+                    title: t('add_account') || 'Nuovo Account',
+                    dataset: { label: t('add_short') || 'Aggiungi' },
+                    onclick: () => window.location.href = `form_account_azienda.html?aziendaId=${currentAziendaId}`
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+                ])
             ]));
         }
 

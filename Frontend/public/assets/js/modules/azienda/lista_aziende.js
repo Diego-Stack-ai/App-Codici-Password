@@ -1,20 +1,21 @@
 /**
- * LISTA AZIENDE MODULE (V4.1)
+ * LISTA AZIENDE MODULE (V5.0 ADAPTER)
  * Visualizzazione e gestione della lista delle aziende dell'utente.
+ * - Entry Point: initListaAziende(user)
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let allAziende = [];
 let sortOrder = 'asc';
+let currentUser = null;
+
 const companyPalettes = [
     { key: 'blue', label: 'Blue' },
     { key: 'green', label: 'Green' },
@@ -28,48 +29,48 @@ const companyPalettes = [
 ];
 
 // --- INITIALIZATION ---
-observeAuth(async (user) => {
-    if (user) {
-        await initComponents();
-        initProtocolUI();
+export async function initListaAziende(user) {
+    console.log("[LISTA-AZIENDE] Init V5.0...");
+    if (!user) return;
+    currentUser = user;
 
-        const loadingTimeout = setTimeout(() => {
-            const container = document.getElementById('aziende-list-container');
-            if (container && container.querySelector('.animate-pulse')) {
-                clearElement(container);
-                setChildren(container, [
-                    createElement('p', {
-                        className: 'text-center text-amber-500 py-10 px-4 text-xs font-bold uppercase',
-                        textContent: "Il caricamento sta impiegando più del previsto. Prova a ricaricare la pagina."
-                    }),
-                    createElement('button', {
-                        className: 'btn-ghost-adaptive mx-auto mt-4 px-6 h-10 rounded-lg',
-                        textContent: 'Ricarica Ora',
-                        onclick: () => window.location.reload()
-                    })
-                ]);
-            }
-        }, 8000);
+    initProtocolUI();
 
-        try {
-            await loadAziende(user.uid);
-            clearTimeout(loadingTimeout);
-        } catch (error) {
-            logError("Initialization", error);
-            clearTimeout(loadingTimeout);
-            const container = document.getElementById('aziende-list-container');
-            if (container) {
-                clearElement(container);
-                setChildren(container, createElement('p', {
-                    className: 'text-center text-red-500 py-10',
-                    textContent: "Errore durante il caricamento. Per favore ricarica la pagina."
-                }));
-            }
+    const loadingTimeout = setTimeout(() => {
+        const container = document.getElementById('aziende-list-container');
+        if (container && container.querySelector('.animate-pulse')) {
+            clearElement(container);
+            setChildren(container, [
+                createElement('p', {
+                    className: 'text-center text-amber-500 py-10 px-4 text-xs font-bold uppercase',
+                    textContent: "Il caricamento sta impiegando più del previsto. Prova a ricaricare la pagina."
+                }),
+                createElement('button', {
+                    className: 'btn-ghost-adaptive mx-auto mt-4 px-6 h-10 rounded-lg',
+                    textContent: 'Ricarica Ora',
+                    onclick: () => window.location.reload()
+                })
+            ]);
         }
-    } else {
-        window.location.href = 'index.html';
+    }, 8000);
+
+    try {
+        await loadAziende(user.uid);
+        clearTimeout(loadingTimeout);
+    } catch (error) {
+        logError("Initialization", error);
+        clearTimeout(loadingTimeout);
+        const container = document.getElementById('aziende-list-container');
+        if (container) {
+            clearElement(container);
+            setChildren(container, createElement('p', {
+                className: 'text-center text-red-500 py-10',
+                textContent: "Errore durante il caricamento. Per favore ricarica la pagina."
+            }));
+        }
     }
-});
+    console.log("[LISTA-AZIENDE] Ready.");
+}
 
 async function initProtocolUI() {
     console.log('[lista_aziende] UI inizializzata tramite main.js');
@@ -78,14 +79,16 @@ async function initProtocolUI() {
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         clearElement(fCenter);
-        setChildren(fCenter, createElement('button', {
+        const addBtn = createElement('button', {
             id: 'add-azienda-btn',
-            className: 'btn-floating-add bg-accent-blue',
+            className: 'btn-fab-action btn-fab-scadenza',
             title: 'Aggiungi Azienda',
             onclick: () => window.location.href = 'aggiungi_nuova_azienda.html'
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
-        ]));
+        ]);
+
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [addBtn]));
     }
 }
 

@@ -38,7 +38,7 @@
 .base-footer {
     bottom: 0;
     padding-bottom: env(safe-area-inset-bottom);
-    height: calc(80px + env(safe-area-inset-bottom));
+    height: calc(85px + env(safe-area-inset-bottom));
     justify-content: space-between;
     border-radius: 0;
     mask-image: linear-gradient(to top, black 40%, transparent 100%);

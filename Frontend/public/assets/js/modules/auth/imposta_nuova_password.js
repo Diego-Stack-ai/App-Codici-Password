@@ -10,8 +10,8 @@ import { t, supportedLanguages, applyGlobalTranslations } from '../../translatio
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("[NEW-PASS] Application Boot V4.1...");
+export async function initImpostaNuovaPassword() {
+    console.log("[NEW-PASS] Init V5.0...");
 
     try {
         // 1. AppState base
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
         console.error("[NEW-PASS] Critical Init Error:", err);
     }
-});
+}
 
 /**
  * Form Salvataggio Password

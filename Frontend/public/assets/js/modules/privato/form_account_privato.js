@@ -23,52 +23,70 @@ let myContacts = [];
 const get = (id) => document.getElementById(id)?.value.trim() || '';
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * FORM ACCOUNT PRIVATO MODULE (V5.0 ADAPTER)
+ * Creazione e modifica account.
+ * - Entry Point: initFormAccountPrivato(user)
+ */
+
+export async function initFormAccountPrivato(user) {
+    console.log("[FORM-ACC] Init V5.0...");
+    if (!user) return;
+    currentUid = user.uid;
+
     const params = new URLSearchParams(window.location.search);
     currentDocId = params.get('id');
     isEditing = !!currentDocId;
 
-    observeAuth(async (user) => {
-        if (user) {
-            currentUid = user.uid;
+    // Footer actions setup
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        clearElement(fCenter);
 
-            // Inizializza Header e Footer secondo Protocollo Base
-            await initComponents();
-
-            // Aggiungi pulsante Salva nel footer
-            const fCenter = document.getElementById('footer-center-actions');
-            if (fCenter) {
-                clearElement(fCenter);
-                setChildren(fCenter, createElement('button', {
-                    id: 'btn-save-footer',
-                    className: 'btn-floating-add bg-accent-blue',
-                    onclick: () => window.saveAccount()
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
-                ]));
+        const cancelBtn = createElement('button', {
+            className: 'btn-fab-action btn-fab-neutral',
+            title: t('cancel') || 'Annulla',
+            onclick: () => {
+                if (isEditing && currentDocId) window.location.href = `dettaglio_account_privato.html?id=${currentDocId}`;
+                else history.back();
             }
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+        ]);
 
-            // Personalizza pulsante Back per tornare al dettaglio (se in modifica)
-            if (isEditing && currentDocId) {
-                const hLeft = document.getElementById('header-left');
-                if (hLeft) {
-                    clearElement(hLeft);
-                    setChildren(hLeft, createElement('button', {
-                        className: 'btn-icon-header',
-                        onclick: () => window.location.href = `dettaglio_account_privato.html?id=${currentDocId}`
-                    }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-                    ]));
-                }
-            }
+        const saveBtn = createElement('button', {
+            id: 'btn-save-footer',
+            className: 'btn-fab-action btn-fab-scadenza',
+            title: t('save') || 'Salva',
+            onclick: () => window.saveAccount()
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+        ]);
 
-            if (isEditing) await loadData();
-            await loadRubrica();
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [cancelBtn, saveBtn]));
+    }
+
+    // Personalizza pulsante Back per tornare al dettaglio (se in modifica)
+    if (isEditing && currentDocId) {
+        const hLeft = document.getElementById('header-left');
+        if (hLeft) {
+            clearElement(hLeft);
+            setChildren(hLeft, createElement('button', {
+                className: 'btn-icon-header',
+                onclick: () => window.location.href = `dettaglio_account_privato.html?id=${currentDocId}`
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+            ]));
         }
-    });
+    }
 
     setupUI();
-});
+
+    if (isEditing) await loadData();
+    await loadRubrica();
+
+    console.log("[FORM-ACC] Ready.");
+}
 
 /**
  * LOADING ENGINE

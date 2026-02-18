@@ -283,11 +283,85 @@
     border-color: #3b82f6;
 }
 
-.w-24 {
+/* Semantic Replacement for w-full/w-24 */
+.inline-edit-row .detail-input {
+    width: 100%;
+}
+
+.inline-edit-row .short-code-input {
     width: 3.5rem;
 }
 
-/* --- 6. ANIMATIONS --- */
+/* Semantic Spacing (Replaces mt-section) */
+.settings-group+.settings-group {
+    margin-top: 2rem;
+}
+
+/* --- 6. SYNTAX HELPERS (New Semantic Classes) --- */
+.syntax-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.syntax-header .material-symbols-outlined {
+    color: var(--accent);
+}
+
+.syntax-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.syntax-inline-container {
+    font-family: 'Robo Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+}
+
+.syntax-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.config-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.config-badge-blue {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.config-badge-emerald {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.config-badge-amber {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* --- 7. ANIMATIONS --- */
 @keyframes fadeIn {
     from {
         opacity: 0;

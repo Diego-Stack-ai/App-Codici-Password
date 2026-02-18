@@ -1,16 +1,15 @@
 /**
- * MODIFICA ACCOUNT AZIENDA MODULE (V4.1)
+ * MODIFICA ACCOUNT AZIENDA MODULE (V5.0 ADAPTER)
  * Modifica delle credenziali e dettagli di un account aziendale esistente.
+ * - Entry Point: initModificaAccountAzienda(user)
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -19,30 +18,32 @@ let currentAccountId = null;
 let accountData = {};
 let bankAccounts = [];
 let myContacts = [];
+let initialized = false;
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+export async function initModificaAccountAzienda(user) {
+    console.log("[EDIT-ACCOUNT-AZIENDA] Init V5.0...");
+    if (!user) return;
+    currentUid = user.uid;
+
     const urlParams = new URLSearchParams(window.location.search);
     currentAziendaId = urlParams.get('aziendaId');
     currentAccountId = urlParams.get('id');
 
-    initProtocolUI();
-    setupEventListeners();
+    // Reset State
+    accountData = {};
+    bankAccounts = [];
+    myContacts = [];
 
-    observeAuth(async (user) => {
-        if (user) {
-            currentUid = user.uid;
-            await loadAccount();
-            loadRubrica();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-});
+    await initProtocolUI();
+    setupEventListeners(); // Handled with initialized flag check inside or idempotent logic
+    await loadAccount();
+    loadRubrica();
+
+    console.log("[EDIT-ACCOUNT-AZIENDA] Ready.");
+}
 
 async function initProtocolUI() {
-    await initComponents();
-
     // Header Left
     const hLeft = document.getElementById('header-left');
     if (hLeft) {
@@ -92,105 +93,66 @@ async function initProtocolUI() {
     }
 }
 
-async function loadAccount() {
-    try {
-        const docRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentAccountId);
-        const snap = await getDoc(docRef);
-        if (!snap.exists()) {
-            showToast(t('error_not_found'), "error");
-            return;
-        }
-        accountData = snap.data();
-        populateForm(accountData);
-    } catch (e) {
-        logError("LoadAccount", e);
-        showToast(t('error_generic'), "error");
-    }
-}
-
-function populateForm(data) {
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-    set('nome-account', data.nomeAccount);
-    set('sito-web', data.url || data.sitoWeb); // Lettura retrocompatibile
-    set('codice-societa', data.codiceSocieta);
-    set('numero-iscrizione', data.numeroIscrizione);
-    set('utente', data.utente);
-    set('account', data.account);
-    set('password', data.password);
-    set('referente-nome', data.referenteNome);
-    set('referente-telefono', data.referenteTelefono);
-    set('referente-cellulare', data.referenteCellulare);
-    set('note', data.note || data.nota);
-
-    const check = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
-    check('flag-shared', data.shared);
-    check('flag-memo', data.hasMemo);
-    check('flag-memo-shared', data.isMemoShared);
-
-    toggleSharingUI(data.shared || data.isMemoShared);
-    if (data.sharedWith) renderGuests(data.sharedWith);
-
-    if (data.logo) {
-        const prev = document.getElementById('account-logo-preview');
-        const place = document.getElementById('logo-placeholder');
-        if (prev) { prev.src = data.logo; prev.classList.remove('hidden'); }
-        if (place) place.classList.add('hidden');
-    }
-
-    bankAccounts = Array.isArray(data.banking) ? data.banking : (data.banking ? [data.banking] : []);
-    if (bankAccounts.length === 0) bankAccounts = [{ iban: '', cards: [] }];
-    renderBankAccounts();
-}
-
 function setupEventListeners() {
-    document.getElementById('btn-trigger-logo')?.addEventListener('click', () => document.getElementById('logo-input')?.click());
-    document.getElementById('logo-input')?.addEventListener('change', handleLogoChange);
+    const btnLogo = document.getElementById('btn-trigger-logo');
+    if (btnLogo) btnLogo.onclick = () => document.getElementById('logo-input')?.click();
 
-    document.getElementById('btn-add-iban')?.addEventListener('click', () => {
+    const logoInput = document.getElementById('logo-input');
+    if (logoInput) logoInput.onchange = handleLogoChange;
+
+    const btnAddIban = document.getElementById('btn-add-iban');
+    if (btnAddIban) btnAddIban.onclick = () => {
         bankAccounts.push({ iban: '', cards: [] });
         renderBankAccounts();
-    });
+    };
 
-    // Visibility and Copy
-    document.body.addEventListener('click', (e) => {
-        const btnToggle = e.target.closest('.btn-toggle-pass');
-        if (btnToggle) {
-            const input = document.getElementById(btnToggle.dataset.target);
-            if (input) {
-                const isShield = input.classList.toggle('base-shield');
-                const icon = btnToggle.querySelector('span');
-                if (icon) icon.textContent = isShield ? 'visibility' : 'visibility_off';
-            }
-        }
-        const btnCopy = e.target.closest('.btn-copy-val');
-        if (btnCopy) {
-            const val = document.getElementById(btnCopy.dataset.target)?.value;
-            if (val) navigator.clipboard.writeText(val).then(() => showToast(t('copied'), "success"));
-        }
-    });
+    // Visibility and Copy - Delegated on Body (One-time init check)
+    if (!initialized) {
+        document.body.addEventListener('click', handleBodyClickDelegate);
+        initialized = true;
+    }
 
     // Flags
     const flags = ['flag-shared', 'flag-memo', 'flag-memo-shared'];
     flags.forEach(fid => {
-        document.getElementById(fid)?.addEventListener('change', (e) => {
-            if (e.target.checked) flags.filter(x => x !== fid).forEach(o => { const el = document.getElementById(o); if (el) el.checked = false; });
+        const el = document.getElementById(fid);
+        if (el) el.onchange = (e) => {
+            if (e.target.checked) flags.filter(x => x !== fid).forEach(o => { const item = document.getElementById(o); if (item) item.checked = false; });
             toggleSharingUI(document.getElementById('flag-shared')?.checked || document.getElementById('flag-memo-shared')?.checked);
-        });
+        };
     });
 
     // Suggestions
     const inviteInput = document.getElementById('invite-email');
     const suggestions = document.getElementById('rubrica-suggestions');
-    inviteInput?.addEventListener('input', () => {
+    if (inviteInput) inviteInput.oninput = () => {
         const val = inviteInput.value.toLowerCase();
         if (!val) { suggestions?.classList.add('hidden'); return; }
         const filt = myContacts.filter(c => (c.nome || '').toLowerCase().includes(val) || (c.email || '').toLowerCase().includes(val));
         if (filt.length === 0) { suggestions?.classList.add('hidden'); return; }
         suggestions?.classList.remove('hidden');
         renderSuggestions(filt);
-    });
+    };
 
-    document.getElementById('btn-send-invite')?.addEventListener('click', sendInvite);
+    const btnSend = document.getElementById('btn-send-invite');
+    if (btnSend) btnSend.onclick = sendInvite;
+}
+
+function handleBodyClickDelegate(e) {
+    const btnToggle = e.target.closest('.btn-toggle-pass');
+    if (btnToggle) {
+        const input = document.getElementById(btnToggle.dataset.target);
+        if (input) {
+            const isShield = input.classList.toggle('base-shield');
+            const icon = btnToggle.querySelector('span');
+            if (icon) icon.textContent = isShield ? 'visibility' : 'visibility_off';
+        }
+    }
+    const btnCopy = e.target.closest('.btn-copy-val');
+    if (btnCopy) {
+        const val = document.getElementById(btnCopy.dataset.target)?.value;
+        if (val) navigator.clipboard.writeText(val).then(() => showToast(t('copied'), "success"));
+    }
 }
 
 function handleLogoChange(e) {

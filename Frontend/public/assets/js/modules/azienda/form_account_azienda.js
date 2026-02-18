@@ -1,16 +1,15 @@
 /**
- * FORM ACCOUNT AZIENDA MODULE (V4.1)
+ * FORM ACCOUNT AZIENDA MODULE (V5.0 ADAPTER)
  * Creazione e modifica account aziendali con gestione dinamica IBAN.
+ * - Entry Point: initFormAccountAzienda(user)
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -24,7 +23,11 @@ let myContacts = [];
 const get = (id) => document.getElementById(id)?.value.trim() || '';
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+export async function initFormAccountAzienda(user) {
+    console.log("[FORM-ACCOUNT-AZIENDA] Init V5.0...");
+    if (!user) return;
+    currentUid = user.uid;
+
     const urlParams = new URLSearchParams(window.location.search);
     currentDocId = urlParams.get('id');
     currentAziendaId = urlParams.get('aziendaId');
@@ -36,40 +39,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Reset State
+    bankAccounts = [];
+    myContacts = [];
+
     initBaseUI();
     setupUI();
     setupImageUploader();
 
-    observeAuth(async (user) => {
-        if (user) {
-            currentUid = user.uid;
+    if (isEditing) await loadData();
+    await loadRubrica();
 
-            // Inizializza Header e Footer
-            await initComponents();
-
-            // Pulsante Salva nel footer
-            const fCenter = document.getElementById('footer-center-actions');
-            if (fCenter) {
-                clearElement(fCenter);
-                setChildren(fCenter, createElement('button', {
-                    id: 'btn-save-footer',
-                    className: 'btn-floating-add bg-accent-blue',
-                    onclick: saveChanges
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
-                ]));
-            }
-
-            if (isEditing) await loadData();
-            await loadRubrica();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-
-    setupUI();
-    setupImageUploader();
-});
+    console.log("[FORM-ACCOUNT-AZIENDA] Ready.");
+}
 
 function initBaseUI() {
     console.log('[form_account_azienda] UI Base gestita da main.js');
@@ -81,28 +63,40 @@ function initBaseUI() {
         if (isEditing) hTitle.classList.add('animate-pulse');
     }
 
-    // Footer
+    // Footer actions setup
     const fCenter = document.getElementById('footer-center-actions');
-    if (isEditing && fCenter) {
+    if (fCenter) {
         clearElement(fCenter);
-        setChildren(fCenter, createElement('button', {
-            id: 'delete-btn',
-            className: 'btn-icon-header btn-delete-footer',
-            onclick: deleteAccount
+
+        const cancelBtn = createElement('button', {
+            className: 'btn-fab-action btn-fab-neutral',
+            title: t('cancel') || 'Annulla',
+            onclick: () => history.back()
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
-        ]));
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+        ]);
+
+        const saveBtn = createElement('button', {
+            id: 'save-btn',
+            className: 'btn-fab-action btn-fab-scadenza',
+            title: t('save') || 'Salva',
+            onclick: saveChanges
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+        ]);
+
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [cancelBtn, saveBtn]));
     }
 
     const fRight = document.getElementById('footer-right-actions');
     if (fRight) {
         clearElement(fRight);
-        setChildren(fRight, createElement('button', {
-            id: 'save-btn',
-            className: 'btn-icon-header btn-save-footer',
-            onclick: saveChanges
+        setChildren(fRight, createElement('a', {
+            href: 'impostazioni.html',
+            className: 'btn-icon-header',
+            title: 'Impostazioni'
         }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: isEditing ? 'save' : 'check_circle' })
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'tune' })
         ]));
     }
 }

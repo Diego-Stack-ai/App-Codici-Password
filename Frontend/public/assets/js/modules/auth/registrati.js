@@ -9,8 +9,8 @@ import { t, supportedLanguages, applyGlobalTranslations } from '../../translatio
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("[REGISTER] Application Boot V4.1...");
+export async function initRegistrati() {
+    console.log("[REGISTER] Init V5.0...");
 
     try {
         // 1. AppState init
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
         console.error("[REGISTER] Critical Init Error:", err);
     }
-});
+}
 
 /**
  * Gestione Form Registrazione

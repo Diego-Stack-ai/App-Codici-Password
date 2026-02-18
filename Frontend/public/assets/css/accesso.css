@@ -299,6 +299,18 @@
     font-weight: 600;
 }
 
+.link-register.flex-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.link-register .material-symbols-outlined {
+    font-size: 1.1rem;
+    vertical-align: middle;
+}
+
 /* --- 4. AUTH FOOTER --- */
 .auth-footer-links {
     margin-top: 1rem;

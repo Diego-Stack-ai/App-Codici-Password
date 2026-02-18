@@ -213,6 +213,8 @@
 }
 
 /* --- 4. ACTIONS PANEL --- */
+/* --- 4. ACTIONS PANEL (Deprecated - Moved to Footer FAB) --- */
+/*
 .detail-actions-panel {
     display: flex;
     flex-direction: row;
@@ -224,7 +226,9 @@
     margin-bottom: 2rem;
     flex-wrap: nowrap;
 }
+*/
 
+/*
 .detail-action-btn {
     width: 48px;
     height: 48px;
@@ -239,6 +243,7 @@
     color: var(--text-primary);
     padding: 0;
 }
+*/
 
 .detail-action-btn:active {
     transform: scale(0.95);

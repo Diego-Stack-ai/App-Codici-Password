@@ -17,57 +17,65 @@ let currentUser = null;
 let currentSwipeList = null;
 let currentContext = 'all';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Context Selector (Premium Dropdown V4.5)
+/**
+ * ARCHIVIO ACCOUNT MODULE (V5.0 ADAPTER)
+ * Gestisce l'archivio (cestino).
+ * - Entry Point: initArchivioAccount(user)
+ */
+
+export async function initArchivioAccount(user) {
+    console.log("[ARCHIVIO] Init V5.0...");
+    if (!user) return;
+    currentUser = user;
+
+    // 1. SETUP UI LISTENERS
+    // Context Selector
     const filterBtn = document.getElementById('archive-filter-btn');
     const filterMenu = document.getElementById('archive-context-menu');
     const activeLabel = document.getElementById('active-context-label');
 
     if (filterBtn && filterMenu) {
-        filterBtn.addEventListener('click', (e) => {
+        filterBtn.onclick = (e) => {
             e.stopPropagation();
             filterMenu.classList.toggle('show');
-        });
+        };
 
         document.addEventListener('click', () => filterMenu.classList.remove('show'));
 
-        filterMenu.addEventListener('click', async (e) => {
+        filterMenu.onclick = async (e) => {
             const item = e.target.closest('.base-dropdown-item');
             if (item) {
                 currentContext = item.dataset.value;
-
                 // Update UI
                 filterMenu.querySelectorAll('.base-dropdown-item').forEach(i => i.classList.remove('active'));
                 item.classList.add('active');
-
                 if (activeLabel) {
                     activeLabel.textContent = item.textContent;
                     if (item.dataset.t) activeLabel.setAttribute('data-t', item.dataset.t);
                     else activeLabel.removeAttribute('data-t');
                 }
-
                 filterMenu.classList.remove('show');
                 await loadArchived();
             }
-        });
+        };
     }
 
-    // 2. Search Area
+    // Search
     const searchInput = document.querySelector('input[type="search"]');
     if (searchInput) {
-        searchInput.addEventListener('input', () => filterAndRender());
+        searchInput.oninput = () => filterAndRender();
     }
 
-    // 3. Empty Trash
+    // Empty Trash
     const btnEmpty = document.getElementById('btn-empty-trash');
     if (btnEmpty) {
-        btnEmpty.addEventListener('click', handleEmptyTrash);
+        btnEmpty.onclick = handleEmptyTrash; // Use onclick to avoid duplicate listeners on re-init
     }
 
-    // 4. Delegated Actions (Copy & Toggle Visibility)
+    // Delegated Actions
     const container = document.getElementById('accounts-container');
     if (container) {
-        container.addEventListener('click', (e) => {
+        container.onclick = (e) => {
             // Copy Action
             const btnCopy = e.target.closest('.copy-btn-dynamic');
             if (btnCopy) {
@@ -78,8 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 return;
             }
-
-
             // Restore Action
             const btnRestore = e.target.closest('.btn-restore-acc');
             if (btnRestore) {
@@ -87,19 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleRestore(btnRestore.dataset.id);
                 return;
             }
-        });
+        };
     }
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            await loadCompanies();
-            await loadArchived();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-});
+    // 2. LOAD DATA
+    await loadCompanies();
+    await loadArchived();
+
+    console.log("[ARCHIVIO] Ready.");
+}
 
 async function loadCompanies() {
     const filterMenu = document.getElementById('archive-context-menu');

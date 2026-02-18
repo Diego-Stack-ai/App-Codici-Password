@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=5.0">
 
     <!-- CORE JS -->
+    <script src="assets/js/theme-init.js" defer></script>
     <script src="assets/js/core.js"></script>
     <script type="module" src="assets/js/ui-core.js"></script>
 </head>
@@ -43,220 +44,225 @@
         <div class="spacer-header"></div>
 
         <main class="base-main">
-            <!-- Hero Profile Header -->
-            <div class="hero-profile-header">
-                <div class="detail-avatar-container">
-                    <div id="detail-avatar" class="detail-avatar border-glow"></div>
-                    <div id="hero-status-dot" class="hero-status-dot">
-                        <span class="material-symbols-outlined">business</span>
+            <div class="page-container pt-header-extra pb-footer-extra">
+                <!-- Hero Profile Header -->
+                <div class="hero-profile-header">
+                    <div class="detail-avatar-container">
+                        <div id="detail-avatar" class="detail-avatar border-glow"></div>
+                        <div id="hero-status-dot" class="hero-status-dot">
+                            <span class="material-symbols-outlined">business</span>
+                        </div>
+                    </div>
+                    <h1 id="hero-title" class="hero-title selectable">-</h1>
+                    <div id="account-type-badge" class="config-badge config-badge-standard hidden">
+                        Azienda
                     </div>
                 </div>
-                <h1 id="hero-title" class="hero-title selectable">-</h1>
-                <div id="account-type-badge" class="config-badge config-badge-standard hidden">
-                    Azienda
-                </div>
-            </div>
 
-            <!-- Main Content -->
-            <div class="detail-content-wrap">
+                <!-- Main Content -->
+                <div class="detail-content-wrap">
 
-                <!-- Credenziali Principali -->
-                <section>
-                    <div class="detail-section-header">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
-                        <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
-                    </div>
-                    <div class="flex-col-gap">
-
-                        <!-- Nome Account -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
-                                Account</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-nomeAccount" name="account_name" readonly
-                                    class="detail-field-input no-transform" autocomplete="off">
-                                <button class="btn-icon-header copy-btn" type="button" data-field="detail-nomeAccount">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>
-                            </div>
+                    <!-- Credenziali Principali -->
+                    <section>
+                        <div class="detail-section-header">
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
+                            <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                         </div>
+                        <div class="flex-col-gap">
 
-                        <!-- Utente -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-username" data-t="username">Utente</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-username" name="account_username" type="text" readonly
-                                    class="detail-field-input no-transform" autocomplete="off">
-                                <button class="btn-icon-header copy-btn" type="button" data-field="detail-username">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Account -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-account" data-t="account_code">Account /
-                                Codice</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-account" name="account_code" type="text" readonly
-                                    class="detail-field-input no-transform" autocomplete="off">
-                                <button class="btn-icon-header copy-btn" type="button" data-field="detail-account">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-password" data-t="password">Password</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-password" name="account_password" type="password" readonly
-                                    class="detail-field-input base-shield field-value-password no-transform"
-                                    autocomplete="new-password">
-                                <div class="detail-field-actions">
-                                    <button id="toggle-password" class="btn-icon-header" type="button">
-                                        <span class="material-symbols-outlined">visibility</span>
-                                    </button>
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-password">
+                            <!-- Nome Account -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
+                                    Account</label>
+                                <div class="detail-field-box border-glow">
+                                    <input id="detail-nomeAccount" name="account_name" readonly
+                                        class="detail-field-input no-transform" autocomplete="off">
+                                    <button class="btn-icon-header copy-btn" type="button"
+                                        data-field="detail-nomeAccount">
                                         <span class="material-symbols-outlined">content_copy</span>
                                     </button>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Sito Web -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-website" readonly
-                                    class="detail-field-input link-underlined no-transform">
-                                <div class="detail-field-actions">
-                                    <button id="open-website" class="btn-icon-header" type="button">
-                                        <span class="material-symbols-outlined">open_in_new</span>
-                                    </button>
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-website">
+                            <!-- Utente -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-username" data-t="username">Utente</label>
+                                <div class="detail-field-box border-glow">
+                                    <input id="detail-username" name="account_username" type="text" readonly
+                                        class="detail-field-input no-transform" autocomplete="off">
+                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-username">
                                         <span class="material-symbols-outlined">content_copy</span>
                                     </button>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Suggerimento Conto Bancario -->
-                        <div id="add-banking-prompt" class="banking-prompt-box hidden">
-                            <button type="button" id="btn-banking-info" class="btn-banking-info">
-                                <span class="material-symbols-outlined info-icon">info</span>
-                                <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
+                            <!-- Account -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-account" data-t="account_code">Account /
+                                    Codice</label>
+                                <div class="detail-field-box border-glow">
+                                    <input id="detail-account" name="account_code" type="text" readonly
+                                        class="detail-field-input no-transform" autocomplete="off">
+                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-account">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-password" data-t="password">Password</label>
+                                <div class="detail-field-box border-glow">
+                                    <input id="detail-password" name="account_password" type="password" readonly
+                                        class="detail-field-input base-shield field-value-password no-transform"
+                                        autocomplete="new-password">
+                                    <div class="detail-field-actions">
+                                        <button id="toggle-password" class="btn-icon-header" type="button">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                        <button class="btn-icon-header copy-btn" type="button"
+                                            data-field="detail-password">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sito Web -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
+                                <div class="detail-field-box border-glow">
+                                    <input id="detail-website" readonly
+                                        class="detail-field-input link-underlined no-transform">
+                                    <div class="detail-field-actions">
+                                        <button id="open-website" class="btn-icon-header" type="button">
+                                            <span class="material-symbols-outlined">open_in_new</span>
+                                        </button>
+                                        <button class="btn-icon-header copy-btn" type="button"
+                                            data-field="detail-website">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Suggerimento Conto Bancario -->
+                            <div id="add-banking-prompt" class="banking-prompt-box hidden">
+                                <button type="button" id="btn-banking-info" class="btn-banking-info">
+                                    <span class="material-symbols-outlined info-icon">info</span>
+                                    <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Coordinate Bancarie (Sezione Dinamica) -->
+                    <section id="section-banking" class="profile-section hidden">
+                        <div class="detail-section-header justify-between">
+                            <div class="flex-center-gap">
+                                <span
+                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
+                                <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
+                            </div>
+                            <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
+                                <span id="banking-chevron"
+                                    class="material-symbols-outlined text-secondary transition-transform">expand_more</span>
                             </button>
                         </div>
-                    </div>
-                </section>
+                        <div id="banking-content" class="flex-col-gap mt-4 hidden">
+                            <!-- Injected via JS -->
+                        </div>
+                    </section>
 
-                <!-- Coordinate Bancarie (Sezione Dinamica) -->
-                <section id="section-banking" class="profile-section hidden">
-                    <div class="detail-section-header justify-between">
-                        <div class="flex-center-gap">
+                    <!-- Referente (Specifico per Azienda) -->
+                    <section id="section-referente" class="profile-section">
+                        <div class="detail-section-header">
                             <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
-                            <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
+                                class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
+                            <h3 class="detail-section-title">Informazioni Referente</h3>
                         </div>
-                        <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
-                            <span id="banking-chevron"
-                                class="material-symbols-outlined text-secondary transition-transform">expand_more</span>
-                        </button>
-                    </div>
-                    <div id="banking-content" class="flex-col-gap mt-4 hidden">
-                        <!-- Injected via JS -->
-                    </div>
-                </section>
-
-                <!-- Referente (Specifico per Azienda) -->
-                <section id="section-referente" class="profile-section">
-                    <div class="detail-section-header">
-                        <span
-                            class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
-                        <h3 class="detail-section-title">Informazioni Referente</h3>
-                    </div>
-                    <div class="flex-col-gap mt-4">
-                        <!-- Nome Referente -->
-                        <div class="glass-field-container">
-                            <label class="view-label">Nome Referente</label>
-                            <div class="detail-field-box border-glow">
-                                <span class="material-symbols-outlined ml-4 opacity-40">person</span>
-                                <input id="ref-name" readonly class="detail-field-input no-transform"
-                                    autocomplete="off">
-                                <button class="btn-icon-header copy-btn" type="button" data-field="ref-name">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Telefoni -->
-                        <div class="glass-field-container">
-                            <label class="view-label">Contatti (Fisso / Cellulare)</label>
-                            <div class="flex flex-col gap-2">
+                        <div class="flex-col-gap mt-4">
+                            <!-- Nome Referente -->
+                            <div class="glass-field-container">
+                                <label class="view-label">Nome Referente</label>
                                 <div class="detail-field-box border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">call</span>
-                                    <input id="ref-phone" readonly class="detail-field-input no-transform">
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="ref-phone">
-                                        <span class="material-symbols-outlined">content_copy</span>
-                                    </button>
-                                </div>
-                                <div class="detail-field-box border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
-                                    <input id="ref-mobile" readonly class="detail-field-input no-transform">
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="ref-mobile">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">person</span>
+                                    <input id="ref-name" readonly class="detail-field-input no-transform"
+                                        autocomplete="off">
+                                    <button class="btn-icon-header copy-btn" type="button" data-field="ref-name">
                                         <span class="material-symbols-outlined">content_copy</span>
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
 
-                <!-- ALLEGATI (Sezione Dinamica) -->
-                <section id="section-attachments" class="profile-section">
-                    <div class="detail-section-header justify-between">
-                        <div class="flex-center-gap">
+                            <!-- Telefoni -->
+                            <div class="glass-field-container">
+                                <label class="view-label">Contatti (Fisso / Cellulare)</label>
+                                <div class="flex flex-col gap-2">
+                                    <div class="detail-field-box border-glow">
+                                        <span class="material-symbols-outlined ml-4 opacity-40">call</span>
+                                        <input id="ref-phone" readonly class="detail-field-input no-transform">
+                                        <button class="btn-icon-header copy-btn" type="button" data-field="ref-phone">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                    <div class="detail-field-box border-glow">
+                                        <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
+                                        <input id="ref-mobile" readonly class="detail-field-input no-transform">
+                                        <button class="btn-icon-header copy-btn" type="button" data-field="ref-mobile">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ALLEGATI (Sezione Dinamica) -->
+                    <section id="section-attachments" class="profile-section">
+                        <div class="detail-section-header justify-between">
+                            <div class="flex-center-gap">
+                                <span
+                                    class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                                <h3 class="detail-section-title">Allegati</h3>
+                            </div>
+                            <button id="btn-add-attachment" type="button" class="btn-icon-header">
+                                <span class="material-symbols-outlined">add</span>
+                            </button>
+                        </div>
+                        <div id="attachments-list" class="flex-col-gap mt-4">
+                            <!-- Injected via JS -->
+                            <p class="text-[10px] text-white/20 uppercase text-center py-4">Nessun allegato</p>
+                        </div>
+                    </section>
+
+                    <!-- NOTE -->
+                    <section class="profile-section">
+                        <div class="detail-section-header">
                             <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
-                            <h3 class="detail-section-title">Allegati</h3>
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
+                            <h3 class="detail-section-title" data-t="notes">Note</h3>
                         </div>
-                        <button id="btn-add-attachment" type="button" class="btn-icon-header">
-                            <span class="material-symbols-outlined">add</span>
-                        </button>
-                    </div>
-                    <div id="attachments-list" class="flex-col-gap mt-4">
-                        <!-- Injected via JS -->
-                        <p class="text-[10px] text-white/20 uppercase text-center py-4">Nessun allegato</p>
-                    </div>
-                </section>
+                        <div class="detail-field-box border-glow mt-4">
+                            <p id="detail-note" class="note-text no-transform flex-1 mr-2">-</p>
+                            <button id="copy-note" class="btn-icon-header" type="button" data-field="detail-note">
+                                <span class="material-symbols-outlined text-sm">content_copy</span>
+                            </button>
+                        </div>
+                    </section>
 
-                <!-- NOTE -->
-                <section class="profile-section">
-                    <div class="detail-section-header">
-                        <span
-                            class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
-                        <h3 class="detail-section-title" data-t="notes">Note</h3>
-                    </div>
-                    <div class="detail-field-box border-glow mt-4">
-                        <p id="detail-note" class="note-text no-transform flex-1 mr-2">-</p>
-                        <button id="copy-note" class="btn-icon-header" type="button" data-field="detail-note">
-                            <span class="material-symbols-outlined text-sm">content_copy</span>
-                        </button>
-                    </div>
-                </section>
+                    <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
+                    <section id="shared-management-section" class="mt-8 mb-10 hidden">
+                        <div class="detail-section-header">
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
+                            <h3 class="detail-section-title">Gestione Accessi</h3>
+                        </div>
+                        <div id="guests-list" class="flex-col-gap mt-4">
+                            <!-- Guest rows injected here -->
+                        </div>
+                    </section>
 
-                <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
-                <section id="shared-management-section" class="mt-8 mb-10 hidden">
-                    <div class="detail-section-header">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
-                        <h3 class="detail-section-title">Gestione Accessi</h3>
-                    </div>
-                    <div id="guests-list" class="flex-col-gap mt-4">
-                        <!-- Guest rows injected here -->
-                    </div>
-                </section>
-
+                </div>
             </div>
         </main>
 
@@ -317,7 +323,7 @@
 
     <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/modules/azienda/dettaglio_account_azienda.js"></script>
+
 </body>
 
 </html>

@@ -65,17 +65,39 @@
     color: var(--text-secondary);
 }
 
-.input {
+.input-wrapper {
+    display: flex;
+    align-items: center;
     width: 100%;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
     border-radius: 16px;
-    padding: 1rem 1.25rem;
+    padding: 0 1.25rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.input-wrapper span.material-symbols-outlined {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.input {
+    flex: 1;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0;
+    padding: 1rem 0;
+    /* Padding solo sopra/sotto ora che il wrapper ha il padding laterale */
     color: var(--input-text);
     font-size: 1rem;
     transition: all 0.3s ease;
     outline: none;
     box-sizing: border-box;
+    width: 100%;
 }
 
 .input option {
@@ -83,7 +105,7 @@
     color: var(--text-primary);
 }
 
-.input:focus {
+.input-wrapper:focus-within {
     background: var(--input-bg-focus);
     border-color: #3b82f6;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
@@ -232,6 +254,27 @@
     color: #10b981;
 }
 
+/* --- 6.1 ICON BOXES (V5.0 Standard) --- */
+.icon-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
+.icon-amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.icon-purple {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+}
+
+.icon-emerald {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
 /* --- 7. EMPTY & LOADING STATES --- */
 .archive-loading-container {
     display: flex;
@@ -351,9 +394,26 @@
 }
 
 .dark .base-dropdown-menu {
-    background: rgba(30, 41, 59, 0.98);
-    /* Deep Slate Blue */
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(12, 74, 110, 0.95);
+    /* Azzurro profondo / Ceruleo (Sky-900) */
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+}
+
+.dark .base-dropdown-item {
+    color: rgba(255, 255, 255, 0.9);
+    /* Testo chiaro su fondo intenso */
+}
+
+.dark .base-dropdown-item:hover {
+    background: rgba(56, 189, 248, 0.15) !important;
+    color: #fff;
+}
+
+.dark .base-dropdown-item.active {
+    background: #0ea5e9;
+    color: #fff;
 }
 
 .base-dropdown-menu.show {

@@ -14,17 +14,22 @@ import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 
 let currentUid = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, user => {
-        if (user) {
-            currentUid = user.uid;
-            loadNotifications(user.uid);
-            initEvents();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-});
+/**
+ * NOTIFICHE MODULE (V5.0 ADAPTER)
+ * Gestione storico notifiche.
+ * - Entry Point: initNotificheStoria(user)
+ */
+
+export async function initNotificheStoria(user) {
+    console.log("[NOTIFICHE] Init V5.0...");
+    if (!user) return;
+    currentUid = user.uid;
+
+    initEvents();
+    await loadNotifications(user.uid);
+
+    console.log("[NOTIFICHE] Ready.");
+}
 
 function initEvents() {
     document.getElementById('btn-clear-history')?.addEventListener('click', clearHistory);

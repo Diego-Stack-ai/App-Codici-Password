@@ -10,21 +10,26 @@ import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/fireba
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 
-// Stato Globale
+/**
+ * HOME PAGE MODULE (V5.0 ADAPTER)
+ * Gestisce l'interfaccia della Home Page.
+ * - Entry Point: initHomePage(user) (chiamato da main.js)
+ */
+
+// Stato Globale Modulo
 let currentUser = null;
 
-// 1. AUTH LISTENER
-document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            // Redirect se non loggato
-            window.location.href = 'index.html';
-            return;
-        }
+// 1. INIT FUNCTION (Single Orchestrator)
+export async function initHomePage(user) {
+    if (!user) {
+        console.error("[HOME] Init chiamato senza utente!");
+        return;
+    }
 
-        currentUser = user;
-        console.log("Utente autenticato:", user.email);
+    console.log("[HOME] Init V5.0 Dashboard...", user.email);
+    currentUser = user;
 
+    try {
         // Renderizza Info Utente (Header)
         await renderHeaderUser(user);
 
@@ -32,20 +37,25 @@ document.addEventListener('DOMContentLoaded', () => {
         await renderDashboardDeadlines(user);
 
         // --- SETUP FLUSSO (V4.5) ---
+        // Caricamento dinamico per performance
         const { initSetupFlusso } = await import('./setup_flusso.js');
         await initSetupFlusso(user);
 
         // Inizializza Listeners (Logout, Tema, Avatar Fallback)
         initHomeListeners();
 
-
         // 4. SBLOCCO VISIBILITÀ (Anti-Flicker Ready)
         document.documentElement.setAttribute("data-i18n", "ready");
 
         // 5. FAB Group (Footer)
         setupFABGroup();
-    });
-});
+
+        console.log("[HOME] Dashboard Ready.");
+
+    } catch (err) {
+        console.error("[HOME] Init Error:", err);
+    }
+}
 
 /**
  * Gestisce i click e gli eventi della Home Page (No Inline JS)

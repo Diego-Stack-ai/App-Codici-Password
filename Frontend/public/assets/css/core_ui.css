@@ -331,3 +331,113 @@
     padding: 8px;
     border-radius: 12px;
 }
+
+/* --- 4. FAB BUTTON SYSTEM (Centralized V5.0) --- */
+.fab-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-bottom: 0;
+    /* Rimosso margine per centrare meglio nel footer basso */
+    z-index: 100;
+}
+
+.btn-fab-action {
+    width: 56px;
+    height: 56px;
+    border-radius: 22px;
+    /* Stile Squircle-like più marcato */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    color: white;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    background-size: 200% 200%;
+}
+
+.btn-fab-action:active {
+    transform: scale(0.92);
+}
+
+.btn-fab-action span.material-symbols-outlined {
+    font-size: 1.8rem;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Color Variants */
+.btn-fab-scadenza {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.45);
+    z-index: 2;
+}
+
+.btn-fab-danger {
+    background: #ef4444;
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+.btn-fab-neutral {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    color: var(--text-primary) !important;
+}
+
+.dark .btn-fab-neutral {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.btn-fab-privato {
+    background: linear-gradient(135deg, #3b82f6 60%, #1d4ed8 100%);
+}
+
+.btn-fab-azienda {
+    background: linear-gradient(135deg, #10b981 60%, #059669 100%);
+}
+
+/* Labels */
+.btn-fab-action::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.5;
+    white-space: nowrap;
+    pointer-events: none;
+    color: var(--text-primary);
+}
+
+@media (max-width: 480px) {
+    .fab-group {
+        gap: 0.85rem;
+    }
+
+    .btn-fab-action {
+        width: 48px;
+        height: 48px;
+    }
+
+    .btn-fab-scadenza {
+        width: 52px;
+        height: 52px;
+    }
+
+    .btn-fab-action span.material-symbols-outlined {
+        font-size: 1.5rem;
+    }
+}

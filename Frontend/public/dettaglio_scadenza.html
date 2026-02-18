@@ -2,30 +2,29 @@
 <html lang="it" data-i18n="loading">
 
 <head>
-    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <!-- Anti-flicker & Theme Master (V5.0) -->
     <script src="assets/js/theme-init.js"></script>
-    <!-- CSP (Content Security Policy) - V3.9 Standard -->
+    <!-- CSP (Content Security Policy) - V5.0 Standard -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dettaglio Scadenza - PROTOCOLLO BASE V3.9</title>
+    <title data-t="deadline_detail">Dettaglio Scadenza - PROTOCOLLO V5.0</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.9.1" />
+    <link rel="manifest" href="manifest.json?v=5.0" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
-    <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
     <link rel="stylesheet" href="assets/css/dettaglio_scadenza.css?v=5.0">
 
-    <!-- CORE JS -->
+    <!-- CORE JS (Orchestrator V5.0) -->
     <script src="assets/js/core.js"></script>
     <script type="module" src="assets/js/ui-core.js"></script>
 </head>
@@ -153,7 +152,6 @@
 
     <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
-    <script type="module" src="assets/js/modules/scadenze/dettaglio_scadenza.js"></script>
 </body>
 
 </html>

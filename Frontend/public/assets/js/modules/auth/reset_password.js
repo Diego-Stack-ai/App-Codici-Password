@@ -9,8 +9,8 @@ import { t, supportedLanguages, applyGlobalTranslations } from '../../translatio
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("[RESET] Application Boot V4.1...");
+export async function initResetPassword() {
+    console.log("[RESET] Init V5.0...");
 
     try {
         // 1. AppState base
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
         console.error("[RESET] Critical Init Error:", err);
     }
-});
+}
 
 /**
  * Gestione Form Recupero

@@ -599,3 +599,8 @@ h3.settings-desc {
 .flex-1 {
     flex: 1;
 }
+
+.legal-docs-link-box {
+    margin-top: 1rem;
+    text-align: center;
+}

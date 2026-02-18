@@ -3,9 +3,46 @@
    ========================================================================== */
 
 /* --- 1. SEARCH & FILTERS --- */
+.deadline-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+}
+
+.deadline-count-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.deadline-count-badge {
+    background: var(--accent);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.deadline-count-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.deadline-sort-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
 .search-bar-container {
     padding: 0 0.5rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 .search-input-wrapper {
@@ -14,9 +51,10 @@
     align-items: center;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 0 1rem;
-    height: 44px;
+    height: 48px;
+    /* Standard V5.0 */
 }
 
 .search-input-wrapper span {
@@ -29,9 +67,60 @@
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 0.85rem;
+    font-size: 0.95rem;
+    /* Standard */
     width: 100%;
     outline: none;
+}
+
+/* FILTER CHIPS (V5.0 Auto-Fill) */
+.filter-container {
+    display: flex;
+    width: 100%;
+    /* Occupy full width */
+    justify-content: space-between;
+    gap: 0.25rem;
+    /* Minimal gap */
+    padding: 0 0.25rem 1rem 0.25rem;
+    overflow-x: hidden;
+    /* No scroll, fit content */
+}
+
+.filter-chip {
+    flex: 1;
+    /* Grow to fill space equally */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    padding: 0.5rem 0.1rem;
+    /* Max vertical, min horizontal */
+    border-radius: 12px;
+    /* Soft square/pill */
+    font-size: 0.6rem;
+    /* Small font to fit text */
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    /* Keep single line */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-chip.active {
+    background: rgba(59, 130, 246, 0.15);
+    /* Accent tint */
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.filter-chip:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* --- 2. DEADLINE CARDS --- */
@@ -39,26 +128,78 @@
     position: relative;
     margin-bottom: 0.75rem;
     animation: slideInUp 0.3s ease-out backwards;
+    /* Hint Colors on Sides */
+    background: linear-gradient(to right,
+            rgba(16, 185, 129, 0.4) 0%,
+            transparent 5%,
+            transparent 95%,
+            rgba(239, 68, 68, 0.4) 100%);
+    border-radius: 20px;
+    padding: 0;
+    /* Content handles spacing */
 }
 
 /* Swipe Content Support */
+.deadline-card .swipe-action-bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    border-radius: 20px;
+    z-index: 1;
+    /* Dietro al contenuto principale */
+    opacity: 0.5;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.swipe-action-bg.bg-restore {
+    justify-content: flex-start;
+    background-color: #10b981;
+    /* Ensure Green for Restore/Archive */
+}
+
+.swipe-action-bg.bg-delete {
+    justify-content: flex-end;
+    background-color: #ef4444;
+    /* Ensure Red for Delete */
+}
+
 .deadline-card .swipe-content {
-    background: var(--card-bg);
-    backdrop-filter: blur(20px);
+    /* Background scuro ma in tono col tema (Slate 900/Blue 950) per coprire le azioni sotto */
+    background: #0f172a;
+    /* Opzionale: leggero gradiente per dare profondità "glass" simulata */
+    background: linear-gradient(145deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%);
+
+    backdrop-filter: none;
+    /* Blur non serve se è opaco */
+
+    /* Hint Colors via Inset Shadow */
+    box-shadow:
+        inset 6px 0 15px -4px rgba(16, 185, 129, 0.2),
+        /* Green Hint Left */
+        inset -6px 0 15px -4px rgba(239, 68, 68, 0.2),
+        /* Red Hint Right */
+        0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* Standard Drop Shadow */
+
+    /* Restore Glass Effect */
     border: 1px solid var(--card-border);
     border-radius: 20px;
     padding: 1.25rem 1rem;
     width: 100%;
     position: relative;
     z-index: 10;
+    /* Sopra le azioni */
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    touch-action: pan-y;
+    /* Permetti scroll vert but swipe orizz controllato da JS */
 }
 
 .deadline-card:hover .swipe-content {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
     border-color: rgba(59, 130, 246, 0.3);
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .deadline-card-layout {
@@ -120,7 +261,7 @@
 
 .deadline-date-badge {
     padding: 0.25rem 0.75rem;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 10px;
     font-weight: 900;
     text-transform: uppercase;
@@ -172,74 +313,16 @@
     opacity: 0.8;
 }
 
-/* --- 3. CHECKBOX COMPLETAMENTO --- */
-.deadline-check-btn {
-    position: absolute;
-    bottom: 0.75rem;
-    right: 0.75rem;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: 2px solid var(--text-secondary);
-    background: transparent;
+/* --- 3. CHECKBOX COMPLETAMENTO (REMOVED) --- */
+/* .deadline-check-btn { ... } */
+
+/* List Container Helper */
+.archive-list-group {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
-    opacity: 0.4;
-}
-
-.deadline-check-btn:hover {
-    opacity: 1;
-    border-color: var(--accent);
-    transform: scale(1.1);
-}
-
-.deadline-check-btn.checked {
-    background: #10b981;
-    border-color: #10b981;
-    opacity: 1;
-    color: white;
-}
-
-/* --- 4. FAB BUTTONS --- */
-.fab-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 4px;
-}
-
-.btn-fab-action {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s, box-shadow 0.2s;
-    color: white;
-}
-
-.btn-fab-scadenza {
-    background: var(--accent);
-    width: 56px;
-    height: 56px;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-}
-
-.btn-fab-azienda {
-    background: #f59e0b;
-}
-
-.btn-fab-privato {
-    background: #a855f7;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 200px;
 }
 
 /* Helpers */

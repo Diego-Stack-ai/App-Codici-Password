@@ -1,26 +1,30 @@
 /**
- * MODIFICA AZIENDA MODULE (V4.1)
+ * MODIFICA AZIENDA MODULE (V5.0 ADAPTER)
  * Gestione anagrafica, allegati, sedi e contatti di un'azienda esistente.
+ * - Entry Point: initModificaAzienda(user)
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
 
 // --- STATE ---
 let currentUid = null;
 let currentAziendaId = null;
 let selectedFiles = [];
 let existingAttachments = [];
+let eventsInitialized = false; // Prevent multiple listeners on body
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+export async function initModificaAzienda(user) {
+    console.log("[EDIT-AZIENDA] Init V5.0...");
+    if (!user) return;
+    currentUid = user.uid;
+
     const urlParams = new URLSearchParams(window.location.search);
     currentAziendaId = urlParams.get('id');
 
@@ -31,17 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initProtocolUI();
+    await loadAzienda();
+    initFormEvents();
 
-    observeAuth(async (user) => {
-        if (user) {
-            currentUid = user.uid;
-            await loadAzienda();
-            initFormEvents();
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
-});
+    console.log("[EDIT-AZIENDA] Ready.");
+}
 
 async function initProtocolUI() {
     console.log('[modifica_azienda] Configurazione azioni footer...');

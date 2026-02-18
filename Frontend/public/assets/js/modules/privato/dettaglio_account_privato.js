@@ -25,7 +25,17 @@ let isReadOnly = false;
 let accountData = null;
 
 // --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * DETTAGLIO ACCOUNT PRIVATO MODULE (V5.0 ADAPTER)
+ * Visualizzazione dettagli.
+ * - Entry Point: initDettaglioAccountPrivato(user)
+ */
+
+export async function initDettaglioAccountPrivato(user) {
+    console.log("[DETTAGLIO] Init V5.0...");
+    if (!user) return;
+    currentUid = user.uid;
+
     const params = new URLSearchParams(window.location.search);
     currentId = params.get('id');
 
@@ -35,53 +45,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    observeAuth(async (user) => {
-        if (user) {
-            currentUid = user.uid;
-            ownerId = params.get('ownerId') || user.uid;
-            isReadOnly = (ownerId !== currentUid);
+    ownerId = params.get('ownerId') || user.uid;
+    isReadOnly = (ownerId !== currentUid);
 
-            // Inizializza Header e Footer secondo Protocollo Base
-            await initComponents();
+    // NAVIGAZIONE GERARCHICA: Override pulsante Back
+    const hLeft = document.getElementById('header-left');
+    if (hLeft) {
+        clearElement(hLeft);
+        setChildren(hLeft, createElement('button', {
+            className: 'btn-icon-header',
+            onclick: () => window.location.href = 'account_privati.html'
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+        ]));
+    }
 
-            // NAVIGAZIONE GERARCHICA: Override pulsante Back per tornare alla LISTA (non history back)
-            const hLeft = document.getElementById('header-left');
-            if (hLeft) {
-                clearElement(hLeft);
-                setChildren(hLeft, createElement('button', {
-                    className: 'btn-icon-header',
-                    onclick: () => window.location.href = 'account_privati.html'
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-                ]));
-            }
-
-            // Aggiungi pulsante Edit nel footer (solo se non è read-only)
-            if (!isReadOnly) {
-                const fCenter = document.getElementById('footer-center-actions');
-                if (fCenter) {
-                    clearElement(fCenter);
-                    const editBtn = createElement('button', {
-                        id: 'btn-edit-footer',
-                        className: 'btn-floating-add bg-accent-blue'
-                    }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
-                    ]);
-                    editBtn.onclick = () => {
-                        console.log('[dettaglio] Navigating to form with ID:', currentId);
-                        window.location.href = `form_account_privato.html?id=${currentId}`;
-                    };
-                    setChildren(fCenter, editBtn);
+    // Aggiungi pulsante Edit nel footer (solo se non è read-only)
+    if (!isReadOnly) {
+        const fCenter = document.getElementById('footer-center-actions');
+        if (fCenter) {
+            clearElement(fCenter);
+            const editBtn = createElement('button', {
+                id: 'btn-edit-footer',
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: t('edit') || 'Modifica',
+                onclick: () => {
+                    console.log('[dettaglio] Navigating to form with ID:', currentId);
+                    window.location.href = `form_account_privato.html?id=${currentId}`;
                 }
-            }
-
-            if (isReadOnly) setupReadOnlyUI();
-            await loadAccount();
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+            ]);
+            setChildren(fCenter, createElement('div', { className: 'fab-group' }, [editBtn]));
         }
-    });
+    }
 
+    if (isReadOnly) setupReadOnlyUI();
     setupActions();
-});
+    await loadAccount();
+
+    console.log("[DETTAGLIO] Ready.");
+}
 
 /**
  * LOADING ENGINE
