@@ -42,7 +42,7 @@
 
 .search-bar-container {
     padding: 0 0.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
     /* Increased spacing */
 }
 
@@ -127,14 +127,17 @@
 /* --- 2. DEADLINE CARDS --- */
 .deadline-card {
     position: relative;
-    margin-bottom: 0.75rem;
+    margin-bottom: 2px;
     animation: slideInUp 0.3s ease-out backwards;
-    /* Hint Colors on Sides */
+    /* Hint Colors on Sides (More Visible) */
     background: linear-gradient(to right,
-            rgba(16, 185, 129, 0.4) 0%,
-            transparent 5%,
-            transparent 95%,
-            rgba(239, 68, 68, 0.4) 100%);
+            rgba(16, 185, 129, 0.8) 0%,
+            /* Green Hint Stronger */
+            transparent 10%,
+            /* Widened visibility */
+            transparent 90%,
+            rgba(239, 68, 68, 0.8) 100%);
+    /* Red Hint Stronger */
     border-radius: 20px;
     padding: 0;
     /* Content handles spacing */
@@ -158,32 +161,30 @@
 
 .swipe-action-bg.bg-restore {
     justify-content: flex-start;
-    background-color: #10b981;
-    /* Ensure Green for Restore/Archive */
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Neutral/Dark */
+    color: #10b981;
+    /* Icon stays Green for meaning */
 }
 
 .swipe-action-bg.bg-delete {
     justify-content: flex-end;
-    background-color: #ef4444;
-    /* Ensure Red for Delete */
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Neutral/Dark */
+    color: #ef4444;
+    /* Icon stays Red for meaning */
 }
 
 .deadline-card .swipe-content {
     /* Background scuro ma in tono col tema (Slate 900/Blue 950) per coprire le azioni sotto */
-    background: #0f172a;
-    /* Opzionale: leggero gradiente per dare profondità "glass" simulata */
-    background: linear-gradient(145deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%);
+    /* Background scuro stile Cerca (Slate 800) ma opaco per coprire azioni */
+    /* Glassmorphism Royal Blue (Vibrante ma Molto Trasparente) */
+    background: rgba(20, 53, 126, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 
-    backdrop-filter: none;
-    /* Blur non serve se è opaco */
-
-    /* Hint Colors via Inset Shadow */
-    box-shadow:
-        inset 6px 0 15px -4px rgba(16, 185, 129, 0.2),
-        /* Green Hint Left */
-        inset -6px 0 15px -4px rgba(239, 68, 68, 0.2),
-        /* Red Hint Right */
-        0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* Hint Colors removed - Clean Look */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     /* Standard Drop Shadow */
 
     /* Restore Glass Effect */
@@ -197,6 +198,28 @@
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     touch-action: pan-y;
     /* Permetti scroll vert but swipe orizz controllato da JS */
+}
+
+/* LIGHT MODE OVERRIDE */
+/* LIGHT MODE OVERRIDE (Correct Selector) */
+html:not(.dark) .deadline-card .swipe-content {
+    background: rgba(219, 234, 254, 0.75);
+    /* Blue 100 Glass (Subtle Blue Tint) */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: #bae6fd;
+    /* Sky 200 */
+    color: #0f172a;
+    /* Slate 900 Text */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+html:not(.dark) .deadline-card-title {
+    color: #0f172a;
+}
+
+html:not(.dark) .deadline-card-subtitle {
+    color: #334155;
 }
 
 .deadline-card:hover .swipe-content {
