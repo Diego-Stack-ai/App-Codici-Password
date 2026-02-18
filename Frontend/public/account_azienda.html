@@ -3,15 +3,19 @@
 
 <head>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' ; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-t="company_accounts">Account Azienda - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=3.4" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-t="company_accounts">Account Azienda - PROTOCOLLO BASE V5.0</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=5.3" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
@@ -19,37 +23,54 @@
     <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/account_azienda.css?v=5.0">
+
+    <!-- CORE JS -->
     <script src="assets/js/theme-init.js" defer></script>
+    <script src="assets/js/core.js"></script>
 </head>
 
 <body class="base-bg">
-    <script src="assets/js/core.js"></script>
-    <script type="module" src="assets/js/ui-core.js"></script> <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="base-container"> <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="base-glow"></div> <!-- HEADER FISSO (Protocollo v3.1 Balanced) -->
+    <div class="base-container">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
+
+        <!-- HEADER FISSO -->
         <header id="header-placeholder" class="base-header"></header>
-        <div class="spacer-header"></div> <!-- Main Content (PROTOCOLLO BASE Main Strategy) -->
+        <div class="spacer-header"></div>
+
+        <!-- Main Content -->
         <main class="base-main">
             <div class="page-container pt-header-extra pb-footer-extra">
-                <!-- SEARCH BAR (Standard PROTOCOLLO BASE UI) -->
-                <div class="search-container"> <label for="account-search" class="sr-only">Cerca account</label>
-                    <div class="glass-field search-field-box"> <span
-                            class="material-symbols-outlined opacity-50">search</span> <input type="search"
-                            id="account-search" placeholder="Cerca account o credenziali..."
+
+                <!-- SEARCH BAR -->
+                <div class="search-container">
+                    <label for="account-search" class="sr-only">Cerca account</label>
+                    <div class="glass-field search-field-box">
+                        <span class="material-symbols-outlined opacity-50">search</span>
+                        <input type="search" id="account-search" placeholder="Cerca account o credenziali..."
                             data-t-placeholder="search_placeholder" autocomplete="off" class="search-input-field">
                     </div>
-                </div> <!-- ACCOUNTS CONTAINER -->
-                <div id="accounts-container" class="micro-account-list"> <!-- Loading Spinner -->
-                    <div class="loading-full-box"> <span
-                            class="material-symbols-outlined animate-spin loading-spinner-icon">sync</span>
+                </div>
+
+                <!-- ACCOUNTS CONTAINER -->
+                <div id="accounts-container" class="micro-account-list">
+                    <!-- Loading Spinner -->
+                    <div class="loading-full-box">
+                        <span class="material-symbols-outlined loading-spinner-icon">sync</span>
                         <p data-t="loading_data">Caricamento...</p>
                     </div>
                 </div>
+
             </div>
         </main>
-        <div class="spacer-footer"></div> <!-- FOOTER PREMIUM -->
+
+        <div class="spacer-footer"></div>
+
+        <!-- FOOTER -->
         <footer id="footer-placeholder" class="base-footer"></footer>
-    </div> <!-- SCRIPTS MODULARI -->
+    </div>
+
+    <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>
 
 </body>

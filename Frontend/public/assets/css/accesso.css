@@ -327,13 +327,19 @@
 }
 
 /* --- 5. VAULT MODULE (Centering) --- */
+
+/* Override: nelle pagine auth il base-container deve centrare verticalmente */
+.base-container {
+    justify-content: center;
+}
+
 .vault {
     width: 100%;
     max-width: 448px;
     position: relative;
     z-index: 10;
     box-sizing: border-box;
-    margin: auto auto;
+    margin: auto;
 }
 
 /* --- 6. PASSWORD FIELD (Auth) --- */

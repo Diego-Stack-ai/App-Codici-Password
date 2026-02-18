@@ -250,3 +250,123 @@
 .base-shield {
     -webkit-text-security: disc;
 }
+
+/* --- 6. SOURCE SELECTOR MODAL (V5.0 - Sostituisce Tailwind) --- */
+.source-selector-overlay {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+
+.source-selector-overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.source-selector-card {
+    width: 280px;
+    padding: 1.25rem;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.source-selector-title {
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+    color: white;
+}
+
+.source-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.source-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.source-btn:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.source-btn.gallery:hover {
+    border-color: rgba(168, 85, 247, 0.5);
+    background: rgba(168, 85, 247, 0.05);
+}
+
+.source-btn.file-doc {
+    grid-column: span 2;
+}
+
+.source-btn.file-doc:hover {
+    border-color: rgba(245, 158, 11, 0.5);
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.source-btn-label {
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.source-selector-footer {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 0.5rem;
+    text-align: center;
+}
+
+.source-selector-cancel {
+    padding: 0.5rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.3);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.source-selector-cancel:hover {
+    color: white;
+}
+
+/* Flex col gap per telefoni referente */
+.flex-col-gap-2-phones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}

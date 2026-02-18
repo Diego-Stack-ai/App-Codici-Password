@@ -77,6 +77,21 @@
     font-weight: 600;
 }
 
+/* Badge forma giuridica azienda */
+.company-badge {
+    display: inline-block;
+    margin: 0.5rem auto 0;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
 /* --- 2. SECTIONS --- */
 .detail-content-wrap {
     padding: 0 1.25rem 2.5rem;

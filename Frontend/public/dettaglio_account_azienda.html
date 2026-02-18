@@ -198,7 +198,7 @@
                             <!-- Telefoni -->
                             <div class="glass-field-container">
                                 <label class="view-label">Contatti (Fisso / Cellulare)</label>
-                                <div class="flex flex-col gap-2">
+                                <div class="flex-col-gap-2-phones">
                                     <div class="detail-field-box border-glow">
                                         <span class="material-symbols-outlined ml-4 opacity-40">call</span>
                                         <input id="ref-phone" readonly class="detail-field-input no-transform">
@@ -278,43 +278,29 @@
     <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden">
 
     <!-- Source Selector Modal -->
-    <!-- Source Selector Modal -->
-    <div id="source-selector-modal"
-        class="modal-overlay backdrop-blur-md bg-black/80 flex items-center justify-center fixed inset-0 z-50 invisible opacity-0 transition-opacity">
-        <div
-            class="glass-card w-[280px] p-5 !bg-[#0f172a] border border-white/10 shadow-2xl rounded-2xl overflow-hidden">
-            <h3 class="text-[10px] font-extrabold uppercase tracking-widest text-center mb-4 opacity-40 text-white">
-                Seleziona Sorgente</h3>
+    <div id="source-selector-modal" class="source-selector-overlay">
+        <div class="source-selector-card">
+            <h3 class="source-selector-title">Seleziona Sorgente</h3>
 
-            <div class="grid grid-cols-2 gap-3">
-                <button
-                    class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group bg-transparent"
-                    data-source="camera">
-                    <span
-                        class="material-symbols-outlined text-2xl text-blue-400 group-hover:scale-110 transition-transform">photo_camera</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Camera</span>
+            <div class="source-selector-grid">
+                <button class="source-btn" data-source="camera">
+                    <span class="material-symbols-outlined icon-accent-blue">photo_camera</span>
+                    <span class="source-btn-label">Camera</span>
                 </button>
 
-                <button
-                    class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group bg-transparent"
-                    data-source="gallery">
-                    <span
-                        class="material-symbols-outlined text-2xl text-purple-400 group-hover:scale-110 transition-transform">collections</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Galleria</span>
+                <button class="source-btn gallery" data-source="gallery">
+                    <span class="material-symbols-outlined icon-accent-purple">collections</span>
+                    <span class="source-btn-label">Galleria</span>
                 </button>
 
-                <button
-                    class="col-span-2 flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group bg-transparent"
-                    data-source="file">
-                    <span
-                        class="material-symbols-outlined text-xl text-amber-400 group-hover:scale-110 transition-transform">description</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Documento</span>
+                <button class="source-btn file-doc" data-source="file">
+                    <span class="material-symbols-outlined icon-accent-amber">description</span>
+                    <span class="source-btn-label">Documento</span>
                 </button>
             </div>
 
-            <div class="mt-4 border-t border-white/5 pt-2 text-center">
-                <button type="button" onclick="closeSourceSelector()"
-                    class="py-2 text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors bg-transparent border-none">
+            <div class="source-selector-footer">
+                <button type="button" id="btn-cancel-source" class="source-selector-cancel">
                     Annulla
                 </button>
             </div>
