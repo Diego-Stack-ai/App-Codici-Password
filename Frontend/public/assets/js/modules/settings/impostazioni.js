@@ -254,14 +254,18 @@ function setupTimeoutSelector(data) {
 
 async function generateVCard(user, data) {
     // V5.0 OPTIMIZATION: Lazy Preview
-    // Evita blocchi al load (Violation handler took >150ms).
-    // Genera un QR minimale ritardato.
+    // Genera la vCard reale con lazy load per non bloccare il caricamento.
     setTimeout(async () => {
         const previewDest = document.getElementById('qrcode-preview');
         if (previewDest) {
             await ensureQRCodeLib();
-            // Stringa fissa leggerissima per preview immediata
-            renderQRCode(previewDest, "PREVIEW", { width: 72, height: 72, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 0 }); // L
+            const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
+                contactPhones,
+                contactEmails,
+                userAddresses
+            });
+            // Stessi parametri di profilo_privato: 104x104, correctLevel Q
+            renderQRCode(previewDest, vcardStr, { width: 104, height: 104, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 2 });
         }
     }, 600);
 }

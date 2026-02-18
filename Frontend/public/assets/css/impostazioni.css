@@ -301,11 +301,11 @@ h3.settings-desc {
 }
 
 .qr-preview-box {
-    width: 90px;
-    height: 90px;
+    width: 116px;
+    height: 116px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
-    padding: 8px;
+    padding: 6px;
     position: relative;
     display: flex;
     align-items: center;
