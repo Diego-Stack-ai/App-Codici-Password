@@ -180,6 +180,50 @@
     padding: 1.75rem 1.5rem;
 }
 
+/* Titolo centrato nel popup QR */
+.modal-box-qr .modal-title {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0f172a;
+    margin-bottom: 0;
+}
+
+.dark .modal-box-qr .modal-title {
+    color: #e2e8f0;
+}
+
+/* Pulsante Chiudi a larghezza piena nel popup QR */
+.modal-box-qr .btn-modal {
+    width: 100%;
+    flex: none;
+    background: rgba(15, 23, 42, 0.08);
+    color: #0f172a;
+    border: 1.5px solid rgba(15, 23, 42, 0.12);
+    border-radius: 99px;
+    height: 3rem;
+    font-size: 0.85rem;
+}
+
+.dark .modal-box-qr .btn-modal {
+    background: rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.modal-box-qr .btn-modal:hover {
+    background: rgba(15, 23, 42, 0.15);
+    transform: translateY(-1px);
+    filter: none;
+}
+
+.dark .modal-box-qr .btn-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
 .qr-zoom-container {
     background: #E3F2FD;
     padding: 8px;
