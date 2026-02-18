@@ -3,6 +3,20 @@
    Login, Registrazione, Reset Password
    ========================================================================== */
 
+/* --- 0. ANTI-FLICKER FALLBACK (Safety Net per pagine Auth) ---
+   Se data-i18n rimane su "loading" (es. errore JS), forza la visibilità dopo 1.5s.
+   Questo previene la schermata nera/vuota in caso di errori di caricamento moduli. */
+@keyframes forceReveal {
+    to {
+        visibility: visible;
+    }
+}
+
+html[data-i18n="loading"] body {
+    animation: forceReveal 0s 1.5s forwards;
+}
+
+
 /* --- 1. SAETTA SYSTEM (PREMIUM) --- */
 .saetta-drop {
     position: absolute;
