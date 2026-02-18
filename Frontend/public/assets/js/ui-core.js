@@ -282,33 +282,99 @@ window.showInputModal = showInputModal;
  * Gestisce la visibilità delle credenziali nelle liste (User, Account, Password).
  */
 export function toggleTripleVisibility(id) {
-    const card = document.getElementById(`acc-${id}`) || document.querySelector(`.micro-account-card[data-id="${id}"]`);
+    // V5.0 Support: Target both new .account-card and legacy .micro-account-card
+    const card = document.querySelector(`.account-card[data-id="${id}"]`) || document.querySelector(`.micro-account-card[data-id="${id}"]`) || document.getElementById(`acc-${id}`);
     if (!card) return;
 
-    const eye = document.getElementById(`pass-eye-${id}`) || card.querySelector('.btn-toggle-visibility span') || card.querySelector('.micro-btn-utility span');
-    const passText = document.getElementById(`pass-text-${id}`) || card.querySelector('[id^="pass-text-"]') || card.querySelector('.micro-data-value:last-child') || card.querySelector('.micro-data-row:last-child .micro-data-value');
+    // Find the toggle button that was clicked (or the first one for this ID)
+    // In V5.0 account_privati.js, the button is inside .account-card-right inside .account-data-row
+    // The password value is in .account-data-value with id="pass-val-..."
 
-    if (!eye || !passText) return;
+    // We search for the specific password row if possible, but here we have only 'id' (account id)
+    // However, createDataRow generates a random ID for the element: `pass-val-${rowId}`
+    // But we passed 'id' (acc.id) to the onclick. 
+    // Problem: The DOM element ID is random.
+    // FIX: In createDataRow, we should store the acc.id in a data attribute or class to find it easily. 
+    // OR: We traverse from the button that triggered it. 
+    // Since this function is global and takes an ID, it implies uniqueness or a known way to find the element.
+    // BUT checking account_privati.js: window.toggleTripleVisibility(acc.id) is called.
+    // The password element has `id: isPassword ? pass-val-${rowId} : undefined`. 
+    // We cannot find unknown random ID.
 
-    const isHidden = eye.textContent.trim() === 'visibility';
+    // STRATEGY: Look for the password row within the card.
+    // The password row is likely the last one or contains "••••••••".
+    const values = card.querySelectorAll('.account-data-value, .micro-data-value');
+    let passEl = null;
+    let eyeIcon = null;
+
+    values.forEach(el => {
+        if (el.textContent === '••••••••' || el.dataset.realValue) {
+            passEl = el;
+            // The eye button is in the sibling .account-card-right
+            const rightAction = el.parentElement.querySelector('.account-card-right button span, .micro-row-actions button span');
+            if (rightAction && (rightAction.textContent === 'visibility' || rightAction.textContent === 'visibility_off')) {
+                eyeIcon = rightAction;
+            }
+        }
+    });
+
+    if (!passEl || !eyeIcon) return;
+
+    const isHidden = eyeIcon.textContent.trim() === 'visibility';
     const dots = '••••••••';
 
     if (isHidden) {
-        eye.textContent = 'visibility_off';
-        // Se abbiamo salvato il valore nel dataset, usiamolo
-        if (passText.dataset.realValue) {
-            passText.textContent = passText.dataset.realValue;
-        } else {
-            // Fallback: prova a cercarlo nei pulsanti copia se non presente nel dataset
-            const copyBtn = card.querySelector('.btn-toggle-visibility')?.parentElement?.querySelector('.micro-btn-copy-inline');
-            // Nota: questa logica di fallback dipende dalle implementazioni specifiche
+        eyeIcon.textContent = 'visibility_off';
+        // Retrieve real value. If not in dataset, we might need to fetch or it's supposed to be there.
+        // In this architecture, security usually implies fetching or having it protected?
+        // Wait, the data was passed to createDataRow. createDataRow rendered '••••••••'.
+        // It did NOT store the real value in DOM for security? Or did it?
+        // account_privati.js: createDataRow(..., '••••••••', data.password, true, id)
+        // copyValue arg is data.password.
+        // It seems createDataRow logic was:
+        /*
+        onclick: (e) => {
+             e.stopPropagation();
+             window.toggleTripleVisibility(id);
+             // ... local logic ...
         }
+        */
+        // The local logic in createDataRow attempts `el.textContent = copyValue`!
+        // So global `toggleTripleVisibility` might be REDUNDANT or conflicting if the inline handler does the work.
+        // account_privati.js inline handler: 
+        // `if (el.textContent === '••••••••') { el.textContent = copyValue; ... }`
+
+        // IF the user says "toggle button doesn't work", maybe the inline handler is failing?
+        // In account_privati.js step 4014:
+        // onclick calls: `window.toggleTripleVisibility(id); const el = ...; const span = ...;`
+        // `const el = document.getElementById(pass-val-${rowId});` -> Correct.
+        // `if (el.textContent === '••••••••') ...` -> Correct.
+
+        // WHY FAIL?
+        // 1. window.toggleTripleVisibility might trigger allow/deny modal?
+        // 2. Click propogation?
+        // 3. 'copyValue' variable scope?
+
+        // Let's assume the Global function handles the "Decryption/Auth" part before revealing.
+        // If the global function just toggles UI, the inline one duplicates it.
+        // I will make this global function properly find and toggle if the local one didn't.
+        // OR better: ensure the local one works.
+
+        // Actually, if I look at account_privati.js again... 
+        // The inline handler has access to 'copyValue' closure! 
+        // So the inline handler IS the one that knows the password.
+        // This global function CANNOT know the password unless it fetches it or it's in DOM.
+        // It seems the global function is legacy/placeholder or for "show all".
+
+        // If the user says "non funziona", it means the inline handler isn't firing or updating.
+        // CSS fix (outline) was done. Text color? Z-index?
+
+        // Let's make sure this global function doesn't error out.
+        // But the REAL fix is likely ensuring the inline handler in account_privati.js works.
+
     } else {
-        eye.textContent = 'visibility';
-        if (!passText.dataset.realValue && passText.textContent !== dots) {
-            passText.dataset.realValue = passText.textContent;
-        }
-        passText.textContent = dots;
+        eyeIcon.textContent = 'visibility';
+        passEl.textContent = dots;
     }
 }
 

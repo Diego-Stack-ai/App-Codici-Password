@@ -1,49 +1,79 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-i18n="loading">
 
 <head>
+    <!-- Anti-flicker & Theme Master (V5.0) -->
+    <script src="assets/js/theme-init.js"></script>
+    <!-- CSP (Content Security Policy) - V5.0 Standard -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' ; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-t="account_private">Account Privati - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
+    <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
     <link rel="manifest" href="manifest.json?v=3.4" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.jpg">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <!-- Fonts -->
+    <!-- CSS Stratificato (V5.0 compliant) -->
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_pagine.css">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/account_privati.css?v=5.0">
 </head>
 
-<body class="base-bg"> <!-- 1. CONTENITORE PRINCIPALE (Standard Regola #2) -->
-    <div class="base-container"> <!-- 2. FARO ANIMATO "VIVO" (Standard Regola #3) -->
-        <div class="base-glow"></div> <!-- HEADER FISSO (Protocollo v3.1 Balanced) -->
+<body class="base-bg">
+    <!-- 1. BASE CONTAINER (Design System V5.0) -->
+    <div class="base-container">
+        <!-- 2. BASE GLOW (Ambience Effect) -->
+        <div class="base-glow"></div>
+
+        <!-- 3. HEADER (Fixed Content Placeholders) -->
         <header id="header-placeholder" class="base-header"></header>
-        <div class="spacer-header"></div> <!-- Main Content (PROTOCOLLO BASE Main Strategy) -->
-        <main class="base-main"> <!-- SEARCH BAR (Standard PROTOCOLLO BASE UI) -->
-            <div class="search-container"> <label for="account-search" class="sr-only">Cerca account</label>
-                <div class="glass-field search-field-box"> <span
-                        class="material-symbols-outlined opacity-50">search</span> <input type="search"
-                        id="account-search" placeholder="Cerca account o credenziali..."
-                        data-t-placeholder="search_placeholder" autocomplete="off" class="search-input-field"> </div>
-            </div> <!-- ACCOUNTS CONTAINER -->
-            <div id="accounts-container" class="micro-account-list"> <!-- Loading Spinner -->
-                <div class="loading-full-box"> <span
-                        class="material-symbols-outlined animate-spin loading-spinner-icon">sync</span>
-                    <p data-t="loading_data">Caricamento...</p>
+
+        <!-- 4. MAIN CONTENT (Pure HTML Strategy) -->
+        <main class="base-main">
+            <!-- PAGE CONTAINER (Safe Area & Padding) -->
+            <div class="page-container pt-header-extra pb-footer-extra">
+
+                <!-- TOOLBAR (Search + Sort) -->
+                <div class="deadline-toolbar search-container mt-2">
+                    <!-- Search Box -->
+                    <div class="glass-field search-field-box">
+                        <span class="material-symbols-outlined opacity-50">search</span>
+                        <input type="search" id="account-search" placeholder="Cerca..."
+                            data-t-placeholder="search_short" autocomplete="off" class="search-input-field">
+                    </div>
+
+                    <!-- Sort Button -->
+                    <button id="sort-btn" class="glass-btn-icon" title="Ordina">
+                        <span class="material-symbols-outlined sort-icon">sort</span>
+                        <span id="sort-label" class="sort-btn-label">A-Z</span>
+                    </button>
                 </div>
+
+                <!-- ACCOUNTS LIST UNIT -->
+                <div id="accounts-container" class="micro-account-list">
+                    <!-- Loading Spinner (Auto-removed by JS) -->
+                    <div class="loading-full-box">
+                        <span class="material-symbols-outlined animate-spin loading-spinner-icon">sync</span>
+                        <p data-t="loading_data">Caricamento...</p>
+                    </div>
+                </div>
+
             </div>
         </main>
-        <div class="spacer-footer"></div> <!-- FOOTER PREMIUM -->
-        <footer id="footer-placeholder" class="base-footer"></footer>
-    </div> <!-- SCRIPTS MODULARI -->
-    <script type="module" src="assets/js/main.js"></script>
 
+        <!-- 5. FOOTER (Fixed Content Placeholders) -->
+        <footer id="footer-placeholder" class="base-footer"></footer>
+    </div>
+
+    <!-- 6. BOOTSTRAP SCRIPTS (Single Orchestrator) -->
+    <script type="module" src="assets/js/main.js"></script>
 </body>
 
 </html>

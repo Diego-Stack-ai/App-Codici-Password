@@ -10,7 +10,7 @@
  */
 
 import { db } from '../../firebase-config.js';
-import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, addDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
@@ -47,8 +47,9 @@ export async function initAreaPrivata(user) {
         loadRubrica(user.uid)
     ]);
 
-    // 2. Setup Event Listeners (Idempotente)
+    // 2. Setup Event Listeners & FABs (Idempotente)
     setupEventListeners(user.uid);
+    setupFABs();
 
     console.log("[AreaPrivata] Modulo Pronto.");
 }
@@ -93,7 +94,7 @@ async function loadCounters(uid, email) {
 
         const setVal = (id, val) => {
             const el = document.getElementById(id);
-            if (el) el.textContent = `(${val})`;
+            if (el) el.textContent = val;
         };
 
         setVal('count-standard', counts.standard);
@@ -122,7 +123,7 @@ async function loadTopAccounts(uid) {
 
         if (snap.empty) {
             list.appendChild(createElement('p', {
-                className: 'text-[10px] text-white/20 text-center py-6 font-bold uppercase tracking-widest',
+                className: 'card-no-data',
                 textContent: t('no_active_data') || 'Nessun dato attivo'
             }));
             return;
@@ -132,7 +133,7 @@ async function loadTopAccounts(uid) {
         setChildren(list, items);
     } catch (e) {
         logError("TopAccounts", e);
-        setChildren(list, createElement('p', { className: 'text-[10px] text-red-400/30 text-center py-6', textContent: 'Errore caricamento' }));
+        setChildren(list, createElement('p', { className: 'error-text', textContent: 'Errore caricamento' }));
     }
 }
 
@@ -142,63 +143,78 @@ function createMicroAccountCard(id, data) {
     const isShared = !!data.shared || !!data.isMemoShared;
 
     let badgeClass = 'bg-blue-500';
-    if (isShared && isMemo) badgeClass = 'badge-shared-memo bg-emerald-500';
-    else if (isShared) badgeClass = 'badge-shared bg-purple-500';
-    else if (isMemo) badgeClass = 'badge-memo bg-amber-500';
+    if (isShared && isMemo) badgeClass = 'bg-emerald-500';
+    else if (isShared) badgeClass = 'bg-purple-500';
+    else if (isMemo) badgeClass = 'bg-amber-500';
 
     const card = createElement('div', {
-        className: 'micro-account-card cursor-pointer hover:bg-white/5 transition-all active:scale-95',
+        className: 'account-card',
         onclick: () => window.location.href = `dettaglio_account_privato.html?id=${id}`
     }, [
         createElement('div', { className: 'swipe-content' }, [
-            createElement('div', { className: 'micro-account-content' }, [
-                createElement('div', { className: 'micro-account-avatar-box' }, [
-                    createElement('img', { className: 'micro-account-avatar', src: avatar }),
-                    createElement('div', { className: `micro-item-badge-dot ${badgeClass}` })
-                ]),
-                createElement('div', { className: 'micro-account-info' }, [
-                    createElement('h3', { className: 'micro-account-name', textContent: data.nomeAccount || t('without_name') }),
-                    createElement('div', { className: 'micro-account-subtitle' }, [
-                        createElement('span', { textContent: `${t('views')}: ${data.views || 0}` })
+            createElement('div', { className: 'account-card-layout' }, [
+                createElement('div', { className: 'account-card-left' }, [
+                    createElement('div', { className: 'account-icon-box' }, [
+                        createElement('img', { className: 'account-avatar', src: avatar }), // class account-avatar not specialized but image fills box
+                        createElement('div', { className: `account-badge-dot ${badgeClass}` })
+                    ]),
+                    createElement('div', { className: 'account-card-info-group' }, [
+                        createElement('h3', { className: 'account-card-title' }, [
+                            document.createTextNode(data.nomeAccount || t('without_name')),
+                            createElement('span', { className: 'micro-visto-inline', style: 'opacity:0.6; font-size: 0.8em; margin-left: 4px;', textContent: `• ${data.views || 0}` })
+                        ]),
+                        createElement('p', { className: 'account-card-subtitle', textContent: data.username || data.email || 'Utente Nascosto' })
                     ])
-                ]),
-                createElement('div', { className: 'micro-account-top-actions' }, [
-                    data.password ? createElement('button', {
-                        className: 'micro-btn-utility relative z-10',
-                        onclick: (e) => { e.stopPropagation(); window.toggleTripleVisibility(id); }
-                    }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' })
-                    ]) : null
                 ])
             ]),
-            createElement('div', { className: 'micro-data-display' }, [
+            createElement('div', { className: 'account-data-display' }, [
                 data.username ? createDataRow(t('label_user'), data.username) : null,
                 data.account ? createDataRow(t('label_account'), data.account) : null,
-                data.password ? createDataRow(t('label_password'), '••••••••', data.password, true) : null
+                data.password ? createDataRow(t('label_password'), '••••••••', data.password, true, id) : null
             ].filter(Boolean))
         ])
     ]);
     return card;
 }
 
-function createDataRow(label, displayValue, copyValue = null, isPassword = false) {
-    return createElement('div', { className: 'micro-data-row' }, [
-        createElement('span', { className: 'micro-data-label', textContent: `${label}:` }),
+function createDataRow(label, displayValue, copyValue = null, isPassword = false, id = null) {
+    const rowId = Math.random().toString(36).substr(2, 9);
+    return createElement('div', { className: 'account-data-row' }, [
+        createElement('span', { className: 'account-data-label', textContent: `${label}:` }),
         createElement('span', {
-            className: 'micro-data-value',
-            id: isPassword ? `pass-text-${Math.random().toString(36).substr(2, 9)}` : undefined, // Genera ID casuale se serve per visibilità
+            className: 'account-data-value',
+            id: isPassword ? `pass-val-${rowId}` : undefined,
             textContent: displayValue
         }),
-        createElement('button', {
-            className: 'micro-btn-copy-inline relative z-10',
-            onclick: (e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(copyValue || displayValue);
-                showToast(t('copied') || "Copiato!");
-            }
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
-        ])
+        createElement('div', { className: 'micro-row-actions' }, [
+            isPassword ? createElement('button', {
+                className: 'btn-mini-action',
+                onclick: (e) => {
+                    e.stopPropagation();
+                    const el = document.getElementById(`pass-val-${rowId}`);
+                    const span = e.currentTarget.querySelector('span');
+                    if (el.textContent === '••••••••') {
+                        el.textContent = copyValue;
+                        span.textContent = 'visibility_off';
+                    } else {
+                        el.textContent = '••••••••';
+                        span.textContent = 'visibility';
+                    }
+                }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'visibility' })
+            ]) : null,
+            createElement('button', {
+                className: 'btn-mini-action',
+                onclick: (e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(copyValue || displayValue);
+                    showToast(t('copied') || "Copiato!");
+                }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'content_copy' })
+            ])
+        ].filter(Boolean))
     ]);
 }
 
@@ -222,7 +238,7 @@ async function loadRubrica(uid) {
         clearElement(listContainer);
 
         if (contacts.length === 0) {
-            listContainer.appendChild(createElement('p', { className: 'text-xs text-white/10 py-10 text-center', textContent: t('empty_contacts') }));
+            listContainer.appendChild(createElement('p', { className: 'card-no-data', textContent: t('empty_contacts') }));
             return;
         }
 
@@ -237,19 +253,45 @@ function createContactItem(uid, c) {
         createElement('div', { className: 'rubrica-item-info-row' }, [
             createElement('div', { className: 'rubrica-item-avatar', textContent: (c.nome || '?').charAt(0).toUpperCase() }),
             createElement('div', { className: 'rubrica-item-info' }, [
-                createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: `${c.nome} ${c.cognome || ''}` }),
-                createElement('p', { className: 'truncate m-0 tracking-tighter max-w-100 rubrica-item-email', textContent: c.email })
+                createElement('p', { className: 'rubrica-item-name', textContent: `${c.nome} ${c.cognome || ''}` }),
+                createElement('p', { className: 'rubrica-item-email', textContent: c.email })
             ])
         ]),
         createElement('div', { className: 'rubrica-item-actions' }, [
             createElement('button', {
-                className: 'btn-delete-contact rubrica-item-action',
+                className: 'rubrica-item-action action-edit',
+                onclick: () => editContact(c)
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
+            ]),
+            createElement('button', {
+                className: 'rubrica-item-action action-delete',
                 onclick: () => deleteContact(uid, c.id)
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
             ])
         ])
     ]);
+}
+
+function editContact(c) {
+    const nomeInput = document.getElementById('contact-nome');
+    const cognomeInput = document.getElementById('contact-cognome');
+    const emailInput = document.getElementById('contact-email');
+    const form = document.getElementById('add-contact-form');
+
+    if (nomeInput) nomeInput.value = c.nome || '';
+    if (cognomeInput) cognomeInput.value = c.cognome || '';
+    if (emailInput) emailInput.value = c.email || '';
+
+    if (form) {
+        form.classList.remove('hidden');
+        form.dataset.editId = c.id; // Salva l'ID per l'update
+        const btnSave = document.getElementById('btn-add-contact');
+        const btnCancel = document.getElementById('btn-cancel-contact');
+        if (btnSave) btnSave.textContent = t('update') || 'AGGIORNA';
+        if (btnCancel) btnCancel.classList.remove('hidden');
+    }
 }
 
 async function deleteContact(uid, id) {
@@ -260,6 +302,26 @@ async function deleteContact(uid, id) {
         showToast(t('contact_removed'));
         loadRubrica(uid); // Ricarica rubrica
     } catch (e) { logError("RubricaDelete", e); }
+}
+
+async function resetAccountViews(uid) {
+    if (!await showConfirmModal(t('confirm_reset_views_title') || "Reset Visti", t('confirm_reset_views_msg') || "Vuoi davvero azzerare tutti i contatori delle visualizzazioni?")) return;
+
+    try {
+        const q = query(collection(db, "users", uid, "accounts"));
+        const snap = await getDocs(q);
+
+        if (snap.empty) return;
+
+        const batch = writeBatch(db);
+        snap.docs.forEach(d => {
+            batch.update(d.ref, { views: 0 });
+        });
+
+        await batch.commit();
+        showToast(t('views_reset_success') || "Contatori azzerati!");
+        loadTopAccounts(uid); // Refresh Top 10
+    } catch (e) { logError("ResetViews", e); }
 }
 
 /**
@@ -288,11 +350,33 @@ function setupEventListeners(uid) {
         }
     });
 
-    // Toggle Form Aggiungi
+    // Reset Views
+    addListenerOnce('btn-reset-views', 'click', () => {
+        resetAccountViews(uid);
+    });
+
     addListenerOnce('add-contact-btn', 'click', (e) => {
         e.stopPropagation();
         const form = document.getElementById('add-contact-form');
-        if (form) form.classList.toggle('hidden');
+        const btnSave = document.getElementById('btn-add-contact');
+        const btnCancel = document.getElementById('btn-cancel-contact');
+        if (form) {
+            const isHidden = form.classList.toggle('hidden');
+            if (isHidden) {
+                resetContactForm();
+            } else {
+                delete form.dataset.editId;
+                if (btnSave) btnSave.textContent = t('save_contact') || 'SALVA';
+                if (btnCancel) btnCancel.classList.add('hidden');
+            }
+        }
+    });
+
+    // Annulla Modifica
+    addListenerOnce('btn-cancel-contact', 'click', () => {
+        resetContactForm();
+        const form = document.getElementById('add-contact-form');
+        if (form) form.classList.add('hidden');
     });
 
     // Salva Contatto
@@ -313,23 +397,81 @@ function setupEventListeners(uid) {
         }
 
         try {
-            await addDoc(collection(db, "users", uid, "contacts"), {
+            const form = document.getElementById('add-contact-form');
+            const editId = form ? form.dataset.editId : null;
+
+            const contactData = {
                 nome,
                 cognome,
                 email,
-                createdAt: new Date().toISOString()
-            });
+                updatedAt: new Date().toISOString()
+            };
 
-            showToast(t('identity_registered'));
+            if (editId) {
+                // UPDATE
+                await updateDoc(doc(db, "users", uid, "contacts", editId), contactData);
+                showToast(t('contact_updated') || 'Contatto aggiornato!');
+            } else {
+                // ADD
+                contactData.createdAt = contactData.updatedAt;
+                await addDoc(collection(db, "users", uid, "contacts"), contactData);
+                showToast(t('identity_registered'));
+            }
 
-            // Reset Form
-            nomeEl.value = '';
-            if (cognomeEl) cognomeEl.value = '';
-            emailEl.value = '';
-            document.getElementById('add-contact-form').classList.add('hidden');
-
-            // Reload
+            // Reset Form and reload
+            resetContactForm();
+            if (form) form.classList.add('hidden');
             loadRubrica(uid);
-        } catch (e) { logError("RubricaAdd", e); }
+        } catch (e) { logError("RubricaSave", e); }
     });
+}
+
+/**
+ * ------------------------------------------------------------------
+ * FAB SYSTEM (Centrale)
+ * ------------------------------------------------------------------
+ */
+function setupFABs() {
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) {
+        clearElement(fCenter);
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+            createElement('a', {
+                href: 'archivio_account.html',
+                className: 'btn-fab-action btn-fab-archive',
+                title: t('account_archive') || 'Archivio',
+                dataset: { label: t('archive') || 'Archivio' }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
+            ]),
+            createElement('button', {
+                id: 'add-account-btn',
+                className: 'btn-fab-action btn-fab-scadenza',
+                title: t('add_account') || 'Nuovo Account',
+                dataset: { label: t('add_short') || 'Aggiungi' },
+                onclick: () => window.location.href = 'form_account_privato.html'
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+            ])
+        ]));
+    }
+}
+
+/**
+ * RESET FORM CONTATTI
+ */
+function resetContactForm() {
+    const nomeEl = document.getElementById('contact-nome');
+    const cognomeEl = document.getElementById('contact-cognome');
+    const emailEl = document.getElementById('contact-email');
+    const form = document.getElementById('add-contact-form');
+    const btnSave = document.getElementById('btn-add-contact');
+    const btnCancel = document.getElementById('btn-cancel-contact');
+
+    if (nomeEl) nomeEl.value = '';
+    if (cognomeEl) cognomeEl.value = '';
+    if (emailEl) emailEl.value = '';
+    if (form) delete form.dataset.editId;
+    if (btnSave) btnSave.textContent = t('save_contact') || 'SALVA';
+    if (btnCancel) btnCancel.classList.add('hidden');
 }

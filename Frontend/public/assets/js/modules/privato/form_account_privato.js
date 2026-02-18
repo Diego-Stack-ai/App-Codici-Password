@@ -317,23 +317,25 @@ function renderBankAccounts() {
     clearElement(container);
 
     bankAccounts.forEach((acc, idx) => {
-        const isOpen = acc._isOpen !== false; // Default aperto se non specificato
+        const isOpen = acc._isOpen !== false;
 
-        const div = createElement('div', { className: 'flex-col-gap p-4 rounded-2xl border border-white/10 bg-white/5 relative border-glow mb-4' }, [
-            createElement('div', {
-                className: 'flex items-center justify-between mb-2 cursor-pointer',
-                onclick: () => { acc._isOpen = !isOpen; renderBankAccounts(); }
-            }, [
-                createElement('div', { className: 'flex items-center gap-2' }, [
+        const div = createElement('div', { className: 'bank-account-card border-glow' }, [
+            // Header: titolo + cestino inline
+            createElement('div', { className: 'bank-header' }, [
+                createElement('div', {
+                    className: 'bank-header-left',
+                    onclick: () => { acc._isOpen = !isOpen; renderBankAccounts(); },
+                    style: 'cursor:pointer; flex:1;'
+                }, [
                     createElement('span', {
-                        className: 'material-symbols-outlined text-[16px] text-purple-400 transition-transform',
+                        className: 'material-symbols-outlined bank-expand-icon',
                         style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
                         textContent: 'expand_more'
                     }),
-                    createElement('span', { className: 'text-[10px] font-black uppercase text-purple-400', textContent: acc.iban ? `Conto: ${acc.iban.substring(0, 10)}...` : `Nuovo Conto #${idx + 1}` })
+                    createElement('span', { className: 'bank-title', textContent: acc.iban ? `Conto: ${acc.iban.substring(0, 10)}...` : `Nuovo Conto #${idx + 1}` })
                 ]),
                 createElement('button', {
-                    className: 'bg-transparent border-none text-red-500/20 hover:text-red-500 transition-all p-1 flex items-center justify-center',
+                    className: 'btn-delete-bank',
                     onclick: async (e) => {
                         e.stopPropagation();
                         const ok = await showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
@@ -342,35 +344,30 @@ function renderBankAccounts() {
                             renderBankAccounts();
                         }
                     }
-                }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })])
+                }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
             ]),
 
             // Content (Solo se aperto)
-            isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
+            isOpen ? createElement('div', { className: 'bank-details' }, [
                 createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
                 createInputField('Pass. Disp.', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock'),
-
-                // Referente Banca
-                createElement('div', { className: 'flex-col-gap mt-2' }, [
-                    createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
-                    createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone')
-                ]),
+                createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
+                createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone'),
 
                 // Carte Section
-                createElement('div', { className: 'mt-4 border-t border-white/5 pt-4' }, [
-                    createElement('div', { className: 'flex items-center justify-between mb-3' }, [
-                        createElement('span', { className: 'text-[9px] font-black uppercase text-white/40 tracking-widest', textContent: 'Carte Associate' }),
+                createElement('div', { className: 'bank-cards-section' }, [
+                    createElement('div', { className: 'bank-cards-header' }, [
+                        createElement('span', { className: 'bank-cards-label', textContent: 'Carte Associate' }),
                         createElement('button', {
-                            className: 'bg-transparent border-none text-emerald-400/40 hover:text-emerald-400 transition-all p-1 flex items-center justify-center',
+                            className: 'btn-add-card',
                             onclick: () => {
                                 if (!acc.cards) acc.cards = [];
-                                // Chiudi altre carte
                                 acc.cards.forEach(c => c._isOpen = false);
                                 acc.cards.push({ cardType: '', cardNumber: '', expiry: '', titolare: '', ccv: '', pin: '', type: 'Credit', _isOpen: true });
                                 renderBankAccounts();
                             }
                         }, [
-                            createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'add_card' })
+                            createElement('span', { className: 'material-symbols-outlined', textContent: 'add_card' })
                         ])
                     ]),
                     createElement('div', { className: 'flex-col-gap' }, (acc.cards || []).map((card, cIdx) => renderCardEntry(idx, cIdx, card)))
@@ -401,36 +398,36 @@ function renderBankAccounts() {
 function renderCardEntry(bankIdx, cardIdx, card) {
     const isOpen = card._isOpen !== false;
 
-    return createElement('div', { className: 'bg-black/20 p-4 rounded-2xl border border-white/5 relative group mb-3 border-glow' }, [
-        // Card Header (Clickable to toggle)
-        createElement('div', {
-            className: 'flex items-center justify-between cursor-pointer mb-2 pr-10',
-            onclick: () => { card._isOpen = !isOpen; renderBankAccounts(); }
-        }, [
-            createElement('div', { className: 'flex items-center gap-2' }, [
+    return createElement('div', { className: 'card-entry border-glow' }, [
+        // Card Header: titolo + cestino inline
+        createElement('div', { className: 'card-entry-header' }, [
+            createElement('div', {
+                className: 'card-entry-title-row',
+                onclick: () => { card._isOpen = !isOpen; renderBankAccounts(); },
+                style: 'cursor:pointer; flex:1;'
+            }, [
                 createElement('span', {
-                    className: 'material-symbols-outlined text-[16px] text-emerald-400 transition-transform',
+                    className: 'material-symbols-outlined card-entry-icon',
                     style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
                     textContent: 'credit_card'
                 }),
-                createElement('span', { className: 'text-[10px] font-black uppercase text-emerald-400', textContent: card.cardType || `Carta #${cardIdx + 1}` })
-            ])
+                createElement('span', { className: 'card-entry-label', textContent: card.cardType || `Carta #${cardIdx + 1}` })
+            ]),
+            createElement('button', {
+                className: 'btn-delete-bank',
+                onclick: async (e) => {
+                    e.stopPropagation();
+                    const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
+                    const ok = await showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
+                    if (ok) {
+                        bankAccounts[bankIdx].cards.splice(cardIdx, 1);
+                        renderBankAccounts();
+                    }
+                }
+            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
         ]),
 
-        createElement('button', {
-            className: 'absolute top-3 right-3 bg-transparent border-none text-red-500/20 hover:text-red-500 transition-all p-1 flex items-center justify-center',
-            onclick: async (e) => {
-                e.stopPropagation();
-                const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
-                const ok = await showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
-                if (ok) {
-                    bankAccounts[bankIdx].cards.splice(cardIdx, 1);
-                    renderBankAccounts();
-                }
-            }
-        }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })]),
-
-        isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
+        isOpen ? createElement('div', { className: 'flex-col-gap' }, [
             createInputField('Nome Carta (es. Visa, Blu...)', card.cardType, (val) => bankAccounts[bankIdx].cards[cardIdx].cardType = val, 'credit_card'),
             createInputField('Titolare', card.titolare, (val) => bankAccounts[bankIdx].cards[cardIdx].titolare = val, 'person'),
             createInputField('Numero Carta', card.cardNumber, (val) => bankAccounts[bankIdx].cards[cardIdx].cardNumber = val, 'numbers'),
@@ -441,15 +438,15 @@ function renderCardEntry(bankIdx, cardIdx, card) {
     ]);
 }
 
-function createInputField(label, value, onInput, icon) {
+function createInputField(label, value, onInput, icon, type = 'text') {
     return createElement('div', { className: 'glass-field-container w-full' }, [
         createElement('label', { className: 'view-label', textContent: label }),
         createElement('div', { className: 'glass-field border-glow' }, [
             createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
             createElement('input', {
-                className: 'bg-transparent border-none text-primary text-xs p-3 w-full outline-none',
+                className: 'field-input',
+                type: type,
                 value: value || '',
-                placeholder: label,
                 oninput: (e) => onInput(e.target.value)
             })
         ])
@@ -469,6 +466,9 @@ window.saveAccount = async () => {
         return hasIban || hasDisp || hasCards || hasRef;
     });
 
+    const logoPreview = document.getElementById('account-logo-preview');
+    const logoSrc = (logoPreview && !logoPreview.classList.contains('hidden')) ? logoPreview.src : null;
+
     const data = {
         nomeAccount: get('account-name'),
         username: get('account-username'),
@@ -476,6 +476,7 @@ window.saveAccount = async () => {
         password: get('account-password'),
         url: get('account-url'),
         note: get('account-note'),
+        logo: logoSrc, // Save the Base64 logo
         shared: document.getElementById('flag-shared')?.checked || false,
         hasMemo: document.getElementById('flag-memo')?.checked || false,
         isMemoShared: document.getElementById('flag-memo-shared')?.checked || false,

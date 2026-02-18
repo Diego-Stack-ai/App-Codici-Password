@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self'; font-src 'self'; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dettaglio Account Privato - PROTOCOLLO BASE</title>
@@ -21,6 +21,7 @@
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=5.0">
 
     <!-- CORE JS -->
@@ -38,187 +39,190 @@
         <!-- HEADER FISSO (Protocollo v3.6 Placeholder) -->
         <header id="header-placeholder" class="base-header"></header>
 
-        <!-- Header Spacer -->
-        <div class="spacer-header"></div>
-
         <main class="base-main">
-            <!-- Hero Profile Header -->
-            <div class="hero-profile-header">
-                <!-- Top Accent Bar (Dynamic) -->
+            <div class="page-container pt-header-extra pb-footer-extra">
+                <!-- Hero Profile Header -->
+                <div class="hero-profile-header">
+                    <!-- Top Accent Bar (Dynamic) -->
 
 
-                <div class="detail-avatar-container">
-                    <div id="detail-avatar" class="detail-avatar border-glow"></div>
-                    <div id="hero-status-dot" class="hero-status-dot">
-                        <span class="material-symbols-outlined">lock</span>
+                    <div class="detail-avatar-container">
+                        <div id="detail-avatar" class="detail-avatar border-glow"></div>
+                        <div id="hero-status-dot" class="hero-status-dot">
+                            <span class="material-symbols-outlined">lock</span>
+                        </div>
+                    </div>
+                    <h1 id="hero-title" class="hero-title selectable">-</h1>
+                    <div id="account-type-badge" class="account-type-badge hidden">
+                        -
                     </div>
                 </div>
-                <h1 id="hero-title" class="hero-title selectable">-</h1>
-                <div id="account-type-badge"
-                    class="mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest hidden mx-auto inline-block">
-                    -
-                </div>
-            </div>
 
-            <!-- Main Content -->
-            <div class="detail-content-wrap">
+                <!-- Main Content -->
+                <div class="detail-content-wrap">
 
-                <!-- Credenziali Principali -->
-                <section>
-                    <div class="detail-section-header">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
-                        <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
-                    </div>
-                    <div class="flex-col-gap">
-
-                        <!-- Nome Account -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
-                                Account</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-nomeAccount" name="account_name" readonly
-                                    class="detail-field-input no-transform" autocomplete="off">
-                                <button class="btn-icon-header copy-btn" type="button" data-field="detail-nomeAccount">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>
-                            </div>
+                    <!-- Credenziali Principali -->
+                    <section>
+                        <div class="detail-section-header">
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">key</span>
+                            <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                         </div>
+                        <div class="flex-col-gap">
 
-                        <!-- Utente -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-username" data-t="username">Utente</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-username" name="account_username" type="text" readonly
-                                    class="detail-field-input no-transform" autocomplete="off">
-                                <button class="btn-icon-header copy-btn" type="button" data-field="detail-username">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>
-                            </div>
-                        </div>
+                            <form onsubmit="return false;" autocomplete="off">
+                                <!-- Nome Account -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
+                                        Account</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-nomeAccount" name="account_name" readonly
+                                            class="detail-field-input no-transform" autocomplete="off">
+                                        <button class="btn-icon-header copy-btn" type="button"
+                                            data-field="detail-nomeAccount">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <!-- Account -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-account" data-t="account_code">Account /
-                                Codice</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-account" name="account_code" type="text" readonly
-                                    class="detail-field-input no-transform" autocomplete="off">
-                                <button class="btn-icon-header copy-btn" type="button" data-field="detail-account">
-                                    <span class="material-symbols-outlined">content_copy</span>
-                                </button>
-                            </div>
-                        </div>
+                                <!-- Utente -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-username" data-t="username">Utente</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-username" name="account_username" type="text" readonly
+                                            class="detail-field-input no-transform" autocomplete="off">
+                                        <button class="btn-icon-header copy-btn" type="button"
+                                            data-field="detail-username">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <!-- Password -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-password" data-t="password">Password</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-password" name="account_password" type="password" readonly
-                                    class="detail-field-input base-shield field-value-password no-transform"
-                                    autocomplete="new-password">
-                                <div class="detail-field-actions">
-                                    <button id="toggle-password" class="btn-icon-header" type="button">
-                                        <span class="material-symbols-outlined">visibility</span>
-                                    </button>
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-password">
-                                        <span class="material-symbols-outlined">content_copy</span>
+                                <!-- Account -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-account" data-t="account_code">Account /
+                                        Codice</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-account" name="account_code" type="text" readonly
+                                            class="detail-field-input no-transform" autocomplete="off">
+                                        <button class="btn-icon-header copy-btn" type="button"
+                                            data-field="detail-account">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-password" data-t="password">Password</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-password" name="account_password" type="password" readonly
+                                            class="detail-field-input base-shield field-value-password no-transform"
+                                            autocomplete="new-password">
+                                        <div class="detail-field-actions">
+                                            <button id="toggle-password" class="btn-icon-header" type="button">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                            <button class="btn-icon-header copy-btn" type="button"
+                                                data-field="detail-password">
+                                                <span class="material-symbols-outlined">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sito Web -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-website" readonly
+                                            class="detail-field-input link-underlined no-transform">
+                                        <div class="detail-field-actions">
+                                            <button id="open-website" class="btn-icon-header" type="button">
+                                                <span class="material-symbols-outlined">open_in_new</span>
+                                            </button>
+                                            <button class="btn-icon-header copy-btn" type="button"
+                                                data-field="detail-website">
+                                                <span class="material-symbols-outlined">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Suggerimento Conto Bancario -->
+                                <div id="add-banking-prompt" class="banking-prompt-box hidden">
+                                    <button type="button" id="btn-banking-info" class="btn-banking-info">
+                                        <span class="material-symbols-outlined info-icon">info</span>
+                                        <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
                                     </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
+                    </section>
 
-                        <!-- Sito Web -->
-                        <div class="glass-field-container">
-                            <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
-                            <div class="detail-field-box border-glow">
-                                <input id="detail-website" readonly
-                                    class="detail-field-input link-underlined no-transform">
-                                <div class="detail-field-actions">
-                                    <button id="open-website" class="btn-icon-header" type="button">
-                                        <span class="material-symbols-outlined">open_in_new</span>
-                                    </button>
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-website">
-                                        <span class="material-symbols-outlined">content_copy</span>
-                                    </button>
-                                </div>
+                    <!-- Coordinate Bancarie (Sezione Dinamica) -->
+                    <section id="section-banking" class="section-spacing hidden">
+                        <div class="detail-section-header justify-between">
+                            <div class="header-left-group">
+                                <span
+                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
+                                <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
                             </div>
-                        </div>
-                        <!-- Suggerimento Conto Bancario -->
-                        <div id="add-banking-prompt" class="banking-prompt-box hidden">
-                            <button type="button" id="btn-banking-info" class="btn-banking-info">
-                                <span class="material-symbols-outlined info-icon">info</span>
-                                <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
+                            <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
+                                <span id="banking-chevron"
+                                    class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
                             </button>
                         </div>
-                    </div>
-                </section>
-
-                <!-- Coordinate Bancarie (Sezione Dinamica) -->
-                <section id="section-banking" class="mt-8 hidden">
-                    <div class="detail-section-header justify-between">
-                        <div class="flex-center-gap">
-                            <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
-                            <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
+                        <div id="banking-content" class="flex-col-gap content-spacing hidden">
+                            <!-- Banking cards injected here -->
                         </div>
-                        <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
-                            <span id="banking-chevron"
-                                class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
-                        </button>
-                    </div>
-                    <div id="banking-content" class="flex-col-gap mt-4 hidden">
-                        <!-- Banking cards injected here -->
-                    </div>
-                </section>
+                    </section>
 
-                <!-- ALLEGATI (Sezione Dinamica) -->
-                <section id="section-attachments" class="mt-8">
-                    <div class="detail-section-header justify-between">
-                        <div class="flex-center-gap">
-                            <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
-                            <h3 class="detail-section-title">Allegati</h3>
+                    <!-- ALLEGATI (Sezione Dinamica) -->
+                    <section id="section-attachments" class="section-spacing">
+                        <div class="detail-section-header justify-between">
+                            <div class="header-left-group">
+                                <span
+                                    class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                                <h3 class="detail-section-title">Allegati</h3>
+                            </div>
+                            <button id="btn-add-attachment" type="button" class="btn-icon-header">
+                                <span class="material-symbols-outlined">add</span>
+                            </button>
                         </div>
-                        <button id="btn-add-attachment" type="button" class="btn-icon-header">
-                            <span class="material-symbols-outlined">add</span>
-                        </button>
-                    </div>
-                    <div id="attachments-list" class="flex-col-gap mt-4">
-                        <!-- Injected via JS -->
-                        <p class="text-[10px] text-white/20 uppercase text-center py-4">Nessun allegato</p>
-                    </div>
-                </section>
+                        <div id="attachments-list" class="flex-col-gap content-spacing">
+                            <!-- Injected via JS -->
+                            <p class="text-[10px] text-white/20 uppercase text-center py-4">Nessun allegato</p>
+                        </div>
+                    </section>
 
-                <!-- NOTE -->
-                <section class="mt-6">
-                    <div class="detail-section-header">
-                        <span
-                            class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
-                        <h3 class="detail-section-title" data-t="notes">Note</h3>
-                    </div>
-                    <div class="detail-field-box border-glow mt-4">
-                        <p id="detail-note" class="note-text no-transform flex-1 mr-2">-</p>
-                        <button id="copy-note" class="btn-icon-header" type="button">
-                            <span class="material-symbols-outlined text-sm">content_copy</span>
-                        </button>
-                    </div>
-                </section>
+                    <!-- NOTE -->
+                    <section class="section-spacing">
+                        <div class="detail-section-header">
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
+                            <h3 class="detail-section-title" data-t="notes">Note</h3>
+                        </div>
+                        <div class="detail-field-box border-glow content-spacing">
+                            <p id="detail-note" class="note-text no-transform flex-1 mr-2">-</p>
+                            <button id="copy-note" class="btn-icon-header" type="button">
+                                <span class="material-symbols-outlined text-sm">content_copy</span>
+                            </button>
+                        </div>
+                    </section>
 
-                <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
-                <section id="shared-management-section" class="mt-8 mb-10 hidden">
-                    <div class="detail-section-header">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
-                        <h3 class="detail-section-title">Gestione Accessi</h3>
-                    </div>
-                    <div id="guests-list" class="flex-col-gap mt-4">
-                        <!-- Guest rows injected here -->
-                    </div>
-                </section>
+                    <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
+                    <section id="shared-management-section" class="section-spacing section-bottom hidden">
+                        <div class="detail-section-header">
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
+                            <h3 class="detail-section-title">Gestione Accessi</h3>
+                        </div>
+                        <div id="guests-list" class="flex-col-gap content-spacing">
+                            <!-- Guest rows injected here -->
+                        </div>
+                    </section>
 
+                </div>
             </div>
         </main>
-
-        <div class="spacer-footer"></div>
 
         <!-- FOOTER PREMIUM (Protocollo Placeholder) -->
         <footer id="footer-placeholder" class="base-footer"></footer>
@@ -232,42 +236,30 @@
 
     <!-- Source Selector Modal -->
     <!-- Source Selector Modal -->
-    <div id="source-selector-modal"
-        class="modal-overlay backdrop-blur-md bg-black/80 flex items-center justify-center fixed inset-0 z-50 invisible opacity-0 transition-opacity">
-        <div
-            class="glass-card w-[280px] p-5 !bg-[#0f172a] border border-white/10 shadow-2xl rounded-2xl overflow-hidden">
-            <h3 class="text-[10px] font-extrabold uppercase tracking-widest text-center mb-4 opacity-40 text-white">
-                Seleziona Sorgente</h3>
+    <!-- Source Selector Modal -->
+    <div id="source-selector-modal" class="modal-overlay hidden">
+        <div class="glass-card modal-source-card">
+            <h3 class="modal-source-title">Seleziona Sorgente</h3>
 
-            <div class="grid grid-cols-2 gap-3">
-                <button
-                    class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group bg-transparent"
-                    data-source="camera">
-                    <span
-                        class="material-symbols-outlined text-2xl text-blue-400 group-hover:scale-110 transition-transform">photo_camera</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Camera</span>
+            <div class="source-grid">
+                <button class="btn-source-option hover-blue" data-source="camera">
+                    <span class="material-symbols-outlined text-blue-400">photo_camera</span>
+                    <span class="btn-source-label">Camera</span>
                 </button>
 
-                <button
-                    class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group bg-transparent"
-                    data-source="gallery">
-                    <span
-                        class="material-symbols-outlined text-2xl text-purple-400 group-hover:scale-110 transition-transform">collections</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Galleria</span>
+                <button class="btn-source-option hover-purple" data-source="gallery">
+                    <span class="material-symbols-outlined text-purple-400">collections</span>
+                    <span class="btn-source-label">Galleria</span>
                 </button>
 
-                <button
-                    class="col-span-2 flex items-center justify-center gap-2 p-3 rounded-xl border border-white/10 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group bg-transparent"
-                    data-source="file">
-                    <span
-                        class="material-symbols-outlined text-xl text-amber-400 group-hover:scale-110 transition-transform">description</span>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-white/60">Documento</span>
+                <button class="btn-source-option hover-amber col-span-2" data-source="file">
+                    <span class="material-symbols-outlined text-amber-400">description</span>
+                    <span class="btn-source-label">Documento</span>
                 </button>
             </div>
 
-            <div class="mt-4 border-t border-white/5 pt-2 text-center">
-                <button type="button" onclick="closeSelector()"
-                    class="py-2 text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors bg-transparent border-none">
+            <div class="modal-footer">
+                <button type="button" id="btn-cancel-source" class="btn-modal-cancel">
                     Annulla
                 </button>
             </div>

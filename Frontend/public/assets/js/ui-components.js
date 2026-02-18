@@ -112,7 +112,7 @@ export function setupCallButtons() {
     buttons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.stopPropagation();
-            const sourceId = this.getAttribute('data-call-source');
+            const sourceId = button.getAttribute('data-call-source');
             const sourceEl = document.getElementById(sourceId);
             if (sourceEl) {
                 const phone = sourceEl.textContent.trim();

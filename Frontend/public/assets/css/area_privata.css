@@ -1,219 +1,555 @@
 /* ==========================================================================
-   AREA PRIVATA (V5.0) - Dedicated Widget Styles
+   AREA PRIVATA (V5.0) - Dedicated Widget Styles (PREMIUM VERSION)
    ========================================================================== */
 
-/* --- 1. LAYOUT OVERRIDE --- */
+/* --- 1. LAYOUT & GRID --- */
 .matrix-grid {
-    grid-template-areas: none;
-    /* Rimuove layout Home */
-    grid-auto-flow: row;
+    grid-template-areas:
+        "std shared"
+        "memo shared-memo"
+        "top10 top10"
+        "rubrica rubrica";
+    grid-template-columns: 1fr 1fr;
 }
 
-/* --- 2. TOP 10 WIDGET --- */
+/* Nuova Estetica Icone Fuse (Watermark Style) */
+.matrix-card .matrix-icon-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    opacity: 0.08;
+    z-index: 1;
+    pointer-events: none;
+    transition: all 0.5s ease;
+}
+
+.matrix-card .matrix-icon-box span {
+    font-size: 120px !important;
+    /* Icona che "prende tutta la card" */
+    line-height: 1;
+}
+
+.matrix-card:hover .matrix-icon-box {
+    opacity: 0.15;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Fix visibilità icona su card Arancione (Note) */
+.area-memo .matrix-icon-box {
+    opacity: 0.15;
+    filter: brightness(1.5);
+}
+
+.area-memo:hover .matrix-icon-box {
+    opacity: 0.25;
+}
+
+.matrix-card .card-text-block {
+    position: relative;
+    z-index: 2;
+    /* Testo sopra l'icona watermark */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.micro-account-avatar-box {
+    width: 34px !important;
+    height: 34px !important;
+}
+
+.micro-account-avatar-box .micro-item-badge-dot {
+    width: 8px;
+    height: 8px;
+}
+
+@media (max-width: 480px) {
+    .matrix-grid {
+        grid-template-areas:
+            "std shared"
+            "memo shared-memo"
+            "top10 top10"
+            "rubrica rubrica";
+        /* We keep 2x2 for the top cards as per user preference in home, 
+           but we ensure the rest follows. */
+    }
+}
+
+/* --- 2. MATRIX CARDS (PREMIUM STYLE) --- */
+.matrix-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.matrix-card:hover {
+    transform: translateY(-5px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.matrix-card:active {
+    transform: scale(0.96);
+}
+
+.matrix-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.mini-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mini-icon-box .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.matrix-icon-box .material-symbols-outlined {
+    font-size: 26px;
+    color: #fff;
+    font-variation-settings: 'FILL' 1;
+}
+
+/* Color Variants (Gradients) */
+.icon-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: #fff;
+}
+
+.icon-amber {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.icon-orange {
+    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+    color: #fff;
+}
+
+.card-blue .matrix-icon-box {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.card-red .matrix-icon-box {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.card-orange .matrix-icon-box {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.card-green .matrix-icon-box {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.card-text-block {
+    display: flex;
+    flex-direction: column;
+}
+
+.matrix-card .card-text-block {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 120px;
+    /* Altezza minima per dare spazio all'icona fusibile */
+}
+
+.matrix-card-title-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.matrix-card-title-box h3,
+.card-text-block h3 {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-transform: capitalize;
+    letter-spacing: normal;
+    margin: 0;
+}
+
+.badge-count {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    backdrop-filter: none;
+    box-shadow: none;
+    opacity: 1;
+}
+
+.micro-visto-inline {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    margin-left: 0.5rem;
+}
+
+/* --- 3. TOP 10 WIDGET (PREMIUM) --- */
 .top10-widget-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    padding: 0 0.25rem;
+    justify-content: space-between;
+    /* Separa titolo da azioni */
+    gap: 0.75rem;
+    margin: 2rem 0 1rem 0;
+    padding: 0 0.5rem;
+}
+
+#btn-reset-views {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    min-width: 36px;
+    height: auto;
+    padding: 0.25rem 0.5rem;
+    gap: 0.35rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(5px);
+}
+
+#btn-reset-views:hover {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+}
+
+
+#btn-reset-views .material-symbols-outlined {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.top10-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.reset-text-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 0.9;
+}
+
+.reset-text-stack span {
+    font-size: 0.5rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
 }
 
 .star-icon {
-    font-size: 0.875rem;
-    /* text-sm */
-    color: #fb923c;
-    /* orange-400 */
+    font-size: 20px;
+    color: #ffffff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
 .top10-title {
     font-size: 0.75rem;
-    /* text-xs */
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.6);
+    font-weight: 900;
+    color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    /* tracking-widest */
+    letter-spacing: 0.15em;
+    margin: 0;
 }
 
 .top10-list-container {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .loading-box {
-    padding: 2.5rem 0;
+    padding: 3rem 0;
     display: flex;
     justify-content: center;
-    opacity: 0.2;
+    color: var(--accent);
 }
 
-/* --- 3. RUBRICA WIDGET --- */
-/* Toggle Button */
+.mt-section {
+    margin-top: 2.5rem;
+}
+
+/* --- 4. RUBRICA (PREMIUM TOGGLE) --- */
 .rubrica-toggle-btn {
     width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 1.25rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.rubrica-toggle-btn:active {
-    transform: scale(0.98);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
 }
 
 .rubrica-toggle-btn:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+html:not(.dark) .rubrica-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .rubrica-toggle-content {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    text-align: left;
+    gap: 1rem;
+}
+
+.micro-account-avatar-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 8px 16px rgba(245, 158, 11, 0.25);
 }
 
 .rubrica-icon {
-    color: #fb923c;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 0.5rem;
-    padding: 0.375rem;
+    font-size: 22px;
+}
+
+.micro-account-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
 }
 
 .rubrica-subtitle {
     font-size: 0.75rem;
-    color: rgba(251, 146, 60, 0.7);
-    /* orange-400/70 */
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--text-secondary);
+    opacity: 0.8;
 }
 
 .chevron-icon {
-    transition: transform 0.3s ease;
-    opacity: 0.4;
+    color: #f59e0b;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Content Container */
+/* Rubrica Content */
 .rubrica-container {
-    margin-top: 0.5rem;
-    /* mt-2 */
     background: var(--card-bg);
     border: 1px solid var(--card-border);
+    border-radius: 28px;
+    margin-top: 0.75rem;
     backdrop-filter: blur(20px);
-    transition: all 0.3s ease;
     overflow: hidden;
 }
 
 .rubrica-inner-padding {
-    padding: 1rem;
+    padding: 1.25rem;
 }
 
 .rubrica-actions-row {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
+    margin-bottom: 1.25rem;
+}
+
+.rubrica-btn-new {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rubrica-btn-new:hover {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.rubrica-form {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 1.25rem;
     margin-bottom: 1.5rem;
 }
 
-/* New Contact Button */
-.rubrica-btn-new {
-    padding: 0.75rem 1.5rem;
-    font-weight: 800;
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    cursor: pointer;
-    border-radius: 1rem;
-    transition: transform 0.1s ease;
-}
-
-.rubrica-btn-new:active {
-    transform: scale(0.95);
-}
-
-/* Form Styles */
-.rubrica-form {
-    background: rgba(255, 255, 255, 0.05);
-    /* bg-white/5 */
-    margin-bottom: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-}
-
-.p-form {
-    padding: 1.25rem;
-}
-
-.rubrica-form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-@media (max-width: 480px) {
-    .rubrica-form-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.mt-form {
-    margin-top: 1rem;
-}
-
 .rubrica-label {
-    font-size: 0.75rem;
-    /* text-xs */
-    font-weight: 700;
-    margin-bottom: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 800;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.7;
+    margin-bottom: 0.25rem;
+    display: block;
 }
 
 .rubrica-input {
     width: 100%;
-    /* Stili base input sono in glass-input di core_ui, qui aggiungiamo se serve */
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.rubrica-input:focus {
+    background: var(--input-bg-focus);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--input-shadow);
 }
 
 .rubrica-btn-save {
-    width: 100%;
-    margin-top: 1rem;
-    padding: 0.5rem 0;
-    border-radius: 0.5rem;
-    font-weight: bold;
+    flex: 1;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.85rem;
+    border-radius: 14px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
 }
 
-/* List Styles */
-.rubrica-list {
+.rubrica-btn-cancel {
+    flex: 1;
+    padding: 0.85rem;
+    border-radius: 14px;
+    font-weight: 800;
+}
+
+.rubrica-btn-save:active {
+    transform: scale(0.98);
+}
+
+/* Contacts List */
+.rubrica-list-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 0.75rem 1rem;
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-width: 100%;
-    overflow: hidden;
-    padding-bottom: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
 }
 
-/* Micro Account Card (Base) - Se usata altrove, definirla, altrimenti è nel css rubrica */
-.micro-account-card {
-    border-radius: 20px;
-}
-
-.micro-account-avatar-box {
-    width: 40px;
-    height: 40px;
+.rubrica-item-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
 }
 
-.micro-account-name {
-    font-size: 0.9rem;
-    font-weight: 800;
+.rubrica-item-info {
+    margin-left: 0.75rem;
+    flex: 1;
+}
+
+.rubrica-item-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.rubrica-item-email {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.rubrica-item-action {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.6;
+}
+
+.rubrica-item-action:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.action-edit {
+    color: var(--accent);
+}
+
+.action-delete {
+    color: #ef4444;
+}
+
+.rubrica-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-text {
+    font-size: 0.7rem;
+    color: #ef4444;
+    text-align: center;
+    padding: 2rem 0;
+    opacity: 0.6;
+    font-weight: 700;
 }

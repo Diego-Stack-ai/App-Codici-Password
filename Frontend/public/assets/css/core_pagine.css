@@ -54,6 +54,31 @@
     grid-area: urgenze;
 }
 
+/* Area Privata Mappings */
+.area-standard {
+    grid-area: std;
+}
+
+.area-shared {
+    grid-area: shared;
+}
+
+.area-memo {
+    grid-area: memo;
+}
+
+.area-shared-memo {
+    grid-area: shared-memo;
+}
+
+.area-top10 {
+    grid-area: top10;
+}
+
+.area-rubrica {
+    grid-area: rubrica;
+}
+
 /* --- 2. MATRIX CARD CORE --- */
 .matrix-card {
     display: flex;

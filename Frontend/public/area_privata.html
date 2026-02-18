@@ -7,16 +7,17 @@
 
     <!-- CSP (Content Security Policy) - V5.0 Standard -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
 
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-t="area_privata_title">Area Privata - PROTOCOLLO BASE</title>
 
+    <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
     <!-- PWA / Mobile Capable -->
     <link rel="manifest" href="manifest.json?v=5.0" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.jpg">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,6 +27,7 @@
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
     <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/account_privati.css?v=5.0">
     <link rel="stylesheet" href="assets/css/area_privata.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
 </head>
@@ -44,79 +46,74 @@
         <main class="base-main">
             <div class="page-container pt-header-extra pb-footer-extra">
 
-                <!-- NUCLEO NAVIGAZIONE (Matrix Grid 2x2) -->
-                <div class="matrix-grid relative z-50">
+                <!-- MATRIX GRID NAV -->
+                <div class="matrix-grid">
 
                     <!-- Account Standard -->
                     <a href="account_privati.html?type=standard"
-                        class="matrix-card card-blue border-glow adaptive-shadow">
-                        <div class="matrix-card-header">
-                            <div class="matrix-icon-box">
-                                <span class="material-symbols-outlined">account_balance_wallet</span>
-                            </div>
+                        class="matrix-card card-blue border-glow adaptive-shadow area-standard">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">lock</span>
                         </div>
                         <div class="card-text-block">
-                            <div class="matrix-card-title-box">
-                                <h3 data-t="section_personal_accounts">Account Personali</h3>
-                                <span id="count-standard" class="badge-count"></span>
-                            </div>
+                            <h3 data-t="section_personal_accounts">Account Standard</h3>
+                            <span id="count-standard" class="badge-count">-</span>
                         </div>
                     </a>
 
                     <!-- Condivisi -->
-                    <a href="account_privati.html?type=shared" class="matrix-card card-red border-glow adaptive-shadow">
-                        <div class="matrix-card-header">
-                            <div class="matrix-icon-box">
-                                <span class="material-symbols-outlined">group</span>
-                            </div>
+                    <a href="account_privati.html?type=shared"
+                        class="matrix-card card-red border-glow adaptive-shadow area-shared">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">group</span>
                         </div>
                         <div class="card-text-block">
-                            <div class="matrix-card-title-box">
-                                <h3 data-t="section_shared_accounts">Account Condivisi</h3>
-                                <span id="count-shared" class="badge-count"></span>
-                            </div>
+                            <h3 data-t="section_shared_accounts">Condivisi</h3>
+                            <span id="count-shared" class="badge-count">-</span>
                         </div>
                     </a>
 
-                    <!-- Memorandum -->
+                    <!-- Memorandum (Note) -->
                     <a href="account_privati.html?type=memo"
-                        class="matrix-card card-orange border-glow adaptive-shadow">
-                        <div class="matrix-card-header">
-                            <div class="matrix-icon-box">
-                                <span class="material-symbols-outlined">sticky_note_2</span>
-                            </div>
+                        class="matrix-card card-orange border-glow adaptive-shadow area-memo">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">edit_note</span>
                         </div>
                         <div class="card-text-block">
-                            <div class="matrix-card-title-box">
-                                <h3 data-t="section_note">Note</h3>
-                                <span id="count-memo" class="badge-count"></span>
-                            </div>
+                            <h3 data-t="section_note">Note Private</h3>
+                            <span id="count-memo" class="badge-count">-</span>
                         </div>
                     </a>
 
                     <!-- Memo Condivisi -->
                     <a href="account_privati.html?type=shared_memo"
-                        class="matrix-card card-green border-glow adaptive-shadow">
-                        <div class="matrix-card-header">
-                            <div class="matrix-icon-box">
-                                <span class="material-symbols-outlined">folder_shared</span>
-                            </div>
+                        class="matrix-card card-green border-glow adaptive-shadow area-shared-memo">
+                        <div class="matrix-icon-box">
+                            <span class="material-symbols-outlined">hub</span>
                         </div>
                         <div class="card-text-block">
-                            <div class="matrix-card-title-box">
-                                <h3 data-t="section_shared_note">Note Condivise</h3>
-                                <span id="count-shared-memo" class="badge-count"></span>
-                            </div>
+                            <h3 data-t="section_shared_note">Note Condivise</h3>
+                            <span id="count-shared-memo" class="badge-count">-</span>
                         </div>
                     </a>
 
                     <!-- TOP 10 WIDGET SECTION -->
-                    <div class="grid-span-2 relative z-40">
+                    <div class="area-top10">
                         <div class="top10-widget-header">
-                            <span class="material-symbols-outlined star-icon">star</span>
-                            <h3 class="top10-title" data-t="top_used_access">
-                                TOP 10 PIÙ USATI
-                            </h3>
+                            <div class="top10-header-left">
+                                <div class="mini-icon-box icon-amber">
+                                    <span class="material-symbols-outlined star-icon">star</span>
+                                </div>
+                                <h3 class="top10-title" data-t="top_used_access">TOP 10 PIÙ USATI</h3>
+                            </div>
+                            <!-- Reset views btn -->
+                            <button id="btn-reset-views" class="btn-icon-minimal" title="Reset Visti">
+                                <div class="reset-text-stack">
+                                    <span>AZZERA</span>
+                                    <span>STATISTICA</span>
+                                </div>
+                                <span class="material-symbols-outlined">restart_alt</span>
+                            </button>
                         </div>
                         <div id="top-accounts-list" class="top10-list-container">
                             <!-- Loading -->
@@ -127,17 +124,16 @@
                     </div>
 
                     <!-- RUBRICA SECTION -->
-                    <div class="grid-span-2 relative z-40 mt-section">
+                    <div class="area-rubrica mt-section">
                         <!-- Bottone Toggle -->
-                        <button id="rubrica-toggle-btn" type="button"
-                            class="micro-account-card rubrica-toggle-btn card-orange border-glow adaptive-shadow">
+                        <button id="rubrica-toggle-btn" type="button" class="rubrica-toggle-btn">
                             <div class="rubrica-toggle-content">
-                                <div class="micro-account-avatar-box">
-                                    <span class="material-symbols-outlined rubrica-icon">group</span>
+                                <div class="matrix-icon-box icon-orange">
+                                    <span class="material-symbols-outlined">group</span>
                                 </div>
-                                <div class="text-left">
+                                <div class="card-text-block text-left">
                                     <h3 class="micro-account-name" data-t="rubrica_title">Rubrica Contatti</h3>
-                                    <p class="micro-account-subtitle rubrica-subtitle">
+                                    <p class="rubrica-subtitle">
                                         <span data-t="rubrica_shared_label">Condivisi</span>
                                         <span id="rubrica-counter">(0)</span>
                                     </p>
@@ -179,10 +175,16 @@
                                         <input type="email" id="contact-email" placeholder="mario.rossi@email.com"
                                             class="glass-input rubrica-input">
                                     </div>
-                                    <button id="btn-add-contact" type="button" class="btn-primary rubrica-btn-save"
-                                        data-t="save_contact">
-                                        SALVA CONTATTO
-                                    </button>
+                                    <div class="flex-center-row gap-3 mt-form">
+                                        <button id="btn-cancel-contact" type="button"
+                                            class="glass-btn rubrica-btn-cancel hidden" data-t="cancel">
+                                            ANNULLA
+                                        </button>
+                                        <button id="btn-add-contact" type="button" class="btn-primary rubrica-btn-save"
+                                            data-t="save_contact">
+                                            SALVA CONTATTO
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div id="contacts-list" class="rubrica-list">

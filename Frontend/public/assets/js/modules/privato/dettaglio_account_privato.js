@@ -6,7 +6,7 @@
 import { auth, db, storage } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
 import {
-    doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, increment, serverTimestamp
+    doc, getDoc, updateDoc, collection, addDoc, query, where, orderBy, getDocs, deleteDoc, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject
@@ -200,7 +200,11 @@ function renderAccount(acc) {
             btnAdd.classList.add('hidden');
         } else {
             btnAdd.classList.remove('hidden');
-            btnAdd.onclick = openSourceSelector;
+            btnAdd.onclick = (e) => {
+                e.preventDefault();
+                console.log("[DETTAGLIO] Add Attachment Clicked (onclick)");
+                openSourceSelector();
+            };
         }
     }
 }
@@ -250,40 +254,40 @@ function renderBanking(acc) {
     }
 
     bankingArr.forEach((bank, idx) => {
-        const card = createElement('div', { className: 'space-y-4 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 border-glow relative' }, [
-            createElement('div', { className: 'flex items-center justify-between border-b border-white/5 pb-2' }, [
-                createElement('span', { className: 'text-[9px] font-black text-emerald-500 uppercase tracking-widest', textContent: `${t('account') || 'Conto'} #${idx + 1}` })
+        const card = createElement('div', { className: 'banking-card' }, [
+            createElement('div', { className: 'banking-header' }, [
+                createElement('span', { className: 'banking-index', textContent: `${t('account') || 'Conto'} #${idx + 1}` })
             ]),
             // IBAN
-            createElement('div', { className: 'bg-black/20 p-2.5 rounded-xl border border-white/5' }, [
+            createElement('div', { className: 'banking-field-box' }, [
                 createMicroRow(t('iban') || 'IBAN', bank.iban || '-', true)
             ]),
             // Secondary Data
-            createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-2 gap-3' }, [
-                createElement('div', { className: 'bg-black/20 p-2.5 rounded-xl border border-white/5 h-full' }, [
+            createElement('div', { className: 'banking-grid' }, [
+                createElement('div', { className: 'banking-field-box h-full' }, [
                     createMicroRow('Pass. Disp.', bank.passwordDispositiva || '••••••••', true, true)
                 ]),
-                createElement('div', { className: 'bg-black/20 p-2.5 rounded-xl border border-white/5 h-full' }, [
+                createElement('div', { className: 'banking-field-box h-full' }, [
                     createMicroRow('Nota', bank.nota || '-')
                 ])
             ]),
             // Referent
-            createElement('div', { className: 'bg-emerald-500/10 p-3 rounded-xl border border-white/5 space-y-2.5' }, [
-                createElement('div', { className: 'flex items-center gap-2 text-emerald-500/80' }, [
+            createElement('div', { className: 'banking-referent-box' }, [
+                createElement('div', { className: 'referent-header' }, [
                     createElement('span', { className: 'material-symbols-outlined text-xs', textContent: 'contact_emergency' }),
-                    createElement('span', { className: 'text-[9px] font-black uppercase tracking-widest', textContent: 'Referente' })
+                    createElement('span', { className: 'referent-title', textContent: 'Referente' })
                 ]),
-                createElement('div', { className: 'text-[11px] font-black uppercase', textContent: bank.referenteNome || '-' }),
-                createElement('div', { className: 'flex flex-col gap-2' }, [
+                createElement('div', { className: 'referent-name', textContent: bank.referenteNome || '-' }),
+                createElement('div', { className: 'flex-col-gap-2' }, [
                     createCallBtn('call', bank.referenteTelefono),
                     createCallBtn('smartphone', bank.referenteCellulare)
                 ])
             ]),
             // Cards Section
-            bank.cards && bank.cards.length > 0 ? createElement('div', { className: 'space-y-2' }, [
-                createElement('div', { className: 'text-[9px] font-black text-white/40 uppercase tracking-widest px-1', textContent: 'Carte / Bancomat' }),
-                ...bank.cards.map(c => createElement('div', { className: 'bg-black/40 p-3 rounded-xl border border-white/5 flex flex-col gap-2 border-glow' }, [
-                    createElement('div', { className: 'text-[10px] font-black text-emerald-400 uppercase', textContent: c.cardType || c.type || 'Carta' }),
+            bank.cards && bank.cards.length > 0 ? createElement('div', { className: 'cards-section' }, [
+                createElement('div', { className: 'cards-title', textContent: 'Carte / Bancomat' }),
+                ...bank.cards.map(c => createElement('div', { className: 'card-item' }, [
+                    createElement('div', { className: 'card-type', textContent: c.cardType || c.type || 'Carta' }),
                     createMicroRow('Titolare', c.titolare || '-'),
                     createMicroRow('Numero', c.cardNumber || '-', true),
                     createMicroRow('Scadenza', c.expiry || '-'),
@@ -304,24 +308,24 @@ function createMicroRow(label, value, copy = false, shield = false) {
         copy ? createElement('button', {
             className: 'micro-btn-copy-inline relative z-10',
             onclick: () => { navigator.clipboard.writeText(value); showToast(t('copied') || "Copiato!"); }
-        }, [createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })]) : null,
+        }, [createElement('span', { className: 'material-symbols-outlined icon-xs', textContent: 'content_copy' })]) : null,
         shield ? createElement('button', {
             className: 'micro-btn-copy-inline relative z-10 !bg-transparent',
             onclick: (e) => {
                 const isMasked = valEl.classList.toggle('base-shield');
                 e.currentTarget.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';
             }
-        }, [createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'visibility' })]) : null
+        }, [createElement('span', { className: 'material-symbols-outlined icon-xs', textContent: 'visibility' })]) : null
     ]);
 }
 
 function createCallBtn(icon, num) {
     return createElement('div', {
-        className: 'micro-data-row bg-black/20 p-2 rounded-lg border border-white/5 cursor-pointer hover:bg-emerald-500/10 transition-all group',
+        className: 'call-btn-row',
         onclick: () => { if (num) window.location.href = `tel:${num.replace(/\s+/g, '')}`; }
     }, [
-        createElement('span', { className: 'material-symbols-outlined text-[14px] text-emerald-500/50 group-hover:text-emerald-400', textContent: icon }),
-        createElement('span', { className: 'micro-data-value text-[10px] font-bold group-hover:text-primary', textContent: num || '-' })
+        createElement('span', { className: 'material-symbols-outlined call-icon', textContent: icon }),
+        createElement('span', { className: 'call-number', textContent: num || '-' })
     ]);
 }
 
@@ -535,7 +539,9 @@ function openSourceSelector() {
     console.log("Opening Source Selector Privato");
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.remove('invisible', 'opacity-0');
+        modal.classList.remove('hidden');
+        // Small delay to allow display:block to apply before opacity transition if we wanted animation
+        // But for now, just show it.
         document.body.style.overflow = 'hidden';
     } else {
         console.error("Modale non trovato");
@@ -545,7 +551,7 @@ function openSourceSelector() {
 function closeSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.add('invisible', 'opacity-0');
+        modal.classList.add('hidden');
         document.body.style.overflow = '';
     }
 }

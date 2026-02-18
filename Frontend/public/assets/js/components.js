@@ -79,8 +79,10 @@ export async function initComponents() {
                     backFn = () => window.location.href = `dati_azienda.html?id=${id}`;
                 } else if (path.endsWith('aggiungi_nuova_azienda.html')) {
                     backFn = () => window.location.href = 'lista_aziende.html';
-                } else if (path.endsWith('profilo_privato.html') || path.endsWith('account_privati.html')) {
+                } else if (path.endsWith('profilo_privato.html')) {
                     backFn = () => window.location.href = 'home_page.html';
+                } else if (path.endsWith('account_privati.html')) {
+                    backFn = () => window.location.href = 'area_privata.html';
                 } else if (path.endsWith('dettaglio_account_privato.html')) {
                     backFn = () => window.location.href = 'account_privati.html';
                 } else if (path.endsWith('form_account_privato.html')) {
@@ -172,7 +174,7 @@ export async function initComponents() {
                 footerLeft.appendChild(
                     createElement('button', {
                         id: isHome ? 'theme-toggle-home' : 'theme-toggle-standard',
-                        className: 'btn-icon-header',
+                        className: 'btn-footer-secondary',
                         title: 'Cambia Tema',
                         onclick: () => document.documentElement.classList.toggle('dark')
                     }, [
@@ -210,7 +212,7 @@ export async function initComponents() {
                     settLink.appendChild(
                         createElement('a', {
                             href: 'impostazioni.html',
-                            className: 'btn-icon-header footer-settings-link',
+                            className: 'btn-footer-secondary footer-settings-link',
                             title: 'Impostazioni'
                         }, [
                             createElement('span', { className: 'material-symbols-outlined footer-settings-icon', textContent: 'tune' })

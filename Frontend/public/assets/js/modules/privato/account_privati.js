@@ -51,12 +51,38 @@ function setupUI() {
         searchInput.addEventListener('input', filterAndRender);
     }
 
-    // Aggiungi pulsante "+" nel footer center
+    // Sort Button Logic (Toggle)
+    const sortBtn = document.getElementById('sort-btn');
+    const sortLabel = document.getElementById('sort-label');
+
+    if (sortBtn && sortLabel) {
+        sortBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Toggle Sort Order
+            sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
+
+            // Update UI
+            sortLabel.textContent = (sortOrder === 'asc') ? 'A-Z' : 'Z-A';
+
+            // Re-render
+            filterAndRender();
+        });
+    }
+
+    // Aggiungi pulsanti FAB nel footer center
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         clearElement(fCenter);
         const type = new URLSearchParams(window.location.search).get('type') || 'standard';
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
+            createElement('a', {
+                href: 'archivio_account.html',
+                className: 'btn-fab-action btn-fab-archive',
+                title: t('account_archive') || 'Archivio',
+                dataset: { label: t('archive') || 'Archivio' }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'inventory_2' })
+            ]),
             createElement('button', {
                 id: 'add-account-btn',
                 className: 'btn-fab-action btn-fab-scadenza',
@@ -170,11 +196,7 @@ function renderList(list) {
     if (list.length === 0) {
         const type = new URLSearchParams(window.location.search).get('type') || 'standard';
         setChildren(container, createElement('div', { className: 'text-center py-10' }, [
-            createElement('p', { className: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6', textContent: t('no_accounts_found') || 'Nessun account trovato' }),
-            createElement('button', {
-                className: 'btn-ghost-adaptive mx-auto px-8 h-12 rounded-xl text-xs font-black uppercase tracking-wider',
-                onclick: () => window.location.href = `form_account_privato.html?type=${type}`
-            }, [createElement('span', { textContent: 'Crea Primo Account' })])
+            createElement('p', { className: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6', textContent: t('no_accounts_found') || 'Nessun account trovato' })
         ]));
         return;
     }
@@ -186,8 +208,8 @@ function renderList(list) {
     if (currentSwipeList) currentSwipeList = null;
     currentSwipeList = new SwipeList('.swipe-row', {
         threshold: 0.15,
-        onSwipeLeft: (item) => handleArchive(item),
-        onSwipeRight: (item) => handleDelete(item)
+        onSwipeLeft: (item) => handleDelete(item),  // Swipe Left <<<< reveals Right (Red/Delete)
+        onSwipeRight: (item) => handleArchive(item) // Swipe Right >>>> reveals Left (Amber/Archive)
     });
 }
 
@@ -202,64 +224,95 @@ function createAccountCard(acc) {
     else if (isMemo) theme = THEMES.memo;
 
     const card = createElement('div', {
-        className: 'micro-account-card swipe-row cursor-pointer hover:bg-white/5 transition-all active:scale-95',
+        className: 'account-card swipe-row',
         dataset: { id: acc.id, owner: acc.isOwner, action: 'navigate' },
         onclick: () => window.location.href = `dettaglio_account_privato.html?id=${acc.id}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}`
     }, [
         // Swipe Backgrounds
-        createElement('div', { className: 'swipe-backgrounds' }, [
-            createElement('div', { className: 'swipe-bg-left' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })]),
-            createElement('div', { className: 'swipe-bg-right' }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'archive' })])
+        // Swipe Backgrounds (Archive Left, Delete Right)
+        createElement('div', { className: 'swipe-action-bg bg-archive' }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'archive' })
         ]),
+        createElement('div', { className: 'swipe-action-bg bg-delete' }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+        ]),
+
         // Content
-        createElement('div', { className: 'relative z-10 swipe-content' }, [
-            createElement('div', { className: 'micro-account-content' }, [
-                createElement('div', { className: 'micro-account-avatar-box' }, [
-                    createElement('img', { className: 'micro-account-avatar', src: acc.logo || acc.avatar || 'assets/images/google-avatar.png' }),
-                    createElement('div', { className: `micro-item-badge-dot ${theme.accent}` })
+        createElement('div', { className: 'swipe-content' }, [
+            createElement('div', { className: 'account-card-layout' }, [
+                createElement('div', { className: 'account-card-left' }, [
+                    createElement('div', { className: 'account-icon-box' }, [
+                        createElement('img', { className: 'account-avatar', src: acc.logo || acc.avatar || 'assets/images/google-avatar.png' }),
+                        createElement('div', { className: `account-badge-dot ${theme.accent}` })
+                    ]),
+                    createElement('div', { className: 'account-card-info-group' }, [
+                        createElement('h3', { className: 'account-card-title' }, [
+                            document.createTextNode(acc.nomeAccount || t('without_name'))
+                        ]),
+                        createElement('p', { className: 'account-card-subtitle', textContent: acc.username || acc.email || 'Utente Nascosto' })
+                    ])
                 ]),
-                createElement('div', { className: 'micro-account-info' }, [
-                    createElement('h3', { className: 'micro-account-name', textContent: acc.nomeAccount || t('without_name') })
-                ]),
-                createElement('div', { className: 'micro-account-top-actions' }, [
-                    acc.password ? createElement('button', {
-                        className: `micro-btn-utility ${theme.text}`,
-                        onclick: (e) => { e.stopPropagation(); window.toggleTripleVisibility(acc.id); }
-                    }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' })
-                    ]) : null,
+                // Right Actions (Pin Only)
+                createElement('div', { className: 'account-card-right' }, [
                     createElement('button', {
-                        className: `micro-btn-utility ${isPinned ? 'text-blue-400' : 'text-white/20'}`,
+                        className: `btn-mini-action ${isPinned ? 'active' : ''}`,
                         onclick: (e) => { e.stopPropagation(); togglePin(acc); }
                     }, [
-                        createElement('span', { className: `material-symbols-outlined ${isPinned ? 'filled' : ''}`, textContent: 'push_pin' })
+                        createElement('span', { className: `material-symbols-outlined ${isPinned ? 'filled' : ''}`, style: 'font-size: 18px;', textContent: 'push_pin' })
                     ])
                 ])
             ]),
-            createElement('div', { className: 'micro-data-display' }, [
+            createElement('div', { className: 'account-data-display' }, [
                 acc.username ? createDataRow(t('label_user'), acc.username) : null,
                 acc.account ? createDataRow(t('label_account'), acc.account) : null,
-                acc.password ? createDataRow(t('label_password'), '••••••••', acc.password) : null
+                acc.password ? createDataRow(t('label_password'), '••••••••', acc.password, true, acc.id) : null
             ].filter(Boolean))
         ])
     ]);
     return card;
 }
 
-function createDataRow(label, displayValue, copyValue = null) {
-    return createElement('div', { className: 'micro-data-row' }, [
-        createElement('span', { className: 'micro-data-label', textContent: `${label}:` }),
-        createElement('span', { className: 'micro-data-value', textContent: displayValue }),
-        createElement('button', {
-            className: 'micro-btn-copy-inline relative z-10',
-            onclick: (e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(copyValue || displayValue);
-                showToast(t('copied') || "Copiato!");
-            }
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
-        ])
+function createDataRow(label, displayValue, copyValue = null, isPassword = false, id = null) {
+    const rowId = Math.random().toString(36).substr(2, 9);
+    return createElement('div', { className: 'account-data-row' }, [
+        createElement('span', { className: 'account-data-label', textContent: `${label}:` }),
+        createElement('span', {
+            className: 'account-data-value',
+            id: isPassword ? `pass-val-${rowId}` : undefined,
+            textContent: displayValue
+        }),
+        createElement('div', { className: 'account-card-right' }, [
+            isPassword ? createElement('button', {
+                className: 'btn-mini-action',
+                onclick: (e) => {
+                    e.stopPropagation();
+                    const el = document.getElementById(`pass-val-${rowId}`);
+                    const span = e.currentTarget.querySelector('span');
+
+                    if (el && span) {
+                        if (el.textContent === '••••••••') {
+                            el.textContent = copyValue; // Show password
+                            span.textContent = 'visibility_off';
+                        } else {
+                            el.textContent = '••••••••'; // Hide password
+                            span.textContent = 'visibility';
+                        }
+                    }
+                }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'visibility' })
+            ]) : null,
+            createElement('button', {
+                className: 'btn-mini-action',
+                onclick: (e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(copyValue || displayValue);
+                    showToast(t('copied') || "Copiato!");
+                }
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'content_copy' })
+            ])
+        ].filter(Boolean))
     ]);
 }
 
