@@ -30,8 +30,9 @@
     padding-top: env(safe-area-inset-top);
     height: calc(85px + env(safe-area-inset-top));
     border-radius: 0;
-    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    /* Maschera più solida: visibile fino al 70%, sfuma solo alla fine */
+    mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
     border-bottom: 1px solid var(--card-border);
 }
 
@@ -41,8 +42,9 @@
     height: calc(85px + env(safe-area-inset-bottom));
     justify-content: space-between;
     border-radius: 0;
-    mask-image: linear-gradient(to top, black 40%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+    /* Maschera più solida: visibile fino al 60%, sfuma dopo */
+    mask-image: linear-gradient(to top, black 0%, black 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, black 0%, black 60%, transparent 100%);
     border-top: 1px solid var(--card-border);
 }
 
