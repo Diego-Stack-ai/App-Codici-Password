@@ -315,14 +315,18 @@
     cursor: pointer;
     transition: background 0.2s;
     text-align: left;
-    /* Light mode: testo scuro ben visibile */
+
+    /* Light mode: testo scuro MOLTO LEGGIBILE */
     color: #0f172a;
+    -webkit-text-fill-color: #0f172a;
+    /* Fix iOS purple links */
 }
 
 .dark .btn-banking-info {
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.04);
     color: rgba(186, 230, 253, 0.9);
+    -webkit-text-fill-color: rgba(186, 230, 253, 0.9);
 }
 
 .btn-banking-info:hover {
