@@ -609,7 +609,7 @@ async function handleFileUpload(input) {
     const file = input.files[0];
     if (!file) return;
 
-    const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", false);
+    const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", "Annulla");
     if (!ok) {
         input.value = '';
         return;
