@@ -303,37 +303,37 @@
     overflow: hidden;
 }
 
-.btn-banking-info {
+#btn-banking-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     width: 100%;
     padding: 0.75rem 1rem;
     border-radius: 1rem;
-    border: 1px solid rgba(15, 23, 42, 0.15) !important;
+    border: 1px solid rgba(14, 165, 233, 0.2);
     background: rgba(14, 165, 233, 0.06);
     cursor: pointer;
     transition: background 0.2s;
     text-align: left;
 
     /* Light mode: testo scuro MOLTO LEGGIBILE */
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    /* Fix iOS purple links */
+    color: #0f172a;
+    /* Slate 900 */
+    -webkit-text-fill-color: #0f172a;
 }
 
-.dark .btn-banking-info {
+.dark #btn-banking-info {
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.04);
     color: rgba(186, 230, 253, 0.9);
     -webkit-text-fill-color: rgba(186, 230, 253, 0.9);
 }
 
-.btn-banking-info:hover {
+#btn-banking-info:hover {
     background: rgba(14, 165, 233, 0.12);
 }
 
-.dark .btn-banking-info:hover {
+.dark #btn-banking-info:hover {
     background: rgba(56, 189, 248, 0.1);
 }
 
