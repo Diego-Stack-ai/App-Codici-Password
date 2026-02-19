@@ -28,7 +28,7 @@
 .base-header {
     top: 0;
     padding-top: env(safe-area-inset-top);
-    height: calc(80px + env(safe-area-inset-top));
+    height: calc(85px + env(safe-area-inset-top));
     border-radius: 0;
     mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
@@ -48,7 +48,7 @@
 
 /* --- 2. BILANCIAMENTO CONTENUTI --- */
 .header-balanced-container {
-    height: 80px;
+    height: 85px;
     /* Altezza fissa del contenuto utile indipendentemente dalla notch */
     display: flex;
     align-items: center;
