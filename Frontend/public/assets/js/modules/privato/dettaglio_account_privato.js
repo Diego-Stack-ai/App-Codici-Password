@@ -82,6 +82,9 @@ export async function initDettaglioAccountPrivato(user) {
 
     if (isReadOnly) setupReadOnlyUI();
     setupActions();
+    // Setup modal allegati (listener pulsanti sorgente)
+    setupSourceSelector();
+
     await loadAccount();
 
     console.log("[DETTAGLIO] Ready.");
@@ -540,8 +543,6 @@ function openSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.remove('hidden');
-        // Small delay to allow display:block to apply before opacity transition if we wanted animation
-        // But for now, just show it.
         document.body.style.overflow = 'hidden';
     } else {
         console.error("Modale non trovato");
@@ -554,6 +555,54 @@ function closeSourceSelector() {
         modal.classList.add('hidden');
         document.body.style.overflow = '';
     }
+}
+
+/**
+ * Collega i pulsanti del modal sorgente agli input file nascosti.
+ * Deve essere chiamata UNA VOLTA all'init della pagina.
+ */
+function setupSourceSelector() {
+    const modal = document.getElementById('source-selector-modal');
+    if (!modal) return;
+
+    // Mappa: data-source -> id input file
+    const sourceMap = {
+        camera: 'input-camera',
+        gallery: 'input-gallery',
+        file: 'input-file'
+    };
+
+    // Pulsanti sorgente
+    modal.querySelectorAll('[data-source]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const src = btn.dataset.source;
+            const inputId = sourceMap[src];
+            if (!inputId) return;
+            const input = document.getElementById(inputId);
+            if (input) {
+                closeSourceSelector();
+                // Piccolo delay per chiudere il modal prima di aprire il file picker
+                setTimeout(() => input.click(), 150);
+            }
+        });
+    });
+
+    // Pulsante Annulla
+    const cancelBtn = document.getElementById('btn-cancel-source');
+    if (cancelBtn) cancelBtn.addEventListener('click', closeSourceSelector);
+
+    // Click sull'overlay (fuori dalla card) per chiudere
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeSourceSelector();
+    });
+
+    // Input file: al cambio avvia upload
+    ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.addEventListener('change', () => handleFileUpload(input));
+    });
+
+    console.log('[DETTAGLIO] setupSourceSelector: listener agganciati');
 }
 
 async function handleFileUpload(input) {
