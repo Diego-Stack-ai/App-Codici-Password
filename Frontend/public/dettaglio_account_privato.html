@@ -168,7 +168,7 @@
                             </div>
                             <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
                                 <span id="banking-chevron"
-                                    class="material-symbols-outlined text-white/20 transition-transform">expand_more</span>
+                                    class="material-symbols-outlined icon-chevron-muted">expand_more</span>
                             </button>
                         </div>
                         <div id="banking-content" class="flex-col-gap content-spacing hidden">
@@ -182,7 +182,7 @@
                             <div class="header-left-group">
                                 <span
                                     class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
-                                <h3 class="detail-section-title">Allegati</h3>
+                                <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
                             </div>
                             <button id="btn-add-attachment" type="button" class="btn-icon-header">
                                 <span class="material-symbols-outlined">add</span>
@@ -190,7 +190,7 @@
                         </div>
                         <div id="attachments-list" class="flex-col-gap content-spacing">
                             <!-- Injected via JS -->
-                            <p class="empty-attachments-text">Nessun allegato</p>
+                            <p class="empty-attachments-text" data-t="no_attachments">Nessun allegato</p>
                         </div>
                     </section>
 
@@ -201,31 +201,32 @@
                                 class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
                             <h3 class="detail-section-title" data-t="notes">Note</h3>
                         </div>
-                        <div class="detail-field-box border-glow content-spacing">
-                            <p id="detail-note" class="note-text no-transform flex-1 mr-2">-</p>
-                            <button id="copy-note" class="btn-icon-header" type="button">
-                                <span class="material-symbols-outlined text-sm">content_copy</span>
-                            </button>
-                        </div>
-                    </section>
-
-                    <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
-                    <section id="shared-management-section" class="section-spacing section-bottom hidden">
-                        <div class="detail-section-header">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
-                            <h3 class="detail-section-title">Gestione Accessi</h3>
-                        </div>
-                        <div id="guests-list" class="flex-col-gap content-spacing">
-                            <!-- Guest rows injected here -->
-                        </div>
-                    </section>
-
                 </div>
-            </div>
-        </main>
+                <div class="detail-field-box border-glow content-spacing">
+                    <p id="detail-note" class="note-text no-transform">-</p>
+                    <button id="copy-note" class="btn-icon-header" type="button">
+                        <span class="material-symbols-outlined text-sm">content_copy</span>
+                    </button>
+                </div>
+                </section>
 
-        <!-- FOOTER PREMIUM (Protocollo Placeholder) -->
-        <footer id="footer-placeholder" class="base-footer"></footer>
+                <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
+                <section id="shared-management-section" class="section-spacing section-bottom hidden">
+                    <div class="detail-section-header">
+                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
+                        <h3 class="detail-section-title" data-t="access_management">Gestione Accessi</h3>
+                    </div>
+                    <div id="guests-list" class="flex-col-gap content-spacing">
+                        <!-- Guest rows injected here -->
+                    </div>
+                </section>
+
+            </div>
+    </div>
+    </main>
+
+    <!-- FOOTER PREMIUM (Protocollo Placeholder) -->
+    <footer id="footer-placeholder" class="base-footer"></footer>
 
     </div>
 
@@ -237,27 +238,27 @@
     <!-- Source Selector Modal (allegati) -->
     <div id="source-selector-modal" class="hidden">
         <div class="modal-source-card">
-            <h3 class="modal-source-title">Seleziona Sorgente</h3>
+            <h3 class="modal-source-title" data-t="select_source">Seleziona Sorgente</h3>
 
             <div class="source-grid">
                 <label for="input-camera" class="btn-source-option cursor-pointer" data-source="camera">
                     <span class="material-symbols-outlined">photo_camera</span>
-                    <span class="btn-source-label">Camera</span>
+                    <span class="btn-source-label" data-t="camera">Camera</span>
                 </label>
 
                 <label for="input-gallery" class="btn-source-option cursor-pointer" data-source="gallery">
                     <span class="material-symbols-outlined">collections</span>
-                    <span class="btn-source-label">Galleria</span>
+                    <span class="btn-source-label" data-t="gallery">Galleria</span>
                 </label>
 
                 <label for="input-file" class="btn-source-option btn-source-wide cursor-pointer" data-source="file">
                     <span class="material-symbols-outlined">description</span>
-                    <span class="btn-source-label">Documento</span>
+                    <span class="btn-source-label" data-t="document">Documento</span>
                 </label>
             </div>
 
             <div class="modal-footer">
-                <button type="button" id="btn-cancel-source" class="btn-modal-cancel">
+                <button type="button" id="btn-cancel-source" class="btn-modal-cancel" data-t="cancel">
                     Annulla
                 </button>
             </div>

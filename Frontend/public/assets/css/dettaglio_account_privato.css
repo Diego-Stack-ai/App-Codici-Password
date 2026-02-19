@@ -372,6 +372,28 @@
     color: rgba(255, 255, 255, 0.2);
 }
 
+/* --- 6c. NOTES & UTILS --- */
+.note-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    /* Replacement for flex-1 mr-2 */
+    flex: 1;
+    margin-right: 0.5rem;
+}
+
+.icon-chevron-muted {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    opacity: 0.3;
+    transition: transform 0.3s;
+}
+
+.dark .icon-chevron-muted {
+    color: rgba(255, 255, 255, 0.3);
+}
+
 /* --- 7. SOURCE SELECTOR MODAL --- */
 
 /* Utility .hidden usata dal JS per mostrare/nascondere il modal */
