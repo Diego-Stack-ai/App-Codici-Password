@@ -581,8 +581,10 @@ function setupSourceSelector() {
             const input = document.getElementById(inputId);
             if (input) {
                 closeSourceSelector();
-                // Piccolo delay per chiudere il modal prima di aprire il file picker
-                setTimeout(() => input.click(), 150);
+                // Reset value preventivo per garantire che l'onchange scatti sempre
+                input.value = '';
+                // Delay per chiudere il modal e lasciare tempo alla UI mobile di assestarsi
+                setTimeout(() => input.click(), 300);
             }
         });
     });
