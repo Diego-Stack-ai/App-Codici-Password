@@ -353,18 +353,8 @@ function setupActions() {
     }
 
     // Modal Events
-    const sourceModal = document.getElementById('source-selector-modal');
-    if (sourceModal) {
-        sourceModal.querySelectorAll('[data-source]').forEach(btn => {
-            btn.onclick = () => {
-                const type = btn.dataset.source;
-                const input = document.getElementById(`input-${type}`);
-                if (input) input.click();
-                closeSourceSelector();
-            };
-        });
-        document.getElementById('btn-cancel-source').onclick = closeSourceSelector;
-    }
+    const btnCancel = document.getElementById('btn-cancel-source');
+    if (btnCancel) btnCancel.onclick = closeSourceSelector;
 
     // Hidden inputs listeners
     ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
@@ -382,26 +372,31 @@ function openSourceSelector() {
     console.log("Opening Source Selector");
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.remove('invisible', 'opacity-0');
-        // modal.classList.add('active'); 
+        modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
-    } else {
-        console.error("Modal source-selector-modal not found");
     }
 }
 
 function closeSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.add('invisible', 'opacity-0');
-        // modal.classList.remove('active');
+        modal.classList.add('hidden');
         document.body.style.overflow = '';
     }
 }
 
 async function handleFileUpload(input) {
+    // Chiudi il modal sorgente se aperto
+    closeSourceSelector();
+
     const file = input.files[0];
     if (!file) return;
+
+    // Feedback immediato per mobile
+    showToast(`File selezionato: ${file.name}`, 'info');
+
+    // Piccolo delay per permettere alla UI mobile di stabilizzarsi dopo chiusura picker/modal
+    await new Promise(r => setTimeout(r, 200));
 
     const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", false);
     if (!ok) {

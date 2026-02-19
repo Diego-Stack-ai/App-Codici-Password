@@ -39,8 +39,7 @@
         <!-- HEADER FISSO (Protocollo Placeholder) -->
         <header id="header-placeholder" class="base-header"></header>
 
-        <!-- Header Spacer -->
-        <div class="spacer-header"></div>
+        <!-- Header Spacer rimosso (gestito da padding body) -->
 
         <main class="base-main">
             <div class="page-container pt-header-extra pb-footer-extra">
@@ -156,7 +155,7 @@
                     </section>
 
                     <!-- Coordinate Bancarie (Sezione Dinamica) -->
-                    <section id="section-banking" class="profile-section hidden">
+                    <section id="section-banking" class="profile-section section-spacing hidden">
                         <div class="detail-section-header justify-between">
                             <div class="flex-center-gap">
                                 <span
@@ -165,22 +164,22 @@
                             </div>
                             <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
                                 <span id="banking-chevron"
-                                    class="material-symbols-outlined text-secondary transition-transform">expand_more</span>
+                                    class="material-symbols-outlined icon-chevron-muted">expand_more</span>
                             </button>
                         </div>
-                        <div id="banking-content" class="flex-col-gap mt-4 hidden">
+                        <div id="banking-content" class="flex-col-gap content-spacing hidden">
                             <!-- Injected via JS -->
                         </div>
                     </section>
 
                     <!-- Referente (Specifico per Azienda) -->
-                    <section id="section-referente" class="profile-section">
+                    <section id="section-referente" class="profile-section section-spacing">
                         <div class="detail-section-header">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
-                            <h3 class="detail-section-title">Informazioni Referente</h3>
+                            <h3 class="detail-section-title" data-t="referent_info">Informazioni Referente</h3>
                         </div>
-                        <div class="flex-col-gap mt-4">
+                        <div class="flex-col-gap content-spacing">
                             <!-- Nome Referente -->
                             <div class="glass-field-container">
                                 <label class="view-label">Nome Referente</label>
@@ -218,32 +217,32 @@
                     </section>
 
                     <!-- ALLEGATI (Sezione Dinamica) -->
-                    <section id="section-attachments" class="profile-section">
+                    <section id="section-attachments" class="profile-section section-spacing">
                         <div class="detail-section-header justify-between">
                             <div class="flex-center-gap">
                                 <span
                                     class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
-                                <h3 class="detail-section-title">Allegati</h3>
+                                <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
                             </div>
                             <button id="btn-add-attachment" type="button" class="btn-icon-header">
                                 <span class="material-symbols-outlined">add</span>
                             </button>
                         </div>
-                        <div id="attachments-list" class="flex-col-gap mt-4">
+                        <div id="attachments-list" class="flex-col-gap content-spacing">
                             <!-- Injected via JS -->
-                            <p class="text-[10px] text-white/20 uppercase text-center py-4">Nessun allegato</p>
+                            <p class="empty-attachments-text" data-t="no_attachments">Nessun allegato</p>
                         </div>
                     </section>
 
                     <!-- NOTE -->
-                    <section class="profile-section">
+                    <section class="profile-section section-spacing">
                         <div class="detail-section-header">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
                             <h3 class="detail-section-title" data-t="notes">Note</h3>
                         </div>
-                        <div class="detail-field-box border-glow mt-4">
-                            <p id="detail-note" class="note-text no-transform flex-1 mr-2">-</p>
+                        <div class="detail-field-box border-glow content-spacing">
+                            <p id="detail-note" class="note-text no-transform">-</p>
                             <button id="copy-note" class="btn-icon-header" type="button" data-field="detail-note">
                                 <span class="material-symbols-outlined text-sm">content_copy</span>
                             </button>
@@ -251,12 +250,12 @@
                     </section>
 
                     <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
-                    <section id="shared-management-section" class="mt-8 mb-10 hidden">
+                    <section id="shared-management-section" class="section-spacing section-bottom hidden">
                         <div class="detail-section-header">
                             <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
-                            <h3 class="detail-section-title">Gestione Accessi</h3>
+                            <h3 class="detail-section-title" data-t="access_management">Gestione Accessi</h3>
                         </div>
-                        <div id="guests-list" class="flex-col-gap mt-4">
+                        <div id="guests-list" class="flex-col-gap content-spacing">
                             <!-- Guest rows injected here -->
                         </div>
                     </section>
@@ -265,41 +264,41 @@
             </div>
         </main>
 
-        <div class="spacer-footer"></div>
+        <div class="spacer-footer-removed"></div>
 
         <!-- FOOTER PREMIUM (Protocollo Placeholder) -->
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
-    <!-- Hidden File Inputs for Different Sources -->
-    <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden">
-    <input type="file" id="input-gallery" accept="image/*,video/*" class="hidden">
-    <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden">
+    <!-- Hidden File Inputs (Using visual hiding instead of display:none for mobile compat) -->
+    <input type="file" id="input-camera" accept="image/*" capture="environment" class="visually-hidden-input">
+    <input type="file" id="input-gallery" accept="image/*" class="visually-hidden-input">
+    <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="visually-hidden-input">
 
-    <!-- Source Selector Modal -->
-    <div id="source-selector-modal" class="source-selector-overlay">
-        <div class="source-selector-card">
-            <h3 class="source-selector-title">Seleziona Sorgente</h3>
+    <!-- Source Selector Modal (allegati) -->
+    <div id="source-selector-modal" class="hidden">
+        <div class="modal-source-card">
+            <h3 class="modal-source-title" data-t="select_source">Seleziona Sorgente</h3>
 
-            <div class="source-selector-grid">
-                <button class="source-btn" data-source="camera">
-                    <span class="material-symbols-outlined icon-accent-blue">photo_camera</span>
-                    <span class="source-btn-label">Camera</span>
-                </button>
+            <div class="source-grid">
+                <label for="input-camera" class="btn-source-option cursor-pointer" data-source="camera">
+                    <span class="material-symbols-outlined">photo_camera</span>
+                    <span class="btn-source-label" data-t="camera">Camera</span>
+                </label>
 
-                <button class="source-btn gallery" data-source="gallery">
-                    <span class="material-symbols-outlined icon-accent-purple">collections</span>
-                    <span class="source-btn-label">Galleria</span>
-                </button>
+                <label for="input-gallery" class="btn-source-option cursor-pointer" data-source="gallery">
+                    <span class="material-symbols-outlined">collections</span>
+                    <span class="btn-source-label" data-t="gallery">Galleria</span>
+                </label>
 
-                <button class="source-btn file-doc" data-source="file">
-                    <span class="material-symbols-outlined icon-accent-amber">description</span>
-                    <span class="source-btn-label">Documento</span>
-                </button>
+                <label for="input-file" class="btn-source-option btn-source-wide cursor-pointer" data-source="file">
+                    <span class="material-symbols-outlined">description</span>
+                    <span class="btn-source-label" data-t="document">Documento</span>
+                </label>
             </div>
 
-            <div class="source-selector-footer">
-                <button type="button" id="btn-cancel-source" class="source-selector-cancel">
+            <div class="modal-footer">
+                <button type="button" id="btn-cancel-source" class="btn-modal-cancel" data-t="cancel">
                     Annulla
                 </button>
             </div>
