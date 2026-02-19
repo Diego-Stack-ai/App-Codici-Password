@@ -234,26 +234,24 @@
     <input type="file" id="input-gallery" accept="image/*,video/*" class="hidden">
     <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden">
 
-    <!-- Source Selector Modal -->
-    <!-- Source Selector Modal -->
-    <!-- Source Selector Modal -->
-    <div id="source-selector-modal" class="modal-overlay hidden">
-        <div class="glass-card modal-source-card">
+    <!-- Source Selector Modal (allegati) -->
+    <div id="source-selector-modal" class="hidden">
+        <div class="modal-source-card">
             <h3 class="modal-source-title">Seleziona Sorgente</h3>
 
             <div class="source-grid">
-                <button class="btn-source-option hover-blue" data-source="camera">
-                    <span class="material-symbols-outlined text-blue-400">photo_camera</span>
+                <button class="btn-source-option" data-source="camera">
+                    <span class="material-symbols-outlined">photo_camera</span>
                     <span class="btn-source-label">Camera</span>
                 </button>
 
-                <button class="btn-source-option hover-purple" data-source="gallery">
-                    <span class="material-symbols-outlined text-purple-400">collections</span>
+                <button class="btn-source-option" data-source="gallery">
+                    <span class="material-symbols-outlined">collections</span>
                     <span class="btn-source-label">Galleria</span>
                 </button>
 
-                <button class="btn-source-option hover-amber col-span-2" data-source="file">
-                    <span class="material-symbols-outlined text-amber-400">description</span>
+                <button class="btn-source-option btn-source-wide" data-source="file">
+                    <span class="material-symbols-outlined">description</span>
                     <span class="btn-source-label">Documento</span>
                 </button>
             </div>

@@ -283,18 +283,28 @@
 }
 
 /* --- 7. SOURCE SELECTOR MODAL --- */
-/* Override core_ui.css: questo modal usa .hidden per nascondersi, non .active */
-.modal-overlay {
+
+/* Utility .hidden usata dal JS per mostrare/nascondere il modal */
+.hidden {
+    display: none !important;
+}
+
+/* Il modal di DEFAULT è nascosto (non ha .hidden rimosso dal JS) */
+#source-selector-modal {
+    display: none;
     position: fixed;
     inset: 0;
     z-index: 9999;
-    display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(14, 165, 233, 0.25);
-    /* Sky-blue overlay */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+}
+
+/* Quando JS rimuove .hidden, il modal diventa flex */
+#source-selector-modal:not(.hidden) {
+    display: flex !important;
 }
 
 .modal-source-card {
@@ -362,8 +372,20 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
-.col-span-2 {
+.btn-source-wide {
     grid-column: span 2;
+}
+
+.btn-source-option[data-source="camera"] .material-symbols-outlined {
+    color: #60a5fa;
+}
+
+.btn-source-option[data-source="gallery"] .material-symbols-outlined {
+    color: #c084fc;
+}
+
+.btn-source-option[data-source="file"] .material-symbols-outlined {
+    color: #fbbf24;
 }
 
 .modal-footer {
