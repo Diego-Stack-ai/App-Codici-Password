@@ -611,6 +611,9 @@ async function handleFileUpload(input) {
     const file = input.files[0];
     if (!file) return;
 
+    // Feedback immediato per mobile
+    showToast(`File selezionato: ${file.name}`, 'info');
+
     const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", "Annulla");
     if (!ok) {
         input.value = '';

@@ -229,10 +229,10 @@
 
     </div>
 
-    <!-- Hidden File Inputs for Different Sources -->
-    <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden">
-    <input type="file" id="input-gallery" accept="image/*,video/*" class="hidden">
-    <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden">
+    <!-- Hidden File Inputs (Using visual hiding instead of display:none for mobile compat) -->
+    <input type="file" id="input-camera" accept="image/*" capture="environment" class="visually-hidden-input">
+    <input type="file" id="input-gallery" accept="image/*" class="visually-hidden-input">
+    <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="visually-hidden-input">
 
     <!-- Source Selector Modal (allegati) -->
     <div id="source-selector-modal" class="hidden">
