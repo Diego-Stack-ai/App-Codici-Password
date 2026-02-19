@@ -282,6 +282,78 @@
     -webkit-text-security: disc;
 }
 
+/* --- 6b. BANKING PROMPT BOX --- */
+.banking-prompt-box {
+    margin-top: 0.75rem;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.btn-banking-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    background: rgba(14, 165, 233, 0.06);
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: left;
+    /* Light mode: testo scuro ben visibile */
+    color: #0f172a;
+}
+
+.dark .btn-banking-info {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(186, 230, 253, 0.9);
+}
+
+.btn-banking-info:hover {
+    background: rgba(14, 165, 233, 0.12);
+}
+
+.dark .btn-banking-info:hover {
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.info-icon {
+    font-size: 1.1rem;
+    /* Light mode: blu scuro */
+    color: #0369a1;
+    flex-shrink: 0;
+}
+
+.dark .info-icon {
+    color: #7dd3fc;
+}
+
+.info-text {
+    font-size: 13px;
+    font-weight: 600;
+    /* NESSUN uppercase - è testo descrittivo normale */
+    color: #0f172a;
+}
+
+.dark .info-text {
+    color: rgba(186, 230, 253, 0.85);
+}
+
+.empty-attachments-text {
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    padding: 1rem 0;
+    /* Light mode: grigio scuro ben visibile */
+    color: rgba(15, 23, 42, 0.4);
+}
+
+.dark .empty-attachments-text {
+    color: rgba(255, 255, 255, 0.2);
+}
+
 /* --- 7. SOURCE SELECTOR MODAL --- */
 
 /* Utility .hidden usata dal JS per mostrare/nascondere il modal */
@@ -307,15 +379,23 @@
     display: flex !important;
 }
 
+/* ---- MODAL CARD ---- */
 .modal-source-card {
     width: 300px;
     padding: 1.5rem;
-    background: rgba(224, 242, 254, 0.95);
-    /* sky-100 */
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.3);
+    /* Light mode: sfondo bianco-azzurro, testo scuro */
+    background: rgba(240, 249, 255, 0.97);
+    border: 1px solid rgba(14, 165, 233, 0.25);
+    box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.25);
     border-radius: 1.5rem;
     overflow: hidden;
+}
+
+/* Dark mode: sfondo blu medio, non troppo chiaro */
+.dark .modal-source-card {
+    background: rgba(14, 42, 80, 0.96);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.4);
 }
 
 .modal-source-title {
@@ -325,9 +405,15 @@
     letter-spacing: 0.1em;
     text-align: center;
     margin-bottom: 1rem;
-    opacity: 0.6;
+    /* Light mode: testo blu scuro */
     color: #0369a1;
-    /* sky-700 */
+    opacity: 0.9;
+}
+
+.dark .modal-source-title {
+    color: #7dd3fc;
+    /* sky-300 */
+    opacity: 0.85;
 }
 
 .source-grid {
@@ -344,15 +430,26 @@
     gap: 0.5rem;
     padding: 0.75rem;
     border-radius: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: transparent;
+    /* Light mode: bordo scuro leggero */
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    background: rgba(14, 165, 233, 0.06);
     cursor: pointer;
     transition: all 0.2s;
 }
 
+.dark .btn-source-option {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
 .btn-source-option:hover {
-    background: rgba(59, 130, 246, 0.05);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(14, 165, 233, 0.12);
+    border-color: rgba(14, 165, 233, 0.5);
+}
+
+.dark .btn-source-option:hover {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.4);
 }
 
 .btn-source-option span.material-symbols-outlined {
@@ -369,7 +466,13 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.6);
+    /* Light mode: testo scuro */
+    color: #0c4a6e;
+}
+
+.dark .btn-source-label {
+    color: rgba(186, 230, 253, 0.75);
+    /* sky-200 semitrasparente */
 }
 
 .btn-source-wide {
@@ -377,22 +480,38 @@
 }
 
 .btn-source-option[data-source="camera"] .material-symbols-outlined {
-    color: #60a5fa;
+    color: #2563eb;
 }
 
 .btn-source-option[data-source="gallery"] .material-symbols-outlined {
-    color: #c084fc;
+    color: #7c3aed;
 }
 
 .btn-source-option[data-source="file"] .material-symbols-outlined {
+    color: #d97706;
+}
+
+.dark .btn-source-option[data-source="camera"] .material-symbols-outlined {
+    color: #60a5fa;
+}
+
+.dark .btn-source-option[data-source="gallery"] .material-symbols-outlined {
+    color: #c084fc;
+}
+
+.dark .btn-source-option[data-source="file"] .material-symbols-outlined {
     color: #fbbf24;
 }
 
 .modal-footer {
     margin-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(14, 165, 233, 0.15);
     padding-top: 0.5rem;
     text-align: center;
+}
+
+.dark .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .btn-modal-cancel {
@@ -401,15 +520,25 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.3);
+    /* Light mode: testo blu scuro */
+    color: rgba(3, 105, 161, 0.6);
     background: transparent;
     border: none;
     cursor: pointer;
     transition: color 0.2s;
 }
 
+.dark .btn-modal-cancel {
+    color: rgba(186, 230, 253, 0.4);
+}
+
 .btn-modal-cancel:hover {
-    color: white;
+    /* Light mode */
+    color: #0c4a6e;
+}
+
+.dark .btn-modal-cancel:hover {
+    color: #bae6fd;
 }
 
 /* Color variants for hover */
