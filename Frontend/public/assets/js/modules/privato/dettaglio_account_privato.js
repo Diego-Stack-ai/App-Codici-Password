@@ -609,6 +609,9 @@ async function handleFileUpload(input) {
     // Feedback immediato per mobile
     showToast(`File selezionato: ${file.name}`, 'info');
 
+    // Piccolo delay per permettere alla UI mobile di stabilizzarsi dopo chiusura picker/modal
+    await new Promise(r => setTimeout(r, 200));
+
     const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", "Annulla");
     if (!ok) {
         input.value = '';
