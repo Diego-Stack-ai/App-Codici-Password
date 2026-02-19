@@ -310,37 +310,37 @@ function renderBankAccounts() {
     bankAccounts.forEach((acc, idx) => {
         const isOpen = acc._isOpen !== false;
 
-        const div = createElement('div', { className: 'flex-col-gap p-4 rounded-2xl border border-white/10 bg-white/5 relative border-glow mb-4' }, [
+        const div = createElement('div', { className: 'bank-account-card' }, [
             createElement('div', {
-                className: 'flex items-center justify-between mb-2 cursor-pointer',
+                className: 'bank-header',
                 onclick: () => { acc._isOpen = !isOpen; renderBankAccounts(); }
             }, [
-                createElement('div', { className: 'flex items-center gap-2' }, [
+                createElement('div', { className: 'bank-header-left' }, [
                     createElement('span', {
-                        className: 'material-symbols-outlined text-[16px] text-purple-400 transition-transform',
+                        className: 'material-symbols-outlined bank-expand-icon',
                         style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
                         textContent: 'expand_more'
                     }),
-                    createElement('span', { className: 'text-[10px] font-black uppercase text-purple-400', textContent: acc.iban ? `Conto: ${acc.iban.substring(0, 10)}...` : `Nuovo Conto #${idx + 1}` })
+                    createElement('span', { className: 'bank-title', textContent: acc.iban ? `Conto: ${acc.iban.substring(0, 10)}...` : `Nuovo Conto #${idx + 1}` })
                 ]),
                 createElement('button', {
-                    className: 'bg-transparent border-none text-red-500/20 hover:text-red-500 transition-all p-1',
+                    className: 'btn-delete-bank',
                     onclick: (e) => { e.stopPropagation(); bankAccounts.splice(idx, 1); renderBankAccounts(); }
                 }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })])
             ]),
 
-            isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
+            isOpen ? createElement('div', { className: 'bank-details' }, [
                 createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
                 createInputField('Pass. Disp.', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock'),
                 createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
                 createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone'),
 
                 // Carte Section
-                createElement('div', { className: 'mt-4 border-t border-white/5 pt-4' }, [
-                    createElement('div', { className: 'flex items-center justify-between mb-3' }, [
-                        createElement('span', { className: 'text-[9px] font-black uppercase text-white/40 tracking-widest', textContent: 'Carte Associate' }),
+                createElement('div', { className: 'bank-cards-section' }, [
+                    createElement('div', { className: 'bank-cards-header' }, [
+                        createElement('span', { className: 'bank-cards-title', textContent: 'Carte Associate' }),
                         createElement('button', {
-                            className: 'bg-transparent border-none text-emerald-400/40 hover:text-emerald-400 p-1',
+                            className: 'btn-add-card',
                             onclick: () => { if (!acc.cards) acc.cards = []; acc.cards.push({ cardType: '', cardNumber: '', expiry: '', titolare: '', ccv: '', pin: '', _isOpen: true }); renderBankAccounts(); }
                         }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'add_card' })])
                     ]),
@@ -354,18 +354,18 @@ function renderBankAccounts() {
 
 function renderCardEntry(bankIdx, cardIdx, card) {
     const isOpen = card._isOpen !== false;
-    return createElement('div', { className: 'bg-black/20 p-4 rounded-2xl border border-white/5 relative group mb-3 border-glow' }, [
+    return createElement('div', { className: 'card-entry' }, [
         createElement('div', {
-            className: 'flex items-center justify-between cursor-pointer mb-2',
+            className: 'card-entry-header',
             onclick: () => { card._isOpen = !isOpen; renderBankAccounts(); }
         }, [
-            createElement('div', { className: 'flex items-center gap-2' }, [
-                createElement('span', { className: 'material-symbols-outlined text-[16px] text-emerald-400', textContent: 'credit_card' }),
-                createElement('span', { className: 'text-[10px] font-black uppercase text-emerald-400', textContent: card.cardType || `Carta #${cardIdx + 1}` })
+            createElement('div', { className: 'card-entry-title-row' }, [
+                createElement('span', { className: 'material-symbols-outlined card-entry-icon', textContent: 'credit_card' }),
+                createElement('span', { className: 'card-entry-label', textContent: card.cardType || `Carta #${cardIdx + 1}` })
             ])
         ]),
         createElement('button', {
-            className: 'absolute top-3 right-3 bg-transparent border-none text-red-500/20 hover:text-red-500 p-1',
+            className: 'btn-delete-card',
             onclick: (e) => { e.stopPropagation(); bankAccounts[bankIdx].cards.splice(cardIdx, 1); renderBankAccounts(); }
         }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })]),
 
@@ -373,7 +373,7 @@ function renderCardEntry(bankIdx, cardIdx, card) {
             createInputField('Nome Carta', card.cardType, (val) => bankAccounts[bankIdx].cards[cardIdx].cardType = val, 'credit_card'),
             createInputField('Titolare', card.titolare, (val) => bankAccounts[bankIdx].cards[cardIdx].titolare = val, 'person'),
             createInputField('Numero Carta', card.cardNumber, (val) => bankAccounts[bankIdx].cards[cardIdx].cardNumber = val, 'numbers'),
-            createElement('div', { className: 'grid grid-cols-3 gap-3' }, [
+            createElement('div', { className: 'form-grid-2' }, [
                 createInputField('Scadenza', card.expiry, (val) => bankAccounts[bankIdx].cards[cardIdx].expiry = val, 'calendar_month'),
                 createInputField('PIN', card.pin, (val) => bankAccounts[bankIdx].cards[cardIdx].pin = val, 'pin'),
                 createInputField('CCV', card.ccv, (val) => bankAccounts[bankIdx].cards[cardIdx].ccv = val, 'shield')
@@ -383,12 +383,12 @@ function renderCardEntry(bankIdx, cardIdx, card) {
 }
 
 function createInputField(label, value, onInput, icon) {
-    return createElement('div', { className: 'glass-field-container w-full' }, [
+    return createElement('div', { className: 'glass-field-container' }, [
         createElement('label', { className: 'view-label', textContent: label }),
         createElement('div', { className: 'glass-field border-glow' }, [
             createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
             createElement('input', {
-                className: 'bg-transparent border-none text-primary text-xs p-3 w-full outline-none',
+                className: 'detail-field-input',
                 value: value || '',
                 placeholder: label,
                 oninput: (e) => onInput(e.target.value)

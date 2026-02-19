@@ -60,7 +60,7 @@ function initProtocolUI() {
                 id: 'btn-edit-footer',
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
-                onclick: () => window.location.href = `modifica_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`
+                onclick: () => window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
             ])
