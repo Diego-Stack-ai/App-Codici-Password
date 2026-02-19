@@ -38,15 +38,15 @@ export async function initListaAziende(user) {
 
     const loadingTimeout = setTimeout(() => {
         const container = document.getElementById('aziende-list-container');
-        if (container && container.querySelector('.animate-pulse')) {
+        if (container && container.querySelector('.loading-placeholder')) {
             clearElement(container);
             setChildren(container, [
                 createElement('p', {
-                    className: 'text-center text-amber-500 py-10 px-4 text-xs font-bold uppercase',
+                    className: 'timeout-text',
                     textContent: "Il caricamento sta impiegando più del previsto. Prova a ricaricare la pagina."
                 }),
                 createElement('button', {
-                    className: 'btn-ghost-adaptive mx-auto mt-4 px-6 h-10 rounded-lg',
+                    className: 'btn-empty-add',
                     textContent: 'Ricarica Ora',
                     onclick: () => window.location.reload()
                 })
@@ -64,7 +64,7 @@ export async function initListaAziende(user) {
         if (container) {
             clearElement(container);
             setChildren(container, createElement('p', {
-                className: 'text-center text-red-500 py-10',
+                className: 'error-text',
                 textContent: "Errore durante il caricamento. Per favore ricarica la pagina."
             }));
         }
@@ -83,7 +83,7 @@ async function initProtocolUI() {
             id: 'add-azienda-btn',
             className: 'btn-fab-action btn-fab-scadenza',
             title: 'Aggiungi Azienda',
-            onclick: () => window.location.href = 'aggiungi_nuova_azienda.html'
+            onclick: () => window.location.replace('aggiungi_nuova_azienda.html')
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
         ]);
@@ -111,15 +111,15 @@ function renderAziende() {
     clearElement(container);
 
     if (allAziende.length === 0) {
-        setChildren(container, createElement('div', { className: 'col-span-full flex-center-col py-20' }, [
-            createElement('span', { className: 'material-symbols-outlined text-4xl opacity-20', textContent: 'domain_disabled' }),
+        setChildren(container, createElement('div', { className: 'empty-state' }, [
+            createElement('span', { className: 'material-symbols-outlined empty-state-icon', textContent: 'domain_disabled' }),
             createElement('p', {
-                className: 'text-[10px] font-black uppercase tracking-widest mt-4 opacity-40',
+                className: 'empty-state-text',
                 textContent: t('no_companies_found') || 'Nessuna Azienda Trovata'
             }),
             createElement('button', {
-                className: 'btn-ghost-adaptive mt-6 px-8 h-12 rounded-xl text-xs font-black uppercase tracking-wider',
-                onclick: () => window.location.href = 'aggiungi_nuova_azienda.html'
+                className: 'btn-empty-add',
+                onclick: () => window.location.replace('aggiungi_nuova_azienda.html')
             }, [createElement('span', { textContent: 'Aggiungi Ora' })])
         ]));
         return;
@@ -141,53 +141,55 @@ function renderAziende() {
 
 function createAziendaCard(a) {
     const palKey = getPaletteKey(a.ragioneSociale, a.colorIndex);
+    const isPinned = !!a.isPinned;
 
     return createElement('div', {
-        className: `matrix-card card-${palKey} border-glow adaptive-shadow group flex flex-col relative overflow-hidden transition-all active:scale-[0.98] p-4 cursor-pointer min-h-[160px]`,
+        className: `azienda-card card-${palKey} border-glow adaptive-shadow`,
         onclick: (e) => {
             if (e.target.closest('button')) return;
-            window.location.href = `account_azienda.html?id=${a.id}`;
+            window.location.replace(`account_azienda.html?id=${a.id}`);
         }
     }, [
         // Pin Button
         createElement('button', {
             type: 'button',
-            className: `btn-pin-azienda absolute top-3 right-3 z-30 w-8 h-8 p-0 flex items-center justify-center bg-transparent border-none outline-none transition-all ${a.isPinned ? 'text-amber-400 opacity-100' : 'text-white/30 hover:text-white opacity-40 hover:opacity-100'}`,
+            className: `btn-pin-azienda${isPinned ? ' is-pinned' : ''}`,
             onclick: (e) => { e.stopPropagation(); togglePin(a.id); }
         }, [
             createElement('span', {
-                className: `material-symbols-outlined text-2xl drop-shadow-md select-none ${a.isPinned ? 'pin-active rotate-neg-45' : 'pin-inactive'}`,
+                className: `material-symbols-outlined ${isPinned ? 'pin-active' : 'pin-inactive'}`,
+                style: 'font-size: 24px;',
                 textContent: 'push_pin'
             })
         ]),
         // Card Body
-        createElement('div', { className: 'flex-1 flex items-center gap-4 z-10 w-full mb-4 px-1' }, [
-            createElement('div', { className: 'size-16 rounded-2xl flex items-center justify-center border-glow text-primary shrink-0 shadow-lg bg-surface-field overflow-hidden' }, [
+        createElement('div', { className: 'card-body' }, [
+            createElement('div', { className: 'card-logo-box border-glow' }, [
                 a.logo ? createElement('img', {
                     src: a.logo,
-                    className: 'size-full object-cover rounded-xl',
+                    className: 'card-logo-img',
                     alt: 'Logo'
                 }) : createElement('span', {
-                    className: 'text-xl font-black',
+                    className: 'card-logo-initial',
                     textContent: (a.ragioneSociale || 'A').charAt(0).toUpperCase()
                 })
             ]),
-            createElement('div', { className: 'flex-1 min-w-0 flex items-center' }, [
+            createElement('div', { className: 'card-name-box' }, [
                 createElement('h3', {
-                    className: 'text-base font-black text-primary truncate leading-snug w-full pr-8',
+                    className: 'card-name',
                     textContent: a.ragioneSociale || t('without_name')
                 })
             ])
         ]),
         // Footer Actions
-        createElement('div', { className: 'grid grid-cols-2 gap-3 z-10 w-full mt-auto' }, [
+        createElement('div', { className: 'card-actions' }, [
             createElement('button', {
-                className: 'btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm',
-                onclick: (e) => { e.stopPropagation(); window.location.href = `dati_azienda.html?id=${a.id}`; }
+                className: 'btn-card-action',
+                onclick: (e) => { e.stopPropagation(); window.location.replace(`dati_azienda.html?id=${a.id}`); }
             }, [createElement('span', { textContent: 'Dati Azienda' })]),
             createElement('button', {
-                className: 'btn-ghost-adaptive w-full h-12 rounded-xl flex-center shadow-sm transition-all font-bold text-xs uppercase tracking-wider backdrop-blur-sm',
-                onclick: (e) => { e.stopPropagation(); window.location.href = `account_azienda.html?id=${a.id}`; }
+                className: 'btn-card-action',
+                onclick: (e) => { e.stopPropagation(); window.location.replace(`account_azienda.html?id=${a.id}`); }
             }, [createElement('span', { textContent: 'Account' })])
         ])
     ]);
