@@ -573,21 +573,13 @@ function setupSourceSelector() {
     };
 
     // Pulsanti sorgente
-    modal.querySelectorAll('[data-source]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const src = btn.dataset.source;
-            const inputId = sourceMap[src];
-            if (!inputId) return;
-            const input = document.getElementById(inputId);
-            if (input) {
-                closeSourceSelector();
-                // Reset value preventivo per garantire che l'onchange scatti sempre
-                input.value = '';
-                // Delay per chiudere il modal e lasciare tempo alla UI mobile di assestarsi
-                setTimeout(() => input.click(), 300);
-            }
-        });
-    });
+    // Pulsanti sorgente (ora sono LABEL): il browser gestisce il click nativamente.
+    // Non aggiungiamo listener click qui per evitare doppi trigger.
+
+    // Listener per chiusura modal dopo selezione (opzionale, gestito nel change)
+    // Se l'utente clicca la label, si apre il file picker.
+    // Se seleziona, scatta 'change' -> handleFileUpload -> closeSourceSelector.
+    // Se annulla, il modal resta aperto (corretto).
 
     // Pulsante Annulla
     const cancelBtn = document.getElementById('btn-cancel-source');
@@ -608,6 +600,9 @@ function setupSourceSelector() {
 }
 
 async function handleFileUpload(input) {
+    // Chiudi il modal sorgente se aperto
+    closeSourceSelector();
+
     const file = input.files[0];
     if (!file) return;
 
