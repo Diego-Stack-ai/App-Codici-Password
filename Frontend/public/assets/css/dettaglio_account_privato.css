@@ -587,46 +587,6 @@
     color: #fbbf24;
 }
 
-/* --- 8. BANKING PROMPT --- */
-.banking-prompt-box {
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-}
-
-.btn-banking-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 9999px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: #60a5fa;
-}
-
-.btn-banking-info:hover {
-    background: rgba(59, 130, 246, 0.2);
-    transform: translateY(-1px);
-}
-
-.info-icon {
-    font-size: 1.2rem;
-}
-
-.info-text {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #60a5fa;
-    letter-spacing: 0.05em;
-}
-
-/* --- 9. UTILITIES FOR JS TOGGLES --- */
-.hidden {
-    display: none !important;
-}
 
 /* --- 10. SEMANTIC SPACING & LAYOUT --- */
 .section-spacing {
