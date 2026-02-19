@@ -54,7 +54,7 @@ export async function initDettaglioAccountPrivato(user) {
         clearElement(hLeft);
         setChildren(hLeft, createElement('button', {
             className: 'btn-icon-header',
-            onclick: () => window.location.href = 'account_privati.html'
+            onclick: () => window.location.replace('account_privati.html')
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
         ]));

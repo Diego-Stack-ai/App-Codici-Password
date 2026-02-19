@@ -46,6 +46,18 @@ export async function initAccountPrivati(user) {
 }
 
 function setupUI() {
+    // Override freccia back -> sempre verso area_privata.html
+    const hLeft = document.getElementById('header-left');
+    if (hLeft) {
+        clearElement(hLeft);
+        setChildren(hLeft, createElement('button', {
+            className: 'btn-icon-header',
+            onclick: () => window.location.href = 'area_privata.html'
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+        ]));
+    }
+
     const searchInput = document.getElementById('account-search');
     if (searchInput) {
         searchInput.addEventListener('input', filterAndRender);

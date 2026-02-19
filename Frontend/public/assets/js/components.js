@@ -46,49 +46,53 @@ export async function initComponents() {
                 const urlParams = new URLSearchParams(window.location.search);
 
                 // Mapping Logico Navigazione
+                // IMPORTANTE: usiamo location.replace() invece di location.href
+                // per non inquinare la history del browser (evita il loop "avanti/indietro")
                 if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
-                    backFn = () => window.location.href = 'home_page.html';
+                    backFn = () => window.location.replace('home_page.html');
+                } else if (path.endsWith('area_privata.html')) {
+                    backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
-                    backFn = () => window.location.href = 'scadenze.html';
+                    backFn = () => window.location.replace('scadenze.html');
                 } else if (path.endsWith('aggiungi_scadenza.html')) {
                     const id = urlParams.get('id');
-                    if (id) backFn = () => window.location.href = `dettaglio_scadenza.html?id=${id}`;
-                    else backFn = () => window.location.href = 'scadenze.html';
+                    if (id) backFn = () => window.location.replace(`dettaglio_scadenza.html?id=${id}`);
+                    else backFn = () => window.location.replace('scadenze.html');
                 } else if (path.endsWith('impostazioni.html')) {
-                    backFn = () => window.location.href = 'home_page.html';
+                    backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('regole_scadenze.html')) {
-                    backFn = () => window.location.href = 'impostazioni.html';
+                    backFn = () => window.location.replace('impostazioni.html');
                 } else if (path.endsWith('privacy.html') || path.endsWith('termini.html')) {
-                    backFn = () => window.location.href = 'impostazioni.html';
+                    backFn = () => window.location.replace('impostazioni.html');
                 } else if (path.endsWith('configurazione_automezzi.html') || path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
-                    backFn = () => window.location.href = 'regole_scadenze.html';
+                    backFn = () => window.location.replace('regole_scadenze.html');
                 } else if (path.endsWith('archivio_account.html') || path.endsWith('notifiche_storia.html')) {
-                    backFn = () => window.location.href = 'impostazioni.html';
+                    backFn = () => window.location.replace('impostazioni.html');
                 } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html')) {
-                    backFn = () => window.location.href = 'lista_aziende.html';
+                    backFn = () => window.location.replace('lista_aziende.html');
                 } else if (path.endsWith('dettaglio_account_azienda.html')) {
                     const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda');
-                    backFn = () => window.location.href = `account_azienda.html?id=${aziendaId}`;
+                    backFn = () => window.location.replace(`account_azienda.html?id=${aziendaId}`);
                 } else if (path.endsWith('form_account_azienda.html')) {
                     const accountId = urlParams.get('id');
                     const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda');
-                    if (accountId) backFn = () => window.location.href = `dettaglio_account_azienda.html?id=${accountId}&aziendaId=${aziendaId}`;
-                    else backFn = () => window.location.href = `account_azienda.html?id=${aziendaId}`;
+                    if (accountId) backFn = () => window.location.replace(`dettaglio_account_azienda.html?id=${accountId}&aziendaId=${aziendaId}`);
+                    else backFn = () => window.location.replace(`account_azienda.html?id=${aziendaId}`);
                 } else if (path.endsWith('modifica_azienda.html')) {
                     const id = urlParams.get('id');
-                    backFn = () => window.location.href = `dati_azienda.html?id=${id}`;
+                    backFn = () => window.location.replace(`dati_azienda.html?id=${id}`);
                 } else if (path.endsWith('aggiungi_nuova_azienda.html')) {
-                    backFn = () => window.location.href = 'lista_aziende.html';
+                    backFn = () => window.location.replace('lista_aziende.html');
                 } else if (path.endsWith('profilo_privato.html')) {
-                    backFn = () => window.location.href = 'home_page.html';
+                    backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('account_privati.html')) {
-                    backFn = () => window.location.href = 'area_privata.html';
+                    backFn = () => window.location.replace('area_privata.html');
                 } else if (path.endsWith('dettaglio_account_privato.html')) {
-                    backFn = () => window.location.href = 'account_privati.html';
+                    backFn = () => window.location.replace('account_privati.html');
                 } else if (path.endsWith('form_account_privato.html')) {
                     const id = urlParams.get('id');
-                    if (id) backFn = () => window.location.href = `dettaglio_account_privato.html?id=${id}`;
-                    else backFn = () => window.location.href = 'account_privati.html';
+                    if (id) backFn = () => window.location.replace(`dettaglio_account_privato.html?id=${id}`);
+                    else backFn = () => window.location.replace('account_privati.html');
                 }
 
                 headerLeft.appendChild(
