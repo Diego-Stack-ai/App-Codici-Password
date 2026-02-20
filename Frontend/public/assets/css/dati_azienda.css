@@ -10,56 +10,69 @@
     position: relative;
     margin-bottom: 2rem;
     padding-top: 1rem;
+    width: 100%;
+}
+
+.header-action-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    position: relative;
 }
 
 .detail-avatar-container {
     position: relative;
-    margin-bottom: 1rem;
 }
 
 .detail-avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
     background: var(--surface-glass);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary);
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     overflow: hidden;
+    position: relative;
 }
 
-.detail-avatar img {
+.detail-avatar-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
+.detail-avatar-placeholder {
+    font-size: 40px;
+    opacity: 0.2;
+    color: var(--text-primary);
+}
+
 .hero-status-dot {
     position: absolute;
-    bottom: -4px;
-    right: -4px;
-    width: 24px;
-    height: 24px;
+    bottom: -6px;
+    right: -6px;
+    width: 28px;
+    height: 28px;
     background: #3b82f6;
     border-radius: 50%;
-    border: 2px solid var(--bg-primary);
+    border: 3px solid var(--bg-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.hero-status-dot span {
-    font-size: 14px;
     color: white;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .hero-title-container {
     text-align: center;
+    width: 100%;
 }
 
 .hero-title {
@@ -67,19 +80,17 @@
     font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 0.25rem;
+    line-height: 1.2;
 }
 
-.hero-category-badge {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
+.hero-title.selectable {
+    user-select: text;
 }
 
-/* Badge forma giuridica azienda */
 .company-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin: 0.5rem auto 0;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
@@ -92,9 +103,39 @@
     border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-/* --- 2. SECTIONS --- */
+/* QR Button */
+.qr-btn-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.qr-code-box {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 2px;
+}
+
+.qr-zoom-indicator {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    border: 2px solid var(--bg-primary);
+}
+
+/* --- 2. SECTIONS & ACCORDIONS --- */
 .detail-content-wrap {
-    padding: 0 1.25rem 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -105,7 +146,6 @@
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1rem;
-    margin-top: 1rem;
 }
 
 .detail-section-title {
@@ -120,6 +160,33 @@
     font-size: 20px;
 }
 
+/* Accordion Trigger Premium */
+.accordion-trigger-premium {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+    color: var(--text-primary);
+}
+
+.accordion-trigger-premium:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.accordion-trigger-premium.active {
+    background: rgba(255, 255, 255, 0.08);
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
 /* --- 3. GLASS CARDS & TABS --- */
 .glass-card {
     background: var(--card-bg);
@@ -127,6 +194,9 @@
     border-radius: 20px;
     padding: 1.25rem;
     backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .tabs-scroll-row {
@@ -135,6 +205,7 @@
     overflow-x: auto;
     padding-bottom: 0.5rem;
     scrollbar-width: none;
+    margin-top: 0.5rem;
 }
 
 .tabs-scroll-row::-webkit-scrollbar {
@@ -159,37 +230,64 @@
     background: #3b82f6;
     color: white;
     border-color: #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 }
 
-/* --- 4. REFERENT --- */
+/* --- 4. REFERENT & CONTACTS --- */
 .referent-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .referent-avatar-box {
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
-.referent-avatar-box img {
+.referent-avatar-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
+.referent-avatar-placeholder {
+    font-size: 32px;
+    opacity: 0.3;
+}
+
 .referent-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.referent-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.referent-role {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #10b981;
 }
 
 .referent-call-btn {
@@ -205,19 +303,24 @@
     transition: all 0.2s;
 }
 
-/* --- 5. FIELDS --- */
+.referent-call-btn:hover {
+    background: rgba(16, 185, 129, 0.2);
+    transform: scale(1.05);
+}
+
+/* --- 5. FIELDS & FORMS --- */
 .glass-field-container {
-    margin-bottom: 1rem;
+    width: 100%;
 }
 
 .view-label {
     display: block;
     font-size: 0.6rem;
-    font-weight: 500;
+    font-weight: 700;
     color: var(--text-secondary);
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.4rem;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
 }
 
 .detail-field-box {
@@ -228,6 +331,12 @@
     border-radius: 12px;
     padding: 0 1rem;
     height: 3.5rem;
+    position: relative;
+    transition: border-color 0.2s;
+}
+
+.detail-field-box:focus-within {
+    border-color: var(--accent);
 }
 
 .detail-field-input {
@@ -236,15 +345,86 @@
     border: none;
     color: var(--text-primary);
     font-size: 0.95rem;
+    font-weight: 500;
     outline: none;
     width: 100%;
+    min-width: 0;
 }
 
-/* --- 6. UTILS --- */
+.detail-field-input.no-transform {
+    text-transform: none;
+}
+
+.detail-field-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-icon-header {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.btn-icon-header:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.note-display-box {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    background: var(--surface-glass);
+    border-left: 4px solid rgba(245, 158, 11, 0.5);
+    /* Amber Accent */
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.form-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    resize: vertical;
+    outline: none;
+}
+
+.form-textarea:focus {
+    border-color: var(--accent);
+}
+
+/* --- 6. UTILS & COLORS --- */
+.flex-col-gap {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .flex-col-gap-xs {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .icon-accent-blue {
@@ -259,8 +439,117 @@
     color: #f59e0b;
 }
 
-.truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.icon-accent-purple {
+    color: #a855f7;
+}
+
+/* Grid for Fiscal Data e.g. */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Email List Items */
+.email-display-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.email-display-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.email-category-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.badge-blue {
+    color: #60a5fa;
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.badge-purple {
+    color: #c084fc;
+    background: rgba(168, 85, 247, 0.15);
+}
+
+/* Address Text */
+.address-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.address-subtext {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* --- 7. MINI ACTION BUTTONS --- */
+.btn-mini-section-action {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+}
+
+.btn-mini-section-action:hover {
+    transform: scale(1.1);
+    opacity: 1 !important;
+}
+
+.action-purple {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+.action-amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.action-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.detail-section-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+.justify-between {
+    justify-content: space-between;
 }
