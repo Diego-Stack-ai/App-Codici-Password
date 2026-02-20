@@ -695,24 +695,6 @@ function initSharingMonitor(account) {
                 continue;
             }
 
-            // REGOLA A: Accepted ma non in array -> Add
-            if (inv.status === 'accepted' && !currentEmails.includes(inv.recipientEmail)) {
-                console.warn("[AutoHealing] Rule A (Azienda): Resyncing email.");
-                await updateDoc(doc(db, colPath), {
-                    sharedWithEmails: arrayUnion(inv.recipientEmail)
-                });
-                needsHealing = true;
-            }
-
-            // REGOLA D: Email in array ma invite 'rejected' -> Remove (Hardening V2)
-            if (inv.status === 'rejected' && currentEmails.includes(inv.recipientEmail)) {
-                console.warn("[AutoHealing] Rule D (Azienda): Removing rejected email.");
-                await updateDoc(doc(db, colPath), {
-                    sharedWithEmails: arrayRemove(inv.recipientEmail)
-                });
-                needsHealing = true;
-            }
-
             // UI Render (Solo pending ed accepted)
             if (inv.status === 'rejected') continue;
 
@@ -745,36 +727,43 @@ function initSharingMonitor(account) {
             listContainer.appendChild(div);
         }
 
-        // REGOLA B: Email in array ma nessun invite valido -> Remove
-        for (const email of currentEmails) {
-            const hasValidInvite = invites.some(i => i.recipientEmail === email && (i.status === 'pending' || i.status === 'accepted'));
-            if (!hasValidInvite) {
-                console.warn("[AutoHealing] Rule B (Azienda): Removing orphan email.");
-                await updateDoc(doc(db, colPath), {
-                    sharedWithEmails: arrayRemove(email)
-                });
-                needsHealing = true;
-            }
+        // AutoHealing (Single Pass) - Synchronize valid emails array
+        const validEmails = invites.filter(i => i.status === 'pending' || i.status === 'accepted').map(i => i.recipientEmail);
+        const arraysMatch = currentEmails.length === validEmails.length && validEmails.every(e => currentEmails.includes(e));
+
+        let needsUpdate = false;
+        let updatePayload = {};
+
+        if (!arraysMatch) {
+            console.warn("[AutoHealing] Syncing local sharedWithEmails array to match Firebase invites.");
+            updatePayload.sharedWithEmails = validEmails;
+            account.sharedWithEmails = validEmails; // UPDATE LOCAL CACHE
+            needsUpdate = true;
         }
 
         // REGOLA E: Se array vuoto ma flag condivisione attivi -> Reset (Auto-Off)
-        const updatedEmails = (await (await getDoc(doc(db, colPath))).data())?.sharedWithEmails || [];
-        if (updatedEmails.length === 0 && isSharingFlagActive) {
+        if (validEmails.length === 0 && isSharingFlagActive) {
             console.warn("[AutoHealing] Rule E (Azienda): Resetting sharing flags.");
-            await updateDoc(doc(db, colPath), {
-                shared: false,
-                isMemoShared: false
-            });
-            account.shared = false;
+            updatePayload.shared = false;
+            updatePayload.isMemoShared = false;
+            account.shared = false; // UPDATE LOCAL CACHE
             account.isMemoShared = false;
 
             const mgmt = document.getElementById('shared-management-section');
             if (mgmt) mgmt.classList.add('hidden');
 
-            needsHealing = true;
+            needsUpdate = true;
         }
 
-        if (needsHealing) console.log("[AutoHealing] Consistency repair complete (Azienda).");
+        // Esegui UN SOLO updateDoc se ci sono cambiamenti
+        if (needsUpdate) {
+            try {
+                await updateDoc(doc(db, colPath), updatePayload);
+                console.log("[AutoHealing] Consistency repair complete (Azienda).");
+            } catch (e) {
+                console.error("[AutoHealing] Failed to execute updateDoc", e);
+            }
+        }
         if (invites.length === 0) listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessun accesso attivo' }));
     });
 }
