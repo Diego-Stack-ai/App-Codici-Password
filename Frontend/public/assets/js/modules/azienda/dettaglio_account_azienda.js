@@ -671,7 +671,7 @@ function initSharingMonitor(account) {
     if (sharingUnsubscribe) sharingUnsubscribe();
 
     console.log("[SharingMonitor-Azienda] Initializing Realtime Check...");
-    const q = query(collection(db, "invites"), where("accountId", "==", currentId));
+    const q = query(collection(db, "invites"), where("accountId", "==", currentId), where("senderId", "==", currentUid));
 
     sharingUnsubscribe = onSnapshot(q, async (snap) => {
         const invites = snap.docs.map(d => ({ id: d.id, ...d.data() }));

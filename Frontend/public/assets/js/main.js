@@ -42,7 +42,7 @@ import { initComponents } from './components.js'; // Imports components system
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
-    doc, getDoc, collection, query, where, getDocs, updateDoc,
+    doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc,
     onSnapshot, runTransaction, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from './ui-core.js';
@@ -282,12 +282,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]),
                 createElement('h3', { className: 'modal-title text-center', textContent: 'Invito Rifiutato' }),
                 createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: `${data.recipientEmail} ha declinato la condivisione per: ${data.accountName}` }),
-                createElement('div', { className: 'modal-actions' }, [
+                createElement('div', { className: 'modal-actions grid grid-cols-2 gap-3' }, [
                     createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-white/10 text-white font-bold uppercase text-[10px] hover:bg-white/20 transition-all',
-                        textContent: 'Ho Capito',
+                        className: 'w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white/40 font-bold uppercase text-[10px] hover:bg-white/10 transition-all',
+                        textContent: 'Archivia',
                         onclick: async () => {
                             await updateDoc(doc(db, "invites", inviteId), { senderNotified: true });
+                            modal.remove();
+                        }
+                    }),
+                    createElement('button', {
+                        className: 'w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold uppercase text-[10px] hover:bg-red-500/20 transition-all',
+                        textContent: 'Elimina Invito',
+                        onclick: async () => {
+                            await deleteDoc(doc(db, "invites", inviteId));
                             modal.remove();
                         }
                     })
@@ -304,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const ownerId = invData.senderId;
             const accId = invData.accountId;
+
             let accountPath = `users/${ownerId}/accounts/${accId}`;
             if (invData.type === 'azienda' && invData.aziendaId) {
                 accountPath = `users/${ownerId}/aziende/${invData.aziendaId}/accounts/${accId}`;
@@ -312,20 +321,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const accRef = doc(db, accountPath);
             const accSnap = await getDoc(accRef);
 
-            if (accSnap.exists()) {
-                const accData = accSnap.data();
-                const currentEmails = accData.sharedWithEmails || [];
-                const isSharingActive = accData.shared || accData.isMemoShared;
+            if (!accSnap.exists()) return;
+            const accData = accSnap.data();
+            const isSharingActive = accData.shared || accData.isMemoShared;
 
-                // Se array emails è vuoto ma i flag sono attivi -> Reset Globale
-                if (currentEmails.length === 0 && isSharingActive) {
-                    console.log("[GlobalAutoHealing] Resetting account flags (No active recipients).");
-                    await updateDoc(accRef, {
-                        shared: false,
-                        isMemoShared: false
-                    });
-                    showToast(`Condivisione terminata per ${accData.nomeAccount}`, 'info');
+            if (!isSharingActive) return;
+
+            // Explicitly query all invites to make absolutely sure there are no other pending/accepted users
+            const q = query(collection(db, "invites"), where("accountId", "==", accId), where("senderId", "==", ownerId));
+            const invitesSnap = await getDocs(q);
+
+            let activeCount = 0;
+            invitesSnap.forEach(docSnap => {
+                const inv = docSnap.data();
+                if (inv.status === 'pending' || inv.status === 'accepted') {
+                    activeCount++;
                 }
+            });
+
+            // If there are no active (pending or accepted) invites left, we turn off sharing globally
+            if (activeCount === 0) {
+                console.log("[GlobalAutoHealing] No active invites remaining -> Resetting account flags");
+                await updateDoc(accRef, {
+                    shared: false,
+                    isMemoShared: false,
+                    sharedWithEmails: []
+                });
+                showToast(`Condivisione terminata per ${accData.nomeAccount}`, 'info');
             }
         } catch (e) {
             console.error("[GlobalAutoHealing] Error:", e);
@@ -394,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('invite-modal');
             if (modal) modal.remove();
 
-            showToast(status === 'accepted' ? "Accesso configurato!" : "Invito archiviato", status === 'accepted' ? 'success' : 'info');
+            showToast(status === 'accepted' ? "Accesso configurato!" : "Invito rifiutato", status === 'accepted' ? 'success' : 'info');
 
             if (status === 'accepted') {
                 setTimeout(() => window.location.reload(), 800);
