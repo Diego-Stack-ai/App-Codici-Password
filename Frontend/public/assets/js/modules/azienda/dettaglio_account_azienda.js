@@ -39,9 +39,6 @@ export async function initDettaglioAccountAzienda(user) {
         return;
     }
 
-    // Expose globals for HTML onclicks if needed (legacy compat)
-    window.openSourceSelector = openSourceSelector;
-    window.closeSourceSelector = closeSourceSelector;
 
     initProtocolUI(); // Sync UI setup
     setupActions();
@@ -187,8 +184,6 @@ function renderBanking(acc) {
             bankingPrompt.classList.remove('hidden');
             const btnBankingInfo = document.getElementById('btn-banking-info');
             if (btnBankingInfo) {
-                const infoText = btnBankingInfo.querySelector('.info-text');
-                if (infoText) infoText.textContent = t('banking_hint');
                 btnBankingInfo.onclick = () => {
                     window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`;
                 };
@@ -354,7 +349,19 @@ function setupActions() {
 
     // Modal Events
     const btnCancel = document.getElementById('btn-cancel-source');
-    if (btnCancel) btnCancel.onclick = closeSourceSelector;
+    if (btnCancel) {
+        btnCancel.onclick = (e) => {
+            e.preventDefault();
+            closeSourceSelector();
+        };
+    }
+
+    const modal = document.getElementById('source-selector-modal');
+    if (modal) {
+        modal.onclick = (e) => {
+            if (e.target === modal) closeSourceSelector();
+        };
+    }
 
     // Hidden inputs listeners
     ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
@@ -364,15 +371,13 @@ function setupActions() {
 
 // --- ATTACHMENTS LOGIC ---
 
-// Renderli globali per onclick HTML
-window.openSourceSelector = openSourceSelector;
-window.closeSourceSelector = closeSourceSelector;
 
 function openSourceSelector() {
-    console.log("Opening Source Selector");
+    console.log("Opening Source Selector Azienda");
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
         document.body.style.overflow = 'hidden';
     }
 }
@@ -380,8 +385,11 @@ function openSourceSelector() {
 function closeSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 300);
     }
 }
 
@@ -396,9 +404,9 @@ async function handleFileUpload(input) {
     showToast(`File selezionato: ${file.name}`, 'info');
 
     // Piccolo delay per permettere alla UI mobile di stabilizzarsi dopo chiusura picker/modal
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 800));
 
-    const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", false);
+    const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", t('cancel') || "Annulla");
     if (!ok) {
         input.value = '';
         return;
@@ -468,33 +476,34 @@ function renderAttachments(list) {
     const items = list.map(a => {
         const type = (a.type || "").toLowerCase();
         let icon = 'description';
-        let color = 'text-blue-400';
-        if (type.includes('image')) { icon = 'image'; color = 'text-purple-400'; }
-        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400'; }
-        else if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400'; }
+        let color = 'text-blue-400/40';
 
-        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : '---';
+        if (type.includes('image')) { icon = 'image'; color = 'text-purple-400/40'; }
+        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400/40'; }
+        else if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
+
+        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '---';
         const size = (a.size / (1024 * 1024)).toFixed(2);
 
-        return createElement('div', { className: 'glass-card flex items-center gap-3 p-3 group transition-all active:scale-[0.98]' }, [
+        return createElement('div', {
+            className: 'attachment-item animate-in slide-in-from-left-2'
+        }, [
             createElement('div', {
-                className: 'size-10 rounded-xl bg-white/5 flex-center border border-white/10 shrink-0 cursor-pointer',
+                className: 'attachment-info cursor-pointer',
                 onclick: () => window.open(a.url, '_blank')
             }, [
-                createElement('span', { className: `material-symbols-outlined ${color} text-xl`, textContent: icon })
-            ]),
-            createElement('div', {
-                className: 'flex-1 flex flex-col min-w-0 cursor-pointer',
-                onclick: () => window.open(a.url, '_blank')
-            }, [
-                createElement('p', { className: 'text-xs font-bold text-white truncate', textContent: a.name }),
-                createElement('span', { className: 'text-[9px] text-white/20 font-medium', textContent: `${size} MB • ${date}` })
+                createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
+                createElement('div', { className: 'attachment-meta' }, [
+                    createElement('span', { className: 'attachment-name', textContent: a.name }),
+                    createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
+                ])
             ]),
             createElement('button', {
-                className: 'btn-icon-header opacity-20 group-hover:opacity-100 hover:text-red-400 transition-all',
-                onclick: () => deleteAttachment(a)
+                type: 'button',
+                className: 'btn-delete-attachment',
+                onclick: (e) => { e.stopPropagation(); deleteAttachment(a); }
             }, [
-                createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
             ])
         ]);
     });
@@ -503,7 +512,7 @@ function renderAttachments(list) {
 }
 
 async function deleteAttachment(att) {
-    const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", true);
+    const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", t('cancel') || "Annulla");
     if (!ok) return;
 
     try {

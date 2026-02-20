@@ -204,12 +204,17 @@ function setupUI() {
                 flags.forEach(other => { if (other !== f) other.checked = false; });
             }
 
-            // RULE 4: Dropdown visibility
+            // RULE 4: Dropdown visibility & Positioning
             const mgmt = document.getElementById('shared-management');
             const isSharing = document.getElementById('flag-shared').checked || document.getElementById('flag-memo-shared').checked;
             if (mgmt) {
                 mgmt.classList.toggle('hidden', !isSharing);
-                if (!isSharing) {
+                if (isSharing) {
+                    // Posiziona il pannello sotto il flag attivo
+                    const currentFlagId = document.getElementById('flag-shared').checked ? 'flag-shared' : 'flag-memo-shared';
+                    const parentCard = document.getElementById(currentFlagId).closest('.option-card');
+                    if (parentCard) parentCard.after(mgmt);
+                } else {
                     // Reset sharing fields
                     const inviteInput = document.getElementById('invite-email');
                     if (inviteInput) inviteInput.value = '';
@@ -297,15 +302,22 @@ function renderSuggestions(list) {
     clearElement(container);
     list.forEach(c => {
         const div = createElement('div', {
-            className: 'p-3 cursor-pointer border-b border-white/5 last:border-none flex-col-gap selection-item-hover',
-            style: 'transition: background 0.2s',
+            className: 'suggestion-item',
             onclick: () => {
                 document.getElementById('invite-email').value = c.email;
                 container.classList.add('hidden');
             }
         }, [
-            createElement('p', { className: 'text-xs font-bold text-primary m-0', textContent: c.nome || c.email.split('@')[0] }),
-            createElement('p', { className: 'text-[10px] text-secondary m-0', textContent: c.email })
+            createElement('p', {
+                className: 'font-bold text-primary m-0',
+                style: 'font-size: 11px; line-height: 1.2;',
+                textContent: c.nome || c.email.split('@')[0]
+            }),
+            createElement('p', {
+                className: 'text-secondary m-0',
+                style: 'font-size: 9px; opacity: 0.7;',
+                textContent: c.email
+            })
         ]);
         container.appendChild(div);
     });

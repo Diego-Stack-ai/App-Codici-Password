@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DETTAGLIO ACCOUNT (V5.0) - CSS Isolation
+   DETTAGLIO ACCOUNT AZIENDA (V5.0) - CSS Isolation
    ========================================================================== */
 
 /* --- 1. HERO HEADER --- */
@@ -58,10 +58,6 @@
     color: white;
 }
 
-.hero-title-container {
-    text-align: center;
-}
-
 .hero-title {
     font-size: 1.5rem;
     font-weight: 800;
@@ -69,12 +65,19 @@
     margin-bottom: 0.25rem;
 }
 
-.hero-category-badge {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
+.account-type-badge {
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 600;
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
 }
 
 /* --- 2. SECTIONS --- */
@@ -97,7 +100,6 @@
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-primary);
-    text-transform: uppercase;
     letter-spacing: 0.1em;
 }
 
@@ -105,7 +107,7 @@
     font-size: 20px;
 }
 
-/* --- 3. GLASS FIELDS (Read-only) --- */
+/* --- 3. GLASS FIELDS --- */
 .glass-field-container {
     margin-bottom: 1rem;
 }
@@ -144,156 +146,154 @@
     width: 100%;
 }
 
-.detail-field-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.micro-btn-copy-inline {
+.btn-icon-header {
     width: 36px;
     height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 10px;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
     transition: all 0.2s;
-    opacity: 0.5;
-}
-
-.micro-btn-copy-inline:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.05);
-    color: #3b82f6;
-}
-
-/* --- 4. ATTACHMENTS --- */
-.attachment-card-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface-glass);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 1rem;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-.attachment-card-row:hover {
-    background: var(--surface-hover);
-    transform: translateY(-1px);
-}
-
-.attachment-info-wrap {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.attachment-icon-box {
-    width: 42px;
-    height: 42px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.attachment-title {
-    font-size: 0.95rem;
-    font-weight: 700;
+.btn-icon-header:hover {
+    background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
 }
 
-.attachment-desc {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+/* --- 4. ATTACHMENTS (V5.0 Premium) --- */
+.attachment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0.75rem;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    transition: all 0.2s ease;
+    flex-wrap: nowrap;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 0.75rem;
 }
 
-.attachment-arrow {
-    color: var(--text-secondary);
-    opacity: 0.3;
+.attachment-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* --- 5. UTILS --- */
-.flex-col-gap {
+.attachment-info {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+    gap: 0.75rem;
+}
+
+.attachment-icon {
+    font-size: 20px;
+    opacity: 0.6;
+}
+
+.attachment-meta {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    min-width: 0;
+    flex: 1;
 }
 
-.flex-col-gap-2 {
+.attachment-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.attachment-status {
+    font-size: 8px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-delete-attachment {
+    width: 32px;
+    height: 32px;
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.icon-accent-blue {
-    color: #3b82f6;
-}
-
-.icon-accent-emerald {
-    color: #10b981;
-}
-
-.icon-accent-amber {
-    color: #f59e0b;
-}
-
-.base-shield {
-    -webkit-text-security: disc;
-}
-
-/* --- 6. SOURCE SELECTOR MODAL (V5.0 Standard) --- */
-
-/* Utility .hidden usata dal JS per mostrare/nascondere il modal */
-.hidden {
-    display: none !important;
-}
-
-/* Il modal di DEFAULT è nascosto (non ha .hidden rimosso dal JS, o meglio ha .hidden) */
-#source-selector-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 900;
-    /* Lower than global modal-overlay (1000) */
     align-items: center;
     justify-content: center;
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-delete-attachment:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* --- 5. SOURCE SELECTOR MODAL (V5.0 Standard) --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(14, 165, 233, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    transition: all 0.3s ease;
+    visibility: hidden;
+}
+
+.modal-overlay:not(.hidden) {
+    visibility: visible;
+}
+
+.modal-overlay.active {
     background: rgba(14, 165, 233, 0.25);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
 
-/* Quando JS rimuove .hidden, il modal diventa flex */
-#source-selector-modal:not(.hidden) {
-    display: flex !important;
+.modal-overlay.hidden {
+    display: none !important;
 }
 
-/* ---- MODAL CARD ---- */
 .modal-source-card {
     width: 300px;
     padding: 1.5rem;
-    /* Light mode: sfondo bianco-azzurro, testo scuro */
     background: rgba(240, 249, 255, 0.97);
     border: 1px solid rgba(14, 165, 233, 0.25);
     box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.25);
     border-radius: 1.5rem;
     overflow: hidden;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Dark mode: sfondo blu medio, non troppo chiaro */
+.modal-overlay.active .modal-source-card {
+    transform: scale(1);
+    opacity: 1;
+}
+
 .dark .modal-source-card {
     background: rgba(14, 42, 80, 0.96);
     border: 1px solid rgba(56, 189, 248, 0.25);
-    box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.4);
 }
 
 .modal-source-title {
@@ -303,14 +303,11 @@
     letter-spacing: 0.1em;
     text-align: center;
     margin-bottom: 1rem;
-    /* Light mode: testo blu scuro */
     color: #0369a1;
-    opacity: 0.9;
 }
 
 .dark .modal-source-title {
     color: #7dd3fc;
-    opacity: 0.85;
 }
 
 .source-grid {
@@ -327,7 +324,6 @@
     gap: 0.5rem;
     padding: 0.75rem;
     border-radius: 0.75rem;
-    /* Light mode: bordo scuro leggero */
     border: 1px solid rgba(14, 165, 233, 0.2);
     background: rgba(14, 165, 233, 0.06);
     cursor: pointer;
@@ -344,26 +340,10 @@
     border-color: rgba(14, 165, 233, 0.5);
 }
 
-.dark .btn-source-option:hover {
-    background: rgba(56, 189, 248, 0.1);
-    border-color: rgba(56, 189, 248, 0.4);
-}
-
-.btn-source-option span.material-symbols-outlined {
-    font-size: 1.5rem;
-    transition: transform 0.2s;
-}
-
-.btn-source-option:hover span.material-symbols-outlined {
-    transform: scale(1.1);
-}
-
 .btn-source-label {
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    /* Light mode: testo scuro */
     color: #0c4a6e;
 }
 
@@ -375,30 +355,6 @@
     grid-column: span 2;
 }
 
-.btn-source-option[data-source="camera"] .material-symbols-outlined {
-    color: #2563eb;
-}
-
-.btn-source-option[data-source="gallery"] .material-symbols-outlined {
-    color: #7c3aed;
-}
-
-.btn-source-option[data-source="file"] .material-symbols-outlined {
-    color: #d97706;
-}
-
-.dark .btn-source-option[data-source="camera"] .material-symbols-outlined {
-    color: #60a5fa;
-}
-
-.dark .btn-source-option[data-source="gallery"] .material-symbols-outlined {
-    color: #c084fc;
-}
-
-.dark .btn-source-option[data-source="file"] .material-symbols-outlined {
-    color: #fbbf24;
-}
-
 .modal-footer {
     margin-top: 1rem;
     border-top: 1px solid rgba(14, 165, 233, 0.15);
@@ -406,36 +362,158 @@
     text-align: center;
 }
 
-.dark .modal-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
 .btn-modal-cancel {
     padding: 0.5rem 0;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: rgba(3, 105, 161, 0.6);
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: color 0.2s;
 }
 
-.dark .btn-modal-cancel {
-    color: rgba(186, 230, 253, 0.4);
+/* --- 6. BANKING PROMPT BOX (Standard V5.0) --- */
+.banking-prompt-box {
+    margin-top: 0.75rem;
+    border-radius: 1rem;
+    overflow: hidden;
 }
 
-.btn-modal-cancel:hover {
-    color: #0c4a6e;
+#btn-banking-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    background: rgba(14, 165, 233, 0.06);
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: left;
+    color: #0f172a;
+    -webkit-text-fill-color: #0f172a;
 }
 
-.dark .btn-modal-cancel:hover {
-    color: #bae6fd;
+.dark #btn-banking-info {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(186, 230, 253, 0.9);
+    -webkit-text-fill-color: rgba(186, 230, 253, 0.9);
 }
 
-/* --- 7. SEMANTIC UTILITIES --- */
+#btn-banking-info:hover {
+    background: rgba(14, 165, 233, 0.12);
+}
+
+.dark #btn-banking-info:hover {
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.info-icon {
+    font-size: 1.1rem;
+    color: #0369a1;
+    flex-shrink: 0;
+}
+
+.dark .info-icon {
+    color: #7dd3fc;
+}
+
+.info-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.dark .info-text {
+    color: rgba(186, 230, 253, 0.85);
+}
+
+/* --- 7. COORDINATE BANCARIE & UTILS --- */
+.banking-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(16, 185, 129, 0.05);
+    border-radius: 1rem;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    position: relative;
+}
+
+.banking-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.5rem;
+}
+
+.banking-index {
+    font-size: 9px;
+    font-weight: 900;
+    color: #10b981;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.micro-data-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.micro-data-label {
+    font-size: 8px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    width: 60px;
+}
+
+.micro-data-value {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.micro-btn-copy-inline {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    opacity: 0.4;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.micro-btn-copy-inline:hover {
+    opacity: 1;
+    color: #3b82f6;
+}
+
+.icon-accent-blue {
+    color: #3b82f6;
+}
+
+.icon-accent-emerald {
+    color: #10b981;
+}
+
+.icon-accent-amber {
+    color: #f59e0b;
+}
+
+.icon-accent-orange {
+    color: #f97316;
+}
+
 .section-spacing {
     margin-top: 2rem;
 }
@@ -452,45 +530,12 @@
     justify-content: space-between;
 }
 
-.flex-center-gap {
+.header-left-group {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-.empty-attachments-text {
-    font-size: 11px;
-    font-weight: 500;
-    text-align: center;
-    padding: 1rem 0;
-    color: rgba(15, 23, 42, 0.4);
-}
-
-.dark .empty-attachments-text {
-    color: rgba(255, 255, 255, 0.2);
-}
-
-.note-text {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    line-height: 1.4;
-    white-space: pre-wrap;
-    flex: 1;
-    margin-right: 0.5rem;
-}
-
-.icon-chevron-muted {
-    font-size: 1.5rem;
-    color: var(--text-secondary);
-    opacity: 0.3;
-    transition: transform 0.3s;
-}
-
-.dark .icon-chevron-muted {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-/* Fix Mobile: Input File invisibile ma cliccabile */
 .visually-hidden-input {
     position: absolute;
     width: 1px;
@@ -501,5 +546,16 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-    opacity: 0;
+    visibility: hidden;
+}
+
+.base-shield {
+    -webkit-text-security: disc;
+}
+
+.icon-chevron-muted {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    opacity: 0.3;
+    transition: transform 0.3s;
 }

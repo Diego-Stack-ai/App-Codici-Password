@@ -148,7 +148,7 @@
     /* explicit focus color */
 }
 
-.detail-field-input {
+.field-input {
     flex: 1;
     background: transparent !important;
     border: none !important;
@@ -157,6 +157,8 @@
     font-family: inherit;
     outline: none !important;
     width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .detail-field-actions {
@@ -786,6 +788,8 @@ input:checked+.base-switch::after {
 }
 
 .suggestions-box {
+    margin-top: 0.75rem;
+    padding: 0.75rem 0;
     background: var(--surface-glass);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -797,10 +801,13 @@ input:checked+.base-switch::after {
 }
 
 .suggestion-item {
-    padding: 0.75rem;
+    padding: 0.85rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     transition: background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
 }
 
 .suggestion-item:last-child {
@@ -809,4 +816,5 @@ input:checked+.base-switch::after {
 
 .suggestion-item:hover {
     background: var(--surface-hover);
+    opacity: 0.9;
 }

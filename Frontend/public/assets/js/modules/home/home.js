@@ -30,6 +30,10 @@ export async function initHomePage(user) {
     currentUser = user;
 
     try {
+        // Fetch Aziende for the shortcut logic
+        const aziSnap = await getDocs(collection(db, "users", user.uid, "aziende"));
+        const aziendes = aziSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
         // Renderizza Info Utente (Header)
         await renderHeaderUser(user);
 
@@ -37,7 +41,6 @@ export async function initHomePage(user) {
         await renderDashboardDeadlines(user);
 
         // --- SETUP FLUSSO (V4.5) ---
-        // Caricamento dinamico per performance
         const { initSetupFlusso } = await import('./setup_flusso.js');
         await initSetupFlusso(user);
 
@@ -48,7 +51,7 @@ export async function initHomePage(user) {
         document.documentElement.setAttribute("data-i18n", "ready");
 
         // 5. FAB Group (Footer)
-        setupFABGroup();
+        setupFABGroup(aziendes);
 
         console.log("[HOME] Dashboard Ready.");
 
@@ -234,7 +237,7 @@ function renderMiniItem(item, today) {
 }
 
 // --- FAB GROUP (Quick Add Actions) ---
-function setupFABGroup() {
+function setupFABGroup(aziendes = []) {
     // Cerca il footer per 2 secondi max
     let attempts = 0;
     const interval = setInterval(() => {
@@ -274,12 +277,20 @@ function setupFABGroup() {
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'event' })
             ]);
 
-            // 3. Azienda (DX)
+            // 3. Azienda (Dynamic Redirect)
             const btnAzienda = createElement('button', {
                 className: 'btn-fab-action btn-fab-azienda',
-                title: 'Nuova Azienda',
+                title: 'Nuovo Account Azienda',
                 dataset: { label: 'Azienda' },
-                onclick: () => window.location.href = 'form_account_azienda.html'
+                onclick: () => {
+                    if (aziendes.length === 1) {
+                        window.location.href = `form_account_azienda.html?aziendaId=${aziendes[0].id}`;
+                    } else if (aziendes.length > 1) {
+                        window.location.href = 'lista_aziende.html?select=1';
+                    } else {
+                        window.location.href = 'aggiungi_nuova_azienda.html';
+                    }
+                }
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'domain_add' })
             ]);

@@ -54,14 +54,7 @@ export async function initFormAccountAzienda(user) {
 }
 
 function initBaseUI() {
-    console.log('[form_account_azienda] UI Base gestita da main.js');
-
-    // Aggiorna titolo Header (se già presente)
-    const hTitle = document.querySelector('.base-header .header-title');
-    if (hTitle) {
-        hTitle.textContent = isEditing ? (t('loading') || 'Caricamento...') : (t('new_company_account') || 'Nuovo Account Azienda');
-        if (isEditing) hTitle.classList.add('animate-pulse');
-    }
+    console.log('[FORM-ACCOUNT-AZIENDA] initBaseUI...');
 
     // Footer actions setup
     const fCenter = document.getElementById('footer-center-actions');
@@ -71,16 +64,19 @@ function initBaseUI() {
         const cancelBtn = createElement('button', {
             className: 'btn-fab-action btn-fab-neutral',
             title: t('cancel') || 'Annulla',
-            onclick: () => history.back()
+            onclick: () => {
+                if (isEditing && currentDocId) window.location.href = `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}`;
+                else history.back();
+            }
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
         ]);
 
         const saveBtn = createElement('button', {
-            id: 'save-btn',
+            id: 'save-btn-footer',
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('save') || 'Salva',
-            onclick: saveChanges
+            onclick: () => window.saveAccount()
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
         ]);
@@ -88,16 +84,18 @@ function initBaseUI() {
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [cancelBtn, saveBtn]));
     }
 
-    const fRight = document.getElementById('footer-right-actions');
-    if (fRight) {
-        clearElement(fRight);
-        setChildren(fRight, createElement('a', {
-            href: 'impostazioni.html',
-            className: 'btn-icon-header',
-            title: 'Impostazioni'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'tune' })
-        ]));
+    // Header Back button customization
+    if (isEditing && currentDocId) {
+        const hLeft = document.getElementById('header-left');
+        if (hLeft) {
+            clearElement(hLeft);
+            setChildren(hLeft, createElement('button', {
+                className: 'btn-icon-header',
+                onclick: () => window.location.href = `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}`
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
+            ]));
+        }
     }
 }
 
@@ -158,6 +156,7 @@ async function loadData() {
             preview.src = data.logo || data.avatar;
             preview.classList.remove('hidden');
             document.getElementById('logo-placeholder').classList.add('hidden');
+            document.getElementById('btn-remove-logo')?.classList.remove('hidden');
         }
 
     } catch (e) { logError("LoadData", e); }
@@ -192,8 +191,30 @@ function setupUI() {
             }
             const mgmt = document.getElementById('shared-management');
             const isSharing = document.getElementById('flag-shared').checked || document.getElementById('flag-memo-shared').checked;
-            if (mgmt) mgmt.classList.toggle('hidden', !isSharing);
+            if (mgmt) {
+                mgmt.classList.toggle('hidden', !isSharing);
+                if (isSharing) {
+                    const activeFlag = document.getElementById('flag-shared').checked ? 'flag-shared' : 'flag-memo-shared';
+                    const parentCard = document.getElementById(activeFlag).closest('.option-card');
+                    if (parentCard) parentCard.after(mgmt);
+                } else {
+                    // Reset sharing fields
+                    const inviteInput = document.getElementById('invite-email');
+                    if (inviteInput) inviteInput.value = '';
+                    const suggestions = document.getElementById('rubrica-suggestions');
+                    if (suggestions) suggestions.classList.add('hidden');
+                }
+            }
         };
+    });
+
+    // Close suggestions on outside click
+    document.addEventListener('click', (e) => {
+        const inviteInput = document.getElementById('invite-email');
+        const suggestions = document.getElementById('rubrica-suggestions');
+        if (!inviteInput?.contains(e.target) && !suggestions?.contains(e.target)) {
+            suggestions?.classList.add('hidden');
+        }
     });
 
     // Banking
@@ -249,23 +270,39 @@ function renderSuggestions(list) {
     clearElement(container);
     list.forEach(c => {
         const div = createElement('div', {
-            className: 'p-3 cursor-pointer border-b border-white/5 last:border-none selection-item-hover',
+            className: 'suggestion-item',
             onclick: () => { document.getElementById('invite-email').value = c.email; container.classList.add('hidden'); }
         }, [
-            createElement('p', { className: 'text-xs font-bold text-primary m-0', textContent: c.nome || c.email.split('@')[0] }),
-            createElement('p', { className: 'text-[10px] text-secondary m-0', textContent: c.email })
+            createElement('p', {
+                className: 'font-bold text-primary m-0',
+                style: 'font-size: 11px; line-height: 1.2;',
+                textContent: c.nome || c.email.split('@')[0]
+            }),
+            createElement('p', {
+                className: 'text-secondary m-0',
+                style: 'font-size: 9px; opacity: 0.7;',
+                textContent: c.email
+            })
         ]);
         container.appendChild(div);
     });
 }
 
 function setupImageUploader() {
+    const trigger = document.getElementById('btn-trigger-logo');
     const input = document.getElementById('logo-input');
     const btnRemove = document.getElementById('btn-remove-logo');
     const preview = document.getElementById('account-logo-preview');
     const placeholder = document.getElementById('logo-placeholder');
 
-    if (!input) return;
+    if (!input || !trigger) return;
+
+    // Reset visibility if empty
+    if (!preview.src || preview.classList.contains('hidden')) {
+        btnRemove?.classList.add('hidden');
+    }
+
+    trigger.onclick = () => input.click();
 
     input.onchange = (e) => {
         const file = e.target.files[0];
@@ -310,7 +347,7 @@ function renderBankAccounts() {
     bankAccounts.forEach((acc, idx) => {
         const isOpen = acc._isOpen !== false;
 
-        const div = createElement('div', { className: 'bank-account-card' }, [
+        const div = createElement('div', { className: 'bank-account-card border-glow' }, [
             createElement('div', {
                 className: 'bank-header',
                 onclick: () => { acc._isOpen = !isOpen; renderBankAccounts(); }
@@ -325,7 +362,14 @@ function renderBankAccounts() {
                 ]),
                 createElement('button', {
                     className: 'btn-delete-bank',
-                    onclick: (e) => { e.stopPropagation(); bankAccounts.splice(idx, 1); renderBankAccounts(); }
+                    onclick: async (e) => {
+                        e.stopPropagation();
+                        const ok = await showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
+                        if (ok) {
+                            bankAccounts.splice(idx, 1);
+                            renderBankAccounts();
+                        }
+                    }
                 }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })])
             ]),
 
@@ -354,7 +398,7 @@ function renderBankAccounts() {
 
 function renderCardEntry(bankIdx, cardIdx, card) {
     const isOpen = card._isOpen !== false;
-    return createElement('div', { className: 'card-entry' }, [
+    return createElement('div', { className: 'card-entry border-glow' }, [
         createElement('div', {
             className: 'card-entry-header',
             onclick: () => { card._isOpen = !isOpen; renderBankAccounts(); }
@@ -366,7 +410,15 @@ function renderCardEntry(bankIdx, cardIdx, card) {
         ]),
         createElement('button', {
             className: 'btn-delete-card',
-            onclick: (e) => { e.stopPropagation(); bankAccounts[bankIdx].cards.splice(cardIdx, 1); renderBankAccounts(); }
+            onclick: async (e) => {
+                e.stopPropagation();
+                const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
+                const ok = await showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
+                if (ok) {
+                    bankAccounts[bankIdx].cards.splice(cardIdx, 1);
+                    renderBankAccounts();
+                }
+            }
         }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })]),
 
         isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
@@ -388,7 +440,7 @@ function createInputField(label, value, onInput, icon) {
         createElement('div', { className: 'glass-field border-glow' }, [
             createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
             createElement('input', {
-                className: 'detail-field-input',
+                className: 'field-input',
                 value: value || '',
                 placeholder: label,
                 oninput: (e) => onInput(e.target.value)
@@ -403,8 +455,8 @@ async function removeIban(idx) {
     renderBankAccounts();
 }
 
-async function saveChanges() {
-    const btn = document.getElementById('save-btn') || document.getElementById('btn-save-footer');
+window.saveAccount = async () => {
+    const btn = document.getElementById('save-btn-footer');
     if (btn) btn.disabled = true;
 
     const hasBankingData = bankAccounts.some(acc => acc.iban?.trim() || (acc.cards && acc.cards.length > 0));
@@ -436,11 +488,24 @@ async function saveChanges() {
         type: 'azienda'
     };
 
-    if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); if (btn) btn.disabled = false; return; }
+    const logoPreview = document.getElementById('account-logo-preview');
+    if (logoPreview && !logoPreview.classList.contains('hidden')) {
+        data.logo = logoPreview.src;
+    }
+
+    if (!data.nomeAccount) {
+        showToast("Inserisci un nome account", "error");
+        if (btn) btn.disabled = false;
+        return;
+    }
 
     const isSharingActive = (data.shared || data.isMemoShared);
     if (isSharingActive) {
-        if (!inviteEmail) { showToast("Scegli un contatto o disattiva il flag condiviso", "warning"); if (btn) btn.disabled = false; return; }
+        if (!inviteEmail) {
+            showToast("Scegli un contatto o disattiva il flag condiviso", "warning");
+            if (btn) btn.disabled = false;
+            return;
+        }
         data.recipientEmail = inviteEmail;
         data.sharedWith = [{ email: inviteEmail, status: 'pending' }];
         data.sharedWithEmails = [inviteEmail];
@@ -492,7 +557,11 @@ async function saveChanges() {
 
         showToast(isEditing ? (t('success_save') || "Dati salvati con successo!") : "Account creato con successo!", "success");
         setTimeout(() => window.location.href = `dettaglio_account_azienda.html?id=${tid}&aziendaId=${currentAziendaId}`, 1000);
-    } catch (e) { logError("Save", e); showToast(t('error_save'), "error"); if (btn) btn.disabled = false; }
+    } catch (e) {
+        logError("Save", e);
+        showToast(t('error_save'), "error");
+        if (btn) btn.disabled = false;
+    }
 }
 
 async function deleteAccount() {

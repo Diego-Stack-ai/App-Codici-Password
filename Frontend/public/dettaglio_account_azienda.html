@@ -2,46 +2,41 @@
 <html lang="it">
 
 <head>
+    <!-- Anti-flicker & Theme Master (V5.0) -->
+    <script src="assets/js/theme-init.js"></script>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dettaglio Account Azienda - PROTOCOLLO OPERATORE V3.7</title>
-
-    <!-- PWA / Mobile Capable -->
+    <title>Dettaglio Account Azienda - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
+    <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
     <link rel="manifest" href="manifest.json?v=5.3" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.jpg">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- Fonts -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
+    <!-- CSS Stratificato (V5.0 compliant) -->
     <link rel="stylesheet" href="assets/css/core_fonts.css">
-    <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=5.0">
-
-    <!-- CORE JS -->
-    <script src="assets/js/theme-init.js"></script>
 </head>
 
 <body class="base-bg">
-    <!-- 1. CONTENITORE PRINCIPALE -->
+    <!-- 1. BASE CONTAINER (Design System V5.0) -->
     <div class="base-container relative">
-        <!-- Ambient Glow -->
+        <!-- 2. BASE GLOW (Ambience Effect) -->
         <div class="base-glow"></div>
-        <!-- 2. FARO ANIMATO -->
         <div class="base-glow pointer-events-none"></div>
 
-        <!-- HEADER FISSO (Protocollo Placeholder) -->
+        <!-- 3. HEADER (Fixed Content Placeholders) -->
         <header id="header-placeholder" class="base-header"></header>
 
-        <!-- Header Spacer rimosso (gestito da padding body) -->
-
+        <!-- 4. MAIN CONTENT (Pure HTML Strategy) -->
         <main class="base-main">
+            <!-- PAGE CONTAINER (Safe Area & Padding) -->
             <div class="page-container pt-header-extra pb-footer-extra">
                 <!-- Hero Profile Header -->
                 <div class="hero-profile-header">
@@ -52,7 +47,7 @@
                         </div>
                     </div>
                     <h1 id="hero-title" class="hero-title selectable">-</h1>
-                    <div id="account-type-badge" class="config-badge config-badge-standard hidden">
+                    <div id="account-type-badge" class="account-type-badge hidden">
                         Azienda
                     </div>
                 </div>
@@ -68,96 +63,100 @@
                         </div>
                         <div class="flex-col-gap">
 
-                            <!-- Nome Account -->
-                            <div class="glass-field-container">
-                                <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
-                                    Account</label>
-                                <div class="detail-field-box border-glow">
-                                    <input id="detail-nomeAccount" name="account_name" readonly
-                                        class="detail-field-input no-transform" autocomplete="off">
-                                    <button class="btn-icon-header copy-btn" type="button"
-                                        data-field="detail-nomeAccount">
-                                        <span class="material-symbols-outlined">content_copy</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Utente -->
-                            <div class="glass-field-container">
-                                <label class="view-label" for="detail-username" data-t="username">Utente</label>
-                                <div class="detail-field-box border-glow">
-                                    <input id="detail-username" name="account_username" type="text" readonly
-                                        class="detail-field-input no-transform" autocomplete="off">
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-username">
-                                        <span class="material-symbols-outlined">content_copy</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Account -->
-                            <div class="glass-field-container">
-                                <label class="view-label" for="detail-account" data-t="account_code">Account /
-                                    Codice</label>
-                                <div class="detail-field-box border-glow">
-                                    <input id="detail-account" name="account_code" type="text" readonly
-                                        class="detail-field-input no-transform" autocomplete="off">
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="detail-account">
-                                        <span class="material-symbols-outlined">content_copy</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Password -->
-                            <div class="glass-field-container">
-                                <label class="view-label" for="detail-password" data-t="password">Password</label>
-                                <div class="detail-field-box border-glow">
-                                    <input id="detail-password" name="account_password" type="password" readonly
-                                        class="detail-field-input base-shield field-value-password no-transform"
-                                        autocomplete="new-password">
-                                    <div class="detail-field-actions">
-                                        <button id="toggle-password" class="btn-icon-header" type="button">
-                                            <span class="material-symbols-outlined">visibility</span>
-                                        </button>
+                            <form onsubmit="return false;" autocomplete="off">
+                                <!-- Nome Account -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
+                                        Account</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-nomeAccount" name="account_name" readonly
+                                            class="detail-field-input no-transform" autocomplete="off">
                                         <button class="btn-icon-header copy-btn" type="button"
-                                            data-field="detail-password">
+                                            data-field="detail-nomeAccount">
                                             <span class="material-symbols-outlined">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Sito Web -->
-                            <div class="glass-field-container">
-                                <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
-                                <div class="detail-field-box border-glow">
-                                    <input id="detail-website" readonly
-                                        class="detail-field-input link-underlined no-transform">
-                                    <div class="detail-field-actions">
-                                        <button id="open-website" class="btn-icon-header" type="button">
-                                            <span class="material-symbols-outlined">open_in_new</span>
-                                        </button>
+                                <!-- Utente -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-username" data-t="username">Utente</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-username" name="account_username" type="text" readonly
+                                            class="detail-field-input no-transform" autocomplete="off">
                                         <button class="btn-icon-header copy-btn" type="button"
-                                            data-field="detail-website">
+                                            data-field="detail-username">
                                             <span class="material-symbols-outlined">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Suggerimento Conto Bancario -->
-                            <div id="add-banking-prompt" class="banking-prompt-box hidden">
-                                <button type="button" id="btn-banking-info" class="btn-banking-info">
-                                    <span class="material-symbols-outlined info-icon">info</span>
-                                    <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
-                                </button>
-                            </div>
+                                <!-- Account -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-account" data-t="account_code">Account /
+                                        Codice</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-account" name="account_code" type="text" readonly
+                                            class="detail-field-input no-transform" autocomplete="off">
+                                        <button class="btn-icon-header copy-btn" type="button"
+                                            data-field="detail-account">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-password" data-t="password">Password</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-password" name="account_password" type="password" readonly
+                                            class="detail-field-input base-shield field-value-password no-transform"
+                                            autocomplete="new-password">
+                                        <div class="detail-field-actions">
+                                            <button id="toggle-password" class="btn-icon-header" type="button">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                            <button class="btn-icon-header copy-btn" type="button"
+                                                data-field="detail-password">
+                                                <span class="material-symbols-outlined">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sito Web -->
+                                <div class="glass-field-container">
+                                    <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
+                                    <div class="detail-field-box border-glow">
+                                        <input id="detail-website" readonly
+                                            class="detail-field-input link-underlined no-transform">
+                                        <div class="detail-field-actions">
+                                            <button id="open-website" class="btn-icon-header" type="button">
+                                                <span class="material-symbols-outlined">open_in_new</span>
+                                            </button>
+                                            <button class="btn-icon-header copy-btn" type="button"
+                                                data-field="detail-website">
+                                                <span class="material-symbols-outlined">content_copy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Suggerimento Conto Bancario -->
+                                <div id="add-banking-prompt" class="banking-prompt-box hidden">
+                                    <button type="button" id="btn-banking-info" class="btn-banking-info">
+                                        <span class="material-symbols-outlined info-icon">info</span>
+                                        <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </section>
 
                     <!-- Coordinate Bancarie (Sezione Dinamica) -->
-                    <section id="section-banking" class="profile-section section-spacing hidden">
+                    <section id="section-banking" class="section-spacing hidden">
                         <div class="detail-section-header justify-between">
-                            <div class="flex-center-gap">
+                            <div class="header-left-group">
                                 <span
                                     class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
                                 <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
@@ -168,12 +167,12 @@
                             </button>
                         </div>
                         <div id="banking-content" class="flex-col-gap content-spacing hidden">
-                            <!-- Injected via JS -->
+                            <!-- Banking cards injected here -->
                         </div>
                     </section>
 
                     <!-- Referente (Specifico per Azienda) -->
-                    <section id="section-referente" class="profile-section section-spacing">
+                    <section id="section-referente" class="section-spacing">
                         <div class="detail-section-header">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
@@ -217,9 +216,9 @@
                     </section>
 
                     <!-- ALLEGATI (Sezione Dinamica) -->
-                    <section id="section-attachments" class="profile-section section-spacing">
+                    <section id="section-attachments" class="section-spacing">
                         <div class="detail-section-header justify-between">
-                            <div class="flex-center-gap">
+                            <div class="header-left-group">
                                 <span
                                     class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
                                 <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
@@ -235,7 +234,7 @@
                     </section>
 
                     <!-- NOTE -->
-                    <section class="profile-section section-spacing">
+                    <section class="section-spacing">
                         <div class="detail-section-header">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
@@ -243,7 +242,7 @@
                         </div>
                         <div class="detail-field-box border-glow content-spacing">
                             <p id="detail-note" class="note-text no-transform">-</p>
-                            <button id="copy-note" class="btn-icon-header" type="button" data-field="detail-note">
+                            <button id="copy-note" class="btn-icon-header" type="button">
                                 <span class="material-symbols-outlined text-sm">content_copy</span>
                             </button>
                         </div>
@@ -264,9 +263,7 @@
             </div>
         </main>
 
-        <div class="spacer-footer-removed"></div>
-
-        <!-- FOOTER PREMIUM (Protocollo Placeholder) -->
+        <!-- 5. FOOTER (Fixed Content Placeholders) -->
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
@@ -276,7 +273,7 @@
     <input type="file" id="input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" class="visually-hidden-input">
 
     <!-- Source Selector Modal (allegati) -->
-    <div id="source-selector-modal" class="hidden">
+    <div id="source-selector-modal" class="modal-overlay hidden">
         <div class="modal-source-card">
             <h3 class="modal-source-title" data-t="select_source">Seleziona Sorgente</h3>
 
@@ -305,7 +302,7 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- 6. BOOTSTRAP SCRIPTS (Single Orchestrator) -->
     <script type="module" src="assets/js/main.js"></script>
 
 </body>

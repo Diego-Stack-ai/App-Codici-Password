@@ -10,18 +10,16 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-t="company_accounts">Account Azienda - PROTOCOLLO BASE V5.0</title>
-
-    <!-- PWA / Mobile Capable -->
+    <title data-t="company_accounts">Account Azienda - PROTOCOLLO BASE</title> <!-- PWA / Mobile Capable -->
+    <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
     <link rel="manifest" href="manifest.json?v=5.3" />
-    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.jpg">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
+    <!-- CSS Stratificato (V5.0 compliant) -->
     <link rel="stylesheet" href="assets/css/core_fonts.css">
+    <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
     <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
@@ -29,22 +27,24 @@
 </head>
 
 <body class="base-bg">
+    <!-- 1. BASE CONTAINER (Design System V5.0) -->
     <div class="base-container">
-        <!-- Ambient Glow -->
+        <!-- 2. BASE GLOW (Ambience Effect) -->
         <div class="base-glow"></div>
 
-        <!-- HEADER FISSO -->
+        <!-- 3. HEADER (Fixed Content Placeholders) -->
         <header id="header-placeholder" class="base-header"></header>
 
-        <!-- Main Content -->
+        <!-- 4. MAIN CONTENT (Pure HTML Strategy) -->
         <main class="base-main">
+            <!-- PAGE CONTAINER (Safe Area & Padding) -->
             <div class="page-container pt-header-extra pb-footer-extra">
 
                 <!-- TOOLBAR (Search + Sort) -->
-                <div class="deadline-toolbar search-container search-container-spacing">
+                <div class="deadline-toolbar search-container toolbar-spacing">
                     <!-- Search Box -->
                     <div class="glass-field search-field-box">
-                        <span class="material-symbols-outlined search-icon-dimmed">search</span>
+                        <span class="material-symbols-outlined search-icon-placeholder">search</span>
                         <input type="search" id="account-search" placeholder="Cerca account o credenziali..."
                             data-t-placeholder="search_placeholder" autocomplete="off" class="search-input-field">
                     </div>
@@ -58,9 +58,9 @@
 
                 <!-- ACCOUNTS CONTAINER -->
                 <div id="accounts-container" class="micro-account-list">
-                    <!-- Loading Spinner -->
+                    <!-- Loading Spinner (Auto-removed by JS) -->
                     <div class="loading-full-box">
-                        <span class="material-symbols-outlined loading-spinner-icon">sync</span>
+                        <span class="material-symbols-outlined animate-spin loading-spinner-icon">sync</span>
                         <p data-t="loading_data">Caricamento...</p>
                     </div>
                 </div>
@@ -68,12 +68,12 @@
             </div>
         </main>
 
+        <!-- 5. FOOTER (Fixed Content Placeholders) -->
         <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
-    <!-- Scripts -->
+    <!-- 6. BOOTSTRAP SCRIPTS (Single Orchestrator) -->
     <script type="module" src="assets/js/main.js"></script>
-
 </body>
 
 </html>
