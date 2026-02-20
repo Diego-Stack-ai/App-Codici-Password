@@ -19,9 +19,34 @@ service cloud.firestore {
       allow read: if request.auth != null && (
         request.auth.uid == userId || (
           resource.data.sharedWithEmails is list && 
-          resource.data.token_email in resource.data.sharedWithEmails &&
+          request.auth.token.email in resource.data.sharedWithEmails &&
           exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))) &&
           get(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))).data.status == "accepted"
+        )
+      );
+      // Permetti al destinatario di aggiornare SOLO l'array sharedWithEmails (per accettazione/rifiuto atomico)
+      allow update: if request.auth != null && (
+        request.auth.uid == userId || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedWithEmails']) &&
+          exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_")))
+        )
+      );
+    }
+
+    // 4. Regola speciale per la CONDIVISIONE di ACCOUNT AZIENDALI (HARDENING V2)
+    match /users/{userId}/aziende/{aziendaId}/accounts/{accountId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId || (
+          resource.data.sharedWithEmails is list && 
+          request.auth.token.email in resource.data.sharedWithEmails &&
+          exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))) &&
+          get(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))).data.status == "accepted"
+        )
+      );
+      allow update: if request.auth != null && (
+        request.auth.uid == userId || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedWithEmails']) &&
+          exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_")))
         )
       );
     }

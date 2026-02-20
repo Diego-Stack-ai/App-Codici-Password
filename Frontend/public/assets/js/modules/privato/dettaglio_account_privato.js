@@ -7,7 +7,7 @@ import { auth, db, storage } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc,
-    deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp
+    deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject
@@ -374,7 +374,18 @@ function initSharingMonitor(account) {
                 needsHealing = true;
             }
 
-            // UI Render
+            // REGOLA D: Email in array ma invite 'rejected' -> Remove (Hardening V2)
+            if (inv.status === 'rejected' && currentEmails.includes(inv.recipientEmail)) {
+                console.warn("[AutoHealing] Rule D: Removing rejected email from array.");
+                await updateDoc(doc(db, "users", currentUid, "accounts", currentId), {
+                    sharedWithEmails: arrayRemove(inv.recipientEmail)
+                });
+                needsHealing = true;
+            }
+
+            // UI Render (Solo pending ed accepted)
+            if (inv.status === 'rejected') continue;
+
             const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
             const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
 
@@ -404,16 +415,27 @@ function initSharingMonitor(account) {
             listContainer.appendChild(div);
         }
 
-        // REGOLA B: Email in array ma nessun invite -> Remove
+        // REGOLA B: Email in array ma nessun invite valido (pending/accepted) -> Remove
         for (const email of currentEmails) {
-            const hasInvite = invites.some(i => i.recipientEmail === email);
-            if (!hasInvite) {
-                console.warn("[AutoHealing] Rule B: Removing email from array (no invite found).");
+            const hasValidInvite = invites.some(i => i.recipientEmail === email && (i.status === 'pending' || i.status === 'accepted'));
+            if (!hasValidInvite) {
+                console.warn("[AutoHealing] Rule B: Removing orphan email from array (no valid invite).");
                 await updateDoc(doc(db, "users", currentUid, "accounts", currentId), {
                     sharedWithEmails: arrayRemove(email)
                 });
                 needsHealing = true;
             }
+        }
+
+        // REGOLA E: Se array vuoto ma flag condivisione attivi -> Reset (Auto-Off)
+        const updatedEmails = (await (await getDoc(doc(db, "users", currentUid, "accounts", currentId))).data())?.sharedWithEmails || [];
+        if (updatedEmails.length === 0 && isSharingFlagActive) {
+            console.warn("[AutoHealing] Rule E: Resetting sharing flags (no active recipients).");
+            await updateDoc(doc(db, "users", currentUid, "accounts", currentId), {
+                shared: false,
+                isMemoShared: false
+            });
+            needsHealing = true;
         }
 
         if (needsHealing) {

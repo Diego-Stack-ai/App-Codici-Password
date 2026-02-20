@@ -1,0 +1,231 @@
+Video presentazione
+Vuoi fare:
+
+🎥 Video guida con tuo avatar
+
+🧩 Spezzarlo in micro-video da inserire nell’app
+
+🖼 Supportarlo con screenshot reali delle pagine
+
+🧪 Usare un account “demo” pieno di dati realistici
+
+Ti spiego come farlo in modo professionale e riutilizzabile.
+
+🔵 FASE 1 — Creare l’Avatar con il tuo volto
+
+Hai 3 strade principali:
+
+1️⃣ Avatar AI realistico (parla al posto tuo)
+
+Strumenti top:
+
+HeyGen
+
+Synthesia
+
+D-ID
+
+Funzionano così:
+
+Carichi un video del tuo volto (2–3 minuti).
+
+Registri o scrivi lo script.
+
+L’AI genera il video con il tuo avatar che parla.
+
+👉 Pro:
+
+Professionale
+
+Scalabile
+
+Puoi rigenerare video quando l’app cambia
+
+👉 Contro:
+
+A pagamento
+
+2️⃣ Registrazione reale + green screen
+
+Registri te stesso
+
+Rimuovi sfondo
+
+Metti dietro schermate app
+
+Software:
+
+CapCut
+
+DaVinci Resolve
+
+Adobe Premiere Pro
+
+👉 Più autentico
+👉 Meno “AI artificiale”
+
+3️⃣ Avatar semi-animato (più leggero)
+
+Canva (Talking avatar)
+
+Vyond
+
+Più semplice, meno realistico.
+
+🔵 FASE 2 — Creare Account Demo Perfetto
+
+Questa è fondamentale.
+
+⚠️ Non usare il tuo account reale.
+⚠️ Non usare dati casuali brutti.
+
+✅ Metodo Professionale
+1️⃣ Crea ambiente DEMO separato
+
+Se usi Firebase:
+
+Crea progetto separato: app-demo
+
+Oppure collection separata: demo_users
+
+2️⃣ Popola con dati realistici
+
+Esempio:
+
+Azienda:
+
+Nome: "Trasporti Europa SRL"
+
+4 automezzi
+
+6 documenti
+
+3 scadenze in rosso
+
+2 in giallo
+
+4 dipendenti
+
+Privato:
+
+Profilo completo
+
+QR generato
+
+Notifiche attive
+
+Lingua cambiabile
+
+👉 Deve sembrare un utente reale con 6 mesi di utilizzo.
+
+3️⃣ Regole per account demo
+
+Email tipo: demo@tuodominio.it
+
+Password semplice
+
+Mai collegato a pagamenti reali
+
+Nessuna integrazione attiva
+
+🔵 FASE 3 — Struttura Video Intelligente
+
+NON fare un video unico da 10 minuti.
+
+Fallo modulare.
+
+🎬 Struttura consigliata
+🎥 Video Master (5–7 minuti)
+
+Panoramica completa.
+
+Poi lo dividi in:
+
+Cos’è l’app (30 sec)
+
+Come creare azienda (45 sec)
+
+Come aggiungere documento (45 sec)
+
+Come gestire scadenze (45 sec)
+
+QR e condivisione (30 sec)
+
+Impostazioni (30 sec)
+
+Ogni blocco = video autonomo.
+
+🔵 FASE 4 — Integrazione Dentro l’App
+
+Qui diventa interessante.
+
+Puoi fare:
+
+1️⃣ Video embed in pagina
+<video controls class="tutorial-video">
+  <source src="/videos/tutorial_scadenze.mp4" type="video/mp4">
+</video>
+
+2️⃣ Modal tutorial
+
+Alla prima apertura:
+
+if (!localStorage.getItem("tutorial_scadenze")) {
+   showTutorialVideo();
+}
+
+3️⃣ Help button con icona 🎥
+
+In header:
+
+“Guarda come funziona”
+
+🔵 FASE 5 — Screenshot Puliti
+
+Quando registri:
+
+Browser in modalità fullscreen
+
+Zoom 100%
+
+Tema coerente (Light o Dark)
+
+Notifiche browser disattivate
+
+Nessuna estensione visibile
+
+🔵 Strategia Avanzata (Molto Intelligente)
+
+Invece di registrare solo video…
+
+Puoi creare:
+
+🎥 Video
+📸 Screenshot statici
+📄 Mini guide PDF
+❓ Tooltip dinamici
+
+Tutto con lo stesso account demo.
+
+Così il lavoro è riutilizzabile.
+
+🔵 Domanda Importante
+
+Vuoi che il video abbia:
+
+A) Tono professionale corporate
+B) Tono amichevole “ti spiego io”
+C) Tono tecnico autorevole
+D) Tono startup energico
+
+Dimmi lo stile e ti preparo:
+
+Script completo
+
+Struttura scene
+
+Frasi da dire
+
+Punti da mostrare a schermo
+
+Indicazioni di montaggio 🎬

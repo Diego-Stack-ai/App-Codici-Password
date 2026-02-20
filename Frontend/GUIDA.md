@@ -1,5 +1,5 @@
-GUIDA DI TRANSIZIONE V4.0 → V5.0 (Consolidata e Operativa)
-1) Stato Iniziale (Pre-Migrazione)
+GUIDA DI TRANSIZIONEV5.0 (Consolidata e Operativa)
+1) Stato Iniziale 
 
 Spiegazione umana:
 Prima del refactoring, le pagine dell’app dipendevano da file monolitici come operatore.css e da utility Tailwind. Gli stili erano sparsi, con molti inline e classi generiche, senza stratificazione chiara. Questo creava confusione e difficoltà nel mantenimento.
@@ -18,19 +18,21 @@ CSS inline e Tailwind non sono ammessi nel target V5.0.
 Ogni pagina deve avere solo i CSS modulari e stratificati corretti.
 
 Comando Agente AI:
-
 AGENTE AI:
+
 Analizza la pagina [pagina.html].
+
 Rimuovi tutti i CSS inline e riferimenti a Tailwind o operatore.css.
+
 Assicura che siano presenti solo core.css, core_fonts.css e [pagina].css come da mappatura standard V5.0.
+
 Segnala eventuali elementi inline non rimovibili.
 
 2) Architettura Target V4.0 / V5.0
 2.1 Stratificazione della Base Consolidata
-Spiegazione umana:
 
-Ogni pagina dell’app deve aderire ad una base architetturale stratificata e coerente.
-Lo scopo è garantire:
+Spiegazione umana:
+Ogni pagina dell’app deve aderire ad una base architetturale stratificata e coerente. Lo scopo è garantire:
 
 Coerenza visiva globale
 
@@ -54,25 +56,8 @@ body.base-bg → gestione sfondo dinamico
 
 .page-container → gestione padding responsivo e safe-area
 
-Questa struttura è obbligatoria per tutte le pagine ad eccezione delle Auth Pages, che seguono un layout alternativo autorizzato (vedi sotto).
-
-⚠️ Eccezione Architetturale Ufficiale – Auth Pages
-
-Le seguenti pagine:
-
-index.html
-
-registrati.html
-
-reset-password.html
-
-nuova-password.html
-
-costituiscono una eccezione strutturale intenzionale e formalmente approvata.
-
-Motivazione:
-
-Sono pagine fuori dal flusso applicativo autenticato.
+Eccezione Architetturale Ufficiale – Auth Pages:
+Le pagine: index.html, registrati.html, reset-password.html, nuova-password.html costituiscono una eccezione strutturale intenzionale e formalmente approvata.
 
 Non devono caricare header e footer applicativi.
 
@@ -80,26 +65,17 @@ Non devono includere <main class="base-main">.
 
 Utilizzano .vault come contenitore primario del contenuto.
 
-Devono comunque includere:
+Devono comunque includere: body class="base-bg", .base-container, .base-glow.
 
-body class="base-bg"
+Esempi Base Background:
 
-.base-container
-
-.base-glow
-
-Il layout Auth è considerato conforme allo standard V5.0 e non rappresenta una violazione della regola Header–Main–Footer.
-
-Non esistono altre eccezioni autorizzate.
-
-Esempi Base Background
 /* Base Background */
 body.base-bg {
     background: var(--base-box-gradient);
     background-attachment: fixed;
 }
 
-Faro Decorativo
+/* Faro Decorativo */
 .base-glow {
     position: fixed;
     top: 0;
@@ -113,12 +89,15 @@ Faro Decorativo
     animation: glowFloat 5s ease-in-out infinite;
 }
 
-Contenitore Principale (Pagine Non Auth)
+
+Contenitore Principale (Pagine Non Auth):
+
 <main class="base-main">
     <div class="page-container pt-header-extra pb-footer-extra">
         <!-- Contenuto -->
     </div>
 </main>
+
 
 Note operative:
 
@@ -131,8 +110,8 @@ Nessun CSS inline è ammesso.
 Nessuna struttura alternativa è ammessa oltre alla variante Auth documentata.
 
 Comando Agente AI:
-
 AGENTE AI:
+
 Controlla la pagina [pagina.html]:
 
 Verifica che body abbia class="base-bg".
@@ -147,7 +126,7 @@ Verifica presenza di <main class="base-main">.
 
 Verifica presenza di div.page-container.
 
-Se la pagina È una Auth Page (index.html, registrati.html, reset-password.html, nuova-password.html):
+Se la pagina È una Auth Page:
 
 NON richiedere <main class="base-main">.
 
@@ -157,11 +136,11 @@ Verifica presenza del wrapper .vault come contenitore principale.
 
 Tutti gli stili devono derivare da CSS modulari, nessun inline.
 
-Segnala eventuali deviazioni strutturali.
+Segnala deviazioni strutturali.
 
 2.2 Sistema CSS Modularizzato
-Spiegazione umana:
 
+Spiegazione umana:
 Il CSS deve essere organizzato in modo modulare e stratificato.
 
 Livelli autorizzati:
@@ -189,13 +168,15 @@ Inserire CSS inline
 Importare file legacy
 
 Tabella Pagine / CSS
+
 Tipologia	Pagina	CSS di Riferimento
 Auth Pages	index.html, registrati.html	core.css + core_fonts.css + accesso.css
 Core Pages	impostazioni.html	core.css + core_fonts.css + core_fascie.css + impostazioni.css + core_ui.css
 Moduli Gestionali	configurazione_generali.html	core.css + core_fonts.css + moduli.css
-Comando Agente AI:
 
+Comando Agente AI:
 AGENTE AI:
+
 Per [pagina.html]:
 
 Identifica la tipologia pagina (Auth, Core, Modulo).
@@ -204,16 +185,13 @@ Controlla che siano inclusi solo i CSS autorizzati dalla tabella.
 
 Nessun file obsoleto (operatore.css, fonts.css ecc.) deve essere presente.
 
-Segnala eventuali CSS non consentiti.
-
 Segnala mancanze di CSS obbligatori per la tipologia pagina.
 
 2.3 Script Loading / Bootstrap JS
+
 Spiegazione umana:
 
 Tutte le pagine devono utilizzare main.js come orchestratore unico.
-
-Regole fondamentali:
 
 I moduli JS devono essere passivi.
 
@@ -221,15 +199,10 @@ Devono esportare solo init[NomePagina](user).
 
 Nessuna auto-inizializzazione.
 
-Nessun DOMContentLoaded.
-
-Nessun observeAuth.
-
-Nessuna chiamata top-level a initComponents() o initLockedUX().
-
 L’inizializzazione è centralizzata in pages-init.js.
 
-Esempio modulo passivo
+Esempio modulo passivo:
+
 // login.js passivo
 export async function initLogin() {
     setupLoginForm();
@@ -237,16 +210,19 @@ export async function initLogin() {
     setupPasswordToggle();
 }
 
-Esempio bootstrap
+
+Esempio bootstrap:
+
 // pages-init.js
 export async function initIndex() {
     const { initLogin } = await import('./modules/auth/login.js');
     await initLogin();
 }
 
-Comando Agente AI:
 
+Comando Agente AI:
 AGENTE AI:
+
 Per [pagina.html]:
 
 Verifica presenza di main.js in fondo al body.
@@ -260,19 +236,15 @@ Segnala moduli legacy auto-inizializzanti.
 Rimuovi DOMContentLoaded, observeAuth o pattern legacy se presenti.
 
 2.4 HTML Refactoring e Classi Semantiche
+
 Spiegazione umana:
 
-La struttura HTML deve essere semanticamente coerente e aderente alla tipologia pagina.
+Struttura HTML deve essere semanticamente coerente e aderente alla tipologia pagina.
 
-Esistono due layout autorizzati:
+Layout autorizzati: Header–Main–Footer (Core Pages) / Vault Layout (Auth Pages).
 
-Layout Applicativo Standard (Header–Main–Footer)
+Esempi Auth Page:
 
-Layout Alternativo Auth (Vault Layout)
-
-Non esistono altre varianti consentite.
-
-Esempi Auth Page
 <body class="base-bg">
     <div class="base-container">
         <div class="base-glow"></div>
@@ -283,17 +255,8 @@ Esempi Auth Page
 </body>
 
 
-Caratteristiche:
+Esempi Core Page:
 
-Nessun header
-
-Nessun footer
-
-Nessun main.base-main
-
-.vault come contenitore primario
-
-Esempi Core Page
 <body class="base-bg home-page">
     <div class="base-container">
         <div class="base-glow"></div>
@@ -308,18 +271,7 @@ Esempi Core Page
 </body>
 
 
-Caratteristiche:
-
-Header placeholder obbligatorio
-
-Footer placeholder obbligatorio
-
-main.base-main obbligatorio
-
-page-container obbligatorio
-
 Comando Agente AI:
-
 AGENTE AI:
 
 Identifica la tipologia pagina.
@@ -359,221 +311,266 @@ Tutti i colori tramite variabili CSS, light/dark mode compatibile.
 i18n tramite data-t, attributi ARIA tramite data-t-aria.
 
 Comando Agente AI:
-
 AGENTE AI:
+
 Per [pagina.html]:
-1. Verifica che tutte le card, toggle, dropdown abbiano classi corrette.
-2. Controlla dual-mode tramite variabili CSS.
-3. Controlla testi con data-t e attributi ARIA con data-t-aria.
+
+Verifica che tutte le card, toggle, dropdown abbiano classi corrette.
+
+Controlla dual-mode tramite variabili CSS.
+
+Controlla testi con data-t e attributi ARIA con data-t-aria.
 
 4) Checklist Finale Post-Migrazione
 
 Controlli da fare per ogni pagina:
 
- Audit completo pagina ✅
+Audit completo pagina ✅
 
- CSS dedicato creato ✅
+CSS dedicato creato ✅
 
- <head> aggiornato ✅
+<head> aggiornato ✅
 
 Header/Footer placeholder presenti ✅ (solo per pagine non Auth)
 
 Layout Auth conforme (.vault presente, nessun header/footer) ✅
 
- Safe area padding ✅
+Safe area padding ✅
 
- Classi Card, Toggle, Dropdown ✅
+Classi Card, Toggle, Dropdown ✅
 
- main.js presente ✅
+main.js presente ✅
 
- Moduli JS passivi importati correttamente ✅
+Moduli JS passivi importati correttamente ✅
 
- Dual-mode e i18n verificati ✅
+Dual-mode e i18n verificati ✅
 
- Nessun CSS Core modificato ✅
+Nessun CSS Core modificato ✅
 
- Nessun file obsoleto caricato ✅
+Nessun file obsoleto caricato ✅
 
 Comando Agente AI (Check Completo):
-
 AGENTE AI:
+
 Esegui audit completo su [pagina.html]:
-1. Controlla presenza CSS e JS come da standard.
-2. Controlla struttura HTML base (body, base-container, base-glow, base-main, header/footer placeholder).
-3. Controlla moduli passivi init[NomePagina](user) corretti.
-4. Controlla classi UI standard, dual-mode, i18n.
-5. Segnala tutte le anomalie, incongruenze o elementi non conformi.
+
+Controlla presenza CSS e JS come da standard.
+
+Controlla struttura HTML base (body, base-container, base-glow, base-main, header/footer placeholder).
+
+Controlla moduli passivi init[NomePagina](user) corretti.
+
+Controlla classi UI standard, dual-mode, i18n.
+
+Segnala tutte le anomalie, incongruenze o elementi non conformi.
 
 5) SISTEMA DI CONDIVISIONE – HARDENING V2 (MULTI-DESTINATARIO)
-📘 5.1 — PARTE UMANA (SPECIFICA TECNICA COMPLETA)
-🎯 Obiettivo
 
-Rendere il sistema di condivisione:
+(segue la guida originale dalla sezione 5, invariata, con tutte le subsezioni 5.1 – 5.3 e esempi JSON, UI, race condition, listener globale, output report, ecc.)
 
-Transaction-safe
-Race-condition proof
-Coerente bidirezionalmente
-Backend-enforced
-Idempotente
-Realtime
-Auto-healing
-Enterprise-ready
-Multi-destinario (più utenti per account/memorandum)
+Aree Critiche / Punti da Monitorare (Aggiornato)
 
-🔐 5.1.1 Stati Account (Flag Esclusivi)
+Migrazione CSS inline e Tailwind:
+Convertire tutti i CSS inline e classi Tailwind in file modulari [pagina].css senza alterare lo styling originale, preservando colori, spaziature, dimensioni e layout responsivo.
 
-Un account può avere un solo flag tra:
-Privato
-Condiviso
-Memorandum
-Se Condiviso o Memorandum → è obbligatorio selezionare almeno un destinatario interno.
-È possibile aggiungere più destinatari per lo stesso account.
+Integrazione JS legacy:
+Moduli legacy adattati a pattern passivi centralizzati in main.js/pages-init.js. Chiamate top-level, DOMContentLoaded o observeAuth sostituite senza perdere logica esistente. Funzioni init[NomePagina](user) devono funzionare correttamente.
 
-🌉 5.1.2 Documento “Invite” (Il Ponte)
+Dual-mode e i18n:
+Tutti gli stili e componenti devono continuare a supportare light/dark mode e variabili CSS dual-mode.
+Componenti UI (card, toggle, dropdown) mantengono classi corrette e comportamento coerente.
+Attributi data-t e data-t-aria preservati per internazionalizzazione e accessibilità.
 
-Ogni destinatario ha il proprio invite singolo.
-Collezione: invites
+Controlli trasversali:
 
-Struttura minima:
+Consistenza visiva rispetto al design originale.
 
-{
-  "accountId": "string",
-  "ownerEmail": "string",
-  "recipientEmail": "string",
-  "status": "pending | accepted | revoked",
-  "createdAt": "timestamp"
-}
-Non creare duplicati.
-Lo stato è indipendente per ogni destinatario.
+Integrità dei moduli JS passivi.
 
-🚫 5.1.3 Anti-Duplicazione
+Compatibilità dual-mode e corretto mapping i18n.
 
-Prima di creare invite:
+Nessun CSS inline residuo.
 
-Verificare che non esista già un invite con stesso accountId e recipientEmail in status pending o accepted.
-Se esiste: non creare duplicato e non resettare lo stato.
+========================================================================
+========================================================================
 
-⚙ 5.1.4 Transazioni Atomiche
+GUIDA DI TRANSIZIONE V5.0 (Agente AI Ready)
+1) Stato Iniziale 
 
-Le operazioni critiche devono usare runTransaction():
-Accettazione invite
-Cambio destinatario
-Stop condivisione
-Accettazione invite:
-Leggi invite
-Verifica status === pending
-Aggiorna invite → accepted
-Aggiorna account → aggiungi email in sharedWithEmails
-Commit
+Task Operativi AI:
 
-Stop condivisione:
+Analizza [pagina.html] e identifica:
 
-Rimuovere flag shared/memo
-Svuotare sharedWithEmails
-Cancellare o revocare invite
-Commit
+Tutti i CSS inline presenti.
 
-🔁 5.1.5 Consistency Check Bidirezionale
+Tutti i riferimenti a Tailwind o operatore.css.
 
-Invite accepted ma email non in sharedWithEmails → aggiungi email.
-Email in sharedWithEmails ma invite mancante → rimuovi email.
-Invite pending ma flag account disattivato → cancella invite.
+File legacy (fonts.css ecc.).
 
-🔒 5.1.6 Security Rules Hardened
+Esegui refactor CSS:
 
-Lettura account condiviso solo se:
-Email presente in sharedWithEmails
-Esiste invite collegato all’account
-Invite.status == accepted
+Rimuovi CSS inline e Tailwind.
 
-🧯 5.1.7 Protezione Doppio Click
+Migra styling esistente in [pagina].css preservando layout e colori.
 
-Disabilita bottone “Accetta” al click
-Controlla status !== pending prima di aggiornare
+Verifica:
 
-🔄 5.1.8 Listener Globale
+Solo core.css, core_fonts.css, [pagina].css presenti secondo mappatura V5.0.
 
-main.js controlla invite pendenti al login
-Mostra popup globale
-Usa listener realtime (onSnapshot)
+Segnala eventuali inline non rimovibili.
 
-📡 5.1.9 Stato Live Lato Proprietario
+2) Architettura Target V5.0
+2.1 Stratificazione della Base
 
-Dettaglio account mostra lista destinatari
-Colore stato:
-Giallo → pending
-Verde → accepted
-Possibilità di aggiungere nuovi destinatari senza alterare quelli già presenti
-Possibilità di revocare singoli destinatari
+Task AI:
 
-🧪 5.2 — PARTE ESEMPIO
-Esempio Multi-Destinario
-{
-  "accountId": "acc_123",
-  "ownerEmail": "owner@app.com",
-  "sharedWithEmails": ["userA@app.com", "userB@app.com", "userC@app.com"]
-}
+Controlla struttura base:
 
-Invites:
-[
-  {"recipientEmail": "userA@app.com", "status": "accepted"},
-  {"recipientEmail": "userB@app.com", "status": "pending"},
-  {"recipientEmail": "userC@app.com", "status": "pending"}
-]
+body ha class="base-bg"
 
-UI:
+div.base-container presente
 
-Lista destinatari con stato live
-Possibilità di aggiungere destinatario D → crea nuovo invite pending
-Possibilità di rimuovere destinatario B → revoke invite + rimuovi email dall’array
-Esempio Stop Condivisione
-Proprietario rimuove flag shared
-sharedWithEmails svuotato
-Invite cancellati/revoked
-Destinatari perdono accesso immediato
-Esempio Race Condition
-Due click su “Accetta” → solo primo update valido
-Nessuna duplicazione
-Coerenza mantenuta
+div.base-glow presente
 
-🤖 5.3 — VERSIONE PER AGENTE AI
-Obiettivo
+Se pagina NON Auth:
 
-Verificare e correggere sistema di condivisione multi-destinario, idempotente, transazionale e coerente.
+<main class="base-main"> presente
 
-5.3.1 Transazioni
+div.page-container presente
 
-Accettazione invite → transaction
-Stop condivisione → transaction
-Cambio destinatario → transaction
-Refactor se operazioni non sono atomic
+Se pagina Auth (index.html, registrati.html, reset-password.html, nuova-password.html):
 
-5.3.2 Consistency Check
+.vault presente
 
-Invite accepted ma email non in array → aggiungere
-Email in array ma invite mancante → rimuovere
-Invite pending ma flag disattivo → cancellare
+NON richiedere <main>
 
-5.3.3 Security Rules
+NON richiedere header/footer
 
-Lettura solo se email in array e invite accepted esiste
+Segnala qualsiasi deviazione dallo standard V5.0.
 
-5.3.4 Anti-Duplicazione
+2.2 Sistema CSS Modularizzato
 
-Prima di creare invite, verificare assenza duplicati
+Task AI:
 
-5.3.5 Protezione doppio click
+Identifica tipologia pagina: Auth, Core, Modulo.
 
-Disabilita bottone
-Controllo status pending
+Controlla inclusione CSS obbligatori per tipologia secondo tabella:
 
-5.3.6 Listener Globale
+Tipologia	Pagina	CSS
+Auth Pages	index.html, registrati.html	core.css + core_fonts.css + accesso.css
+Core Pages	impostazioni.html	core.css + core_fonts.css + core_fascie.css + impostazioni.css + core_ui.css
+Moduli Gestionali	configurazione_generali.html	core.css + core_fonts.css + moduli.css
 
-Controllo invite pendenti al login
-Popup globale
-Realtime listener
+Segnala file obsoleti o mancanti.
 
-5.3.7 Output report JSON
+2.3 Script Loading / Bootstrap JS
+
+Task AI:
+
+Controlla <script src="main.js"> presente in fondo al body.
+
+Controlla che tutti i moduli JS siano passivi e esportino solo init[NomePagina](user).
+
+Rimuovi pattern legacy: DOMContentLoaded, observeAuth, initComponents(), initLockedUX().
+
+Segnala moduli legacy auto-inizializzanti.
+
+2.4 HTML Refactoring e Classi Semantiche
+
+Task AI:
+
+Identifica tipologia pagina.
+
+Per pagine NON Auth:
+
+#header-placeholder con class="base-header" presente
+
+<main class="base-main"> presente
+
+div.page-container presente
+
+#footer-placeholder con class="base-footer" presente
+
+Per pagine Auth:
+
+.vault presente
+
+NON richiedere header/footer/main
+
+Controlla che body, .base-container, .base-glow siano sempre presenti.
+
+Segnala elementi non conformi.
+
+3) Componenti UI / Dual Mode / i18n
+
+Task AI:
+
+Controlla tutte le card, toggle, dropdown, hero-card, matrix-card:
+
+Classi corrette
+
+Comportamento dual-mode tramite variabili CSS
+
+Controlla testi:
+
+data-t per traduzioni
+
+data-t-aria per ARIA/accessibilità
+
+Segnala anomalie o regressioni visive/semantiche.
+
+4) Checklist Finale Post-Migrazione
+
+Task AI:
+
+Per [pagina.html], verifica:
+
+Audit completo pagina ✅
+
+CSS dedicato creato ✅
+
+<head> aggiornato ✅
+
+Header/Footer placeholder presenti (solo non Auth) ✅
+
+Layout Auth conforme ✅
+
+Safe area padding corretto ✅
+
+Classi Card, Toggle, Dropdown corrette ✅
+
+main.js presente ✅
+
+Moduli JS passivi importati correttamente ✅
+
+Dual-mode e i18n verificati ✅
+
+Nessun CSS Core modificato ✅
+
+Nessun file obsoleto caricato ✅
+
+5) SISTEMA DI CONDIVISIONE – HARDENING V2 (MULTI-DESTINATARIO)
+
+Task AI:
+
+Accettazione invite, stop condivisione, cambio destinatario: usa transaction atomic.
+
+Verifica anti-duplicazione: non creare invite duplicati.
+
+Controlla coerenza bidirezionale:
+
+Invite accepted ma email non in array → aggiungi
+
+Email in array ma invite mancante → rimuovi
+
+Invite pending ma flag account disattivo → cancella
+
+Protezione doppio click: disabilita bottone se status ≠ pending.
+
+Listener globale: realtime onSnapshot, popup invite pendenti.
+
+Output JSON report per ogni account:
+
 {
   "accountId": "acc_123",
   "sharedWithEmails": [
@@ -585,16 +582,32 @@ Realtime listener
   "actions_needed": []
 }
 
-✅ Risultato Atteso
+6) Aree Critiche / Punti da Monitorare (AI Ready)
 
-Dopo implementazione completa:
+Migrazione CSS inline e Tailwind
 
-Transaction-safe
-Race-condition proof
-Multi-destinario
-Coerenza bidirezionale
-Backend-enforced
-Idempotente
-Realtime
-Auto-healing
-Enterprise-ready
+Convertire senza perdere styling originale.
+
+Tutti i layout e colori devono essere preservati in [pagina].css.
+
+Integrazione JS legacy
+
+Adattare a moduli passivi centralizzati.
+
+Sostituire pattern top-level e legacy senza perdere funzionalità.
+
+Dual-mode e i18n
+
+Verifica compatibilità light/dark mode.
+
+Controlla attributi data-t e data-t-aria.
+
+Controlli trasversali
+
+Consistenza visiva con design originale
+
+Integrità moduli JS
+
+Compatibilità dual-mode/i18n
+
+Nessun CSS inline residuo

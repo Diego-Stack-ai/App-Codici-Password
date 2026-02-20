@@ -22,6 +22,7 @@ let currentAziendaId = null;
 let isEditing = false;
 let bankAccounts = [];
 let myContacts = [];
+let invitedEmails = [];
 
 // Utility per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -50,9 +51,8 @@ export async function initFormAccountAzienda(user) {
     initBaseUI();
     setupUI();
     setupImageUploader();
-
-    if (isEditing) await loadData();
     await loadRubrica();
+    if (isEditing) await loadData();
 
     console.log("[FORM-ACCOUNT-AZIENDA] Ready.");
 }
@@ -152,7 +152,8 @@ async function loadData() {
         if (data.shared || data.isMemoShared) {
             document.getElementById('shared-management')?.classList.remove('hidden');
             const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
-            setVal('invite-email', emails.join(', '));
+            invitedEmails = [...emails];
+            renderGuestsList();
         }
 
         // Logo
@@ -180,16 +181,23 @@ function setupUI() {
     const flags = ['flag-shared', 'flag-memo', 'flag-memo-shared'].map(id => document.getElementById(id)).filter(Boolean);
     flags.forEach(f => {
         f.onchange = () => {
+            const namePopulated = !!get('account-name');
             const fieldsPopulated = !!(get('account-username') || get('account-code') || get('account-password'));
             if (f.checked) {
-                if ((f.id === 'flag-memo' || f.id === 'flag-memo-shared') && fieldsPopulated) {
+                if (!namePopulated) {
                     f.checked = false;
-                    showToast("Per usare Memorandum devi prima svuotare Username / Codice / Password", "warning");
+                    showToast("Il campo 'Nome Account' è obbligatorio prima di attivare questa opzione.", "warning");
                     return;
                 }
                 if (f.id === 'flag-shared' && !fieldsPopulated) {
                     f.checked = false;
-                    showToast("Per condividere devi inserire almeno Username, Codice o Password", "warning");
+                    showToast("Per l'Account Condiviso devi compilare almeno uno tra Username, Codice o Password.", "warning");
+                    return;
+                }
+                if ((f.id === 'flag-memo' || f.id === 'flag-memo-shared') && fieldsPopulated) {
+                    f.checked = false;
+                    const msg = f.id === 'flag-memo-shared' ? "Per il Memorandum Condiviso NON devono essere compilati Username, Codice o Password." : "Per usare Memorandum devi svuotare Username, Codice e Password.";
+                    showToast(msg, "warning");
                     return;
                 }
                 flags.forEach(other => { if (other !== f) other.checked = false; });
@@ -202,12 +210,27 @@ function setupUI() {
                     const activeFlag = document.getElementById('flag-shared').checked ? 'flag-shared' : 'flag-memo-shared';
                     const parentCard = document.getElementById(activeFlag).closest('.option-card');
                     if (parentCard) parentCard.after(mgmt);
+
+                    // Proactive focus (Hardening V2.1)
+                    const inviteInput = document.getElementById('invite-email');
+                    const suggestions = document.getElementById('rubrica-suggestions');
+                    if (inviteInput) {
+                        setTimeout(() => {
+                            inviteInput.focus();
+                            if (myContacts.length > 0) {
+                                renderSuggestions(myContacts);
+                                suggestions?.classList.remove('hidden');
+                            }
+                        }, 100);
+                    }
                 } else {
                     // Reset sharing fields
                     const inviteInput = document.getElementById('invite-email');
-                    if (inviteInput) inviteInput.value = '';
                     const suggestions = document.getElementById('rubrica-suggestions');
+                    if (inviteInput) inviteInput.value = '';
                     if (suggestions) suggestions.classList.add('hidden');
+                    invitedEmails = [];
+                    renderGuestsList();
                 }
             }
         };
@@ -243,7 +266,34 @@ function setupUI() {
         };
     }
 
-    // Suggestions logic
+    // Suggestion logic and INVITA button
+    const btnInvite = document.getElementById('btn-send-invite');
+    if (btnInvite) {
+        btnInvite.onclick = () => {
+            const input = document.getElementById('invite-email');
+            const val = input.value.trim().toLowerCase();
+            const emails = val.split(/[,; ]+/).filter(e => e.includes('@'));
+
+            if (emails.length > 0) {
+                let added = false;
+                emails.forEach(email => {
+                    if (!invitedEmails.includes(email)) {
+                        invitedEmails.push(email);
+                        added = true;
+                    }
+                });
+                if (added) {
+                    input.value = '';
+                    renderGuestsList();
+                } else {
+                    showToast("Email già aggiunte", "warning");
+                }
+            } else if (val !== '') {
+                showToast("Inserisci un'email valida", "warning");
+            }
+        };
+    }
+
     const inviteInput = document.getElementById('invite-email');
     const suggestions = document.getElementById('rubrica-suggestions');
     if (inviteInput && suggestions) {
@@ -269,6 +319,29 @@ function setupUI() {
     }
 }
 
+window.renderGuestsList = function () {
+    const list = document.getElementById('guests-list');
+    if (!list) return;
+    clearElement(list);
+
+    invitedEmails.forEach((email, idx) => {
+        const item = createElement('div', { className: 'guest-item flex justify-between border border-white/20 p-2 rounded-lg bg-white/5 items-center mb-2' }, [
+            createElement('span', { className: 'text-sm text-white/80', textContent: email }),
+            createElement('button', {
+                type: 'button',
+                className: 'material-symbols-outlined text-red-400 hover:text-red-300',
+                style: 'font-size: 18px;',
+                textContent: 'close',
+                onclick: () => {
+                    invitedEmails.splice(idx, 1);
+                    renderGuestsList();
+                }
+            })
+        ]);
+        list.appendChild(item);
+    });
+}
+
 function renderSuggestions(list) {
     const container = document.getElementById('rubrica-suggestions');
     if (!container) return;
@@ -276,7 +349,17 @@ function renderSuggestions(list) {
     list.forEach(c => {
         const div = createElement('div', {
             className: 'suggestion-item',
-            onclick: () => { document.getElementById('invite-email').value = c.email; container.classList.add('hidden'); }
+            onclick: () => {
+                const email = c.email.toLowerCase();
+                if (!invitedEmails.includes(email)) {
+                    invitedEmails.push(email);
+                    renderGuestsList();
+                }
+                const input = document.getElementById('invite-email');
+                if (input) input.value = '';
+                container.classList.add('hidden');
+                if (input) input.focus();
+            }
         }, [
             createElement('p', {
                 className: 'font-bold text-primary m-0',
@@ -508,20 +591,24 @@ window.saveAccount = async () => {
     // RULE 4: Validation for Sharing
     let inviteEmails = [];
     if (data.shared || data.isMemoShared) {
+        inviteEmails = [...invitedEmails];
         const raw = get('invite-email');
-        if (!raw) {
-            showToast("Per salvare devi scegliere almeno un contatto o disattivare il flag", "warning");
-            return;
+        if (raw) {
+            const extraEmails = raw.split(/[,; ]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes('@'));
+            extraEmails.forEach(e => {
+                if (!inviteEmails.includes(e)) inviteEmails.push(e);
+            });
         }
-        inviteEmails = raw.split(/[,; ]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes('@'));
         if (inviteEmails.length === 0) {
-            showToast("Inserisci almeno un'email valida", "warning");
+            showToast("Scegli o aggiungi almeno un contatto per condividere.", "warning");
+            if (btnSave) btnSave.disabled = false;
             return;
         }
         data.recipientEmail = inviteEmails[0];
         data.sharedWithEmails = inviteEmails;
     } else {
         data.sharedWithEmails = [];
+        data.recipientEmail = "";
     }
 
     try {
@@ -532,20 +619,24 @@ window.saveAccount = async () => {
             const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
             const targetId = accRef.id;
 
-            // 1. Check existing state for Revocation logic
-            let oldData = null;
-            if (isEditing) {
-                const snap = await transaction.get(accRef);
-                if (snap.exists()) oldData = snap.data();
+            // 1. ALL READS FIRST
+            const accountSnap = isEditing ? await transaction.get(accRef) : null;
+            const oldData = accountSnap?.exists() ? accountSnap.data() : null;
+            const oldEmails = oldData?.sharedWithEmails || (oldData?.recipientEmail ? [oldData.recipientEmail] : []);
+
+            const inviteSnaps = {};
+            if (isSharingActive) {
+                for (const email of inviteEmails) {
+                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    inviteSnaps[email] = await transaction.get(doc(db, "invites", invId));
+                }
             }
 
-            // 2. Prepare Account Data
+            // 2. NOW EXECUTE ALL WRITES
             const finalData = { ...data };
             if (!isEditing) finalData.createdAt = new Date().toISOString();
 
-            // 3. Handle Sharing / Revocation Logic (MULTI-DESTINATARIO)
-            const oldEmails = oldData?.sharedWithEmails || (oldData?.recipientEmail ? [oldData.recipientEmail] : []);
-
+            // Handle Revocation Logic
             if (!isSharingActive && oldEmails.length > 0) {
                 oldEmails.forEach(email => {
                     const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -553,8 +644,7 @@ window.saveAccount = async () => {
                 });
                 finalData.sharedWithEmails = [];
                 finalData.recipientEmail = "";
-            }
-            else if (isSharingActive) {
+            } else if (isSharingActive) {
                 const toRemove = oldEmails.filter(e => !inviteEmails.includes(e));
                 toRemove.forEach(email => {
                     const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
@@ -562,20 +652,20 @@ window.saveAccount = async () => {
                 });
             }
 
-            // 4. Update/Create Account
+            // Update/Create Account
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);
 
-            // 5. Create/Update Invites (MULTI)
+            // Create/Update Invites
             if (isSharingActive) {
                 for (const email of inviteEmails) {
                     const inviteId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
                     const inviteRef = doc(db, "invites", inviteId);
-                    const inviteSnap = await transaction.get(inviteRef);
+                    const snap = inviteSnaps[email];
 
                     let shouldSet = true;
-                    if (inviteSnap.exists()) {
-                        const status = inviteSnap.data().status;
+                    if (snap && snap.exists()) {
+                        const status = snap.data().status;
                         if (status === 'accepted' || status === 'pending') {
                             shouldSet = false; // Preserva esistente
                         }

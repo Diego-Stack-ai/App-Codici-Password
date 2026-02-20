@@ -137,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. GLOBAL SECURITY & INVITE CHECK & PRIVATE ROUTING
     let inviteUnsubscribe = null;
+    let sentInviteUnsubscribe = null;
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -201,11 +202,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
+                // GLOBAL REALTIME REJECTION LISTENER (HARDENING V2.3)
+                if (sentInviteUnsubscribe) sentInviteUnsubscribe();
+                const qSent = query(
+                    collection(db, "invites"),
+                    where("senderId", "==", user.uid),
+                    where("status", "==", "rejected"),
+                    where("senderNotified", "==", false)
+                );
+                sentInviteUnsubscribe = onSnapshot(qSent, (snap) => {
+                    snap.docChanges().forEach(async (change) => {
+                        if (change.type === "added" || change.type === "modified") {
+                            const invData = change.doc.data();
+                            showRejectionModal(change.doc.id, invData);
+                            // Global Auto-Healing: Reset flags if last person rejects
+                            await autoHealAccountFlags(invData);
+                        }
+                    });
+                });
+
             } catch (error) {
                 console.error("Global Check Error:", error);
             }
         } else {
             if (inviteUnsubscribe) inviteUnsubscribe();
+            if (sentInviteUnsubscribe) sentInviteUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
                 // window.location.href = 'index.html'; // Scommentare in prod
@@ -248,58 +269,145 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(modal);
     }
 
+    /**
+     * REJECTION SYSTEM (Global Notifier) - HARDENING V2.3
+     */
+    function showRejectionModal(inviteId, data) {
+        if (document.getElementById(`reject-modal-${inviteId}`)) return;
+
+        const modal = createElement('div', { id: `reject-modal-${inviteId}`, className: 'modal-overlay active' }, [
+            createElement('div', { className: 'modal-box pb-8' }, [
+                createElement('div', { className: 'flex justify-center mb-4' }, [
+                    createElement('span', { className: 'material-symbols-outlined text-4xl text-red-400', textContent: 'person_remove' })
+                ]),
+                createElement('h3', { className: 'modal-title text-center', textContent: 'Invito Rifiutato' }),
+                createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: `${data.recipientEmail} ha declinato la condivisione per: ${data.accountName}` }),
+                createElement('div', { className: 'modal-actions' }, [
+                    createElement('button', {
+                        className: 'w-full p-4 rounded-2xl bg-white/10 text-white font-bold uppercase text-[10px] hover:bg-white/20 transition-all',
+                        textContent: 'Ho Capito',
+                        onclick: async () => {
+                            await updateDoc(doc(db, "invites", inviteId), { senderNotified: true });
+                            modal.remove();
+                        }
+                    })
+                ])
+            ])
+        ]);
+        document.body.appendChild(modal);
+    }
+
+    /**
+     * GLOBAL AUTO-HEALING (Real-time Reset)
+     */
+    async function autoHealAccountFlags(invData) {
+        try {
+            const ownerId = invData.senderId;
+            const accId = invData.accountId;
+            let accountPath = `users/${ownerId}/accounts/${accId}`;
+            if (invData.type === 'azienda' && invData.aziendaId) {
+                accountPath = `users/${ownerId}/aziende/${invData.aziendaId}/accounts/${accId}`;
+            }
+
+            const accRef = doc(db, accountPath);
+            const accSnap = await getDoc(accRef);
+
+            if (accSnap.exists()) {
+                const accData = accSnap.data();
+                const currentEmails = accData.sharedWithEmails || [];
+                const isSharingActive = accData.shared || accData.isMemoShared;
+
+                // Se array emails è vuoto ma i flag sono attivi -> Reset Globale
+                if (currentEmails.length === 0 && isSharingActive) {
+                    console.log("[GlobalAutoHealing] Resetting account flags (No active recipients).");
+                    await updateDoc(accRef, {
+                        shared: false,
+                        isMemoShared: false
+                    });
+                    showToast(`Condivisione terminata per ${accData.nomeAccount}`, 'info');
+                }
+            }
+        } catch (e) {
+            console.error("[GlobalAutoHealing] Error:", e);
+        }
+    }
+
     async function handleInviteResponse(inviteId, inviteData, status) {
-        // Double Click Protection
+        // 1. Double Click Protection
         const btnAccept = document.getElementById('btn-invite-accept');
         const btnReject = document.getElementById('btn-invite-reject');
-        if (btnAccept) btnAccept.disabled = true;
-        if (btnReject) btnReject.disabled = true;
+        if (btnAccept) { btnAccept.disabled = true; btnAccept.style.opacity = "0.5"; }
+        if (btnReject) { btnReject.disabled = true; btnReject.style.opacity = "0.5"; }
 
         try {
-            // ATOMIC TRANSACTION (HARDENING V2)
+            const currentUserEmail = auth.currentUser?.email;
+            if (!currentUserEmail) throw "User not authenticated";
+
+            // --- ATOMIC TRANSACTION (HARDENING V2) ---
             await runTransaction(db, async (transaction) => {
                 const inviteRef = doc(db, "invites", inviteId);
                 const invSnap = await transaction.get(inviteRef);
 
-                if (!invSnap.exists()) throw "Invite not found";
-                if (invSnap.data().status !== 'pending') throw "Invite already processed";
+                // a) Leggi invite e verifica esistenza
+                if (!invSnap.exists()) throw "ERR_NOT_FOUND: Invito non trovato.";
+                const storedInvite = invSnap.data();
 
-                // 1. Update Invite status
+                // b) Controllo status === pending
+                if (storedInvite.status !== 'pending') throw "ERR_PROCESSED: Questo invito è già stato elaborato.";
+
+                // c) Verifica corrispondenza utente (Security Guard)
+                if (storedInvite.recipientEmail !== currentUserEmail) {
+                    throw "ERR_IDENTITY: Non sei autorizzato ad accettare questo invito.";
+                }
+
+                // d) Aggiorna invite status -> accepted/rejected
                 transaction.update(inviteRef, {
                     status: status,
                     respondedAt: new Date().toISOString()
                 });
 
-                // 2. If accepted, add to sharedWithEmails array on Account document
+                // e) Sincronizza account (sharedWithEmails) - HARDENING V2
+                const ownerId = storedInvite.senderId;
+                const accId = storedInvite.accountId;
+
+                let accountPath = `users/${ownerId}/accounts/${accId}`;
+                if (storedInvite.type === 'azienda' && storedInvite.aziendaId) {
+                    accountPath = `users/${ownerId}/aziende/${storedInvite.aziendaId}/accounts/${accId}`;
+                }
+
+                const accountRef = doc(db, accountPath);
+
                 if (status === 'accepted') {
-                    const ownerId = inviteData.senderId;
-                    const accId = inviteData.accountId;
-
-                    // Note: This logic assumes the structure is /users/{ownerId}/accounts/{accId}
-                    // For Azienda, it would be /users/{ownerId}/aziende/{aziId}/accounts/{accId}
-                    // We need the full path. Let's rely on inviteData.accountPath if available, or deduce.
-                    let accountPath = `users/${ownerId}/accounts/${accId}`;
-                    if (inviteData.type === 'azienda' && inviteData.aziendaId) {
-                        accountPath = `users/${ownerId}/aziende/${inviteData.aziendaId}/accounts/${accId}`;
-                    }
-
-                    const accountRef = doc(db, accountPath);
+                    // Se accettato, aggiungi all'array (se non già presente)
                     transaction.update(accountRef, {
-                        sharedWithEmails: arrayUnion(inviteData.recipientEmail)
+                        sharedWithEmails: arrayUnion(currentUserEmail)
+                    });
+                } else if (status === 'rejected') {
+                    // Se rifiutato, rimuovi dall'array se presente (cleanup orfani proprietario)
+                    transaction.update(accountRef, {
+                        sharedWithEmails: arrayRemove(currentUserEmail)
                     });
                 }
             });
 
+            // Cleanup modal
             const modal = document.getElementById('invite-modal');
             if (modal) modal.remove();
 
-            showToast(status === 'accepted' ? "Invito accettato!" : "Invito rifiutato", status === 'accepted' ? 'success' : 'info');
+            showToast(status === 'accepted' ? "Accesso configurato!" : "Invito archiviato", status === 'accepted' ? 'success' : 'info');
+
             if (status === 'accepted') {
-                setTimeout(() => window.location.reload(), 500);
+                setTimeout(() => window.location.reload(), 800);
             }
         } catch (e) {
-            console.error("InviteResponseTransaction", e);
-            showToast(typeof e === 'string' ? e : t('error_generic'), 'error');
+            console.error("[Hardening-V2] Response Transaction Failed:", e);
+            let msg = t('error_generic') || "Errore durante l'elaborazione.";
+
+            if (typeof e === 'string') msg = e;
+            else if (e.code === 'permission-denied') msg = "Accesso negato dal server (Permessi insufficienti).";
+
+            alert(msg); // Messaggio chiaro come richiesto
+
             const modal = document.getElementById('invite-modal');
             if (modal) modal.remove();
         }

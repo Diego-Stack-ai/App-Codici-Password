@@ -704,7 +704,18 @@ function initSharingMonitor(account) {
                 needsHealing = true;
             }
 
-            // UI Render
+            // REGOLA D: Email in array ma invite 'rejected' -> Remove (Hardening V2)
+            if (inv.status === 'rejected' && currentEmails.includes(inv.recipientEmail)) {
+                console.warn("[AutoHealing] Rule D (Azienda): Removing rejected email.");
+                await updateDoc(doc(db, colPath), {
+                    sharedWithEmails: arrayRemove(inv.recipientEmail)
+                });
+                needsHealing = true;
+            }
+
+            // UI Render (Solo pending ed accepted)
+            if (inv.status === 'rejected') continue;
+
             const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
             const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
 
@@ -734,16 +745,27 @@ function initSharingMonitor(account) {
             listContainer.appendChild(div);
         }
 
-        // REGOLA B: Email in array ma nessun invite -> Remove
+        // REGOLA B: Email in array ma nessun invite valido -> Remove
         for (const email of currentEmails) {
-            const hasInvite = invites.some(i => i.recipientEmail === email);
-            if (!hasInvite) {
+            const hasValidInvite = invites.some(i => i.recipientEmail === email && (i.status === 'pending' || i.status === 'accepted'));
+            if (!hasValidInvite) {
                 console.warn("[AutoHealing] Rule B (Azienda): Removing orphan email.");
                 await updateDoc(doc(db, colPath), {
                     sharedWithEmails: arrayRemove(email)
                 });
                 needsHealing = true;
             }
+        }
+
+        // REGOLA E: Se array vuoto ma flag condivisione attivi -> Reset (Auto-Off)
+        const updatedEmails = (await (await getDoc(doc(db, colPath))).data())?.sharedWithEmails || [];
+        if (updatedEmails.length === 0 && isSharingFlagActive) {
+            console.warn("[AutoHealing] Rule E (Azienda): Resetting sharing flags.");
+            await updateDoc(doc(db, colPath), {
+                shared: false,
+                isMemoShared: false
+            });
+            needsHealing = true;
         }
 
         if (needsHealing) console.log("[AutoHealing] Consistency repair complete (Azienda).");

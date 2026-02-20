@@ -1,0 +1,138 @@
+🎯 Lancio App
+OBIETTIVO
+
+Bloccare definitivamente:
+
+side-effects top-level
+
+doppie inizializzazioni
+
+doppie dichiarazioni (Identifier already declared)
+
+import non centralizzati
+
+regressioni CSS (Tailwind su pagine nuove)
+
+script modulo inseriti in HTML
+
+🔐 BLOCCO 1 — Sentinel Check in main.js
+
+Inserisci all’inizio di main.js:
+
+if (window.__V5_BOOTSTRAPPED__) {
+  console.error("V5 ERROR: main.js inizializzato due volte.");
+  throw new Error("Double bootstrap detected");
+}
+window.__V5_BOOTSTRAPPED__ = true;
+
+
+Questo impedisce doppia esecuzione orchestratore.
+
+🔐 BLOCCO 2 — Guard Anti-Init nei Moduli Pagina
+
+Ogni modulo pagina deve iniziare così:
+
+let initialized = false;
+
+export function initNomePagina(user) {
+  if (initialized) return;
+  initialized = true;
+
+  // codice pagina
+}
+
+
+Previene doppio attach listener.
+
+🔐 BLOCCO 3 — Global Leak Detector (Dev Mode)
+
+Aggiungi in fondo a main.js (solo in dev):
+
+const allowedGlobals = new Set(Object.getOwnPropertyNames(window));
+
+setTimeout(() => {
+  const currentGlobals = Object.getOwnPropertyNames(window);
+  const diff = currentGlobals.filter(g => !allowedGlobals.has(g));
+
+  if (diff.length) {
+    console.warn("⚠️ Global leak detected:", diff);
+  }
+}, 2000);
+
+
+Se un modulo crea global implicite → lo vedi subito.
+
+🔐 BLOCCO 4 — HTML Guard
+
+Regola permanente:
+
+Ogni pagina deve contenere SOLO:
+
+<head>
+  <script src="/js/theme-init.js"></script>
+</head>
+<body>
+  ...
+  <script type="module" src="/js/main.js"></script>
+</body>
+
+
+Se trovi <script type="module"> diverso → errore CRITICAL.
+
+🔐 BLOCCO 5 — Tailwind Freeze
+
+Per evitare che qualcuno usi Tailwind su pagine nuove:
+
+Nel CSS globale puoi aggiungere commento guard:
+
+/* V5 RULE:
+   Vietato usare classi Tailwind nelle nuove pagine.
+   Usare solo classi semantiche V5.
+*/
+
+
+E durante audit cercare pattern:
+
+class="flex "
+class="grid "
+class="px-
+class="bg-
+
+🔐 BLOCCO 6 — Console Clean Policy
+
+Regola assoluta:
+
+Zero errori console.
+Zero warning Firebase.
+Zero duplicate listener.
+Zero Identifier declared.
+
+Se appare uno → stato torna “NOT COMPLIANT”.
+
+🧠 Ora Sei a Livello Architetturale Alto
+
+Hai:
+
+Orchestratore unico
+
+Moduli passivi
+
+Init idempotenti
+
+CSS controllato
+
+Utility centralizzate
+
+Guard anti-regressione
+
+Questo non è più un progetto improvvisato.
+È una struttura mantenibile.
+
+📦 Prossimo Livello (Scelta Strategica)
+
+Vuoi ora attivare:
+
+1️⃣ Modalità Produzione (versioning + cache busting + hardening)
+2️⃣ Performance mode (riduzione payload + split intelligente)
+3️⃣ Test mode (simulazione carichi + navigazione rapida automatica)
+4️⃣ Blocco definitivo + feature development only
