@@ -183,10 +183,10 @@
                             <!-- Anteprima Oggetto -->
                             <div class="form-group">
                                 <label class="label-sm" data-t="email_subject_preview">Anteprima Oggetto</label>
-                                <div class="input-wrapper read-only"
-                                    style="align-items: flex-start; padding-top: 0.75rem;">
-                                    <textarea id="oggetto_email" readonly class="input italic"
-                                        placeholder="Oggetto automatico..." rows="3" style="resize: none;"></textarea>
+                                <div class="input-wrapper read-only input-wrapper-textarea">
+                                    <textarea id="oggetto_email" readonly
+                                        class="input italic input-textarea-resize-none"
+                                        placeholder="Oggetto automatico..." rows="3"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -274,13 +274,13 @@
 
                         <!-- WhatsApp Beta Toggle -->
                         <div class="whatsapp-toggle-card">
-                            <div class="flex-align-center gap-3">
+                            <div class="whatsapp-header-row">
                                 <div class="planning-icon-box icon-emerald">
                                     <span class="material-symbols-outlined">chat</span>
                                 </div>
                                 <div>
-                                    <span class="block text-sm font-bold" data-t="whatsapp_label">Notifica (Beta)</span>
-                                    <span class="block text-xs opacity-40 uppercase" data-t="whatsapp_desc">Invio
+                                    <span class="whatsapp-title" data-t="whatsapp_label">Notifica (Beta)</span>
+                                    <span class="whatsapp-subtitle" data-t="whatsapp_desc">Invio
                                         automatico</span>
                                 </div>
                             </div>
@@ -298,7 +298,7 @@
                         <h3 class="form-section-title" data-t="attachments_notes">Allegati & Note</h3>
                     </div>
 
-                    <div class="flex-col-gap-4">
+                    <div class="attachments-notes-container">
                         <!-- Note -->
                         <div class="form-group">
                             <label class="label-sm">
@@ -350,23 +350,23 @@
     <!-- Source Selector Modal (Semantic) -->
     <div id="source-selector-modal" class="modal-overlay">
         <div class="source-modal-box modal-box">
-            <h3 class="text-xs font-extra-bold uppercase tracking-widest text-center mb-5 opacity-40 text-white">
+            <h3 class="modal-title-source">
                 Seleziona Sorgente</h3>
 
             <div class="modal-grid">
                 <button type="button" class="source-option-btn" data-source="camera">
                     <span class="material-symbols-outlined">photo_camera</span>
-                    <span class="text-xs font-bold uppercase tracking-wider opacity-60">Camera</span>
+                    <span class="source-btn-label">Camera</span>
                 </button>
 
                 <button type="button" class="source-option-btn" data-source="gallery">
                     <span class="material-symbols-outlined">collections</span>
-                    <span class="text-xs font-bold uppercase tracking-wider opacity-60">Galleria</span>
+                    <span class="source-btn-label">Galleria</span>
                 </button>
 
-                <button type="button" class="source-option-btn full-width flex-align-center gap-4" data-source="file">
+                <button type="button" class="source-option-btn full-width source-btn-row" data-source="file">
                     <span class="material-symbols-outlined">description</span>
-                    <span class="text-xs font-bold uppercase tracking-wider opacity-60">Documento</span>
+                    <span class="source-btn-label">Documento</span>
                 </button>
             </div>
 

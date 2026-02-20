@@ -8,6 +8,10 @@
     margin-bottom: 2rem;
 }
 
+.toolbar-spacing {
+    margin-top: 0.5rem;
+}
+
 .deadline-toolbar {
     display: flex;
     gap: 0.5rem;
@@ -25,6 +29,10 @@
     padding: 0 1.25rem;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+.search-icon-placeholder {
+    opacity: 0.5;
 }
 
 .sort-icon {
@@ -385,17 +393,7 @@ html:not(.dark) .account-card-subtitle {
 
 .loading-spinner-icon {
     font-size: 3rem !important;
-    animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+    /* Animation handled globally by .animate-spin in core_ui.css */
 }
 
 @keyframes slideInUp {

@@ -8,6 +8,10 @@
     margin-bottom: 2rem;
 }
 
+.search-container-spacing {
+    margin-top: 0.5rem;
+}
+
 .deadline-toolbar {
     display: flex;
     gap: 0.5rem;
@@ -25,6 +29,10 @@
     padding: 0 1.25rem;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+.search-icon-dimmed {
+    opacity: 0.5;
 }
 
 .sort-icon {
@@ -340,40 +348,42 @@ html:not(.dark) .account-card-subtitle {
     border: 1.5px solid var(--card-bg);
 }
 
-.bg-blue-500 {
+/* Theme Accents (Semantic Renaming) */
+.theme-accent-standard {
     background: #3b82f6;
 }
 
-.bg-purple-500 {
+.theme-accent-shared {
     background: #a855f7;
 }
 
-.bg-amber-500 {
+.theme-accent-memo {
     background: #f59e0b;
 }
 
-.bg-emerald-500 {
+.theme-accent-shared-memo {
     background: #10b981;
 }
 
-/* Text colors */
-.text-blue-400 {
+/* Text colors equivalent */
+/* Note: kept separate for flexibility if text differs from bg */
+.theme-text-standard {
     color: #60a5fa;
 }
 
-.text-purple-400 {
+.theme-text-shared {
     color: #c084fc;
 }
 
-.text-amber-400 {
+.theme-text-memo {
     color: #fbbf24;
 }
 
-.text-emerald-400 {
+.theme-text-shared-memo {
     color: #34d399;
 }
 
-/* --- 5. LOADING & EMPTY --- */
+/* --- 5. LOADING & EMPTY STATES --- */
 .loading-full-box {
     padding: 5rem 2rem;
     display: flex;
@@ -386,6 +396,27 @@ html:not(.dark) .account-card-subtitle {
 .loading-spinner-icon {
     font-size: 3rem !important;
     animation: spin 2s linear infinite;
+}
+
+.empty-state-box {
+    text-align: center;
+    padding: 2.5rem 0;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    opacity: 0.4;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+}
+
+.error-message-box {
+    text-align: center;
+    color: #ef4444;
+    padding: 2.5rem 0;
 }
 
 @keyframes spin {

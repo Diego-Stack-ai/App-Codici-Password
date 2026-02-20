@@ -239,11 +239,11 @@ function setupLocations(data) {
     if (!tabs) return;
 
     const btns = currentLocations.map((l, i) => createElement('button', {
-        className: `location-tab-btn flex-center-col gap-0.5 min-w-[55px] p-1 rounded-xl transition-all border outline-none ${i === 0 ? 'bg-white text-blue-600 border-transparent shadow-sm' : 'bg-white/5 border-white/5 text-white/40'}`,
+        className: `location-tab-btn ${i === 0 ? 'active' : ''}`,
         onclick: () => switchLocation(i)
     }, [
-        createElement('span', { className: 'material-symbols-outlined text-xs', textContent: l.icon }),
-        createElement('span', { className: 'text-3xs font-medium uppercase tracking-tight truncate w-full text-center', textContent: l.tipo })
+        createElement('span', { className: 'material-symbols-outlined', textContent: l.icon }),
+        createElement('span', { textContent: l.tipo })
     ]));
 
     setChildren(tabs, btns);
@@ -264,24 +264,8 @@ function switchLocation(index) {
 
     document.querySelectorAll('.location-tab-btn').forEach((btn, i) => {
         const isActive = i === index;
-        btn.classList.toggle('bg-white', isActive);
-        btn.classList.toggle('text-blue-600', isActive);
-        btn.classList.toggle('border-transparent', isActive);
-        btn.classList.toggle('shadow-sm', isActive);
-
-        btn.classList.toggle('bg-white/5', !isActive);
-        btn.classList.toggle('border-white/5', !isActive);
-        btn.classList.toggle('text-white/40', !isActive);
-
-        // Forza rimozione outline e border neri se presenti
-        if (isActive) {
-            btn.style.borderColor = 'transparent';
-            btn.style.outline = 'none';
-            btn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-        } else {
-            btn.style.borderColor = '';
-            btn.style.boxShadow = '';
-        }
+        if (isActive) btn.classList.add('active');
+        else btn.classList.remove('active');
     });
 
 }
@@ -305,52 +289,53 @@ function renderEmailCategories(data) {
         clearElement(container);
 
         // Grouping all in one box as requested
-        const mainBox = createElement('div', { className: 'glass-card p-4 flex flex-col gap-4' });
+        const mainBox = createElement('div', { className: 'glass-card email-cards-container' });
 
         emailEntries.forEach((c, idx) => {
-            const item = createElement('div', { className: `flex flex-col gap-2 ${idx > 0 ? 'border-t border-white/5 pt-4' : ''}` }, [
-                createElement('div', { className: 'flex items-center justify-between' }, [
-                    createElement('div', { className: 'flex items-center gap-3' }, [
-                        createElement('div', { className: 'size-8 rounded-lg bg-purple-500/10 text-purple-400 flex-center border border-purple-500/10 shrink-0' }, [
-                            createElement('span', { className: 'material-symbols-outlined text-base', textContent: c.icon })
+            const item = createElement('div', { className: 'email-item-group' }, [
+                // Header (Icon + Label)
+                createElement('div', { className: 'email-item-header' }, [
+                    createElement('div', { className: 'email-type-badge' }, [
+                        createElement('div', { className: 'email-icon-box' }, [
+                            createElement('span', { className: 'material-symbols-outlined icon-medium', textContent: c.icon })
                         ]),
-                        createElement('span', { className: 'text-[9px] font-medium uppercase text-secondary tracking-widest', textContent: c.label })
+                        createElement('span', { className: 'email-label-text', textContent: c.label })
                     ])
                 ]),
                 // Email Field
-                createElement('div', { className: 'glass-container flex items-center justify-between bg-black/20 rounded-xl p-2 px-3 border border-white/5 group' }, [
-                    createElement('span', { className: 'text-xs font-bold text-primary truncate min-w-0 flex-1', textContent: c.email }),
-                    createElement('div', { className: 'flex items-center gap-2 ml-2' }, [
+                createElement('div', { className: 'email-detail-row group' }, [
+                    createElement('span', { className: 'email-text-value', textContent: c.email }),
+                    createElement('div', { className: 'email-action-group' }, [
                         createElement('button', {
-                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1',
+                            className: 'email-action-icon',
                             onclick: () => { navigator.clipboard.writeText(c.email).then(() => showToast(t('copied'), 'success')); }
-                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'content_copy' })]),
+                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'content_copy' })]),
                         createElement('a', {
                             href: `mailto:${c.email}`,
-                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1'
-                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'mail' })])
+                            className: 'email-action-icon'
+                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'mail' })])
                     ])
                 ]),
                 // Password Field (if exists)
-                c.password ? createElement('div', { className: 'glass-container flex items-center justify-between bg-black/20 rounded-xl p-2 px-3 border border-white/5 group' }, [
+                c.password ? createElement('div', { className: 'email-detail-row group' }, [
                     createElement('div', { className: 'flex items-center gap-2 flex-1 min-w-0' }, [
-                        createElement('span', { className: 'material-symbols-outlined text-xs text-amber-500/60', textContent: 'key' }),
+                        createElement('span', { className: 'material-symbols-outlined icon-field-left opacity-low', textContent: 'key' }),
                         createElement('span', {
                             id: `pwd-${c.id}`,
-                            className: 'text-xs font-mono text-primary truncate field-password',
+                            className: 'email-text-value field-password',
                             dataset: { password: c.password, hidden: 'true' },
                             textContent: '••••••••'
                         })
                     ]),
-                    createElement('div', { className: 'flex items-center gap-2 ml-2' }, [
+                    createElement('div', { className: 'email-action-group' }, [
                         createElement('button', {
-                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1',
+                            className: 'email-action-icon',
                             onclick: (e) => togglePwd(c.id, e.currentTarget)
-                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'visibility' })]),
+                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'visibility' })]),
                         createElement('button', {
-                            className: 'opacity-20 group-hover:opacity-100 transition-opacity p-1',
+                            className: 'email-action-icon',
                             onclick: () => { navigator.clipboard.writeText(c.password).then(() => showToast(t('copied'), 'success')); }
-                        }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'content_copy' })])
+                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'content_copy' })])
                     ])
                 ]) : null
             ].filter(Boolean));
@@ -505,13 +490,13 @@ function renderAllegati(allegati) {
     const items = allegati.map(a => createElement('a', {
         href: a.url,
         target: '_blank',
-        className: 'flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all group'
+        className: 'attachment-item group'
     }, [
-        createElement('div', { className: 'flex items-center gap-3' }, [
-            createElement('span', { className: 'material-symbols-outlined text-blue-400', textContent: 'description' }),
-            createElement('span', { className: 'text-xs text-white/80 font-medium', textContent: a.name || a.nome })
+        createElement('div', { className: 'attachment-info' }, [
+            createElement('span', { className: 'material-symbols-outlined icon-accent-blue', textContent: 'description' }),
+            createElement('span', { className: 'attachment-name', textContent: a.name || a.nome })
         ]),
-        createElement('span', { className: 'material-symbols-outlined text-sm opacity-20 group-hover:opacity-100', textContent: 'open_in_new' })
+        createElement('span', { className: 'material-symbols-outlined attachment-icon-open', textContent: 'open_in_new' })
     ]));
 
     setChildren(container, items);

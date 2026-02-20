@@ -20,10 +20,10 @@ let sortOrder = 'asc';
 let currentAziendaId = null;
 
 const THEMES = {
-    standard: { accent: 'bg-blue-500', text: 'text-blue-400' },
-    shared: { accent: 'bg-purple-500', text: 'text-purple-400' },
-    memo: { accent: 'bg-amber-500', text: 'text-amber-400' },
-    shared_memo: { accent: 'bg-emerald-500', text: 'text-emerald-400' }
+    standard: { accent: 'theme-accent-standard', text: 'theme-text-standard' },
+    shared: { accent: 'theme-accent-shared', text: 'theme-text-shared' },
+    memo: { accent: 'theme-accent-memo', text: 'theme-text-memo' },
+    shared_memo: { accent: 'theme-accent-shared-memo', text: 'theme-text-shared-memo' }
 };
 
 // --- INITIALIZATION ---
@@ -45,7 +45,7 @@ export async function initAccountAziendaList(user) {
         if (container) {
             clearElement(container);
             setChildren(container, createElement('p', {
-                className: 'text-center text-red-500 py-10',
+                className: 'error-message-box',
                 textContent: t('error_loading_accounts') || "Errore caricamento dati."
             }));
         }
@@ -139,8 +139,8 @@ function renderList(list) {
     clearElement(container);
 
     if (list.length === 0) {
-        setChildren(container, createElement('div', { className: 'text-center py-10 opacity-50' }, [
-            createElement('p', { className: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6', textContent: t('no_accounts_found') || 'Nessun account trovato' })
+        setChildren(container, createElement('div', { className: 'empty-state-box' }, [
+            createElement('p', { className: 'empty-state-text', textContent: t('no_accounts_found') || 'Nessun account trovato' })
         ]));
         return;
     }

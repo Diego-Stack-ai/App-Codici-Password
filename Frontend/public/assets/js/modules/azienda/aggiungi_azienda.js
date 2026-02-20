@@ -221,7 +221,7 @@ async function saveAzienda() {
         if (btn) {
             btn.disabled = true;
             setChildren(btn, [
-                createElement('span', { className: 'material-symbols-outlined animate-spin text-xl', textContent: 'progress_activity' })
+                createElement('span', { className: 'material-symbols-outlined animate-spin', textContent: 'progress_activity' })
             ]);
         }
 

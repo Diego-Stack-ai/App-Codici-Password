@@ -50,7 +50,7 @@ async function initProtocolUI() {
         clearElement(fCenter);
         setChildren(fCenter, createElement('button', {
             id: 'btn-delete',
-            className: 'footer-action-btn text-red-400',
+            className: 'footer-action-btn btn-danger',
             onclick: deleteAzienda
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
@@ -63,7 +63,7 @@ async function initProtocolUI() {
         clearElement(fRight);
         setChildren(fRight, createElement('button', {
             id: 'btn-save',
-            className: 'footer-action-btn text-blue-400',
+            className: 'footer-action-btn btn-primary',
             onclick: saveAzienda
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
@@ -322,11 +322,11 @@ function renderAttachments() {
         let icon = 'description';
         let color = 'text-white/20';
 
-        if (type.endsWith('.pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
-        else if (type.match(/\.(jpg|jpeg|png|gif|webp)$/)) { icon = 'image'; color = 'text-purple-400/40'; }
+        if (type.endsWith('.pdf')) { icon = 'picture_as_pdf'; color = 'text-icon-red'; }
+        else if (type.match(/\.(jpg|jpeg|png|gif|webp)$/)) { icon = 'image'; color = 'text-icon-purple'; }
 
         return createElement('div', {
-            className: 'flex items-center justify-between p-3 glass-card border-white/5 animate-in slide-in-from-left-2 transition-all'
+            className: 'attachment-item-edit'
         }, [
             createElement('div', { className: 'flex items-center gap-3' }, [
                 createElement('span', {
@@ -345,7 +345,7 @@ function renderAttachments() {
                 ])
             ]),
             createElement('button', {
-                className: 'size-8 flex-center text-red-400/40 hover:text-red-400 transition-colors',
+                className: 'btn-remove-item',
                 onclick: () => removeAttachment(f.idx, f.existing)
             }, [
                 createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'close' })
@@ -366,20 +366,20 @@ function addExtraEmail(data = null) {
     const container = document.getElementById('email-extra-container');
     if (!container) return;
 
-    const wrapper = createElement('div', { className: 'email-extra-item bg-white/5 p-4 rounded-2xl border border-white/5 flex-col-gap-3 relative animate-in slide-in-from-top-2 fade-in duration-300' });
+    const wrapper = createElement('div', { className: 'email-extra-item' });
 
     // Header con Tipo e Remove
-    const header = createElement('div', { className: 'flex items-center gap-2 mb-1' }, [
+    const header = createElement('div', { className: 'email-extra-header' }, [
         createElement('input', {
             type: 'text',
-            className: 'flex-1 bg-transparent border-none text-[9px] font-black uppercase tracking-widest text-blue-400 placeholder-white/20 outline-none p-0 email-type',
+            className: 'email-type-input',
             placeholder: 'TIPO EMAIL (ES. ORDINI)',
             value: data ? data.tipo : '',
             'aria-label': 'Tipo Email'
         }),
         createElement('button', {
             type: 'button',
-            className: 'text-red-400/50 hover:text-red-400 transition-colors',
+            className: 'btn-remove-item',
             onclick: () => wrapper.remove(),
             'aria-label': 'Rimuovi email'
         }, [
@@ -415,7 +415,7 @@ function addExtraEmail(data = null) {
             createElement('div', { className: 'detail-field-actions pr-2' }, [
                 createElement('button', {
                     type: 'button',
-                    className: 'btn-toggle-pass size-8 flex-center text-white/20 hover:text-white transition-colors',
+                    className: 'btn-toggle-pass',
                     'data-target': uniqueId
                 }, [
                     createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'visibility' })
@@ -433,16 +433,16 @@ function addExtraSede(data = null) {
     if (!container) return;
 
     const uniqueId = `sede-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-    const wrapper = createElement('div', { className: 'glass-card overflow-hidden extra-sede-item animate-in slide-in-from-top-2 fade-in duration-300 mb-4' });
+    const wrapper = createElement('div', { className: 'extra-sede-item' });
 
     // Header
-    const header = createElement('div', { className: 'p-4 flex items-center justify-between cursor-pointer bg-white/5 hover:bg-white/10 transition-colors' }, [
+    const header = createElement('div', { className: 'sede-extra-header cursor-pointer' }, [
         createElement('div', { className: 'flex items-center gap-3 flex-1' }, [
-            createElement('span', { className: 'material-symbols-outlined text-purple-400', textContent: 'domain' }),
-            createElement('div', { className: 'flex-1 border-b border-transparent focus-within:border-purple-500/50 transition-colors mr-4' }, [
+            createElement('span', { className: 'material-symbols-outlined text-icon-purple', textContent: 'domain' }),
+            createElement('div', { className: 'flex-1' }, [
                 createElement('input', {
                     type: 'text',
-                    className: 'w-full bg-transparent text-xs font-bold uppercase tracking-widest text-white placeholder-white/20 outline-none sede-tipo',
+                    className: 'email-type-input sede-tipo',
                     placeholder: 'TIPO SEDE (ES. OPERATIVA)',
                     value: data ? (data.tipo || '').replace('Sede ', '') : '',
                     onclick: (e) => e.stopPropagation()
@@ -451,7 +451,7 @@ function addExtraSede(data = null) {
             createElement('div', { className: 'flex items-center gap-1 opacity-40' }, [
                 createElement('input', {
                     type: 'checkbox',
-                    className: 'size-3.5 accent-purple-500 sede-qr',
+                    className: 'checkbox-qr sede-qr',
                     checked: data ? (data.qr !== false) : true,
                     onclick: (e) => e.stopPropagation(),
                     'aria-label': 'Includi nel QR'
@@ -462,7 +462,7 @@ function addExtraSede(data = null) {
         createElement('div', { className: 'flex items-center gap-2' }, [
             createElement('button', {
                 type: 'button',
-                className: 'text-red-400/50 hover:text-red-400 p-1 transition-colors',
+                className: 'btn-remove-item',
                 onclick: (e) => { e.stopPropagation(); wrapper.remove(); }
             }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })]),
             createElement('span', {
@@ -474,12 +474,12 @@ function addExtraSede(data = null) {
     ]);
 
     // Body
-    const body = createElement('div', { id: `body-${uniqueId}`, className: 'px-5 pb-5 pt-2 flex flex-col gap-3 hidden' }, [
-        createElement('div', { className: 'grid grid-cols-[3fr_1fr] gap-3' }, [
+    const body = createElement('div', { id: `body-${uniqueId}`, className: 'hidden mt-2 flex-col-gap' }, [
+        createElement('div', { className: 'form-grid-3' }, [
             createFieldBox('Indirizzo', 'text', data?.indirizzo, 'sede-indirizzo', 'Via / Piazza'),
             createFieldBox('N.', 'text', data?.civico, 'sede-civico', 'N.', true)
         ]),
-        createElement('div', { className: 'grid grid-cols-3 gap-3' }, [
+        createElement('div', { className: 'form-grid-3' }, [
             createFieldBox('Città', 'text', data?.citta, 'sede-citta', 'Città'),
             createFieldBox('Prov', 'text', data?.provincia, 'sede-provincia', 'PR', true, true),
             createFieldBox('CAP', 'tel', data?.cap, 'sede-cap', 'CAP', true)

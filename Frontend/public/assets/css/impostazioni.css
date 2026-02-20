@@ -596,8 +596,12 @@ h3.settings-desc {
     gap: 1rem;
 }
 
-.flex-1 {
+.timer-btn-flex {
     flex: 1;
+}
+
+.arrow-icon-muted {
+    color: var(--text-secondary);
 }
 
 .legal-docs-link-box {

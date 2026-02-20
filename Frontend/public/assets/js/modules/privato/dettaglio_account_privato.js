@@ -543,6 +543,8 @@ function openSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.remove('hidden');
+        // Piccolo delay per permettere al browser di vedere la rimozione di 'hidden' prima di animare
+        setTimeout(() => modal.classList.add('active'), 10);
         document.body.style.overflow = 'hidden';
     } else {
         console.error("Modale non trovato");
@@ -552,8 +554,12 @@ function openSourceSelector() {
 function closeSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
+        modal.classList.remove('active');
+        // Aspettiamo la fine della transizione CSS (0.3s in core_ui.css) prima di rimettere hidden
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }, 300);
     }
 }
 
@@ -610,7 +616,7 @@ async function handleFileUpload(input) {
     showToast(`File selezionato: ${file.name}`, 'info');
 
     // Piccolo delay per permettere alla UI mobile di stabilizzarsi dopo chiusura picker/modal
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 800));
 
     const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", "Annulla");
     if (!ok) {
@@ -704,10 +710,10 @@ function renderAttachments(list) {
                 createElement('span', { className: 'text-[9px] text-white/20 font-medium', textContent: `${size} MB • ${date}` })
             ]),
             !isReadOnly ? createElement('button', {
-                className: 'btn-icon-header opacity-20 group-hover:opacity-100 hover:text-red-400 transition-all',
-                onclick: () => deleteAttachment(a)
+                className: 'size-8 flex items-center justify-center text-red-400/60 hover:text-red-400 transition-colors active:scale-90',
+                onclick: (e) => { e.stopPropagation(); deleteAttachment(a); }
             }, [
-                createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined !text-[20px]', textContent: 'delete' })
             ]) : null
         ]);
     });

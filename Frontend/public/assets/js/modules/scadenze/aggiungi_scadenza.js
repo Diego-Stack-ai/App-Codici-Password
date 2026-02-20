@@ -10,7 +10,7 @@ import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/fireba
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { EMAILS, buildEmailSubject } from './scadenza_templates.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
@@ -722,27 +722,25 @@ function renderAttachments() {
         else if (ext === 'pdf') { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
 
         const item = createElement('div', {
-            className: 'flex items-center justify-between p-3 glass-card border-white/5 animate-in slide-in-from-left-2 transition-all'
+            className: 'attachment-item animate-in slide-in-from-left-2'
         }, [
-            createElement('div', { className: 'flex items-center gap-3' }, [
-                createElement('span', { className: `material-symbols-outlined ${color}`, textContent: icon }),
-                createElement('div', { className: 'flex flex-col' }, [
-                    createElement('span', {
-                        className: 'text-[10px] font-black text-white/80 uppercase truncate max-w-[180px]',
-                        textContent: file.name
-                    }),
-                    createElement('span', {
-                        className: 'text-[8px] font-bold text-white/20 uppercase tracking-widest',
-                        textContent: file.existing ? 'Caricato' : 'Nuovo'
-                    })
+            createElement('div', { className: 'attachment-info' }, [
+                createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
+                createElement('div', { className: 'attachment-meta' }, [
+                    createElement('span', { className: 'attachment-name', textContent: file.name }),
+                    createElement('span', { className: 'attachment-status', textContent: file.existing ? 'Caricato' : 'Nuovo' })
                 ])
             ]),
             createElement('button', {
                 type: 'button',
-                className: 'size-8 flex-center text-red-400/40 hover:text-red-400 transition-colors',
-                onclick: () => removeAttachment(file.idx, file.existing)
+                className: 'btn-delete-attachment',
+                onclick: async (e) => {
+                    e.stopPropagation();
+                    const ok = await showConfirmModal("ELIMINA ALLEGATO", `Vuoi rimuovere l'allegato ${file.name}?`, "Elimina", "Annulla");
+                    if (ok) removeAttachment(file.idx, file.existing);
+                }
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'close' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
             ])
         ]);
 
