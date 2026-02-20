@@ -829,6 +829,11 @@
     border: 1px solid var(--border-color);
     border-radius: 16px;
     transition: all 0.2s ease;
+    flex-wrap: nowrap;
+    /* Forza riga singola */
+    width: 100%;
+    box-sizing: border-box;
+    gap: 0.75rem;
 }
 
 .attachment-item:hover {
@@ -839,8 +844,10 @@
 .attachment-info {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
     min-width: 0;
+    /* Essenziale per flex-box con testo lungo */
+    flex: 1;
+    gap: 0.75rem;
 }
 
 .attachment-icon {
@@ -852,6 +859,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    flex: 1;
 }
 
 .attachment-name {
@@ -862,6 +870,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Accorcia il nome invece di andare a capo */
 }
 
 .attachment-status {
@@ -884,6 +893,8 @@
     opacity: 0.5;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
+    /* Impedisce al cestino di rimpicciolirsi o sparire */
 }
 
 .btn-delete-attachment:hover {

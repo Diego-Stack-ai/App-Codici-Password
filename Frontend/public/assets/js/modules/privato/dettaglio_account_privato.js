@@ -712,7 +712,7 @@ function renderAttachments(list) {
 }
 
 async function deleteAttachment(att) {
-    const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", true);
+    const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", t('cancel') || "Annulla");
     if (!ok) return;
 
     try {
