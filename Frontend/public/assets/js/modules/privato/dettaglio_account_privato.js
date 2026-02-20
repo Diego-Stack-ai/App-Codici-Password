@@ -435,6 +435,12 @@ function initSharingMonitor(account) {
                 shared: false,
                 isMemoShared: false
             });
+            account.shared = false;
+            account.isMemoShared = false;
+
+            const mgmt = document.getElementById('shared-management-section');
+            if (mgmt) mgmt.classList.add('hidden');
+
             needsHealing = true;
         }
 
