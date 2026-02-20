@@ -5,7 +5,11 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import {
+    doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection,
+    addDoc, getDocs, setDoc, query, where, runTransaction,
+    arrayUnion, arrayRemove
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
@@ -147,7 +151,8 @@ async function loadData() {
 
         if (data.shared || data.isMemoShared) {
             document.getElementById('shared-management')?.classList.remove('hidden');
-            setVal('invite-email', data.recipientEmail);
+            const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
+            setVal('invite-email', emails.join(', '));
         }
 
         // Logo
@@ -456,8 +461,8 @@ async function removeIban(idx) {
 }
 
 window.saveAccount = async () => {
-    const btn = document.getElementById('save-btn-footer');
-    if (btn) btn.disabled = true;
+    const btnSave = document.querySelector('button[onclick="window.saveAccount()"]') || document.getElementById('save-btn-footer');
+    if (btnSave) btnSave.disabled = true;
 
     const hasBankingData = bankAccounts.some(acc => acc.iban?.trim() || (acc.cards && acc.cards.length > 0));
     const inviteEmail = get('invite-email');
@@ -500,69 +505,108 @@ window.saveAccount = async () => {
     }
 
     const isSharingActive = (data.shared || data.isMemoShared);
-    if (isSharingActive) {
-        if (!inviteEmail) {
-            showToast("Scegli un contatto o disattiva il flag condiviso", "warning");
-            if (btn) btn.disabled = false;
+    // RULE 4: Validation for Sharing
+    let inviteEmails = [];
+    if (data.shared || data.isMemoShared) {
+        const raw = get('invite-email');
+        if (!raw) {
+            showToast("Per salvare devi scegliere almeno un contatto o disattivare il flag", "warning");
             return;
         }
-        data.recipientEmail = inviteEmail;
-        data.sharedWith = [{ email: inviteEmail, status: 'pending' }];
-        data.sharedWithEmails = [inviteEmail];
+        inviteEmails = raw.split(/[,; ]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes('@'));
+        if (inviteEmails.length === 0) {
+            showToast("Inserisci almeno un'email valida", "warning");
+            return;
+        }
+        data.recipientEmail = inviteEmails[0];
+        data.sharedWithEmails = inviteEmails;
+    } else {
+        data.sharedWithEmails = [];
     }
 
     try {
-        let tid = currentDocId;
         const colPath = `users/${currentUid}/aziende/${currentAziendaId}/accounts`;
 
-        // Revoca Search & Destroy
-        if (isEditing) {
-            const oldSnap = await getDocFromServer(doc(db, colPath, currentDocId));
-            if (oldSnap.exists()) {
-                const old = oldSnap.data();
-                const wasShared = old.shared || old.isMemoShared;
-                if (wasShared && (!isSharingActive || old.recipientEmail !== inviteEmail)) {
-                    const qFlags = query(collection(db, "invites"), where("accountId", "==", currentDocId), where("senderId", "==", currentUid));
-                    const qS = await getDocs(qFlags);
-                    qS.forEach(async (d) => await deleteDoc(d.ref));
+        // --- ATOMIC TRANSACTION (HARDENING V2) ---
+        await runTransaction(db, async (transaction) => {
+            const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
+            const targetId = accRef.id;
+
+            // 1. Check existing state for Revocation logic
+            let oldData = null;
+            if (isEditing) {
+                const snap = await transaction.get(accRef);
+                if (snap.exists()) oldData = snap.data();
+            }
+
+            // 2. Prepare Account Data
+            const finalData = { ...data };
+            if (!isEditing) finalData.createdAt = new Date().toISOString();
+
+            // 3. Handle Sharing / Revocation Logic (MULTI-DESTINATARIO)
+            const oldEmails = oldData?.sharedWithEmails || (oldData?.recipientEmail ? [oldData.recipientEmail] : []);
+
+            if (!isSharingActive && oldEmails.length > 0) {
+                oldEmails.forEach(email => {
+                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    transaction.delete(doc(db, "invites", invId));
+                });
+                finalData.sharedWithEmails = [];
+                finalData.recipientEmail = "";
+            }
+            else if (isSharingActive) {
+                const toRemove = oldEmails.filter(e => !inviteEmails.includes(e));
+                toRemove.forEach(email => {
+                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    transaction.delete(doc(db, "invites", invId));
+                });
+            }
+
+            // 4. Update/Create Account
+            if (isEditing) transaction.update(accRef, finalData);
+            else transaction.set(accRef, finalData);
+
+            // 5. Create/Update Invites (MULTI)
+            if (isSharingActive) {
+                for (const email of inviteEmails) {
+                    const inviteId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    const inviteRef = doc(db, "invites", inviteId);
+                    const inviteSnap = await transaction.get(inviteRef);
+
+                    let shouldSet = true;
+                    if (inviteSnap.exists()) {
+                        const status = inviteSnap.data().status;
+                        if (status === 'accepted' || status === 'pending') {
+                            shouldSet = false; // Preserva esistente
+                        }
+                    }
+
+                    if (shouldSet) {
+                        transaction.set(inviteRef, {
+                            senderId: currentUid,
+                            senderEmail: auth.currentUser?.email || 'unknown',
+                            recipientEmail: email,
+                            accountId: targetId,
+                            aziendaId: currentAziendaId,
+                            accountName: data.nomeAccount,
+                            type: 'azienda',
+                            status: 'pending',
+                            createdAt: new Date().toISOString()
+                        });
+                    }
                 }
             }
-            await updateDoc(doc(db, colPath, currentDocId), data);
-        } else {
-            data.createdAt = new Date().toISOString();
-            const nr = await addDoc(collection(db, colPath), data);
-            tid = nr.id;
-        }
+        });
 
-        // Invito
-        if (isSharingActive) {
-            const invId = `${tid}_${inviteEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            const invRef = doc(db, "invites", invId);
-            const invSnap = await getDoc(invRef);
-            if (!invSnap.exists() || (invSnap.data().status !== 'accepted' && invSnap.data().status !== 'pending')) {
-                await setDoc(invRef, {
-                    senderId: currentUid,
-                    senderEmail: auth.currentUser?.email || 'unknown',
-                    recipientEmail: inviteEmail,
-                    accountId: tid,
-                    accountName: data.nomeAccount,
-                    type: 'azienda',
-                    status: 'pending',
-                    aziendaId: currentAziendaId,
-                    createdAt: new Date().toISOString()
-                });
-                showToast(t('success_invite_sent'));
-            }
-        }
+        showToast(t('success_save'), "success");
+        setTimeout(() => window.location.href = `account_azienda.html?aziendaId=${currentAziendaId}`, 1000);
 
-        showToast(isEditing ? (t('success_save') || "Dati salvati con successo!") : "Account creato con successo!", "success");
-        setTimeout(() => window.location.href = `dettaglio_account_azienda.html?id=${tid}&aziendaId=${currentAziendaId}`, 1000);
     } catch (e) {
-        logError("Save", e);
-        showToast(t('error_save'), "error");
-        if (btn) btn.disabled = false;
+        console.error("SaveAccountTransaction Azienda", e);
+        showToast(t('error_generic'), 'error');
+        if (btnSave) btnSave.disabled = false;
     }
-}
+};
 
 async function deleteAccount() {
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) return;

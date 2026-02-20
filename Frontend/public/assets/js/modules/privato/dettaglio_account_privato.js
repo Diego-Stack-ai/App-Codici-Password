@@ -6,7 +6,8 @@
 import { auth, db, storage } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
 import {
-    doc, getDoc, updateDoc, collection, addDoc, query, where, orderBy, getDocs, deleteDoc, increment, serverTimestamp
+    doc, getDoc, collection, query, where, getDocs, updateDoc,
+    deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject
@@ -193,7 +194,8 @@ function renderAccount(acc) {
     if (acc.shared || acc.isMemoShared) {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
-        renderGuests(acc.sharedWith || []);
+        if (!isReadOnly) initSharingMonitor(acc);
+        else renderGuests(acc.sharedWithEmails || []);
     }
 
     // --- ALLEGATI: Aggancio Listener ---
@@ -333,69 +335,139 @@ function createCallBtn(icon, num) {
 }
 
 /**
- * GUESTS
+ * SHARING MONITOR & CONSISTENCY (HARDENING V2)
  */
-async function renderGuests(guests) {
+let sharingUnsubscribe = null;
+
+function initSharingMonitor(account) {
+    if (sharingUnsubscribe) sharingUnsubscribe();
+
+    console.log("[SharingMonitor] Initializing Realtime Check...");
+    const q = query(collection(db, "invites"), where("accountId", "==", currentId));
+
+    sharingUnsubscribe = onSnapshot(q, async (snap) => {
+        const invites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const listContainer = document.getElementById('guests-list');
+        if (!listContainer) return;
+
+        clearElement(listContainer);
+
+        const currentEmails = account.sharedWithEmails || [];
+        const isSharingFlagActive = account.shared || account.isMemoShared;
+
+        let needsHealing = false;
+
+        for (const inv of invites) {
+            // REGOLA C: Pending ed account non condiviso -> Delete
+            if (inv.status === 'pending' && !isSharingFlagActive) {
+                console.warn("[AutoHealing] Rule C: Deleting orphan pending invite.");
+                await deleteDoc(doc(db, "invites", inv.id));
+                continue;
+            }
+
+            // REGOLA A: Accepted ma non in array -> Add
+            if (inv.status === 'accepted' && !currentEmails.includes(inv.recipientEmail)) {
+                console.warn("[AutoHealing] Rule A: Resyncing missing email to account array.");
+                await updateDoc(doc(db, "users", currentUid, "accounts", currentId), {
+                    sharedWithEmails: arrayUnion(inv.recipientEmail)
+                });
+                needsHealing = true;
+            }
+
+            // UI Render
+            const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
+            const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
+
+            const revokeBtn = createElement('button', {
+                className: 'btn-icon-header ml-2 hover:text-red-400 transition-colors',
+                onclick: () => revokeRecipient(inv.recipientEmail)
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+            ]);
+
+            const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
+                createElement('div', { className: 'rubrica-item-info-row' }, [
+                    createElement('div', { className: 'rubrica-item-avatar', textContent: inv.recipientEmail.charAt(0).toUpperCase() }),
+                    createElement('div', { className: 'rubrica-item-info' }, [
+                        createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.recipientEmail.split('@')[0] }),
+                        createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.recipientEmail })
+                    ])
+                ]),
+                createElement('div', { className: 'flex items-center gap-2' }, [
+                    createElement('span', {
+                        className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                        textContent: displayStatus
+                    }),
+                    revokeBtn
+                ])
+            ]);
+            listContainer.appendChild(div);
+        }
+
+        // REGOLA B: Email in array ma nessun invite -> Remove
+        for (const email of currentEmails) {
+            const hasInvite = invites.some(i => i.recipientEmail === email);
+            if (!hasInvite) {
+                console.warn("[AutoHealing] Rule B: Removing email from array (no invite found).");
+                await updateDoc(doc(db, "users", currentUid, "accounts", currentId), {
+                    sharedWithEmails: arrayRemove(email)
+                });
+                needsHealing = true;
+            }
+        }
+
+        if (needsHealing) {
+            console.log("[AutoHealing] Consistency repair complete.");
+        }
+
+        if (invites.length === 0) {
+            listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessuna condivisione attiva' }));
+        }
+    });
+}
+
+/**
+ * REVOKE SINGLE RECIPIENT (HARDENING V2 - MULTI)
+ */
+async function revokeRecipient(email) {
+    if (!email) return;
+    const ok = await showConfirmModal(t('confirm_revoke_title') || "REVOCA ACCESSO", `${t('confirm_revoke_msg') || 'Vuoi rimuovere l\'accesso per'} ${email}?`, t('revoke') || "Revoca");
+    if (!ok) return;
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const accRef = doc(db, "users", currentUid, "accounts", currentId);
+            const inviteId = `${currentId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const inviteRef = doc(db, "invites", inviteId);
+
+            // 1. Remove from array
+            transaction.update(accRef, {
+                sharedWithEmails: arrayRemove(email)
+            });
+
+            // 2. Delete/Revoke invite
+            transaction.delete(inviteRef);
+        });
+
+        showToast("Accesso revocato con successo");
+    } catch (e) {
+        console.error("RevokeRecipient failed", e);
+        showToast(t('error_generic'), 'error');
+    }
+}
+
+function renderGuests(guests) {
     const list = document.getElementById('guests-list');
     if (!list) return;
     clearElement(list);
 
     if (!guests || guests.length === 0) {
-        list.appendChild(createElement('p', { className: 'text-xs text-white/40 italic ml-1', textContent: t('no_active_access') || 'Nessun accesso attivo' }));
+        list.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Sola lettura' }));
         return;
     }
 
-    // Mappa per aggiornamenti batch se necessario
-    let needsUpdate = false;
-    let updatedGuests = [...guests];
-
-    for (let i = 0; i < guests.length; i++) {
-        let item = guests[i];
-
-        // Normalizzazione item stringa vs oggetto
-        if (typeof item !== 'object') {
-            item = { email: item, status: 'accepted' };
-        }
-
-        if (item.status === 'rejected') continue;
-
-        const displayEmail = item.email;
-        let isPending = item.status === 'pending';
-        let displayStatus = t('status_pending') || 'In attesa';
-        let statusClass = 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse';
-
-        // LIVE STATUS CHECK
-        if (isPending) {
-            try {
-                // Cerchiamo l'invito reale corrispondente
-                // Nota: L'ID invito è costruito come accountId_emailSanitized
-                const inviteId = `${currentId}_${displayEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                const invSnap = await getDoc(doc(db, "invites", inviteId));
-
-                if (invSnap.exists()) {
-                    const invData = invSnap.data();
-                    if (invData.status === 'accepted') {
-                        // AGGIORNAMENTO UI
-                        isPending = false;
-                        displayStatus = t('status_accepted') || 'Accettato';
-                        statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-
-                        // Preparo aggiornamento persistente
-                        updatedGuests[i] = { ...item, status: 'accepted' };
-                        needsUpdate = true;
-                    } else if (invData.status === 'rejected') {
-                        // Se rifiutato, lo saltiamo visivamente (o mostriamo rifiutato)
-                        updatedGuests[i] = { ...item, status: 'rejected' };
-                        needsUpdate = true;
-                        continue;
-                    }
-                }
-            } catch (e) { console.warn("LiveCheck failed", e); }
-        } else {
-            displayStatus = t('status_accepted') || 'Accettato';
-            statusClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-        }
-
+    guests.forEach(item => {
+        const displayEmail = typeof item === 'string' ? item : item.email;
         const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
             createElement('div', { className: 'rubrica-item-info-row' }, [
                 createElement('div', { className: 'rubrica-item-avatar', textContent: displayEmail.charAt(0).toUpperCase() }),
@@ -405,20 +477,12 @@ async function renderGuests(guests) {
                 ])
             ]),
             createElement('span', {
-                className: `ml-auto text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-                textContent: displayStatus
+                className: `ml-auto text-[8px] font-black uppercase px-2 py-1 rounded border bg-emerald-500/20 text-emerald-400 border-emerald-500/20`,
+                textContent: t('status_accepted') || 'Accettato'
             })
         ]);
         list.appendChild(div);
-    }
-
-    // SELF-HEALING: Se abbiamo rilevato cambiamenti di stato, aggiorniamo il documento
-    if (needsUpdate && !isReadOnly) {
-        try {
-            await updateDoc(doc(db, "users", currentUid, "accounts", currentId), { sharedWith: updatedGuests });
-            console.log("Account sharedWith list auto-updated based on invites status.");
-        } catch (e) { console.error("SelfHealing update failed", e); }
-    }
+    });
 }
 
 /**

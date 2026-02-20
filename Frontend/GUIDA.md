@@ -403,3 +403,198 @@ Esegui audit completo su [pagina.html]:
 3. Controlla moduli passivi init[NomePagina](user) corretti.
 4. Controlla classi UI standard, dual-mode, i18n.
 5. Segnala tutte le anomalie, incongruenze o elementi non conformi.
+
+5) SISTEMA DI CONDIVISIONE – HARDENING V2 (MULTI-DESTINATARIO)
+📘 5.1 — PARTE UMANA (SPECIFICA TECNICA COMPLETA)
+🎯 Obiettivo
+
+Rendere il sistema di condivisione:
+
+Transaction-safe
+Race-condition proof
+Coerente bidirezionalmente
+Backend-enforced
+Idempotente
+Realtime
+Auto-healing
+Enterprise-ready
+Multi-destinario (più utenti per account/memorandum)
+
+🔐 5.1.1 Stati Account (Flag Esclusivi)
+
+Un account può avere un solo flag tra:
+Privato
+Condiviso
+Memorandum
+Se Condiviso o Memorandum → è obbligatorio selezionare almeno un destinatario interno.
+È possibile aggiungere più destinatari per lo stesso account.
+
+🌉 5.1.2 Documento “Invite” (Il Ponte)
+
+Ogni destinatario ha il proprio invite singolo.
+Collezione: invites
+
+Struttura minima:
+
+{
+  "accountId": "string",
+  "ownerEmail": "string",
+  "recipientEmail": "string",
+  "status": "pending | accepted | revoked",
+  "createdAt": "timestamp"
+}
+Non creare duplicati.
+Lo stato è indipendente per ogni destinatario.
+
+🚫 5.1.3 Anti-Duplicazione
+
+Prima di creare invite:
+
+Verificare che non esista già un invite con stesso accountId e recipientEmail in status pending o accepted.
+Se esiste: non creare duplicato e non resettare lo stato.
+
+⚙ 5.1.4 Transazioni Atomiche
+
+Le operazioni critiche devono usare runTransaction():
+Accettazione invite
+Cambio destinatario
+Stop condivisione
+Accettazione invite:
+Leggi invite
+Verifica status === pending
+Aggiorna invite → accepted
+Aggiorna account → aggiungi email in sharedWithEmails
+Commit
+
+Stop condivisione:
+
+Rimuovere flag shared/memo
+Svuotare sharedWithEmails
+Cancellare o revocare invite
+Commit
+
+🔁 5.1.5 Consistency Check Bidirezionale
+
+Invite accepted ma email non in sharedWithEmails → aggiungi email.
+Email in sharedWithEmails ma invite mancante → rimuovi email.
+Invite pending ma flag account disattivato → cancella invite.
+
+🔒 5.1.6 Security Rules Hardened
+
+Lettura account condiviso solo se:
+Email presente in sharedWithEmails
+Esiste invite collegato all’account
+Invite.status == accepted
+
+🧯 5.1.7 Protezione Doppio Click
+
+Disabilita bottone “Accetta” al click
+Controlla status !== pending prima di aggiornare
+
+🔄 5.1.8 Listener Globale
+
+main.js controlla invite pendenti al login
+Mostra popup globale
+Usa listener realtime (onSnapshot)
+
+📡 5.1.9 Stato Live Lato Proprietario
+
+Dettaglio account mostra lista destinatari
+Colore stato:
+Giallo → pending
+Verde → accepted
+Possibilità di aggiungere nuovi destinatari senza alterare quelli già presenti
+Possibilità di revocare singoli destinatari
+
+🧪 5.2 — PARTE ESEMPIO
+Esempio Multi-Destinario
+{
+  "accountId": "acc_123",
+  "ownerEmail": "owner@app.com",
+  "sharedWithEmails": ["userA@app.com", "userB@app.com", "userC@app.com"]
+}
+
+Invites:
+[
+  {"recipientEmail": "userA@app.com", "status": "accepted"},
+  {"recipientEmail": "userB@app.com", "status": "pending"},
+  {"recipientEmail": "userC@app.com", "status": "pending"}
+]
+
+UI:
+
+Lista destinatari con stato live
+Possibilità di aggiungere destinatario D → crea nuovo invite pending
+Possibilità di rimuovere destinatario B → revoke invite + rimuovi email dall’array
+Esempio Stop Condivisione
+Proprietario rimuove flag shared
+sharedWithEmails svuotato
+Invite cancellati/revoked
+Destinatari perdono accesso immediato
+Esempio Race Condition
+Due click su “Accetta” → solo primo update valido
+Nessuna duplicazione
+Coerenza mantenuta
+
+🤖 5.3 — VERSIONE PER AGENTE AI
+Obiettivo
+
+Verificare e correggere sistema di condivisione multi-destinario, idempotente, transazionale e coerente.
+
+5.3.1 Transazioni
+
+Accettazione invite → transaction
+Stop condivisione → transaction
+Cambio destinatario → transaction
+Refactor se operazioni non sono atomic
+
+5.3.2 Consistency Check
+
+Invite accepted ma email non in array → aggiungere
+Email in array ma invite mancante → rimuovere
+Invite pending ma flag disattivo → cancellare
+
+5.3.3 Security Rules
+
+Lettura solo se email in array e invite accepted esiste
+
+5.3.4 Anti-Duplicazione
+
+Prima di creare invite, verificare assenza duplicati
+
+5.3.5 Protezione doppio click
+
+Disabilita bottone
+Controllo status pending
+
+5.3.6 Listener Globale
+
+Controllo invite pendenti al login
+Popup globale
+Realtime listener
+
+5.3.7 Output report JSON
+{
+  "accountId": "acc_123",
+  "sharedWithEmails": [
+    {"email": "userA@app.com", "status": "accepted"},
+    {"email": "userB@app.com", "status": "pending"},
+    {"email": "userC@app.com", "status": "pending"}
+  ],
+  "consistency_check": "OK / NON_COMPLIANT",
+  "actions_needed": []
+}
+
+✅ Risultato Atteso
+
+Dopo implementazione completa:
+
+Transaction-safe
+Race-condition proof
+Multi-destinario
+Coerenza bidirezionale
+Backend-enforced
+Idempotente
+Realtime
+Auto-healing
+Enterprise-ready

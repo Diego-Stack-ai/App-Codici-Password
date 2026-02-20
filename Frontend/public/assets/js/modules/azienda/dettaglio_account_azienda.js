@@ -6,8 +6,9 @@
 
 import { auth, db, storage } from '../../firebase-config.js';
 import {
-    doc, getDoc, updateDoc, increment,
-    collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp, where
+    doc, getDoc, updateDoc, increment, onSnapshot, runTransaction,
+    collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp,
+    where, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject
@@ -22,6 +23,7 @@ let currentUid = null;
 let currentId = null;
 let currentAziendaId = null;
 let originalData = null;
+let isReadOnly = false;
 
 // --- INITIALIZATION ---
 export async function initDettaglioAccountAzienda(user) {
@@ -42,7 +44,7 @@ export async function initDettaglioAccountAzienda(user) {
 
     initProtocolUI(); // Sync UI setup
     setupActions();
-    await loadAccount(currentId);
+    await loadAccount();
 
     console.log("[DETTAGLIO-ACCOUNT-AZIENDA] Ready.");
 }
@@ -68,21 +70,26 @@ function initBaseUI() {
     console.log('[dettaglio_account_azienda] UI Base gestita da main.js');
 }
 
-async function loadAccount(id) {
+async function loadAccount() {
     try {
-        const docRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", id);
+        const docRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId);
         const docSnap = await getDoc(docRef);
 
         if (!docSnap.exists()) {
-            showToast(t('error_not_found') || "Account non trovato", "error");
+            showToast(t('account_not_found'), "error");
+            setTimeout(() => history.back(), 1000);
             return;
         }
 
         originalData = { id: docSnap.id, ...docSnap.data() };
+        isReadOnly = (originalData.sharedWithEmails || []).includes(auth.currentUser?.email) && originalData.ownerId !== auth.currentUser?.uid;
+
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
         render(originalData);
         await loadAttachments();
+
+        if (isReadOnly) setupReadOnlyUI();
 
     } catch (e) {
         logError("LoadAccount", e);
@@ -157,11 +164,12 @@ function render(acc) {
     setF('ref-phone', refPhone);
     setF('ref-mobile', refMobile);
 
-    // Shared Management
+    // Shared Management (HARDENING V2)
     if (acc.shared || acc.isMemoShared) {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
-        renderGuests(acc.sharedWith || []);
+        if (!isReadOnly) initSharingMonitor(acc);
+        else renderGuests(acc.sharedWithEmails || []);
     }
 
     // --- ALLEGATI: Aggancio Listener ---
@@ -654,3 +662,158 @@ function checkRealBankingData(acc) {
     });
 }
 
+/**
+ * SHARING MONITOR & CONSISTENCY (HARDENING V2)
+ */
+let sharingUnsubscribe = null;
+
+function initSharingMonitor(account) {
+    if (sharingUnsubscribe) sharingUnsubscribe();
+
+    console.log("[SharingMonitor-Azienda] Initializing Realtime Check...");
+    const q = query(collection(db, "invites"), where("accountId", "==", currentId));
+
+    sharingUnsubscribe = onSnapshot(q, async (snap) => {
+        const invites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const listContainer = document.getElementById('guests-list');
+        if (!listContainer) return;
+
+        clearElement(listContainer);
+
+        const currentEmails = account.sharedWithEmails || [];
+        const isSharingFlagActive = account.shared || account.isMemoShared;
+
+        let needsHealing = false;
+
+        const colPath = `users/${currentUid}/aziende/${currentAziendaId}/accounts/${currentId}`;
+
+        for (const inv of invites) {
+            // REGOLA C: Pending ed account non condiviso -> Delete
+            if (inv.status === 'pending' && !isSharingFlagActive) {
+                console.warn("[AutoHealing] Rule C (Azienda): Deleting orphan invite.");
+                await deleteDoc(doc(db, "invites", inv.id));
+                continue;
+            }
+
+            // REGOLA A: Accepted ma non in array -> Add
+            if (inv.status === 'accepted' && !currentEmails.includes(inv.recipientEmail)) {
+                console.warn("[AutoHealing] Rule A (Azienda): Resyncing email.");
+                await updateDoc(doc(db, colPath), {
+                    sharedWithEmails: arrayUnion(inv.recipientEmail)
+                });
+                needsHealing = true;
+            }
+
+            // UI Render
+            const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
+            const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
+
+            const revokeBtn = createElement('button', {
+                className: 'btn-icon-header ml-2 hover:text-red-400 transition-colors',
+                onclick: () => revokeRecipient(inv.recipientEmail)
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+            ]);
+
+            const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
+                createElement('div', { className: 'rubrica-item-info-row' }, [
+                    createElement('div', { className: 'rubrica-item-avatar', textContent: inv.recipientEmail.charAt(0).toUpperCase() }),
+                    createElement('div', { className: 'rubrica-item-info' }, [
+                        createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.recipientEmail.split('@')[0] }),
+                        createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.recipientEmail })
+                    ])
+                ]),
+                createElement('div', { className: 'flex items-center gap-2' }, [
+                    createElement('span', {
+                        className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                        textContent: displayStatus
+                    }),
+                    revokeBtn
+                ])
+            ]);
+            listContainer.appendChild(div);
+        }
+
+        // REGOLA B: Email in array ma nessun invite -> Remove
+        for (const email of currentEmails) {
+            const hasInvite = invites.some(i => i.recipientEmail === email);
+            if (!hasInvite) {
+                console.warn("[AutoHealing] Rule B (Azienda): Removing orphan email.");
+                await updateDoc(doc(db, colPath), {
+                    sharedWithEmails: arrayRemove(email)
+                });
+                needsHealing = true;
+            }
+        }
+
+        if (needsHealing) console.log("[AutoHealing] Consistency repair complete (Azienda).");
+        if (invites.length === 0) listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessun accesso attivo' }));
+    });
+}
+
+/**
+ * REVOKE SINGLE RECIPIENT (HARDENING V2 - MULTI)
+ */
+async function revokeRecipient(email) {
+    if (!email) return;
+    const ok = await showConfirmModal(t('confirm_revoke_title') || "REVOCA ACCESSO", `${t('confirm_revoke_msg') || 'Vuoi rimuovere l\'accesso per'} ${email}?`, t('revoke') || "Revoca");
+    if (!ok) return;
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const accRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId);
+            const inviteId = `${currentId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const inviteRef = doc(db, "invites", inviteId);
+
+            // 1. Remove from array
+            transaction.update(accRef, {
+                sharedWithEmails: arrayRemove(email)
+            });
+
+            // 2. Delete/Revoke invite
+            transaction.delete(inviteRef);
+        });
+
+        showToast("Accesso revocato con successo");
+    } catch (e) {
+        console.error("RevokeRecipient failed", e);
+        showToast(t('error_generic'), 'error');
+    }
+}
+
+function renderGuests(emails) {
+    const list = document.getElementById('guests-list');
+    if (!list) return;
+    clearElement(list);
+
+    if (!emails || emails.length === 0) {
+        list.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Sola lettura' }));
+        return;
+    }
+
+    emails.forEach(email => {
+        const displayEmail = typeof email === 'string' ? email : email.email;
+        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
+            createElement('div', { className: 'rubrica-item-info-row' }, [
+                createElement('div', { className: 'rubrica-item-avatar', textContent: displayEmail.charAt(0).toUpperCase() }),
+                createElement('div', { className: 'rubrica-item-info' }, [
+                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: displayEmail.split('@')[0] }),
+                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: displayEmail })
+                ])
+            ]),
+            createElement('span', {
+                className: `ml-auto text-[8px] font-black uppercase px-2 py-1 rounded border bg-emerald-500/20 text-emerald-400 border-emerald-500/20`,
+                textContent: t('status_accepted') || 'Accettato'
+            })
+        ]);
+        list.appendChild(div);
+    });
+}
+
+function setupReadOnlyUI() {
+    // Hide Actions
+    const fCenter = document.getElementById('footer-center-actions');
+    if (fCenter) fCenter.classList.add('hidden');
+    const btnEdit = document.getElementById('btn-edit-footer');
+    if (btnEdit) btnEdit.remove();
+}

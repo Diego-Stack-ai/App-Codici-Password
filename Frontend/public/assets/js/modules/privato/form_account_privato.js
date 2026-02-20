@@ -153,7 +153,8 @@ async function loadData() {
         if (isShared || isMemoShared) {
             const mgmt = document.getElementById('shared-management');
             if (mgmt) mgmt.classList.remove('hidden');
-            setVal('invite-email', data.recipientEmail);
+            const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
+            setVal('invite-email', emails.join(', '));
         }
 
         // Logo
@@ -469,6 +470,9 @@ function createInputField(label, value, onInput, icon, type = 'text') {
  * ACTIONS
  */
 window.saveAccount = async () => {
+    const btnSave = document.querySelector('button[onclick="saveAccount()"]') || document.getElementById('save-btn-footer');
+    if (btnSave) btnSave.disabled = true;
+
     // Check if banking actually has data
     const hasBankingData = (bankAccounts || []).some(acc => {
         const hasIban = acc.iban && acc.iban.trim().length > 0;
@@ -503,109 +507,103 @@ window.saveAccount = async () => {
     if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); return; }
 
     // RULE 4: Validation for Sharing
+    let inviteEmails = [];
     if (data.shared || data.isMemoShared) {
-        if (!inviteEmail) {
-            showToast("Per salvare devi scegliere un contatto o disattivare il flag", "warning");
+        const raw = get('invite-email');
+        if (!raw) {
+            showToast("Per salvare devi scegliere almeno un contatto o disattivare il flag", "warning");
             return;
         }
-        data.recipientEmail = inviteEmail;
-        data.sharedWith = [{ email: inviteEmail, status: 'pending' }]; // For compatibility with Detail page and Rule 7
-        data.sharedWithEmails = [inviteEmail]; // For Security Rules (Simple Array Check)
+        inviteEmails = raw.split(/[,; ]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes('@'));
+        if (inviteEmails.length === 0) {
+            showToast("Inserisci almeno un'email valida", "warning");
+            return;
+        }
+        data.recipientEmail = inviteEmails[0];
+        data.sharedWithEmails = inviteEmails;
+    } else {
+        data.sharedWithEmails = [];
     }
 
     try {
-        let targetId = currentDocId;
+        // --- ATOMIC TRANSACTION (HARDENING V2) ---
+        await runTransaction(db, async (transaction) => {
+            const accRef = isEditing ? doc(db, "users", currentUid, "accounts", currentDocId) : doc(collection(db, "users", currentUid, "accounts"));
+            const targetId = accRef.id;
 
-        // --- LOGICA GESTIONE INVITI (Revoca & Anti-Spam) ---
-        // 1. REVOCA: Se stiamo aggiornando, controlliamo se c'era una condivisione precedente da rimuovere
-        if (isEditing) {
-            // FORCE FROM SERVER: Ignoriamo la cache del dispositivo per assicurarci di leggere lo stato REALE dell'account
-            /* 
-              Problema risolto: Su mobile la cache a volte indicava l'account come non condiviso anche se lo era,
-              facendo saltare la revoca. Ora chiediamo direttamente al database. 
-            */
-            const oldSnap = await getDocFromServer(doc(db, "users", currentUid, "accounts", currentDocId));
-            if (oldSnap.exists()) {
-                const oldData = oldSnap.data();
-                const wasShared = oldData.shared || oldData.isMemoShared;
-                const oldRecipient = oldData.recipientEmail;
+            // 1. Check existing state for Revocation logic
+            let oldData = null;
+            if (isEditing) {
+                const snap = await transaction.get(accRef);
+                if (snap.exists()) oldData = snap.data();
+            }
 
-                // Se era condiviso e ora NON lo è più, oppure è cambiato il destinatario -> CANCELLA VECCHIO INVITO (Search & Destroy)
-                if (wasShared && (!isSharingActive || (isSharingActive && oldRecipient !== inviteEmail))) {
-                    try {
-                        const q = query(
-                            collection(db, "invites"),
-                            where("accountId", "==", currentDocId),
-                            where("senderId", "==", currentUid)
-                        );
-                        // Usiamo getDocsFromCache o standard getDocs. Qui getDocs standard va bene, 
-                        // ma se vogliamo essere sicuri di trovarlo anche se appena creato altrove, usiamo standard.
-                        const querySnapshot = await getDocs(q);
+            // 2. Prepare Account Data
+            const finalData = { ...data };
+            if (!isEditing) finalData.createdAt = new Date().toISOString();
 
-                        querySnapshot.forEach(async (docSnap) => {
-                            await deleteDoc(docSnap.ref);
-                            console.log("Invito revocato (Search&Destroy) ID:", docSnap.id);
-                        });
+            // 3. Handle Sharing / Revocation Logic (MULTI-DESTINATARIO)
+            const oldEmails = oldData?.sharedWithEmails || (oldData?.recipientEmail ? [oldData.recipientEmail] : []);
 
-                        if (querySnapshot.empty) {
-                            console.warn("Nessun invito trovato da revocare tramite query.");
+            // Se la condivisione è disattivata completamante -> Revoca TUTTI
+            if (!isSharingActive && oldEmails.length > 0) {
+                oldEmails.forEach(email => {
+                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    transaction.delete(doc(db, "invites", invId));
+                });
+                finalData.sharedWithEmails = [];
+                finalData.recipientEmail = "";
+            }
+            // Se sharing è attivo, calcoliamo chi rimuovere (quelli che c'erano ma non ci sono più nel nuovo input)
+            else if (isSharingActive) {
+                const toRemove = oldEmails.filter(e => !inviteEmails.includes(e));
+                toRemove.forEach(email => {
+                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    transaction.delete(doc(db, "invites", invId));
+                });
+            }
+
+            // 4. Update/Create Account
+            if (isEditing) transaction.update(accRef, finalData);
+            else transaction.set(accRef, finalData);
+
+            // 5. Create/Update Invites (for current active emails)
+            if (isSharingActive) {
+                for (const email of inviteEmails) {
+                    const inviteId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    const inviteRef = doc(db, "invites", inviteId);
+                    const inviteSnap = await transaction.get(inviteRef);
+
+                    let shouldSet = true;
+                    if (inviteSnap.exists()) {
+                        const status = inviteSnap.data().status;
+                        if (status === 'accepted' || status === 'pending') {
+                            shouldSet = false; // Preserva stato esistente
                         }
-                    } catch (e) {
-                        console.warn("Errore revoca invito (Query):", e);
+                    }
+
+                    if (shouldSet) {
+                        transaction.set(inviteRef, {
+                            senderId: currentUid,
+                            senderEmail: auth.currentUser?.email || 'unknown',
+                            recipientEmail: email,
+                            accountId: targetId,
+                            accountName: data.nomeAccount,
+                            type: data.isMemoShared ? 'memorandum' : 'privato',
+                            status: 'pending',
+                            createdAt: new Date().toISOString()
+                        });
                     }
                 }
             }
-        }
+        });
 
-        // 2. SALVATAGGIO DATI ACCOUNT
-        if (isEditing) {
-            await updateDoc(doc(db, "users", currentUid, "accounts", currentDocId), data);
-        } else {
-            data.createdAt = new Date().toISOString();
-            const docRef = await addDoc(collection(db, "users", currentUid, "accounts"), data);
-            targetId = docRef.id;
-        }
+        showToast(t('success_save'), "success");
+        setTimeout(() => window.location.href = 'account_privati.html', 1000);
 
-        // 3. INVIO/AGGIORNAMENTO INVITO (Se condivisione attiva)
-        if (isSharingActive) {
-            try {
-                const inviteId = `${targetId}_${inviteEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                const inviteRef = doc(db, "invites", inviteId);
-                const inviteSnap = await getDoc(inviteRef); // Questo potrebbe fallire se non ho permessi lettura
-
-                let shouldSend = true;
-                if (inviteSnap && inviteSnap.exists()) {
-                    const existingStatus = inviteSnap.data().status;
-                    if (existingStatus === 'accepted' || existingStatus === 'pending') {
-                        shouldSend = false; // L'invito è già valido, non resettiamo a 'pending'
-                        console.log("Invito già esistente e attivo. Salto invio duplicato.");
-                    }
-                }
-
-                if (shouldSend) {
-                    const inviteData = {
-                        senderId: currentUid,
-                        senderEmail: auth.currentUser?.email || 'unknown',
-                        recipientEmail: inviteEmail,
-                        accountId: targetId,
-                        accountName: data.nomeAccount,
-                        type: data.isMemoShared ? 'memorandum' : 'privato',
-                        status: 'pending',
-                        createdAt: new Date().toISOString()
-                    };
-                    await setDoc(inviteRef, inviteData);
-                    showToast(t('success_invite_sent'));
-                } else {
-                    showToast(t('success_save') + " (Condivisione aggiornata)");
-                }
-            } catch (invError) {
-                console.warn("Errore durante invio invito:", invError);
-                showToast("Account salvato, ma errore invio invito: " + invError.message, "warning");
-            }
-        } else {
-            showToast(isEditing ? t('success_save') : t('success_create') || "Account creato!");
-        }
-
-        setTimeout(() => window.location.href = `dettaglio_account_privato.html?id=${targetId}`, 1000);
-    } catch (e) { logError("SaveAccount", e); showToast(t('error_generic'), "error"); }
+    } catch (e) {
+        console.error("SaveAccountTransaction", e);
+        showToast(t('error_generic'), 'error');
+        if (btnSave) btnSave.disabled = false;
+    }
 };

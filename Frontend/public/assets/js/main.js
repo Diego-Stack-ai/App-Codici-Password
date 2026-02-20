@@ -41,7 +41,10 @@ import { initComponents } from './components.js'; // Imports components system
  */
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import {
+    doc, getDoc, collection, query, where, getDocs, updateDoc,
+    onSnapshot, runTransaction, arrayUnion, arrayRemove
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from './ui-core.js';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations } from './translations.js';
@@ -133,6 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. GLOBAL SECURITY & INVITE CHECK & PRIVATE ROUTING
+    let inviteUnsubscribe = null;
+
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             try {
@@ -182,13 +187,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'gestione_allegati': await Pages.initGestioneAllegati(user); break;
                 }
 
-                // Global Services
-                checkForPendingInvites(user.email);
+                // GLOBAL REALTIME INVITE LISTENER (HARDENING V2)
+                if (inviteUnsubscribe) inviteUnsubscribe();
+                const q = query(
+                    collection(db, "invites"),
+                    where("recipientEmail", "==", user.email),
+                    where("status", "==", "pending")
+                );
+                inviteUnsubscribe = onSnapshot(q, (snap) => {
+                    if (!snap.empty) {
+                        const inviteDoc = snap.docs[0];
+                        showInviteModal(inviteDoc.id, inviteDoc.data());
+                    }
+                });
 
             } catch (error) {
                 console.error("Global Check Error:", error);
             }
         } else {
+            if (inviteUnsubscribe) inviteUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
                 // window.location.href = 'index.html'; // Scommentare in prod
@@ -196,49 +213,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ... (Invite System e funzioni restano qui sotto) ...
-
     /**
-     * INVITE SYSTEM (Global Receiver)
+     * INVITE SYSTEM (Global Receiver) - HARDENING V2
      */
-    async function checkForPendingInvites(email) {
-        if (!email) return;
-
-        try {
-            const q = query(collection(db, "invites"),
-                where("recipientEmail", "==", email),
-                where("status", "==", "pending")
-            );
-            const snap = await getDocs(q);
-
-            if (!snap.empty) {
-                // Processing one invite at a time
-                const inviteDoc = snap.docs[0];
-                const inviteData = inviteDoc.data();
-                showInviteModal(inviteDoc.id, inviteData);
-            }
-        } catch (e) { console.error("CheckInvites", e); }
-    }
-
     function showInviteModal(inviteId, data) {
         if (document.getElementById('invite-modal')) return;
 
         const modal = createElement('div', { id: 'invite-modal', className: 'modal-overlay active' }, [
-            createElement('div', { className: 'modal-box' }, [
-                createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-purple', textContent: 'mail' }),
-                createElement('h3', { className: 'modal-title', textContent: t('invite_received_title') || 'Nuovo Invito' }),
-                createElement('p', { className: 'modal-text', textContent: `${data.senderEmail} ${t('invite_received_msg') || 'ha condiviso un account con te:'}` }),
-                createElement('p', { className: 'text-sm font-bold text-white mt-2 mb-4', textContent: data.accountName }),
-                createElement('div', { className: 'modal-actions' }, [
+            createElement('div', { className: 'modal-box pb-8' }, [
+                createElement('div', { className: 'flex justify-center mb-4' }, [
+                    createElement('span', { className: 'material-symbols-outlined text-4xl text-purple-400', textContent: 'mail' })
+                ]),
+                createElement('h3', { className: 'modal-title text-center', textContent: t('invite_received_title') || 'Nuovo Invito' }),
+                createElement('p', { className: 'modal-text text-center text-white/60 mb-1', textContent: `${data.senderEmail} ${t('invite_received_msg') || 'ha condiviso un account con te:'}` }),
+                createElement('div', { className: 'p-4 bg-white/5 border border-white/10 rounded-2xl mb-6' }, [
+                    createElement('p', { className: 'text-center font-black text-white text-lg', textContent: data.accountName }),
+                ]),
+                createElement('div', { className: 'modal-actions grid grid-cols-2 gap-3' }, [
                     createElement('button', {
-                        className: 'btn-modal btn-secondary',
+                        id: 'btn-invite-reject',
+                        className: 'p-4 rounded-2xl bg-white/5 border border-white/10 text-white/40 font-bold uppercase text-[10px] hover:bg-red-500/10 hover:text-red-400 transition-all',
                         textContent: t('invite_reject') || 'Rifiuta',
-                        onclick: () => handleInviteResponse(inviteId, 'rejected')
+                        onclick: () => handleInviteResponse(inviteId, data, 'rejected')
                     }),
                     createElement('button', {
-                        className: 'btn-modal btn-primary',
+                        id: 'btn-invite-accept',
+                        className: 'p-4 rounded-2xl bg-purple-500 text-white font-black uppercase text-[10px] shadow-lg shadow-purple-500/20 hover:scale-105 transition-all',
                         textContent: t('invite_accept') || 'Accetta',
-                        onclick: () => handleInviteResponse(inviteId, 'accepted')
+                        onclick: () => handleInviteResponse(inviteId, data, 'accepted')
                     })
                 ])
             ])
@@ -246,35 +248,66 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(modal);
     }
 
-    async function handleInviteResponse(inviteId, status) {
-        const modal = document.getElementById('invite-modal');
-        if (modal) modal.remove();
+    async function handleInviteResponse(inviteId, inviteData, status) {
+        // Double Click Protection
+        const btnAccept = document.getElementById('btn-invite-accept');
+        const btnReject = document.getElementById('btn-invite-reject');
+        if (btnAccept) btnAccept.disabled = true;
+        if (btnReject) btnReject.disabled = true;
 
         try {
-            await updateDoc(doc(db, "invites", inviteId), { status: status, respondedAt: new Date().toISOString() });
-            showToast(status === 'accepted' ? "Invito accettato!" : "Invito rifiutato", status === 'accepted' ? 'success' : 'info');
+            // ATOMIC TRANSACTION (HARDENING V2)
+            await runTransaction(db, async (transaction) => {
+                const inviteRef = doc(db, "invites", inviteId);
+                const invSnap = await transaction.get(inviteRef);
 
+                if (!invSnap.exists()) throw "Invite not found";
+                if (invSnap.data().status !== 'pending') throw "Invite already processed";
+
+                // 1. Update Invite status
+                transaction.update(inviteRef, {
+                    status: status,
+                    respondedAt: new Date().toISOString()
+                });
+
+                // 2. If accepted, add to sharedWithEmails array on Account document
+                if (status === 'accepted') {
+                    const ownerId = inviteData.senderId;
+                    const accId = inviteData.accountId;
+
+                    // Note: This logic assumes the structure is /users/{ownerId}/accounts/{accId}
+                    // For Azienda, it would be /users/{ownerId}/aziende/{aziId}/accounts/{accId}
+                    // We need the full path. Let's rely on inviteData.accountPath if available, or deduce.
+                    let accountPath = `users/${ownerId}/accounts/${accId}`;
+                    if (inviteData.type === 'azienda' && inviteData.aziendaId) {
+                        accountPath = `users/${ownerId}/aziende/${inviteData.aziendaId}/accounts/${accId}`;
+                    }
+
+                    const accountRef = doc(db, accountPath);
+                    transaction.update(accountRef, {
+                        sharedWithEmails: arrayUnion(inviteData.recipientEmail)
+                    });
+                }
+            });
+
+            const modal = document.getElementById('invite-modal');
+            if (modal) modal.remove();
+
+            showToast(status === 'accepted' ? "Invito accettato!" : "Invito rifiutato", status === 'accepted' ? 'success' : 'info');
             if (status === 'accepted') {
-                setTimeout(() => window.location.reload(), 1000);
+                setTimeout(() => window.location.reload(), 500);
             }
-        } catch (e) { console.error("InviteResponse", e); showToast(t('error_generic'), 'error'); }
+        } catch (e) {
+            console.error("InviteResponseTransaction", e);
+            showToast(typeof e === 'string' ? e : t('error_generic'), 'error');
+            const modal = document.getElementById('invite-modal');
+            if (modal) modal.remove();
+        }
     }
 
-    // 5. LOAD SHARED COMPONENTS (Header/Footer)
-    // Utilizziamo initComponents che gestisce Auth/App logic internamente
-    // Skip on Home Page to avoid double loading if home.js does it (home.js actually relies on main usually, but initComponents handles checks)
-    const pathName = window.location.pathname;
-    const isHomePage = pathName.endsWith('home_page.html') || pathName.endsWith('/');
-
-    // 5. LOAD SHARED COMPONENTS (Header/Footer)
     initComponents();
-
-    // 6. TRADUZIONE & REVEAL (V3.9 Protocol)
-    // Applica le traduzioni a tutti i data-t e imposta data-i18n="ready"
     applyGlobalTranslations();
-
-    console.log("PROTOCOLLO BASE Initialized (v4.4)");
-
-    // Force reveal content to avoid black screen (Backup Safety)
     setTimeout(() => document.body.classList.add('revealed'), 100);
 });
+
+console.log("PROTOCOLLO BASE (v5.0-HARDENED) Initialized");
