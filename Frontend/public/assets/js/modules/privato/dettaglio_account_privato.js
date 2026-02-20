@@ -510,28 +510,17 @@ function setupActions() {
         };
     }
 
-    // --- MODALE SELEZIONE SORGENTE ---
-    const sourceModal = document.getElementById('source-selector-modal');
-    if (sourceModal) {
-        // Pulsanti Sorgente
-        sourceModal.querySelectorAll('[data-source]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const type = btn.dataset.source;
-                const input = document.getElementById(`input-${type}`);
-                if (input) input.click();
-                closeSourceSelector();
-            });
-        });
-
-        // Pulsante Annulla
-        document.getElementById('btn-cancel-source')?.addEventListener('click', closeSourceSelector);
-    }
-
-    // Listeners for hidden inputs
-    ['input-camera', 'input-video', 'input-gallery', 'input-file'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', (e) => handleFileUpload(e.target));
+    // Pulsante Annulla
+    document.getElementById('btn-cancel-source')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeSourceSelector();
     });
 }
+
+// Listeners for hidden inputs
+['input-camera', 'input-video', 'input-gallery', 'input-file'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', (e) => handleFileUpload(e.target));
+});
 
 // --- ATTACHMENTS LOGIC ---
 
@@ -687,33 +676,34 @@ function renderAttachments(list) {
     const items = list.map(a => {
         const type = (a.type || "").toLowerCase();
         let icon = 'description';
-        let color = 'text-blue-400';
-        if (type.includes('image')) { icon = 'image'; color = 'text-purple-400'; }
-        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400'; }
-        else if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400'; }
+        let color = 'text-blue-400/40';
 
-        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : '---';
+        if (type.includes('image')) { icon = 'image'; color = 'text-purple-400/40'; }
+        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400/40'; }
+        else if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
+
+        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '---';
         const size = (a.size / (1024 * 1024)).toFixed(2);
 
-        return createElement('div', { className: 'glass-card flex items-center gap-3 p-3 group transition-all active:scale-[0.98]' }, [
+        return createElement('div', {
+            className: 'attachment-item animate-in slide-in-from-left-2'
+        }, [
             createElement('div', {
-                className: 'size-10 rounded-xl bg-white/5 flex-center border border-white/10 shrink-0 cursor-pointer',
+                className: 'attachment-info cursor-pointer',
                 onclick: () => window.open(a.url, '_blank')
             }, [
-                createElement('span', { className: `material-symbols-outlined ${color} text-xl`, textContent: icon })
-            ]),
-            createElement('div', {
-                className: 'flex-1 flex flex-col min-w-0 cursor-pointer',
-                onclick: () => window.open(a.url, '_blank')
-            }, [
-                createElement('p', { className: 'text-xs font-bold text-white truncate', textContent: a.name }),
-                createElement('span', { className: 'text-[9px] text-white/20 font-medium', textContent: `${size} MB • ${date}` })
+                createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
+                createElement('div', { className: 'attachment-meta' }, [
+                    createElement('span', { className: 'attachment-name', textContent: a.name }),
+                    createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
+                ])
             ]),
             !isReadOnly ? createElement('button', {
-                className: 'size-8 flex items-center justify-center text-red-400/60 hover:text-red-400 transition-colors active:scale-90',
+                type: 'button',
+                className: 'btn-delete-attachment',
                 onclick: (e) => { e.stopPropagation(); deleteAttachment(a); }
             }, [
-                createElement('span', { className: 'material-symbols-outlined !text-[20px]', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
             ]) : null
         ]);
     });
