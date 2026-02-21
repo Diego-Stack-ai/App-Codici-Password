@@ -10,10 +10,12 @@ import {
     query,
     where,
     orderBy,
+    runTransaction,
     arrayUnion,
     arrayRemove,
     collectionGroup
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { sanitizeEmail } from './utils.js';
 
 /**
  * Recupera le scadenze per un determinato utente.
@@ -142,45 +144,122 @@ async function getPendingInvitations(email) {
 }
 
 /**
- * Accetta o rifiuta un invito.
+ * Accetta o rifiuta un invito (V5.1 Master - Atomic).
  */
-async function respondToInvitation(inviteId, accept, guestUid) {
+async function respondToInvitation(inviteId, accept, guestUid, guestEmail) {
     const inviteRef = doc(db, "invites", inviteId);
-    const inviteSnap = await getDoc(inviteRef);
 
-    if (!inviteSnap.exists()) throw new Error("Invito non trovato");
-    const invite = inviteSnap.data();
+    await runTransaction(db, async (transaction) => {
+        const invSnap = await transaction.get(inviteRef);
+        if (!invSnap.exists()) throw new Error("Invito non trovato");
 
-    if (accept) {
-        // 1. Aggiungi il guestUid all'array sharedWith dell'account
-        const accountRef = doc(db, "users", invite.ownerId, "accounts", invite.accountId);
-        await updateDoc(accountRef, {
-            sharedWith: arrayUnion(guestUid)
+        const invite = invSnap.data();
+        if (invite.status !== 'pending') throw new Error("Invito già elaborato");
+
+        const status = accept ? 'accepted' : 'rejected';
+        const sKey = sanitizeEmail(guestEmail || invite.recipientEmail);
+
+        // Path dinamico per account (Privato o Azienda)
+        let accPath = invite.aziendaId
+            ? `users/${invite.ownerId}/aziende/${invite.aziendaId}/accounts/${invite.accountId}`
+            : `users/${invite.ownerId}/accounts/${invite.accountId}`;
+        const accountRef = doc(db, accPath);
+        const accSnap = await transaction.get(accountRef);
+
+        if (accSnap.exists()) {
+            let accData = accSnap.data();
+            let sharedWith = accData.sharedWith || {};
+
+            // Aggiorna mappa condivisione
+            if (sharedWith[sKey]) {
+                sharedWith[sKey].status = status;
+                if (accept) sharedWith[sKey].uid = guestUid;
+            }
+
+            // Auto-Healing: ricalcolo contatori e visibilità
+            const newCount = Object.values(sharedWith).filter(g => g.status === 'accepted').length;
+            const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
+            const newVisibility = hasActive ? "shared" : "private";
+
+            transaction.update(accountRef, {
+                sharedWith: sharedWith,
+                acceptedCount: newCount,
+                visibility: newVisibility,
+                updatedAt: new Date().toISOString()
+            });
+        }
+
+        // Aggiorna l'invito
+        transaction.update(inviteRef, {
+            status: status,
+            guestUid: accept ? guestUid : null,
+            respondedAt: new Date().toISOString()
         });
 
-        // 2. Segna come accettato
-        await updateDoc(inviteRef, { status: 'accepted', guestUid });
-    } else {
-        await updateDoc(inviteRef, { status: 'rejected' });
-    }
+        // Notifica per il proprietario
+        const notifRef = doc(collection(db, "users", invite.ownerId, "notifications"));
+        transaction.set(notifRef, {
+            title: accept ? "Invito Accettato" : "Invito Rifiutato",
+            message: `${guestEmail || invite.recipientEmail} ha ${accept ? 'accettato' : 'rifiutato'} l'invito.`,
+            type: "share_response",
+            accountId: invite.accountId,
+            guestEmail: guestEmail || invite.recipientEmail,
+            timestamp: new Date().toISOString(),
+            read: false
+        });
+    });
 }
 
 /**
- * Revoca l'accesso a un account.
+ * Revoca l'accesso a un account (V5.1 Master - Atomic).
  */
-async function revokeAccess(ownerId, accountId, guestUid) {
-    const accountRef = doc(db, "users", ownerId, "accounts", accountId);
-    await updateDoc(accountRef, {
-        sharedWith: arrayRemove(guestUid)
-    });
+async function revokeAccess(ownerId, accountId, guestEmail, aziendaId = null) {
+    const sKey = sanitizeEmail(guestEmail);
+    const inviteId = `${accountId}_${sKey}`;
+    const invRef = doc(db, "invites", inviteId);
 
-    // Rimuovi anche l'invito accettato per pulizia
-    const q = query(collection(db, "invites"),
-        where("accountId", "==", accountId),
-        where("guestUid", "==", guestUid)
-    );
-    const snap = await getDocs(q);
-    snap.forEach(async (d) => await deleteDoc(doc(db, "invites", d.id)));
+    await runTransaction(db, async (transaction) => {
+        let accPath = `users/${ownerId}/accounts/${accountId}`;
+        if (aziendaId) {
+            accPath = `users/${ownerId}/aziende/${aziendaId}/accounts/${accountId}`;
+        }
+        const accountRef = doc(db, accPath);
+        const accSnap = await transaction.get(accountRef);
+
+        if (!accSnap.exists()) return;
+
+        let data = accSnap.data();
+        let sharedWith = data.sharedWith || {};
+
+        // Rimuovi dalla mappa
+        delete sharedWith[sKey];
+
+        const newCount = Object.values(sharedWith).filter(g => g.status === 'accepted').length;
+        const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
+        const newVisibility = hasActive ? "shared" : "private";
+
+        transaction.update(accountRef, {
+            sharedWith: sharedWith,
+            acceptedCount: newCount,
+            visibility: newVisibility,
+            updatedAt: new Date().toISOString()
+        });
+
+        // Elimina l'invito
+        transaction.delete(invRef);
+
+        // Notifica
+        const notifRef = doc(collection(db, "users", ownerId, "notifications"));
+        transaction.set(notifRef, {
+            title: "Accesso Revocato",
+            message: `Hai revocato l'accesso a ${guestEmail}.`,
+            type: "share_revoked",
+            accountId: accountId,
+            guestEmail: guestEmail,
+            timestamp: new Date().toISOString(),
+            read: false
+        });
+    });
 }
 
 /**

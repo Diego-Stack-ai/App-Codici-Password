@@ -108,6 +108,12 @@ function getCurrentPage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 🔐 BLOCCO SENTINELLA V5.1 - Previene il doppio bootstrap
+    if (window.__V5_BOOTSTRAPPED__) {
+        console.warn("⚠️ Rilevato tentativo di doppio bootstrap. Blocco sentinella attivo.");
+        return;
+    }
+    window.__V5_BOOTSTRAPPED__ = true;
 
     // 1. Policy UX (Lockdown menu/selezione)
     initLockedUX();
