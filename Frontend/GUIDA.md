@@ -591,5 +591,41 @@ Nel file `scadenze.js` la funzione globale `loadUrgentDeadlinesCount()` esegue u
 
 ---
 
+## 19. BACKEND ENTERPRISE: CLOUD FUNCTIONS E CRONJOBS (V2.0 Notifier)
+
+### Spiegazione umana:
+L'App Codici Password non è una semplice PWA (Client-Side). Possiede un "demone" serverless resident su Firebase Cloud Functions (`functions/index.js`) che opera indipendentemente dai telefoni degli utenti. Questo demone ha l'onere e l'onore di svegliarsi ogni giorno spaccando il minuto, scansionare il database globale, calcolare chi deve ricevere una notifica per una scadenza e inviarla in modo sicuro via Push o Email, tenendo traccia della cronologia per evitare spam.
+
+### 19.1 Il Demone Schedulato (Cron Job)
+La funzione primaria exportata è `checkDeadlines`, schedulata tramite `onSchedule("0 8 * * *")`.
+- **Fuso Orario**: Esegue ogni giorno alle ore 08:00 AM (configurazione standard UTC/Europe).
+- **Logica di Trigger**: Effettua una lettura passiva globale (`usersSnap = await db.collection("users").get()`), scorrendo ogni utente ed interpolando i dati con le relative collection `scadenze` attive.
+
+### 19.2 L'Algoritmo di Avviso (Preavviso e Frequenza)
+Il backend per far scattare un avviso non guarda solo "se è scaduto", ma esegue una doppia verifica algoritmica incrociata per non importunare l'utente:
+1. **Verifica Preavviso (`notificationDaysBefore`)**: "Oggi mancano X giorni alla data. X è minore del limite di preavviso salvato in db?" (Es: Mancano 11 giorni, l'avviso è a 14. Regola superata).
+2. **Verifica Frequenza Anti-Spam (`notificationFrequency`)**: Per evitare un'email al giorno, la funzione calcola il delta temporale (`now - lastSent`) dalla variabile `lastNotificationSent`. L'allarme viene effettivamente triggrato **solo** se il tempo trascorso dall'ultimo invio è pari o superiore ai giorni impostati nella frequenza (es. ogni 7 giorni).
+
+### 19.3 Il Flusso di Rilascio Mutuamente Esclusivo (Push ➡️ Email Fallback)
+Questa è l'architettura core di routing dei messaggi:
+- **Piano A (Push Notifcation via FCM)**: Il modulo interroga prima gli `fcmTokens` salvati nell'utente. Se abilitato (`prefs_push !== false`), l'infrastruttura di Google spedisce un pacchetto push criptato al device, facendo apparire la notifica nativa sul telefono IOS/Android.
+- **Piano B (Email Fallback Auth2)**: Solo e unicamente se il Push fallisce e l'utente ha autorizzato la ricezione email (`prefs_email_sharing !== false`), il sistema sgancia l'email di backup, assicurandosi che il messaggio arrivi a destinazione in ogni casistica.
+
+### 19.4 Architettura Email OAuth2 e JWT
+Le mail in Firebase Hosting non passano mai per vecchi e insicuri SMTP diretti. 
+Sfruttiamo l'autenticazione API nativa Google (`googleapis` + `JWT Client`) usando l'account di servizio `amministrazione.bmservice@gmail.com`. Questo approccio Enterprise fornisce:
+- Recapità garantito (Bypass delle cartelle spam comuni).
+- Assenza di limitazioni di invio rispetto agli SMTP gratis commerciali.
+- Autorità crittografata sul server con standard zero-knowledge password (via `-----BEGIN PRIVATE KEY-----`).
+
+> 🤖 **Comando Agente AI: audit_backend_functions()**
+> \`\`\`
+> 1. Trattandosi di un ambiente Node.js distaccato (Server), evita di richiamare file, librerie e moduli frontend JS dentro `functions/index.js`. Qui si ragiona ESCLUSIVAMENTE tramite l'oggetto `admin.firestore()`.
+> 2. Mai disabilitare le logiche "ArrayUnion" (ad esempio dentro `logNotification`) che tengono traccia dello storico notifiche nell'architettura utente, sono legali ed essenziali.
+> 3. Evita cicli in `forEach` puri (bloccanti). Le scan di Firebase Functions devono SEMPRE usare esplicitamente costrutti ciclici basati su standard moderni (`for...of`) o map + Promise.all per evitare memory leaks e timeout dei processi lambda.
+> \`\`\`
+
+---
+
 ✅ **PROTOCOLLO V5.1 MASTER — DOCUMENTAZIONE COMPLETA.**
 Questa guida è ora il tuo unico manuale operativo. Non deviare dalla via maestra.
