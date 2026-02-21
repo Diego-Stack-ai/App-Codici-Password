@@ -482,13 +482,38 @@ Abbiamo categoricamente dismesso i vecchi array che generavano crash e duplicati
 - **`isExplicitMemo`**: Booleano. Permette di distinguere un account nato esplicitamente come Memorandum da un Account Normale convertito temporaneamente in Memo per la condivisione protetta.
 - **`sharedWith`**: L'oggetto della verità. Le chiavi sono l'email sanificata (es: `mario_rossi_at_gmail_com`) e il valore contiene lo stato: `{ email: "...", status: "pending|accepted", uid: "..." }`.
 
-### 17.2 Il Flusso Atomico & Auto-Healing
+### 17.2 Le 4 Tipologie Core di Account (Regole Logiche UI)
+L'architettura gestisce un singolo record (Account) plasmato da 4 "stati dell'essere":
+
+1. **Account Privato**: 
+   - Deve avere il campo NOME ACCOUNT popolato.
+   - Nessuna spunta di condivisione attivata nell'interfaccia.
+   - Rimane sigillato nella lista personale degli account. 
+   - L'utente è libero in qualsiasi momento di editarlo e convertirlo in una delle altre tre opzioni.
+
+2. **Memorandum**:
+   - Spunta "Memorandum" selezionata.
+   - **Regola di ferro:** Deve avere NOME ACCOUNT popolato, ma i campi UTENTE, PASSWORD e ACCOUNT/CODICE devono essere categoricamente *vuoti*.
+   - Il sistema interdice il salvataggio o fa un wipe preventivo se ci sono dati anagrafici, in quanto è progettato solo per salvare Note, IBAN e Allegati.
+
+3. **Memorandum Condiviso**: 
+   - Dinamica identica a *Memorandum* puro, ma con spunta di condivisione attiva.
+   - In UI si apre il modulo della Rubrica. Il contatto selezionato cade a cascata sotto la card come invito pendente.
+   - Al salvataggio parte la notifica di sistema al ricevente. Lato Owner, nel Dettaglio Account appare la dicitura *"In attesa di accettazione"*.
+
+4. **Account Condiviso (Utente Condiviso)**: 
+   - Spunta "Condiviso" selezionata.
+   - Deve avere il NOME ACCOUNT e *almeno uno* tra Utente, Account o Password popolati.
+   - Segue l'identico flusso contatti del Memorandum Condiviso.
+   - C'è una logica di **Auto-Rimozione condizionata**: se c'era un solo ospite ed egli rifiuta l'invito, scompare *"In attesa di accettazione"* e l'account stesso deve sflagarsi in automatico dalle condivisioni (tramite l'Auto-Healing) e sparire da quelle liste tornando "Privato". Se ci sono altri ospiti accettati, la dicitura per chi ha rifiutato sparisce ma l'account resta globalmente "Condiviso".
+
+### 17.3 Il Flusso Atomico & Auto-Healing
 Ogni operazione di condivisione o revoca avviene tramite `runTransaction` (Transazioni Atomiche db) per garantire l'integrità assoluta dei conflitti di rete.
 - **Fase Invio**: L'owner salva il form. Viene creato un documento nella collection globale `invites` (ID: `{accountId}_{emailSanificata}`) e aggiornata la mappa `sharedWith` dell'account sorgente. Simultaneamente parte una notifica all'ospite.
 - **Fase Risposta**: Il modulo `main.js` dell'ospite è costantemente in ascolto del nodo `invites`. Al click di "Accetta", la transazione va a bussare criptograficamente nel database dell'owner, inietta l'`UID` dell'ospite nella mappa e setta lo stato su `"accepted"`.
 - **Auto-Healing (Il Riparo Medico)**: Se un account "shared" rimane improvvisamente senza alcun ospite attivo (es. tutti rifiutano o vengono rimossi dall'owner), il sistema lo riporta in `visibility="private"`. In questo istante controlla il flag `isExplicitMemo`. Se è `false`, **ri-trasforma automaticamente l'account da Memo ad Account puro**, ripristinando l'integrità e la visualizzazione originaria per l'Owner senza necessità di click manuali.
 
-### 17.3 Revoca Estromissione Avanzata:
+### 17.4 Revoca ed Estromissione Avanzata:
 Quando un accesso fiduciario si spezza (revoca da parte dell'Owner), la transazione:
 1. Spazza via la chiave incriminata dalla mappa `sharedWith`.
 2. Azzera ed elimina gli eventuali inviti fantasma in `invites`.
