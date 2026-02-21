@@ -322,6 +322,44 @@ Il CSP è il "perimetro di difesa" dell'app. Non usiamo una configurazione permi
 - Autorizza specificamente lo script inline di inizializzazione tema (`theme-init.js` logic) senza abilitare `unsafe-inline` per tutti gli script, proteggendo l'integrità dell'app.
 - Se modifichi lo script inline in `index.html`, devi ricalcolare l'hash e aggiornare questa guida e tutti i file HTML, altrimenti l'app si bloccherà per violazione di sicurezza.
 
+### 8.3 Sicurezza Form & Anti-Autofill (Standard V6.1.0 Hardened)
+### Spiegazione umana:
+I browser moderni e i password manager (Chrome, Safari, 1Password, ecc.) sono estremamente aggressivi e tentano di autocompilare o proporre il salvataggio per qualsiasi campo `type="password"` visibile. In un'app che gestisce le password di account terzi (come App Codici Password), questo causa problemi critici: il browser tenterà di salvare la password dell'account del cliente, sovrascrivendola a quella di accesso dell'app stessa. Dobbiamo inibire totalmente questo comportamento con un pattern specifico a 4 livelli.
+
+### Le 4 Regole d'Oro Anti-Autofill:
+1. **La Trappola (Honey Pot Nascosto):** Posizionare sempre all'inizio del form due campi fittizi nascosti in modo assoluto (non `display: none` base, ma `-9999px`). I bot riempiranno questi campi saziandosi e ignorando i restanti.
+2. **Nomi in incognito:** Mai usare `name="password"`, `id="password"`, `name="username"` o `name="email"` sui campi veri. Usa nomi come `account_label` e `account_secret`.
+3. **Attributi repellenti:** I campi login veri devono avere `autocomplete="new-password"`, `autocorrect="off"` e `spellcheck="false"`. `autocomplete="off"` **non** è sufficiente da solo.
+4. **Tipo Nativo:** Manteniamo il `type="password"` sul campo reale così la UI di reveal (l'occhio per mostrare/nascondere) e la cifratura a schermo funzionano nativamente.
+
+**Esempio di Form Blindato:**
+```html
+<form id="account-form" autocomplete="off" onsubmit="return false">
+    <!-- 1. Trappola Anti-autofill (V6.1.0) -->
+    <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
+        <input type="text" tabindex="-1">
+        <input type="password" tabindex="-1">
+    </div>
+
+    <!-- 2 e 3. Campi Veri Protetti -->
+    <div class="glass-field-container">
+        <input id="detail-username" type="text" name="account_label" 
+               autocomplete="new-password" autocorrect="off" spellcheck="false">
+    </div>
+
+    <div class="glass-field-container">
+        <input id="detail-password" type="password" name="account_secret" 
+               autocomplete="new-password" autocorrect="off" spellcheck="false">
+    </div>
+</form>
+```
+
+> 🤖 **Comando Agente AI — Audit Anti-Autofill**
+> `audit_form_security([pagina.html])`
+> - Scansiona ogni file contenente un form per verificare la presenza del div `.anti-autofill-trap` con stile `position: absolute; left: -9999px;` all'inizio del `<form>`.
+> - Verifica che non esistano input con `name="password"` o `name="username"`. Devono usare varianti generiche.
+> - Controlla che gli input reali di tipo testo/password abbiano `autocomplete="new-password"`, `autocorrect="off"` e `spellcheck="false"`.
+
 ---
 
 ## 9. VISIONE E2EE (END-TO-END ENCRYPTION) - ROADMAP

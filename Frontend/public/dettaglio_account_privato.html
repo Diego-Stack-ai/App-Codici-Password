@@ -70,10 +70,10 @@
                         <div class="flex-col-gap">
 
                             <form onsubmit="return false;" autocomplete="off">
-                                <!-- Anti-autofill trap (V5.9.2) -->
+                                <!-- Anti-autofill trap (V6.1.0) -->
                                 <div class="anti-autofill-trap" aria-hidden="true">
-                                    <input type="text" name="username" tabindex="-1" />
-                                    <input type="password" name="password" tabindex="-1" />
+                                    <input type="text" style="display:none" tabindex="-1">
+                                    <input type="password" style="display:none" tabindex="-1">
                                 </div>
 
                                 <!-- Nome Account -->
@@ -94,9 +94,9 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="detail-username" data-t="username">Utente</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="detail-username" type="text" readonly
+                                        <input id="detail-username" type="text" name="account_label" readonly
                                             class="detail-field-input no-transform" autocomplete="new-password"
-                                            spellcheck="false">
+                                            autocorrect="off" spellcheck="false">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-username">
                                             <span class="material-symbols-outlined">content_copy</span>
@@ -123,9 +123,9 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="detail-password" data-t="password">Password</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="detail-password" type="password" readonly
+                                        <input id="detail-password" type="password" name="account_secret" readonly
                                             class="detail-field-input base-shield field-value-password no-transform"
-                                            autocomplete="new-password" spellcheck="false">
+                                            autocomplete="new-password" autocorrect="off" spellcheck="false">
                                         <div class="detail-field-actions">
                                             <button id="toggle-password" class="btn-icon-header" type="button">
                                                 <span class="material-symbols-outlined">visibility</span>
