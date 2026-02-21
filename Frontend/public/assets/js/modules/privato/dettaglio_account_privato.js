@@ -1,5 +1,5 @@
 /**
- * DETTAGLIO ACCOUNT PRIVATO (V4.3)
+ * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
@@ -374,7 +374,8 @@ function renderSharingMap(account) {
 
         if (!isReadOnly) {
             items.push(createElement('button', {
-                className: 'ml-2 p-2 rounded-lg bg-transparent border-none text-red-400 hover:text-red-300 hover:scale-110 transition-all cursor-pointer flex items-center justify-center',
+                className: 'ml-2 p-2 rounded-lg bg-transparent border-none text-red-600 hover:text-red-500 hover:scale-110 transition-all cursor-pointer flex items-center justify-center',
+                style: 'outline: none !important; border: none !important; box-shadow: none !important; background: transparent !important;',
                 onclick: () => revokeRecipientV3(inv.email)
             }, [
                 createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })

@@ -1,5 +1,5 @@
 /**
- * DETTAGLIO ACCOUNT AZIENDA MODULE (V5.0 ADAPTER)
+ * DETTAGLIO ACCOUNT AZIENDA MODULE (V5.9.5 ADAPTER)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
  * - Entry Point: initDettaglioAccountAzienda(user)
  */
@@ -622,8 +622,8 @@ async function renderGuests(guests) {
                     textContent: displayStatus
                 }),
                 !isReadOnly ? createElement('button', {
-                    className: 'ml-1 p-2 rounded-lg bg-transparent border-none text-red-500 hover:text-red-400 hover:scale-110 transition-all cursor-pointer flex items-center justify-center',
-                    style: 'outline: none;',
+                    className: 'ml-1 p-2 rounded-lg bg-transparent border-none text-red-600 hover:text-red-500 hover:scale-110 transition-all cursor-pointer flex items-center justify-center',
+                    style: 'outline: none !important; border: none !important; box-shadow: none !important; background: transparent !important;',
                     onclick: () => revokeRecipientV3(displayEmail)
                 }, [
                     createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })

@@ -1,5 +1,5 @@
 /**
- * FORM ACCOUNT AZIENDA MODULE (V5.0 ADAPTER)
+ * FORM ACCOUNT AZIENDA MODULE (V5.9.5 ADAPTER)
  * Creazione e modifica account aziendali con gestione dinamica IBAN.
  * - Entry Point: initFormAccountAzienda(user)
  */
