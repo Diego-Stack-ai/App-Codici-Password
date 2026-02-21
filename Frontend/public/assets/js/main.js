@@ -301,6 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     createElement('span', { className: `material-symbols-outlined text-4xl ${accentClass}`, textContent: icon })
                 ]),
                 createElement('h3', { className: 'modal-title text-center', textContent: data.title }),
+                createElement('div', { className: 'p-4 bg-white/5 border border-white/10 rounded-2xl mb-4' }, [
+                    createElement('p', { className: 'text-center font-black text-white text-lg', textContent: data.accountName || 'Account' }),
+                ]),
                 createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: data.message }),
                 createElement('div', { className: 'modal-actions' }, [
                     createElement('button', {
@@ -541,8 +544,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     transaction.set(notifRef, {
                         title: status === 'accepted' ? "Invito Accettato" : "Invito Rifiutato",
                         message: `${currentUserEmail} ha ${status === 'accepted' ? 'accettato' : 'rifiutato'} l'invito.`,
+                        accountName: data.nomeAccount || 'Senza Nome',
                         type: "share_response",
                         accountId: accId,
+                        aziendaId: azId || null,
                         guestEmail: currentUserEmail,
                         timestamp: new Date().toISOString(),
                         read: false
