@@ -68,6 +68,67 @@
     align-items: center;
 }
 
+/* --- SELECTION BAR (V5.2) --- */
+.selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    padding: 0.75rem 1.25rem;
+    border-radius: 18px;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+    animation: slideDown 0.3s ease-out;
+}
+
+.selection-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.count-badge {
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.btn-select-all-flat {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+}
+
+.btn-select-all-flat:active {
+    opacity: 0.6;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .btn-action-outline {
     display: flex;
     align-items: center;

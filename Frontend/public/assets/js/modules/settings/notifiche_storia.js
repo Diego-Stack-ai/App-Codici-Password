@@ -186,25 +186,36 @@ function toggleSelectionMode(active) {
 
     const normalActions = document.getElementById('normal-actions');
     const selectionActions = document.getElementById('selection-actions');
+    const selectionBar = document.getElementById('selection-bar');
     const btnTextSelectAll = document.querySelector('#btn-select-all [data-t="select_all_btn"]');
+
     if (btnTextSelectAll) btnTextSelectAll.textContent = "Tutti";
 
     if (active) {
         normalActions?.classList.add('hidden');
         selectionActions?.classList.remove('hidden');
+        selectionBar?.classList.remove('hidden');
     } else {
         normalActions?.classList.remove('hidden');
         selectionActions?.classList.add('hidden');
+        selectionBar?.classList.add('hidden');
     }
 
+    updateSelectionUI();
     const list = document.getElementById('notifications-list');
     renderNotifications(allNotifications, list, document.getElementById('empty-state'));
+}
+
+function updateSelectionUI() {
+    const countEl = document.getElementById('selection-count');
+    if (countEl) countEl.textContent = selectedIds.size;
 }
 
 function toggleItemSelection(id) {
     if (selectedIds.has(id)) selectedIds.delete(id);
     else selectedIds.add(id);
 
+    updateSelectionUI();
     renderNotifications(allNotifications, document.getElementById('notifications-list'), document.getElementById('empty-state'));
 }
 
@@ -218,6 +229,7 @@ function toggleSelectAll() {
         allNotifications.forEach(n => selectedIds.add(n.id));
         if (btnText) btnText.textContent = "Nessuno";
     }
+    updateSelectionUI();
     renderNotifications(allNotifications, document.getElementById('notifications-list'), document.getElementById('empty-state'));
 }
 

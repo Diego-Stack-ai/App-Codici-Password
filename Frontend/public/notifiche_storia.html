@@ -66,14 +66,22 @@
                             <span class="material-symbols-outlined">close</span>
                             <span data-t="cancel_btn">Annulla</span>
                         </button>
-                        <button id="btn-select-all" class="btn-action-outline">
-                            <span class="material-symbols-outlined">done_all</span>
-                            <span data-t="select_all_btn">Tutti</span>
-                        </button>
                         <button id="btn-delete-selected" class="btn-icon-delete" title="Elimina Selezionati">
                             <span class="material-symbols-outlined">delete</span>
                         </button>
                     </div>
+                </div>
+
+                <!-- Selection Status Bar (V5.2) -->
+                <div id="selection-bar" class="selection-bar hidden">
+                    <div class="selection-info">
+                        <span id="selection-count" class="count-badge">0</span>
+                        <span data-t="selected_label">Selezionate</span>
+                    </div>
+                    <button id="btn-select-all" class="btn-select-all-flat">
+                        <span class="material-symbols-outlined">done_all</span>
+                        <span data-t="select_all_btn">Tutti</span>
+                    </button>
                 </div>
 
                 <!-- Status Indicators -->
