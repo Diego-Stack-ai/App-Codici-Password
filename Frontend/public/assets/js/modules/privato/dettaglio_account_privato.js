@@ -444,16 +444,33 @@ async function revokeRecipientV3(email) {
             transaction.delete(invRef);
 
             // 3. V3 Notification to Owner
-            const notifRef = doc(collection(db, "users", currentUid, "notifications"));
-            transaction.set(notifRef, {
+            const ownerNotifRef = doc(collection(db, "users", currentUid, "notifications"));
+            transaction.set(ownerNotifRef, {
                 title: "Accesso Revocato",
                 message: `Hai revocato l'accesso a ${email} per l'account ${data.nomeAccount || 'selezionato'}.`,
+                accountName: data.nomeAccount || 'Account',
                 type: "share_revoked",
                 accountId: currentId,
                 guestEmail: email,
                 timestamp: new Date().toISOString(),
                 read: false
             });
+
+            // 4. [NEW] Notification to Guest (if accepted)
+            const guestUid = wasAccepted ? accSnap.data().sharedWith[targetSanitized]?.uid : null;
+            if (guestUid) {
+                const guestNotifRef = doc(collection(db, "users", guestUid, "notifications"));
+                transaction.set(guestNotifRef, {
+                    title: "Accesso Revocato",
+                    message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account condiviso'}.`,
+                    accountName: data.nomeAccount || 'Account',
+                    type: "share_revoked",
+                    ownerEmail: auth.currentUser?.email || 'Proprietario',
+                    timestamp: new Date().toISOString(),
+                    read: false
+                });
+                console.log(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+            }
         });
 
         showToast("Accesso revocato con successo");

@@ -651,7 +651,22 @@ window.saveAccount = async () => {
             if (!isSharingActive) {
                 // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
                 for (const sKey of Object.keys(currentSharedWith)) {
+                    const guest = currentSharedWith[sKey];
                     transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
+
+                    // [NEW] Notifica Guest (se aveva accettato)
+                    if (guest && guest.status === 'accepted' && guest.uid) {
+                        const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
+                        transaction.set(guestNotifRef, {
+                            title: "Accesso Revocato",
+                            message: `Il proprietario ha reso privato l'account aziendale: ${data.nomeAccount || 'condiviso'}. Il tuo accesso è terminato.`,
+                            accountName: data.nomeAccount || 'Account',
+                            type: "share_revoked",
+                            ownerEmail: auth.currentUser?.email || 'Proprietario',
+                            timestamp: new Date().toISOString(),
+                            read: false
+                        });
+                    }
                 }
                 finalData.sharedWith = {};
                 finalData.acceptedCount = 0;
@@ -665,8 +680,23 @@ window.saveAccount = async () => {
                 // Rimuovi quelli sbiancati dalla UI
                 for (const oldKey of Object.keys(currentSharedWith)) {
                     if (!requestedSanitizedKeys.includes(oldKey)) {
+                        const guest = currentSharedWith[oldKey];
                         delete finalData.sharedWith[oldKey];
                         transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
+
+                        // [NEW] Notifica Guest (se aveva accettato)
+                        if (guest && guest.status === 'accepted' && guest.uid) {
+                            const guestNotifRef = doc(collection(db, "users", guest.uid, "notifications"));
+                            transaction.set(guestNotifRef, {
+                                title: "Accesso Revocato",
+                                message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account aziendale condiviso'}.`,
+                                accountName: data.nomeAccount || 'Account',
+                                type: "share_revoked",
+                                ownerEmail: auth.currentUser?.email || 'Proprietario',
+                                timestamp: new Date().toISOString(),
+                                read: false
+                            });
+                        }
                     }
                 }
 
