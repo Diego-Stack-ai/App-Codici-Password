@@ -157,8 +157,8 @@ function renderList(list) {
 }
 
 function createAccountCard(acc) {
-    const isMemo = (acc.type === 'memo' || acc.type === 'memorandum') || !!acc.isMemo || !!acc.hasMemo; // Azienda non ha type 'memorandum' esplicito di solito, ma ha flag
-    const isShared = acc.visibility === 'shared' || !!acc.shared || !!acc.isMemoShared;
+    const isMemo = (acc.type === 'memo' || acc.type === 'memorandum');
+    const isShared = (acc.visibility === 'shared');
     const isPinned = !!acc.isPinned;
 
     let theme = THEMES.standard;

@@ -144,9 +144,9 @@ async function loadData() {
             renderBankAccounts();
         }
 
-        // Flags & Sharing (V3.1 Alignment)
-        const isMemo = (data.type === 'memo' || data.type === 'memorandum') || !!data.hasMemo;
-        const isShared = data.visibility === 'shared' || !!data.shared || !!data.isMemoShared;
+        // Flags & Sharing UI (V5.1 Master - Strict Mode)
+        const isMemo = (data.type === 'memo' || data.type === 'memorandum');
+        const isShared = (data.visibility === 'shared');
         const isMemoShared = isShared && isMemo;
 
         if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared && !isMemo;

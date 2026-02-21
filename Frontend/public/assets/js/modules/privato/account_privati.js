@@ -198,8 +198,8 @@ function filterAndRender() {
     const searchVal = document.getElementById('account-search')?.value.toLowerCase() || '';
 
     let filtered = allAccounts.filter(acc => {
-        const isMemo = (acc.type === 'memo' || acc.type === 'memorandum') || !!acc.hasMemo;
-        const isShared = acc.visibility === 'shared' || !!acc.shared || !!acc.isMemoShared || acc._isGuest;
+        const isMemo = (acc.type === 'memo' || acc.type === 'memorandum');
+        const isShared = acc.visibility === 'shared' || acc._isGuest;
 
         if (type === 'standard') return !isShared && !isMemo;
         if (type === 'shared') return isShared && !isMemo;
@@ -253,8 +253,8 @@ function renderList(list) {
 }
 
 function createAccountCard(acc) {
-    const isMemo = (acc.type === 'memo' || acc.type === 'memorandum') || !!acc.hasMemo;
-    const isShared = acc.visibility === 'shared' || !!acc.shared || !!acc.isMemoShared || acc._isGuest;
+    const isMemo = (acc.type === 'memo' || acc.type === 'memorandum');
+    const isShared = acc.visibility === 'shared' || acc._isGuest;
     const isPinned = !!acc.isPinned;
 
     let theme = THEMES.standard;
