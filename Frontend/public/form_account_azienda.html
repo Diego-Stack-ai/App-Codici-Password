@@ -67,6 +67,11 @@
 
                 <div class="detail-content-wrap">
                     <form id="account-form" autocomplete="off" onsubmit="return false">
+                        <!-- Anti-autofill trap (V5.9.2) -->
+                        <div class="anti-autofill-trap" aria-hidden="true">
+                            <input type="text" name="username" tabindex="-1" />
+                            <input type="password" name="password" tabindex="-1" />
+                        </div>
 
                         <!-- 1. Dati Principali -->
                         <section>
@@ -82,9 +87,9 @@
                                         Account</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
-                                        <input id="account-name" name="account_name" type="text"
-                                            data-t-placeholder="account_name_placeholder" autocomplete="off"
-                                            class="field-input" />
+                                        <input id="account-name" type="text"
+                                            data-t-placeholder="account_name_placeholder" autocomplete="no-autofill"
+                                            spellcheck="false" class="field-input" />
                                     </div>
                                 </div>
 
@@ -93,9 +98,9 @@
                                         Email</label>
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined ml-4 opacity-40">person</span>
-                                        <input id="account-username" name="account_username" type="text"
-                                            data-t-placeholder="username_placeholder" autocomplete="off"
-                                            class="field-input" />
+                                        <input id="account-username" type="text"
+                                            data-t-placeholder="username_placeholder" autocomplete="new-password"
+                                            spellcheck="false" class="field-input" />
                                     </div>
                                 </div>
 
@@ -105,9 +110,8 @@
                                             Codice</label>
                                         <div class="glass-field border-glow">
                                             <span class="material-symbols-outlined ml-4 opacity-40">pin</span>
-                                            <input id="account-code" name="account_code" type="text"
-                                                data-t-placeholder="code_placeholder" autocomplete="off"
-                                                class="field-input" />
+                                            <input id="account-code" type="text" data-t-placeholder="code_placeholder"
+                                                autocomplete="one-time-code" spellcheck="false" class="field-input" />
                                         </div>
                                     </div>
 
@@ -116,9 +120,9 @@
                                             data-t="password">Password</label>
                                         <div class="glass-field border-glow">
                                             <span class="material-symbols-outlined ml-4 opacity-40">lock</span>
-                                            <input id="account-password" name="account_password" type="password"
-                                                class="field-input base-shield"
-                                                data-t-placeholder="password_placeholder" autocomplete="new-password" />
+                                            <input id="account-password" type="password" class="field-input base-shield"
+                                                data-t-placeholder="password_placeholder" autocomplete="new-password"
+                                                spellcheck="false" />
                                             <button id="btn-toggle-password-edit" type="button"
                                                 class="btn-field-toggle">
                                                 <span class="material-symbols-outlined">visibility</span>

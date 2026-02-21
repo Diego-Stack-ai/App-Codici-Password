@@ -102,6 +102,17 @@
     overflow-y: auto;
 }
 
+/* --- ANTI-AUTOFILL UTILITY (V5.9.2) --- */
+.anti-autofill-trap {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    left: -9999px;
+}
+
 .custom-select-menu.show {
     opacity: 1;
     visibility: visible;
