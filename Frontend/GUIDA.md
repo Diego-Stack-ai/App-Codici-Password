@@ -572,6 +572,23 @@ Come stabilito dal Protocollo UX, le scadenze non usano bottoni invasivi:
 > 3. Nelle query Firebase verifica sempre di estrapolare `.orderBy('dataScadenza', 'asc')` in modo che le più urgenti appaiano sempre e matematicamente in cima alla lista frontend.
 > \`\`\`
 
+### 18.4 Il Motore di Sintassi e Notifiche Email (Triple DB Mode)
+Il sistema scadenze abbandona il monolite per operare su tre configurazioni atomiche separate e personalizzabili, per fornire opzioni granulari ed intelligenza ai placeholder:
+- **Automezzi** (`deadlineConfig`): per gestire Modelli, Targhe e Assicurazioni.
+- **Documenti** (`deadlineConfigDocuments`): per gestire Intestatari e Patenti/ID.
+- **Generali** (`generalConfig`): per gestire oggetti liberi come Corsi o Affitti.
+
+**Il Parsing Automatico dell'Oggetto (Syntax Builder)**:
+Tramite la funzione `buildEmailSubject(objectName, detail)` in `scadenza_templates.js`, il front-end genera a tempo di record l'oggetto email. Se l'utente unisce la tipologia "L'Assicurazione" e la targa "AB123CD", l'app pre-assemblerà matematicamente la stringa:
+> *"L'Assicurazione dell'auto targata AB123CD e in scadenza con data DD/MM/YYYY"*
+Questa logica riduce l'errore umano ed è pronta per essere pescata dai demoni di background per l'invio delle comunicazioni primarie (`email1`) e secondarie (`email2`).
+
+### 18.5 Algoritmo di Calcolo "Urgenze e Avvisi in Home"
+Le allerte per le scadenze non sono hardcoded, ma variano per ciascun record in base alla direttiva `notificationDaysBefore` (i "Giorni di preavviso" salvati).
+Nel file `scadenze.js` la funzione globale `loadUrgentDeadlinesCount()` esegue un calcolo assoluto rispetto al giorno odierno privo di orario (`today.setHours(0, 0, 0, 0)`):
+- Identifica la variabile temporale: `Inizio_Allarme = dataScadenza - notificationDaysBefore`
+- Se la data odierna entra in questa "finestra", scatta la sirena (`urgente = true`) e l'Home Page espone la **Badge Rossa** animata col count cumulativo senza interrogare di nuovo la base dati primaria, risparmiando letture asincrone esose e costose.
+
 ---
 
 ✅ **PROTOCOLLO V5.1 MASTER — DOCUMENTAZIONE COMPLETA.**
