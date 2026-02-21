@@ -409,9 +409,9 @@ h3.settings-desc {
 
 /* --- 9. DROPDOWNS & MODALS --- */
 .settings-dropdown-panel {
-    background: rgba(30, 41, 59, 0.7);
-    /* Vetro slate blu coordinato con moduli.css */
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    /* Vetro chiaro in Light Mode (tema default) */
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 20px;
     padding: 0.4rem;
     margin: 0.25rem 0.25rem 0.75rem;
@@ -420,11 +420,16 @@ h3.settings-desc {
     gap: 2px;
     animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(15px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    /* Leggera ombra per contrasto sul bg chiaro */
 }
 
 .dark .settings-dropdown-panel {
     background: rgba(15, 23, 42, 0.6);
-    /* Più scuro in dark mode per contrasto */
+    /* Sfondo scuro in dark mode per contrasto */
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+    /* In dark mode usiamo il border o le ombre scure standard */
 }
 
 .settings-dropdown-btn {
