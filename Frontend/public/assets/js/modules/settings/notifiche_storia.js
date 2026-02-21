@@ -164,7 +164,7 @@ function renderNotifications(data, list, empty) {
             // 3. Data Wrapper
             createElement('div', { className: 'notification-data-wrapper' }, [
                 createElement('div', { className: 'notification-header' }, [
-                    createElement('span', { className: 'notification-title', textContent: config.label }),
+                    createElement('span', { className: 'notification-title', textContent: notif.title || config.label }),
                     createElement('span', { className: 'notification-time', textContent: `${dateStr} • ${timeStr}` })
                 ]),
                 createElement('div', {
