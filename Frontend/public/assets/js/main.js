@@ -430,10 +430,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
                 const newVisibility = hasActive ? "shared" : "private";
 
+                // V5.2 AUTO-HEALING: Se torna privato e non era un Memo esplicito, torna ad essere Account
+                let newType = data.type;
+                if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
+                    console.log("[V3.1-DEBUG] Auto-Healing: Reverting shared-memo to account type.");
+                    newType = 'account';
+                }
+
                 const updatePayload = {
                     sharedWith: sharedWith,
                     acceptedCount: newCount,
                     visibility: newVisibility,
+                    type: newType,
                     updatedAt: new Date().toISOString()
                 };
 

@@ -181,10 +181,17 @@ async function respondToInvitation(inviteId, accept, guestUid, guestEmail) {
             const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
             const newVisibility = hasActive ? "shared" : "private";
 
+            // V5.2 AUTO-HEALING: Se torna privato e non era un Memo esplicito, torna ad essere Account
+            let newType = accData.type;
+            if (newVisibility === 'private' && accData.type === 'memo' && accData.isExplicitMemo !== true) {
+                newType = 'account';
+            }
+
             transaction.update(accountRef, {
                 sharedWith: sharedWith,
                 acceptedCount: newCount,
                 visibility: newVisibility,
+                type: newType,
                 updatedAt: new Date().toISOString()
             });
         }

@@ -18,6 +18,7 @@ let currentDocId = null;
 let isEditing = false;
 let bankAccounts = []; // Inizialmente vuoto per nuovi account
 let myContacts = [];
+let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
 
 // Utility per recupero rapido valori (evita ReferenceError)
@@ -142,6 +143,8 @@ async function loadData() {
             bankAccounts = [];
         }
 
+        isExplicitMemo = data.isExplicitMemo || false;
+
         // Flags & Sharing UI (V5.1 Master - Strict Mode)
         const isMemo = (data.type === 'memo' || data.type === 'memorandum');
         const isShared = (data.visibility === 'shared') || data._isGuest;
@@ -212,6 +215,10 @@ function setupUI() {
                     showToast(msg, "warning");
                     return;
                 }
+
+                if (f.id === 'flag-memo') isExplicitMemo = true;
+                if (f.id === 'flag-shared') isExplicitMemo = false;
+                // Se è flag-memo-shared (Verde), NON tocchiamo isExplicitMemo per preservare la natura originale
 
                 flags.forEach(other => { if (other !== f) other.checked = false; });
             }
@@ -588,6 +595,7 @@ window.saveAccount = async () => {
 
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
         banking: bankAccounts || [],
+        isExplicitMemo: isExplicitMemo,
         updatedAt: new Date().toISOString()
     };
 

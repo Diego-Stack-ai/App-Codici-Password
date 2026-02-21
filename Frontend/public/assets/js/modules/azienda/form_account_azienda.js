@@ -22,6 +22,7 @@ let currentAziendaId = null;
 let isEditing = false;
 let bankAccounts = [];
 let myContacts = [];
+let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
 
 // Utility per recupero rapido valori
@@ -144,6 +145,8 @@ async function loadData() {
             renderBankAccounts();
         }
 
+        isExplicitMemo = data.isExplicitMemo || false;
+
         // Flags & Sharing UI (V5.1 Master - Strict Mode)
         const isMemo = (data.type === 'memo' || data.type === 'memorandum');
         const isShared = (data.visibility === 'shared');
@@ -208,6 +211,10 @@ function setupUI() {
                     showToast(msg, "warning");
                     return;
                 }
+                if (f.id === 'flag-memo') isExplicitMemo = true;
+                if (f.id === 'flag-shared') isExplicitMemo = false;
+                // Se è flag-memo-shared (Verde), NON tocchiamo isExplicitMemo per preservare la natura originale
+
                 flags.forEach(other => { if (other !== f) other.checked = false; });
             }
             const mgmt = document.getElementById('shared-management');
@@ -578,6 +585,7 @@ window.saveAccount = async () => {
             referenteCellulare: (b.referenteCellulare || '').trim(),
             cards: b.cards || []
         })),
+        isExplicitMemo: isExplicitMemo,
         updatedAt: new Date().toISOString()
     };
 

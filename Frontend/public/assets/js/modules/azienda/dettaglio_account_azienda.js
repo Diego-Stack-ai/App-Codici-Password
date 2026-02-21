@@ -756,10 +756,17 @@ async function revokeRecipientV3(email) {
             let hasActiveGests = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
             let newVisibility = hasActiveGests ? "shared" : "private";
 
+            // V5.2 AUTO-HEALING: Se torna privato e non era un Memo esplicito, torna ad essere Account
+            let newType = data.type;
+            if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
+                newType = 'account';
+            }
+
             transaction.update(accRef, {
                 sharedWith: sharedWith,
                 acceptedCount: newCount,
                 visibility: newVisibility,
+                type: newType,
                 updatedAt: new Date().toISOString()
             });
 
