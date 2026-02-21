@@ -341,11 +341,11 @@ window.renderGuestsList = function () {
 
     invitedEmails.forEach((email, idx) => {
         const item = createElement('div', { className: 'guest-item flex justify-between items-center py-2 px-1 border-b border-white/5 last:border-0' }, [
-            createElement('span', { className: 'text-[11px] text-white/50 font-medium', textContent: email }),
+            createElement('span', { className: 'text-[9px] text-white/40 font-medium tracking-wider', textContent: email }),
             createElement('button', {
                 type: 'button',
-                className: 'material-symbols-outlined text-red-500 hover:text-red-400 bg-transparent border-none p-1 cursor-pointer hover:scale-110 transition-all',
-                style: 'font-size: 16px; outline: none; -webkit-appearance: none; background: transparent;',
+                className: 'material-symbols-outlined text-red-600 hover:text-red-500 bg-transparent border-none p-1 cursor-pointer hover:scale-110 transition-all',
+                style: 'font-size: 16px; outline: none; -webkit-appearance: none; background: transparent; border: none !important; box-shadow: none !important;',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);
@@ -377,13 +377,13 @@ function renderSuggestions(list) {
             }
         }, [
             createElement('p', {
-                className: 'font-bold text-primary m-0',
-                style: 'font-size: 11px; line-height: 1.2;',
+                className: 'font-black text-primary m-0',
+                style: 'font-size: 13px; line-height: 1.2;',
                 textContent: c.nome || c.email.split('@')[0]
             }),
             createElement('p', {
                 className: 'text-secondary m-0',
-                style: 'font-size: 9px; opacity: 0.7;',
+                style: 'font-size: 10px; opacity: 0.8; font-weight: 600;',
                 textContent: c.email
             })
         ]);
