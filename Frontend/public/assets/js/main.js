@@ -261,11 +261,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 createElement('div', { className: 'flex justify-center mb-4' }, [
                     createElement('span', { className: 'material-symbols-outlined text-4xl text-purple-400', textContent: 'mail' })
                 ]),
-                createElement('h3', { className: 'modal-title text-center', textContent: t('invite_received_title') || 'Nuovo Invito' }),
-                createElement('p', { className: 'modal-text text-center text-white/60 mb-1', textContent: `${data.senderEmail} ${t('invite_received_msg') || 'ha condiviso un account con te:'}` }),
-                createElement('div', { className: 'p-4 bg-white/5 border border-white/10 rounded-2xl mb-6' }, [
-                    createElement('p', { className: 'text-center font-black text-white text-lg', textContent: data.accountName }),
+                createElement('h3', { className: 'modal-title text-center mb-1', textContent: t('invite_received_title') || 'Nuovo Invito' }),
+                createElement('div', { className: 'flex justify-center mb-4' }, [
+                    createElement('div', { className: 'px-4 py-1 rounded-full bg-white/5 border border-white/10' }, [
+                        createElement('span', { className: 'text-[11px] font-black text-white/50 uppercase tracking-widest', textContent: data.accountName })
+                    ])
                 ]),
+                createElement('p', { className: 'modal-text text-center text-white/60 mb-8 px-4', textContent: `${data.senderEmail} ${t('invite_received_msg') || 'ha condiviso un account con te'}` }),
                 createElement('div', { className: 'modal-actions grid grid-cols-2 gap-4 mt-2' }, [
                     createElement('button', {
                         id: 'btn-invite-reject',
@@ -300,14 +302,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 createElement('div', { className: 'flex justify-center mb-4' }, [
                     createElement('span', { className: `material-symbols-outlined text-4xl ${accentClass}`, textContent: icon })
                 ]),
-                createElement('h3', { className: 'modal-title text-center', textContent: data.title }),
-                createElement('div', { className: 'p-4 bg-white/5 border border-white/10 rounded-2xl mb-4' }, [
-                    createElement('p', { className: 'text-center font-black text-white text-lg', textContent: data.accountName || 'Account' }),
+                createElement('h3', { className: 'modal-title text-center mb-1', textContent: data.title }),
+                createElement('div', { className: 'flex justify-center mb-6' }, [
+                    createElement('div', { className: 'px-4 py-1 rounded-full bg-white/5 border border-white/10' }, [
+                        createElement('span', { className: 'text-[11px] font-black text-white/50 uppercase tracking-widest', textContent: data.accountName || 'Account' })
+                    ])
                 ]),
-                createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: data.message }),
+                createElement('p', { className: 'modal-text text-center text-white/70 mb-8 px-4 leading-relaxed', textContent: data.message }),
                 createElement('div', { className: 'modal-actions' }, [
                     createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-white/10 border border-white/10 text-white font-black uppercase text-[10px] tracking-widest hover:bg-white/20 hover:border-white/20 transition-all active:scale-95 shadow-lg',
+                        className: 'w-full p-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-purple-500/25 hover:scale-[1.02] transition-all active:scale-95',
                         textContent: 'HO CAPITO (OK)',
                         onclick: async () => {
                             // Al click su OK, eseguiamo la bonifica e chiudiamo
