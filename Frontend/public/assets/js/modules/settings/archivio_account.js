@@ -7,7 +7,7 @@
 import { auth, db } from '../../firebase-config.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDocs, collection, query, where, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast, showInputModal } from '../../ui-core.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
 import { t } from '../../translations.js';
@@ -141,28 +141,72 @@ async function loadArchived() {
 
     try {
         let results = [];
-        // Privato
+        console.log(`[ARCHIVIO] Loading context: ${currentContext}`);
+
+        // 1. PRIVATO
         if (currentContext === 'all' || currentContext === 'privato') {
-            const snap = await getDocs(query(collection(db, "users", currentUser.uid, "accounts"), where("isArchived", "==", true)));
-            snap.forEach(d => results.push({ ...d.data(), id: d.id, context: 'privato' }));
+            try {
+                const snap = await getDocs(query(collection(db, "users", currentUser.uid, "accounts"), where("isArchived", "==", true)));
+                snap.forEach(d => results.push({ ...d.data(), id: d.id, context: 'privato' }));
+                console.log(`[ARCHIVIO] Found ${snap.size} private archived items`);
+            } catch (err) {
+                console.error("[ARCHIVIO] Private query error:", err);
+                if (currentContext === 'privato') throw err; // Re-throw if it's the only one
+            }
         }
-        // Aziende
+
+        // 2. AZIENDE
         if (currentContext === 'all') {
-            const bizSnap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
-            for (const b of bizSnap.docs) {
-                const snap = await getDocs(query(collection(db, "users", currentUser.uid, "aziende", b.id, "accounts"), where("isArchived", "==", true)));
-                snap.forEach(d => results.push({ ...d.data(), id: d.id, context: b.id, businessName: b.data().ragioneSociale }));
+            try {
+                const bizSnap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
+                console.log(`[ARCHIVIO] Searching archived items in ${bizSnap.size} companies...`);
+
+                for (const b of bizSnap.docs) {
+                    try {
+                        const bData = b.data();
+                        // Strategy V3.1: Fetch all and filter in-memory to avoid elusive index requirement on nested subcollections
+                        const snap = await getDocs(collection(db, "users", currentUser.uid, "aziende", b.id, "accounts"));
+                        const archived = snap.docs
+                            .map(d => ({ ...d.data(), id: d.id }))
+                            .filter(acc => acc.isArchived === true);
+
+                        archived.forEach(acc => {
+                            results.push({ ...acc, context: b.id, businessName: bData.ragioneSociale });
+                        });
+                    } catch (err) {
+                        console.warn(`[ARCHIVIO] Accesso limitato agli account dell'azienda ${b.id}.`, err.message);
+                    }
+                }
+            } catch (err) {
+                console.error("[ARCHIVIO] Error listing companies:", err);
             }
         } else if (currentContext !== 'privato') {
-            const snap = await getDocs(query(collection(db, "users", currentUser.uid, "aziende", currentContext, "accounts"), where("isArchived", "==", true)));
-            snap.forEach(d => results.push({ ...d.data(), id: d.id, context: currentContext }));
+            // Specific Company Context
+            try {
+                // Fetch company data first to get the name
+                const bizDoc = await getDoc(doc(db, "users", currentUser.uid, "aziende", currentContext));
+                const bData = bizDoc.exists() ? bizDoc.data() : { ragioneSociale: currentContext };
+
+                const snap = await getDocs(collection(db, "users", currentUser.uid, "aziende", currentContext, "accounts"));
+                const archived = snap.docs
+                    .map(d => ({ ...d.data(), id: d.id }))
+                    .filter(acc => acc.isArchived === true);
+
+                archived.forEach(acc => {
+                    results.push({ ...acc, context: currentContext, businessName: bData.ragioneSociale });
+                });
+                console.log(`[ARCHIVIO] Found ${archived.length} archived items for biz ${currentContext}`);
+            } catch (err) {
+                console.error(`[ARCHIVIO] Error querying accounts for biz ${currentContext}:`, err);
+                throw err;
+            }
         }
 
         allArchived = results;
         filterAndRender();
     } catch (e) {
-        console.error(e);
-        showToast(t('error_generic') || "Errore caricamento", "error");
+        console.error("[ARCHIVIO-EXCEPTION] Full details:", e);
+        showToast(t('error_generic') || "Errore durante il caricamento dell'archivio", "error");
     }
 }
 

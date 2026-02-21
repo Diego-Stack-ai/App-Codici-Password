@@ -51,6 +51,16 @@ export function formatDateToIT(dateString) {
   return dateString;
 }
 
+/**
+ * Sanitizes an email to be used as a Firestore Map Key.
+ */
+export function sanitizeEmail(email) {
+  if (!email) return 'unknown_guest';
+  const clean = email.toLowerCase().replace(/[^a-zA-Z0-9]/g, '_');
+  return clean || 'unknown_guest';
+}
+
 // Global exposure for non-module scripts
 window.makeCall = makeCall;
 window.formatDateToIT = formatDateToIT;
+window.sanitizeEmail = sanitizeEmail;

@@ -62,14 +62,16 @@ export async function initAreaPrivata(user) {
  */
 async function loadCounters(uid, email) {
     try {
+        console.log(`[Counters] Fetching own accounts for UID: ${uid}`);
         const allSnap = await getDocs(collection(db, "users", uid, "accounts"));
+        console.log(`[Counters] Own accounts fetched: ${allSnap.size}`);
         let counts = { standard: 0, memo: 0, shared: 0, sharedMemo: 0 };
 
         allSnap.forEach(doc => {
             const d = doc.data();
             if (d.isArchived) return;
-            const isShared = !!d.shared || !!d.isMemoShared;
-            const isMemo = !!d.isMemo || d.type === 'memorandum' || !!d.hasMemo;
+            const isShared = d.visibility === 'shared' || !!d.shared || !!d.isMemoShared;
+            const isMemo = (d.type === 'memo' || d.type === 'memorandum') || !!d.isMemo || !!d.hasMemo;
 
             if (isShared) {
                 if (isMemo) counts.sharedMemo++;
@@ -81,15 +83,25 @@ async function loadCounters(uid, email) {
             }
         });
 
-        // Controlla inviti accettati (per conteggio condivisi)
+        // Controlla inviti accettati (per conteggio condivisi) - Normalizzazione V5.0
+        const rawEmail = email || "";
+        const lowerEmail = rawEmail.toLowerCase().trim();
+        const emailsToSearch = [...new Set([rawEmail.trim(), lowerEmail])].filter(Boolean);
+
+        console.log(`[Counters] Fetching invites for:`, emailsToSearch);
         const invitesQ = query(collection(db, "invites"),
-            where("recipientEmail", "==", email),
+            where("recipientEmail", "in", emailsToSearch),
             where("status", "==", "accepted")
         );
         const invitesSnap = await getDocs(invitesQ);
+        console.log(`[Counters] Invites fetched: ${invitesSnap.size}`);
         invitesSnap.forEach(invDoc => {
             const inv = invDoc.data();
-            if (inv.type === 'privato') counts.shared++;
+            const invType = inv.type || 'privato';
+            const isMemoInv = (invType === 'memo' || invType === 'memorandum');
+
+            if (isMemoInv) counts.sharedMemo++;
+            else counts.shared++;
         });
 
         const setVal = (id, val) => {
@@ -139,8 +151,8 @@ async function loadTopAccounts(uid) {
 
 function createMicroAccountCard(id, data) {
     const avatar = data.logo || data.avatar || 'assets/images/google-avatar.png';
-    const isMemo = !!data.hasMemo || data.type === 'memorandum';
-    const isShared = !!data.shared || !!data.isMemoShared;
+    const isMemo = (data.type === 'memo' || data.type === 'memorandum') || !!data.isMemo || !!data.hasMemo;
+    const isShared = data.visibility === 'shared' || !!data.shared || !!data.isMemoShared;
 
     let badgeClass = 'bg-blue-500';
     if (isShared && isMemo) badgeClass = 'bg-emerald-500';

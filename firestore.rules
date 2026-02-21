@@ -3,67 +3,46 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // --- UTENTI (Profilo e Sottocollezioni) ---
-    // 1. Permesso sul documento utente stesso
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
+    function isAuth() { return request.auth != null; }
 
-    // 2. Permesso su TUTTE le sottocollezioni dell'utente (aziende, accounts, contacts, etc.)
+    // --- 1. UTENTI & PROPRIETARIO (ACCESSO TOTALE) ---
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isAuth() && request.auth.uid == userId;
     }
 
-    // 3. Regola speciale per la CONDIVISIONE di ACCOUNT (HARDENING V2)
+    // --- 2. ACCESSO OSPITI (SHARED DATA) ---
+    // Regole ultra-permissive per quando un account è segnato come condiviso.
+    // Supportiamo sia il nuovo flag 'visibility: shared' che il vecchio 'shared: true' o 'isMemoShared: true'.
     match /users/{userId}/accounts/{accountId} {
-      allow read: if request.auth != null && (
-        request.auth.uid == userId || (
-          resource.data.sharedWithEmails is list && 
-          request.auth.token.email in resource.data.sharedWithEmails &&
-          exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))) &&
-          get(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))).data.status == "accepted"
-        )
-      );
-      // Permetti al destinatario di aggiornare SOLO l'array sharedWithEmails (per accettazione/rifiuto atomico)
-      allow update: if request.auth != null && (
-        request.auth.uid == userId || (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedWithEmails']) &&
-          exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_")))
-        )
+      allow read, update: if isAuth() && (
+        resource.data.get('visibility', 'private') == 'shared' || 
+        resource.data.get('shared', false) == true ||
+        resource.data.get('isMemoShared', false) == true
       );
     }
-
-    // 4. Regola speciale per la CONDIVISIONE di ACCOUNT AZIENDALI (HARDENING V2)
     match /users/{userId}/aziende/{aziendaId}/accounts/{accountId} {
-      allow read: if request.auth != null && (
-        request.auth.uid == userId || (
-          resource.data.sharedWithEmails is list && 
-          request.auth.token.email in resource.data.sharedWithEmails &&
-          exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))) &&
-          get(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_"))).data.status == "accepted"
-        )
-      );
-      allow update: if request.auth != null && (
-        request.auth.uid == userId || (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedWithEmails']) &&
-          exists(/databases/$(database)/documents/invites/$(accountId + "_" + request.auth.token.email.replace("[^a-zA-Z0-9]", "_")))
-        )
+      allow read, update: if isAuth() && (
+        resource.data.get('visibility', 'private') == 'shared' || 
+        resource.data.get('shared', false) == true ||
+        resource.data.get('isMemoShared', false) == true
       );
     }
 
-    // --- INVITI (HARDENING V2) ---
+    // Notifiche (Permetti invio da terzi per risposte condivisione)
+    match /users/{userId}/notifications/{notifId} {
+      allow create: if isAuth(); 
+    }
+
+    // --- 3. INVITI (INVITES) ---
     match /invites/{inviteId} {
-      allow get: if request.auth != null;
-      allow list: if request.auth != null && (
-        resource.data.senderId == request.auth.uid || 
-        resource.data.recipientEmail == request.auth.token.email
+      allow list, create: if isAuth(); 
+      allow read, update, delete: if isAuth() && (
+        resource == null ||
+        resource.data.get('ownerId', '') == request.auth.uid || 
+        resource.data.get('senderId', '') == request.auth.uid ||
+        resource.data.get('recipientEmail', '').lower() == (request.auth.token.email || "").lower() ||
+        resource.data.get('recipientEmail', '') == request.auth.token.email
       );
-      allow create: if request.auth != null && request.resource.data.senderId == request.auth.uid;
-      allow update: if request.auth != null && (
-        resource.data.senderId == request.auth.uid || 
-        resource.data.recipientEmail == request.auth.token.email
-      );
-      allow delete: if request.auth != null && resource.data.senderId == request.auth.uid;
     }
   }
 }

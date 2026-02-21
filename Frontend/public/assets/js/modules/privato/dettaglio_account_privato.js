@@ -15,7 +15,7 @@ import {
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
-import { logError, formatDateToIT } from '../../utils.js';
+import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
 import { initComponents } from '../../components.js';
 
 // --- STATE ---
@@ -191,11 +191,13 @@ function renderAccount(acc) {
         }
     }
 
-    if (acc.shared || acc.isMemoShared) {
+    if (acc.visibility === 'shared') {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
-        if (!isReadOnly) initSharingMonitor(acc);
-        else renderGuests(acc.sharedWithEmails || []);
+        renderSharingMap(acc);
+    } else {
+        const mgmt = document.getElementById('shared-management-section');
+        if (mgmt) mgmt.classList.add('hidden');
     }
 
     // --- ALLEGATI: Aggancio Listener ---
@@ -337,115 +339,66 @@ function createCallBtn(icon, num) {
 /**
  * SHARING MONITOR & CONSISTENCY (HARDENING V2)
  */
-let sharingUnsubscribe = null;
+let sharingUnsubscribe = null; // Removed inside loading logic later, left for safety
 
-function initSharingMonitor(account) {
-    if (sharingUnsubscribe) sharingUnsubscribe();
+function renderSharingMap(account) {
+    const listContainer = document.getElementById('guests-list');
+    const mgmtSection = document.getElementById('shared-management-section');
 
-    console.log("[SharingMonitor] Initializing Realtime Check...");
-    const q = query(collection(db, "invites"), where("accountId", "==", currentId), where("senderId", "==", currentUid));
+    if (!listContainer) return;
 
-    sharingUnsubscribe = onSnapshot(q, async (snap) => {
-        const invites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const listContainer = document.getElementById('guests-list');
-        if (!listContainer) return;
+    clearElement(listContainer);
 
-        clearElement(listContainer);
+    if (account.visibility !== 'shared' || !account.sharedWith || Object.keys(account.sharedWith).length === 0) {
+        if (mgmtSection) mgmtSection.classList.add('hidden');
+        listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessuna condivisione attiva' }));
+        return;
+    }
 
-        const currentEmails = account.sharedWithEmails || [];
-        const isSharingFlagActive = account.shared || account.isMemoShared;
+    if (mgmtSection) mgmtSection.classList.remove('hidden');
 
-        let needsHealing = false;
+    const guests = Object.values(account.sharedWith);
 
-        for (const inv of invites) {
-            // REGOLA C: Pending ed account non condiviso -> Delete
-            if (inv.status === 'pending' && !isSharingFlagActive) {
-                console.warn("[AutoHealing] Rule C: Deleting orphan pending invite.");
-                await deleteDoc(doc(db, "invites", inv.id));
-                continue;
-            }
+    for (const inv of guests) {
+        if (inv.status === 'rejected') continue; // Should be handled/removed cleanly by backend, but safe fallback
 
-            // UI Render (Solo pending ed accepted)
-            if (inv.status === 'rejected') continue;
+        const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
+        const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
 
-            const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
-            const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
+        const items = [
+            createElement('span', {
+                className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                textContent: displayStatus
+            })
+        ];
 
-            const revokeBtn = createElement('button', {
+        if (!isReadOnly) {
+            items.push(createElement('button', {
                 className: 'btn-icon-header ml-2 hover:text-red-400 transition-colors',
-                onclick: () => revokeRecipient(inv.recipientEmail)
+                onclick: () => revokeRecipientV3(inv.email)
             }, [
                 createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-            ]);
+            ]));
+        }
 
-            const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
-                createElement('div', { className: 'rubrica-item-info-row' }, [
-                    createElement('div', { className: 'rubrica-item-avatar', textContent: inv.recipientEmail.charAt(0).toUpperCase() }),
-                    createElement('div', { className: 'rubrica-item-info' }, [
-                        createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.recipientEmail.split('@')[0] }),
-                        createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.recipientEmail })
-                    ])
-                ]),
-                createElement('div', { className: 'flex items-center gap-2' }, [
-                    createElement('span', {
-                        className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-                        textContent: displayStatus
-                    }),
-                    revokeBtn
+        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
+            createElement('div', { className: 'rubrica-item-info-row' }, [
+                createElement('div', { className: 'rubrica-item-avatar', textContent: inv.email.charAt(0).toUpperCase() }),
+                createElement('div', { className: 'rubrica-item-info' }, [
+                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.email.split('@')[0] }),
+                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.email })
                 ])
-            ]);
-            listContainer.appendChild(div);
-        }
-
-        // AutoHealing (Single Pass) - Synchronize valid emails array
-        const validEmails = invites.filter(i => i.status === 'pending' || i.status === 'accepted').map(i => i.recipientEmail);
-        const arraysMatch = currentEmails.length === validEmails.length && validEmails.every(e => currentEmails.includes(e));
-
-        // Costruiamo un payload unico se ci sono cambiamenti
-        let needsUpdate = false;
-        let updatePayload = {};
-
-        if (!arraysMatch) {
-            console.warn("[AutoHealing] Syncing local sharedWithEmails array to match Firebase invites.");
-            updatePayload.sharedWithEmails = validEmails;
-            account.sharedWithEmails = validEmails; // UPDATE LOCAL CACHE
-            needsUpdate = true;
-        }
-
-        // REGOLA E: Se array vuoto ma flag condivisione attivi -> Reset (Auto-Off)
-        if (validEmails.length === 0 && isSharingFlagActive) {
-            console.warn("[AutoHealing] Rule E: Resetting sharing flags (no active recipients).");
-            updatePayload.shared = false;
-            updatePayload.isMemoShared = false;
-            account.shared = false; // UPDATE LOCAL CACHE
-            account.isMemoShared = false;
-
-            const mgmt = document.getElementById('shared-management-section');
-            if (mgmt) mgmt.classList.add('hidden');
-
-            needsUpdate = true;
-        }
-
-        // Esegui UN SOLO updateDoc se ci sono cambiamenti, evitando scritture multiple e concorrenti
-        if (needsUpdate) {
-            try {
-                await updateDoc(doc(db, "users", currentUid, "accounts", currentId), updatePayload);
-                console.log("[AutoHealing] Consistency repair complete.");
-            } catch (e) {
-                console.error("[AutoHealing] Failed to execute updateDoc", e);
-            }
-        }
-
-        if (invites.length === 0) {
-            listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessuna condivisione attiva' }));
-        }
-    });
+            ]),
+            createElement('div', { className: 'flex items-center gap-2' }, items)
+        ]);
+        listContainer.appendChild(div);
+    }
 }
 
 /**
- * REVOKE SINGLE RECIPIENT (HARDENING V2 - MULTI)
+ * REVOKE SINGLE RECIPIENT V3.1 (Atomic Transaction over Map)
  */
-async function revokeRecipient(email) {
+async function revokeRecipientV3(email) {
     if (!email) return;
     const ok = await showConfirmModal(t('confirm_revoke_title') || "REVOCA ACCESSO", `${t('confirm_revoke_msg') || 'Vuoi rimuovere l\'accesso per'} ${email}?`, t('revoke') || "Revoca");
     if (!ok) return;
@@ -453,19 +406,52 @@ async function revokeRecipient(email) {
     try {
         await runTransaction(db, async (transaction) => {
             const accRef = doc(db, "users", currentUid, "accounts", currentId);
-            const inviteId = `${currentId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            const inviteRef = doc(db, "invites", inviteId);
+            const targetSanitized = sanitizeEmail(email);
+            const inviteId = `${currentId}_${targetSanitized}`;
+            const invRef = doc(db, "invites", inviteId);
 
-            // 1. Remove from array
+            const accSnap = await transaction.get(accRef);
+            if (!accSnap.exists()) return;
+
+            let data = accSnap.data();
+            let sharedWith = data.sharedWith || {};
+            let wasAccepted = sharedWith[targetSanitized]?.status === 'accepted';
+
+            // 1. Array Remove
+            delete sharedWith[targetSanitized];
+
+            let newCount = data.acceptedCount || 0;
+            if (wasAccepted) newCount = Math.max(0, newCount - 1);
+
+            let hasActiveGests = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
+            let newVisibility = hasActiveGests ? "shared" : "private";
+
             transaction.update(accRef, {
-                sharedWithEmails: arrayRemove(email)
+                sharedWith: sharedWith,
+                acceptedCount: newCount,
+                visibility: newVisibility,
+                updatedAt: new Date().toISOString()
             });
 
-            // 2. Delete/Revoke invite
-            transaction.delete(inviteRef);
+            // 2. Clear technical invite (silent fail if not found natively in V3)
+            transaction.delete(invRef);
+
+            // 3. V3 Notification to Owner
+            const notifRef = doc(collection(db, "users", currentUid, "notifications"));
+            transaction.set(notifRef, {
+                title: "Accesso Revocato",
+                message: `Hai revocato l'accesso a ${email} per l'account ${data.nomeAccount || 'selezionato'}.`,
+                type: "share_revoked",
+                accountId: currentId,
+                guestEmail: email,
+                timestamp: new Date().toISOString(),
+                read: false
+            });
         });
 
         showToast("Accesso revocato con successo");
+        // Reload account internally or via UI bounce since we killed the listener
+        await loadAccount();
     } catch (e) {
         console.error("RevokeRecipient failed", e);
         showToast(t('error_generic'), 'error');

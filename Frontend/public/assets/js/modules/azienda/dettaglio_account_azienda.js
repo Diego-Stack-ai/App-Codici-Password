@@ -16,7 +16,7 @@ import {
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
-import { logError } from '../../utils.js';
+import { logError, sanitizeEmail } from '../../utils.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -24,6 +24,7 @@ let currentId = null;
 let currentAziendaId = null;
 let originalData = null;
 let isReadOnly = false;
+let ownerId = null;
 
 // --- INITIALIZATION ---
 export async function initDettaglioAccountAzienda(user) {
@@ -34,6 +35,7 @@ export async function initDettaglioAccountAzienda(user) {
     const urlParams = new URLSearchParams(window.location.search);
     currentId = urlParams.get('id');
     currentAziendaId = urlParams.get('aziendaId');
+    ownerId = urlParams.get('ownerId') || user.uid; // V3 Add owner parameter
 
     if (!currentId || !currentAziendaId) {
         showToast("Parametri mancanti", "error");
@@ -41,6 +43,7 @@ export async function initDettaglioAccountAzienda(user) {
         return;
     }
 
+    isReadOnly = (ownerId !== currentUid);
 
     initProtocolUI(); // Sync UI setup
     setupActions();
@@ -72,7 +75,7 @@ function initBaseUI() {
 
 async function loadAccount() {
     try {
-        const docRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId);
+        const docRef = doc(db, "users", ownerId, "aziende", currentAziendaId, "accounts", currentId);
         const docSnap = await getDoc(docRef);
 
         if (!docSnap.exists()) {
@@ -82,7 +85,6 @@ async function loadAccount() {
         }
 
         originalData = { id: docSnap.id, ...docSnap.data() };
-        isReadOnly = (originalData.sharedWithEmails || []).includes(auth.currentUser?.email) && originalData.ownerId !== auth.currentUser?.uid;
 
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
@@ -164,12 +166,14 @@ function render(acc) {
     setF('ref-phone', refPhone);
     setF('ref-mobile', refMobile);
 
-    // Shared Management (HARDENING V2)
-    if (acc.shared || acc.isMemoShared) {
+    // Shared Management V3
+    if (acc.visibility === 'shared') {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
-        if (!isReadOnly) initSharingMonitor(acc);
-        else renderGuests(acc.sharedWithEmails || []);
+        renderSharingMap(acc);
+    } else {
+        const mgmt = document.getElementById('shared-management-section');
+        if (mgmt) mgmt.classList.add('hidden');
     }
 
     // --- ALLEGATI: Aggancio Listener ---
@@ -188,7 +192,7 @@ function renderBanking(acc) {
     const hasRealBanking = checkRealBankingData(acc);
     const bankingPrompt = document.getElementById('add-banking-prompt');
     if (bankingPrompt) {
-        if (!hasRealBanking) {
+        if (!hasRealBanking && !isReadOnly) {
             bankingPrompt.classList.remove('hidden');
             const btnBankingInfo = document.getElementById('btn-banking-info');
             if (btnBankingInfo) {
@@ -578,7 +582,7 @@ async function renderGuests(guests) {
 
         if (isPending) {
             try {
-                const inviteId = `${currentId}_${displayEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const inviteId = `${currentId}_${sanitizeEmail(displayEmail)}`;
                 const invSnap = await getDoc(doc(db, "invites", inviteId));
 
                 if (invSnap.exists()) {
@@ -665,113 +669,66 @@ function checkRealBankingData(acc) {
 /**
  * SHARING MONITOR & CONSISTENCY (HARDENING V2)
  */
-let sharingUnsubscribe = null;
+let sharingUnsubscribe = null; // Removed inside loading logic later, left for safety
 
-function initSharingMonitor(account) {
-    if (sharingUnsubscribe) sharingUnsubscribe();
+function renderSharingMap(account) {
+    const listContainer = document.getElementById('guests-list');
+    const mgmtSection = document.getElementById('shared-management-section');
 
-    console.log("[SharingMonitor-Azienda] Initializing Realtime Check...");
-    const q = query(collection(db, "invites"), where("accountId", "==", currentId), where("senderId", "==", currentUid));
+    if (!listContainer) return;
 
-    sharingUnsubscribe = onSnapshot(q, async (snap) => {
-        const invites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const listContainer = document.getElementById('guests-list');
-        if (!listContainer) return;
+    clearElement(listContainer);
 
-        clearElement(listContainer);
+    if (account.visibility !== 'shared' || !account.sharedWith || Object.keys(account.sharedWith).length === 0) {
+        if (mgmtSection) mgmtSection.classList.add('hidden');
+        listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessuna condivisione attiva' }));
+        return;
+    }
 
-        const currentEmails = account.sharedWithEmails || [];
-        const isSharingFlagActive = account.shared || account.isMemoShared;
+    if (mgmtSection) mgmtSection.classList.remove('hidden');
 
-        let needsHealing = false;
+    const guests = Object.values(account.sharedWith);
 
-        const colPath = `users/${currentUid}/aziende/${currentAziendaId}/accounts/${currentId}`;
+    for (const inv of guests) {
+        if (inv.status === 'rejected') continue;
 
-        for (const inv of invites) {
-            // REGOLA C: Pending ed account non condiviso -> Delete
-            if (inv.status === 'pending' && !isSharingFlagActive) {
-                console.warn("[AutoHealing] Rule C (Azienda): Deleting orphan invite.");
-                await deleteDoc(doc(db, "invites", inv.id));
-                continue;
-            }
+        const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
+        const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
 
-            // UI Render (Solo pending ed accepted)
-            if (inv.status === 'rejected') continue;
+        const items = [
+            createElement('span', {
+                className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                textContent: displayStatus
+            })
+        ];
 
-            const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
-            const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-
-            const revokeBtn = createElement('button', {
+        if (!isReadOnly) {
+            items.push(createElement('button', {
                 className: 'btn-icon-header ml-2 hover:text-red-400 transition-colors',
-                onclick: () => revokeRecipient(inv.recipientEmail)
+                onclick: () => revokeRecipientV3(inv.email)
             }, [
                 createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-            ]);
+            ]));
+        }
 
-            const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
-                createElement('div', { className: 'rubrica-item-info-row' }, [
-                    createElement('div', { className: 'rubrica-item-avatar', textContent: inv.recipientEmail.charAt(0).toUpperCase() }),
-                    createElement('div', { className: 'rubrica-item-info' }, [
-                        createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.recipientEmail.split('@')[0] }),
-                        createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.recipientEmail })
-                    ])
-                ]),
-                createElement('div', { className: 'flex items-center gap-2' }, [
-                    createElement('span', {
-                        className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-                        textContent: displayStatus
-                    }),
-                    revokeBtn
+        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
+            createElement('div', { className: 'rubrica-item-info-row' }, [
+                createElement('div', { className: 'rubrica-item-avatar', textContent: inv.email.charAt(0).toUpperCase() }),
+                createElement('div', { className: 'rubrica-item-info' }, [
+                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.email.split('@')[0] }),
+                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.email })
                 ])
-            ]);
-            listContainer.appendChild(div);
-        }
-
-        // AutoHealing (Single Pass) - Synchronize valid emails array
-        const validEmails = invites.filter(i => i.status === 'pending' || i.status === 'accepted').map(i => i.recipientEmail);
-        const arraysMatch = currentEmails.length === validEmails.length && validEmails.every(e => currentEmails.includes(e));
-
-        let needsUpdate = false;
-        let updatePayload = {};
-
-        if (!arraysMatch) {
-            console.warn("[AutoHealing] Syncing local sharedWithEmails array to match Firebase invites.");
-            updatePayload.sharedWithEmails = validEmails;
-            account.sharedWithEmails = validEmails; // UPDATE LOCAL CACHE
-            needsUpdate = true;
-        }
-
-        // REGOLA E: Se array vuoto ma flag condivisione attivi -> Reset (Auto-Off)
-        if (validEmails.length === 0 && isSharingFlagActive) {
-            console.warn("[AutoHealing] Rule E (Azienda): Resetting sharing flags.");
-            updatePayload.shared = false;
-            updatePayload.isMemoShared = false;
-            account.shared = false; // UPDATE LOCAL CACHE
-            account.isMemoShared = false;
-
-            const mgmt = document.getElementById('shared-management-section');
-            if (mgmt) mgmt.classList.add('hidden');
-
-            needsUpdate = true;
-        }
-
-        // Esegui UN SOLO updateDoc se ci sono cambiamenti
-        if (needsUpdate) {
-            try {
-                await updateDoc(doc(db, colPath), updatePayload);
-                console.log("[AutoHealing] Consistency repair complete (Azienda).");
-            } catch (e) {
-                console.error("[AutoHealing] Failed to execute updateDoc", e);
-            }
-        }
-        if (invites.length === 0) listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessun accesso attivo' }));
-    });
+            ]),
+            createElement('div', { className: 'flex items-center gap-2' }, items)
+        ]);
+        listContainer.appendChild(div);
+    }
 }
 
 /**
- * REVOKE SINGLE RECIPIENT (HARDENING V2 - MULTI)
+ * REVOKE SINGLE RECIPIENT V3.1 (Atomic Transaction over Map)
  */
-async function revokeRecipient(email) {
+async function revokeRecipientV3(email) {
     if (!email) return;
     const ok = await showConfirmModal(t('confirm_revoke_title') || "REVOCA ACCESSO", `${t('confirm_revoke_msg') || 'Vuoi rimuovere l\'accesso per'} ${email}?`, t('revoke') || "Revoca");
     if (!ok) return;
@@ -779,52 +736,55 @@ async function revokeRecipient(email) {
     try {
         await runTransaction(db, async (transaction) => {
             const accRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId);
-            const inviteId = `${currentId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-            const inviteRef = doc(db, "invites", inviteId);
+            const targetSanitized = sanitizeEmail(email);
+            const inviteId = `${currentId}_${targetSanitized}`;
+            const invRef = doc(db, "invites", inviteId);
 
-            // 1. Remove from array
+            const accSnap = await transaction.get(accRef);
+            if (!accSnap.exists()) return;
+
+            let data = accSnap.data();
+            let sharedWith = data.sharedWith || {};
+            let wasAccepted = sharedWith[targetSanitized]?.status === 'accepted';
+
+            // 1. Array Remove
+            delete sharedWith[targetSanitized];
+
+            let newCount = data.acceptedCount || 0;
+            if (wasAccepted) newCount = Math.max(0, newCount - 1);
+
+            let hasActiveGests = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
+            let newVisibility = hasActiveGests ? "shared" : "private";
+
             transaction.update(accRef, {
-                sharedWithEmails: arrayRemove(email)
+                sharedWith: sharedWith,
+                acceptedCount: newCount,
+                visibility: newVisibility,
+                updatedAt: new Date().toISOString()
             });
 
-            // 2. Delete/Revoke invite
-            transaction.delete(inviteRef);
+            // 2. Clear technical invite
+            transaction.delete(invRef);
+
+            // 3. V3 Notification to Owner
+            const notifRef = doc(collection(db, "users", currentUid, "notifications"));
+            transaction.set(notifRef, {
+                title: "Accesso Revocato",
+                message: `Hai revocato l'accesso a ${email} per l'account ${data.nomeAccount || 'selezionato'}.`,
+                type: "share_revoked",
+                accountId: currentId,
+                guestEmail: email,
+                timestamp: new Date().toISOString(),
+                read: false
+            });
         });
 
         showToast("Accesso revocato con successo");
+        await loadAccount();
     } catch (e) {
         console.error("RevokeRecipient failed", e);
         showToast(t('error_generic'), 'error');
     }
-}
-
-function renderGuests(emails) {
-    const list = document.getElementById('guests-list');
-    if (!list) return;
-    clearElement(list);
-
-    if (!emails || emails.length === 0) {
-        list.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Sola lettura' }));
-        return;
-    }
-
-    emails.forEach(email => {
-        const displayEmail = typeof email === 'string' ? email : email.email;
-        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
-            createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-avatar', textContent: displayEmail.charAt(0).toUpperCase() }),
-                createElement('div', { className: 'rubrica-item-info' }, [
-                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: displayEmail.split('@')[0] }),
-                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: displayEmail })
-                ])
-            ]),
-            createElement('span', {
-                className: `ml-auto text-[8px] font-black uppercase px-2 py-1 rounded border bg-emerald-500/20 text-emerald-400 border-emerald-500/20`,
-                textContent: t('status_accepted') || 'Accettato'
-            })
-        ]);
-        list.appendChild(div);
-    });
 }
 
 function setupReadOnlyUI() {

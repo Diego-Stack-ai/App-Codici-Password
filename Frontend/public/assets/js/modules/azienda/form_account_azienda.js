@@ -8,12 +8,12 @@ import { auth, db } from '../../firebase-config.js';
 import {
     doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection,
     addDoc, getDocs, setDoc, query, where, runTransaction,
-    arrayUnion, arrayRemove
+    arrayUnion, arrayRemove, deleteField
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
-import { logError } from '../../utils.js';
+import { logError, sanitizeEmail } from '../../utils.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -144,15 +144,23 @@ async function loadData() {
             renderBankAccounts();
         }
 
-        // Flags & Sharing
-        if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = !!data.shared;
-        if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = !!data.hasMemo;
-        if (document.getElementById('flag-memo-shared')) document.getElementById('flag-memo-shared').checked = !!data.isMemoShared;
+        // Flags & Sharing (V3.1 Alignment)
+        const isMemo = (data.type === 'memo' || data.type === 'memorandum') || !!data.hasMemo;
+        const isShared = data.visibility === 'shared' || !!data.shared || !!data.isMemoShared;
+        const isMemoShared = isShared && isMemo;
 
-        if (data.shared || data.isMemoShared) {
+        if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared && !isMemo;
+        if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = isMemo && !isShared;
+        if (document.getElementById('flag-memo-shared')) document.getElementById('flag-memo-shared').checked = isMemoShared;
+
+        if (isShared) {
             document.getElementById('shared-management')?.classList.remove('hidden');
-            const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
-            invitedEmails = [...emails];
+            if (data.sharedWith) {
+                invitedEmails = Object.values(data.sharedWith).map(g => g.email);
+            } else {
+                const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
+                invitedEmails = [...emails];
+            }
             renderGuestsList();
         }
 
@@ -551,29 +559,26 @@ window.saveAccount = async () => {
     const inviteEmail = get('invite-email');
 
     const data = {
-        nomeAccount: get('account-name'),
-        username: get('account-username'),
-        account: get('account-code'),
-        password: get('account-password'),
-        url: get('account-url'),
-        note: get('account-note'),
-        referenteNome: get('ref-name'),
-        referenteTelefono: get('ref-phone'),
-        referenteCellulare: get('ref-mobile'),
-        shared: document.getElementById('flag-shared')?.checked || false,
-        hasMemo: document.getElementById('flag-memo')?.checked || false,
-        isMemoShared: document.getElementById('flag-memo-shared')?.checked || false,
+        nomeAccount: (get('account-name') || '').trim(),
+        username: (get('account-username') || '').trim(),
+        account: (get('account-code') || '').trim(),
+        password: (get('account-password') || '').trim(),
+        url: (get('account-url') || '').trim(),
+        note: (get('account-note') || '').trim(),
+        referenteNome: (get('ref-name') || '').trim(),
+        referenteTelefono: (get('ref-phone') || '').trim(),
+        referenteCellulare: (get('ref-mobile') || '').trim(),
+
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
         banking: bankAccounts.map(b => ({
-            iban: b.iban || '',
-            passwordDispositiva: b.passwordDispositiva || '',
-            referenteNome: b.referenteNome || '',
-            referenteTelefono: b.referenteTelefono || '',
-            referenteCellulare: b.referenteCellulare || '',
+            iban: (b.iban || '').trim(),
+            passwordDispositiva: (b.passwordDispositiva || '').trim(),
+            referenteNome: (b.referenteNome || '').trim(),
+            referenteTelefono: (b.referenteTelefono || '').trim(),
+            referenteCellulare: (b.referenteCellulare || '').trim(),
             cards: b.cards || []
         })),
-        updatedAt: new Date().toISOString(),
-        type: 'azienda'
+        updatedAt: new Date().toISOString()
     };
 
     const logoPreview = document.getElementById('account-logo-preview');
@@ -583,38 +588,43 @@ window.saveAccount = async () => {
 
     if (!data.nomeAccount) {
         showToast("Inserisci un nome account", "error");
-        if (btn) btn.disabled = false;
+        if (btnSave) btnSave.disabled = false;
         return;
     }
 
-    const isSharingActive = (data.shared || data.isMemoShared);
-    // RULE 4: Validation for Sharing
-    let inviteEmails = [];
-    if (data.shared || data.isMemoShared) {
-        inviteEmails = [...invitedEmails];
+    const isSharedUI = document.getElementById('flag-shared')?.checked || false;
+    const isMemoUI = document.getElementById('flag-memo')?.checked || false;
+    const isMemoSharedUI = document.getElementById('flag-memo-shared')?.checked || false;
+
+    data.type = (isMemoUI || isMemoSharedUI) ? "memo" : "account";
+    data.visibility = (isSharedUI || isMemoSharedUI) ? "shared" : "private";
+
+    const isSharingActive = data.visibility === 'shared';
+
+    let emailsToInvite = [];
+    if (isSharingActive) {
+        emailsToInvite = [...invitedEmails];
         const raw = get('invite-email');
         if (raw) {
             const extraEmails = raw.split(/[,; ]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes('@'));
             extraEmails.forEach(e => {
-                if (!inviteEmails.includes(e)) inviteEmails.push(e);
+                if (!emailsToInvite.includes(e)) emailsToInvite.push(e);
             });
         }
-        if (inviteEmails.length === 0) {
+        if (emailsToInvite.length === 0) {
             showToast("Scegli o aggiungi almeno un contatto per condividere.", "warning");
             if (btnSave) btnSave.disabled = false;
             return;
         }
-        data.recipientEmail = inviteEmails[0];
-        data.sharedWithEmails = inviteEmails;
     } else {
-        data.sharedWithEmails = [];
-        data.recipientEmail = "";
+        data.sharedWith = {};
+        data.acceptedCount = 0;
     }
 
     try {
         const colPath = `users/${currentUid}/aziende/${currentAziendaId}/accounts`;
 
-        // --- ATOMIC TRANSACTION (HARDENING V2) ---
+        // --- ATOMIC TRANSACTION V3.1 ---
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, colPath, currentDocId) : doc(collection(db, colPath));
             const targetId = accRef.id;
@@ -622,78 +632,108 @@ window.saveAccount = async () => {
             // 1. ALL READS FIRST
             const accountSnap = isEditing ? await transaction.get(accRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
-            const oldEmails = oldData?.sharedWithEmails || (oldData?.recipientEmail ? [oldData.recipientEmail] : []);
-
-            const inviteSnaps = {};
-            if (isSharingActive) {
-                for (const email of inviteEmails) {
-                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    inviteSnaps[email] = await transaction.get(doc(db, "invites", invId));
-                }
-            }
+            let currentSharedWith = oldData?.sharedWith || {};
 
             // 2. NOW EXECUTE ALL WRITES
             const finalData = { ...data };
             if (!isEditing) finalData.createdAt = new Date().toISOString();
+            finalData.type = (data.type === 'memo') ? 'memo' : 'account'; // Force correct type V3.1
 
-            // Handle Revocation Logic
-            if (!isSharingActive && oldEmails.length > 0) {
-                oldEmails.forEach(email => {
-                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    transaction.delete(doc(db, "invites", invId));
-                });
-                finalData.sharedWithEmails = [];
-                finalData.recipientEmail = "";
-            } else if (isSharingActive) {
-                const toRemove = oldEmails.filter(e => !inviteEmails.includes(e));
-                toRemove.forEach(email => {
-                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    transaction.delete(doc(db, "invites", invId));
-                });
-            }
+            // Handle Revocation Logic o Switch to Private
+            if (!isSharingActive) {
+                // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
+                for (const sKey of Object.keys(currentSharedWith)) {
+                    transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
+                }
+                finalData.sharedWith = {};
+                finalData.acceptedCount = 0;
+            } else {
+                // E' SHARED. Merge new invites into the sharedWith Map
+                finalData.sharedWith = { ...currentSharedWith };
 
-            // Update/Create Account
-            if (isEditing) transaction.update(accRef, finalData);
-            else transaction.set(accRef, finalData);
+                // Track which emails are requested in UI to find removed ones
+                const requestedSanitizedKeys = emailsToInvite.map(e => sanitizeEmail(e));
 
-            // Create/Update Invites
-            if (isSharingActive) {
-                for (const email of inviteEmails) {
-                    const inviteId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    const inviteRef = doc(db, "invites", inviteId);
-                    const snap = inviteSnaps[email];
-
-                    let shouldSet = true;
-                    if (snap && snap.exists()) {
-                        const status = snap.data().status;
-                        if (status === 'accepted' || status === 'pending') {
-                            shouldSet = false; // Preserva esistente
-                        }
+                // Rimuovi quelli sbiancati dalla UI
+                for (const oldKey of Object.keys(currentSharedWith)) {
+                    if (!requestedSanitizedKeys.includes(oldKey)) {
+                        delete finalData.sharedWith[oldKey];
+                        transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
                     }
+                }
 
-                    if (shouldSet) {
-                        transaction.set(inviteRef, {
-                            senderId: currentUid,
-                            senderEmail: auth.currentUser?.email || 'unknown',
-                            recipientEmail: email,
+                // Aggiungi Nuovi
+                for (const email of emailsToInvite) {
+                    const sKey = sanitizeEmail(email);
+
+                    if (!finalData.sharedWith[sKey]) {
+                        // Nuovo Guest
+                        finalData.sharedWith[sKey] = {
+                            email: email,
+                            status: 'pending',
+                            uid: null
+                        };
+
+                        // Crea Invito
+                        transaction.set(doc(db, "invites", `${targetId}_${sKey}`), {
+                            inviteId: `${targetId}_${sKey}`,
                             accountId: targetId,
                             aziendaId: currentAziendaId,
+                            ownerId: currentUid,
+                            senderId: currentUid,
+                            senderEmail: auth.currentUser?.email || '',
+                            recipientEmail: email.toLowerCase().trim(),
                             accountName: data.nomeAccount,
-                            type: 'azienda',
+                            type: finalData.type,
                             status: 'pending',
                             createdAt: new Date().toISOString()
                         });
+
+                        // V3 Notifica Owner (pending)
+                        const notifRef = doc(collection(db, "users", currentUid, "notifications"));
+                        transaction.set(notifRef, {
+                            title: "Invito Inviato",
+                            message: `Hai invitato ${email} ad accedere a ${data.nomeAccount}. In attesa di risposta.`,
+                            type: "share_sent",
+                            accountId: targetId,
+                            guestEmail: email,
+                            timestamp: new Date().toISOString(),
+                            read: false
+                        });
                     }
                 }
+
+                // Calcola Accepted Count V3.1
+                finalData.acceptedCount = Object.values(finalData.sharedWith).filter(g => g.status === 'accepted').length;
+
+                // Rule E Fallback Naturale V3.1: se tutto pending è stato rimosso o nessuno esiste 
+                if (Object.keys(finalData.sharedWith).length === 0) {
+                    finalData.visibility = "private";
+                }
             }
+
+            // Elimina vecchi flag se esistenti in OldData (pulizia volante)
+            if (isEditing) {
+                finalData.shared = deleteField();
+                finalData.isMemoShared = deleteField();
+                finalData.hasMemo = deleteField();
+                finalData.sharedWithEmails = deleteField();
+                finalData.recipientEmail = deleteField();
+            }
+
+            console.log("[V3.1-DEBUG] Final Transaction Payload Azienda:", finalData);
+            // Update/Create Account V3.1
+            if (isEditing) transaction.update(accRef, finalData);
+            else transaction.set(accRef, finalData);
         });
 
         showToast(t('success_save'), "success");
-        setTimeout(() => window.location.href = `account_azienda.html?aziendaId=${currentAziendaId}`, 1000);
+        setTimeout(() => window.location.href = 'dettaglio_azienda.html?id=' + currentAziendaId, 1000);
 
     } catch (e) {
-        console.error("SaveAccountTransaction Azienda", e);
-        showToast(t('error_generic'), 'error');
+        console.error("[V3.1-ERROR] SaveAccount Azienda Failed:", e);
+        if (e.code === 'permission-denied') showToast("Accesso negato. Controlla i permessi Firestore.", "error");
+        else showToast(t('error_generic') || "Errore durante il salvataggio", "error");
         if (btnSave) btnSave.disabled = false;
     }
 };

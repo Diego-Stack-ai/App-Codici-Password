@@ -50,6 +50,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations } from './translations.js';
 import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
+import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js';
 
 // Inizializza il controllo inattività globalmente (SOSPESO TEMPORANEAMENTE PER SVILUPPO)
@@ -141,16 +142,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            console.log(`[AUTH-DEBUG] User logged in: ${user.email} (UID: ${user.uid})`);
             try {
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    if (!userData?.security_setup_done) {
-                        // showSecuritySetupModal(user, userData);
-                    }
+                    console.log("[AUTH-DEBUG] User document found.");
+                } else {
+                    console.warn("[AUTH-DEBUG] User document NOT found in Firestore.");
                 }
+            } catch (err) {
+                console.error("[AUTH-DEBUG] Permission record check failed:", err.message);
+            }
 
+            try {
                 // ROUTER - Step 2: Inizializza Pagina Privata
                 switch (currentPage) {
                     case 'home': await Pages.initHomePage(user); break;
@@ -192,13 +198,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (inviteUnsubscribe) inviteUnsubscribe();
                 const q = query(
                     collection(db, "invites"),
-                    where("recipientEmail", "==", user.email),
+                    where("recipientEmail", "==", user.email.toLowerCase().trim()),
                     where("status", "==", "pending")
                 );
                 inviteUnsubscribe = onSnapshot(q, (snap) => {
                     if (!snap.empty) {
                         const inviteDoc = snap.docs[0];
                         showInviteModal(inviteDoc.id, inviteDoc.data());
+                    }
+                }, (err) => {
+                    console.error("[V3.1-DEBUG] Error in Incoming Invite listener:", err.message, err.code);
+                    if (err.code === 'permission-denied') {
+                        console.warn("[V3.1-SECURITY] Check if your emails in Auth and Firestore match exactly (case-sensitive).");
                     }
                 });
 
@@ -219,6 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             await autoHealAccountFlags(invData);
                         }
                     });
+                }, (err) => {
+                    console.error("[V3.1-DEBUG] Error in Sent Invite Rejection listener:", err.message, err.code);
                 });
 
             } catch (error) {
@@ -305,53 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(modal);
     }
 
-    /**
-     * GLOBAL AUTO-HEALING (Real-time Reset)
-     */
     async function autoHealAccountFlags(invData) {
-        try {
-            const ownerId = invData.senderId;
-            const accId = invData.accountId;
-
-            let accountPath = `users/${ownerId}/accounts/${accId}`;
-            if (invData.type === 'azienda' && invData.aziendaId) {
-                accountPath = `users/${ownerId}/aziende/${invData.aziendaId}/accounts/${accId}`;
-            }
-
-            const accRef = doc(db, accountPath);
-            const accSnap = await getDoc(accRef);
-
-            if (!accSnap.exists()) return;
-            const accData = accSnap.data();
-            const isSharingActive = accData.shared || accData.isMemoShared;
-
-            if (!isSharingActive) return;
-
-            // Explicitly query all invites to make absolutely sure there are no other pending/accepted users
-            const q = query(collection(db, "invites"), where("accountId", "==", accId), where("senderId", "==", ownerId));
-            const invitesSnap = await getDocs(q);
-
-            let activeCount = 0;
-            invitesSnap.forEach(docSnap => {
-                const inv = docSnap.data();
-                if (inv.status === 'pending' || inv.status === 'accepted') {
-                    activeCount++;
-                }
-            });
-
-            // If there are no active (pending or accepted) invites left, we turn off sharing globally
-            if (activeCount === 0) {
-                console.log("[GlobalAutoHealing] No active invites remaining -> Resetting account flags");
-                await updateDoc(accRef, {
-                    shared: false,
-                    isMemoShared: false,
-                    sharedWithEmails: []
-                });
-                showToast(`Condivisione terminata per ${accData.nomeAccount}`, 'info');
-            }
-        } catch (e) {
-            console.error("[GlobalAutoHealing] Error:", e);
-        }
+        // [V3.1] Deprecated globally. Auto-healing is inherently handled by atomic transactions in handleInviteResponse.
     }
 
     async function handleInviteResponse(inviteId, inviteData, status) {
@@ -362,34 +330,63 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnReject) { btnReject.disabled = true; btnReject.style.opacity = "0.5"; }
 
         try {
+            const currentUid = auth.currentUser?.uid;
             const currentUserEmail = auth.currentUser?.email;
-            if (!currentUserEmail) throw "User not authenticated";
+            const sKey = sanitizeEmail(currentUserEmail);
 
-            // --- ATOMIC TRANSACTION (HARDENING V2) ---
+            if (!currentUserEmail) throw new Error("Utente non autenticato.");
+
+            console.log(`[V3.1-DEBUG] --- handleInviteResponse ---`);
+            console.log(`[V3.1-DEBUG] User: ${currentUserEmail} (UID: ${currentUid}), Action: ${status}`);
+
+            // --- RETRY LOGIC (Harden V3.1) ---
+            let invSnap = null;
+            let inviteRef = doc(db, "invites", inviteId);
+
+            console.log(`[V3.1-DEBUG] Fetching Invite Doc: ${inviteId}`);
+            for (let i = 0; i < 5; i++) {
+                invSnap = await getDoc(inviteRef);
+                if (invSnap.exists()) {
+                    console.log(`[V3.1-DEBUG] Invite found on attempt ${i + 1}/5`);
+                    break;
+                }
+                const delay = 800 * (i + 1);
+                console.warn(`[V3.1-DEBUG] [RETRY] Attempt ${i + 1}/5 fail. Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+
+            if (!invSnap || !invSnap.exists()) {
+                throw new Error("L'invito non è ancora visibile sui server. Per favore attendi qualche secondo e riprova.");
+            }
+
+            const preflightData = invSnap.data();
+            if (preflightData.status !== 'pending') throw new Error("Questo invito è già stato elaborato o revocato.");
+
+            // Normalize for comparison
+            if (preflightData.recipientEmail.toLowerCase().trim() !== currentUserEmail.toLowerCase().trim()) {
+                throw new Error("Non sei autorizzato a rispondere a questo invito.");
+            }
+
+            // --- ATOMIC TRANSACTION V3.1 ---
+            console.log("[V3.1-DEBUG] Executing runTransaction...");
             await runTransaction(db, async (transaction) => {
-                const inviteRef = doc(db, "invites", inviteId);
-                const invSnap = await transaction.get(inviteRef);
+                console.log(`[V3.1-DEBUG] Transaction started for invite: ${inviteId}`);
 
-                // a) Leggi invite e verifica esistenza
-                if (!invSnap.exists()) throw "ERR_NOT_FOUND: Invito non trovato.";
-                const storedInvite = invSnap.data();
-
-                // b) Controllo status === pending
-                if (storedInvite.status !== 'pending') throw "ERR_PROCESSED: Questo invito è già stato elaborato.";
-
-                // c) Verifica corrispondenza utente (Security Guard)
-                if (storedInvite.recipientEmail !== currentUserEmail) {
-                    throw "ERR_IDENTITY: Non sei autorizzato ad accettare questo invito.";
+                // 1. Get Inverse
+                let storedInviteSnap;
+                try {
+                    storedInviteSnap = await transaction.get(inviteRef);
+                    if (!storedInviteSnap.exists()) throw new Error("Invito non trovato nel database.");
+                    console.log("[V3.1-DEBUG] Invite fetched successfully.");
+                } catch (e) {
+                    console.error("[V3.1-DEBUG] Invite GET failed:", e.message);
+                    throw e;
                 }
 
-                // d) Aggiorna invite status -> accepted/rejected
-                transaction.update(inviteRef, {
-                    status: status,
-                    respondedAt: new Date().toISOString()
-                });
+                const storedInvite = storedInviteSnap.data();
+                if (storedInvite.status !== 'pending') throw "L'invito è stato aggiornato da un'altra sessione.";
 
-                // e) Sincronizza account (sharedWithEmails) - HARDENING V2
-                const ownerId = storedInvite.senderId;
+                const ownerId = storedInvite.ownerId || storedInvite.senderId;
                 const accId = storedInvite.accountId;
 
                 let accountPath = `users/${ownerId}/accounts/${accId}`;
@@ -397,20 +394,69 @@ document.addEventListener('DOMContentLoaded', () => {
                     accountPath = `users/${ownerId}/aziende/${storedInvite.aziendaId}/accounts/${accId}`;
                 }
 
+                console.log(`[V3.1-DEBUG] Syncing account at path: ${accountPath}`);
                 const accountRef = doc(db, accountPath);
 
-                if (status === 'accepted') {
-                    // Se accettato, aggiungi all'array (se non già presente)
-                    transaction.update(accountRef, {
-                        sharedWithEmails: arrayUnion(currentUserEmail)
-                    });
-                } else if (status === 'rejected') {
-                    // Se rifiutato, rimuovi dall'array se presente (cleanup orfani proprietario)
-                    transaction.update(accountRef, {
-                        sharedWithEmails: arrayRemove(currentUserEmail)
-                    });
+                let accSnap;
+                try {
+                    accSnap = await transaction.get(accountRef);
+                    if (!accSnap.exists()) throw new Error("Account non trovato o accesso negato.");
+                    console.log("[V3.1-DEBUG] Account fetched successfully.");
+                } catch (e) {
+                    console.error("[V3.1-DEBUG] Account GET failed:", e.message);
+                    throw e;
                 }
+
+                let data = accSnap.data();
+                let sharedWith = data.sharedWith || {};
+                console.log(`[V3.1-DEBUG] Current sharedWith State:`, sharedWith);
+                console.log(`[V3.1-DEBUG] Processing Guest: ${sKey}, Status: ${status}`);
+
+                if (sharedWith[sKey]) {
+                    sharedWith[sKey].status = status;
+                    if (status === 'accepted') {
+                        sharedWith[sKey].uid = auth.currentUser.uid;
+                    }
+                } else {
+                    console.warn(`[V3.1-DEBUG] Missing key ${sKey} in sharedWith map. Possible sanitization mismatch.`);
+                }
+
+                const newCount = Object.values(sharedWith).filter(g => g.status === 'accepted').length;
+                const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
+                const newVisibility = hasActive ? "shared" : "private";
+
+                const updatePayload = {
+                    sharedWith: sharedWith,
+                    acceptedCount: newCount,
+                    visibility: newVisibility,
+                    updatedAt: new Date().toISOString()
+                };
+
+                console.log("[V3.1-DEBUG] Final Account Update Payload:", updatePayload);
+                console.log("[V3.1-DEBUG] Performing updates...");
+                transaction.update(accountRef, updatePayload);
+                transaction.update(inviteRef, {
+                    status: status,
+                    respondedAt: new Date().toISOString()
+                });
+
+                if (ownerId && ownerId !== auth.currentUser?.uid) {
+                    const notifRef = doc(collection(db, "users", ownerId, "notifications"));
+                    transaction.set(notifRef, {
+                        title: status === 'accepted' ? "Invito Accettato" : "Invito Rifiutato",
+                        message: `${currentUserEmail} ha ${status === 'accepted' ? 'accettato' : 'rifiutato'} l'invito.`,
+                        type: "share_response",
+                        accountId: accId,
+                        guestEmail: currentUserEmail,
+                        timestamp: new Date().toISOString(),
+                        read: false
+                    });
+                    console.log("[V3.1-DEBUG] Notification queued for owner.");
+                }
+                console.log("[V3.1-DEBUG] Updates queued in transaction.");
             });
+
+            console.log("[V3.1-DEBUG] Transaction committed successfully.");
 
             // Cleanup modal
             const modal = document.getElementById('invite-modal');
@@ -422,13 +468,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => window.location.reload(), 800);
             }
         } catch (e) {
-            console.error("[Hardening-V2] Response Transaction Failed:", e);
+            console.error("[V3.1-EXCEPTION] Detailed Error Log:");
+            console.error("-> Message:", e?.message || e);
+            console.error("-> Code:", e?.code || "N/A");
+            console.error("-> Full Stack:", e);
+
             let msg = t('error_generic') || "Errore durante l'elaborazione.";
 
             if (typeof e === 'string') msg = e;
-            else if (e.code === 'permission-denied') msg = "Accesso negato dal server (Permessi insufficienti).";
+            else if (e.code === 'permission-denied') msg = "Accesso negato. Errore permessi Firestore (Security Rules).";
+            else if (e.code === 'failed-precondition') msg = "Conflitto: l'indice o la transazione è fallita sul server.";
 
-            alert(msg); // Messaggio chiaro come richiesto
+            showToast(msg, 'error');
 
             const modal = document.getElementById('invite-modal');
             if (modal) modal.remove();

@@ -118,31 +118,58 @@ async function loadAccounts() {
         sharedAccountIds.clear();
 
         // 1. Invitations Accepted
+        const rawEmail = currentUser.email || "";
+        const lowerEmail = rawEmail.toLowerCase().trim();
+        const emailsToSearch = [...new Set([rawEmail.trim(), lowerEmail])].filter(Boolean);
+
+        console.log(`[ACCOUNTS] Searching invites for:`, emailsToSearch);
+
         const invitesQ = query(collection(db, "invites"),
-            where("recipientEmail", "==", currentUser.email),
+            where("recipientEmail", "in", emailsToSearch),
             where("status", "==", "accepted")
         );
         const invitesSnap = await getDocs(invitesQ);
+        console.log(`[ACCOUNTS] Found ${invitesSnap.size} accepted invites.`);
+
         const invitePromises = invitesSnap.docs.map(async invDoc => {
             const inv = invDoc.data();
+            const inviteId = invDoc.id;
             try {
-                // FIXED: Use senderId (standard) or fallback to senderUid (legacy)
-                const senderId = inv.senderId || inv.senderUid;
-                if (!senderId) { console.error("Missing senderId in invite:", inv); return null; }
+                const senderId = inv.senderId || inv.senderUid || inv.ownerId;
+                if (!senderId) {
+                    console.error(`[ACCOUNTS] Invite ${inviteId} skipped: missing sender/owner ID`);
+                    return null;
+                }
 
-                const accSnap = await getDoc(doc(db, "users", senderId, "accounts", inv.accountId));
+                let accPath = `users/${senderId}/accounts/${inv.accountId}`;
+                // Consider empty string or null as no azienda
+                if (inv.aziendaId && inv.aziendaId.trim() !== "") {
+                    accPath = `users/${senderId}/aziende/${inv.aziendaId}/accounts/${inv.accountId}`;
+                }
+
+                console.log(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
+                const accSnap = await getDoc(doc(db, accPath));
+
                 if (accSnap.exists()) {
                     const d = accSnap.data();
                     sharedAccountIds.add(accSnap.id);
-                    return { ...d, id: accSnap.id, isOwner: false, ownerId: senderId, _isGuest: true };
+                    console.log(`[ACCOUNTS] SUCCESS: Loaded "${d.nomeAccount}" from ${senderId}`);
+                    return { ...d, id: accSnap.id, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
+                } else {
+                    console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
                 }
-            } catch (e) { logError("LoadShared", e); }
+            } catch (e) {
+                console.error(`[ACCOUNTS] ERROR loading ${inviteId}:`, e.message);
+            }
             return null;
         });
         sharedWithMe = (await Promise.all(invitePromises)).filter(Boolean);
+        console.log(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
 
         // 2. Own Accounts
+        console.log(`[ACCOUNTS] Loading own accounts for: ${currentUser.uid}`);
         const ownSnap = await getDocs(collection(db, "users", currentUser.uid, "accounts"));
+        console.log(`[ACCOUNTS] Found ${ownSnap.size} own accounts.`);
         const ownAccounts = ownSnap.docs.map(d => {
             const data = d.data();
             const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;
@@ -171,8 +198,8 @@ function filterAndRender() {
     const searchVal = document.getElementById('account-search')?.value.toLowerCase() || '';
 
     let filtered = allAccounts.filter(acc => {
-        const isMemo = !!acc.hasMemo || acc.type === 'memorandum';
-        const isShared = !!acc.shared || !!acc.isMemoShared || acc._isGuest;
+        const isMemo = (acc.type === 'memo' || acc.type === 'memorandum') || !!acc.hasMemo;
+        const isShared = acc.visibility === 'shared' || !!acc.shared || !!acc.isMemoShared || acc._isGuest;
 
         if (type === 'standard') return !isShared && !isMemo;
         if (type === 'shared') return isShared && !isMemo;
@@ -226,8 +253,8 @@ function renderList(list) {
 }
 
 function createAccountCard(acc) {
-    const isMemo = !!acc.hasMemo || acc.type === 'memorandum';
-    const isShared = !!acc.shared || !!acc.isMemoShared || acc._isGuest;
+    const isMemo = (acc.type === 'memo' || acc.type === 'memorandum') || !!acc.hasMemo;
+    const isShared = acc.visibility === 'shared' || !!acc.shared || !!acc.isMemoShared || acc._isGuest;
     const isPinned = !!acc.isPinned;
 
     let theme = THEMES.standard;
@@ -238,7 +265,13 @@ function createAccountCard(acc) {
     const card = createElement('div', {
         className: 'account-card swipe-row',
         dataset: { id: acc.id, owner: acc.isOwner, action: 'navigate' },
-        onclick: () => window.location.href = `dettaglio_account_privato.html?id=${acc.id}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}`
+        onclick: () => {
+            if (acc._aziendaId) {
+                window.location.href = `dettaglio_account_azienda.html?id=${acc.id}&aziendaId=${acc._aziendaId}&ownerId=${acc.ownerId}`;
+            } else {
+                window.location.href = `dettaglio_account_privato.html?id=${acc.id}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}`;
+            }
+        }
     }, [
         // Swipe Backgrounds
         // Swipe Backgrounds (Archive Left, Delete Right)

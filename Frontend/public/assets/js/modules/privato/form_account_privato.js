@@ -5,11 +5,11 @@
 
 import { auth, db } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
-import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where, runTransaction, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
-import { logError } from '../../utils.js';
+import { logError, sanitizeEmail } from '../../utils.js';
 import { initComponents } from '../../components.js';
 
 // --- STATE ---
@@ -142,19 +142,24 @@ async function loadData() {
             bankAccounts = [];
         }
 
-        // Flags & Sharing UI
-        const isShared = !!data.shared;
-        const isMemoShared = !!data.isMemoShared;
+        // Flags & Sharing UI (V3.1 Alignment)
+        const isMemo = (data.type === 'memo' || data.type === 'memorandum') || !!data.hasMemo;
+        const isShared = data.visibility === 'shared' || !!data.shared || !!data.isMemoShared;
+        const isMemoShared = isShared && isMemo;
 
-        if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared;
-        if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = !!data.hasMemo;
+        if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared && !isMemo;
+        if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = isMemo && !isShared;
         if (document.getElementById('flag-memo-shared')) document.getElementById('flag-memo-shared').checked = isMemoShared;
 
-        if (isShared || isMemoShared) {
+        if (isShared) {
             const mgmt = document.getElementById('shared-management');
             if (mgmt) mgmt.classList.remove('hidden');
-            const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
-            invitedEmails = [...emails];
+            if (data.sharedWith) {
+                invitedEmails = Object.values(data.sharedWith).map(g => g.email);
+            } else {
+                const emails = data.sharedWithEmails || (data.recipientEmail ? [data.recipientEmail] : []);
+                invitedEmails = [...emails];
+            }
             renderGuestsList();
         }
 
@@ -564,130 +569,163 @@ window.saveAccount = async () => {
     const logoPreview = document.getElementById('account-logo-preview');
     const logoSrc = (logoPreview && !logoPreview.classList.contains('hidden')) ? logoPreview.src : null;
 
+    const isSharedUI = document.getElementById('flag-shared')?.checked || false;
+    const isMemoUI = document.getElementById('flag-memo')?.checked || false;
+    const isMemoSharedUI = document.getElementById('flag-memo-shared')?.checked || false;
+
     const data = {
-        nomeAccount: get('account-name'),
-        username: get('account-username'),
-        account: get('account-code'),
-        password: get('account-password'),
-        url: get('account-url'),
-        note: get('account-note'),
-        logo: logoSrc, // Save the Base64 logo
-        shared: document.getElementById('flag-shared')?.checked || false,
-        hasMemo: document.getElementById('flag-memo')?.checked || false,
-        isMemoShared: document.getElementById('flag-memo-shared')?.checked || false,
+        nomeAccount: (get('account-name') || '').trim(),
+        username: (get('account-username') || '').trim(),
+        account: (get('account-code') || '').trim(),
+        password: (get('account-password') || '').trim(),
+        url: (get('account-url') || '').trim(),
+        note: (get('account-note') || '').trim(),
+        logo: logoSrc || null,
+
+        // V3.1: Deterministc Types
+        type: (isMemoUI || isMemoSharedUI) ? "memo" : "account",
+        visibility: (isSharedUI || isMemoSharedUI) ? "shared" : "private",
+
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
-        banking: bankAccounts,
+        banking: bankAccounts || [],
         updatedAt: new Date().toISOString()
     };
 
-    const isSharingActive = (data.shared || data.isMemoShared);
-    const inviteEmail = get('invite-email');
+    if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); if (btnSave) btnSave.disabled = false; return; }
 
-    if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); return; }
+    const isSharingActive = data.visibility === 'shared';
+    console.log(`[V3.1-DEBUG] saveAccount payload constructed. visibility=${data.visibility}, type=${data.type}`);
 
-    // RULE 4: Validation for Sharing
-    let inviteEmails = [];
-    if (data.shared || data.isMemoShared) {
-        inviteEmails = [...invitedEmails];
+    // Gestione Array UI / Contatti Selezionati
+    let emailsToInvite = [];
+    if (isSharingActive) {
+        emailsToInvite = [...invitedEmails];
         const raw = get('invite-email');
         if (raw) {
             const extraEmails = raw.split(/[,; ]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes('@'));
             extraEmails.forEach(e => {
-                if (!inviteEmails.includes(e)) inviteEmails.push(e);
+                if (!emailsToInvite.includes(e)) emailsToInvite.push(e);
             });
         }
-        if (inviteEmails.length === 0) {
+        if (emailsToInvite.length === 0) {
             showToast("Scegli o aggiungi almeno un contatto per condividere.", "warning");
             if (btnSave) btnSave.disabled = false;
             return;
         }
-        data.recipientEmail = inviteEmails[0];
-        data.sharedWithEmails = inviteEmails;
     } else {
-        data.sharedWithEmails = [];
-        data.recipientEmail = "";
+        data.sharedWith = {};
+        data.acceptedCount = 0;
     }
 
     try {
-        // --- ATOMIC TRANSACTION (HARDENING V2) ---
+        // --- ATOMIC TRANSACTION V3.1 ---
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, "users", currentUid, "accounts", currentDocId) : doc(collection(db, "users", currentUid, "accounts"));
             const targetId = accRef.id;
 
-            // 1. ALL READS FIRST (Firestore Constraint)
+            // 1. ALL READS FIRST
             const accountSnap = isEditing ? await transaction.get(accRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
-            const oldEmails = oldData?.sharedWithEmails || (oldData?.recipientEmail ? [oldData.recipientEmail] : []);
-
-            const inviteSnaps = {};
-            if (isSharingActive) {
-                for (const email of inviteEmails) {
-                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    inviteSnaps[email] = await transaction.get(doc(db, "invites", invId));
-                }
-            }
+            let currentSharedWith = oldData?.sharedWith || {};
 
             // 2. NOW EXECUTE ALL WRITES
-            const finalData = { ...data };
+            let finalData = { ...data };
             if (!isEditing) finalData.createdAt = new Date().toISOString();
 
-            // Handle Revocation Logic
-            if (!isSharingActive && oldEmails.length > 0) {
-                oldEmails.forEach(email => {
-                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    transaction.delete(doc(db, "invites", invId));
-                });
-                finalData.sharedWithEmails = [];
-                finalData.recipientEmail = "";
-            } else if (isSharingActive) {
-                const toRemove = oldEmails.filter(e => !inviteEmails.includes(e));
-                toRemove.forEach(email => {
-                    const invId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    transaction.delete(doc(db, "invites", invId));
-                });
-            }
+            // Handle Revocation Logic o Switch to Private
+            if (!isSharingActive) {
+                // Se diventa privato, distruggi tutti gli inviti pendenti pregressi (orfani)
+                for (const sKey of Object.keys(currentSharedWith)) {
+                    transaction.delete(doc(db, "invites", `${targetId}_${sKey}`));
+                }
+                finalData.sharedWith = {};
+                finalData.acceptedCount = 0;
+            } else {
+                // E' SHARED. Merge new invites into the sharedWith Map
+                finalData.sharedWith = { ...currentSharedWith };
 
-            // Update/Create Account
-            if (isEditing) transaction.update(accRef, finalData);
-            else transaction.set(accRef, finalData);
+                // Track which emails are requested in UI to find removed ones
+                const requestedSanitizedKeys = emailsToInvite.map(e => sanitizeEmail(e));
 
-            // Create/Update Invites
-            if (isSharingActive) {
-                for (const email of inviteEmails) {
-                    const inviteId = `${targetId}_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    const inviteRef = doc(db, "invites", inviteId);
-                    const snap = inviteSnaps[email];
-
-                    let shouldSet = true;
-                    if (snap && snap.exists()) {
-                        const status = snap.data().status;
-                        if (status === 'accepted' || status === 'pending') {
-                            shouldSet = false; // Preserva stato esistente
-                        }
+                // Rimuovi quelli sbiancati dalla UI
+                for (const oldKey of Object.keys(currentSharedWith)) {
+                    if (!requestedSanitizedKeys.includes(oldKey)) {
+                        delete finalData.sharedWith[oldKey];
+                        transaction.delete(doc(db, "invites", `${targetId}_${oldKey}`));
                     }
+                }
 
-                    if (shouldSet) {
-                        transaction.set(inviteRef, {
-                            senderId: currentUid,
-                            senderEmail: auth.currentUser?.email || 'unknown',
-                            recipientEmail: email,
+                // Aggiungi Nuovi
+                for (const email of emailsToInvite) {
+                    const sKey = sanitizeEmail(email);
+
+                    if (!finalData.sharedWith[sKey]) {
+                        // Nuovo Guest
+                        finalData.sharedWith[sKey] = {
+                            email: email,
+                            status: 'pending',
+                            uid: null
+                        };
+
+                        // Crea Invito
+                        transaction.set(doc(db, "invites", `${targetId}_${sKey}`), {
+                            inviteId: `${targetId}_${sKey}`,
                             accountId: targetId,
+                            ownerId: currentUid,
+                            senderId: currentUid,
+                            senderEmail: auth.currentUser?.email || '',
+                            recipientEmail: email.toLowerCase().trim(),
                             accountName: data.nomeAccount,
-                            type: data.isMemoShared ? 'memorandum' : 'privato',
+                            type: data.type,
                             status: 'pending',
                             createdAt: new Date().toISOString()
                         });
+
+                        // V3 Notifica Owner (pending)
+                        const notifRef = doc(collection(db, "users", currentUid, "notifications"));
+                        transaction.set(notifRef, {
+                            title: "Invito Inviato",
+                            message: `Hai invitato ${email} ad accedere a ${data.nomeAccount}. In attesa di risposta.`,
+                            type: "share_sent",
+                            accountId: targetId,
+                            guestEmail: email,
+                            timestamp: new Date().toISOString(),
+                            read: false
+                        });
                     }
                 }
+
+                // Calcola Accepted Count V3.1
+                finalData.acceptedCount = Object.values(finalData.sharedWith).filter(g => g.status === 'accepted').length;
+
+                // Rule E Fallback Naturale V3.1: se tutto pending è stato rimosso o nessuno esiste 
+                if (Object.keys(finalData.sharedWith).length === 0) {
+                    finalData.visibility = "private";
+                }
             }
+
+            // Elimina vecchi flag se esistenti in OldData (pulizia volante)
+            if (isEditing) {
+                finalData.shared = deleteField();
+                finalData.isMemoShared = deleteField();
+                finalData.hasMemo = deleteField();
+                finalData.sharedWithEmails = deleteField();
+                finalData.recipientEmail = deleteField();
+            }
+
+            console.log("[V3.1-DEBUG] Final Transaction Payload:", finalData);
+            // Update/Create Account V3.1
+            if (isEditing) transaction.update(accRef, finalData);
+            else transaction.set(accRef, finalData);
         });
 
         showToast(t('success_save'), "success");
         setTimeout(() => window.location.href = 'account_privati.html', 1000);
 
     } catch (e) {
-        console.error("SaveAccountTransaction", e);
-        showToast(t('error_generic'), 'error');
+        console.error("[V3.1-ERROR] SaveAccount Transaction Failed:", e);
+        if (e.code === 'permission-denied') showToast("Accesso negato. Controlla i permessi Firestore.", "error");
+        else showToast(t('error_generic') || "Errore durante il salvataggio", "error");
         if (btnSave) btnSave.disabled = false;
     }
 };
