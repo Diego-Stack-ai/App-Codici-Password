@@ -340,16 +340,19 @@ window.renderGuestsList = function () {
     clearElement(list);
 
     invitedEmails.forEach((email, idx) => {
-        const item = createElement('div', { className: 'guest-item flex justify-between items-center py-2 px-1 border-b border-white/5 last:border-0' }, [
+        const item = createElement('div', {
+            className: 'guest-item flex justify-between items-center py-2 px-1 border-b border-white/5 last:border-0',
+            style: 'flex-wrap: nowrap !important; width: 100%;'
+        }, [
             createElement('span', {
                 className: 'font-bold flex-1 truncate',
-                style: 'font-size: 14px; color: var(--text-primary); margin-right: 10px;',
+                style: 'font-size: 14px; color: var(--text-primary); margin-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;',
                 textContent: email
             }),
             createElement('button', {
                 type: 'button',
                 className: 'material-symbols-outlined flex-shrink-0',
-                style: 'font-size: 20px; color: #ef4444; background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;',
+                style: 'font-size: 20px; color: #ef4444; background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px;',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);
