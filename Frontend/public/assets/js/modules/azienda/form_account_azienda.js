@@ -344,9 +344,9 @@ window.renderGuestsList = function () {
             createElement('span', { className: 'text-[11px] text-white/50 font-medium', textContent: email }),
             createElement('button', {
                 type: 'button',
-                className: 'material-symbols-outlined text-red-400 hover:text-red-300 bg-transparent border-none p-1 cursor-pointer hover:scale-110 transition-all',
-                style: 'font-size: 16px;',
-                textContent: 'close',
+                className: 'material-symbols-outlined text-red-500 hover:text-red-400 bg-transparent border-none p-1 cursor-pointer hover:scale-110 transition-all',
+                style: 'font-size: 16px; outline: none; -webkit-appearance: none; background: transparent;',
+                textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);
                     renderGuestsList();
