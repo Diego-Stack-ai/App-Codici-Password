@@ -616,10 +616,19 @@ async function renderGuests(guests) {
                     createElement('p', { className: 'text-[10px] text-white/30 m-0', textContent: displayEmail })
                 ])
             ]),
-            createElement('span', {
-                className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-                textContent: displayStatus
-            })
+            createElement('div', { className: 'flex items-center gap-2' }, [
+                createElement('span', {
+                    className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
+                    textContent: displayStatus
+                }),
+                !isReadOnly ? createElement('button', {
+                    className: 'ml-1 p-2 rounded-lg bg-transparent border-none text-red-500 hover:text-red-400 hover:scale-110 transition-all cursor-pointer flex items-center justify-center',
+                    style: 'outline: none;',
+                    onclick: () => revokeRecipientV3(displayEmail)
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+                ]) : null
+            ])
         ]);
         list.appendChild(div);
     }

@@ -374,7 +374,7 @@ function renderSharingMap(account) {
 
         if (!isReadOnly) {
             items.push(createElement('button', {
-                className: 'btn-icon-header ml-2 hover:text-red-400 transition-colors',
+                className: 'ml-2 p-2 rounded-lg bg-transparent border-none text-red-400 hover:text-red-300 hover:scale-110 transition-all cursor-pointer flex items-center justify-center',
                 onclick: () => revokeRecipientV3(inv.email)
             }, [
                 createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })

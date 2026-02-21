@@ -340,12 +340,12 @@ window.renderGuestsList = function () {
     clearElement(list);
 
     invitedEmails.forEach((email, idx) => {
-        const item = createElement('div', { className: 'guest-item flex justify-between border border-white/20 p-2 rounded-lg bg-white/5 items-center mb-2' }, [
-            createElement('span', { className: 'text-sm text-white/80', textContent: email }),
+        const item = createElement('div', { className: 'guest-item flex justify-between items-center py-2 px-1 border-b border-white/5 last:border-0' }, [
+            createElement('span', { className: 'text-[11px] text-white/50 font-medium', textContent: email }),
             createElement('button', {
                 type: 'button',
-                className: 'material-symbols-outlined text-red-400 hover:text-red-300',
-                style: 'font-size: 18px;',
+                className: 'material-symbols-outlined text-red-400 hover:text-red-300 bg-transparent border-none p-1 cursor-pointer hover:scale-110 transition-all',
+                style: 'font-size: 16px;',
                 textContent: 'close',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);

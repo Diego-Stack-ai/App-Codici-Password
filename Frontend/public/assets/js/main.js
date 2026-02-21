@@ -266,16 +266,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 createElement('div', { className: 'p-4 bg-white/5 border border-white/10 rounded-2xl mb-6' }, [
                     createElement('p', { className: 'text-center font-black text-white text-lg', textContent: data.accountName }),
                 ]),
-                createElement('div', { className: 'modal-actions grid grid-cols-2 gap-3' }, [
+                createElement('div', { className: 'modal-actions grid grid-cols-2 gap-4 mt-2' }, [
                     createElement('button', {
                         id: 'btn-invite-reject',
-                        className: 'p-4 rounded-2xl bg-white/5 border border-white/10 text-white/40 font-bold uppercase text-[10px] hover:bg-red-500/10 hover:text-red-400 transition-all',
+                        className: 'p-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 hover:text-white transition-all active:scale-95',
                         textContent: t('invite_reject') || 'Rifiuta',
                         onclick: () => handleInviteResponse(inviteId, data, 'rejected')
                     }),
                     createElement('button', {
                         id: 'btn-invite-accept',
-                        className: 'p-4 rounded-2xl bg-purple-500 text-white font-black uppercase text-[10px] shadow-lg shadow-purple-500/20 hover:scale-105 transition-all',
+                        className: 'p-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-purple-500/25 hover:scale-105 hover:shadow-purple-500/40 transition-all active:scale-95',
                         textContent: t('invite_accept') || 'Accetta',
                         onclick: () => handleInviteResponse(inviteId, data, 'accepted')
                     })
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: data.message }),
                 createElement('div', { className: 'modal-actions' }, [
                     createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-white/10 text-white font-black uppercase text-xs hover:bg-white/20 transition-all',
+                        className: 'w-full p-4 rounded-2xl bg-white/10 border border-white/10 text-white font-black uppercase text-[10px] tracking-widest hover:bg-white/20 hover:border-white/20 transition-all active:scale-95 shadow-lg',
                         textContent: 'HO CAPITO (OK)',
                         onclick: async () => {
                             // Al click su OK, eseguiamo la bonifica e chiudiamo
@@ -334,9 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]),
                 createElement('h3', { className: 'modal-title text-center', textContent: 'Invito Rifiutato' }),
                 createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: `${data.recipientEmail} ha declinato la condivisione per: ${data.accountName}` }),
-                createElement('div', { className: 'modal-actions grid grid-cols-2 gap-3' }, [
+                createElement('div', { className: 'modal-actions grid grid-cols-2 gap-4 mt-2' }, [
                     createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white/40 font-bold uppercase text-[10px] hover:bg-white/10 transition-all',
+                        className: 'w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all active:scale-95',
                         textContent: 'Archivia',
                         onclick: async () => {
                             await updateDoc(doc(db, "invites", inviteId), { senderNotified: true });
@@ -344,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }),
                     createElement('button', {
-                        className: 'w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold uppercase text-[10px] hover:bg-red-500/20 transition-all',
-                        textContent: 'Elimina Invito',
+                        className: 'w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-black uppercase text-[10px] tracking-widest hover:bg-red-500/20 transition-all active:scale-95',
+                        textContent: 'Elimina',
                         onclick: async () => {
                             await deleteDoc(doc(db, "invites", inviteId));
                             modal.remove();
