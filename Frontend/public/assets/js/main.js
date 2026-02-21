@@ -219,25 +219,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // GLOBAL REALTIME REJECTION LISTENER (HARDENING V2.3)
-                if (sentInviteUnsubscribe) sentInviteUnsubscribe();
-                const qSent = query(
-                    collection(db, "invites"),
-                    where("senderId", "==", user.uid),
-                    where("status", "==", "rejected"),
-                    where("senderNotified", "==", false)
+                // GLOBAL NOTIFICATION LISTENER (V5.4 - Owner Confirmation)
+                let notificationUnsubscribe = null;
+                if (notificationUnsubscribe) notificationUnsubscribe();
+                const qNotif = query(
+                    collection(db, "users", user.uid, "notifications"),
+                    where("read", "==", false),
+                    where("type", "==", "share_response")
                 );
-                sentInviteUnsubscribe = onSnapshot(qSent, (snap) => {
-                    snap.docChanges().forEach(async (change) => {
-                        if (change.type === "added" || change.type === "modified") {
-                            const invData = change.doc.data();
-                            showRejectionModal(change.doc.id, invData);
-                            // Global Auto-Healing: Reset flags if last person rejects
-                            await autoHealAccountFlags(invData);
+                notificationUnsubscribe = onSnapshot(qNotif, (snap) => {
+                    snap.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            showNotificationModal(change.doc.id, change.doc.data());
                         }
                     });
                 }, (err) => {
-                    console.error("[V3.1-DEBUG] Error in Sent Invite Rejection listener:", err.message, err.code);
+                    console.error("[V5.4-DEBUG] Error in Notification listener:", err.message);
                 });
 
             } catch (error) {
@@ -289,6 +286,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
+     * NOTIFICATION SYSTEM (V5.4 - Results with OK Confirmation)
+     */
+    function showNotificationModal(notifId, data) {
+        if (document.getElementById(`notif-modal-${notifId}`)) return;
+
+        const isAccepted = data.title.toLowerCase().includes('accettato');
+        const accentClass = isAccepted ? 'text-green-400' : 'text-red-400';
+        const icon = isAccepted ? 'check_circle' : 'person_remove';
+
+        const modal = createElement('div', { id: `notif-modal-${notifId}`, className: 'modal-overlay active' }, [
+            createElement('div', { className: 'modal-box pb-8' }, [
+                createElement('div', { className: 'flex justify-center mb-4' }, [
+                    createElement('span', { className: `material-symbols-outlined text-4xl ${accentClass}`, textContent: icon })
+                ]),
+                createElement('h3', { className: 'modal-title text-center', textContent: data.title }),
+                createElement('p', { className: 'modal-text text-center text-white/60 mb-6', textContent: data.message }),
+                createElement('div', { className: 'modal-actions' }, [
+                    createElement('button', {
+                        className: 'w-full p-4 rounded-2xl bg-white/10 text-white font-black uppercase text-xs hover:bg-white/20 transition-all',
+                        textContent: 'HO CAPITO (OK)',
+                        onclick: async () => {
+                            // Al click su OK, eseguiamo la bonifica e chiudiamo
+                            await autoHealAccountFlags(data, notifId);
+                            document.getElementById(`notif-modal-${notifId}`).remove();
+                        }
+                    })
+                ])
+            ])
+        ]);
+        document.body.appendChild(modal);
+    }
+
+    /**
      * REJECTION SYSTEM (Global Notifier) - HARDENING V2.3
      */
     function showRejectionModal(inviteId, data) {
@@ -324,14 +354,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(modal);
     }
 
-    async function autoHealAccountFlags(invData) {
-        if (!invData || !invData.accountId || !invData.senderId) return;
+    async function autoHealAccountFlags(notifData, notifId) {
+        if (!notifData.accountId) {
+            // Se non c'è ID account, segniamo solo come letta
+            if (notifId) await updateDoc(doc(db, "users", auth.currentUser.uid, "notifications", notifId), { read: true });
+            return;
+        }
 
-        const ownerId = invData.senderId;
-        const accId = invData.accountId;
-        const azId = invData.aziendaId;
+        const ownerId = auth.currentUser.uid;
+        const accId = notifData.accountId;
+        const azId = notifData.aziendaId;
 
-        // Risoluzione Path (Consistenza con main.js)
         const accountPath = azId
             ? `users/${ownerId}/aziende/${azId}/accounts/${accId}`
             : `users/${ownerId}/accounts/${accId}`;
@@ -346,29 +379,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = accSnap.data();
                 const sharedWith = data.sharedWith || {};
 
-                // 1. Ricalcolo visibilità
                 const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
                 const newVisibility = hasActive ? "shared" : "private";
 
-                // 2. Logica Sovranità V5.3 (Solo l'owner può cambiare il type)
                 let newType = data.type;
                 const isMemoLike = (data.type === 'memo' || data.type === 'memorandum');
 
                 if (newVisibility === 'private' && isMemoLike && data.isExplicitMemo !== true) {
-                    console.log(`[V5.3-SENTINEL] Auto-healing account identiy for ${accId}. Reverting to 'account'.`);
+                    console.log(`[V5.4-CONFIRM] Reverting shared-memo to account type after owner OK.`);
                     newType = 'account';
                 }
 
-                if (data.visibility !== newVisibility || data.type !== newType) {
-                    transaction.update(accountRef, {
-                        visibility: newVisibility,
-                        type: newType,
-                        updatedAt: new Date().toISOString()
-                    });
+                // Aggiorna Account
+                transaction.update(accountRef, {
+                    visibility: newVisibility,
+                    type: newType,
+                    updatedAt: new Date().toISOString()
+                });
+
+                // Segna notifica come letta
+                if (notifId) {
+                    const notifRef = doc(db, "users", ownerId, "notifications", notifId);
+                    transaction.update(notifRef, { read: true });
                 }
             });
+            showToast("Presa d'atto confermata", "success");
         } catch (e) {
-            console.error("[V5.3-SENTINEL] Auto-healing transaction failed:", e.message);
+            console.error("[V5.4-CONFIRM] Healing/Read update failed:", e.message);
+            // Fallback: segna almeno la notifica come letta se l'account non esiste più
+            if (notifId) await updateDoc(doc(db, "users", ownerId, "notifications", notifId), { read: true });
         }
     }
 
