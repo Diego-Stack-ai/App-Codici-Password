@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         accountName: data.nomeAccount || 'Senza Nome',
                         type: "share_response",
                         accountId: accId,
-                        aziendaId: azId || null,
+                        aziendaId: storedInvite.aziendaId || null,
                         guestEmail: currentUserEmail,
                         timestamp: new Date().toISOString(),
                         read: false
