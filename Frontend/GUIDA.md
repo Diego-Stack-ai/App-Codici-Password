@@ -467,5 +467,44 @@ Ogni notifica è un documento in `/users/{uid}/notifications/` con:
 
 ---
 
+---
+
+## 17. ARCHITETTURA ACCOUNT & MEMORANDUM CONDIVISI (V5.1+ Hardened)
+
+### Spiegazione umana (Presentazione Pubblica):
+"Immagina di avere una cassaforte. Fino a ieri, se volevi che un tuo collaboratore accedesse a una combinazione, dovevi prestargli la chiave dell'intera stanza. Oggi, con il sistema Condivisi & Memorandum, puoi 'duplicare' virtualmente solo lo scrigno desiderato e consegnarlo nel suo palmo. Quando lui apre la sua app, lo trova comodamente posato sulla scrivania, pronto per essere consultato. E la cosa più bella? Se un domani decidi di cambiare la serratura o ritirare l'accesso, l'altra persona si ritroverà con la scatola vuota sotto gli occhi, senza che tu debba fare chiamate imbarazzanti o avvisi. 
+Inoltre, per tutelare i segreti, c'è il *Memorandum Condiviso*: una modalità furbissima in cui dai a Tizio lo scrigno, ma svuoti prima i campi Password, Codice e Username, lasciandogli leggere solo le note, gli allegati o i referenti della banca. Comunichi quindi *come* fare una cosa senza fornire la chiave. Tutto questo avviene dietro le quinte in frazioni di secondo: l'invito, l'accettazione e persino lo storico delle notifiche in tempo reale che vi avvisano ad ogni singolo movimento fiduciario."
+
+### 17.1 Struttura Dati (Il Motore a Mappe)
+Abbiamo categoricamente dismesso i vecchi array che generavano crash e duplicati a favore di una robusta struttura a Map per i documenti in Firestore:
+- **`visibility`**: Campo semantico `"private"` o `"shared"`.
+- **`type`**: `"account"` o `"memo"`.
+- **`isExplicitMemo`**: Booleano. Permette di distinguere un account nato esplicitamente come Memorandum da un Account Normale convertito temporaneamente in Memo per la condivisione protetta.
+- **`sharedWith`**: L'oggetto della verità. Le chiavi sono l'email sanificata (es: `mario_rossi_at_gmail_com`) e il valore contiene lo stato: `{ email: "...", status: "pending|accepted", uid: "..." }`.
+
+### 17.2 Il Flusso Atomico & Auto-Healing
+Ogni operazione di condivisione o revoca avviene tramite `runTransaction` (Transazioni Atomiche db) per garantire l'integrità assoluta dei conflitti di rete.
+- **Fase Invio**: L'owner salva il form. Viene creato un documento nella collection globale `invites` (ID: `{accountId}_{emailSanificata}`) e aggiornata la mappa `sharedWith` dell'account sorgente. Simultaneamente parte una notifica all'ospite.
+- **Fase Risposta**: Il modulo `main.js` dell'ospite è costantemente in ascolto del nodo `invites`. Al click di "Accetta", la transazione va a bussare criptograficamente nel database dell'owner, inietta l'`UID` dell'ospite nella mappa e setta lo stato su `"accepted"`.
+- **Auto-Healing (Il Riparo Medico)**: Se un account "shared" rimane improvvisamente senza alcun ospite attivo (es. tutti rifiutano o vengono rimossi dall'owner), il sistema lo riporta in `visibility="private"`. In questo istante controlla il flag `isExplicitMemo`. Se è `false`, **ri-trasforma automaticamente l'account da Memo ad Account puro**, ripristinando l'integrità e la visualizzazione originaria per l'Owner senza necessità di click manuali.
+
+### 17.3 Revoca Estromissione Avanzata:
+Quando un accesso fiduciario si spezza (revoca da parte dell'Owner), la transazione:
+1. Spazza via la chiave incriminata dalla mappa `sharedWith`.
+2. Azzera ed elimina gli eventuali inviti fantasma in `invites`.
+3. Notifica lo storico dell'Owner dell'operazione compiuta.
+4. **V5.4+**: Notifica con procedura diretta l'Ospite che "l'accesso per l'Account X gli è stato appena revocato", mantenendo totale trasparenza delle history di sistema.
+
+> 🤖 **Comando Agente AI: audit_sharing_architecture()**
+> \`\`\`
+> 1. In ogni refactor documentale controlla che `sharedWith` sia sempre iniettata/letta come Object e mai come Array.
+> 2. Verifica che l'array UI di email `invitedEmails` sfrutti la funzione `sanitizeEmail(email)` prima di operare sulle chiavi di Firestore.
+> 3. Assicurati che ogni modifica/creazione d'invito sia incapsulata obbligatoriamente in `runTransaction()`, pena possibile perdita di sincronia.
+> 4. Audita fermamente l'Auto-Healing: il `newType` deve per forza fare fallback su `'account'` solo se `isExplicitMemo !== true` nell'istante in cui diventa `"private"`.
+> 5. Controlla che in caso di "Sbiancamento account (Switch to Private)" venga sparato il record notification di revoca nel doc dell`UID` di tutti i guest estromessi.
+> \`\`\`
+
+---
+
 ✅ **PROTOCOLLO V5.1 MASTER — DOCUMENTAZIONE COMPLETA.**
 Questa guida è ora il tuo unico manuale operativo. Non deviare dalla via maestra.
