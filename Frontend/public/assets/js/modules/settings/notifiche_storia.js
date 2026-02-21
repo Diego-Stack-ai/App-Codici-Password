@@ -62,6 +62,7 @@ async function loadNotifications(uid) {
     if (cachedData && cachedTs && (now - parseInt(cachedTs) < CACHE_DURATION)) {
         console.log("PWA: Caricamento notifiche da cache locale.");
         const data = JSON.parse(cachedData);
+        allNotifications = data; // FIX: Sincronizza la variabile globale per la selezione
         if (loading) loading.classList.add('hidden');
         renderNotifications(data, list, empty);
         return;
