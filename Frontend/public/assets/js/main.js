@@ -325,7 +325,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function autoHealAccountFlags(invData) {
-        // [V3.1] Deprecated globally. Auto-healing is inherently handled by atomic transactions in handleInviteResponse.
+        if (!invData || !invData.accountId || !invData.senderId) return;
+
+        const ownerId = invData.senderId;
+        const accId = invData.accountId;
+        const azId = invData.aziendaId;
+
+        // Risoluzione Path (Consistenza con main.js)
+        const accountPath = azId
+            ? `users/${ownerId}/aziende/${azId}/accounts/${accId}`
+            : `users/${ownerId}/accounts/${accId}`;
+
+        const accountRef = doc(db, accountPath);
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const accSnap = await transaction.get(accountRef);
+                if (!accSnap.exists()) return;
+
+                const data = accSnap.data();
+                const sharedWith = data.sharedWith || {};
+
+                // 1. Ricalcolo visibilità
+                const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
+                const newVisibility = hasActive ? "shared" : "private";
+
+                // 2. Logica Sovranità V5.3 (Solo l'owner può cambiare il type)
+                let newType = data.type;
+                const isMemoLike = (data.type === 'memo' || data.type === 'memorandum');
+
+                if (newVisibility === 'private' && isMemoLike && data.isExplicitMemo !== true) {
+                    console.log(`[V5.3-SENTINEL] Auto-healing account identiy for ${accId}. Reverting to 'account'.`);
+                    newType = 'account';
+                }
+
+                if (data.visibility !== newVisibility || data.type !== newType) {
+                    transaction.update(accountRef, {
+                        visibility: newVisibility,
+                        type: newType,
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+            });
+        } catch (e) {
+            console.error("[V5.3-SENTINEL] Auto-healing transaction failed:", e.message);
+        }
     }
 
     async function handleInviteResponse(inviteId, inviteData, status) {
