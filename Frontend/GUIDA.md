@@ -526,7 +526,50 @@ Quando un accesso fiduciario si spezza (revoca da parte dell'Owner), la transazi
 > 2. Verifica che l'array UI di email `invitedEmails` sfrutti la funzione `sanitizeEmail(email)` prima di operare sulle chiavi di Firestore.
 > 3. Assicurati che ogni modifica/creazione d'invito sia incapsulata obbligatoriamente in `runTransaction()`, pena possibile perdita di sincronia.
 > 4. Audita fermamente l'Auto-Healing: il `newType` deve per forza fare fallback su `'account'` solo se `isExplicitMemo !== true` nell'istante in cui diventa `"private"`.
-> 5. Controlla che in caso di "Sbiancamento account (Switch to Private)" venga sparato il record notification di revoca nel doc dell`UID` di tutti i guest estromessi.
+> \`\`\`
+
+---
+
+## 18. ARCHITETTURA E LOGICA DELLE SCADENZE (V2.0+)
+
+### Spiegazione umana:
+Il tab Scadenze non è una banale "lista della spesa". È un sistema proattivo (agenda automatica) in grado di gestire i rinnovi di domini, assicurazioni, abbonamenti e revisioni auto, calcolando quanto manca e mutando visivamente al variare del tempo residuo.
+
+### 18.1 Struttura Dati (Il Modello Scadenza)
+Ogni Scadenza salvata in `/scadenze` possiede questi metadati vitali:
+- **`titolo`**: Il nome della scadenza (es. "Rinnovo Dominio Aruba").
+- **`dataScadenza`**: Data matematica limite.
+- **`categoria`**: Associato a icone/colori precisi per l'UI (es. Vetture, Utenze, Abbonamenti).
+- **`stato`**: Variabile che determina il ciclo di vita (es. `in_scadenza`, `scaduta`, `pagata`).
+- **`importo`**: Identifica la transazione economica.
+- **`nota`**: Testo esteso per dettagli o link di pagamento.
+
+### 18.2 Le 3 Fasi Temporali (Behavior Logic)
+Il frontend analizza la `dataScadenza` rispetto alla data odierna (`Date.now()`) e innesca automatismi visivi:
+
+1. **Stato Neutro (Regolare)**:
+   - Scadenza molto lontana nel futuro (oltre i 30gg solitamente).
+   - Card visualizzata con toni standard, senza icone di urgenza.
+
+2. **In Avvicinamento (Warning / In Scadenza)**:
+   - Identificata da una finestra temporale in base alle "Regole" impostate (`impostazioni > regole invio scadenze`).
+   - L'UI si "accende" di toni caldi (Arancione/Giallo) e mostra un "countdown" dei giorni mancanti (es. "-12 giorni").
+   
+3. **Scaduta Oltre Termine (Critical)**:
+   - Se `Data.now() > dataScadenza` e l'utente NON dispone del flag "Pagata".
+   - L'UI diventa "Rosso Allarme". Mostra un valore temporale in ritardo ("Scaduta da 4 giorni").
+   - Questa fase richiede un'azione di chiusura manuale (Click su "Segna come Pagata").
+
+### 18.3 Azioni In-Page (Swipe-To-Action)
+Come stabilito dal Protocollo UX, le scadenze non usano bottoni invasivi:
+- **Swipe verso Sinistra**: Elimina (Cestino Rosso). L'operazione tritura permanentemente dal db la scadenza.
+- **Swipe verso Destra / Tasto Flag**: Marca come `Pagata` / `Risolta`. La scadenza passa in colore Verde (Safe), stoppa matematicamente i timer e i controlli, congelandosi in attesa che l'utente, l'anno successivo, sposti la data in avanti riavviando la giostra.
+
+> 🤖 **Comando Agente AI: audit_scadenze_logic()**
+> \`\`\`
+> 1. Controlla che le date (`dataScadenza`) scritte nel Database siano formattate sempre in ISO compatibile o in stringhe `YYYY-MM-DD` per consentirgli parsing nativi senza errori da `Date()`.
+> 2. Assicurati che se un utente marca una scadenza come "Eliminata", l'azione venga avvolta in un popup di conferma o sfrutti l'Undo (se archiviata).
+> 3. Nelle query Firebase verifica sempre di estrapolare `.orderBy('dataScadenza', 'asc')` in modo che le più urgenti appaiano sempre e matematicamente in cima alla lista frontend.
 > \`\`\`
 
 ---
