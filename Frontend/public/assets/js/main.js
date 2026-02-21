@@ -395,10 +395,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ownerId = storedInvite.ownerId || storedInvite.senderId;
                 const accId = storedInvite.accountId;
 
-                let accountPath = `users/${ownerId}/accounts/${accId}`;
-                if (storedInvite.type === 'azienda' && storedInvite.aziendaId) {
-                    accountPath = `users/${ownerId}/aziende/${storedInvite.aziendaId}/accounts/${accId}`;
-                }
+                let accountPath = storedInvite.aziendaId
+                    ? `users/${ownerId}/aziende/${storedInvite.aziendaId}/accounts/${accId}`
+                    : `users/${ownerId}/accounts/${accId}`;
 
                 console.log(`[V3.1-DEBUG] Syncing account at path: ${accountPath}`);
                 const accountRef = doc(db, accountPath);

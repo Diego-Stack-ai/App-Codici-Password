@@ -666,8 +666,11 @@ window.saveAccount = async () => {
                 for (const email of emailsToInvite) {
                     const sKey = sanitizeEmail(email);
 
-                    if (!finalData.sharedWith[sKey]) {
-                        // Nuovo Guest
+                    const existingGuest = finalData.sharedWith[sKey];
+
+                    // --- FIX V5.1: Se l'utente non c'e' OPPURE ha rifiutato, crea/resetta l'invito ---
+                    if (!existingGuest || existingGuest.status === 'rejected') {
+                        // Nuovo Guest o Reset di un rifiutato
                         finalData.sharedWith[sKey] = {
                             email: email,
                             status: 'pending',
@@ -706,8 +709,9 @@ window.saveAccount = async () => {
                 // Calcola Accepted Count V3.1
                 finalData.acceptedCount = Object.values(finalData.sharedWith).filter(g => g.status === 'accepted').length;
 
-                // Rule E Fallback Naturale V3.1: se tutto pending è stato rimosso o nessuno esiste 
-                if (Object.keys(finalData.sharedWith).length === 0) {
+                // --- AUTO-HEALING V5.1: Forza visibilità private se non ci sono inviti attivi ---
+                const hasActive = Object.values(finalData.sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
+                if (!hasActive) {
                     finalData.visibility = "private";
                 }
             }
