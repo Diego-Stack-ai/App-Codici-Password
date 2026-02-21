@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const qNotif = query(
                     collection(db, "users", user.uid, "notifications"),
                     where("read", "==", false),
-                    where("type", "==", "share_response")
+                    where("type", "in", ["share_response", "share_revoked"])
                 );
                 notificationUnsubscribe = onSnapshot(qNotif, (snap) => {
                     snap.docChanges().forEach((change) => {
