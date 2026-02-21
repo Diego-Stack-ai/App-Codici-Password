@@ -366,14 +366,14 @@ window.renderGuestsList = function () {
     invitedEmails.forEach((email, idx) => {
         const item = createElement('div', { className: 'guest-item flex justify-between items-center py-2 px-1 border-b border-white/5 last:border-0' }, [
             createElement('span', {
-                className: 'font-bold',
-                style: 'font-size: 14px; color: rgba(255, 255, 255, 0.9);',
+                className: 'font-bold flex-1 truncate',
+                style: 'font-size: 14px; color: var(--text-primary); margin-right: 10px;',
                 textContent: email
             }),
             createElement('button', {
                 type: 'button',
-                className: 'material-symbols-outlined',
-                style: 'font-size: 20px; color: #ef4444; background: transparent; border: none !important; outline: none !important; box-shadow: none !important; cursor: pointer; padding: 4px; transition: transform 0.2s;',
+                className: 'material-symbols-outlined flex-shrink-0',
+                style: 'font-size: 20px; color: #ef4444; background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);
