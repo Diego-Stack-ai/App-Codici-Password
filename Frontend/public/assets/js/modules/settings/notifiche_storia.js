@@ -75,10 +75,22 @@ async function loadNotifications(uid) {
 
         snap.forEach(docSnap => {
             const data = docSnap.data();
+            let tsRaw = data.timestamp;
+            let tsMillis = now;
+
+            if (tsRaw) {
+                if (typeof tsRaw.toDate === 'function') {
+                    tsMillis = tsRaw.toDate().getTime();
+                } else {
+                    // Prendi come stringa ISO o numero
+                    tsMillis = new Date(tsRaw).getTime() || now;
+                }
+            }
+
             notifications.push({
                 id: docSnap.id,
                 ...data,
-                timestamp: data.timestamp ? data.timestamp.toDate().getTime() : now
+                timestamp: tsMillis
             });
         });
 
@@ -115,7 +127,11 @@ function renderNotifications(data, list, empty) {
         const timeStr = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
         const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
 
-        const config = getNotificationConfig(notif.type);
+        const config = getNotificationConfig(notif.type, notif.title);
+
+        const displayMessage = notif.accountName
+            ? `[${notif.accountName}] ${notif.message}`
+            : (notif.message || 'Avviso di Sistema');
 
         const item = createElement('div', { className: 'notification-item' }, [
             createElement('div', { className: `notification-icon-wrapper ${config.variant}` }, [
@@ -125,7 +141,7 @@ function renderNotifications(data, list, empty) {
                 createElement('div', { className: 'notification-header' }, [
                     createElement('span', {
                         className: 'notification-message',
-                        textContent: notif.message || 'Avviso di Sistema'
+                        textContent: displayMessage
                     })
                 ]),
                 createElement('div', { className: 'notification-meta' }, [
@@ -147,10 +163,17 @@ function renderNotifications(data, list, empty) {
     setChildren(list, items);
 }
 
-function getNotificationConfig(type) {
+function getNotificationConfig(type, title) {
     const base = { icon: 'notifications', variant: 'notif-info', label: 'Sistema' };
+    const tLower = (title || '').toLowerCase();
 
     switch (type) {
+        case 'share_response':
+            if (tLower.includes('accet')) {
+                return { icon: 'check_circle', variant: 'notif-success', label: 'Collaborazione' };
+            } else {
+                return { icon: 'cancel', variant: 'notif-error', label: 'Accesso' };
+            }
         case 'invite_accepted':
             return { icon: 'check_circle', variant: 'notif-success', label: 'Collaborazione' };
         case 'invite_rejected':
