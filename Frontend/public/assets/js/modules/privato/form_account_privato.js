@@ -365,11 +365,15 @@ window.renderGuestsList = function () {
 
     invitedEmails.forEach((email, idx) => {
         const item = createElement('div', { className: 'guest-item flex justify-between items-center py-2 px-1 border-b border-white/5 last:border-0' }, [
-            createElement('span', { className: 'text-[13px] text-white/80 font-bold', textContent: email }),
+            createElement('span', {
+                className: 'font-bold',
+                style: 'font-size: 14px; color: rgba(255, 255, 255, 0.9);',
+                textContent: email
+            }),
             createElement('button', {
                 type: 'button',
-                className: 'material-symbols-outlined text-red-600 hover:text-red-500 bg-transparent border-none p-1 cursor-pointer hover:scale-110 transition-all',
-                style: 'font-size: 18px; outline: none; -webkit-appearance: none; background: transparent; border: none !important; box-shadow: none !important;',
+                className: 'material-symbols-outlined',
+                style: 'font-size: 20px; color: #ef4444; background: transparent; border: none !important; outline: none !important; box-shadow: none !important; cursor: pointer; padding: 4px; transition: transform 0.2s;',
                 textContent: 'delete',
                 onclick: () => {
                     invitedEmails.splice(idx, 1);
