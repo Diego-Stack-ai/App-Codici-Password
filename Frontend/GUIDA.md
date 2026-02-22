@@ -142,6 +142,49 @@ Esiste un "contratto" dinamico tra il codice JavaScript e il motore CSS. Alcune 
 > - Cerca selezioni ad IDs (`#element`) e suggerisci la conversione in classi (`.element`) se lo stile è riutilizzabile.
 > - Segnala l'uso di `!important` al di fuori di `core_ui.css`.
 
+### 3.4 SISTEMA TIPOGRAFICO E ICONOGRAFICO (V3.8+ Focused)
+### Spiegazione umana:
+La tipografia non è solo "scelta del font", è l'intelaiatura della leggibilità. In App Codici Password, usiamo **Manrope** come font unico per la sua estrema modernità e chiarezza sui display retina. Il sistema è centralizzato in `core_fonts.css` per garantire che ogni testo, dal micro-badge al titolo hero, segua una "Scala Armonica" (Scale Tokens). Questo evita che l'app sembri un collage di stili diversi e permette di cambiare il "carattere" dell'intera piattaforma modificando un solo file.
+
+### 3.4.1 I 4 Pilastri del Design System:
+1. **Scala Tipografica (Scale Tokens)**: Variabili da `--fs-micro` (12px) a `--fs-xl` (24px). Non usare mai valori `px` nei file di pagina, usa sempre i tokens.
+2. **Grammatura (Font Weights)**: Definito gerarchicamente da `--font-weight-normal` (400) a `--font-strong-weight` (900).
+3. **Semantic Tokens (V5.0 Ready)**: Variabili composite come `--font-h1`, `--font-label`, `--font-card-title`. Contengono già peso, dimensione e altezza riga. 
+4. **Icon System**: Centralizzato su **Material Symbols Outlined**. Le icone sono trattate come font, garantendo allineamento perfetto con il testo.
+
+### Esempio Applicazione (CSS):
+```css
+/* ✅ Utilizzo Corretto (Tokens Semantici) */
+.mia-card-titolo {
+    font: var(--font-card-title);
+    color: var(--white);
+}
+
+/* ✅ Utilizzo Corretto (Scale Tokens) */
+.testo-piccolo {
+    font-size: var(--fs-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+/* ❌ DA EVITARE (Valori Hardcoded) */
+.titolo {
+    font-family: 'Arial'; /* ERRATO: Non usare font esterni */
+    font-size: 14px;      /* ERRATO: Non usare px */
+}
+```
+
+### Note operative per Sviluppatori:
+- **Font-Face & Performance**: I font sono self-hosted in `/assets/fonts/` per evitare dipendenze esterne (Google Fonts) e caricamenti lenti.
+- **Immediate Override**: `core_fonts.css` usa `!important` sui selettori globali (`html`, `body`, `input`) per forzare l'identità Manrope ovunque e prevenire flash di font legacy.
+- **Material Symbols**: Usare sempre la classe `.material-symbols-outlined`. Se serve un'icona piena, aggiungere la classe `.filled`.
+
+> 🤖 **Comando Agente AI — Audit Typography**
+> `audit_typography([file.html/.css])`
+> 1. Scansiona il file alla ricerca di font-family diverse da 'Manrope'.
+> 2. Identifica valori di `font-size` espressi in `px` o `em` manuali.
+> 3. Suggerisce la sostituzione con il token semantico corrispondente (es. `var(--fs-base)`).
+> 4. Verifica che le icone usino la classe standard e che non ci siano font-icons rimasugli di vecchie versioni (font-awesome, ecc.).
+
 ---
 
 ## 4. JS BOOTSTRAP E ORCHESTRAZIONE UNICA
