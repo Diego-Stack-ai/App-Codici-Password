@@ -1,0 +1,19 @@
+2026-02-17T08:00:10.338910Z I checkdeadlines: Default STARTUP TCP probe succeeded after 1 attempt for container "worker" on port 8080.
+2026-02-17T08:00:10.485950Z ? checkdeadlines: [START] Controllo scadenze e notifiche: 2026-02-17
+
+2026-02-18T08:00:01.962551Z I checkdeadlines: 
+2026-02-18T08:00:01.998994Z I checkdeadlines: Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.
+2026-02-18T08:00:06.879072Z I checkdeadlines: Default STARTUP TCP probe succeeded after 1 attempt for container "worker" on port 8080.
+2026-02-18T08:00:06.962185Z ? checkdeadlines: [START] Controllo scadenze e notifiche: 2026-02-18
+
+2026-02-19T08:00:01.832655Z I checkdeadlines: 
+2026-02-19T08:00:01.901078Z I checkdeadlines: Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.
+2026-02-19T08:00:06.705934Z I checkdeadlines: Default STARTUP TCP probe succeeded after 1 attempt for container "worker" on port 8080.
+2026-02-19T08:00:06.738935Z ? checkdeadlines: [START] Controllo scadenze e notifiche: 2026-02-19
+
+2026-02-20T08:00:01.819637Z I checkdeadlines: 
+2026-02-20T08:00:01.858717Z I checkdeadlines: Starting new instance. Reason: AUTOSCALING - Instance started due to configured scaling factors (e.g. CPU utilization, request throughput, etc.) or no existing capacity for current traffic.
+2026-02-20T08:00:06.202776Z I checkdeadlines: Default STARTUP TCP probe succeeded after 1 attempt for container "worker" on port 8080.
+2026-02-20T08:00:06.292877Z ? checkdeadlines: [START] Controllo scadenze e notifiche: 2026-02-20
+
+2026-02-21T08:00:01.807898Z I checkdeadlines: 

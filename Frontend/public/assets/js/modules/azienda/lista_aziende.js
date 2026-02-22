@@ -83,7 +83,7 @@ async function initProtocolUI() {
             id: 'add-azienda-btn',
             className: 'btn-fab-action btn-fab-scadenza',
             title: 'Aggiungi Azienda',
-            onclick: () => window.location.replace('aggiungi_nuova_azienda.html')
+            onclick: () => window.location.replace('modifica_azienda.html')
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
         ]);
@@ -119,7 +119,7 @@ function renderAziende() {
             }),
             createElement('button', {
                 className: 'btn-empty-add',
-                onclick: () => window.location.replace('aggiungi_nuova_azienda.html')
+                onclick: () => window.location.replace('modifica_azienda.html')
             }, [createElement('span', { textContent: 'Aggiungi Ora' })])
         ]));
         return;

@@ -20,7 +20,6 @@ form\_account\_azienda.html
 modifica\_account\_azienda.html
 dati\_azienda.html
 modifica\_azienda.html
-aggiungi\_nuova\_azienda.html
 archivio\_account.html
 
 Gestione Privati:
@@ -45,6 +44,7 @@ Altro:
 notifiche\_storia.html
 privacy.html
 termini.html
+
 
 
 
@@ -131,7 +131,7 @@ Prima della pubblicazione: testare cifratura/decifratura, backup e ripristino, e
 
 Valutare eventuali librerie E2EE consolidate per JS (es. CryptoJS
 
-&nbsp;o libsodium.js
+ o libsodium.js
 
 ).
 

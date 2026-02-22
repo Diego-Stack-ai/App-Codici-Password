@@ -80,9 +80,8 @@ export async function initComponents() {
                     else backFn = () => window.location.replace(`account_azienda.html?id=${aziendaId}`);
                 } else if (path.endsWith('modifica_azienda.html')) {
                     const id = urlParams.get('id');
-                    backFn = () => window.location.replace(`dati_azienda.html?id=${id}`);
-                } else if (path.endsWith('aggiungi_nuova_azienda.html')) {
-                    backFn = () => window.location.replace('lista_aziende.html');
+                    if (id) backFn = () => window.location.replace(`dati_azienda.html?id=${id}`);
+                    else backFn = () => window.location.replace('lista_aziende.html');
                 } else if (path.endsWith('profilo_privato.html')) {
                     backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('account_privati.html')) {

@@ -62,6 +62,7 @@ export const translations = {
         fax: "Fax",
         general_notes: "Note Generali",
         save_company: "Salva Azienda",
+        legal_form: "Forma Giuridica",
 
         // LOGIN PAGE
         login_title: "Accedi",
@@ -722,6 +723,7 @@ export const translations = {
         fax: "Fax",
         general_notes: "General Notes",
         save_company: "Save Company",
+        legal_form: "Legal Form",
         // LOGIN PAGE
         login_title: "Login",
         login_subtitle: "Secure Access",

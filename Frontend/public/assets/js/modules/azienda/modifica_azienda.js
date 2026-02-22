@@ -28,14 +28,12 @@ export async function initModificaAzienda(user) {
     const urlParams = new URLSearchParams(window.location.search);
     currentAziendaId = urlParams.get('id');
 
-    if (!currentAziendaId) {
-        showToast("ID mancante", "error");
-        setTimeout(() => window.location.href = 'lista_aziende.html', 1500);
-        return;
-    }
-
     initProtocolUI();
-    await loadAzienda();
+    if (currentAziendaId) {
+        await loadAzienda();
+    } else {
+        updateTitlesForCreation();
+    }
     initFormEvents();
 
     console.log("[EDIT-AZIENDA] Ready.");
@@ -44,17 +42,19 @@ export async function initModificaAzienda(user) {
 async function initProtocolUI() {
     console.log('[modifica_azienda] Configurazione azioni footer...');
 
-    // Footer Center - Pulsante Delete
+    // Footer Center - Pulsante Delete (Solo in Modifica)
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         clearElement(fCenter);
-        setChildren(fCenter, createElement('button', {
-            id: 'btn-delete',
-            className: 'footer-action-btn btn-danger',
-            onclick: deleteAzienda
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
-        ]));
+        if (currentAziendaId) {
+            setChildren(fCenter, createElement('button', {
+                id: 'btn-delete',
+                className: 'footer-action-btn btn-danger',
+                onclick: deleteAzienda
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
+            ]));
+        }
     }
 
     // Footer Right
@@ -85,6 +85,16 @@ async function loadAzienda() {
         logError("LoadAzienda", e);
         showToast(t('error_generic'), "error");
     }
+}
+
+function updateTitlesForCreation() {
+    document.title = (t('new_company') || 'Nuova Azienda') + " - PROTOCOLLO BASE";
+
+    const hTitle = document.querySelector('.hero-title');
+    if (hTitle) hTitle.textContent = t('new_company') || 'Nuova Azienda';
+
+    const headerTitle = document.querySelector('.base-header .header-title');
+    if (headerTitle) headerTitle.textContent = t('new_company') || 'Nuova Azienda';
 }
 
 function initFormEvents() {
@@ -252,12 +262,13 @@ function populateForm(data) {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
     set('ragione-sociale', data.ragioneSociale);
+    set('forma-giuridica', data.formaGiuridica);
     set('tipo-sede-legale', data.tipoSedeLegale || 'Sede Legale');
     set('telefono-azienda', data.telefonoAzienda);
     set('fax-azienda', data.faxAzienda);
     set('piva', data.partitaIva);
     set('codice-sdi', data.codiceSDI);
-    set('referente-titolo', data.referenteTitolo);
+    set('referente-ruolo', data.referenteTitolo || data.referenteRuolo);
     set('referente-nome', data.referenteNome);
     set('referente-cognome', data.referenteCognome);
     set('referente-cellulare', data.referenteCellulare);
@@ -266,7 +277,7 @@ function populateForm(data) {
     set('citta', data.cittaSede);
     set('provincia', data.provinciaSede);
     set('cap', data.capSede);
-    set('numero-cciaa', data.numeroCCIAA);
+    set('cciaa', data.numeroCCIAA);
     set('data-iscrizione', data.dataIscrizione);
     set('note-azienda', data.note);
 
@@ -646,18 +657,18 @@ async function saveAzienda() {
             telefonoAzienda: document.getElementById('telefono-azienda')?.value.trim(),
             faxAzienda: document.getElementById('fax-azienda')?.value.trim(),
             partitaIva: document.getElementById('piva')?.value.trim(),
-            codiceSDI: document.getElementById('codice-sdi')?.value.trim().toUpperCase(),
-            referenteTitolo: document.getElementById('referente-titolo')?.value.trim(),
-            referenteNome: document.getElementById('referente-nome')?.value.trim(),
-            referenteCognome: document.getElementById('referente-cognome')?.value.trim(),
-            referenteCellulare: document.getElementById('referente-cellulare')?.value.trim(),
-            indirizzoSede: document.getElementById('indirizzo')?.value.trim(),
-            civicoSede: document.getElementById('civico')?.value.trim(),
-            cittaSede: document.getElementById('citta')?.value.trim(),
-            provinciaSede: document.getElementById('provincia')?.value.trim().toUpperCase(),
-            capSede: document.getElementById('cap')?.value.trim(),
-            numeroCCIAA: document.getElementById('numero-cciaa')?.value.trim(),
-            dataIscrizione: document.getElementById('data-iscrizione')?.value,
+            formaGiuridica: document.getElementById('forma-giuridica')?.value.trim() || '',
+            referenteTitolo: document.getElementById('referente-ruolo')?.value.trim() || '',
+            referenteNome: document.getElementById('referente-nome')?.value.trim() || '',
+            referenteCognome: document.getElementById('referente-cognome')?.value.trim() || '',
+            referenteCellulare: document.getElementById('referente-cellulare')?.value.trim() || '',
+            indirizzoSede: document.getElementById('indirizzo')?.value.trim() || '',
+            civicoSede: document.getElementById('civico')?.value.trim() || '',
+            cittaSede: document.getElementById('citta')?.value.trim() || '',
+            provinciaSede: document.getElementById('provincia')?.value.trim().toUpperCase() || '',
+            capSede: document.getElementById('cap')?.value.trim() || '',
+            numeroCCIAA: document.getElementById('cciaa')?.value.trim() || '',
+            dataIscrizione: document.getElementById('data-iscrizione')?.value || '',
             emails: {
                 pec: document.getElementById('type-pec') ? {
                     tipo: document.getElementById('type-pec').value.trim(),
@@ -691,6 +702,11 @@ async function saveAzienda() {
             updatedAt: serverTimestamp()
         };
 
+        if (!currentAziendaId) {
+            data.createdAt = serverTimestamp();
+            data.colorIndex = Math.floor(Math.random() * 10);
+        }
+
         // Logo & Photo
         const logoSrc = document.getElementById('logo-preview')?.src;
         if (logoSrc?.startsWith('data:')) data.logo = await resizeImage(logoSrc, 400);
@@ -707,9 +723,17 @@ async function saveAzienda() {
         }
         data.allegati = [...existingAttachments, ...newAtt];
 
-        await updateDoc(doc(db, "users", currentUid, "aziende", currentAziendaId), data);
-        showToast(t('success_save') || "Azienda salvata con successo!", "success");
-        setTimeout(() => window.location.href = `dati_azienda.html?id=${currentAziendaId}`, 1000);
+        if (currentAziendaId) {
+            await updateDoc(doc(db, "users", currentUid, "aziende", currentAziendaId), data);
+            showToast(t('success_save') || "Azienda salvata con successo!", "success");
+            setTimeout(() => window.location.href = `dati_azienda.html?id=${currentAziendaId}`, 1000);
+        } else {
+            const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
+            const colRef = collection(db, "users", currentUid, "aziende");
+            const newDoc = await addDoc(colRef, data);
+            showToast(t('success_save') || "Azienda creata con successo!", "success");
+            setTimeout(() => window.location.href = `dati_azienda.html?id=${newDoc.id}`, 1000);
+        }
     } catch (e) {
         logError("Save", e);
         showToast(t('error_generic'), "error");

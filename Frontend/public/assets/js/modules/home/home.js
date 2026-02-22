@@ -288,7 +288,7 @@ function setupFABGroup(aziendes = []) {
                     } else if (aziendes.length > 1) {
                         window.location.href = 'lista_aziende.html?select=1';
                     } else {
-                        window.location.href = 'aggiungi_nuova_azienda.html';
+                        window.location.href = 'modifica_azienda.html';
                     }
                 }
             }, [

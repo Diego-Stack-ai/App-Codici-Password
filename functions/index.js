@@ -13,48 +13,29 @@ const { getParams } = require("firebase-functions/params");
 admin.initializeApp();
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 
-// Recupero parametri da Firebase Params//
-//const clientEmail = getParams().gmail.client_email.value();//
+// Recupero parametri da Firebase Params (OAuth disabilitato per App Password)
+//const clientEmail = getParams().gmail.client_email.value();
 const clientEmail = "gmail-sender@halogen-acumen-473312-f4.iam.gserviceaccount.com";
 
-//const privateKey = getParams().gmail.private_key.value().replace(/\\n/g, '\n');//
-
-const privateKey = `-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDP+7cWpJ6eaVrB\nFn2ZVQ4n2GpEzRtUOX1k31zyN3B1klIXhxe8T5oNWZ+vBiUIZ0mt51LjslhnTyP4\n9cTh10I/drCVzE8vELfIBKbpCkKC1GjVP8Rad8Ln/hZ0nDY/ktAZKqiZ34qiQU1V\nrcIVU81MHMhj2MWwhkKROq1vCpIonjcnEKfslWov7fwBsBmFDqgapTvDRGaTz3/M\nq5Xs3GEFAyfdcUCcPdTfwT9L08obogr7R21ibMS9Pdo9uqGLgOqhQVUa/J7K/97w\nGI2xdoAkc5Xc1mfVgjDb+V/DYFRxQUvALCFdbWV/xN02uky11HgobcyKKIJ7pFUJ\ngR0zx8slAgMBAAECggEAAvkTv0/pfiIxzE8uytS1N+SXQElReeOIfO4+CeHsMM7Z\nCMHczDHnGQgnvC/xf5LaZSrIiIpLSs7BMntw4QZbfN5Zdj3nzXU6Hn9sICpBYSIs\n89kBf+zBhuEFUsCY4rfA7PTEv2funcfvlXXyYq1CYszwIF1AFit7ibZPaSYhiLfg\nbxwGLIyxf8BOFztUnt5bg7JRZWZzgIFr/mqEi5QfTSyRpon3LeX1ePzkrOfqbeba\nHR8eTny5ebjoF+8sh0RZtf0mkjJtgl8Y0z4EyCksgq3cJlEa1S5RRdfJbTsrp3Y5\nWKIGyB78cmpVbWXiicacSPOIc61FYlTKxGGgP+v/gQKBgQD5s4mty3V0uNqcAx5D\nR3FljQef2ptCWdJiOZ3LIU2ryb2xgkfQWBiMs70imnAPRHdIxkaHO+dsXS6NeT8K\nfF90WMXX5TOW9xMnFRF6kVug6FeoGXj6hsORKUQc+jKfsPiOdVAYUaz+qiELErd2\nDoJtYLcSGjXSQAIWq0KDZx1YrQKBgQDVOsfGKRX/nl7zP/wf+CemHka8/zhOtGFS\n9g6DY/grJhnXcnCs3DXZnwSIMqYm/wrWG76YikGVkziPNzzwdkvTNjYI3aDiqcjd\nsV6DxfAO7vIOSeiXGDahLz+gS0+RfYey5H/waUYKMgK+UePP+B0Cz6I7axrXsU+G\naNltbz+zWQKBgQDlssnBDTu0LuQyxg+NtmfTEgPkghV22OfWocfM94rar4+HfiAP\nwSp8LE+dSFIzSTktwe9ZMbr2jVVooRNj0vuALLV6oAZwJkMBHblhddvDTlhsc1o9\no8C9hSd6PJJbIlHTwoj2hhPMhLY22HXZ7QkAEwr1ZRUDnwwMzGg4Np/hVQKBgHmW\nDPhH0U1zBv15zNCF9kXZGckHVxo57Q0bVWdCh+5CyZV6ohlPcD1pWXI4P1oZMBqq\ns2HT5FXgHu47Nzp+mfoT/XfMuMLGwcz4KMbHBX3ebpQLPN97ZRtAD+3dQ7/Ybppp\nhTKXNOL3ZW0U0OxztEc4EnADQMkhSBGClAi82PvxAoGBAPX3E4+KfYeZjAh6jzBZ\nqtJvPUKI5fZLyNhEuCn/8g1eAGk5qkf2gHNVtDi+6uMgI/Wzoeqi2OVdbVbCY+j1\n/EcdLg2onANNxQhZoYtTZYwLMJW5yF1sv4imtf3jzhlwgEinWiNo1QQmOqjib38K\nj9X1ibdne6rvj6XbFFYAZSlA\n-----END PRIVATE KEY-----\n`
-
 // Email account da usare come mittente
-const MAIL_USER = "amministrazione.bmservice@gmail.com";
+const MAIL_USER = "boschettodiego@gmail.com";
+// TODO: INSERISCI LA TUA PASSWORD PER LE APP QUI SOTTO
+const MAIL_APP_PASSWORD = "nhwrwwhfetubfvif";
 
-// JWT client per Gmail API
-const jwtClient = new google.auth.JWT(
-  clientEmail,
-  null,
-  privateKey,
-  ["https://www.googleapis.com/auth/gmail.send"]
-);
-
-// Funzione helper per generare access token valido
-async function getAccessToken() {
-  await jwtClient.authorize();
-  return jwtClient.credentials.access_token;
-}
-
-// Crea transporter Nodemailer con OAuth2
+// Crea transporter Nodemailer con App Password
 async function createTransporter() {
-  const accessToken = await getAccessToken();
-
   return nodemailer.createTransport({
     service: "gmail",
     auth: {
-      type: "OAuth2",
       user: MAIL_USER,
-      accessToken: accessToken
+      pass: MAIL_APP_PASSWORD
     }
   });
 }
 
-// Funzione schedulata per controllare scadenze
-exports.checkDeadlines = onSchedule("0 8 * * *", async () => {
-  const db = admin.firestore();
+const { onRequest } = require("firebase-functions/v2/https");
+
+async function runChecks(db) {
   const now = new Date();
   const todayStr = now.toISOString().split("T")[0];
 
@@ -104,6 +85,17 @@ exports.checkDeadlines = onSchedule("0 8 * * *", async () => {
   } catch (error) {
     console.error("[CRITICAL ERROR]", error);
   }
+}
+
+// Funzione schedulata ordinaria (Cron)
+exports.checkDeadlines = onSchedule("0 8 * * *", async () => {
+  await runChecks(admin.firestore());
+});
+
+// Funzione temporanea HTTP per test immediato ORA
+exports.testScadenzeOra = onRequest(async (req, res) => {
+  await runChecks(admin.firestore());
+  res.send("✅ Test Eseguito! L'avviso per e-mail e notifiche push urgenti è stato appena processato sui server!");
 });
 
 /**
@@ -125,6 +117,11 @@ async function processNotificationChannel(db, recipientEmail, scadenza, ownerPre
           notification: {
             title: `Scadenza: ${scadenza.type}`,
             body: `Ti ricordiamo ${scadenza.type} in data ${scadenza.dueDate}.`
+          },
+          webpush: {
+            fcmOptions: {
+              link: `https://appcodici-password.web.app/dettaglio_scadenza.html?id=${scadenzaId}`
+            }
           },
           data: { scadenzaId, ownerId: ownerUid, click_action: "FLUTTER_NOTIFICATION_CLICK" }
         };
@@ -157,14 +154,26 @@ async function processNotificationChannel(db, recipientEmail, scadenza, ownerPre
 async function sendNotificationEmail(scadenza, recipient) {
   const transporter = await createTransporter();
 
+  // Parsing Allegati
+  const mailAttachments = [];
+  if (scadenza.attachments && Array.isArray(scadenza.attachments)) {
+    scadenza.attachments.forEach(att => {
+      mailAttachments.push({
+        filename: att.name || "allegato_scadenza",
+        path: att.url // Nodemailer scarica automaticamente il file pubblico
+      });
+    });
+  }
+
   const mailOptions = {
-    from: `"BM SERVICE - Protocollo" <${MAIL_USER}>`,
+    from: `"Codex Scadenze" <${MAIL_USER}>`,
     to: recipient,
     subject: `[SCADENZA] ${scadenza.type}`,
     text: `Gentile ${scadenza.name || "Cliente"},\n\nTi ricordiamo la seguente scadenza:\n\n` +
       `Oggetto: ${scadenza.type}\n` +
       `Data Scadenza: ${scadenza.dueDate}\n` +
-      `Note: ${scadenza.notes || "-"}\n\nCordiali saluti,\nBM Service s.r.l.`
+      `Note: ${scadenza.notes || "-"}\n\nCordiali saluti,\nCodex Team.`,
+    attachments: mailAttachments
   };
 
   return transporter.sendMail(mailOptions);

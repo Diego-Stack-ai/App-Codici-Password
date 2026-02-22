@@ -1,0 +1,110 @@
+diff --git a/Frontend/public/dettaglio_account_azienda.html b/Frontend/public/dettaglio_account_azienda.html
+index 63f0883..d4d0b8f 100644
+--- a/Frontend/public/dettaglio_account_azienda.html
++++ b/Frontend/public/dettaglio_account_azienda.html
+@@ -65,9 +65,10 @@
+ 
+                             <form onsubmit="return false;" autocomplete="off">
+                                 <!-- Anti-autofill trap (V5.9.2) -->
+-                                <div class="anti-autofill-trap" aria-hidden="true">
+-                                    <input type="text" name="username" tabindex="-1" />
+-                                    <input type="password" name="password" tabindex="-1" />
++                                <div class="anti-autofill-trap" aria-hidden="true"
++                                    style="position: absolute; left: -9999px;">
++                                    <input type="text" name="g7k9_us3r" tabindex="-1" />
++                                    <input type="text" name="b2m4_p4ss" tabindex="-1" />
+                                 </div>
+ 
+                                 <!-- Nome Account -->
+@@ -117,7 +118,8 @@
+                                 <div class="glass-field-container">
+                                     <label class="view-label" for="detail-password" data-t="password">Password</label>
+                                     <div class="detail-field-box border-glow">
+-                                        <input id="detail-password" type="password" readonly
++                                        <input id="detail-password" type="text" style="-webkit-text-security: disc;"
++                                            readonly
+                                             class="detail-field-input base-shield field-value-password no-transform"
+                                             autocomplete="new-password" spellcheck="false">
+                                         <div class="detail-field-actions">
+diff --git a/Frontend/public/dettaglio_account_privato.html b/Frontend/public/dettaglio_account_privato.html
+index b5d98d1..e2b6d71 100644
+--- a/Frontend/public/dettaglio_account_privato.html
++++ b/Frontend/public/dettaglio_account_privato.html
+@@ -71,9 +71,10 @@
+ 
+                             <form onsubmit="return false;" autocomplete="off">
+                                 <!-- Anti-autofill trap (V5.9.2) -->
+-                                <div class="anti-autofill-trap" aria-hidden="true">
+-                                    <input type="text" name="username" tabindex="-1" />
+-                                    <input type="password" name="password" tabindex="-1" />
++                                <div class="anti-autofill-trap" aria-hidden="true"
++                                    style="position: absolute; left: -9999px;">
++                                    <input type="text" name="h4j7_u5er" tabindex="-1" />
++                                    <input type="text" name="v9k2_p4ss" tabindex="-1" />
+                                 </div>
+ 
+                                 <!-- Nome Account -->
+@@ -123,7 +124,8 @@
+                                 <div class="glass-field-container">
+                                     <label class="view-label" for="detail-password" data-t="password">Password</label>
+                                     <div class="detail-field-box border-glow">
+-                                        <input id="detail-password" type="password" readonly
++                                        <input id="detail-password" type="text" style="-webkit-text-security: disc;"
++                                            readonly
+                                             class="detail-field-input base-shield field-value-password no-transform"
+                                             autocomplete="new-password" spellcheck="false">
+                                         <div class="detail-field-actions">
+diff --git a/Frontend/public/form_account_azienda.html b/Frontend/public/form_account_azienda.html
+index b8b53f0..4cce218 100644
+--- a/Frontend/public/form_account_azienda.html
++++ b/Frontend/public/form_account_azienda.html
+@@ -68,9 +68,9 @@
+                 <div class="detail-content-wrap">
+                     <form id="account-form" autocomplete="off" onsubmit="return false">
+                         <!-- Anti-autofill trap (V5.9.2) -->
+-                        <div class="anti-autofill-trap" aria-hidden="true">
+-                            <input type="text" name="username" tabindex="-1" />
+-                            <input type="password" name="password" tabindex="-1" />
++                        <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left:-9999px;">
++                            <input type="text" name="r4nd0m_u5er" tabindex="-1" />
++                            <input type="text" name="r4nd0m_p4ss" tabindex="-1" />
+                         </div>
+ 
+                         <!-- 1. Dati Principali -->
+@@ -120,7 +120,8 @@
+                                             data-t="password">Password</label>
+                                         <div class="glass-field border-glow">
+                                             <span class="material-symbols-outlined ml-4 opacity-40">lock</span>
+-                                            <input id="account-password" type="password" class="field-input base-shield"
++                                            <input id="account-password" type="text"
++                                                style="-webkit-text-security: disc;" class="field-input base-shield"
+                                                 data-t-placeholder="password_placeholder" autocomplete="new-password"
+                                                 spellcheck="false" />
+                                             <button id="btn-toggle-password-edit" type="button"
+diff --git a/Frontend/public/form_account_privato.html b/Frontend/public/form_account_privato.html
+index e0ab85f..cbb735d 100644
+--- a/Frontend/public/form_account_privato.html
++++ b/Frontend/public/form_account_privato.html
+@@ -68,9 +68,9 @@
+                 <div class="detail-content-wrap">
+                     <form id="account-form" autocomplete="off" onsubmit="return false">
+                         <!-- Anti-autofill trap (V5.9.2) -->
+-                        <div class="anti-autofill-trap" aria-hidden="true">
+-                            <input type="text" name="username" tabindex="-1" />
+-                            <input type="password" name="password" tabindex="-1" />
++                        <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
++                            <input type="text" name="r8v2_u5er" tabindex="-1" />
++                            <input type="text" name="m3p9_p4ss" tabindex="-1" />
+                         </div>
+ 
+                         <!-- 1. Dati Principali -->
+@@ -120,7 +120,8 @@
+                                             data-t="password">Password</label>
+                                         <div class="glass-field border-glow">
+                                             <span class="material-symbols-outlined ml-4 opacity-40">lock</span>
+-                                            <input id="account-password" type="password" class="field-input base-shield"
++                                            <input id="account-password" type="text"
++                                                style="-webkit-text-security: disc;" class="field-input base-shield"
+                                                 data-t-placeholder="password_placeholder" autocomplete="new-password"
+                                                 spellcheck="false" />
+                                             <button id="btn-toggle-password-edit" type="button"
