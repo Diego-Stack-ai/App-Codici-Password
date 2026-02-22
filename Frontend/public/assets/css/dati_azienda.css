@@ -409,6 +409,8 @@ html:not(.dark) .glass-card {
     justify-content: center;
     border: 1px solid rgba(16, 185, 129, 0.2);
     transition: all 0.2s;
+    font-family: inherit;
+    text-decoration: none;
 }
 
 /* --- 5. NOTE SECTION --- */
@@ -452,6 +454,7 @@ html:not(.dark) .glass-card {
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
+    font-family: inherit;
 }
 
 .btn-mini-section-action.action-amber {
@@ -479,71 +482,10 @@ html:not(.dark) .glass-card {
     border: none;
     cursor: pointer;
     opacity: 0.7;
+    font-family: inherit;
 }
 
-/* --- 6. MODALS (QR ZOOM) --- */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.modal-box-qr {
-    background: #1e1e1e;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 30px;
-    padding: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    position: relative;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    max-width: 90vw;
-}
-
-.qr-zoom-container {
-    padding: 1rem;
-    background: white;
-    border-radius: 16px;
-}
-
-.qr-scan-text {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-}
-
-.btn-modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
+/* --- 6. MODALS — definiti in core_ui.css, non duplicare qui --- */
 
 /* --- 7. UTILITY --- */
 .flex-col-gap {
@@ -607,6 +549,7 @@ html:not(.dark) .glass-card {
     cursor: pointer;
     background: rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.4);
+    font-family: inherit;
 }
 
 .location-tab-btn span.material-symbols-outlined {
