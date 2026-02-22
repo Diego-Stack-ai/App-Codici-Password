@@ -322,6 +322,14 @@ Il CSP è il "perimetro di difesa" dell'app. Non usiamo una configurazione permi
 - Autorizza specificamente lo script inline di inizializzazione tema (`theme-init.js` logic) senza abilitare `unsafe-inline` per tutti gli script, proteggendo l'integrità dell'app.
 - Se modifichi lo script inline in `index.html`, devi ricalcolare l'hash e aggiornare questa guida e tutti i file HTML, altrimenti l'app si bloccherà per violazione di sicurezza.
 
+**💡 Eccezione per lo Sviluppo Locale (Nota Operativa):**
+Durante l'uso di **Live Server** o i **Chrome DevTools**, potresti vedere errori in console che bloccano connessioni a `127.0.0.1` o `ws://...` (usati per il refresh automatico o il debugging). 
+Per silenziare questi errori "rumorosi" durante lo sviluppo, puoi aggiungere temporaneamente l'eccezione locale alla direttiva `connect-src`:
+```text
+connect-src 'self' http://127.0.0.1:* ws://127.0.0.1:* https://*.googleapis.com ...
+```
+⚠️ **ATTENZIONE**: Questa eccezione è strettamente per uso locale. Prima della messa in produzione o del deploy su Firebase, il CSP deve essere riportato allo standard rigoroso senza riferimenti a `127.0.0.1`.
+
 ### 8.3 Sicurezza Form & Anti-Autofill (Standard V6.1.0 Hardened)
 ### Spiegazione umana:
 I browser moderni e i password manager (Chrome, Safari, 1Password, ecc.) sono estremamente aggressivi e tentano di autocompilare o proporre il salvataggio per qualsiasi campo `type="password"` visibile. In un'app che gestisce le password di account terzi (come App Codici Password), questo causa problemi critici: il browser tenterà di salvare la password dell'account del cliente, sovrascrivendola a quella di accesso dell'app stessa. Dobbiamo inibire totalmente questo comportamento con un pattern specifico a 4 livelli.
@@ -629,3 +637,49 @@ Sfruttiamo l'autenticazione API nativa Google (`googleapis` + `JWT Client`) usan
 
 ✅ **PROTOCOLLO V5.1 MASTER — DOCUMENTAZIONE COMPLETA.**
 Questa guida è ora il tuo unico manuale operativo. Non deviare dalla via maestra.
+
+---
+
+## 20. MODALITÀ OFFLINE E SICUREZZA LOCALE (ROADMAP STRATEGICA)
+
+### 20.1 🎯 Obiettivo
+L’app dovrà permettere la navigazione tra gli account e l’accesso ai dati essenziali anche in assenza di connessione internet. Lo scenario d’uso principale è il seguente:
+- **Utente senza segnale** che necessita di accedere a un’informazione critica (es. PIN Bancomat, codice carta, credenziali di emergenza).
+L’obiettivo è rendere l’utente autonomo anche offline, evitando blocchi operativi in situazioni critiche.
+
+### 20.2 ⚠️ Premessa Importante
+In assenza di connessione:
+- L’accesso a username/password di siti web potrebbe non essere immediatamente utile.
+- Tuttavia, codici fisici (**PIN, codici carte, codici emergenza**) possono risultare fondamentali.
+
+È quindi necessario distinguere tra:
+- **🔹 Credenziali “web”**
+- **🔹 Dati sensibili di utilizzo fisico** (PIN, codici carta, ecc.) — *Priorità Offline*
+
+### 20.3 🔐 Tema Critico: Sicurezza dei Dati Locali
+Consentire l'accesso offline significa salvare dati sensibili in locale sul dispositivo. Questo introduce rischi significativi in caso di smarrimento, furto o accesso fisico non autorizzato. La modalità offline deve quindi essere progettata con un modello **“zero trust locale”**.
+
+### 20.4 🔒 Linee Guida di Sicurezza Obbligatorie
+
+1. **1️⃣ Cifratura Locale Forte**:
+   - Tutti i dati sensibili devono essere cifrati in locale. Nessun dato leggibile in chiaro nel filesystem.
+   - Utilizzo di chiavi derivate dalla master password o secure enclave del dispositivo.
+2. **2️⃣ Sblocco Biometrico Obbligatorio**:
+   - Accesso ai dati offline consentito solo tramite **Biometria** (FaceID / Fingerprint) o **Master password**. Mai accesso diretto automatico.
+3. **3️⃣ Separazione dei Livelli di Sensibilità**:
+   - Possibile evoluzione: Livello base visibile offline, Livello critico (PIN, carte) visibile solo dopo un secondo livello di autenticazione.
+4. **4️⃣ Auto-Lock & Auto-Purge**:
+   - Blocco automatico dopo inattività e cancellazione delle cache temporanee. Nessun dato lasciato in memoria oltre il tempo necessario.
+
+### 20.5 🧠 Decisione Architetturale da Prendere
+**Domanda chiave**: Vogliamo che tutti gli account siano disponibili offline o solo quelli marcati come “Accesso Emergenza”?
+**Possibile soluzione evoluta**:
+- Inserire un Toggle **“Disponibile Offline”** per ogni account.
+- Sincronizzazione cifrata locale solo per gli elementi marcati. Questo riduce drasticamente il rischio.
+
+### 20.6 ⚖️ Considerazione Strategica
+Un’app che contiene PIN Bancomat, codici carte di credito e password critiche diventa un **“Single Point of Failure”**. L’obiettivo non deve essere solo funzionale, ma **ridurre il danno massimo possibile** in caso di compromissione del dispositivo.
+
+### 20.7 📌 Conclusione
+La modalità offline è un’evoluzione strategica importante, ma deve essere implementata solo con cifratura robusta, autenticazione forte e minimizzazione dei dati salvati. 
+**La sicurezza non può essere un’aggiunta successiva: deve essere parte integrante della progettazione.**

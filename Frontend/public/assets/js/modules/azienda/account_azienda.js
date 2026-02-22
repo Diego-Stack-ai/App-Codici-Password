@@ -59,7 +59,7 @@ function setupUI() {
         clearElement(hLeft);
         setChildren(hLeft, createElement('button', {
             className: 'btn-icon-header',
-            onclick: () => window.location.href = `dettaglio_azienda.html?id=${currentAziendaId}`
+            onclick: () => window.location.href = `dati_azienda.html?id=${currentAziendaId}`
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
         ]));

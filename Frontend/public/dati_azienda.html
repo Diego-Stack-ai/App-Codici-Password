@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -86,7 +86,7 @@
                                 class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
                         </button>
 
-                        <div id="referente-container" class="mt-content hidden-content">
+                        <div id="referente-container" class="mt-content hidden">
                             <div class="glass-card">
                                 <div class="referent-header">
                                     <div class="referent-avatar-box">
@@ -105,7 +105,8 @@
                                 </div>
 
                                 <div class="glass-field-container">
-                                    <label class="view-label" data-t="whatsapp_number">Cellulare / WhatsApp</label>
+                                    <label class="view-label" for="referente-cellulare"
+                                        data-t="whatsapp_number">Cellulare / WhatsApp</label>
                                     <div class="detail-field-box border-glow">
                                         <span
                                             class="material-symbols-outlined icon-field-left opacity-low">smartphone</span>
@@ -153,7 +154,7 @@
 
                         <div class="glass-card flex-col-gap">
                             <div class="glass-field-container">
-                                <label class="view-label" data-t="phone">Telefono</label>
+                                <label class="view-label" for="telefono-azienda" data-t="phone">Telefono</label>
                                 <div class="detail-field-box border-glow">
                                     <span class="material-symbols-outlined icon-field-left opacity-low">call</span>
                                     <input id="telefono-azienda" readonly class="detail-field-input no-transform"
@@ -171,7 +172,7 @@
                             </div>
 
                             <div class="glass-field-container">
-                                <label class="view-label" data-t="fax">Fax</label>
+                                <label class="view-label" for="fax-azienda" data-t="fax">Fax</label>
                                 <div class="detail-field-box border-glow">
                                     <span class="material-symbols-outlined icon-field-left opacity-low">fax</span>
                                     <input id="fax-azienda" readonly class="detail-field-input no-transform" value="-">
@@ -202,7 +203,7 @@
                                     class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
                             </div>
                         </button>
-                        <div id="email-list-container" class="mt-content hidden-content">
+                        <div id="email-list-container" class="mt-content hidden">
                             <!-- Generato via JS -->
                         </div>
                     </section>
@@ -224,10 +225,10 @@
                             </div>
                         </button>
 
-                        <div id="fiscal-container" class="mt-content hidden-content">
+                        <div id="fiscal-container" class="mt-content hidden">
                             <div class="glass-card flex-col-gap">
                                 <div class="glass-field-container">
-                                    <label class="view-label" data-t="vat_number">Partita IVA</label>
+                                    <label class="view-label" for="piva" data-t="vat_number">Partita IVA</label>
                                     <div class="detail-field-box border-glow">
                                         <input id="piva" readonly class="detail-field-input" value="-">
                                         <div class="detail-field-actions">
@@ -240,7 +241,7 @@
                                 </div>
 
                                 <div class="glass-field-container">
-                                    <label class="view-label" data-t="sdi_code">Codice SDI</label>
+                                    <label class="view-label" for="codice-sdi" data-t="sdi_code">Codice SDI</label>
                                     <div class="detail-field-box border-glow">
                                         <input id="codice-sdi" readonly class="detail-field-input" value="-">
                                         <div class="detail-field-actions">
@@ -253,7 +254,8 @@
                                 </div>
 
                                 <div class="glass-field-container">
-                                    <label class="view-label" data-t="cciaa_number">CCIAA (Numero Iscrizione)</label>
+                                    <label class="view-label" for="cciaa" data-t="cciaa_number">CCIAA (Numero
+                                        Iscrizione)</label>
                                     <div class="detail-field-box border-glow">
                                         <input id="cciaa" readonly class="detail-field-input" value="-">
                                         <div class="detail-field-actions">
@@ -266,7 +268,8 @@
                                 </div>
 
                                 <div class="glass-field-container">
-                                    <label class="view-label" data-t="registration_date">Data Iscrizione</label>
+                                    <label class="view-label" for="data-iscrizione" data-t="registration_date">Data
+                                        Iscrizione</label>
                                     <div class="detail-field-box border-glow">
                                         <input id="data-iscrizione" readonly class="detail-field-input text-primary"
                                             value="-">
@@ -310,7 +313,7 @@
                                 class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
                         </button>
 
-                        <div id="allegati-container" class="mt-content hidden-content">
+                        <div id="allegati-container" class="mt-content hidden">
                             <div id="allegati-list" class="flex-col-gap-xs">
                                 <p class="no-attachments-text" data-t="no_attachments">Nessun allegato</p>
                             </div>

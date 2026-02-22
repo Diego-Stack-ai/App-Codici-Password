@@ -45,7 +45,7 @@ export function observeAuth(callback) {
  * @param {string} email - User's email.
  * @param {string} password - User's password.
  */
-async function register(nome, cognome, email, password) {
+async function register(nome, cognome, email, password, prefPush = true, prefEmail = true) {
     try {
         // Client-side Password Validation (Protocollo 12-3-3)
         if (password.length < 12) {
@@ -75,7 +75,9 @@ async function register(nome, cognome, email, password) {
             email: email,
             createdAt: new Date(),
             photoURL: "",
-            settings: { theme: 'system' }
+            settings: { theme: 'system' },
+            pref_push_enabled: prefPush,
+            pref_email_enabled: prefEmail
         });
 
         // Send email verification (optional but recommended)
@@ -85,9 +87,6 @@ async function register(nome, cognome, email, password) {
 
         showToast("Registrazione avvenuta con successo!", "success");
 
-        // Removed automatic redirect to allow user to see verification modal.
-        // You can navigate manually after verification.
-
         return true;
 
     } catch (error) {
@@ -96,14 +95,13 @@ async function register(nome, cognome, email, password) {
         if (error.code === 'auth/email-already-in-use') {
             message = "Questa email è già registrata.";
         } else if (error.code === 'auth/weak-password') {
-            message = "La password è troppo debole (min. 6 caratteri).";
-        } else if (error.code === 'auth/weak-password-special') {
+            message = "La password è troppo debole (min. 12 caratteri).";
+        } else if (error.code === 'auth/weak-password-upper' || error.code === 'auth/weak-password-symbols') {
             message = error.message;
         } else if (error.code === 'auth/network-request-failed') {
             message = "Problema di connessione. Riprova.";
         }
         showToast(message, "error");
-        alert(message); // Fallback alert ensures visibility if notification fails
         return false;
     }
 }

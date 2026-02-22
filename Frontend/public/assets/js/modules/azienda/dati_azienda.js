@@ -276,13 +276,25 @@ function renderEmailCategories(data) {
     if (!container) return;
 
     const emailEntries = [
-        { id: 'pec', label: 'PEC', icon: 'verified_user', email: data.aziendaEmail || data.emails?.pec?.email, password: data.emails?.pec?.password || data.aziendaEmailPassword },
-        { id: 'amministrazione', label: 'Amm.ne', icon: 'payments', email: data.emails?.amministrazione?.email, password: data.emails?.amministrazione?.password },
-        { id: 'personale', label: 'Personale', icon: 'group', email: data.emails?.personale?.email, password: data.emails?.personale?.password },
-        { id: 'manutenzione', label: 'Manutenz.', icon: 'build_circle', email: data.emails?.manutenzione?.email, password: data.emails?.manutenzione?.password },
-        { id: 'attrezzatura', label: 'Attrezzat.', icon: 'precision_manufacturing', email: data.emails?.attrezzatura?.email, password: data.emails?.attrezzatura?.password },
-        { id: 'magazzino', label: 'Magazzino', icon: 'inventory_2', email: data.emails?.magazzino?.email, password: data.emails?.magazzino?.password }
+        { id: 'pec', label: data.emails?.pec?.tipo || 'PEC', icon: 'verified_user', email: data.aziendaEmail || data.emails?.pec?.email, password: data.emails?.pec?.password || data.aziendaEmailPassword },
+        { id: 'amministrazione', label: data.emails?.amministrazione?.tipo || 'Amm.ne', icon: 'payments', email: data.emails?.amministrazione?.email, password: data.emails?.amministrazione?.password },
+        { id: 'personale', label: data.emails?.personale?.tipo || 'Personale', icon: 'group', email: data.emails?.personale?.email, password: data.emails?.personale?.password }
     ].filter(c => c.email);
+
+    // Add Extra Emails
+    if (data.emails?.extra && Array.isArray(data.emails.extra)) {
+        data.emails.extra.forEach((e, i) => {
+            if (e.email) {
+                emailEntries.push({
+                    id: `extra-${i}`,
+                    label: e.tipo || 'Email',
+                    icon: 'mail',
+                    email: e.email,
+                    password: e.password
+                });
+            }
+        });
+    }
 
     if (emailEntries.length > 0) {
         wrap?.classList.remove('hidden');
@@ -418,10 +430,31 @@ function buildVCard(data) {
         v += `TEL;TYPE=CELL:${data.referenteCellulare}\n`;
     }
 
-    // Email (PEC) - Key map: aziendaEmail (from modify page flag) -> matches data.emails.pec
+    // Email (PEC)
     const pecEmail = data.emails?.pec?.email || data.aziendaEmail;
     if (config.aziendaEmail !== false && pecEmail) {
         v += `EMAIL;TYPE=WORK,INTERNET:${pecEmail}\n`;
+    }
+
+    // Email (Amministrazione)
+    const adminEmail = data.emails?.amministrazione?.email;
+    if (config.adminEmail && adminEmail) {
+        v += `EMAIL;TYPE=WORK,INTERNET:${adminEmail}\n`;
+    }
+
+    // Email (Personale)
+    const persEmail = data.emails?.personale?.email;
+    if (config.persEmail && persEmail) {
+        v += `EMAIL;TYPE=HOME,INTERNET:${persEmail}\n`;
+    }
+
+    // Extra Emails
+    if (data.emails?.extra && Array.isArray(data.emails.extra)) {
+        data.emails.extra.forEach(e => {
+            if (e.qr !== false && e.email) {
+                v += `EMAIL;TYPE=WORK,INTERNET:${e.email}\n`;
+            }
+        });
     }
 
     // Extra Data in NOTE or Custom Fields

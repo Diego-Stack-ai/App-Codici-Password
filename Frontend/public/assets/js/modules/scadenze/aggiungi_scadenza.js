@@ -5,7 +5,7 @@
  */
 
 import { db, auth, storage } from '../../firebase-config.js';
-import { collection, addDoc, Timestamp, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { EMAILS, buildEmailSubject } from './scadenza_templates.js';
@@ -85,6 +85,9 @@ export async function initAggiungiScadenza(user) {
 
     initProxyDropdowns();
     initAttachmentSystem();
+    setupNotificationChannels();
+    setupMultiSelects();
+    await loadPushUsers();
 
     // --- FOOTER ACTIONS SYSTEM (Home Page Style) ---
     const interval = setInterval(() => {
@@ -536,6 +539,152 @@ function updateAttachmentsUI() {
     }
 }
 
+/**
+ * Logica Canali di Notifica (Push/Email)
+ */
+function setupNotificationChannels() {
+    const channelSelect = document.getElementById('notif_channel_select');
+    const pushWrapper = document.getElementById('push_recipients_wrapper');
+    const emailWrapper = document.getElementById('email_recipients_wrapper');
+
+    if (!channelSelect) return;
+
+    channelSelect.addEventListener('change', () => {
+        const val = channelSelect.value;
+        if (val === 'push') {
+            pushWrapper?.classList.remove('hidden');
+            emailWrapper?.classList.add('hidden');
+        } else if (val === 'email') {
+            pushWrapper?.classList.add('hidden');
+            emailWrapper?.classList.remove('hidden');
+        } else if (val === 'both') {
+            pushWrapper?.classList.remove('hidden');
+            emailWrapper?.classList.remove('hidden');
+        } else {
+            pushWrapper?.classList.add('hidden');
+            emailWrapper?.classList.add('hidden');
+        }
+    });
+}
+
+/**
+ * Caricamento Utenti per Push (dalla Rubrica)
+ */
+async function loadPushUsers() {
+    if (!currentUser) return;
+    const menu = document.getElementById('push_users_menu');
+    const nativeSelect = document.getElementById('push_users_select');
+    if (!menu || !nativeSelect) return;
+
+    try {
+        const snap = await getDocs(collection(db, "users", currentUser.uid, "contacts"));
+        clearElement(menu);
+        clearElement(nativeSelect);
+
+        if (snap.empty) {
+            menu.appendChild(createElement('div', { className: 'dropdown-option disabled', textContent: 'Nessun contatto salvato' }));
+            return;
+        }
+
+        snap.forEach(docSnap => {
+            const contact = docSnap.data();
+            const displayName = `${contact.nome} ${contact.cognome || ''}`.trim();
+            const email = contact.email; // Usiamo l'email come identificatore per ora
+
+            const opt = createElement('div', {
+                className: 'dropdown-option',
+                dataset: { value: email, label: displayName },
+                textContent: displayName,
+                onclick: (e) => {
+                    e.stopPropagation();
+                    togglePushRecipient(email, displayName);
+                }
+            });
+            menu.appendChild(opt);
+
+            const nativeOpt = new Option(displayName, email);
+            nativeSelect.appendChild(nativeOpt);
+        });
+
+        // Se abbiamo già dei destinatari selezionati (es. caricati da Edit), aggiorniamo le label reali dalla rubrica
+        if (selectedPushRecipients.length > 0) {
+            selectedPushRecipients.forEach(r => {
+                const found = Array.from(nativeSelect.options).find(opt => opt.value === r.email);
+                if (found) r.label = found.textContent;
+            });
+            updatePushChips();
+        }
+
+    } catch (e) {
+        console.error("Load Push Users Error:", e);
+    }
+}
+
+let selectedPushRecipients = []; // Array di {email, label}
+
+function togglePushRecipient(email, label) {
+    const idx = selectedPushRecipients.findIndex(r => r.email === email);
+    if (idx === -1) {
+        selectedPushRecipients.push({ email, label });
+    } else {
+        selectedPushRecipients.splice(idx, 1);
+    }
+    updatePushChips();
+    syncNativePushSelect();
+}
+
+function updatePushChips() {
+    const container = document.getElementById('selected_push_chips');
+    const menu = document.getElementById('push_users_menu');
+    if (!container) return;
+    clearElement(container);
+
+    selectedPushRecipients.forEach(r => {
+        const chip = createElement('div', { className: 'selected-chip' }, [
+            createElement('span', { className: 'chip-text', textContent: r.label }),
+            createElement('span', {
+                className: 'material-symbols-outlined chip-remove',
+                textContent: 'cancel',
+                onclick: (e) => {
+                    e.stopPropagation();
+                    togglePushRecipient(r.email, r.label);
+                }
+            })
+        ]);
+        container.appendChild(chip);
+    });
+
+    // Sync active class in menu
+    if (menu) {
+        menu.querySelectorAll('.dropdown-option').forEach(opt => {
+            const val = opt.dataset.value;
+            opt.classList.toggle('active', selectedPushRecipients.some(r => r.email === val));
+        });
+    }
+}
+
+function syncNativePushSelect() {
+    const select = document.getElementById('push_users_select');
+    if (!select) return;
+    Array.from(select.options).forEach(opt => {
+        opt.selected = selectedPushRecipients.some(r => r.email === opt.value);
+    });
+}
+
+function setupMultiSelects() {
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('[data-multi-select] .dropdown-trigger');
+        if (trigger) {
+            e.stopPropagation();
+            const container = trigger.closest('[data-multi-select]');
+            const menu = container.querySelector('.base-dropdown-menu');
+            if (menu) menu.classList.toggle('show');
+        } else {
+            document.querySelectorAll('[data-multi-select] .base-dropdown-menu.show').forEach(m => m.classList.remove('show'));
+        }
+    });
+}
+
 function setupSaveLogic() {
     const btnSave = document.getElementById('save-btn');
     if (!btnSave) return;
@@ -562,8 +711,23 @@ function setupSaveLogic() {
         const email1 = (emailPrimariaSelect.value === 'manual') ? document.getElementById('email_primaria_input').value.trim() : emailPrimariaSelect.value;
         const email2 = (emailSecondariaSelect.value === 'manual') ? document.getElementById('email_secondaria_input').value.trim() : emailSecondariaSelect.value;
 
-        if (!name || !type || !date || !email1) {
+        const notifChannel = document.getElementById('notif_channel_select').value;
+        const pushRecipients = selectedPushRecipients.map(r => r.email);
+
+        if (!name || !type || !date) {
             return showToast("Compila i campi obbligatori", "error");
+        }
+
+        // Validazione Canali
+        if (notifChannel === 'email' || notifChannel === 'both') {
+            if (!email1) return showToast("Seleziona un'email per le notifiche", "error");
+        }
+        if (notifChannel === 'push' || notifChannel === 'both') {
+            if (pushRecipients.length === 0) return showToast("Seleziona almeno un utente per le notifiche push", "error");
+        }
+        if (notifChannel === 'none') {
+            const proceed = await showConfirmModal(t('notification_channel'), t('in_app_only_warn'));
+            if (!proceed) return;
         }
 
         const data = {
@@ -576,9 +740,10 @@ function setupSaveLogic() {
             dueDate: date,
             notes: document.getElementById('notes').value,
             emails: [email1, email2].filter(e => e && e !== 'manual'),
-            whatsappEnabled: document.getElementById('whatsapp_enable').checked,
+            notificationChannel: notifChannel,
+            pushRecipients: pushRecipients,
             notificationDaysBefore: parseInt(notifDaysInput.value),
-            notificationFrequency: parseInt(notifFreqInput.value), // Corretto id variabile locale
+            notificationFrequency: parseInt(notifFreqInput.value),
             createdAt: Timestamp.now(),
             status: 'active',
             completed: false
@@ -816,7 +981,22 @@ async function loadScadenzaForEdit(id) {
             dateInput.dataset.isoValue = '';
         }
         document.getElementById('notes').value = data.notes || '';
-        document.getElementById('whatsapp_enable').checked = data.whatsappEnabled || false;
+
+        // Canale Notifica
+        const channelSelect = document.getElementById('notif_channel_select');
+        if (channelSelect) {
+            channelSelect.value = data.notificationChannel || 'email';
+            channelSelect.dispatchEvent(new Event('change'));
+            // Sync proxy dropdown manually since we changed native value
+            syncCustomDropdowns();
+        }
+
+        // Destinatari Push
+        if (data.pushRecipients && Array.isArray(data.pushRecipients)) {
+            selectedPushRecipients = data.pushRecipients.map(email => ({ email, label: email }));
+            updatePushChips();
+            syncNativePushSelect();
+        }
 
         // Notifiche
         document.getElementById('notif_days_before').value = data.notificationDaysBefore || 14;

@@ -81,16 +81,40 @@ function setupRegisterForm() {
         ]);
         document.body.classList.add('is-auth-progress');
 
+        const prefPush = document.getElementById('reg-pref-push')?.checked ?? true;
+        const prefEmail = document.getElementById('reg-pref-email')?.checked ?? true;
+
+        // 3. Controllo Canali Notifica
+        if (!prefPush && !prefEmail) {
+            const proceed = await showConfirmModal(t('notifications_prefs'), t('in_app_only_warn'));
+            if (!proceed) {
+                // Riabilita bottone se annulla
+                submitBtn.disabled = false;
+                clearElement(submitBtn);
+                setChildren(submitBtn, originalContent);
+                document.body.classList.remove('is-auth-progress');
+                return;
+            }
+        }
+
         try {
             console.log("[REGISTER] Creating account...");
-            await register(nome, cognome, email, password);
+            const success = await register(nome, cognome, email, password, prefPush, prefEmail);
 
-            showToast(t('success_registration'), "success");
+            if (success) {
+                showToast(t('success_registration'), "success");
 
-            // Redirect al login dopo successo
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 3000);
+                // Redirect al login dopo successo
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 3000);
+            } else {
+                // Rimetto lo stato originale se fallisce internamente
+                submitBtn.disabled = false;
+                clearElement(submitBtn);
+                setChildren(submitBtn, originalContent);
+                document.body.classList.remove('is-auth-progress');
+            }
 
         } catch (err) {
             console.error("[REGISTER] Failure:", err);

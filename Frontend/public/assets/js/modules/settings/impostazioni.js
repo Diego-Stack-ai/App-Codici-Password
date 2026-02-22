@@ -184,6 +184,8 @@ function initSettingsEvents() {
 function setupToggles(data) {
     const t2fa = document.getElementById('2fa-toggle');
     const tFace = document.getElementById('face-id-toggle');
+    const tPush = document.getElementById('push-notify-toggle');
+    const tEmail = document.getElementById('email-notify-toggle');
 
     if (t2fa) {
         t2fa.checked = data.settings_2fa || false;
@@ -196,7 +198,7 @@ function setupToggles(data) {
                 }
             } catch (e) {
                 console.error("Error saving 2FA:", e);
-                t2fa.checked = !val; // Revert on error
+                t2fa.checked = !val;
                 showToast(t('error_config_save') || "Errore salvataggio", "error");
             }
         });
@@ -213,8 +215,42 @@ function setupToggles(data) {
                 }
             } catch (e) {
                 console.error("Error saving Biometric:", e);
-                tFace.checked = !val; // Revert on error
+                tFace.checked = !val;
                 showToast(t('error_config_save') || "Errore salvataggio", "error");
+            }
+        });
+    }
+
+    if (tPush) {
+        tPush.checked = data.pref_push_enabled !== false; // Default true
+        tPush.addEventListener('change', async () => {
+            const val = tPush.checked;
+            try {
+                if (auth.currentUser) {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { pref_push_enabled: val });
+                    showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
+                }
+            } catch (e) {
+                console.error("Error saving Push Pref:", e);
+                tPush.checked = !val;
+                showToast("Errore salvataggio", "error");
+            }
+        });
+    }
+
+    if (tEmail) {
+        tEmail.checked = data.pref_email_enabled !== false; // Default true
+        tEmail.addEventListener('change', async () => {
+            const val = tEmail.checked;
+            try {
+                if (auth.currentUser) {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { pref_email_enabled: val });
+                    showToast(val ? "Notifiche Email Attivate" : "Notifiche Email Disattivate");
+                }
+            } catch (e) {
+                console.error("Error saving Email Pref:", e);
+                tEmail.checked = !val;
+                showToast("Errore salvataggio", "error");
             }
         });
     }

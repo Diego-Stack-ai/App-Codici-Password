@@ -110,6 +110,41 @@
                             required class="input" data-t-placeholder="password_placeholder_reg" placeholder="********">
                     </div>
 
+                    <!-- Preferenze Notifiche (V5.0) -->
+                    <div class="form-group registration-notifications-box">
+                        <p class="label-sm mb-3" data-t="notifications_prefs">Preferenze Notifiche</p>
+
+                        <div class="flex-col-gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                            <!-- Push -->
+                            <div class="flex-between-row">
+                                <div class="flex-col">
+                                    <span class="text-sm font-medium text-white" data-t="pref_push_label">Notifiche Push
+                                        (Device)</span>
+                                    <span class="text-xs opacity-50" data-t="pref_push_desc">Ricevi avvisi sul
+                                        cellulare</span>
+                                </div>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" id="reg-pref-push" class="base-switch-hidden" checked>
+                                    <div class="base-switch"></div>
+                                </label>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="flex-between-row">
+                                <div class="flex-col">
+                                    <span class="text-sm font-medium text-white" data-t="pref_email_label">Notifiche
+                                        Email</span>
+                                    <span class="text-xs opacity-50" data-t="pref_email_desc">Ricevi avvisi via
+                                        posta</span>
+                                </div>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" id="reg-pref-email" class="base-switch-hidden" checked>
+                                    <div class="base-switch"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <button type="submit" id="register-submit-btn" class="btn-primary" data-t="create_account_btn">
                         <span class="material-symbols-outlined">person_add_alt</span>

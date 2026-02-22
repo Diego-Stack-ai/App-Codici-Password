@@ -777,7 +777,7 @@ window.saveAccount = async () => {
         });
 
         showToast(t('success_save'), "success");
-        setTimeout(() => window.location.href = 'dettaglio_azienda.html?id=' + currentAziendaId, 1000);
+        setTimeout(() => window.location.href = 'dati_azienda.html?id=' + currentAziendaId, 1000);
 
     } catch (e) {
         console.error("[V3.1-ERROR] SaveAccount Azienda Failed:", e);

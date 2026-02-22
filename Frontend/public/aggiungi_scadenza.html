@@ -134,7 +134,8 @@
 
                         <!-- Template Messaggio (Custom Dropdown Proxy) -->
                         <div id="testo_email_wrapper" class="form-group hidden">
-                            <label class="label-sm" data-t="email_template">Template Messaggio</label>
+                            <label class="label-sm" for="testo_email_select" data-t="email_template">Template
+                                Messaggio</label>
                             <div class="base-dropdown base-dropdown-full" data-custom-select="testo_email_select">
                                 <div class="base-btn-secondary dropdown-trigger" role="button" tabindex="0">
                                     <div class="dropdown-trigger-content">
@@ -169,7 +170,7 @@
                         <div class="form-grid">
                             <!-- Data Scadenza -->
                             <div class="form-group">
-                                <label class="label-sm">
+                                <label class="label-sm" for="dueDate">
                                     <span
                                         class="material-symbols-outlined icon-amber label-icon">notifications_active</span>
                                     <span data-t="expiry_date">Data Scadenza</span>
@@ -182,7 +183,8 @@
 
                             <!-- Anteprima Oggetto -->
                             <div class="form-group">
-                                <label class="label-sm" data-t="email_subject_preview">Anteprima Oggetto</label>
+                                <label class="label-sm" for="oggetto_email" data-t="email_subject_preview">Anteprima
+                                    Oggetto</label>
                                 <div class="input-wrapper read-only input-wrapper-textarea">
                                     <textarea id="oggetto_email" readonly
                                         class="input italic input-textarea-resize-none"
@@ -224,70 +226,108 @@
                     </div>
 
                     <div class="flex-col-gap-4">
-                        <!-- Email Primaria (Custom Dropdown Proxy) -->
+                        <!-- Scelta Canale -->
                         <div class="form-group">
-                            <label class="label-sm">
-                                <span class="material-symbols-outlined icon-emerald label-icon">alternate_email</span>
-                                <span data-t="primary_email">Email Primaria</span>
-                            </label>
-                            <div class="flex-col-gap-2">
-                                <div class="base-dropdown base-dropdown-full"
-                                    data-custom-select="email_primaria_select">
-                                    <button type="button" class="base-btn-secondary dropdown-trigger">
-                                        <div class="dropdown-trigger-content">
-                                            <span class="material-symbols-outlined dropdown-icon">mail</span>
-                                            <span class="dropdown-label truncate"
-                                                data-t="select_email">Seleziona...</span>
-                                        </div>
-                                        <span class="material-symbols-outlined arrow-icon">expand_more</span>
-                                    </button>
-                                    <div class="base-dropdown-menu scrollable role-menu"></div>
-                                    <select id="email_primaria_select" class="hidden"></select>
+                            <label class="label-sm" for="notif_channel_select" data-t="notification_channel">Canale di
+                                Notifica</label>
+                            <div class="base-dropdown base-dropdown-full" data-custom-select="notif_channel_select">
+                                <button type="button" class="base-btn-secondary dropdown-trigger">
+                                    <div class="dropdown-trigger-content">
+                                        <span class="material-symbols-outlined dropdown-icon">notifications</span>
+                                        <span class="dropdown-label truncate" data-t="select_channel">Scegli
+                                            canale...</span>
+                                    </div>
+                                    <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                                </button>
+                                <div class="base-dropdown-menu scrollable role-menu">
+                                    <div class="dropdown-option" data-value="both" data-t="notif_both">Entrambi (Push +
+                                        Email)</div>
+                                    <div class="dropdown-option" data-value="push" data-t="notif_push_only">Solo
+                                        Notifica Push (App)</div>
+                                    <div class="dropdown-option" data-value="email" data-t="notif_email_only">Solo
+                                        Notifica Email</div>
+                                    <div class="dropdown-option" data-value="none">Nessuna (Solo in-app)</div>
                                 </div>
-                                <input id="email_primaria_input" type="email" class="input hidden"
-                                    placeholder="Inserisci email manuale...">
+                                <select id="notif_channel_select" class="hidden">
+                                    <option value="both">both</option>
+                                    <option value="push">push</option>
+                                    <option value="email">email</option>
+                                    <option value="none">none</option>
+                                </select>
                             </div>
                         </div>
 
-                        <!-- Email Secondaria (Custom Dropdown Proxy) -->
-                        <div class="form-group">
-                            <label class="label-sm" data-t="secondary_email">Email Secondaria (Opz.)</label>
-                            <div class="flex-col-gap-2">
-                                <div class="base-dropdown base-dropdown-full"
-                                    data-custom-select="email_secondaria_select">
-                                    <button type="button" class="base-btn-secondary dropdown-trigger">
-                                        <div class="dropdown-trigger-content">
-                                            <span
-                                                class="material-symbols-outlined dropdown-icon">forward_to_inbox</span>
-                                            <span class="dropdown-label truncate"
-                                                data-t="select_email">Seleziona...</span>
-                                        </div>
-                                        <span class="material-symbols-outlined arrow-icon">expand_more</span>
-                                    </button>
-                                    <div class="base-dropdown-menu scrollable role-menu"></div>
-                                    <select id="email_secondaria_select" class="hidden"></select>
+                        <!-- Sezione PUSH (Utenti Registrati) -->
+                        <div id="push_recipients_wrapper" class="form-group hidden">
+                            <label class="label-sm" for="push_users_select">
+                                <span class="material-symbols-outlined icon-blue label-icon">person_search</span>
+                                <span data-t="push_recipients">Utenti Registrati (Push)</span>
+                            </label>
+                            <div class="base-dropdown base-dropdown-full" data-multi-select="push_users_select">
+                                <button type="button" class="base-btn-secondary dropdown-trigger">
+                                    <div class="dropdown-trigger-content">
+                                        <span class="material-symbols-outlined dropdown-icon">app_registration</span>
+                                        <span class="dropdown-label truncate" data-t="select_user">Seleziona
+                                            utente...</span>
+                                    </div>
+                                    <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                                </button>
+                                <div class="base-dropdown-menu scrollable role-menu" id="push_users_menu">
+                                    <!-- Popolato da JS -->
                                 </div>
-                                <input id="email_secondaria_input" type="email" class="input hidden"
-                                    placeholder="Inserisci email manuale...">
+                                <select id="push_users_select" class="hidden" multiple></select>
                             </div>
+                            <div id="selected_push_chips" class="selected-chips-container mt-2"></div>
                         </div>
 
-                        <!-- WhatsApp Beta Toggle -->
-                        <div class="whatsapp-toggle-card">
-                            <div class="whatsapp-header-row">
-                                <div class="planning-icon-box icon-emerald">
-                                    <span class="material-symbols-outlined">chat</span>
-                                </div>
-                                <div>
-                                    <span class="whatsapp-title" data-t="whatsapp_label">Notifica (Beta)</span>
-                                    <span class="whatsapp-subtitle" data-t="whatsapp_desc">Invio
-                                        automatico</span>
+                        <!-- Sezione EMAIL -->
+                        <div id="email_recipients_wrapper" class="flex-col-gap-4 hidden">
+                            <div class="form-group">
+                                <label class="label-sm" for="email_primaria_select">
+                                    <span
+                                        class="material-symbols-outlined icon-emerald label-icon">alternate_email</span>
+                                    <span data-t="primary_email">Email Primaria</span>
+                                </label>
+                                <div class="flex-col-gap-2">
+                                    <div class="base-dropdown base-dropdown-full"
+                                        data-custom-select="email_primaria_select">
+                                        <button type="button" class="base-btn-secondary dropdown-trigger">
+                                            <div class="dropdown-trigger-content">
+                                                <span class="material-symbols-outlined dropdown-icon">mail</span>
+                                                <span class="dropdown-label truncate"
+                                                    data-t="select_email">Seleziona...</span>
+                                            </div>
+                                            <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                                        </button>
+                                        <div class="base-dropdown-menu scrollable role-menu"></div>
+                                        <select id="email_primaria_select" class="hidden"></select>
+                                    </div>
+                                    <input id="email_primaria_input" type="email" class="input hidden"
+                                        placeholder="Inserisci email manuale...">
                                 </div>
                             </div>
-                            <label class="cursor-pointer">
-                                <input type="checkbox" id="whatsapp_enable" class="base-switch-hidden">
-                                <div class="base-switch"></div>
-                            </label>
+                            <div class="form-group">
+                                <label class="label-sm" for="email_secondaria_select" data-t="secondary_email">Email
+                                    Secondaria (Opz.)</label>
+                                <div class="flex-col-gap-2">
+                                    <div class="base-dropdown base-dropdown-full"
+                                        data-custom-select="email_secondaria_select">
+                                        <button type="button" class="base-btn-secondary dropdown-trigger">
+                                            <div class="dropdown-trigger-content">
+                                                <span
+                                                    class="material-symbols-outlined dropdown-icon">forward_to_inbox</span>
+                                                <span class="dropdown-label truncate"
+                                                    data-t="select_email">Seleziona...</span>
+                                            </div>
+                                            <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                                        </button>
+                                        <div class="base-dropdown-menu scrollable role-menu"></div>
+                                        <select id="email_secondaria_select" class="hidden"></select>
+                                    </div>
+                                    <input id="email_secondaria_input" type="email" class="input hidden"
+                                        placeholder="Inserisci email manuale...">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -301,7 +341,7 @@
                     <div class="attachments-notes-container">
                         <!-- Note -->
                         <div class="form-group">
-                            <label class="label-sm">
+                            <label class="label-sm" for="notes">
                                 <span class="material-symbols-outlined icon-amber label-icon">description</span>
                                 <span data-t="notes">Note Aggiuntive</span>
                             </label>

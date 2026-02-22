@@ -97,8 +97,14 @@ function initFormEvents() {
 
     // Toggles & Sections
     document.body.addEventListener('click', (e) => {
+        // Se il click è su un elemento che deve fermare la propagazione del toggle (es. input, button cestino)
+        if (e.target.closest('[data-stop-propagation]')) return;
+
         const btnToggle = e.target.closest('.btn-toggle-section');
-        if (btnToggle) toggleSection(btnToggle.dataset.target, btnToggle);
+        if (btnToggle) {
+            e.preventDefault();
+            toggleSection(btnToggle.dataset.target, btnToggle);
+        }
 
         const btnPass = e.target.closest('.btn-toggle-pass');
         if (btnPass) {
@@ -156,8 +162,7 @@ function openSourceSelector() {
     console.log("Opening Source Selector Modifica Azienda");
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.remove('invisible', 'opacity-0');
-        // modal.classList.add('active'); // Manteniamo per sicurezza
+        modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     } else {
         console.error("Modale non trovato");
@@ -167,8 +172,7 @@ function openSourceSelector() {
 function closeSourceSelector() {
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
-        modal.classList.add('invisible', 'opacity-0');
-        // modal.classList.remove('active');
+        modal.classList.remove('active');
         document.body.style.overflow = '';
     }
 }
@@ -189,17 +193,37 @@ function handleImagePreview(e, previewId, placeholderId) {
 
 function toggleSection(id, btn) {
     const el = document.getElementById(id);
-    const arrow = btn.querySelector('.chevron') || document.getElementById('arrow-' + id);
+    const arrow = btn.querySelector('.chevron') || btn.querySelector('.icon-chevron') || document.getElementById('arrow-' + id);
     if (!el) return;
+
+    // Se ha la classe hidden-content, la rimuoviamo per permettere il calcolo delle dimensioni
+    if (el.classList.contains('hidden-content')) {
+        el.classList.remove('hidden-content');
+        el.style.maxHeight = '0px'; // Assicuriamo che parta da 0 se era nascosto via classe
+    }
 
     const isOpen = el.style.maxHeight && el.style.maxHeight !== '0px';
 
     if (isOpen) {
         el.style.maxHeight = '0px';
         if (arrow) arrow.style.transform = 'rotate(0deg)';
+        // Opzionale: rimettiamo la classe dopo la transizione (400ms)
+        setTimeout(() => {
+            if (el.style.maxHeight === '0px') el.classList.add('hidden-content');
+        }, 400);
     } else {
-        el.style.maxHeight = el.scrollHeight + 'px';
+        // Rimuoviamo preventivamente la classe se presente (doppio controllo)
+        el.classList.remove('hidden-content');
+        // Forza il ricalcolo per permettere la transizione da 0 a scrollHeight
+        const contentHeight = el.scrollHeight;
+        el.style.maxHeight = contentHeight + 'px';
         if (arrow) arrow.style.transform = 'rotate(180deg)';
+
+        // Per evitare problemi con contenuti dinamici che cambiano altezza, 
+        // dopo la transizione possiamo mettere 'none' o 'max-content'
+        setTimeout(() => {
+            if (el.style.maxHeight !== '0px') el.style.maxHeight = 'none';
+        }, 400);
     }
 }
 
@@ -207,6 +231,9 @@ function populateForm(data) {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
     set('ragione-sociale', data.ragioneSociale);
+    set('tipo-sede-legale', data.tipoSedeLegale || 'Sede Legale');
+    set('telefono-azienda', data.telefonoAzienda);
+    set('fax-azienda', data.faxAzienda);
     set('piva', data.partitaIva);
     set('codice-sdi', data.codiceSDI);
     set('referente-titolo', data.referenteTitolo);
@@ -223,13 +250,18 @@ function populateForm(data) {
     set('note-azienda', data.note);
 
     if (data.emails) {
+        set('type-pec', data.emails.pec?.tipo || 'PEC Aziendale');
         set('email-pec', data.emails.pec?.email);
         set('email-pec-password', data.emails.pec?.password);
         set('email-pec-note', data.emails.pec?.note);
+        set('type-amministrazione', data.emails.amministrazione?.tipo || 'Amministrazione');
         set('email-amministrazione', data.emails.amministrazione?.email);
         set('email-amministrazione-password', data.emails.amministrazione?.password);
+        set('email-amministrazione-note', data.emails.amministrazione?.note);
+        set('type-personale', data.emails.personale?.tipo || 'Personale');
         set('email-personale', data.emails.personale?.email);
         set('email-personale-password', data.emails.personale?.password);
+        set('email-personale-note', data.emails.personale?.note);
 
         // Extra Sedi
         const sediContainer = document.getElementById('altre-sedi-container');
@@ -254,7 +286,8 @@ function populateForm(data) {
                     addExtraEmail({
                         tipo: key, // Use key as type label
                         email: obj.email || '',
-                        password: obj.password || ''
+                        password: obj.password || '',
+                        note: obj.note || ''
                     });
                 }
             }
@@ -279,24 +312,7 @@ function populateForm(data) {
         if (h) h.classList.add('hidden');
     }
 
-    if (data.altreSedi) {
-        const admin = data.altreSedi.find(s => s.tipo === 'Sede Amministrativa');
-        if (admin) {
-            set('admin-indirizzo', admin.indirizzo);
-            set('admin-civico', admin.civico);
-            set('admin-citta', admin.citta);
-            set('admin-provincia', admin.provincia);
-            set('admin-cap', admin.cap);
-        }
-        const oper = data.altreSedi.find(s => s.tipo === 'Sede Operativa');
-        if (oper) {
-            set('oper-indirizzo', oper.indirizzo);
-            set('oper-civico', oper.civico);
-            set('oper-citta', oper.citta);
-            set('oper-provincia', oper.provincia);
-            set('oper-cap', oper.cap);
-        }
-    }
+
 
     document.querySelectorAll('input[data-qr-field]').forEach(cb => {
         const field = cb.dataset.qrField;
@@ -340,11 +356,12 @@ function renderAttachments() {
                     }),
                     createElement('span', {
                         className: 'text-[8px] font-bold text-white/20 uppercase tracking-widest',
-                        textContent: f.existing ? (t('uploaded') || 'Caricato') : (t('new') || 'Nuovo')
+                        textContent: f.existing ? (t('uploaded')) : (t('new'))
                     })
                 ])
             ]),
             createElement('button', {
+                type: 'button',
                 className: 'btn-remove-item',
                 onclick: () => removeAttachment(f.idx, f.existing)
             }, [
@@ -353,7 +370,9 @@ function renderAttachments() {
         ]);
     });
 
-    setChildren(list, cards);
+    setChildren(list, cards.length ? cards : [
+        createElement('p', { className: 'no-attachments-text', 'data-t': 'no_attachments', textContent: t('no_attachments') })
+    ]);
 }
 
 function removeAttachment(idx, existing) {
@@ -365,153 +384,199 @@ function removeAttachment(idx, existing) {
 function addExtraEmail(data = null) {
     const container = document.getElementById('email-extra-container');
     if (!container) return;
+    const uniqueId = 'email-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    const bodyId = `body_${uniqueId}`;
+    const arrowId = `arrow-${bodyId}`;
 
-    const wrapper = createElement('div', { className: 'email-extra-item' });
+    const wrapper = createElement('div', { className: 'glass-card inside-card email-extra-item' });
 
-    // Header con Tipo e Remove
-    const header = createElement('div', { className: 'email-extra-header' }, [
+    // HEADER
+    const header = createElement('div', {
+        className: 'email-card-header btn-toggle-section',
+        'data-target': bodyId
+    }, [
         createElement('input', {
+            id: `type_${uniqueId}`,
             type: 'text',
-            className: 'email-type-input',
-            placeholder: 'TIPO EMAIL (ES. ORDINI)',
+            className: 'email-type-input email-type',
+            placeholder: t('email_type_placeholder') || 'TIPO EMAIL',
             value: data ? data.tipo : '',
-            'aria-label': 'Tipo Email'
+            'data-stop-propagation': true,
+            autocomplete: 'new-password'
         }),
-        createElement('button', {
-            type: 'button',
-            className: 'btn-remove-item',
-            onclick: () => wrapper.remove(),
-            'aria-label': 'Rimuovi email'
-        }, [
-            createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-        ])
-    ]);
-
-    // Email Input
-    const emailBox = createElement('div', { className: 'glass-field-container' }, [
-        createElement('div', { className: 'detail-field-box border-glow h-9' }, [
-            createElement('input', {
-                type: 'email',
-                className: 'detail-field-input email-value',
-                placeholder: 'Indirizzo Email',
-                value: data ? data.email : '',
-                'aria-label': 'Indirizzo Email Extra'
+        createElement('div', { className: 'email-actions-group' }, [
+            createElement('div', { className: 'field-action-qr opacity-40' }, [
+                createElement('input', {
+                    id: `qr_${uniqueId}`,
+                    type: 'checkbox',
+                    className: 'checkbox-qr email-qr',
+                    checked: data ? (data.qr !== false) : true,
+                    'data-stop-propagation': true
+                }),
+                createElement('label', { for: `qr_${uniqueId}`, className: 'sr-only', textContent: 'QR' })
+            ]),
+            createElement('button', {
+                type: 'button',
+                className: 'btn-remove-item',
+                'data-stop-propagation': true,
+                onclick: () => wrapper.remove()
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+            ]),
+            createElement('span', {
+                id: arrowId,
+                className: 'material-symbols-outlined icon-chevron transition-transform',
+                textContent: 'expand_more'
             })
         ])
     ]);
 
-    // Password Input
-    const uniqueId = 'pass-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-    const passBox = createElement('div', { className: 'glass-field-container' }, [
-        createElement('div', { className: 'detail-field-box border-glow h-9' }, [
-            createElement('input', {
-                id: uniqueId,
-                type: 'text',
-                className: 'detail-field-input base-shield email-pass',
-                placeholder: 'Password',
-                value: data ? data.password : '',
-                'aria-label': 'Password Email Extra'
-            }),
-            createElement('div', { className: 'detail-field-actions pr-2' }, [
-                createElement('button', {
-                    type: 'button',
-                    className: 'btn-toggle-pass',
-                    'data-target': uniqueId
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'visibility' })
+    // BODY
+    const body = createElement('div', {
+        id: bodyId,
+        className: 'email-card-body collapsible-section'
+    }, [
+        // Email Input
+        createElement('div', { className: 'glass-field-container' }, [
+            createElement('label', { className: 'view-label', textContent: t('email_address') }),
+            createElement('div', { className: 'detail-field-box border-glow' }, [
+                createElement('input', {
+                    type: 'email',
+                    className: 'detail-field-input email-value',
+                    placeholder: 'codex@codex.it',
+                    value: data ? data.email : '',
+                    autocomplete: 'new-password'
+                })
+            ])
+        ]),
+        // Password Input
+        createElement('div', { className: 'glass-field-container' }, [
+            createElement('label', { className: 'view-label', textContent: t('password') }),
+            createElement('div', { className: 'detail-field-box border-glow' }, [
+                createElement('input', {
+                    type: 'text',
+                    className: 'detail-field-input base-shield email-pass',
+                    placeholder: 'Password',
+                    value: data ? data.password : '',
+                    autocomplete: 'new-password'
+                }),
+                createElement('div', { className: 'detail-field-actions pr-2' }, [
+                    createElement('button', {
+                        type: 'button',
+                        className: 'btn-toggle-pass'
+                    }, [
+                        createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'visibility' })
+                    ])
                 ])
+            ])
+        ]),
+        // Note Input
+        createElement('div', { className: 'glass-field-container' }, [
+            createElement('label', { className: 'view-label', textContent: t('notes') }),
+            createElement('div', { className: 'detail-field-box border-glow note-box' }, [
+                createElement('textarea', {
+                    className: 'form-textarea email-note',
+                    placeholder: 'Note accessorie email...',
+                    textContent: data ? data.note : '',
+                    autocomplete: 'new-password'
+                })
             ])
         ])
     ]);
 
-    setChildren(wrapper, [header, emailBox, passBox]);
+    setChildren(wrapper, [header, body]);
     container.appendChild(wrapper);
 }
 
 function addExtraSede(data = null) {
     const container = document.getElementById('altre-sedi-container');
     if (!container) return;
+    const uniqueId = 'sede-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    const bodyId = `body_${uniqueId}`;
+    const arrowId = `arrow-${bodyId}`;
 
-    const uniqueId = `sede-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-    const wrapper = createElement('div', { className: 'extra-sede-item' });
+    const wrapper = createElement('div', { className: 'glass-card inside-card extra-sede-item' });
 
-    // Header
-    const header = createElement('div', { className: 'sede-extra-header cursor-pointer' }, [
+    // HEADER
+    const header = createElement('div', {
+        className: 'email-card-header btn-toggle-section',
+        'data-target': bodyId
+    }, [
         createElement('div', { className: 'flex items-center gap-3 flex-1' }, [
             createElement('span', { className: 'material-symbols-outlined text-icon-purple', textContent: 'domain' }),
-            createElement('div', { className: 'flex-1' }, [
+            createElement('input', {
+                id: `tipo_${uniqueId}`,
+                type: 'text',
+                className: 'email-type-input sede-tipo',
+                placeholder: t('office_type_placeholder') || 'TIPO SEDE',
+                value: data ? (data.tipo || '').replace('Sede ', '') : '',
+                'data-stop-propagation': true,
+                autocomplete: 'new-password'
+            })
+        ]),
+        createElement('div', { className: 'email-actions-group' }, [
+            createElement('div', { className: 'field-action-qr opacity-40' }, [
                 createElement('input', {
-                    type: 'text',
-                    className: 'email-type-input sede-tipo',
-                    placeholder: 'TIPO SEDE (ES. OPERATIVA)',
-                    value: data ? (data.tipo || '').replace('Sede ', '') : '',
-                    onclick: (e) => e.stopPropagation()
-                })
-            ]),
-            createElement('div', { className: 'flex items-center gap-1 opacity-40' }, [
-                createElement('input', {
+                    id: `qr_${uniqueId}`,
                     type: 'checkbox',
                     className: 'checkbox-qr sede-qr',
                     checked: data ? (data.qr !== false) : true,
-                    onclick: (e) => e.stopPropagation(),
-                    'aria-label': 'Includi nel QR'
+                    'data-stop-propagation': true
                 }),
-                createElement('span', { className: 'text-[8px] font-bold uppercase', textContent: 'QR' })
-            ])
-        ]),
-        createElement('div', { className: 'flex items-center gap-2' }, [
+                createElement('label', { for: `qr_${uniqueId}`, className: 'sr-only', textContent: 'QR' })
+            ]),
             createElement('button', {
                 type: 'button',
                 className: 'btn-remove-item',
-                onclick: (e) => { e.stopPropagation(); wrapper.remove(); }
-            }, [createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })]),
+                'data-stop-propagation': true,
+                onclick: () => wrapper.remove()
+            }, [
+                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+            ]),
             createElement('span', {
-                className: 'material-symbols-outlined text-white/20 transition-transform duration-300',
-                textContent: 'expand_more',
-                id: `arrow-${uniqueId}`
+                id: arrowId,
+                className: 'material-symbols-outlined icon-chevron transition-transform',
+                textContent: 'expand_more'
             })
         ])
     ]);
 
-    // Body
-    const body = createElement('div', { id: `body-${uniqueId}`, className: 'hidden mt-2 flex-col-gap' }, [
+    // BODY
+    const body = createElement('div', {
+        id: bodyId,
+        className: 'email-card-body collapsible-section'
+    }, [
         createElement('div', { className: 'form-grid-3' }, [
-            createFieldBox('Indirizzo', 'text', data?.indirizzo, 'sede-indirizzo', 'Via / Piazza'),
-            createFieldBox('N.', 'text', data?.civico, 'sede-civico', 'N.', true)
+            createFieldBox('Indirizzo', 'address', 'text', data?.indirizzo, 'sede-indirizzo', 'Via / Piazza', 'address_placeholder'),
+            createFieldBox('N.', '', 'text', data?.civico, 'sede-civico', 'N.', 'civic_number', true)
         ]),
         createElement('div', { className: 'form-grid-3' }, [
-            createFieldBox('Città', 'text', data?.citta, 'sede-citta', 'Città'),
-            createFieldBox('Prov', 'text', data?.provincia, 'sede-provincia', 'PR', true, true),
-            createFieldBox('CAP', 'tel', data?.cap, 'sede-cap', 'CAP', true)
+            createFieldBox('Città', 'city', 'text', data?.citta, 'sede-citta', 'Città', 'city'),
+            createFieldBox('Prov', 'province', 'text', data?.provincia, 'sede-provincia', 'PR', 'province_short', true, true),
+            createFieldBox('CAP', 'cap', 'tel', data?.cap, 'sede-cap', 'CAP', 'cap', true)
         ])
     ]);
-
-    // Toggle
-    header.addEventListener('click', () => {
-        const arrow = header.querySelector(`#arrow-${uniqueId}`);
-        if (body.classList.contains('hidden')) {
-            body.classList.remove('hidden');
-            if (arrow) arrow.style.transform = 'rotate(180deg)';
-        } else {
-            body.classList.add('hidden');
-            if (arrow) arrow.style.transform = 'rotate(0deg)';
-        }
-    });
 
     setChildren(wrapper, [header, body]);
     container.appendChild(wrapper);
 }
 
-function createFieldBox(label, type, val, cls, place, center = false, uppercase = false) {
+function createFieldBox(labelText, labelT, type, val, cls, place, placeT, center = false, uppercase = false) {
+    const uniqueId = `field_${Math.random().toString(36).substr(2, 5)}`;
+    const fieldId = `id_${cls}_${uniqueId}`;
     return createElement('div', { className: 'glass-field-container' }, [
-        createElement('label', { className: 'view-label', textContent: label }),
-        createElement('div', { className: 'detail-field-box border-glow h-10' }, [
+        createElement('label', { className: 'view-label', for: fieldId, 'data-t': labelT, textContent: t(labelT) || labelText }),
+        createElement('div', { className: 'detail-field-box border-glow' }, [
             createElement('input', {
+                id: fieldId,
                 type: type,
+                name: `${cls}_${uniqueId}`,
                 className: `detail-field-input ${cls} ${center ? 'text-center' : ''} ${uppercase ? 'uppercase' : ''}`,
                 value: val || '',
                 placeholder: place,
-                maxLength: uppercase ? 2 : (cls.includes('cap') ? 5 : undefined)
+                'data-t-placeholder': placeT,
+                maxLength: uppercase ? 2 : (cls.includes('cap') ? 5 : undefined),
+                autocomplete: 'new-password', autocorrect: 'off', spellcheck: 'false'
             })
         ])
     ]);
@@ -547,6 +612,9 @@ async function saveAzienda() {
 
         const data = {
             ragioneSociale,
+            tipoSedeLegale: document.getElementById('tipo-sede-legale')?.value.trim() || 'Sede Legale',
+            telefonoAzienda: document.getElementById('telefono-azienda')?.value.trim(),
+            faxAzienda: document.getElementById('fax-azienda')?.value.trim(),
             partitaIva: document.getElementById('piva')?.value.trim(),
             codiceSDI: document.getElementById('codice-sdi')?.value.trim().toUpperCase(),
             referenteTitolo: document.getElementById('referente-titolo')?.value.trim(),
@@ -561,23 +629,30 @@ async function saveAzienda() {
             numeroCCIAA: document.getElementById('numero-cciaa')?.value.trim(),
             dataIscrizione: document.getElementById('data-iscrizione')?.value,
             emails: {
-                pec: {
+                pec: document.getElementById('type-pec') ? {
+                    tipo: document.getElementById('type-pec').value.trim(),
                     email: document.getElementById('email-pec')?.value.trim(),
                     password: document.getElementById('email-pec-password')?.value.trim(),
                     note: document.getElementById('email-pec-note')?.value.trim()
-                },
-                amministrazione: {
+                } : null,
+                amministrazione: document.getElementById('type-amministrazione') ? {
+                    tipo: document.getElementById('type-amministrazione').value.trim(),
                     email: document.getElementById('email-amministrazione')?.value.trim(),
-                    password: document.getElementById('email-amministrazione-password')?.value.trim()
-                },
-                personale: {
+                    password: document.getElementById('email-amministrazione-password')?.value.trim(),
+                    note: document.getElementById('email-amministrazione-note')?.value.trim()
+                } : null,
+                personale: document.getElementById('type-personale') ? {
+                    tipo: document.getElementById('type-personale').value.trim(),
                     email: document.getElementById('email-personale')?.value.trim(),
-                    password: document.getElementById('email-personale-password')?.value.trim()
-                },
+                    password: document.getElementById('email-personale-password')?.value.trim(),
+                    note: document.getElementById('email-personale-note')?.value.trim()
+                } : null,
                 extra: Array.from(document.querySelectorAll('.email-extra-item')).map(el => ({
                     tipo: el.querySelector('.email-type')?.value.trim(),
                     email: el.querySelector('.email-value')?.value.trim(),
-                    password: el.querySelector('.email-pass')?.value.trim()
+                    password: el.querySelector('.email-pass')?.value.trim(),
+                    note: el.querySelector('.email-note')?.value.trim(),
+                    qr: el.querySelector('.email-qr')?.checked
                 })).filter(e => e.tipo || e.email)
             },
             note: document.getElementById('note-azienda')?.value.trim(),
