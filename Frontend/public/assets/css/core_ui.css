@@ -187,12 +187,13 @@
 }
 
 .modal-box-qr {
-    /* Variante specifica per QR - padding ridotto per dare spazio al QR */
-    padding: 1.75rem 1.5rem;
+    /* Variante specifica per QR */
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    min-height: 360px;
-    /* altezza minima per dare spazio al bottone in fondo */
+    align-items: center;
+    height: 480px;
+    /* altezza fissa — consente a flex:1 e margin-top:auto di funzionare */
 }
 
 /* Titolo centrato nel popup QR */
@@ -242,15 +243,20 @@
 .modal-overlay .modal-box-qr .btn-modal-close {
     margin-top: auto;
     width: 100%;
+    flex-shrink: 0;
+    /* non si comprime anche se poco spazio */
 }
 
+/* Il contenitore QR cresce per riempire lo spazio e spingere il bottone in basso */
 .qr-zoom-container {
-    background: #E3F2FD;
-    padding: 8px;
-    border-radius: 12px;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #E3F2FD;
+    padding: 8px;
+    border-radius: 12px;
+    width: 100%;
 }
 
 
