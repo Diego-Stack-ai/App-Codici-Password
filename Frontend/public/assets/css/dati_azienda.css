@@ -306,9 +306,12 @@ html:not(.dark) .glass-card {
     border: none;
     outline: none;
     color: var(--text-primary);
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: inherit;
+    /* fix: gli <input> non ereditano il font di default */
     width: 100%;
+    min-width: 0;
 }
 
 .detail-field-input[readonly] {
