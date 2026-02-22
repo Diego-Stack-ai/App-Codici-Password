@@ -6,7 +6,7 @@
 
 import { auth, db, messaging } from '../../firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, arrayUnion, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
 import { syncPushToken, removePushToken, checkPushCompatibility } from '../shared/push_manager.js';
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -261,6 +261,9 @@ function setupToggles(data) {
 
                     await updateDoc(doc(db, "users", auth.currentUser.uid), updateData);
                     showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
+
+                    // Mostra/Nascondi bottone di prova
+                    if (btnTest) btnTest.classList.toggle('hidden', !val);
                 }
             } catch (e) {
                 console.error("Error saving Push Pref:", e);
@@ -268,6 +271,30 @@ function setupToggles(data) {
                 showToast("Errore salvataggio", "error");
             }
         });
+
+        // Logica Bottone di Prova
+        const btnTest = document.getElementById('btn-test-push');
+        if (btnTest) {
+            btnTest.classList.toggle('hidden', !tPush.checked);
+            btnTest.addEventListener('click', async () => {
+                try {
+                    btnTest.disabled = true;
+                    showToast("Invio notifica di prova...");
+
+                    await addDoc(collection(db, "users", auth.currentUser.uid, "notifications"), {
+                        title: "Prova Push ✅",
+                        message: "Se leggi questo messaggio, il sistema di notifiche push è configurato correttamente!",
+                        timestamp: new Date().toISOString(),
+                        type: "test"
+                    });
+                } catch (e) {
+                    console.error("Errore invio prova:", e);
+                    showToast("Errore invio prova", "error");
+                } finally {
+                    setTimeout(() => btnTest.disabled = false, 3000);
+                }
+            });
+        }
     }
 
     if (tEmail) {

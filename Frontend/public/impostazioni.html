@@ -181,17 +181,24 @@
                 <div class="settings-container mt-section">
                     <h3 class="settings-desc" data-t="notifications_prefs">Preferenze Notifiche</h3>
 
-                    <div class="settings-item">
-                        <div class="row-layout">
-                            <div class="settings-icon-box icon-blue">
-                                <span class="material-symbols-outlined">notifications_active</span>
+                    <div class="settings-item flex-col items-start gap-2">
+                        <div class="flex-between w-full">
+                            <div class="row-layout">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">notifications_active</span>
+                                </div>
+                                <div class="settings-item-info">
+                                    <span class="settings-label" data-t="pref_push_label">Notifiche Push (Device)</span>
+                                    <span class="settings-desc" data-t="pref_push_desc">Ricevi avvisi sul
+                                        cellulare</span>
+                                </div>
                             </div>
-                            <div class="settings-item-info">
-                                <span class="settings-label" data-t="pref_push_label">Notifiche Push (Device)</span>
-                                <span class="settings-desc" data-t="pref_push_desc">Ricevi avvisi sul cellulare</span>
-                            </div>
+                            <input type="checkbox" id="push-notify-toggle" class="settings-toggle">
                         </div>
-                        <input type="checkbox" id="push-notify-toggle" class="settings-toggle">
+                        <button id="btn-test-push" class="btn-text-accent text-[10px] mt-1 hidden">
+                            <span class="material-symbols-outlined text-[14px]">send</span>
+                            Invia Notifica di Prova
+                        </button>
                     </div>
 
                     <div class="settings-item">
