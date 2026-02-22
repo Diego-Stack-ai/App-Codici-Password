@@ -8,6 +8,7 @@ import { auth, db, messaging } from '../../firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
+import { syncPushToken, removePushToken, checkPushCompatibility } from '../shared/push_manager.js';
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast } from '../../ui-core.js';
@@ -176,6 +177,7 @@ function initSettingsEvents() {
     document.getElementById('logout-btn-settings')?.addEventListener('click', async () => {
         const ok = await showConfirmModal(t('section_security'), "Vuoi davvero uscire dall'account?", "Esci", true);
         if (ok) {
+            await removePushToken(auth.currentUser);
             await signOut(auth);
             window.location.href = 'index.html';
         }
@@ -234,13 +236,27 @@ function setupToggles(data) {
                         pref_push_enabled: val
                     };
 
-                    // Se l'utente attiva il push, proviamo a recuperare il token se manca
+                    // Se l'utente attiva il push, proviamo a recuperare il token
                     if (val) {
-                        const token = await requestPushPermission();
-                        if (token) {
-                            updateData.fcmToken = token;
-                            updateData.fcmTokens = arrayUnion(token);
+                        const comp = checkPushCompatibility();
+                        if (!comp.compatible) {
+                            if (comp.reason === 'ios_not_pwa') {
+                                showToast("Su iOS le notifiche richiedono l'installazione in Home (PWA).", "info");
+                            } else {
+                                showToast("Le notifiche non sono supportate da questo browser.", "error");
+                            }
+                            tPush.checked = false;
+                            return;
                         }
+                        const token = await syncPushToken(auth.currentUser);
+                        if (!token) {
+                            showToast("Permesso negato o errore durante l'attivazione.", "warning");
+                            tPush.checked = false;
+                            return;
+                        }
+                    } else {
+                        // Se disattiva, rimuoviamo il token dal DB per smettere di inviare
+                        await removePushToken(auth.currentUser);
                     }
 
                     await updateDoc(doc(db, "users", auth.currentUser.uid), updateData);
@@ -448,23 +464,4 @@ function setupTermsShort() {
     setChildren(p, container);
 }
 
-async function requestPushPermission() {
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            // Registriamo manualmente il service worker con un path relativo
-            // per evitare il 404 se l'app non è nella root del server locale
-            const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
-
-            const token = await getToken(messaging, {
-                serviceWorkerRegistration: registration,
-                vapidKey: 'BLeoqii3Y7Qdd-mdHeUbroeLmRN4JzsoYAzMsO39W2TUDrV_2c_Gs9MMajKdBEI4_iRnkUMvS-zP8Xyz5eieJ3M'
-            });
-            return token;
-        }
-        return null;
-    } catch (e) {
-        console.error("Errore richiesta token:", e);
-        return null;
-    }
-}
+// requestPushPermission rimosso - ora gestito da push_manager.js

@@ -668,12 +668,13 @@ Questa è l'architettura core di routing dei messaggi:
 - **Piano A (Push Notifcation via FCM)**: Il modulo interroga prima gli `fcmTokens` salvati nell'utente. Se abilitato (`prefs_push !== false`), l'infrastruttura di Google spedisce un pacchetto push criptato al device, facendo apparire la notifica nativa sul telefono IOS/Android.
 - **Piano B (Email Fallback Auth2)**: Solo e unicamente se il Push fallisce e l'utente ha autorizzato la ricezione email (`prefs_email_sharing !== false`), il sistema sgancia l'email di backup, assicurandosi che il messaggio arrivi a destinazione in ogni casistica.
 
-### 19.4 Architettura Email OAuth2 e JWT
-Le mail in Firebase Hosting non passano mai per vecchi e insicuri SMTP diretti. 
-Sfruttiamo l'autenticazione API nativa Google (`googleapis` + `JWT Client`) usando l'account di servizio `amministrazione.bmservice@gmail.com`. Questo approccio Enterprise fornisce:
+### 19.4 Architettura Email OAuth2 e JWT (App Password)
+Le mail passano per l'autenticazione tramite Password per le App.
+Attualmente configurato con l'account: `boschettodiego@gmail.com`. 
+Questo approccio garantisce:
 - Recapità garantito (Bypass delle cartelle spam comuni).
 - Assenza di limitazioni di invio rispetto agli SMTP gratis commerciali.
-- Autorità crittografata sul server con standard zero-knowledge password (via `-----BEGIN PRIVATE KEY-----`).
+- Sicurezza tramite credenziale dedicata.
 
 > 🤖 **Comando Agente AI: audit_backend_functions()**
 > \`\`\`

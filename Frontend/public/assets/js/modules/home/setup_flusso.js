@@ -6,6 +6,7 @@
 import { auth, db, messaging } from '../../firebase-config.js';
 import { doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
+import { syncPushToken, checkPushCompatibility } from '../shared/push_manager.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
@@ -146,14 +147,12 @@ async function handleSaveSetup(user) {
     try {
         // Se Push attivo, richiedi token
         if (pushEnabled) {
-            const token = await requestPushToken();
-            if (token) {
-                // Usa un array per i token per supportare più dispositivi
-                const userSnap = await getDoc(doc(db, "users", user.uid));
-                const currentTokens = userSnap.data()?.fcmTokens || [];
-                if (!currentTokens.includes(token)) {
-                    updateData.fcmTokens = [...currentTokens, token];
-                }
+            const comp = checkPushCompatibility();
+            if (comp.compatible) {
+                await syncPushToken(user);
+            } else {
+                console.warn("[SETUP] Push non compatibile:", comp.reason);
+                updateData.prefs_push = false; // Reset se non compatibile
             }
         }
 
@@ -172,20 +171,4 @@ async function handleSaveSetup(user) {
     }
 }
 
-async function requestPushToken() {
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            // Ottieni il token FCM
-            // Nota: Sostituire con VAPID KEY reale quando disponibile
-            const token = await getToken(messaging, {
-                vapidKey: 'BLeoqii3Y7Qdd-mdHeUbroeLmRN4JzsoYAzMsO39W2TUDrV_2c_Gs9MMajKdBEI4_iRnkUMvS-zP8Xyz5eieJ3M'
-            });
-            return token;
-        }
-        return null;
-    } catch (e) {
-        console.error("Errore requestPushToken:", e);
-        return null;
-    }
-}
+// requestPushToken rimosso - ora gestito da push_manager.js

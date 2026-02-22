@@ -36,30 +36,55 @@ async function createTransporter() {
 const { onRequest } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 
-/**
- * Trigger per invio push immediato quando viene aggiunta una notifica nel DB.
- * Usato per il TEST PUSH e per alert immediati.
- */
 exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/{notificationId}", async (event) => {
   const data = event.data.data();
   const userId = event.params.userId;
 
-  console.log(`[TRIGGER] Nuova notifica rilevata per utente ${userId}: ${data.title}`);
+  console.log(`[TRIGGER] Analizzando nuova notifica per ${userId}. Titolo: ${data.title}`);
 
   try {
     const db = admin.firestore();
     const userDoc = await db.collection("users").doc(userId).get();
-    if (!userDoc.exists) return;
+    if (!userDoc.exists) {
+      console.warn(`[TRIGGER ERROR] Utente ${userId} non trovato nel DB.`);
+      return;
+    }
 
     const userData = userDoc.data();
-    const tokens = userData.fcmTokens || [];
+    // Cerchiamo i token in fcmTokens o fcmToken (compatibilità legacy)
+    let tokens = userData.fcmTokens || [];
+    if (userData.fcmToken && !tokens.includes(userData.fcmToken)) {
+      tokens.push(userData.fcmToken);
+    }
+
     const pushAllowed = userData.prefs_push !== false;
+
+    console.log(`[TRIGGER DEBUG] Tokens trovati: ${tokens.length}. Push abilitato in prefs: ${pushAllowed}`);
 
     if (pushAllowed && tokens.length > 0) {
       const payload = {
         notification: {
           title: data.title,
           body: data.message
+        },
+        android: {
+          priority: "high",
+          notification: {
+            channelId: "default",
+            clickAction: "FLUTTER_NOTIFICATION_CLICK"
+          }
+        },
+        webpush: {
+          headers: {
+            Urgency: "high"
+          },
+          notification: {
+            icon: "https://appcodici-password.web.app/assets/images/app-icon.jpg",
+            requireInteraction: true
+          },
+          fcmOptions: {
+            link: "https://appcodici-password.web.app/notifiche_storia.html"
+          }
         },
         data: {
           type: data.type || "generic",
@@ -68,12 +93,34 @@ exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/
       };
 
       const response = await admin.messaging().sendEachForMulticast({ tokens, ...payload });
-      console.log(`[TRIGGER SUCCESS] Inviata a ${userId}: ${response.successCount} successi.`);
+      console.log(`[TRIGGER SUCCESS] Risultato invio a ${userId}: ${response.successCount} successi, ${response.failureCount} fallimenti.`);
+
+      // Cleanup token morti
+      if (response.failureCount > 0) {
+        const tokensToRemove = [];
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            const errCode = resp.error?.code;
+            console.warn(`[TRIGGER CLEANUP] Errore token ${tokens[idx]}: ${errCode}`);
+            // Se il token non è più registrato o è diventato invalido, lo segnamo per la rimozione
+            if (errCode === 'messaging/registration-token-not-registered' || errCode === 'messaging/invalid-registration-token') {
+              tokensToRemove.push(tokens[idx]);
+            }
+          }
+        });
+
+        if (tokensToRemove.length > 0) {
+          await db.collection("users").doc(userId).update({
+            fcmTokens: admin.firestore.FieldValue.arrayRemove(...tokensToRemove)
+          });
+          console.log(`[TRIGGER CLEANUP] Rimossi ${tokensToRemove.length} token non validi dal profilo ${userId}.`);
+        }
+      }
     } else {
-      console.log(`[TRIGGER SKIP] Push non attivo o nessun token per ${userId}`);
+      console.log(`[TRIGGER SKIP] Invio ignorato per ${userId}: pushAllowed=${pushAllowed}, tokenCount=${tokens.length}`);
     }
   } catch (e) {
-    console.error("[TRIGGER ERROR]", e);
+    console.error("[TRIGGER CRITICAL ERROR]", e);
   }
 });
 
@@ -160,7 +207,21 @@ async function processNotificationChannel(db, recipientEmail, scadenza, ownerPre
             title: `Scadenza: ${scadenza.type}`,
             body: `Ti ricordiamo ${scadenza.type} in data ${scadenza.dueDate}.`
           },
+          android: {
+            priority: "high",
+            notification: {
+              channelId: "default",
+              clickAction: "FLUTTER_NOTIFICATION_CLICK"
+            }
+          },
           webpush: {
+            headers: {
+              Urgency: "high"
+            },
+            notification: {
+              icon: "https://appcodici-password.web.app/assets/images/app-icon.jpg",
+              requireInteraction: true
+            },
             fcmOptions: {
               link: `https://appcodici-password.web.app/dettaglio_scadenza.html?id=${scadenzaId}`
             }

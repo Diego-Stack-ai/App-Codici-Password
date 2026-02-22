@@ -40,9 +40,18 @@ export async function initHomePage(user) {
         // Renderizza Scadenze e Urgenze
         await renderDashboardDeadlines(user);
 
-        // --- SETUP FLUSSO (V4.5) ---
+        // --- SETUP FLUSSO & PUSH SYNC (V5.0) ---
         const { initSetupFlusso } = await import('./setup_flusso.js');
+        const { syncPushToken, listenForTokenRefresh } = await import('../shared/push_manager.js');
+
         await initSetupFlusso(user);
+
+        // Auto-healing dei token se le notifiche sono attive
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists() && userDoc.data().prefs_push !== false) {
+            await syncPushToken(user);
+            listenForTokenRefresh(user);
+        }
 
         // Inizializza Listeners (Logout, Tema, Avatar Fallback)
         initHomeListeners();

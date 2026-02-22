@@ -2,6 +2,7 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { auth } from './firebase-config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
+import { removePushToken } from './modules/shared/push_manager.js';
 
 /**
  * Inizializza i componenti condivisi (Header/Footer)
@@ -136,6 +137,7 @@ export async function initComponents() {
                                 if (typeof window.showLogoutModal === 'function') {
                                     const confirmed = await window.showLogoutModal();
                                     if (confirmed) {
+                                        await removePushToken(auth.currentUser);
                                         await signOut(auth);
                                         window.location.href = 'index.html';
                                     }

@@ -26,8 +26,41 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: '/assets/images/app-icon.jpg' // Assicurati che l'icona esista
+        icon: 'https://appcodici-password.web.app/assets/images/app-icon.jpg',
+        badge: 'https://appcodici-password.web.app/assets/images/app-icon.jpg',
+        data: payload.data, // Manteniamo i dati per il click
+        tag: 'deadline-alert', // Aggrega notifiche simili
+        renotify: true
     };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    return self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Gestione Click sulla Notifica
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    // Default link
+    let urlToOpen = 'https://appcodici-password.web.app/notifiche_storia.html';
+
+    // Se c'è un ID scadenza specifico
+    if (event.notification.data && event.notification.data.scadenzaId) {
+        urlToOpen = `https://appcodici-password.web.app/dettaglio_scadenza.html?id=${event.notification.data.scadenzaId}`;
+    }
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // Se c'è già una finestra aperta, facciamo il focus
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if (client.url === urlToOpen && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // Altrimenti apriamo una nuova
+            if (clients.openWindow) {
+                return clients.openWindow(urlToOpen);
+            }
+        })
+    );
 });
