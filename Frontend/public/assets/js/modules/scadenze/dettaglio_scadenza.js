@@ -4,12 +4,12 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { getScadenza, updateScadenza, deleteScadenza } from '../../db.js';
+import { getScadenza, updateScadenza, deleteScadenza, addNotification, getPushToken } from '../../db.js';
 import { auth } from '../../firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { buildEmailBody } from './scadenza_templates.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 
 let currentScadenza = null;
@@ -158,6 +158,40 @@ async function handleArchive() {
     }
 }
 
+async function handleTestNotification() {
+    if (!currentScadenza || !auth.currentUser) return;
+
+    try {
+        const ok = await showConfirmModal(
+            "INVIO TEST PUSH",
+            "Vuoi inviare una notifica push di test per questa scadenza per verificarne la ricezione?",
+            "Invia Test"
+        );
+
+        if (!ok) return;
+
+        // Recupera il token per log (opzionale)
+        const token = await getPushToken(auth.currentUser.uid);
+        if (!token) {
+            console.warn("[DETT-SCADENZA] Nessun token FCM trovato per l'utente.");
+        }
+
+        // Aggiungi la notifica per triggerare il sistema
+        await addNotification(auth.currentUser.uid, {
+            title: "🔔 TEST PUSH: " + currentScadenza.title,
+            message: "Verifica ricezione: la notifica per questa scadenza è configurata correttamente.",
+            type: "deadline_test",
+            scadenzaId: currentScadenzaId,
+            channel: currentScadenza.notificationChannel || 'none'
+        });
+
+        showToast("Notifica di test inviata!", "success");
+    } catch (e) {
+        console.error("Errore invio test:", e);
+        showToast("Errore durante l'invio", "error");
+    }
+}
+
 function renderScadenza(scadenza) {
     const isCompleted = scadenza.status === 'completed' || scadenza.completed === true;
 
@@ -222,27 +256,44 @@ function renderScadenza(scadenza) {
         }
     }
 
-    // WhatsApp / Notifications status
+    // Notifications status
     const notifCont = document.getElementById('display-notifications');
     if (notifCont) {
         clearElement(notifCont);
-        const wsEnabled = scadenza.whatsappEnabled || false;
+        const channel = scadenza.notificationChannel || 'none';
+        const isNotifActive = channel !== 'none';
+
         const lastSent = scadenza.lastNotificationSent;
         const lastSentStr = lastSent ? (lastSent.toDate ? lastSent.toDate().toLocaleString('it-IT') : new Date(lastSent).toLocaleString('it-IT')) : 'MAI INVIATA';
 
+        const channelLabels = {
+            'push': 'SOLO APP',
+            'email': 'SOLO EMAIL',
+            'both': 'APP + EMAIL',
+            'none': 'SOLO IN-APP'
+        };
+
         const item = createElement('div', { className: 'detail-list-item' }, [
             createElement('div', { className: 'detail-list-item-left' }, [
-                createElement('div', { className: `detail-list-icon-box ${wsEnabled ? 'icon-emerald' : 'icon-dim'}` }, [
+                createElement('div', { className: `detail-list-icon-box ${isNotifActive ? 'icon-emerald' : 'icon-dim'}` }, [
                     createElement('span', { className: 'material-symbols-outlined', textContent: 'notifications_active' })
                 ]),
                 createElement('div', { className: 'detail-list-item-info' }, [
-                    createElement('span', { className: 'detail-list-item-title', textContent: 'Notifica' }),
+                    createElement('span', { className: 'detail-list-item-title', textContent: 'Canale Notifiche' }),
                     createElement('span', {
-                        className: `detail-list-item-meta ${wsEnabled ? 'text-emerald-400' : 'text-white/20'}`,
-                        textContent: wsEnabled ? 'STATO: ATTIVO' : 'STATO: DISATTIVATO'
+                        className: `detail-list-item-meta ${isNotifActive ? 'text-emerald-400' : 'text-white/20'}`,
+                        textContent: isNotifActive ? `STATO: ATTIVO (${channelLabels[channel] || channel})` : 'STATO: SOLO IN-APP'
                     })
                 ])
-            ])
+            ]),
+            isNotifActive ? createElement('button', {
+                className: 'btn-icon-test-push',
+                title: 'Invia Notifica di Test',
+                onclick: handleTestNotification
+            }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'send' }),
+                createElement('span', { className: 'text-xs ml-1', textContent: 'TEST' })
+            ]) : null
         ]);
 
         const mailReport = createElement('div', { className: 'detail-list-item' }, [

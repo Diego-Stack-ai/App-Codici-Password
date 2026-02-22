@@ -309,6 +309,36 @@ async function getPublicUserDataByEmail(email) {
     return null;
 }
 
+/**
+ * Aggiunge una notifica direttamente nella collezione dell'utente.
+ */
+async function addNotification(userId, notification) {
+    if (!userId) throw new Error("User ID mancante");
+    const notifRef = collection(db, "users", userId, "notifications");
+    await addDoc(notifRef, {
+        ...notification,
+        timestamp: new Date().toISOString(),
+        read: false
+    });
+}
+
+/**
+ * Recupera il token push dell'utente (se esistente).
+ */
+async function getPushToken(userId) {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+        const data = userSnap.data();
+        // Supporta sia il campo singolo che l'array (per multi-device)
+        if (data.fcmToken) return data.fcmToken;
+        if (data.fcmTokens && data.fcmTokens.length > 0) {
+            return data.fcmTokens[data.fcmTokens.length - 1]; // Prende l'ultimo registrato
+        }
+    }
+    return null;
+}
+
 export {
     getScadenze,
     getScadenza,
@@ -327,5 +357,7 @@ export {
     getSharedAccounts,
     getContacts,
     addContact,
-    getPublicUserDataByEmail
+    getPublicUserDataByEmail,
+    addNotification,
+    getPushToken
 };

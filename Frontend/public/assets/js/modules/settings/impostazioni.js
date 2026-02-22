@@ -222,12 +222,16 @@ function setupToggles(data) {
     }
 
     if (tPush) {
-        tPush.checked = data.pref_push_enabled !== false; // Default true
+        // Supporta entrambi i campi per compatibilità, preferendo prefs_push
+        tPush.checked = (data.prefs_push !== undefined) ? data.prefs_push : (data.pref_push_enabled !== false);
         tPush.addEventListener('change', async () => {
             const val = tPush.checked;
             try {
                 if (auth.currentUser) {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { pref_push_enabled: val });
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                        prefs_push: val,
+                        pref_push_enabled: val // Manteniamo entrambi per ora per sicurezza
+                    });
                     showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
                 }
             } catch (e) {
@@ -239,12 +243,16 @@ function setupToggles(data) {
     }
 
     if (tEmail) {
-        tEmail.checked = data.pref_email_enabled !== false; // Default true
+        // Supporta entrambi i campi per compatibilità, preferendo prefs_email_sharing
+        tEmail.checked = (data.prefs_email_sharing !== undefined) ? data.prefs_email_sharing : (data.pref_email_enabled !== false);
         tEmail.addEventListener('change', async () => {
             const val = tEmail.checked;
             try {
                 if (auth.currentUser) {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { pref_email_enabled: val });
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                        prefs_email_sharing: val,
+                        pref_email_enabled: val // Manteniamo entrambi per ora per sicurezza
+                    });
                     showToast(val ? "Notifiche Email Attivate" : "Notifiche Email Disattivate");
                 }
             } catch (e) {

@@ -35,15 +35,15 @@
 }
 
 .detail-section-title {
-    font-size: 1rem;
-    font-weight: 800;
+    font-size: var(--fs-base);
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     letter-spacing: 0.1rem;
     color: var(--text-primary);
 }
 
 .detail-section-icon {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
 }
 
 .icon-accent-blue {
@@ -51,7 +51,7 @@
 }
 
 .icon-accent-emerald {
-    color: #10b981;
+    color: var(--status-success);
 }
 
 /* --- 3. FIELDS & INPUTS --- */
@@ -63,8 +63,8 @@
 }
 
 .view-label {
-    font-size: 0.7rem;
-    font-weight: 800;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     color: var(--text-secondary);
     letter-spacing: 0.05em;
@@ -93,8 +93,8 @@
     outline: none;
     color: var(--text-primary);
     flex: 1;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: var(--fs-base);
+    font-weight: var(--font-weight-medium);
 }
 
 .detail-field-actions {

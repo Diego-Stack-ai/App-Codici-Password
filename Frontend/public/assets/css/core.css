@@ -82,6 +82,11 @@ body,
 
     --transition-base: 0.2s ease;
     --qr-bg: #E3F2FD;
+
+    /* STATUS COLORS (Premium Palette) */
+    --status-success: #10b981;
+    --status-warning: #f59e0b;
+    --status-error: #ef4444;
 }
 
 /* -----------------------
@@ -107,6 +112,12 @@ body,
     --input-shadow: rgba(59, 130, 246, 0.08);
 
     --border-color: rgba(255, 255, 255, 0.12);
+
+    /* STATUS COLORS (Dark Overrides if needed) */
+    --status-success: #34d399;
+    /* Leggermente più luminoso */
+    --status-error: #f87171;
+    /* Leggermente più desaturato */
 }
 
 /* -----------------------
@@ -220,7 +231,7 @@ body,
 }
 
 .text-red {
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .flex-1 {

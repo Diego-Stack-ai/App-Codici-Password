@@ -4,18 +4,46 @@
 
 :root {
     /* SCALA TIPOGRAFICA PREMIUM (Design Tokens) */
-    --fs-xs: 0.75rem;
-    /* 12px - Menu compatti, Badge, Categorie */
-    --fs-sm: 0.85rem;
-    /* 13.6px - Sottotitoli, Testi secondari */
+    --fs-micro: 0.75rem;
+    /* 12px - Menu compatti, Badge, FAB labels */
+    --fs-xs: 0.85rem;
+    /* 13.6px - Label campi, Placeholder, Testi secondari */
     --fs-base: 1rem;
     /* 16px - Testo standard, Input */
     --fs-md: 1.1rem;
     /* 17.6px - Titoli Card, Pulsanti principali */
     --fs-lg: 1.25rem;
-    /* 20px - Titoli di sezione */
+    /* 20px - Titoli di sezione, Titoli Modali */
     --fs-xl: 1.5rem;
-    /* 24px - Hero titles */
+    /* 24px - Hero titles (Pagina) */
+
+    /* SEMANTIC TOKENS (V5.0) - Font + Weight + Size */
+    --font-h1: var(--font-strong-weight) var(--fs-xl)/var(--lh-tight) 'Manrope', sans-serif;
+    --font-h2: var(--font-title-weight) var(--fs-lg)/var(--lh-tight) 'Manrope', sans-serif;
+    --font-card-title: var(--font-title-weight) var(--fs-md)/var(--lh-tight) 'Manrope', sans-serif;
+    --font-label: var(--font-label-weight) var(--fs-xs)/var(--lh-tight) 'Manrope', sans-serif;
+    --font-input: var(--font-weight-normal) var(--fs-base)/var(--lh-normal) 'Manrope', sans-serif;
+    --font-button: var(--font-title-weight) var(--fs-xs)/var(--lh-tight) 'Manrope', sans-serif;
+    --font-badge: var(--font-strong-weight) var(--fs-micro)/1 'Manrope', sans-serif;
+    --font-micro: var(--font-weight-medium) var(--fs-micro)/var(--lh-tight) 'Manrope', sans-serif;
+
+    /* FONT WEIGHTS (Phase 2) */
+    --font-weight-normal: 400;
+    --font-weight-medium: 600;
+    --font-label-weight: 700;
+    --font-title-weight: 800;
+    --font-strong-weight: 900;
+
+    /* ICON SYSTEM (Phase 3) */
+    --icon-xs: 16px;
+    --icon-sm: 18px;
+    --icon-md: 20px;
+    --icon-lg: 24px;
+
+    /* LINE HEIGHTS (Phase 4) */
+    --lh-tight: 1.2;
+    --lh-normal: 1.4;
+    --lh-relaxed: 1.6;
 }
 
 /* 1. DEFINIZIONI @FONT-FACE */

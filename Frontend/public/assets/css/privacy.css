@@ -44,9 +44,8 @@
 }
 
 .hero-page-title {
-    font-size: 1.25rem;
-    /* Più compatto */
-    font-weight: 900;
+    font: var(--font-h2);
+    /* Leggermente più compatto per privacy (1.25rem) invece di h1 */
     color: var(--text-primary);
     text-transform: uppercase;
     margin-bottom: 0.2rem;
@@ -54,10 +53,9 @@
 }
 
 .hero-page-subtitle {
-    font-size: 0.7rem;
+    font: var(--font-micro);
     color: var(--text-secondary);
     text-transform: uppercase;
-    font-weight: 800;
     letter-spacing: 0.2em;
     opacity: 0.6;
 }
@@ -106,17 +104,17 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-size: 1.2rem;
+    font-size: var(--fs-lg);
 }
 
 .icon-emerald {
     background: rgba(16, 185, 129, 0.12);
-    color: #10b981;
+    color: var(--status-success);
 }
 
 .icon-blue {
     background: rgba(59, 130, 246, 0.12);
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-purple {
@@ -126,12 +124,12 @@
 
 .icon-red {
     background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .icon-amber {
     background: rgba(245, 158, 11, 0.12);
-    color: #f59e0b;
+    color: var(--status-warning);
 }
 
 .settings-item-info {
@@ -139,16 +137,14 @@
 }
 
 .settings-label {
-    font-size: 0.9rem;
-    font-weight: 800;
+    font: var(--font-label);
     color: var(--text-primary);
     margin: 0;
 }
 
 .settings-desc {
-    font-size: 0.6rem;
+    font: var(--font-micro);
     color: var(--text-secondary);
-    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     opacity: 0.7;
@@ -156,7 +152,8 @@
 
 /* --- 4. CONTENT TEXT --- */
 .settings-item-description {
-    font-size: 0.85rem;
+    font: var(--font-input);
+    font-size: var(--fs-xs);
     line-height: 1.5;
     color: var(--text-secondary);
     opacity: 0.9;
@@ -164,7 +161,7 @@
 
 .text-accent {
     color: var(--accent);
-    font-weight: 700;
+    font-weight: var(--font-label-weight);
 }
 
 .settings-list {
@@ -184,15 +181,15 @@
 }
 
 .settings-list-label {
-    font-size: 0.7rem;
+    font: var(--font-badge);
     color: var(--text-primary);
     text-transform: uppercase;
-    font-weight: 900;
     letter-spacing: 0.5px;
 }
 
 .settings-list-text {
-    font-size: 0.8rem;
+    font-size: var(--fs-xs);
+    /* Normalizzato da 0.8rem */
 }
 
 /* --- 5. FOOTER & INFO --- */
@@ -203,8 +200,7 @@
 }
 
 .app-version-info {
-    font-size: 0.65rem;
-    font-weight: 700;
+    font: var(--font-micro);
     text-transform: uppercase;
 }
 

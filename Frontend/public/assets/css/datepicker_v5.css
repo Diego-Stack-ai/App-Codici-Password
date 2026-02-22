@@ -53,8 +53,8 @@
 .dp-title-btn {
     background: transparent;
     border: none;
-    font-size: 1.1rem;
-    font-weight: 800;
+    font-size: var(--fs-md);
+    font-weight: var(--font-title-weight);
     color: var(--text-primary);
     text-transform: capitalize;
     cursor: pointer;
@@ -91,8 +91,8 @@
 }
 
 .dp-day-label {
-    font-size: 0.7rem;
-    font-weight: 800;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-title-weight);
     color: var(--text-secondary);
     text-transform: uppercase;
     padding-bottom: 0.5rem;
@@ -104,8 +104,8 @@
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
@@ -120,7 +120,7 @@
     background: var(--accent);
     color: white;
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-    font-weight: 800;
+    font-weight: var(--font-title-weight);
 }
 
 .dp-day.today {
@@ -153,8 +153,8 @@
     border: none;
     padding: 0.5rem 1rem;
     color: var(--text-secondary);
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: var(--font-label-weight);
+    font-size: var(--fs-xs);
     cursor: pointer;
     border-radius: 8px;
 }
@@ -165,8 +165,8 @@
     border: none;
     padding: 0.5rem 1.25rem;
     border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: var(--font-label-weight);
+    font-size: var(--fs-xs);
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }

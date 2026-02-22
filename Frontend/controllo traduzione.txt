@@ -1,0 +1,285 @@
+🎯 OBIETTIVO
+
+Scansionare tutte le pagine HTML del progetto App Codici Password, incluse:
+
+Pagine principali
+
+Pagine collegate via <a href>
+
+Modali
+
+Popup dinamici
+
+Dropdown custom (.base-dropdown)
+
+Menu mobile
+
+Toast (core_ui.css)
+
+Placeholder input
+
+Label
+
+Bottoni
+
+Tooltip
+
+Alert
+
+Messaggi JS dinamici
+
+Template email frontend
+
+Testi generati in scadenza_templates.js
+
+Notifiche UI realtime
+
+Qualsiasi stringa visibile all’utente
+
+E verificare:
+
+Che ogni testo sia mappato nel file translations.js
+
+Che la chiave esista in TUTTE le lingue supportate
+
+Che non esistano testi hardcoded nel DOM o nei file JS
+
+🔎 FASE 1 — SCANSIONE HTML COMPLETA
+
+Per ogni file .html:
+
+1️⃣ Recupera tutti i nodi contenenti testo visibile:
+
+Text nodes
+
+innerText
+
+innerHTML
+
+placeholder
+
+title
+
+aria-label
+
+value
+
+alt
+
+data-* visibili
+
+2️⃣ Ignora:
+
+Script
+
+Commenti
+
+JSON inline non UI
+
+3️⃣ Identifica:
+
+Testi non racchiusi in attributo data-i18n
+
+Stringhe letterali nei bottoni
+
+Testi dentro <option>
+
+Testi nei dropdown custom
+
+Testi nei modali nascosti (display:none)
+
+Testi in template <template>
+
+🔎 FASE 2 — SCANSIONE JS FRONTEND
+
+Analizza:
+
+main.js
+
+moduli pagina
+
+scadenze.js
+
+scadenza_templates.js
+
+core_ui.js
+
+swipe-list-v6.js
+
+qualsiasi file modulo UI
+
+Cerca:
+
+Stringhe letterali visibili all’utente
+
+Messaggi alert
+
+Toast message
+
+Notifiche
+
+Messaggi di errore
+
+Confirm dialog
+
+Email subject builder
+
+Titoli dinamici
+
+Vietato:
+alert("Operazione completata");
+showToast("Salvato con successo");
+
+Tutto deve essere:
+
+showToast(t("save_success"));
+🔎 FASE 3 — VERIFICA FILE TRANSLATIONS
+
+Apri translations.js
+
+1️⃣ Recupera elenco lingue:
+
+Esempio:
+
+it
+en
+es
+fr
+de
+2️⃣ Per ogni chiave:
+
+Verifica che esista in tutte le lingue
+
+Verifica che il valore NON sia:
+
+stringa vuota
+
+copia identica dell’italiano
+
+TODO
+
+null
+
+🔎 FASE 4 — CROSS MATCH
+
+Per ogni testo trovato nel DOM o JS:
+
+✔ Verifica:
+
+Esiste chiave associata?
+
+È usato data-i18n="chiave"?
+
+Oppure funzione t("chiave")?
+
+❌ Se trovi:
+
+Testo hardcoded
+
+Stringa non mappata
+
+Chiave mancante
+
+Lingua mancante
+
+→ Segnala violazione
+
+🔎 FASE 5 — MODALI E CONTENUTI NASCOSTI
+
+L’agente deve:
+
+Forzare scansione di:
+
+Popup conferma eliminazione
+
+Popup condivisione
+
+Menu hamburger
+
+Dropdown filtri
+
+Overlay loader
+
+Messaggi "In attesa di accettazione"
+
+Badge scadenze
+
+Stato vuoto liste
+
+⚠ Anche contenuti caricati dinamicamente devono essere tracciati se presenti nel codice sorgente.
+
+🔎 FASE 6 — EMAIL TEMPLATE FRONTEND
+
+Controllare:
+
+Oggetti email generati in scadenza_templates.js
+
+Placeholder dinamici
+
+Sintassi builder oggetto email
+
+Verificare che:
+
+La frase base sia tradotta
+
+I placeholder siano coerenti tra lingue
+
+📊 OUTPUT OBBLIGATORIO DELL’AGENTE
+
+L’agente deve restituire:
+
+📁 PAGINA ANALIZZATA: nomefile.html
+✅ Traduzioni corrette:
+
+elenco chiavi corrette
+
+⚠ Warning:
+
+chiavi duplicate
+
+traduzioni sospette
+
+❌ Violazioni:
+
+Testi hardcoded trovati
+
+Chiavi mancanti
+
+Lingue incomplete
+
+📦 REPORT GLOBALE
+
+Totale testi trovati:
+
+Totale correttamente mappati:
+
+Totale hardcoded:
+
+Totale chiavi mancanti:
+
+Lingue con copertura incompleta:
+
+Percentuale conformità i18n:
+
+🚨 REGOLE RIGIDE
+
+L’agente NON deve:
+
+Modificare codice
+
+Creare traduzioni
+
+Inventare chiavi
+
+Alterare struttura DOM
+
+È solo audit.
+
+🏁 STATO FINALE
+
+Alla fine deve sempre scrivere:
+
+STATO TRADUZIONI:
+[ ] 100% Conforme
+[ ] Conforme con Warning
+[ ] NON Conforme

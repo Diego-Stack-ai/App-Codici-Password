@@ -77,7 +77,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 14px;
+    font-size: var(--fs-micro);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -93,13 +93,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: var(--fs-micro);
     backdrop-filter: blur(4px);
 }
 
 .hero-title {
+    font: var(--font-h2);
     font-size: 1.35rem;
-    font-weight: 800;
+    /* Override per hero specifico */
     color: var(--text-primary);
     text-align: center;
     margin-bottom: 0;
@@ -127,23 +128,19 @@
 }
 
 .detail-section-title {
-    font-size: 0.72rem;
-    font-weight: 700;
+    font: var(--font-badge);
     color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
 
 .detail-section-icon {
-    font-size: 18px;
+    font-size: var(--icon-sm);
 }
 
 .section-badge-mandatory {
-    font-size: 0.54rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #60a5fa;
+    font: var(--font-badge);
+    color: var(--accent);
     opacity: 0.6;
 }
 
@@ -165,8 +162,9 @@
 
 .view-label {
     display: block;
-    font-size: 0.54rem;
-    font-weight: 700;
+    font: var(--font-label);
+    font-size: var(--fs-micro);
+    /* Ultra compatto per form */
     color: var(--text-secondary);
     margin-bottom: 0.25rem;
     text-transform: uppercase;
@@ -195,8 +193,8 @@
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 0.85rem;
-    font-weight: 500;
+    font: var(--font-input);
+    font-size: var(--fs-xs);
     outline: none;
     width: 100%;
     min-width: 0;
@@ -221,7 +219,7 @@
 .icon-field-left {
     margin-right: 1rem;
     opacity: 0.4;
-    font-size: 18px;
+    font-size: var(--icon-sm);
 }
 
 .detail-field-actions {
@@ -249,7 +247,8 @@
     color: var(--text-primary) !important;
     outline: none !important;
     resize: none;
-    font-size: 0.85rem;
+    font: var(--font-input);
+    font-size: var(--fs-xs);
     font-family: inherit;
     -webkit-appearance: none;
     appearance: none;
@@ -265,8 +264,7 @@
 
 .field-action-qr::after {
     content: 'QR';
-    font-size: 0.58rem;
-    font-weight: 800;
+    font: var(--font-badge);
     color: var(--accent);
     letter-spacing: 0.05em;
     cursor: default;
@@ -415,11 +413,9 @@
     background: transparent;
     border: none;
     outline: none;
-    font-size: 0.63rem;
-    font-weight: 800;
-    text-transform: uppercase;
+    font: var(--font-badge);
     letter-spacing: 0.1em;
-    color: #60a5fa;
+    color: var(--accent);
     width: 100%;
 }
 
@@ -433,7 +429,7 @@
 }
 
 .btn-remove-item:hover {
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .btn-toggle-pass {
@@ -493,7 +489,9 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    color: #60a5fa;
+    color: var(--accent);
+    background: rgba(59, 130, 246, 0.05);
+    /* Mantengo colore alpha */
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -512,7 +510,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #60a5fa;
+    color: var(--accent);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -540,16 +538,16 @@
 }
 
 .btn-danger {
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .btn-primary {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 /* Text Utilities for Icons */
 .text-icon-red {
-    color: #ef4444;
+    color: var(--status-error);
     opacity: 0.6;
 }
 
@@ -580,7 +578,7 @@
 }
 
 .text-sm {
-    font-size: 0.875rem;
+    font-size: var(--fs-xs);
 }
 
 .opacity-40 {
@@ -597,11 +595,11 @@
 
 /* Color utilities */
 .text-blue-400 {
-    color: #60a5fa;
+    color: var(--accent);
 }
 
 .text-emerald-400 {
-    color: #34d399;
+    color: var(--status-success);
 }
 
 .text-purple-400 {
@@ -609,7 +607,7 @@
 }
 
 .text-green-400 {
-    color: #4ade80;
+    color: var(--status-success);
 }
 
 /* Rounded utilities */
@@ -648,15 +646,15 @@
 }
 
 .icon-accent-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-accent-emerald {
-    color: #10b981;
+    color: var(--status-success);
 }
 
 .icon-accent-amber {
-    color: #f59e0b;
+    color: var(--status-warning);
 }
 
 .icon-accent-purple {
@@ -728,8 +726,7 @@
     color: #000;
     /* Richiesto nero */
     cursor: pointer;
-    font-size: 0.72rem;
-    font-weight: 700;
+    font: var(--font-badge);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     transition: color 0.2s;
@@ -778,13 +775,11 @@
 }
 
 .btn-source-option span {
-    font-size: 21px;
+    font-size: var(--icon-md);
 }
 
 .btn-source-option p {
-    font-size: 0.58rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font: var(--font-badge);
     color: var(--text-primary);
 }
 
@@ -801,7 +796,7 @@
     }
 }
 
-/* --- 10. CLASSI AGGIUNTIVE (Fusione modifica_azienda.css V4.0) --- */
+
 
 /* Grid indirizzo + civico */
 .form-grid-addr {

@@ -25,8 +25,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    font-weight: 700;
+    font-size: var(--icon-lg);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -69,18 +69,18 @@
 }
 
 .hero-title {
-    font-size: 1.5rem;
-    font-weight: 800;
+    font-size: var(--fs-xl);
+    font-weight: var(--font-title-weight);
     color: var(--text-primary);
     margin-bottom: 0.25rem;
 }
 
 .hero-category-badge {
-    font-size: 0.8rem;
+    font-size: var(--fs-micro);
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-weight: 600;
+    font-weight: var(--font-weight-medium);
 }
 
 /* --- 2. SECTIONS --- */
@@ -101,15 +101,15 @@
 }
 
 .detail-section-title {
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
 
 .detail-section-icon {
-    font-size: 20px;
+    font-size: var(--icon-md);
 }
 
 /* --- 3. GLASS FIELDS (Editable) --- */
@@ -119,8 +119,8 @@
 
 .view-label {
     display: block;
-    font-size: 0.6rem;
-    font-weight: 500;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     margin-bottom: 0.35rem;
     text-transform: uppercase;
@@ -153,7 +153,7 @@
     background: transparent !important;
     border: none !important;
     color: var(--text-primary) !important;
-    font-size: 0.95rem;
+    font-size: var(--fs-xs);
     font-family: inherit;
     outline: none !important;
     width: 100%;
@@ -191,7 +191,7 @@
 }
 
 .btn-field-toggle span {
-    font-size: 18px;
+    font-size: var(--icon-sm);
 }
 
 /* --- 4. TEXTAREA / NOTE BOX --- */
@@ -211,7 +211,7 @@
     color: var(--text-primary);
     outline: none;
     resize: none;
-    font-size: 0.9rem;
+    font-size: var(--fs-xs);
     font-family: inherit;
 }
 
@@ -282,11 +282,11 @@
 }
 
 .icon-accent-emerald {
-    color: #10b981;
+    color: var(--status-success);
 }
 
 .icon-accent-amber {
-    color: #f59e0b;
+    color: var(--status-warning);
 }
 
 .base-shield {
@@ -299,7 +299,7 @@
     width: 60px;
     height: 60px;
     border-radius: 20px;
-    background: #10b981;
+    background: var(--status-success);
     color: white;
     box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
     border: none;
@@ -342,7 +342,7 @@
 }
 
 input:checked+.base-switch {
-    background: #10b981;
+    background: var(--status-success);
 }
 
 input:checked+.base-switch::after {
@@ -371,9 +371,9 @@ input:checked+.base-switch::after {
 }
 
 .loading-text {
-    font-weight: 700;
+    font-weight: var(--font-label-weight);
     color: #94a3b8;
-    font-size: 0.875rem;
+    font-size: var(--fs-xs);
 }
 
 /* --- 8. LOGO UPLOADER --- */
@@ -423,13 +423,13 @@ input:checked+.base-switch::after {
 }
 
 .logo-placeholder-icon {
-    font-size: 24px;
+    font-size: var(--icon-lg);
 }
 
 .logo-placeholder-text {
     font-size: 8px;
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: var(--font-label-weight);
 }
 
 .btn-remove-logo {
@@ -446,7 +446,7 @@ input:checked+.base-switch::after {
 }
 
 .btn-remove-logo:hover {
-    color: #ef4444;
+    color: var(--status-error);
     /* red-500 */
     background: rgba(239, 68, 68, 0.1);
 }
@@ -487,7 +487,7 @@ input:checked+.base-switch::after {
 .option-icon {
     padding: 0.5rem;
     border-radius: 0.5rem;
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
 }
 
 .bg-purple-soft {
@@ -507,8 +507,8 @@ input:checked+.base-switch::after {
 }
 
 .option-label {
-    font-size: 0.75rem;
-    font-weight: 900;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-strong-weight);
     text-transform: uppercase;
 }
 
@@ -535,8 +535,8 @@ input:checked+.base-switch::after {
 }
 
 input:checked+.base-switch {
-    background: #10b981;
-    border-color: #10b981;
+    background: var(--status-success);
+    border-color: var(--status-success);
 }
 
 input:checked+.base-switch::after {
@@ -554,7 +554,7 @@ input:checked+.base-switch::after {
     color: #22c55e;
     /* verde erba */
     font-size: 10px;
-    font-weight: 900;
+    font-weight: var(--font-strong-weight);
     cursor: pointer;
 }
 
@@ -586,7 +586,7 @@ input:checked+.base-switch::after {
 }
 
 .bank-expand-icon {
-    font-size: 16px;
+    font-size: var(--icon-xs);
     color: #22c55e;
     /* verde erba */
     transition: transform 0.2s;
@@ -594,7 +594,7 @@ input:checked+.base-switch::after {
 
 .bank-title {
     font-size: 10px;
-    font-weight: 900;
+    font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: #22c55e;
     /* verde erba */
@@ -614,7 +614,7 @@ input:checked+.base-switch::after {
 }
 
 .btn-delete-bank:hover {
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .bank-details {
@@ -640,7 +640,7 @@ input:checked+.base-switch::after {
 .bank-cards-title,
 .bank-cards-label {
     font-size: 9px;
-    font-weight: 900;
+    font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.4);
     letter-spacing: 0.1em;
@@ -687,14 +687,14 @@ input:checked+.base-switch::after {
 }
 
 .card-entry-icon {
-    font-size: 16px;
+    font-size: var(--icon-xs);
     color: #34d399;
     transition: transform 0.2s;
 }
 
 .card-entry-label {
     font-size: 10px;
-    font-weight: 900;
+    font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: #34d399;
 }
@@ -716,14 +716,14 @@ input:checked+.base-switch::after {
 }
 
 .card-icon {
-    font-size: 16px;
+    font-size: var(--icon-xs);
     color: #34d399;
     transition: transform 0.2s;
 }
 
 .card-title {
     font-size: 10px;
-    font-weight: 900;
+    font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: #34d399;
 }
@@ -744,7 +744,7 @@ input:checked+.base-switch::after {
 }
 
 .btn-delete-card:hover {
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 /* --- 12. SHARED MANAGEMENT --- */
@@ -773,7 +773,7 @@ input:checked+.base-switch::after {
     border: none;
     outline: none;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: var(--fs-xs);
 }
 
 .btn-invite {
@@ -781,8 +781,8 @@ input:checked+.base-switch::after {
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     padding: 0.25rem 1rem;
-    font-size: 0.75rem;
-    font-weight: 900;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-strong-weight);
     color: var(--text-primary);
     cursor: pointer;
 }
@@ -819,8 +819,8 @@ input:checked+.base-switch::after {
 }
 
 .suggestion-name {
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
     margin: 0;
 }
@@ -835,7 +835,7 @@ input:checked+.base-switch::after {
 .field-icon {
     margin-left: 1rem;
     opacity: 0.4;
-    font-size: 24px;
+    font-size: var(--icon-lg);
 }
 
 /* .field-input shifted to head of file */

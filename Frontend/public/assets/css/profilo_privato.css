@@ -14,7 +14,7 @@
     align-items: center;
 }
 
-/* Riduzione fascia di rispetto per profilo compatto (mantiene protezione Safe Area) (V4.0) */
+
 .page-container.pt-header-extra {
     padding-top: calc(82px + env(safe-area-inset-top));
 }
@@ -94,7 +94,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #fff;
+    border: 2px solid white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -106,8 +106,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .qr-zoom-btn .material-symbols-outlined {
-    font-size: 20px;
-    color: #fff;
+    font-size: var(--icon-md);
+    color: white;
 }
 
 .avatar-group {
@@ -149,15 +149,15 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .user-display-name {
-    font-size: 1.5rem;
-    font-weight: 900;
+    font: var(--font-h1);
+    /* 1.5rem / 900 */
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-primary);
     margin-top: 0.85rem;
     padding: 0;
     text-align: center;
-    line-height: 1.2;
+    line-height: var(--lh-tight);
 }
 
 #user-info-group {
@@ -170,13 +170,10 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .user-role-badge {
     background: rgba(37, 99, 235, 0.2);
-    color: #60a5fa;
+    color: var(--accent);
     padding: 4px 12px;
     border-radius: 99px;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font: var(--font-badge);
     border: 1px solid rgba(37, 99, 235, 0.3);
     margin-top: 0.5rem;
 }
@@ -189,7 +186,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     transform: translateX(-50%);
     width: 2px;
     height: 150px;
-    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), #fff);
+    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), white);
     opacity: 0;
     z-index: 0;
     animation: saettaStrike 3s infinite ease-in-out;
@@ -202,7 +199,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     left: 50%;
     width: 100%;
     height: 1px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
     transform: translateX(-50%) scaleX(0);
     opacity: 0;
     z-index: 0;
@@ -291,7 +288,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .expand-icon {
-    font-size: 24px;
+    font-size: var(--icon-lg);
     color: var(--accent);
     transition: transform 0.3s ease;
 }
@@ -301,8 +298,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .form-section-title {
-    font-size: 0.95rem;
-    font-weight: 800;
+    font: var(--font-card-title);
+    /* Normalizzato da 0.95rem/800 */
     color: var(--text-primary);
     text-transform: capitalize;
     letter-spacing: 0.05em;
@@ -322,21 +319,21 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .settings-icon-box .material-symbols-outlined {
-    font-size: 22px;
+    font-size: var(--icon-lg);
 }
 
 .icon-blue {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: #fff;
+    background: var(--accent);
+    color: white;
 }
 
 .icon-emerald {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--status-success) 0%, #059669 100%);
     color: #fff;
 }
 
 .icon-amber {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
     color: #fff;
 }
 
@@ -346,8 +343,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .icon-red {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: #fff;
+    background: linear-gradient(135deg, var(--status-error) 0%, #dc2626 100%);
+    color: white;
 }
 
 .qr-check-badge {
@@ -453,11 +450,10 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .data-label {
-    font-size: 0.72rem;
-    font-weight: 800;
+    font: var(--font-label);
+    /* Normalizzato da 0.72rem/800 */
     text-transform: capitalize;
-    color: #1e3a8a;
-    /* Darker Blue (Indigo-900) */
+    color: var(--accent);
     opacity: 0.85;
     letter-spacing: 0.02em;
     margin: 0;
@@ -479,23 +475,24 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .qr-mini-label {
-    font-size: 0.7rem;
+    font: var(--font-micro);
     color: var(--text-secondary);
     margin: 0;
     cursor: pointer;
-    font-weight: 700;
 }
 
 .data-value {
-    font-size: 1rem;
-    font-weight: 600;
+    font: var(--font-input);
+    /* Normalizzato da 1rem/600 */
+    font-weight: var(--font-weight-medium);
+    /* Override semantico necessario per data display */
     color: var(--text-primary);
 }
 
 .data-value-sub {
-    font-size: 0.9rem;
+    font: var(--font-micro);
     color: var(--text-secondary);
-    font-weight: 700;
+    font-weight: var(--font-label-weight);
 }
 
 .btn-edit-section {
@@ -507,32 +504,31 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     justify-content: center;
     background: rgba(59, 130, 246, 0.1);
     /* Light Blue */
-    color: #3b82f6;
+    color: var(--accent);
     border: none;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-edit-section:hover {
-    background: #3b82f6;
-    color: #fff;
+    background: var(--accent);
+    color: white;
     transform: translateY(-2px);
 }
 
 .btn-edit-section.active {
     background: var(--accent);
-    color: #fff;
+    color: white;
 }
 
 .btn-edit-section.btn-delete {
     background: rgba(239, 68, 68, 0.1);
-    /* Light Red */
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .btn-edit-section.btn-delete:hover {
-    background: #ef4444;
-    color: #fff;
+    background: var(--status-error);
+    color: white;
 }
 
 .btn-upload-trigger {
@@ -541,7 +537,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     padding: 0.85rem;
     /* Reduced from 1.25rem */
     background: rgba(59, 130, 246, 0.05);
-    border: 1.5px dashed rgba(29, 78, 216, 0.3);
+    border: 1.5px dashed var(--accent);
     /* Darker border */
     border-radius: 14px;
     display: flex;
@@ -550,15 +546,12 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     gap: 0.75rem;
     cursor: pointer;
     transition: all 0.2s;
-    color: #1e40af;
-    /* Darker Blue (Indigo-800) */
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 0.75rem;
+    color: var(--accent);
+    font: var(--font-button);
 }
 
 .dark .btn-upload-trigger {
-    color: #60a5fa;
+    color: var(--accent);
     background: rgba(59, 130, 246, 0.1);
     border-color: rgba(96, 165, 250, 0.4);
 }
@@ -572,7 +565,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .dark .glass-field-input {
-    color: #ffffff;
+    color: white;
     /* Pure White for maximum visibility */
 }
 
@@ -582,8 +575,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     outline: none;
     color: var(--text-primary);
     flex: 1;
-    font-size: 1.05rem;
-    font-weight: 700;
+    font: var(--font-input);
+    font-weight: var(--font-label-weight);
     padding-right: 1.25rem;
     width: 100%;
     height: 100%;
@@ -591,13 +584,13 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .glass-field-icon {
     margin-left: 1.5rem;
-    font-size: 1.4rem;
+    font-size: var(--fs-lg);
     color: var(--accent);
     filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.3));
 }
 
 .dark .glass-field-icon {
-    color: #60a5fa;
+    color: var(--accent);
     /* Brighter blue for visibility */
     filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.5));
 }
@@ -617,7 +610,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .dark .data-value {
-    color: #ffffff;
+    color: white;
 }
 
 .dark .data-value-sub {
@@ -644,20 +637,19 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     align-items: center;
     justify-content: center;
     border-radius: 16px;
-    font-weight: 800;
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     letter-spacing: 0.05rem;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1.5px solid transparent;
-    font-size: 0.9rem;
+    font: var(--font-button);
     box-sizing: border-box;
-    outline: none;
 }
 
 .btn-modal.btn-primary {
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--accent);
+    color: white;
     box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
 }
 
@@ -700,12 +692,12 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 .dark .btn-action-mini {
     background: rgba(255, 255, 255, 0.05);
-    color: #60a5fa;
+    color: var(--accent);
 }
 
 .btn-action-mini:hover {
     background: var(--accent);
-    color: #ffffff;
+    color: white;
     transform: scale(1.1);
 }
 
@@ -714,7 +706,7 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .btn-action-mini .material-symbols-outlined {
-    font-size: 14px;
+    font-size: var(--fs-micro);
 }
 
 /* --- 6. JS RENDERING CLASSES (Pure HTML Standard) --- */
@@ -745,14 +737,13 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .card-icon-box .material-symbols-outlined {
-    font-size: 20px;
+    font-size: var(--icon-md);
 }
 
 .card-title-accent {
-    font-weight: 800;
+    font: var(--font-badge);
     color: var(--accent);
     text-transform: uppercase;
-    font-size: 0.85rem;
 }
 
 .card-actions-row {
@@ -800,16 +791,16 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     display: block;
     opacity: 0.3;
     font-style: italic;
-    font-size: 0.9rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
 }
 
 .note-text {
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     opacity: 0.7;
-    line-height: 1.6;
+    line-height: var(--lh-relaxed);
     white-space: pre-wrap;
     margin: 0;
 }
@@ -847,8 +838,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 
 /* --- Modal Form Specifics (Added) --- */
 .view-label {
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-weight-medium);
     color: #94a3b8;
     /* Slate 400 - Grigio più marcato */
     margin-bottom: 0.25rem;
@@ -864,11 +855,11 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .note-text {
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     opacity: 0.7;
-    line-height: 1.6;
+    line-height: var(--lh-relaxed);
     white-space: pre-wrap;
     margin: 0;
 }

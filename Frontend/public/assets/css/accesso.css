@@ -25,7 +25,7 @@ html[data-i18n="loading"] body {
     transform: translateX(-50%);
     width: 2px;
     height: 100px;
-    background: linear-gradient(to bottom, transparent, #3b82f6);
+    background: linear-gradient(to bottom, transparent, var(--accent));
     opacity: 0.5;
     animation: saettaDrop 3s infinite;
     z-index: 1;
@@ -108,18 +108,17 @@ html[data-i18n="loading"] body {
 
 /* TYPOGRAPHY */
 .title {
-    font-size: 2rem;
-    font-weight: 800;
+    font: var(--font-h1);
     margin-bottom: 0.5rem;
     color: var(--text-primary);
     letter-spacing: -0.02em;
 }
 
 .subtitle {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     color: var(--text-secondary);
     margin-bottom: 2rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
 }
 
 /* FORM ELEMENTS */
@@ -131,10 +130,7 @@ html[data-i18n="loading"] body {
 .label {
     display: block;
     margin-bottom: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font: var(--font-label);
     color: var(--text-secondary);
 }
 
@@ -145,7 +141,7 @@ html[data-i18n="loading"] body {
     border-radius: 16px;
     padding: 1rem 1.25rem;
     color: var(--input-text);
-    font-size: 1rem;
+    font: var(--font-input);
     transition: all 0.3s ease;
     outline: none;
     box-sizing: border-box;
@@ -153,7 +149,7 @@ html[data-i18n="loading"] body {
 
 .input:focus {
     background: var(--input-bg-focus);
-    border-color: #3b82f6;
+    border-color: var(--accent);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
@@ -179,14 +175,12 @@ html[data-i18n="loading"] body {
 .btn-primary {
     width: 100%;
     padding: 1rem;
-    background: #3b82f6;
+    background: var(--accent);
     color: white;
     border: none;
     border-radius: 16px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.9rem;
+    font: var(--font-button);
+    font-size: var(--fs-xs);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -211,11 +205,12 @@ html[data-i18n="loading"] body {
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem auto;
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-box .material-symbols-outlined {
     font-size: 32px;
+    /* Mantenuto per auth hero */
 }
 
 /* --- 2. LANGUAGE SELECTOR (Specifico Auth) --- */
@@ -278,8 +273,8 @@ html[data-i18n="loading"] body {
     color: var(--text-primary);
     border-radius: 8px;
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font: var(--font-label);
+    font-size: var(--fs-xs);
 }
 
 .lang-option:hover {
@@ -297,7 +292,7 @@ html[data-i18n="loading"] body {
     display: block;
     text-align: center;
     margin-top: 1rem;
-    font-size: 0.85rem;
+    font-size: var(--fs-xs);
     color: var(--link-color);
     text-decoration: none;
     transition: color 0.2s;
@@ -305,12 +300,12 @@ html[data-i18n="loading"] body {
 
 .link-forgot:hover,
 .link-register:hover {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .link-register {
     margin-top: 2rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-medium);
 }
 
 .link-register.flex-icon {
@@ -321,7 +316,7 @@ html[data-i18n="loading"] body {
 }
 
 .link-register .material-symbols-outlined {
-    font-size: 1.1rem;
+    font-size: var(--icon-sm);
     vertical-align: middle;
 }
 
@@ -335,8 +330,7 @@ html[data-i18n="loading"] body {
 .legal-footer {
     margin-top: 2rem;
     color: rgba(255, 255, 255, 0.4);
-    /* Specifico per dark auth */
-    font-size: 0.75rem;
+    font: var(--font-badge);
     text-align: center;
 }
 
@@ -377,7 +371,7 @@ html[data-i18n="loading"] body {
     border: none;
     padding: 0.25rem;
     cursor: pointer;
-    color: var(--text-secondary, #888);
+    color: var(--text-secondary);
     z-index: 2;
     display: flex;
     align-items: center;
@@ -393,7 +387,7 @@ html[data-i18n="loading"] body {
 }
 
 .toggle-password .material-symbols-outlined {
-    font-size: 1.5rem;
+    font-size: var(--icon-lg);
     pointer-events: none;
 }
 

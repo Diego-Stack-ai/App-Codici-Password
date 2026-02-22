@@ -84,8 +84,8 @@
 }
 
 .settings-label {
-    font-size: 0.875rem;
-    font-weight: 700;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
     margin: 0;
 }
@@ -120,7 +120,7 @@
 }
 
 .btn-icon-add span {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
 }
 
 .arrow-icon {
@@ -172,13 +172,13 @@
 }
 
 .config-item-name {
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-weight-medium);
     color: var(--text-primary);
 }
 
 .config-item-desc {
-    font-size: 0.85rem;
+    font-size: var(--fs-xs);
     color: var(--text-secondary);
 }
 
@@ -221,8 +221,8 @@
     width: auto;
     height: auto;
     padding: 0.4rem 0.8rem;
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-label-weight);
     text-transform: uppercase;
 }
 
@@ -238,8 +238,8 @@
 .btn-icon-cancel:hover,
 .btn-delete-item-semantic:hover {
     background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    border-color: #ef4444;
+    color: var(--status-error);
+    border-color: var(--status-error);
 }
 
 /* --- 5. INLINE EDITING --- */
@@ -263,7 +263,7 @@
     border-radius: 10px;
     padding: 0.5rem 0.75rem;
     color: var(--text-primary);
-    font-size: 0.85rem;
+    font-size: var(--fs-xs);
     outline: none;
     transition: all 0.2s;
 }
@@ -300,19 +300,19 @@
 }
 
 .syntax-title {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .syntax-inline-container {
-    font-family: 'Robo Mono', monospace;
+    font-family: inherit;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    font-size: 0.8rem;
+    font-size: var(--fs-micro);
     background: rgba(0, 0, 0, 0.2);
     padding: 0.75rem;
     border-radius: 12px;
@@ -328,8 +328,8 @@
 .config-badge {
     padding: 2px 6px;
     border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-weight-medium);
     letter-spacing: 0.02em;
 }
 

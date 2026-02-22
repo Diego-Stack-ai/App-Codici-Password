@@ -96,8 +96,8 @@
     outline: none;
     color: var(--text-primary);
     width: 100%;
-    font-size: 1rem;
-    font-weight: 500;
+    font-size: var(--fs-base);
+    font-weight: var(--font-weight-medium);
 }
 
 /* --- 3. LIST CONTAINER & ROWS --- */
@@ -153,7 +153,7 @@
 }
 
 .archive-icon-box span {
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
 }
 
 .archive-item-info {
@@ -168,10 +168,10 @@
 }
 
 .archive-item-name {
-    font-size: 0.875rem;
-    font-weight: 700;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
-    line-height: 1.2;
+    line-height: var(--lh-tight);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     /* Massimo 2 righe */
@@ -181,8 +181,8 @@
 }
 
 .archive-badge-context {
-    font-size: 0.65rem;
-    font-weight: 800;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: 0.2rem 0.6rem;
@@ -205,13 +205,13 @@
 .bg-restore {
     justify-content: flex-start;
     background: linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, transparent 100%);
-    color: #10b981;
+    color: var(--status-success);
 }
 
 .bg-delete {
     justify-content: flex-end;
     background: linear-gradient(270deg, rgba(239, 68, 68, 0.25) 0%, transparent 100%);
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 /* --- 6. FOOTER ACTIONS --- */
@@ -225,9 +225,9 @@
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: 18px;
-    color: #ef4444;
-    font-weight: 800;
-    font-size: 0.95rem;
+    color: var(--status-error);
+    font-weight: var(--font-title-weight);
+    font-size: var(--fs-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
@@ -236,7 +236,7 @@
 
 .btn-action-danger:hover {
     background: rgba(239, 68, 68, 0.2);
-    border-color: #ef4444;
+    border-color: var(--status-error);
     transform: translateY(-2px);
 }
 
@@ -257,8 +257,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-weight-medium);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }

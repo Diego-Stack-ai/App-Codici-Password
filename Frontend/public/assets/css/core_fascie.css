@@ -77,8 +77,8 @@
 }
 
 .header-title {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: var(--fs-md);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
     letter-spacing: 0.1em;
 }
@@ -96,7 +96,7 @@
     color: var(--text-primary);
     transition: transform 0.2s;
     cursor: pointer;
-    font-size: 24px;
+    font-size: var(--icon-lg);
     outline: none;
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
@@ -143,7 +143,7 @@
 .legal-footer {
     margin-top: 2rem;
     color: var(--footer-color);
-    font-size: 0.75rem;
+    font-size: var(--fs-micro);
     text-align: center;
 }
 

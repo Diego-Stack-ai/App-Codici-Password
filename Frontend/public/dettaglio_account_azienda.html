@@ -16,12 +16,12 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <!-- Fonts -->
-    <!-- CSS Stratificato (V5.0 compliant) -->
-    <link rel="stylesheet" href="assets/css/core_fonts.css">
+    <!-- CSS Stratificato (V5.1 Master Compliant) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/dettaglio_account_azienda.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
 </head>
 
 <body class="base-bg">
@@ -62,13 +62,14 @@
                             <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                         </div>
                         <div class="flex-col-gap">
-
-                            <form onsubmit="return false;" autocomplete="off">
-                                <!-- Anti-autofill trap (V6.1.0) -->
-                                <div class="anti-autofill-trap" aria-hidden="true">
-                                    <input type="text" style="display:none" tabindex="-1">
-                                    <input type="password" style="display:none" tabindex="-1">
-                                </div>
+                            <div class="flex-col-gap">
+                                <!-- [V5.1 Master] Blinded Context: Micro-form logic only for the trap to satisfy DOM warnings -->
+                                <form class="anti-autofill-trap" aria-hidden="true"
+                                    style="position: absolute; left: -9999px;" onsubmit="return false;">
+                                    <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+                                    <input type="password" name="password_trap" autocomplete="current-password"
+                                        tabindex="-1">
+                                </form>
 
                                 <!-- Nome Account -->
                                 <div class="glass-field-container">
@@ -88,9 +89,9 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="detail-username" data-t="username">Utente</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="detail-username" type="text" name="account_label" readonly
-                                            class="detail-field-input no-transform" autocomplete="new-password"
-                                            autocorrect="off" spellcheck="false">
+                                        <input id="detail-username" type="text" readonly
+                                            class="detail-field-input no-transform" autocomplete="off" autocorrect="off"
+                                            spellcheck="false">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-username">
                                             <span class="material-symbols-outlined">content_copy</span>
@@ -104,7 +105,7 @@
                                         Codice</label>
                                     <div class="detail-field-box border-glow">
                                         <input id="detail-account" type="text" readonly
-                                            class="detail-field-input no-transform" autocomplete="one-time-code"
+                                            class="detail-field-input no-transform" autocomplete="off"
                                             spellcheck="false">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-account">
@@ -117,9 +118,9 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="detail-password" data-t="password">Password</label>
                                     <div class="detail-field-box border-glow">
-                                        <input id="detail-password" type="password" name="account_secret" readonly
+                                        <input id="detail-password" type="text" readonly
                                             class="detail-field-input base-shield field-value-password no-transform"
-                                            autocomplete="new-password" autocorrect="off" spellcheck="false">
+                                            autocomplete="off" autocorrect="off" spellcheck="false">
                                         <div class="detail-field-actions">
                                             <button id="toggle-password" class="btn-icon-header" type="button">
                                                 <span class="material-symbols-outlined">visibility</span>
@@ -151,128 +152,120 @@
                                 </div>
 
                                 <!-- Suggerimento Conto Bancario -->
-                                <div id="add-banking-prompt" class="banking-prompt-box hidden">
-                                    <button type="button" id="btn-banking-info" class="btn-banking-info">
-                                        <span class="material-symbols-outlined info-icon">info</span>
-                                        <span class="info-text" data-t="banking_hint">Aggiungi conto bancario</span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </section>
-
-                    <!-- Coordinate Bancarie (Sezione Dinamica) -->
-                    <section id="section-banking" class="section-spacing hidden">
-                        <div class="detail-section-header justify-between">
-                            <div class="header-left-group">
-                                <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
-                                <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
-                            </div>
-                            <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
-                                <span id="banking-chevron"
-                                    class="material-symbols-outlined icon-chevron-muted">expand_more</span>
-                            </button>
-                        </div>
-                        <div id="banking-content" class="flex-col-gap content-spacing hidden">
-                            <!-- Banking cards injected here -->
-                        </div>
-                    </section>
-
-                    <!-- Referente (Specifico per Azienda) -->
-                    <section id="section-referente" class="section-spacing">
-                        <div class="detail-section-header">
-                            <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
-                            <h3 class="detail-section-title" data-t="referent_info">Informazioni Referente</h3>
-                        </div>
-                        <div class="flex-col-gap content-spacing">
-                            <!-- Nome Referente -->
-                            <div class="glass-field-container">
-                                <label class="view-label">Nome Referente</label>
-                                <div class="detail-field-box border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">person</span>
-                                    <input id="ref-name" readonly class="detail-field-input no-transform"
-                                        autocomplete="off">
-                                    <button class="btn-icon-header copy-btn" type="button" data-field="ref-name">
-                                        <span class="material-symbols-outlined">content_copy</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Telefoni -->
-                            <div class="glass-field-container">
-                                <label class="view-label">Contatti (Fisso / Cellulare)</label>
-                                <div class="flex-col-gap-2-phones">
-                                    <div class="detail-field-box border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">call</span>
-                                        <input id="ref-phone" readonly class="detail-field-input no-transform">
-                                        <button class="btn-icon-header copy-btn" type="button" data-field="ref-phone">
-                                            <span class="material-symbols-outlined">content_copy</span>
-                                        </button>
-                                    </div>
-                                    <div class="detail-field-box border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
-                                        <input id="ref-mobile" readonly class="detail-field-input no-transform">
-                                        <button class="btn-icon-header copy-btn" type="button" data-field="ref-mobile">
-                                            <span class="material-symbols-outlined">content_copy</span>
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
-                    </section>
-
-                    <!-- ALLEGATI (Sezione Dinamica) -->
-                    <section id="section-attachments" class="section-spacing">
-                        <div class="detail-section-header justify-between">
-                            <div class="header-left-group">
-                                <span
-                                    class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
-                                <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
-                            </div>
-                            <button id="btn-add-attachment" type="button" class="btn-icon-header">
-                                <span class="material-symbols-outlined">add</span>
-                            </button>
-                        </div>
-                        <div id="attachments-list" class="flex-col-gap content-spacing">
-                            <!-- Injected via JS -->
-                            <p class="empty-attachments-text" data-t="no_attachments">Nessun allegato</p>
-                        </div>
-                    </section>
-
-                    <!-- NOTE -->
-                    <section class="section-spacing">
-                        <div class="detail-section-header">
-                            <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
-                            <h3 class="detail-section-title" data-t="notes">Note</h3>
-                        </div>
-                        <div class="detail-field-box border-glow content-spacing">
-                            <p id="detail-note" class="note-text no-transform">-</p>
-                            <button id="copy-note" class="btn-icon-header" type="button">
-                                <span class="material-symbols-outlined text-sm">content_copy</span>
-                            </button>
-                        </div>
-                    </section>
-
-                    <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
-                    <section id="shared-management-section" class="section-spacing section-bottom hidden">
-                        <div class="detail-section-header">
-                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
-                            <h3 class="detail-section-title" data-t="access_management">Gestione Accessi</h3>
-                        </div>
-                        <div id="guests-list" class="flex-col-gap content-spacing">
-                            <!-- Guest rows injected here -->
-                        </div>
-                    </section>
-
                 </div>
             </div>
-        </main>
+            </section>
 
-        <!-- 5. FOOTER (Fixed Content Placeholders) -->
-        <footer id="footer-placeholder" class="base-footer"></footer>
+            <!-- Coordinate Bancarie (Sezione Dinamica) -->
+            <section id="section-banking" class="section-spacing hidden">
+                <div class="detail-section-header justify-between">
+                    <div class="header-left-group">
+                        <span
+                            class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
+                        <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
+                    </div>
+                    <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
+                        <span id="banking-chevron"
+                            class="material-symbols-outlined icon-chevron-muted">expand_more</span>
+                    </button>
+                </div>
+                <div id="banking-content" class="flex-col-gap content-spacing hidden">
+                    <!-- Banking cards injected here -->
+                </div>
+            </section>
+
+            <!-- Referente (Specifico per Azienda) -->
+            <section id="section-referente" class="section-spacing">
+                <div class="detail-section-header">
+                    <span class="material-symbols-outlined detail-section-icon icon-accent-orange">assignment_ind</span>
+                    <h3 class="detail-section-title" data-t="referent_info">Informazioni Referente</h3>
+                </div>
+                <div class="flex-col-gap content-spacing">
+                    <!-- Nome Referente -->
+                    <div class="glass-field-container">
+                        <label class="view-label">Nome Referente</label>
+                        <div class="detail-field-box border-glow">
+                            <span class="material-symbols-outlined ml-4 opacity-40">person</span>
+                            <input id="ref-name" readonly class="detail-field-input no-transform" autocomplete="off">
+                            <button class="btn-icon-header copy-btn" type="button" data-field="ref-name">
+                                <span class="material-symbols-outlined">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Telefoni -->
+                    <div class="glass-field-container">
+                        <label class="view-label">Contatti (Fisso / Cellulare)</label>
+                        <div class="flex-col-gap-2-phones">
+                            <div class="detail-field-box border-glow">
+                                <span class="material-symbols-outlined ml-4 opacity-40">call</span>
+                                <input id="ref-phone" readonly class="detail-field-input no-transform">
+                                <button class="btn-icon-header copy-btn" type="button" data-field="ref-phone">
+                                    <span class="material-symbols-outlined">content_copy</span>
+                                </button>
+                            </div>
+                            <div class="detail-field-box border-glow">
+                                <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
+                                <input id="ref-mobile" readonly class="detail-field-input no-transform">
+                                <button class="btn-icon-header copy-btn" type="button" data-field="ref-mobile">
+                                    <span class="material-symbols-outlined">content_copy</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ALLEGATI (Sezione Dinamica) -->
+            <section id="section-attachments" class="section-spacing">
+                <div class="detail-section-header justify-between">
+                    <div class="header-left-group">
+                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                        <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
+                    </div>
+                    <button id="btn-add-attachment" type="button" class="btn-icon-header">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                </div>
+                <div id="attachments-list" class="flex-col-gap content-spacing">
+                    <!-- Injected via JS -->
+                    <p class="empty-attachments-text" data-t="no_attachments">Nessun allegato</p>
+                </div>
+            </section>
+
+            <!-- NOTE -->
+            <section class="section-spacing">
+                <div class="detail-section-header">
+                    <span class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
+                    <h3 class="detail-section-title" data-t="notes">Note</h3>
+                </div>
+                <div class="detail-field-box border-glow content-spacing">
+                    <p id="detail-note" class="note-text no-transform">-</p>
+                    <button id="copy-note" class="btn-icon-header" type="button">
+                        <span class="material-symbols-outlined text-sm">content_copy</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
+            <section id="shared-management-section" class="section-spacing section-bottom hidden">
+                <div class="detail-section-header">
+                    <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
+                    <h3 class="detail-section-title" data-t="access_management">Gestione Accessi</h3>
+                </div>
+                <div id="guests-list" class="flex-col-gap content-spacing">
+                    <!-- Guest rows injected here -->
+                </div>
+            </section>
+
+    </div>
+    </div>
+    </main>
+
+    <!-- 5. FOOTER (Fixed Content Placeholders) -->
+    <footer id="footer-placeholder" class="base-footer"></footer>
     </div>
 
     <!-- Hidden File Inputs (Using visual hiding instead of display:none for mobile compat) -->

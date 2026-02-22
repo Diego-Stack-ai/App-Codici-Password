@@ -18,13 +18,13 @@
     cursor: pointer;
     z-index: 2;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    color: #fff;
+    color: white;
     transition: background 0.2s;
 }
 
 .qr-lens-icon:hover {
     background: rgba(59, 130, 246, 0.25);
-    color: #137fec;
+    color: var(--accent);
 }
 
 /* ==========================================================================
@@ -87,7 +87,7 @@
     top: calc(100% + 5px);
     left: 0;
     width: 100%;
-    background: #ffffff;
+    background: white;
     border-radius: 16px;
     /* Arrotondato - Richiesta UI Pagina */
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -121,10 +121,12 @@
 
 .custom-option {
     padding: 12px 16px;
-    font-size: 0.95rem;
-    color: #1e293b;
+    font-size: var(--fs-xs);
+    /* Normalizzato da 0.95rem */
+    color: var(--text-primary);
+    /* Rimosso hardcoded #1e293b */
     cursor: pointer;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    border-bottom: 1px solid var(--border-color);
     transition: background 0.2s;
     text-align: left;
 }
@@ -146,7 +148,7 @@
 }
 
 .dark .custom-option {
-    color: #ffffff;
+    color: white;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -161,7 +163,7 @@
 /* --- MODAL PROFILE BOX (QR Code / Profile modals) --- */
 .modal-profile-box {
     background: #E3F2FD;
-    border: 2px solid #fff;
+    border: 2px solid white;
     border-radius: 30px;
     padding: 2rem 1.75rem;
     width: 90%;
@@ -201,11 +203,11 @@
 /* Titolo centrato nel popup QR */
 .modal-overlay .modal-box-qr .modal-title {
     text-align: center;
-    font-size: 1.1rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
+    font: var(--font-card-title);
+    /* Normalizzato da 1.1rem/900 */
     text-transform: uppercase;
-    color: #0f172a;
+    letter-spacing: 0.08em;
+    color: var(--text-primary);
     margin-bottom: 0;
 }
 
@@ -218,11 +220,12 @@
     width: 100%;
     flex: none;
     background: rgba(15, 23, 42, 0.08);
-    color: #0f172a;
+    color: var(--text-primary);
     border: 1.5px solid rgba(15, 23, 42, 0.12);
     border-radius: 99px;
-    height: 3rem;
-    font-size: 0.85rem;
+    height: 3.5rem;
+    /* Aumentato per comfort touch standard */
+    font: var(--font-button);
 }
 
 .dark .modal-overlay .modal-box-qr .btn-modal {
@@ -269,9 +272,8 @@
     border: none !important;
     outline: none !important;
     background: rgba(255, 255, 255, 0.6);
-    color: #1e293b;
-    font-size: 1.05rem;
-    font-weight: 500;
+    color: var(--text-primary);
+    font: var(--font-input);
     text-align: left;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.03);
     transition: all 0.3s ease;
@@ -279,7 +281,7 @@
 
 .dark .modal-input-glass {
     background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    color: white;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
@@ -296,7 +298,7 @@
 .modal-accent-bar {
     height: 3px;
     width: 40px;
-    background: #3b82f6;
+    background: var(--accent);
     margin: 0 0 1.5rem 0;
     /* Align Left */
     border-radius: 10px;
@@ -311,39 +313,40 @@
 }
 
 .icon-accent-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-accent-orange {
-    color: #f59e0b;
+    color: var(--status-warning);
 }
 
 .modal-title {
-    font-size: 1.6rem;
-    font-weight: 800;
+    font: var(--font-h2);
+    /* Ricalibrato per gerarchia: 1.25rem invece di 1.6rem */
     margin-bottom: 0.75rem;
-    color: #0f172a;
+    color: var(--text-primary);
     letter-spacing: -0.02em;
     text-align: left;
     width: 100%;
-    /* Allineamento a sinistra richiesto */
 }
 
 .view-label {
     width: 100%;
+    font: var(--font-label);
     text-align: left;
     display: block;
 }
 
 .dark .modal-title {
-    color: #fff;
+    color: white;
 }
 
 .modal-text {
-    font-size: 1.05rem;
-    color: #475569;
+    font-size: var(--fs-base);
+    /* 1rem invece di 1.05rem */
+    color: var(--text-secondary);
     margin-bottom: 2.25rem;
-    line-height: 1.6;
+    line-height: var(--lh-relaxed);
 }
 
 .dark .modal-text {
@@ -370,8 +373,7 @@
     /* Forza la rimozione di margini ereditati */
     border-radius: 18px;
     border: 1px solid transparent;
-    font-weight: 800;
-    font-size: 0.95rem;
+    font: var(--font-button);
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -390,26 +392,26 @@
 
 .btn-modal.btn-secondary {
     background: rgba(255, 255, 255, 0.5);
-    color: #1e293b;
+    color: var(--text-primary);
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .dark .btn-modal.btn-secondary {
     background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    color: white;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-modal.btn-primary {
-    background: #3b82f6;
+    background: var(--accent);
     color: white;
     border: 1px solid transparent;
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
 .btn-modal.btn-danger {
-    background: #ef4444;
+    background: var(--status-error);
     color: white;
     border: 1px solid transparent;
     box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
@@ -421,12 +423,11 @@
     left: 50%;
     bottom: 120px;
     transform: translate(-50%, 20px);
-    background: #ffffff;
+    background: white;
     color: #0a0f1e;
     padding: 0.75rem 1.5rem;
     border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 700;
+    font: var(--font-label);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     pointer-events: none;
     z-index: 999999;
@@ -492,7 +493,7 @@
 
 /* Color Variants */
 .btn-fab-scadenza {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -501,21 +502,21 @@
 }
 
 .btn-fab-privato {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: var(--accent);
     width: 48px;
     height: 48px;
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
 
 .btn-fab-azienda {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--status-success) 0%, #059669 100%);
     width: 48px;
     height: 48px;
     box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
 }
 
 .btn-fab-danger {
-    background: #ef4444;
+    background: var(--status-error);
     box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
@@ -570,24 +571,24 @@
 }
 
 .btn-fab-privato {
-    background: linear-gradient(135deg, #3b82f6 60%, #1d4ed8 100%);
+    background: var(--accent);
 }
 
 .btn-fab-archive {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
     border-radius: 50%;
 }
 
 /* Labels */
 .btn-fab-action::after {
+    display: none;
     content: attr(data-label);
     position: absolute;
     bottom: -22px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 8px;
-    font-weight: 800;
+    font: var(--font-micro);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     opacity: 0.5;
@@ -614,7 +615,7 @@
     }
 
     .btn-fab-action span.material-symbols-outlined {
-        font-size: 1.5rem;
+        font-size: var(--fs-xl);
     }
 }
 

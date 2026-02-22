@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. GLOBAL SECURITY & INVITE CHECK & PRIVATE ROUTING
     let inviteUnsubscribe = null;
     let sentInviteUnsubscribe = null;
+    let notificationUnsubscribe = null; // Spostato qui per pulizia sistematica
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -220,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 // GLOBAL NOTIFICATION LISTENER (V5.4 - Owner Confirmation)
-                let notificationUnsubscribe = null;
                 if (notificationUnsubscribe) notificationUnsubscribe();
                 const qNotif = query(
                     collection(db, "users", user.uid, "notifications"),
@@ -243,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (inviteUnsubscribe) inviteUnsubscribe();
             if (sentInviteUnsubscribe) sentInviteUnsubscribe();
+            if (notificationUnsubscribe) notificationUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
                 // window.location.href = 'index.html'; // Scommentare in prod

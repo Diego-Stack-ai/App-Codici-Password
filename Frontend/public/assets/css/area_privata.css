@@ -125,7 +125,7 @@
 }
 
 .mini-icon-box .material-symbols-outlined {
-    font-size: 18px;
+    font-size: var(--icon-sm);
 }
 
 .matrix-icon-box .material-symbols-outlined {
@@ -141,11 +141,11 @@
 }
 
 .icon-amber {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
 }
 
 .icon-orange {
-    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+    background: linear-gradient(135deg, var(--status-warning) 0%, #ea580c 100%);
     color: #fff;
 }
 
@@ -154,15 +154,15 @@
 }
 
 .card-red .matrix-icon-box {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--status-error) 0%, #dc2626 100%);
 }
 
 .card-orange .matrix-icon-box {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
 }
 
 .card-green .matrix-icon-box {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--status-success) 0%, #059669 100%);
 }
 
 .card-text-block {
@@ -187,8 +187,8 @@
 
 .matrix-card-title-box h3,
 .card-text-block h3 {
-    font-size: 0.85rem;
-    font-weight: 800;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-title-weight);
     color: var(--text-primary);
     text-transform: capitalize;
     letter-spacing: normal;
@@ -196,8 +196,8 @@
 }
 
 .badge-count {
-    font-size: 0.85rem;
-    font-weight: 800;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-title-weight);
     color: var(--text-primary);
     padding: 0;
     background: transparent;
@@ -208,8 +208,8 @@
 }
 
 .micro-visto-inline {
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-label-weight);
     color: var(--text-secondary);
     opacity: 0.7;
     margin-left: 0.5rem;
@@ -246,14 +246,14 @@
 #btn-reset-views:hover {
     background: rgba(245, 158, 11, 0.1);
     border-color: rgba(245, 158, 11, 0.3);
-    color: #f59e0b;
+    color: var(--status-warning);
     transform: scale(1.05);
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
 }
 
 
 #btn-reset-views .material-symbols-outlined {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     color: var(--text-secondary);
 }
 
@@ -271,21 +271,21 @@
 }
 
 .reset-text-stack span {
-    font-size: 0.5rem;
-    font-weight: 700;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-label-weight);
     color: var(--text-secondary);
     text-transform: uppercase;
 }
 
 .star-icon {
-    font-size: 20px;
+    font-size: var(--icon-md);
     color: #ffffff;
     filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
 .top10-title {
-    font-size: 0.75rem;
-    font-weight: 900;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-strong-weight);
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -343,7 +343,7 @@ html:not(.dark) .rubrica-toggle-btn:hover {
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--status-warning) 0%, #d97706 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -356,21 +356,21 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 }
 
 .micro-account-name {
-    font-size: 0.95rem;
-    font-weight: 800;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-title-weight);
     color: var(--text-primary);
     margin: 0;
 }
 
 .rubrica-subtitle {
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-label-weight);
     color: var(--text-secondary);
     opacity: 0.8;
 }
 
 .chevron-icon {
-    color: #f59e0b;
+    color: var(--status-warning);
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -396,12 +396,12 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 
 .rubrica-btn-new {
     background: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
+    color: var(--status-warning);
     border: 1px solid rgba(245, 158, 11, 0.2);
     padding: 0.5rem 1rem;
     border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 900;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
@@ -409,7 +409,7 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 }
 
 .rubrica-btn-new:hover {
-    background: #f59e0b;
+    background: var(--status-warning);
     color: #fff;
 }
 
@@ -422,8 +422,8 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 }
 
 .rubrica-label {
-    font-size: 0.7rem;
-    font-weight: 800;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-title-weight);
     color: var(--text-secondary);
     text-transform: uppercase;
     margin-bottom: 0.25rem;
@@ -437,7 +437,7 @@ html:not(.dark) .rubrica-toggle-btn:hover {
     border-radius: 12px;
     padding: 0.75rem 1rem;
     color: var(--text-primary);
-    font-weight: 600;
+    font-weight: var(--font-weight-medium);
     outline: none;
     transition: all 0.2s;
 }
@@ -454,7 +454,7 @@ html:not(.dark) .rubrica-toggle-btn:hover {
     color: #fff;
     padding: 0.85rem;
     border-radius: 14px;
-    font-weight: 800;
+    font-weight: var(--font-title-weight);
     border: none;
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
@@ -465,7 +465,7 @@ html:not(.dark) .rubrica-toggle-btn:hover {
     flex: 1;
     padding: 0.85rem;
     border-radius: 14px;
-    font-weight: 800;
+    font-weight: var(--font-title-weight);
 }
 
 .rubrica-btn-save:active {
@@ -489,12 +489,12 @@ html:not(.dark) .rubrica-toggle-btn:hover {
     height: 36px;
     border-radius: 10px;
     background: rgba(245, 158, 11, 0.15);
-    color: #f59e0b;
+    color: var(--status-warning);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 1rem;
+    font-weight: var(--font-title-weight);
+    font-size: var(--fs-base);
 }
 
 .rubrica-item-info {
@@ -503,13 +503,13 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 }
 
 .rubrica-item-name {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-label-weight);
     color: var(--text-primary);
 }
 
 .rubrica-item-email {
-    font-size: 0.7rem;
+    font-size: var(--fs-micro);
     color: var(--text-secondary);
     opacity: 0.6;
 }
@@ -536,7 +536,7 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 }
 
 .action-delete {
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .rubrica-item-actions {
@@ -546,10 +546,10 @@ html:not(.dark) .rubrica-toggle-btn:hover {
 }
 
 .error-text {
-    font-size: 0.7rem;
-    color: #ef4444;
+    font-size: var(--fs-micro);
+    color: var(--status-error);
     text-align: center;
     padding: 2rem 0;
     opacity: 0.6;
-    font-weight: 700;
+    font-weight: var(--font-label-weight);
 }

@@ -63,8 +63,8 @@
 }
 
 .sort-btn-label {
-    font-size: 0.6rem;
-    font-weight: 800;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     line-height: 1;
     opacity: 0.8;
@@ -76,7 +76,7 @@
     outline: none;
     color: var(--text-primary);
     width: 100%;
-    font-size: 1rem;
+    font-size: var(--fs-base);
 }
 
 /* --- 2. LIST CONTAINER --- */
@@ -117,20 +117,20 @@
     border-radius: 20px;
     z-index: 1;
     opacity: 0.5;
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: bold;
 }
 
 .swipe-action-bg.bg-delete {
     justify-content: flex-end;
     background-color: rgba(255, 255, 255, 0.05);
-    color: #ef4444;
+    color: var(--status-error);
 }
 
 .swipe-action-bg.bg-archive {
     justify-content: flex-start;
     background-color: rgba(255, 255, 255, 0.05);
-    color: #f59e0b;
+    color: var(--status-warning);
 }
 
 
@@ -212,8 +212,8 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 .account-card-category {
-    font-size: 0.65rem;
-    font-weight: 800;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     opacity: 0.6;
@@ -229,19 +229,19 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 .account-card-category.badge-amber {
-    color: #f59e0b;
+    color: var(--status-warning);
 }
 
 .account-card-category.badge-emerald {
-    color: #10b981;
+    color: var(--status-success);
 }
 
 .account-card-title {
-    font-size: 0.95rem;
-    font-weight: 800;
+    font: var(--font-input);
+    font-weight: var(--font-title-weight);
     color: var(--text-primary);
     margin: 0;
-    line-height: 1.2;
+    line-height: var(--lh-tight);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -252,8 +252,8 @@ html:not(.dark) .account-card-title {
 }
 
 .account-card-subtitle {
-    font-size: 0.70rem;
-    font-weight: 500;
+    font-size: var(--fs-micro);
+    font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     opacity: 0.8;
     white-space: nowrap;
@@ -313,7 +313,7 @@ html:not(.dark) .account-card-subtitle {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.75rem;
+    font-size: var(--fs-micro);
     background: rgba(255, 255, 255, 0.03);
     padding: 0.25rem 0.6rem;
     border-radius: 8px;
@@ -322,17 +322,17 @@ html:not(.dark) .account-card-subtitle {
 
 .account-data-label {
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     text-transform: uppercase;
-    font-size: 0.65rem;
+    font-size: var(--fs-micro);
     letter-spacing: 0.05em;
 }
 
 .account-data-value {
     flex: 1;
     color: var(--text-primary);
-    font-weight: 700;
-    font-family: 'Roboto Mono', monospace;
+    font-weight: var(--font-label-weight);
+    font-family: inherit;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -357,11 +357,11 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .bg-amber-500 {
-    background: #f59e0b;
+    background: var(--status-warning);
 }
 
 .bg-emerald-500 {
-    background: #10b981;
+    background: var(--status-success);
 }
 
 /* Text colors */

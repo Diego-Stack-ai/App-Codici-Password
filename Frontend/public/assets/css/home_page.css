@@ -15,7 +15,7 @@
     transform: translateX(-50%);
     width: 2px;
     height: 150px;
-    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), #fff);
+    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), white);
     opacity: 0;
     z-index: 0;
     animation: saettaStrike 3s infinite ease-in-out;
@@ -110,20 +110,19 @@
     height: 40px;
     border-radius: 12px;
     background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .setup-option-title {
-    font-size: 0.85rem;
-    font-weight: 800;
+    font: var(--font-label);
     color: var(--text-primary);
 }
 
 .setup-option-desc {
-    font-size: 0.65rem;
+    font: var(--font-micro);
     color: var(--text-secondary);
 }
 
@@ -151,7 +150,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #fff;
+    background: white;
     transition: transform 0.3s;
 }
 
@@ -166,7 +165,7 @@
     background: var(--accent);
     color: white;
     border: none;
-    font-weight: 800;
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     display: flex;
     align-items: center;

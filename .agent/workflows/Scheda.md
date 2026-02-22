@@ -264,38 +264,46 @@ Nessuna possibilità di iniezione JS/CSS malevola.
 
 Controllo corretto dei moduli JS per prevenire vulnerabilità.
 
-9. Controlli Password e Protezione Keychain
+9. Controlli Password e Protezione Keychain (Total Blinding V7.0)
 Obiettivo
 
-Prevenire il riempimento automatico indesiderato da Password Manager nelle pagine di gestione account.
+Rendere l'applicazione completamente invisibile agli sniffing dei browser e dei Password Manager per evitare conflitti e salvataggi indesiderati.
 
 Azioni Applicate
 
-Autocomplete e Attributi HTML:
+Rottura del Contesto Form:
 
-username/account → autocomplete="off"
+Rimozione del tag <form> nelle pagine di gestione account (Dettaglio, Modifica, Creazione).
 
-password → type="password" autocomplete="new-password"
+Mascheramento "Text-Only":
 
-ID e name dei campi univoci.
+Tutti i campi password usano type="text".
 
-Toggle visibilità password gestito con JS esterno, addEventListener.
+Mascheramento visivo tramite classe .base-shield (-webkit-text-security: disc).
 
-Fallback traduzioni: window.t = window.t || ((k) => k);
+Attributi Puliti:
+
+Autocomplete impostato sempre su "off".
+
+Rimozione di attributi name "parlanti" (password, username, email) dai campi dati reali.
+
+Trappola Anti-autofill Hardened:
+
+Input invisibili posizionati strategicamente con nomi trap (user_login_trap, password_trap) e autocomplete espliciti per distogliere l'attenzione del browser dai campi reali.
 
 Pagine interessate:
 
-Privato: modifica_account_privato.html/js, aggiungi_account_privato.html/js, dettaglio_account_privato.html/js
+Privato: dettaglio_account_privato.html, form_account_privato.html
 
-Azienda: modifica_account_azienda.html/js, aggiungi_account_azienda.html/js, dettaglio_account_azienda.html/js
+Azienda: dettaglio_account_azienda.html, form_account_azienda.html
 
 Effetti Ottenuti
 
-Blocco riempimento automatico su campi non login.
+Blocco totale del riempimento automatico e dei popup "Salva Password" nelle sezioni gestionali.
 
-Piena compatibilità con login/registrazione/reset password.
+User Experience fluida e premium senza interferenze del browser.
 
-Robustezza JS e visibilità password sicura.
+Protezione massima dei dati sensibili gestiti.
 
 10. Gestione HTML/CSS/JS
 HTML

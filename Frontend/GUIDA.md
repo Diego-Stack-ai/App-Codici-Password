@@ -330,43 +330,49 @@ connect-src 'self' http://127.0.0.1:* ws://127.0.0.1:* https://*.googleapis.com 
 ```
 ⚠️ **ATTENZIONE**: Questa eccezione è strettamente per uso locale. Prima della messa in produzione o del deploy su Firebase, il CSP deve essere riportato allo standard rigoroso senza riferimenti a `127.0.0.1`.
 
-### 8.3 Sicurezza Form & Anti-Autofill (Standard V6.1.0 Hardened)
+### 8.3 Sicurezza Form & Anti-Autofill (Standard V7.0 Total Blinding)
+
 ### Spiegazione umana:
-I browser moderni e i password manager (Chrome, Safari, 1Password, ecc.) sono estremamente aggressivi e tentano di autocompilare o proporre il salvataggio per qualsiasi campo `type="password"` visibile. In un'app che gestisce le password di account terzi (come App Codici Password), questo causa problemi critici: il browser tenterà di salvare la password dell'account del cliente, sovrascrivendola a quella di accesso dell'app stessa. Dobbiamo inibire totalmente questo comportamento con un pattern specifico a 4 livelli.
+I browser moderni (Chrome, Safari, Edge) e i password manager sono diventati estremamente aggressivi. Tentano di "sniffare" qualsiasi campo che assomigli a una password per salvare o aggiornare credenziali. In un'app di gestione password (come App Codici Password), questo è un disastro di UX e sicurezza. Lo standard **V7.0 Total Blinding** rompe radicalmente ogni euristica di sniffing per rendere la pagina completamente invisibile agli automatismi esterni.
 
-### Le 4 Regole d'Oro Anti-Autofill:
-1. **La Trappola (Honey Pot Nascosto):** Posizionare sempre all'inizio del form due campi fittizi nascosti in modo assoluto (non `display: none` base, ma `-9999px`). I bot riempiranno questi campi saziandosi e ignorando i restanti.
-2. **Nomi in incognito:** Mai usare `name="password"`, `id="password"`, `name="username"` o `name="email"` sui campi veri. Usa nomi come `account_label` e `account_secret`.
-3. **Attributi repellenti:** I campi login veri devono avere `autocomplete="new-password"`, `autocorrect="off"` e `spellcheck="false"`. `autocomplete="off"` **non** è sufficiente da solo.
-4. **Tipo Nativo:** Manteniamo il `type="password"` sul campo reale così la UI di reveal (l'occhio per mostrare/nascondere) e la cifratura a schermo funzionano nativamente.
+### Le 4 Regole d'Oro del Total Blinding:
+1.  **No-Form Context (Rottura Euristica):** Rimuovere completamente il tag `<form>` dalle pagine di dettaglio e modifica. Senza un contenitore form, i browser non riescono a identificare la pagina come un modulo di login o editor di credenziali. La logica di invio dati deve essere gestita tramite ID e listener JS diretti.
+2.  **Text-Only Protection (Bypass Scanner):** Mai usare `type="password"` sui campi reali dei dati gestiti. Convertire in `type="text"` e applicare la classe CSS `.base-shield` (che applica `-webkit-text-security: disc`). Il browser vede testo semplice, ma l'utente vede i pallini.
+3.  **Annullamento Attributi:** Rimuovere attributi `name` sospetti (come `password`, `account_secret`, `account_label`) dai campi reali. Impostare `autocomplete="off"` in modo sistematico su ogni campo, inclusi quelli dinamici generati via JS.
+4.  **La Trappola Rinforzata (Finto Login):** Inserire all'inizio della sezione una trappola invisibile (`left: -9999px`) con nomi di campi e attributi autocomplete *molto appetibili* per i browser (`user_login_trap`, `password_trap`). Il browser "si sfoga" sulla trappola, lasciando puliti i dati reali.
 
-**Esempio di Form Blindato:**
+**Esempio di Implementazione Blindata:**
 ```html
-<form id="account-form" autocomplete="off" onsubmit="return false">
-    <!-- 1. Trappola Anti-autofill (V6.1.0) -->
+<div class="detail-content-wrap">
+    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
     <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
-        <input type="text" tabindex="-1">
-        <input type="password" tabindex="-1">
+        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
     </div>
 
-    <!-- 2 e 3. Campi Veri Protetti -->
+    <!-- Campi reali travestiti da testo comune -->
     <div class="glass-field-container">
-        <input id="detail-username" type="text" name="account_label" 
-               autocomplete="new-password" autocorrect="off" spellcheck="false">
+        <label class="view-label">Utente</label>
+        <div class="detail-field-box border-glow">
+            <input id="detail-username" type="text" autocomplete="off" class="detail-field-input no-transform">
+        </div>
     </div>
 
     <div class="glass-field-container">
-        <input id="detail-password" type="password" name="account_secret" 
-               autocomplete="new-password" autocorrect="off" spellcheck="false">
+        <label class="view-label">Password</label>
+        <div class="detail-field-box border-glow">
+            <input id="detail-password" type="text" autocomplete="off" 
+                   class="detail-field-input base-shield field-value-password no-transform">
+        </div>
     </div>
-</form>
+</div>
 ```
 
-> 🤖 **Comando Agente AI — Audit Anti-Autofill**
-> `audit_form_security([pagina.html])`
-> - Scansiona ogni file contenente un form per verificare la presenza del div `.anti-autofill-trap` con stile `position: absolute; left: -9999px;` all'inizio del `<form>`.
-> - Verifica che non esistano input con `name="password"` o `name="username"`. Devono usare varianti generiche.
-> - Controlla che gli input reali di tipo testo/password abbiano `autocomplete="new-password"`, `autocorrect="off"` e `spellcheck="false"`.
+> 🤖 **Comando Agente AI — Audit Total Blinding**
+> `audit_total_blinding([pagina.html])`
+> - Scansione a tappeto: il tag `<form>` deve essere ASSENTE nelle pagine di dettaglio e modifica account.
+> - Verifica campi sensibili: devono essere `type="text"` con classe `.base-shield`.
+> - Check Trappola: deve contenere input con `name="user_login_trap"` e `name="password_trap"`.
 
 ---
 

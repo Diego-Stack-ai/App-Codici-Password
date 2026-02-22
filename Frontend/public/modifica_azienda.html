@@ -16,12 +16,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Design System Master (PROTOCOLLO V5.0) -->
+    <!-- Design System Master (PROTOCOLLO V5.1 Master) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/form_azienda.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -38,15 +38,11 @@
         <main class="base-main">
             <div class="page-container pt-header-extra pb-footer-extra">
                 <div class="detail-content-wrap">
-                    <!-- 🛡️ Trappola Anti-autofill (V6.1.0 Hardened) -->
+                    <!-- [V5.1 Master] Blinded Context: Micro-form logic only for the trap to satisfy DOM warnings -->
                     <form aria-hidden="true" autocomplete="off" class="anti-autofill-trap"
-                        style="position: absolute; left: -9999px;">
-                        <label for="trap_entry_01">Indirizzo Email Fittizio</label>
-                        <input id="trap_entry_01" name="trap_entry_01" type="text" tabindex="-1"
-                            autocomplete="username">
-                        <label for="trap_secret_01">Password Fittizia</label>
-                        <input id="trap_secret_01" name="trap_secret_01" type="password" tabindex="-1"
-                            autocomplete="current-password">
+                        style="position: absolute; left: -9999px;" onsubmit="return false;">
+                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
                     </form>
 
                     <div class="hero-profile-header">
@@ -91,12 +87,11 @@
                                         Sociale</label>
                                     <div class="detail-field-box border-glow">
                                         <span class="material-symbols-outlined icon-field-left">business</span>
-                                        <input id="ragione-sociale" name="ragione_sociale_master" type="text"
-                                            class="detail-field-input" placeholder="Ragione Sociale"
-                                            data-t-placeholder="company_name" autocomplete="new-password"
-                                            autocorrect="off" spellcheck="false" />
+                                        <input id="ragione-sociale" type="text" class="detail-field-input"
+                                            placeholder="Ragione Sociale" data-t-placeholder="company_name"
+                                            autocomplete="off" autocorrect="off" spellcheck="false" />
                                         <div class="field-action-qr">
-                                            <input id="qr-ragione-sociale" name="qr-ragione-sociale" type="checkbox"
+                                            <input id="qr-ragione-sociale" type="checkbox"
                                                 data-qr-field="ragioneSociale" title="Includi in QR"
                                                 aria-label="Includi Ragione Sociale nel QR" class="checkbox-qr"
                                                 checked />
@@ -126,7 +121,7 @@
                                             <span class="material-symbols-outlined icon-field-left">call</span>
                                             <input id="telefono-azienda" name="company_phone" type="tel"
                                                 class="detail-field-input" placeholder="Telefono"
-                                                data-t-placeholder="phone" autocomplete="new-password" />
+                                                data-t-placeholder="phone" autocomplete="off" />
                                         </div>
                                     </div>
                                     <!-- Fax -->
@@ -136,7 +131,7 @@
                                             <span class="material-symbols-outlined icon-field-left">fax</span>
                                             <input id="fax-azienda" name="company_fax" type="tel"
                                                 class="detail-field-input" placeholder="Fax" data-t-placeholder="fax"
-                                                autocomplete="new-password" />
+                                                autocomplete="off" />
                                         </div>
                                     </div>
                                 </div>
@@ -169,7 +164,7 @@
                                                     <span class="material-symbols-outlined icon-field-left">tag</span>
                                                     <input id="piva" name="company_vat_master" type="tel"
                                                         class="detail-field-input" placeholder="Partita IVA"
-                                                        data-t-placeholder="vat_number" autocomplete="new-password"
+                                                        data-t-placeholder="vat_number" autocomplete="off"
                                                         autocorrect="off" spellcheck="false" />
                                                     <div class="field-action-qr">
                                                         <input id="qr-partita-iva" name="qr-partita-iva" type="checkbox"
@@ -191,7 +186,7 @@
                                                     <input id="codice-sdi" name="company_sdi_master" type="text"
                                                         class="detail-field-input uppercase tracking-widest"
                                                         placeholder="Codice SDI" data-t-placeholder="sdi_code"
-                                                        autocomplete="new-password" autocorrect="off" spellcheck="false"
+                                                        autocomplete="off" autocorrect="off" spellcheck="false"
                                                         maxlength="7" />
                                                     <div class="field-action-qr">
                                                         <input id="qr-sdicodici" name="qr-sdicodici" type="checkbox"
@@ -214,9 +209,8 @@
                                                         class="material-symbols-outlined icon-field-left">fact_check</span>
                                                     <input id="cciaa" name="office_cciaa_master" type="text"
                                                         class="detail-field-input" placeholder="REA..."
-                                                        data-t-placeholder="cciaa_placeholder"
-                                                        autocomplete="new-password" autocorrect="off"
-                                                        spellcheck="false" />
+                                                        data-t-placeholder="cciaa_placeholder" autocomplete="off"
+                                                        autocorrect="off" spellcheck="false" />
                                                     <div class="field-action-qr">
                                                         <input id="qr-cciaa" name="qr-cciaa" type="checkbox"
                                                             data-qr-field="numeroCCIAA"
@@ -292,8 +286,7 @@
                                                     <input id="referente-ruolo" name="ref_role_master" type="text"
                                                         class="detail-field-input" placeholder="es. Amministratore"
                                                         data-t-placeholder="referent_role_placeholder"
-                                                        autocomplete="new-password" autocorrect="off"
-                                                        spellcheck="false" />
+                                                        autocomplete="off" autocorrect="off" spellcheck="false" />
                                                     <div class="field-action-qr">
                                                         <input id="qr-referente-titolo" name="qr-referente-titolo"
                                                             type="checkbox" data-qr-field="referenteTitolo"
@@ -314,8 +307,8 @@
                                             <div class="detail-field-box border-glow">
                                                 <input id="referente-nome" name="ref_fn_master" type="text"
                                                     class="detail-field-input" placeholder="Nome"
-                                                    data-t-placeholder="first_name" autocomplete="new-password"
-                                                    autocorrect="off" spellcheck="false" />
+                                                    data-t-placeholder="first_name" autocomplete="off" autocorrect="off"
+                                                    spellcheck="false" />
                                                 <div class="field-action-qr">
                                                     <input id="qr-referente-nome" name="qr-referente-nome"
                                                         type="checkbox" data-qr-field="referenteNome"
@@ -331,8 +324,8 @@
                                             <div class="detail-field-box border-glow">
                                                 <input id="referente-cognome" name="ref_ln_master" type="text"
                                                     class="detail-field-input" placeholder="Cognome"
-                                                    data-t-placeholder="last_name" autocomplete="new-password"
-                                                    autocorrect="off" spellcheck="false" />
+                                                    data-t-placeholder="last_name" autocomplete="off" autocorrect="off"
+                                                    spellcheck="false" />
                                                 <div class="field-action-qr">
                                                     <input id="qr-referente-cognome" name="qr-referente-cognome"
                                                         type="checkbox" data-qr-field="referenteCognome"
@@ -353,7 +346,7 @@
                                             <span class="material-symbols-outlined icon-field-left">smartphone</span>
                                             <input id="referente-cellulare" name="ref_tel_master" type="tel"
                                                 class="detail-field-input" placeholder="Cellulare"
-                                                data-t-placeholder="phone" autocomplete="new-password" autocorrect="off"
+                                                data-t-placeholder="phone" autocomplete="off" autocorrect="off"
                                                 spellcheck="false" />
                                             <div class="field-action-qr">
                                                 <input id="qr-referente-cellulare" name="qr-referente-cellulare"
@@ -422,7 +415,7 @@
                                                             <input id="indirizzo" name="office_addr_master" type="text"
                                                                 class="detail-field-input" placeholder="Via / Piazza"
                                                                 data-t-placeholder="address_placeholder"
-                                                                autocomplete="new-password" autocorrect="off"
+                                                                autocomplete="off" autocorrect="off"
                                                                 spellcheck="false" />
                                                         </div>
                                                     </div>
@@ -433,7 +426,7 @@
                                                             <input id="civico" name="office_civic_master" type="text"
                                                                 class="detail-field-input text-center"
                                                                 placeholder="Civico" data-t-placeholder="civic_number"
-                                                                autocomplete="new-password" autocorrect="off"
+                                                                autocomplete="off" autocorrect="off"
                                                                 spellcheck="false" />
                                                         </div>
                                                     </div>
@@ -445,7 +438,7 @@
                                                         <div class="detail-field-box border-glow">
                                                             <input id="citta" name="office_city_master" type="text"
                                                                 class="detail-field-input" placeholder="Città"
-                                                                data-t-placeholder="city" autocomplete="new-password"
+                                                                data-t-placeholder="city" autocomplete="off"
                                                                 autocorrect="off" spellcheck="false" />
                                                         </div>
                                                     </div>
@@ -456,9 +449,8 @@
                                                             <input id="provincia" name="office_prov_master" type="text"
                                                                 class="detail-field-input text-center uppercase"
                                                                 placeholder="PR" maxlength="2"
-                                                                data-t-placeholder="province_short"
-                                                                autocomplete="new-password" autocorrect="off"
-                                                                spellcheck="false" />
+                                                                data-t-placeholder="province_short" autocomplete="off"
+                                                                autocorrect="off" spellcheck="false" />
                                                         </div>
                                                     </div>
                                                     <div class="glass-field-container">
@@ -467,7 +459,7 @@
                                                             <input id="cap" name="office_zip_master" type="tel"
                                                                 class="detail-field-input text-center" placeholder="CAP"
                                                                 maxlength="5" data-t-placeholder="cap"
-                                                                autocomplete="new-password" autocorrect="off"
+                                                                autocomplete="off" autocorrect="off"
                                                                 spellcheck="false" />
                                                         </div>
                                                     </div>
@@ -536,11 +528,10 @@
                                                         data-t="pec_address">Indirizzo
                                                         PEC</label>
                                                     <div class="detail-field-box border-glow">
-                                                        <input id="email-pec" name="pec_entry_master" type="email"
-                                                            class="detail-field-input" placeholder="email@pec.it"
+                                                        <input id="email-pec" type="email" class="detail-field-input"
+                                                            placeholder="email@pec.it"
                                                             data-t-placeholder="pec_address_placeholder"
-                                                            autocomplete="new-password" autocorrect="off"
-                                                            spellcheck="false" />
+                                                            autocomplete="off" autocorrect="off" spellcheck="false" />
                                                     </div>
                                                 </div>
                                                 <div class="glass-field-container">
@@ -548,11 +539,10 @@
                                                         data-t="pec_password">Password
                                                         PEC</label>
                                                     <div class="detail-field-box border-glow">
-                                                        <input id="email-pec-password" name="pec_secret_master"
-                                                            type="text" class="detail-field-input base-shield"
+                                                        <input id="email-pec-password" type="text"
+                                                            class="detail-field-input base-shield"
                                                             placeholder="Password PEC" data-t-placeholder="password"
-                                                            autocomplete="new-password" autocorrect="off"
-                                                            spellcheck="false" />
+                                                            autocomplete="off" autocorrect="off" spellcheck="false" />
                                                         <div class="detail-field-actions">
                                                             <button type="button" id="btn-toggle-pec-pass"
                                                                 class="btn-toggle-pass btn-icon-header"
@@ -567,11 +557,10 @@
                                                     <label class="view-label" for="email-pec-note" data-t="notes">Note
                                                         Accesso</label>
                                                     <div class="detail-field-box border-glow note-box">
-                                                        <textarea id="email-pec-note" name="pec_notes_master"
-                                                            class="form-textarea" placeholder="Note accesso PEC..."
-                                                            data-t-placeholder="notes_placeholder"
-                                                            autocomplete="new-password" autocorrect="off"
-                                                            spellcheck="false"></textarea>
+                                                        <textarea id="email-pec-note" class="form-textarea"
+                                                            placeholder="Note accesso PEC..."
+                                                            data-t-placeholder="notes_placeholder" autocomplete="off"
+                                                            autocorrect="off" spellcheck="false"></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -611,25 +600,22 @@
                                                         <label class="view-label" for="email-amministrazione"
                                                             data-t="email_address">Indirizzo Email</label>
                                                         <div class="detail-field-box border-glow">
-                                                            <input id="email-amministrazione" name="admin_entry_master"
-                                                                type="email" class="detail-field-input"
+                                                            <input id="email-amministrazione" type="email"
+                                                                class="detail-field-input"
                                                                 placeholder="Email Amministrazione"
-                                                                data-t-placeholder="email_address"
-                                                                autocomplete="new-password" autocorrect="off"
-                                                                spellcheck="false" />
+                                                                data-t-placeholder="email_address" autocomplete="off"
+                                                                autocorrect="off" spellcheck="false" />
                                                         </div>
                                                     </div>
                                                     <div class="glass-field-container">
                                                         <label class="view-label" for="email-amministrazione-password"
                                                             data-t="email_password">Password Email</label>
                                                         <div class="detail-field-box border-glow">
-                                                            <input id="email-amministrazione-password"
-                                                                name="admin_secret_master" type="text"
+                                                            <input id="email-amministrazione-password" type="text"
                                                                 class="detail-field-input base-shield"
                                                                 placeholder="Password Amministrazione"
-                                                                data-t-placeholder="password"
-                                                                autocomplete="new-password" autocorrect="off"
-                                                                spellcheck="false" />
+                                                                data-t-placeholder="password" autocomplete="off"
+                                                                autocorrect="off" spellcheck="false" />
                                                             <div class="detail-field-actions">
                                                                 <button type="button"
                                                                     class="btn-toggle-pass btn-icon-header"
@@ -646,10 +632,10 @@
                                                             Accesso</label>
                                                         <div class="detail-field-box border-glow note-box">
                                                             <textarea id="email-amministrazione-note"
-                                                                name="admin_notes_master" class="form-textarea"
+                                                                class="form-textarea"
                                                                 placeholder="Note Amministrazione..."
                                                                 data-t-placeholder="notes_placeholder"
-                                                                autocomplete="new-password" autocorrect="off"
+                                                                autocomplete="off" autocorrect="off"
                                                                 spellcheck="false"></textarea>
                                                         </div>
                                                     </div>
@@ -689,25 +675,21 @@
                                                             data-t="email_address">Indirizzo
                                                             Email</label>
                                                         <div class="detail-field-box border-glow">
-                                                            <input id="email-personale" name="pers_entry_master"
-                                                                type="email" class="detail-field-input"
-                                                                placeholder="Email Personale"
-                                                                data-t-placeholder="email_address"
-                                                                autocomplete="new-password" autocorrect="off"
-                                                                spellcheck="false" />
+                                                            <input id="email-personale" type="email"
+                                                                class="detail-field-input" placeholder="Email Personale"
+                                                                data-t-placeholder="email_address" autocomplete="off"
+                                                                autocorrect="off" spellcheck="false" />
                                                         </div>
                                                     </div>
                                                     <div class="glass-field-container">
                                                         <label class="view-label" for="email-personale-password"
                                                             data-t="email_password">Password Email</label>
                                                         <div class="detail-field-box border-glow">
-                                                            <input id="email-personale-password"
-                                                                name="pers_secret_master" type="text"
+                                                            <input id="email-personale-password" type="text"
                                                                 class="detail-field-input base-shield"
                                                                 placeholder="Password Personale"
-                                                                data-t-placeholder="password"
-                                                                autocomplete="new-password" autocorrect="off"
-                                                                spellcheck="false" />
+                                                                data-t-placeholder="password" autocomplete="off"
+                                                                autocorrect="off" spellcheck="false" />
                                                             <div class="detail-field-actions">
                                                                 <button type="button"
                                                                     class="btn-toggle-pass btn-icon-header"
@@ -723,10 +705,10 @@
                                                             data-t="notes">Note
                                                             Accesso</label>
                                                         <div class="detail-field-box border-glow note-box">
-                                                            <textarea id="email-personale-note" name="pers_notes_master"
-                                                                class="form-textarea" placeholder="Note Personale..."
+                                                            <textarea id="email-personale-note" class="form-textarea"
+                                                                placeholder="Note Personale..."
                                                                 data-t-placeholder="notes_placeholder"
-                                                                autocomplete="new-password" autocorrect="off"
+                                                                autocomplete="off" autocorrect="off"
                                                                 spellcheck="false"></textarea>
                                                         </div>
                                                     </div>
@@ -772,9 +754,8 @@
                                             <textarea id="note-azienda" name="company_notes_master"
                                                 class="form-textarea"
                                                 placeholder="Dati aggiuntivi (Telefono, Fax, Note...)"
-                                                data-t-placeholder="company_notes_placeholder"
-                                                autocomplete="new-password" autocorrect="off"
-                                                spellcheck="false"></textarea>
+                                                data-t-placeholder="company_notes_placeholder" autocomplete="off"
+                                                autocorrect="off" spellcheck="false"></textarea>
                                         </div>
                                     </div>
 

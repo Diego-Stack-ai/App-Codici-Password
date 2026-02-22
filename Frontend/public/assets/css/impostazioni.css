@@ -103,22 +103,22 @@
 }
 
 .icon-blue {
-    color: #3b82f6;
+    color: var(--accent);
     background: rgba(59, 130, 246, 0.1);
 }
 
 .icon-red {
-    color: #ef4444;
+    color: var(--status-error);
     background: rgba(239, 68, 68, 0.1);
 }
 
 .icon-emerald {
-    color: #10b981;
+    color: var(--status-success);
     background: rgba(16, 185, 129, 0.1);
 }
 
 .icon-amber {
-    color: #f59e0b;
+    color: var(--status-warning);
     background: rgba(245, 158, 11, 0.1);
 }
 
@@ -131,15 +131,15 @@
 }
 
 .settings-label {
-    font-size: 0.95rem;
-    font-weight: 700;
+    font: var(--font-label);
+    font-size: var(--fs-base);
+    /* Ricalibrato per menu impostazioni */
     color: var(--text-primary);
 }
 
 .settings-desc {
-    font-size: 0.7rem;
+    font: var(--font-micro);
     color: var(--text-secondary);
-    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     opacity: 0.7;
@@ -178,7 +178,7 @@ h3.settings-desc {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #fff;
+    background: white;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
@@ -195,8 +195,7 @@ h3.settings-desc {
     color: var(--text-secondary);
     border-radius: 12px;
     padding: 0.75rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font: var(--font-label);
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -258,7 +257,7 @@ h3.settings-desc {
     transform: translateX(-50%);
     width: 2px;
     height: 100px;
-    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), #fff);
+    background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.8), white);
     opacity: 0;
     animation: saettaStrike 4s infinite ease-in-out;
 }
@@ -330,7 +329,7 @@ h3.settings-desc {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: var(--icon-sm);
     z-index: 20;
     cursor: pointer;
     border: 2px solid white;
@@ -340,17 +339,15 @@ h3.settings-desc {
 
 .qr-lens-icon:hover {
     transform: scale(1.1);
-    background: #137fec;
+    background: var(--accent);
 }
 
 .hero-user-name {
-    font-size: 1.6rem;
-    /* Un filo più piccolo */
-    font-weight: 900;
+    font: var(--font-h1);
+    /* Normalizzato da 1.6rem */
     letter-spacing: -0.02em;
     color: var(--text-primary);
     margin: 1rem 0 0.75rem;
-    /* Ridotti margini nome */
     text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -363,10 +360,7 @@ h3.settings-desc {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font: var(--font-button);
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -392,16 +386,15 @@ h3.settings-desc {
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    color: #ef4444;
+    color: var(--status-error);
     cursor: pointer;
-    font-weight: 800;
-    text-transform: uppercase;
+    font: var(--font-button);
     letter-spacing: 0.1em;
     transition: all 0.3s;
 }
 
 .btn-logout-semantic:hover {
-    background: #ef4444;
+    background: var(--status-error);
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 15px 30px rgba(239, 68, 68, 0.3);
@@ -439,13 +432,15 @@ h3.settings-desc {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: var(--fs-xs);
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.85rem;
     border-radius: 12px;
+    font: var(--font-input);
+    /* Normalizzato da 0.9rem/600 */
     transition: all 0.2s;
 }
 
@@ -465,15 +460,15 @@ h3.settings-desc {
 }
 
 .settings-dropdown-btn span {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     opacity: 0.9;
 }
 
 .btn-link-accent {
     display: inline-block;
     color: var(--accent);
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: var(--font-label-weight);
+    font-size: var(--fs-xs);
     padding: 0.5rem 1rem;
     background: rgba(59, 130, 246, 0.1);
     border-radius: 12px;
@@ -545,7 +540,7 @@ h3.settings-desc {
     color: black;
     border-radius: 99px;
     border: none;
-    font-weight: 800;
+    font-weight: var(--font-title-weight);
     text-transform: uppercase;
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);

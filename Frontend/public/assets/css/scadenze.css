@@ -22,13 +22,11 @@
     color: white;
     padding: 0.2rem 0.6rem;
     border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 800;
+    font: var(--font-badge);
 }
 
 .deadline-count-label {
-    font-size: 0.9rem;
-    font-weight: 700;
+    font: var(--font-label);
     color: var(--text-primary);
 }
 
@@ -36,8 +34,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font: var(--font-label);
 }
 
 .search-bar-container {
@@ -60,7 +57,7 @@
 
 .search-input-wrapper span {
     color: var(--text-secondary);
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     margin-right: 0.75rem;
 }
 
@@ -68,8 +65,7 @@
     background: transparent;
     border: none;
     color: var(--text-primary);
-    font-size: 0.95rem;
-    /* Standard */
+    font: var(--font-input);
     width: 100%;
     outline: none;
 }
@@ -101,9 +97,7 @@
     /* Max vertical, min horizontal */
     border-radius: 12px;
     /* Soft square/pill */
-    font-size: 0.6rem;
-    /* Small font to fit text */
-    font-weight: 800;
+    font: var(--font-badge);
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
@@ -154,7 +148,7 @@
     z-index: 1;
     /* Dietro al contenuto principale */
     opacity: 0.5;
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: bold;
     color: white;
 }
@@ -163,16 +157,14 @@
     justify-content: flex-start;
     background-color: rgba(255, 255, 255, 0.05);
     /* Neutral/Dark */
-    color: #10b981;
-    /* Icon stays Green for meaning */
+    color: var(--status-success);
 }
 
 .swipe-action-bg.bg-delete {
     justify-content: flex-end;
     background-color: rgba(255, 255, 255, 0.05);
     /* Neutral/Dark */
-    color: #ef4444;
-    /* Icon stays Red for meaning */
+    color: var(--status-error);
 }
 
 .deadline-card .swipe-content {
@@ -209,17 +201,16 @@ html:not(.dark) .deadline-card .swipe-content {
     -webkit-backdrop-filter: blur(16px);
     border-color: #bae6fd;
     /* Sky 200 */
-    color: #0f172a;
-    /* Slate 900 Text */
+    color: var(--text-primary);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 html:not(.dark) .deadline-card-title {
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 html:not(.dark) .deadline-card-subtitle {
-    color: #334155;
+    color: var(--text-secondary);
 }
 
 .deadline-card:hover .swipe-content {
@@ -261,24 +252,22 @@ html:not(.dark) .deadline-card-subtitle {
 }
 
 .deadline-card-category {
-    font-size: 0.65rem;
-    font-weight: 800;
+    font: var(--font-micro);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     opacity: 0.6;
 }
 
 .deadline-card-title {
-    font-size: 0.85rem;
-    font-weight: 800;
+    font: var(--font-label);
     color: var(--text-primary);
     margin: 0;
-    line-height: 1.2;
+    line-height: var(--lh-tight);
 }
 
 .deadline-card-subtitle {
-    font-size: 0.65rem;
-    font-weight: 500;
+    font: var(--font-micro);
+    font-weight: var(--font-weight-medium);
     color: var(--text-secondary);
     opacity: 0.8;
 }
@@ -286,8 +275,7 @@ html:not(.dark) .deadline-card-subtitle {
 .deadline-date-badge {
     padding: 0.25rem 0.75rem;
     border-radius: 12px;
-    font-size: 10px;
-    font-weight: 900;
+    font: var(--font-badge);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     flex-shrink: 0;
@@ -298,37 +286,37 @@ html:not(.dark) .deadline-card-subtitle {
 
 /* Status Variants */
 .deadline-card-expired .deadline-icon-box {
-    color: #ef4444;
+    color: var(--status-error);
     background: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.3);
 }
 
 .deadline-card-expired .deadline-date-badge {
-    color: #ef4444;
+    color: var(--status-error);
     background: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.2);
 }
 
 .deadline-card-upcoming .deadline-icon-box {
-    color: #f59e0b;
+    color: var(--status-warning);
     background: rgba(245, 158, 11, 0.12);
     border-color: rgba(245, 158, 11, 0.1);
 }
 
 .deadline-card-upcoming .deadline-date-badge {
-    color: #f59e0b;
+    color: var(--status-warning);
     background: rgba(245, 158, 11, 0.12);
     border-color: rgba(245, 158, 11, 0.1);
 }
 
 .deadline-card-completed .deadline-icon-box {
-    color: #10b981;
+    color: var(--status-success);
     background: rgba(16, 185, 129, 0.12);
     border-color: rgba(16, 185, 129, 0.1);
 }
 
 .deadline-card-completed .deadline-date-badge {
-    color: #10b981;
+    color: var(--status-success);
     background: rgba(16, 185, 129, 0.12);
     border-color: rgba(16, 185, 129, 0.1);
 }

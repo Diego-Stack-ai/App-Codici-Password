@@ -558,7 +558,8 @@ function createInputField(label, value, onInput, icon, type = 'text') {
                 className: 'field-input',
                 type: type,
                 value: value || '',
-                oninput: (e) => onInput(e.target.value)
+                oninput: (e) => onInput(e.target.value),
+                autocomplete: 'off'
             })
         ])
     ]);

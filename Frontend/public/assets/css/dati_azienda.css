@@ -50,7 +50,7 @@
 }
 
 .detail-avatar-placeholder {
-    font-size: 3rem;
+    font-size: calc(var(--icon-lg) * 2);
     color: var(--text-secondary);
     opacity: 0.5;
 }
@@ -59,7 +59,7 @@
     position: absolute;
     bottom: -5px;
     right: -5px;
-    background: #3b82f6;
+    background: var(--accent);
     color: white;
     width: 28px;
     height: 28px;
@@ -108,7 +108,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: var(--fs-micro);
     border: 2px solid var(--card-bg);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
@@ -119,18 +119,15 @@
 
 /* QR Modal styles */
 .qr-scan-text {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #0f172a;
+    font: var(--font-badge);
+    color: var(--text-primary);
     opacity: 0.5;
     text-align: center;
     margin: 0.75rem 0;
 }
 
 .dark .qr-scan-text {
-    color: #e2e8f0;
+    color: var(--text-primary);
 }
 
 .btn-modal-close {
@@ -138,10 +135,9 @@
     padding: 0.85rem 1rem;
     border-radius: 99px;
     border: none;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: var(--accent);
     color: white;
-    font-size: 0.85rem;
-    font-weight: 800;
+    font: var(--font-button);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     cursor: pointer;
@@ -165,10 +161,8 @@
 }
 
 .hero-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    line-height: 1.2;
+    font: var(--font-h1);
+    line-height: var(--lh-tight);
     margin: 0;
 }
 
@@ -178,10 +172,7 @@
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid var(--card-border);
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font: var(--font-badge);
     color: var(--text-secondary);
     margin-top: 0.5rem;
 }
@@ -206,15 +197,12 @@
 }
 
 .detail-section-icon {
-    font-size: 1.2rem;
+    font-size: var(--icon-lg);
     opacity: 0.9;
 }
 
 .detail-section-title {
-    font-size: 0.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font: var(--font-label);
     color: var(--text-secondary);
     margin: 0;
 }
@@ -238,7 +226,7 @@
 }
 
 .icon-chevron {
-    font-size: 1.2rem;
+    font-size: var(--icon-lg);
     opacity: 0.5;
     transition: transform 0.3s ease;
 }
@@ -279,10 +267,8 @@ html:not(.dark) .glass-card {
 .view-label {
     display: block;
     margin-bottom: 0.4rem;
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font: var(--font-label);
+    font-size: var(--fs-micro);
     color: var(--text-secondary);
     opacity: 0.7;
     margin-left: 0.25rem;
@@ -306,8 +292,8 @@ html:not(.dark) .glass-card {
     border: none;
     outline: none;
     color: var(--text-primary);
-    font-size: 0.85rem;
-    font-weight: 500;
+    font: var(--font-input);
+    font-size: var(--fs-xs);
     font-family: inherit;
     /* fix: gli <input> non ereditano il font di default */
     width: 100%;
@@ -324,7 +310,7 @@ html:not(.dark) .glass-card {
 
 .icon-field-left {
     opacity: 0.5;
-    font-size: 1.2rem;
+    font-size: var(--icon-lg);
 }
 
 .detail-field-actions {
@@ -385,16 +371,16 @@ html:not(.dark) .glass-card {
 }
 
 .referent-name {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font: var(--font-card-title);
+    font-size: var(--fs-base);
+    /* Compattato per card */
     color: var(--text-primary);
     margin: 0;
-    line-height: 1.2;
+    line-height: var(--lh-tight);
 }
 
 .referent-role {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font: var(--font-micro);
     opacity: 0.8;
 }
 
@@ -403,7 +389,7 @@ html:not(.dark) .glass-card {
     height: 42px;
     border-radius: 14px;
     background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
+    color: var(--status-success);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -422,8 +408,9 @@ html:not(.dark) .glass-card {
 }
 
 .note-text-display {
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font: var(--font-input);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
     color: var(--text-primary);
     opacity: 0.9;
     white-space: pre-wrap;
@@ -437,9 +424,9 @@ html:not(.dark) .glass-card {
     outline: none;
     color: var(--text-primary);
     resize: none;
-    font-family: inherit;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font: var(--font-input);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
 }
 
 .btn-mini-section-action {
@@ -458,31 +445,30 @@ html:not(.dark) .glass-card {
 }
 
 .btn-mini-section-action.action-amber {
-    color: #f59e0b;
+    color: var(--status-warning);
     background: rgba(245, 158, 11, 0.1);
     border-color: rgba(245, 158, 11, 0.2);
 }
 
 .btn-mini-section-action.action-blue {
-    color: #3b82f6;
+    color: var(--accent);
     background: rgba(59, 130, 246, 0.1);
     border-color: rgba(59, 130, 246, 0.2);
 }
 
 .btn-mini-section-action.action-purple {
-    color: #a855f7;
+    color: var(--accent);
     background: rgba(168, 85, 247, 0.1);
     border-color: rgba(168, 85, 247, 0.2);
 }
 
 .btn-cancel-text {
-    font-size: 0.75rem;
+    font: var(--font-badge);
     color: var(--text-secondary);
     background: transparent;
     border: none;
     cursor: pointer;
     opacity: 0.7;
-    font-family: inherit;
 }
 
 /* --- 6. MODALS — definiti in core_ui.css, non duplicare qui --- */
@@ -505,19 +491,19 @@ html:not(.dark) .glass-card {
 }
 
 .icon-accent-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-accent-emerald {
-    color: #10b981;
+    color: var(--status-success);
 }
 
 .icon-accent-purple {
-    color: #a855f7;
+    color: var(--accent);
 }
 
 .icon-accent-amber {
-    color: #f59e0b;
+    color: var(--status-warning);
 }
 
 .section-bottom {
@@ -553,14 +539,12 @@ html:not(.dark) .glass-card {
 }
 
 .location-tab-btn span.material-symbols-outlined {
-    font-size: 1.2rem;
+    font-size: var(--icon-lg);
 }
 
 .location-tab-btn span:last-child {
-    font-size: 0.55rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font: var(--font-badge);
+    font-size: var(--fs-micro);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -569,14 +553,14 @@ html:not(.dark) .glass-card {
 }
 
 .location-tab-btn.active {
-    background: #ffffff;
-    color: #2563eb;
+    background: white;
+    color: var(--accent);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 html:not(.dark) .location-tab-btn.active {
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--accent);
+    color: white;
 }
 
 /* Email List Items */
@@ -616,7 +600,7 @@ html:not(.dark) .location-tab-btn.active {
     height: 2rem;
     border-radius: 0.5rem;
     background: rgba(168, 85, 247, 0.1);
-    color: #c084fc;
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -625,11 +609,8 @@ html:not(.dark) .location-tab-btn.active {
 }
 
 .email-label-text {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font: var(--font-badge);
     color: var(--text-secondary);
-    letter-spacing: 0.1em;
 }
 
 .email-detail-row {
@@ -649,8 +630,7 @@ html:not(.dark) .location-tab-btn.active {
 }
 
 .email-text-value {
-    font-size: 0.75rem;
-    font-weight: 700;
+    font: var(--font-badge);
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -678,7 +658,7 @@ html:not(.dark) .location-tab-btn.active {
 }
 
 .field-password {
-    font-family: 'Roboto Mono', monospace;
+    font-family: inherit;
 }
 
 /* Attachments */
@@ -706,13 +686,12 @@ html:not(.dark) .location-tab-btn.active {
 }
 
 .attachment-name {
-    font-size: 0.75rem;
+    font: var(--font-badge);
     color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
 }
 
 .attachment-icon-open {
-    font-size: 0.9rem;
+    font-size: var(--icon-sm);
     opacity: 0.2;
     transition: opacity 0.2s;
 }
@@ -724,7 +703,7 @@ html:not(.dark) .location-tab-btn.active {
 .no-attachments-text {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font: var(--font-badge);
     opacity: 0.5;
     padding: 1rem 0;
 }
