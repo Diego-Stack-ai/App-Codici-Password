@@ -108,11 +108,22 @@ function initFormEvents() {
 
         const btnPass = e.target.closest('.btn-toggle-pass');
         if (btnPass) {
-            const input = document.getElementById(btnPass.dataset.target);
+            // 1. Cerca input via data-target (card statiche HTML)
+            let input = btnPass.dataset.target
+                ? document.getElementById(btnPass.dataset.target)
+                : null;
+            // 2. Fallback: cerca l'input nel .detail-field-box più vicino (card dinamiche JS)
+            if (!input) {
+                input = btnPass.closest('.detail-field-box')?.querySelector('input');
+            }
             if (input) {
-                const isShield = input.classList.toggle('base-shield');
+                const isNowShielded = input.classList.toggle('base-shield');
+                // Fallback Firefox: -webkit-text-security non funziona → cambio type
+                if (!CSS.supports('-webkit-text-security', 'disc')) {
+                    input.type = isNowShielded ? 'password' : 'text';
+                }
                 const icon = btnPass.querySelector('span');
-                if (icon) icon.textContent = isShield ? 'visibility' : 'visibility_off';
+                if (icon) icon.textContent = isNowShielded ? 'visibility' : 'visibility_off';
             }
         }
     });
@@ -205,9 +216,20 @@ function toggleSection(id, btn) {
     const isOpen = el.style.maxHeight && el.style.maxHeight !== '0px';
 
     if (isOpen) {
-        el.style.maxHeight = '0px';
+        // FIX: se maxHeight è 'none', CSS non può animare verso 0px —
+        // dobbiamo prima ancorarlo all'altezza reale, poi ridurlo a 0 nel frame successivo
+        if (el.style.maxHeight === 'none' || !el.style.maxHeight) {
+            el.style.maxHeight = el.scrollHeight + 'px';
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => { // doppio rAF per garantire il paint
+                    el.style.maxHeight = '0px';
+                });
+            });
+        } else {
+            el.style.maxHeight = '0px';
+        }
         if (arrow) arrow.style.transform = 'rotate(0deg)';
-        // Opzionale: rimettiamo la classe dopo la transizione (400ms)
+        // Rimettiamo la classe dopo la transizione (400ms)
         setTimeout(() => {
             if (el.style.maxHeight === '0px') el.classList.add('hidden-content');
         }, 400);
@@ -219,8 +241,7 @@ function toggleSection(id, btn) {
         el.style.maxHeight = contentHeight + 'px';
         if (arrow) arrow.style.transform = 'rotate(180deg)';
 
-        // Per evitare problemi con contenuti dinamici che cambiano altezza, 
-        // dopo la transizione possiamo mettere 'none' o 'max-content'
+        // Dopo la transizione impostiamo 'none' per permettere scroll interno/resize
         setTimeout(() => {
             if (el.style.maxHeight !== '0px') el.style.maxHeight = 'none';
         }, 400);
@@ -454,18 +475,20 @@ function addExtraEmail(data = null) {
             createElement('label', { className: 'view-label', textContent: t('password') }),
             createElement('div', { className: 'detail-field-box border-glow' }, [
                 createElement('input', {
+                    id: `pass_${uniqueId}`,
                     type: 'text',
                     className: 'detail-field-input base-shield email-pass',
                     placeholder: 'Password',
                     value: data ? data.password : '',
                     autocomplete: 'new-password'
                 }),
-                createElement('div', { className: 'detail-field-actions pr-2' }, [
+                createElement('div', { className: 'detail-field-actions' }, [
                     createElement('button', {
                         type: 'button',
-                        className: 'btn-toggle-pass'
+                        className: 'btn-toggle-pass btn-icon-header',
+                        'data-target': `pass_${uniqueId}`
                     }, [
-                        createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'visibility' })
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' })
                     ])
                 ])
             ])
@@ -497,19 +520,19 @@ function addExtraSede(data = null) {
 
     const wrapper = createElement('div', { className: 'glass-card inside-card extra-sede-item' });
 
-    // HEADER
+    // HEADER — identico alla Sede Legale
     const header = createElement('div', {
         className: 'email-card-header btn-toggle-section',
         'data-target': bodyId
     }, [
         createElement('div', { className: 'flex items-center gap-3 flex-1' }, [
-            createElement('span', { className: 'material-symbols-outlined text-icon-purple', textContent: 'domain' }),
+            createElement('span', { className: 'material-symbols-outlined icon-accent-blue', textContent: 'location_on' }),
             createElement('input', {
                 id: `tipo_${uniqueId}`,
                 type: 'text',
-                className: 'email-type-input sede-tipo',
-                placeholder: t('office_type_placeholder') || 'TIPO SEDE',
-                value: data ? (data.tipo || '').replace('Sede ', '') : '',
+                className: 'email-type-input text-blue-400 sede-tipo',
+                placeholder: t('office_type_placeholder') || 'Altra Sede',
+                value: data ? (data.tipo || '') : '',
                 'data-stop-propagation': true,
                 autocomplete: 'new-password'
             })
@@ -521,7 +544,8 @@ function addExtraSede(data = null) {
                     type: 'checkbox',
                     className: 'checkbox-qr sede-qr',
                     checked: data ? (data.qr !== false) : true,
-                    'data-stop-propagation': true
+                    'data-stop-propagation': true,
+                    'aria-label': 'Includi sede nel QR'
                 }),
                 createElement('label', { for: `qr_${uniqueId}`, className: 'sr-only', textContent: 'QR' })
             ]),
@@ -536,20 +560,26 @@ function addExtraSede(data = null) {
             createElement('span', {
                 id: arrowId,
                 className: 'material-symbols-outlined icon-chevron transition-transform',
+                style: 'transform: rotate(180deg)',
                 textContent: 'expand_more'
             })
         ])
     ]);
 
-    // BODY
+    // BODY — stesso grid della Sede Legale (1fr 80px per indirizzo/civico)
     const body = createElement('div', {
         id: bodyId,
-        className: 'email-card-body collapsible-section'
+        className: 'email-card-body collapsible-section',
+        style: 'max-height: none' // parte aperta, come la sede legale
     }, [
-        createElement('div', { className: 'form-grid-3' }, [
+        // Riga Indirizzo + Civico: grid 1fr / 80px (identico alla sede legale)
+        createElement('div', {
+            style: 'display: grid; grid-template-columns: 1fr 80px; gap: 0.75rem;'
+        }, [
             createFieldBox('Indirizzo', 'address', 'text', data?.indirizzo, 'sede-indirizzo', 'Via / Piazza', 'address_placeholder'),
-            createFieldBox('N.', '', 'text', data?.civico, 'sede-civico', 'N.', 'civic_number', true)
+            createFieldBox('N.', 'civic_number', 'text', data?.civico, 'sede-civico', 'N.', 'civic_number', true)
         ]),
+        // Riga Città / Prov / CAP: form-grid-3
         createElement('div', { className: 'form-grid-3' }, [
             createFieldBox('Città', 'city', 'text', data?.citta, 'sede-citta', 'Città', 'city'),
             createFieldBox('Prov', 'province', 'text', data?.provincia, 'sede-provincia', 'PR', 'province_short', true, true),
