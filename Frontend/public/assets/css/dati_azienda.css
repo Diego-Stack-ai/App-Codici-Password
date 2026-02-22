@@ -7,8 +7,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
     position: relative;
     z-index: 10;
 }
@@ -189,7 +189,7 @@
 /* --- 2. SECTIONS & ACCORDIONS --- */
 .detail-section {
     position: relative;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .detail-section-header {
@@ -244,7 +244,7 @@
 }
 
 .mt-content {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
 .hidden-content {
@@ -257,8 +257,8 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 1.25rem;
+    border-radius: 20px;
+    padding: 0.75rem;
     position: relative;
     overflow: hidden;
 }
@@ -269,7 +269,7 @@ html:not(.dark) .glass-card {
 }
 
 .glass-field-container {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .glass-field-container:last-child {
@@ -291,13 +291,13 @@ html:not(.dark) .glass-card {
 .detail-field-box {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0 1rem;
-    height: 3.5rem;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+    height: 2.2rem;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
-    border-radius: 16px;
-    transition: all 0.3s ease;
+    border-radius: 12px;
+    transition: all 0.2s ease;
 }
 
 .detail-field-input {
@@ -353,8 +353,8 @@ html:not(.dark) .glass-card {
 .referent-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .referent-avatar-box {
