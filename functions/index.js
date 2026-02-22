@@ -51,15 +51,18 @@ exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/
     }
 
     const userData = userDoc.data();
-    // Cerchiamo i token in fcmTokens o fcmToken (compatibilità legacy)
-    let tokens = userData.fcmTokens || [];
-    if (userData.fcmToken && !tokens.includes(userData.fcmToken)) {
-      tokens.push(userData.fcmToken);
+    // Cerchiamo i token in fcmTokens e deduplichiamo
+    let rawTokens = userData.fcmTokens || [];
+    if (userData.fcmToken && !rawTokens.includes(userData.fcmToken)) {
+      rawTokens.push(userData.fcmToken);
     }
+
+    // Rimuovi eventuali duplicati o valori vuoti
+    const tokens = [...new Set(rawTokens.filter(t => !!t))];
 
     const pushAllowed = userData.prefs_push !== false;
 
-    console.log(`[TRIGGER DEBUG] Tokens trovati: ${tokens.length}. Push abilitato in prefs: ${pushAllowed}`);
+    console.log(`[TRIGGER DEBUG] Tokens unici: ${tokens.length}. Push abilitato: ${pushAllowed}`);
 
     if (pushAllowed && tokens.length > 0) {
       const payload = {
@@ -74,12 +77,33 @@ exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/
             clickAction: "FLUTTER_NOTIFICATION_CLICK"
           }
         },
+        apns: {
+          payload: {
+            aps: {
+              alert: {
+                title: data.title,
+                body: data.message
+              },
+              sound: "default",
+              badge: 1,
+              "content-available": 1
+            }
+          },
+          headers: {
+            "apns-priority": "10",
+            "apns-push-type": "alert"
+          }
+        },
         webpush: {
           headers: {
-            Urgency: "high"
+            Urgency: "high",
+            TTL: "86400"
           },
           notification: {
+            title: data.title,
+            body: data.message,
             icon: "https://appcodici-password.web.app/assets/images/app-icon.jpg",
+            badge: "https://appcodici-password.web.app/assets/images/app-icon.jpg",
             requireInteraction: true
           },
           fcmOptions: {
@@ -93,7 +117,16 @@ exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/
       };
 
       const response = await admin.messaging().sendEachForMulticast({ tokens, ...payload });
-      console.log(`[TRIGGER SUCCESS] Risultato invio a ${userId}: ${response.successCount} successi, ${response.failureCount} fallimenti.`);
+      console.log(`[TRIGGER SUCCESS] Utente ${userId}. Successi: ${response.successCount}, Fallimenti: ${response.failureCount}.`);
+
+      // Log dettagliato se ci sono fallimenti
+      if (response.failureCount > 0) {
+        response.responses.forEach((res, idx) => {
+          if (!res.success) {
+            console.error(`[TRIGGER FAIL] Token ${tokens[idx].substring(0, 10)}... Errore:`, res.error.message);
+          }
+        });
+      }
 
       // Cleanup token morti
       if (response.failureCount > 0) {
