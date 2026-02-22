@@ -238,6 +238,11 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
+/* Pulsante CHIUDI premium in fondo al modal QR */
+.modal-overlay .modal-box-qr .btn-modal-close {
+    margin-top: auto;
+    width: 100%;
+}
 
 .qr-zoom-container {
     background: #E3F2FD;
