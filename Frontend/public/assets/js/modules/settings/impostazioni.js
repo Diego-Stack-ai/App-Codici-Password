@@ -4,9 +4,10 @@
  * V4.6: Aggiunto initComponents() per header/footer standard con Settings button opaco.
  */
 
-import { auth, db } from '../../firebase-config.js';
+import { auth, db, messaging } from '../../firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast } from '../../ui-core.js';
@@ -228,10 +229,21 @@ function setupToggles(data) {
             const val = tPush.checked;
             try {
                 if (auth.currentUser) {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    const updateData = {
                         prefs_push: val,
-                        pref_push_enabled: val // Manteniamo entrambi per ora per sicurezza
-                    });
+                        pref_push_enabled: val
+                    };
+
+                    // Se l'utente attiva il push, proviamo a recuperare il token se manca
+                    if (val) {
+                        const token = await requestPushPermission();
+                        if (token) {
+                            updateData.fcmToken = token;
+                            updateData.fcmTokens = arrayUnion(token);
+                        }
+                    }
+
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), updateData);
                     showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
                 }
             } catch (e) {
@@ -434,4 +446,20 @@ function setupTermsShort() {
     ]);
 
     setChildren(p, container);
+}
+
+async function requestPushPermission() {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            const token = await getToken(messaging, {
+                vapidKey: 'BMe7J_...' // Segnaposto, l'utente dovrebbe fornirlo o lo troviamo in console
+            });
+            return token;
+        }
+        return null;
+    } catch (e) {
+        console.error("Errore richiesta token:", e);
+        return null;
+    }
 }
