@@ -452,8 +452,13 @@ async function requestPushPermission() {
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
+            // Registriamo manualmente il service worker con un path relativo
+            // per evitare il 404 se l'app non è nella root del server locale
+            const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+
             const token = await getToken(messaging, {
-                vapidKey: 'BMe7J_...' // Segnaposto, l'utente dovrebbe fornirlo o lo troviamo in console
+                serviceWorkerRegistration: registration,
+                vapidKey: 'BMe7J_...' // Segnaposto
             });
             return token;
         }
