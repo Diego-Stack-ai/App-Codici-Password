@@ -458,7 +458,7 @@ async function requestPushPermission() {
 
             const token = await getToken(messaging, {
                 serviceWorkerRegistration: registration,
-                vapidKey: 'BMe7J_...' // Segnaposto
+                vapidKey: '' // <--- INSERISCI QUI LA TUA VAPID KEY DA FIREBASE CONSOLE
             });
             return token;
         }

@@ -179,7 +179,7 @@ async function requestPushToken() {
             // Ottieni il token FCM
             // Nota: Sostituire con VAPID KEY reale quando disponibile
             const token = await getToken(messaging, {
-                vapidKey: 'BMe7J_...' // Esempio segnaposto
+                vapidKey: '' // <--- INSERISCI QUI LA TUA VAPID KEY DA FIREBASE CONSOLE
             });
             return token;
         }
