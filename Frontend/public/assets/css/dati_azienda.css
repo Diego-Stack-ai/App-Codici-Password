@@ -151,6 +151,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    margin-top: auto;
+    /* spinge il bottone in fondo al popup flex */
 }
 
 .btn-modal-close:hover {

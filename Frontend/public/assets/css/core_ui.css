@@ -189,6 +189,10 @@
 .modal-box-qr {
     /* Variante specifica per QR - padding ridotto per dare spazio al QR */
     padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+    /* altezza minima per dare spazio al bottone in fondo */
 }
 
 /* Titolo centrato nel popup QR */
