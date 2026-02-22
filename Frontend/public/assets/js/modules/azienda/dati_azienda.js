@@ -17,6 +17,8 @@ import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 let currentAziendaId = null;
 let currentAziendaData = null;
 let currentLocations = [];
+let currentVCard = null;       // VCard string per lazy QR zoom
+let isQRZoomRendered = false;  // Evita re-render ad ogni apertura del modal
 
 // --- INITIALIZATION ---
 export async function initDatiAzienda(user) {
@@ -378,29 +380,20 @@ async function handleLogoAndQR(data) {
         logoPlace?.classList.add('hidden');
     }
 
-    const vcard = buildVCard(data);
+    // Costruisce la vCard e la salva per il lazy zoom
+    currentVCard = buildVCard(data);
 
-    // Render Preview
+    // Render Preview leggero (104x104) — non blocca il load
     const qrCont = document.getElementById('qrcode-container');
-    if (qrCont) {
-        renderQRCode(qrCont, vcard, {
+    if (qrCont && currentVCard) {
+        renderQRCode(qrCont, currentVCard, {
             width: 104,
             height: 104,
             colorDark: "#000000",
             colorLight: "#E3F2FD"
         });
     }
-
-    // Render Zoom (Lazy ideally, but kept here for stability if already present)
-    const qrZoom = document.getElementById('qrcode-zoom-container');
-    if (qrZoom) {
-        renderQRCode(qrZoom, vcard, {
-            width: 300,
-            height: 300,
-            colorDark: "#000000",
-            colorLight: "#E3F2FD"
-        });
-    }
+    // Il QR zoom 300x300 viene generato in openQRZoom() alla prima apertura (lazy)
 }
 
 function buildVCard(data) {
@@ -508,7 +501,22 @@ function buildVCard(data) {
 
 function openQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');
-    if (modal) modal.classList.add('active');
+    if (!modal) return;
+    modal.classList.add('active');
+
+    // Lazy render: genera il QR 300x300 solo alla prima apertura
+    if (!isQRZoomRendered && currentVCard) {
+        const qrZoom = document.getElementById('qrcode-zoom-container');
+        if (qrZoom) {
+            renderQRCode(qrZoom, currentVCard, {
+                width: 300,
+                height: 300,
+                colorDark: "#000000",
+                colorLight: "#E3F2FD"
+            });
+            isQRZoomRendered = true;
+        }
+    }
 }
 
 function closeQRZoom() {
