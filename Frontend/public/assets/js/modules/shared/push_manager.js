@@ -54,7 +54,7 @@ export async function syncPushToken(user) {
         }
 
         // 2. Registrazione Service Worker (fondamentale per getToken)
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
 
         // 3. Ottieni Token
         const token = await getToken(messaging, {
@@ -91,7 +91,7 @@ export async function removePushToken(user) {
     try {
         // Nota: non possiamo revocare il token lato server facilmente senza admin SDK,
         // ma lo rimuoviamo dal database per smettere di inviare notifiche.
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
         const token = await getToken(messaging, {
             serviceWorkerRegistration: registration,
             vapidKey: VAPID_KEY
