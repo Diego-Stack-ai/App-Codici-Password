@@ -302,58 +302,81 @@ function renderEmailCategories(data) {
         wrap?.classList.remove('hidden');
         clearElement(container);
 
-        // Grouping all in one box as requested
-        const mainBox = createElement('div', { className: 'glass-card email-cards-container' });
+        const mainBox = createElement('div', { className: 'glass-card flex-col-gap' });
 
-        emailEntries.forEach((c, idx) => {
-            const item = createElement('div', { className: 'email-item-group' }, [
-                // Header (Icon + Label)
-                createElement('div', { className: 'email-item-header' }, [
-                    createElement('div', { className: 'email-type-badge' }, [
-                        createElement('div', { className: 'email-icon-box' }, [
-                            createElement('span', { className: 'material-symbols-outlined icon-medium', textContent: c.icon })
-                        ]),
-                        createElement('span', { className: 'email-label-text', textContent: c.label })
-                    ])
-                ]),
-                // Email Field
-                createElement('div', { className: 'email-detail-row group' }, [
-                    createElement('span', { className: 'email-text-value', textContent: c.email }),
-                    createElement('div', { className: 'email-action-group' }, [
-                        createElement('button', {
-                            className: 'email-action-icon',
-                            onclick: () => { navigator.clipboard.writeText(c.email).then(() => showToast(t('copied'), 'success')); }
-                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'content_copy' })]),
+        emailEntries.forEach((c) => {
+            // Separatore di categoria con icona
+            const catHeader = createElement('div', { className: 'detail-section-header' }, [
+                createElement('span', { className: 'material-symbols-outlined detail-section-icon', textContent: c.icon }),
+                createElement('span', { className: 'detail-section-title', textContent: c.label })
+            ]);
+
+            // Campo email (read-only, con copia + mailto)
+            const emailField = createElement('div', { className: 'glass-field-container' }, [
+                createElement('label', { className: 'view-label', textContent: t('email_address') || 'Email' }),
+                createElement('div', { className: 'detail-field-box border-glow' }, [
+                    createElement('span', { className: 'material-symbols-outlined icon-field-left opacity-low', textContent: 'alternate_email' }),
+                    createElement('input', {
+                        type: 'email',
+                        className: 'detail-field-input no-transform',
+                        value: c.email,
+                        readOnly: true
+                    }),
+                    createElement('div', { className: 'detail-field-actions' }, [
                         createElement('a', {
                             href: `mailto:${c.email}`,
-                            className: 'email-action-icon'
-                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'mail' })])
+                            className: 'btn-icon-header'
+                        }, [createElement('span', { className: 'material-symbols-outlined icon-accent-emerald', textContent: 'mail' })]),
+                        createElement('button', {
+                            type: 'button',
+                            className: 'btn-icon-header copy-btn',
+                            onclick: () => navigator.clipboard.writeText(c.email).then(() => showToast(t('copied'), 'success'))
+                        }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })])
                     ])
-                ]),
-                // Password Field (if exists)
-                c.password ? createElement('div', { className: 'email-detail-row group' }, [
-                    createElement('div', { className: 'flex items-center gap-2 flex-1 min-w-0' }, [
+                ])
+            ]);
+
+            const fields = [catHeader, emailField];
+
+            // Campo password (se esiste)
+            if (c.password) {
+                const pwdInputId = `pwd-input-${c.id}`;
+                const pwdField = createElement('div', { className: 'glass-field-container' }, [
+                    createElement('label', { className: 'view-label', textContent: t('password') || 'Password' }),
+                    createElement('div', { className: 'detail-field-box border-glow' }, [
                         createElement('span', { className: 'material-symbols-outlined icon-field-left opacity-low', textContent: 'key' }),
-                        createElement('span', {
-                            id: `pwd-${c.id}`,
-                            className: 'email-text-value field-password',
-                            dataset: { password: c.password, hidden: 'true' },
-                            textContent: '••••••••'
-                        })
-                    ]),
-                    createElement('div', { className: 'email-action-group' }, [
-                        createElement('button', {
-                            className: 'email-action-icon',
-                            onclick: (e) => togglePwd(c.id, e.currentTarget)
-                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'visibility' })]),
-                        createElement('button', {
-                            className: 'email-action-icon',
-                            onclick: () => { navigator.clipboard.writeText(c.password).then(() => showToast(t('copied'), 'success')); }
-                        }, [createElement('span', { className: 'material-symbols-outlined icon-small', textContent: 'content_copy' })])
+                        createElement('input', {
+                            id: pwdInputId,
+                            type: 'text',
+                            className: 'detail-field-input base-shield',
+                            value: c.password,
+                            readOnly: true
+                        }),
+                        createElement('div', { className: 'detail-field-actions' }, [
+                            createElement('button', {
+                                type: 'button',
+                                className: 'btn-icon-header',
+                                onclick: (e) => {
+                                    const inp = document.getElementById(pwdInputId);
+                                    const icon = e.currentTarget.querySelector('span');
+                                    if (inp) {
+                                        const isShielded = inp.classList.toggle('base-shield');
+                                        if (icon) icon.textContent = isShielded ? 'visibility' : 'visibility_off';
+                                    }
+                                }
+                            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' })]),
+                            createElement('button', {
+                                type: 'button',
+                                className: 'btn-icon-header copy-btn',
+                                onclick: () => navigator.clipboard.writeText(c.password).then(() => showToast(t('copied'), 'success'))
+                            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })])
+                        ])
                     ])
-                ]) : null
-            ].filter(Boolean));
-            mainBox.appendChild(item);
+                ]);
+                fields.push(pwdField);
+            }
+
+            mainBox.appendChild(createElement('div', { className: 'flex-col-gap-xs' }, fields));
         });
 
         container.appendChild(mainBox);
