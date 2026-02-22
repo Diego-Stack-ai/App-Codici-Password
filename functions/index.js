@@ -34,6 +34,48 @@ async function createTransporter() {
 }
 
 const { onRequest } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+
+/**
+ * Trigger per invio push immediato quando viene aggiunta una notifica nel DB.
+ * Usato per il TEST PUSH e per alert immediati.
+ */
+exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/{notificationId}", async (event) => {
+  const data = event.data.data();
+  const userId = event.params.userId;
+
+  console.log(`[TRIGGER] Nuova notifica rilevata per utente ${userId}: ${data.title}`);
+
+  try {
+    const db = admin.firestore();
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (!userDoc.exists) return;
+
+    const userData = userDoc.data();
+    const tokens = userData.fcmTokens || [];
+    const pushAllowed = userData.prefs_push !== false;
+
+    if (pushAllowed && tokens.length > 0) {
+      const payload = {
+        notification: {
+          title: data.title,
+          body: data.message
+        },
+        data: {
+          type: data.type || "generic",
+          scadenzaId: data.scadenzaId || ""
+        }
+      };
+
+      const response = await admin.messaging().sendEachForMulticast({ tokens, ...payload });
+      console.log(`[TRIGGER SUCCESS] Inviata a ${userId}: ${response.successCount} successi.`);
+    } else {
+      console.log(`[TRIGGER SKIP] Push non attivo o nessun token per ${userId}`);
+    }
+  } catch (e) {
+    console.error("[TRIGGER ERROR]", e);
+  }
+});
 
 async function runChecks(db) {
   const now = new Date();

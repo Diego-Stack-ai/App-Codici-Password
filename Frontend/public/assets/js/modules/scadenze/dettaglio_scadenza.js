@@ -302,7 +302,7 @@ function renderScadenza(scadenza) {
                     createElement('span', { className: 'material-symbols-outlined', textContent: 'mark_email_read' })
                 ]),
                 createElement('div', { className: 'detail-list-item-info' }, [
-                    createElement('span', { className: 'detail-list-item-title', textContent: 'Ultimo Invio Email' }),
+                    createElement('span', { className: 'detail-list-item-title', textContent: 'Ultima Notifica Inviata' }),
                     createElement('span', { className: 'detail-list-item-meta', textContent: lastSentStr })
                 ])
             ])
