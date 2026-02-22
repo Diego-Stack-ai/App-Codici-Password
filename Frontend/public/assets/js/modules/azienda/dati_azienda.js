@@ -383,12 +383,12 @@ async function handleLogoAndQR(data) {
     // Costruisce la vCard e la salva per il lazy zoom
     currentVCard = buildVCard(data);
 
-    // Render Preview leggero (104x104) — non blocca il load
+    // Render Preview leggero (88x88 → box 100px con padding 6px) — non blocca il load
     const qrCont = document.getElementById('qrcode-container');
     if (qrCont && currentVCard) {
         renderQRCode(qrCont, currentVCard, {
-            width: 104,
-            height: 104,
+            width: 88,
+            height: 88,
             colorDark: "#000000",
             colorLight: "#E3F2FD"
         });
