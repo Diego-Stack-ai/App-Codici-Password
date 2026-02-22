@@ -54,7 +54,7 @@ export async function syncPushToken(user) {
         }
 
         // 2. Registrazione Service Worker (fondamentale per getToken)
-        const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
         // 3. Ottieni Token
         const token = await getToken(messaging, {
@@ -91,7 +91,7 @@ export async function removePushToken(user) {
     try {
         // Nota: non possiamo revocare il token lato server facilmente senza admin SDK,
         // ma lo rimuoviamo dal database per smettere di inviare notifiche.
-        const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
         const token = await getToken(messaging, {
             serviceWorkerRegistration: registration,
             vapidKey: VAPID_KEY
@@ -108,6 +108,47 @@ export async function removePushToken(user) {
         console.error("[PUSH] Errore rimozione token:", e);
     }
 }
+
+/**
+ * Diagnostica completa da console.
+ */
+export async function debugPushStatus() {
+    console.group("🚀 [PUSH DEBUG REPORT]");
+
+    // 1. Supporto Browser
+    const supported = isPushSupported();
+    console.log("Supporto Push:", supported ? "✅" : "❌");
+
+    // 2. Permessi
+    console.log("Stato Permessi Notification:", Notification.permission);
+
+    // 3. Service Worker
+    if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        console.log("Service Workers registrati:", regs.length);
+        regs.forEach(r => console.log(` - Scope: ${r.scope}, Active: ${!!r.active}`));
+    }
+
+    // 4. Token attuale
+    if (auth.currentUser) {
+        console.log("Utente loggato:", auth.currentUser.email);
+        try {
+            const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                console.log("Prefs Push (Firestore):", data.prefs_push);
+                console.log("Token salvati (Array):", data.fcmTokens?.length || 0);
+            }
+        } catch (e) { console.error("Errore fetch Firestore:", e); }
+    } else {
+        console.warn("Nessun utente loggato in Auth.");
+    }
+
+    console.groupEnd();
+}
+
+// Esponi al window per debug immediato
+window.debugPush = debugPushStatus;
 
 /**
  * Listener per il refresh automatico del token.
