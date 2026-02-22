@@ -250,16 +250,14 @@
     width: auto;
 }
 
-/* Il contenitore QR cresce per riempire lo spazio e spingere il bottone in basso */
+/* Il contenitore QR si adatta al canvas (nessun width forzato) */
 .qr-zoom-container {
-    flex: 1;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     background: #E3F2FD;
     padding: 8px;
     border-radius: 12px;
-    width: 100%;
 }
 
 
