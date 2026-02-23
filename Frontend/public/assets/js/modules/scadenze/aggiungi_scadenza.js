@@ -592,14 +592,22 @@ async function loadPushUsers() {
             const email = contact.email; // Usiamo l'email come identificatore per ora
 
             const opt = createElement('div', {
-                className: 'dropdown-option',
+                className: 'base-dropdown-item',
                 dataset: { value: email, label: displayName },
-                textContent: displayName,
                 onclick: (e) => {
                     e.stopPropagation();
                     togglePushRecipient(email, displayName);
                 }
-            });
+            }, [
+                createElement('div', { className: 'flex-items-center-between w-full' }, [
+                    createElement('span', { textContent: displayName, className: 'truncate' }),
+                    createElement('span', {
+                        className: 'material-symbols-outlined check-icon',
+                        textContent: 'check_circle',
+                        style: 'font-size: 18px; opacity: 0;' // Visibile solo se selezionato
+                    })
+                ])
+            ]);
             menu.appendChild(opt);
 
             const nativeOpt = new Option(displayName, email);
@@ -656,9 +664,14 @@ function updatePushChips() {
 
     // Sync active class in menu
     if (menu) {
-        menu.querySelectorAll('.dropdown-option').forEach(opt => {
+        menu.querySelectorAll('.base-dropdown-item').forEach(opt => {
             const val = opt.dataset.value;
-            opt.classList.toggle('active', selectedPushRecipients.some(r => r.email === val));
+            const isActive = selectedPushRecipients.some(r => r.email === val);
+            opt.classList.toggle('active', isActive);
+
+            // Gestione spunta
+            const check = opt.querySelector('.check-icon');
+            if (check) check.style.opacity = isActive ? '1' : '0';
         });
     }
 }

@@ -505,8 +505,12 @@ exports.triggerScadenzaOnSave = onDocumentWritten("users/{uid}/scadenze/{sid}", 
       pushEnabled: ownerData.prefs_push !== false
     };
 
-    // Riutilizzo la logica di runChecks ma mirata solo a questo ID
-    if (!newData.dueDate || !newData.emails || newData.emails.length === 0) return;
+    // Riutilizzo la logica di runChecks ma mirata solo a questo ID.
+    // Procedi se c'è almeno un'email o almeno un destinatario Push.
+    const hasEmails = newData.emails && newData.emails.length > 0;
+    const hasPush = newData.pushRecipients && newData.pushRecipients.length > 0;
+
+    if (!newData.dueDate || (!hasEmails && !hasPush)) return;
 
     const now = new Date();
     const dueDate = new Date(newData.dueDate);
@@ -523,7 +527,14 @@ exports.triggerScadenzaOnSave = onDocumentWritten("users/{uid}/scadenze/{sid}", 
 
       if (shouldNotify) {
         console.log(`[TRIGGER-SAVE] INVIO IMMEDIATO per ${scadenzaId}`);
-        for (const email of newData.emails) {
+
+        // Uniamo tutti i destinatari (Email e Push) per assicurarci che chiunque sia in lista riceva l'avviso
+        const allRecipients = new Set([
+          ...(newData.emails || []),
+          ...(newData.pushRecipients || [])
+        ]);
+
+        for (const email of allRecipients) {
           await processNotificationChannel(db, email, newData, ownerPrefs, ownerUid, scadenzaId);
         }
 
