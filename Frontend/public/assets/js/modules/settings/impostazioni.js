@@ -227,6 +227,8 @@ function setupToggles(data) {
     if (tPush) {
         // Supporta entrambi i campi per compatibilità, preferendo prefs_push
         tPush.checked = (data.prefs_push !== undefined) ? data.prefs_push : (data.pref_push_enabled !== false);
+        const btnTest = document.getElementById('btn-test-push');
+
         tPush.addEventListener('change', async () => {
             const val = tPush.checked;
             try {
@@ -262,8 +264,10 @@ function setupToggles(data) {
                     await updateDoc(doc(db, "users", auth.currentUser.uid), updateData);
                     showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
 
-                    // Mostra/Nascondi bottone di prova
-                    if (btnTest) btnTest.classList.toggle('hidden', !val);
+                    // Mostra/Nascondi bottone di prova in modo esplicito (JS style ha priorità su CSS)
+                    if (btnTest) {
+                        btnTest.style.display = val ? 'flex' : 'none';
+                    }
                 }
             } catch (e) {
                 console.error("Error saving Push Pref:", e);
@@ -273,9 +277,10 @@ function setupToggles(data) {
         });
 
         // Logica Bottone di Prova
-        const btnTest = document.getElementById('btn-test-push');
         if (btnTest) {
-            btnTest.classList.toggle('hidden', !tPush.checked);
+            // Stato iniziale basato sul toggle (JS style ha priorità su CSS)
+            btnTest.style.display = tPush.checked ? 'flex' : 'none';
+
             btnTest.addEventListener('click', async () => {
                 try {
                     btnTest.disabled = true;

@@ -970,7 +970,7 @@ async function loadScadenzaForEdit(id) {
                 const year = d.getFullYear();
 
                 dateInput.value = `${day}/${month}/${year}`;
-                dateInput.dataset.isoValue = d.toISOString().split('T')[0];
+                dateInput.dataset.isoValue = `${year}-${month}-${day}`;
             } else {
                 console.warn("Invalid Date found:", data.dueDate);
                 dateInput.value = data.dueDate || ''; // Show raw

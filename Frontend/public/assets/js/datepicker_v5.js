@@ -195,7 +195,12 @@ function confirmSelection() {
     if (selectedDate && activeInput) {
         // Salva valore ISO in dataset per uso JS backend
         // YYYY-MM-DD
-        const iso = selectedDate.toISOString().split('T')[0];
+        // Calcola ISO (YYYY-MM-DD) usando componenti locali per evitare shift di fuso orario
+        const y = selectedDate.getFullYear();
+        const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const d = String(selectedDate.getDate()).padStart(2, '0');
+        const iso = `${y}-${m}-${d}`;
+
         activeInput.dataset.isoDate = iso;
         activeInput.value = iso; // Compatibilità standard form (value = YYYY-MM-DD solitamente)
 
