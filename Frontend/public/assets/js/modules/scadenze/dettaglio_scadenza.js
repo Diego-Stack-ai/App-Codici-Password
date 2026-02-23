@@ -185,6 +185,10 @@ async function handleTestNotification() {
             channel: currentScadenza.notificationChannel || 'none'
         });
 
+        // Invalida cache dello storico per forzare ricaricamento pulito alla prossima visita
+        localStorage.removeItem(`notifications_cache_data_${auth.currentUser.uid}`);
+        localStorage.removeItem(`notifications_cache_timestamp_${auth.currentUser.uid}`);
+
         showToast("Notifica di test inviata!", "success");
     } catch (e) {
         console.error("Errore invio test:", e);

@@ -217,21 +217,21 @@ function renderBanking(acc) {
 
                 // IBAN
                 if (bank.iban) {
-                    fields.push(createElement('div', { className: 'bg-black/20 p-2.5 rounded-xl border border-white/5' }, [
-                        createElement('div', { className: 'micro-data-row' }, [
-                            createElement('span', { className: 'micro-data-label', textContent: 'IBAN' }),
-                            createElement('span', { className: 'micro-data-value text-emerald-400 font-mono tracking-wider truncate', textContent: bank.iban }),
+                    fields.push(createElement('div', { className: 'banking-subcard flex-col gap-1' }, [
+                        createElement('div', { className: 'flex justify-between items-center w-full' }, [
+                            createElement('span', { className: 'micro-data-label !w-auto', textContent: 'IBAN' }),
                             createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(bank.iban) }, [
                                 createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
                             ])
-                        ])
+                        ]),
+                        createElement('span', { className: 'micro-data-value text-emerald-400 font-mono tracking-wider break-all text-[12px]', textContent: bank.iban })
                     ]));
                 }
 
                 // Password Dispositiva (Shielded)
                 if (bank.passwordDispositiva) {
                     const passId = `bank-pass-${bIdx}`;
-                    fields.push(createElement('div', { className: 'bg-black/20 p-2.5 rounded-xl border border-white/5' }, [
+                    fields.push(createElement('div', { className: 'banking-subcard' }, [
                         createElement('div', { className: 'micro-data-row' }, [
                             createElement('span', { className: 'micro-data-label', textContent: 'Password Disp.' }),
                             createElement('span', { id: passId, className: 'micro-data-value text-white font-mono base-shield', textContent: bank.passwordDispositiva }),
@@ -257,28 +257,47 @@ function renderBanking(acc) {
                 // Cards
                 if (bank.cards && bank.cards.length > 0) {
                     bank.cards.forEach((card, cIdx) => {
-                        fields.push(createElement('div', { className: 'bg-white/5 p-3 rounded-xl border border-white/5 mt-2' }, [
-                            createElement('div', { className: 'flex items-center gap-2 mb-2 opacity-40' }, [
+                        fields.push(createElement('div', { className: 'banking-subcard' }, [
+                            createElement('div', { className: 'flex items-center gap-2 mb-2 opacity-50' }, [
                                 createElement('span', { className: 'material-symbols-outlined !text-[16px]', textContent: 'credit_card' }),
-                                createElement('span', { className: 'text-[9px] font-black uppercase tracking-widest', textContent: card.name || `Carta ${cIdx + 1}` })
+                                createElement('span', { className: 'banking-index', textContent: card.cardType || card.type || `Carta ${cIdx + 1}` })
                             ]),
-                            createElement('div', { className: 'micro-data-row' }, [
+                            card.titolare ? createElement('div', { className: 'micro-data-row mb-1' }, [
+                                createElement('span', { className: 'micro-data-label', textContent: 'Intestatario' }),
+                                createElement('span', { className: 'micro-data-value text-white truncate', textContent: card.titolare }),
+                                createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.titolare) }, [
+                                    createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
+                                ])
+                            ]) : null,
+                            createElement('div', { className: 'micro-data-row mb-1' }, [
                                 createElement('span', { className: 'micro-data-label', textContent: 'Numero' }),
-                                createElement('span', { className: 'micro-data-value text-white font-mono', textContent: card.number || '-' }),
-                                createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.number) }, [
+                                createElement('span', { className: 'micro-data-value text-white font-mono', textContent: card.cardNumber || '-' }),
+                                createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.cardNumber) }, [
                                     createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
                                 ])
                             ]),
-                            createElement('div', { className: 'grid grid-cols-2 gap-2 mt-2' }, [
-                                createElement('div', { className: 'micro-data-row' }, [
+                            createElement('div', { className: 'micro-data-row mt-2 space-x-4' }, [
+                                createElement('div', { className: 'micro-data-row flex-1' }, [
                                     createElement('span', { className: 'micro-data-label', textContent: 'Scad.' }),
                                     createElement('span', { className: 'micro-data-value text-white', textContent: card.expiry || '-' })
                                 ]),
-                                createElement('div', { className: 'micro-data-row' }, [
+                                createElement('div', { className: 'micro-data-row flex-1' }, [
                                     createElement('span', { className: 'micro-data-label', textContent: 'CVV' }),
-                                    createElement('span', { className: 'micro-data-value text-white font-mono', textContent: card.cvv || '-' }),
-                                    createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.cvv) }, [
-                                        createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
+                                    createElement('span', { className: 'micro-data-value text-white font-mono base-shield', textContent: card.ccv || '-' }),
+                                    createElement('div', { className: 'flex gap-2' }, [
+                                        createElement('button', {
+                                            className: 'micro-btn-copy-inline',
+                                            onclick: (e) => {
+                                                const span = e.currentTarget.parentElement.previousElementSibling;
+                                                const isPass = span.classList.toggle('base-shield');
+                                                e.currentTarget.querySelector('span').textContent = isPass ? 'visibility' : 'visibility_off';
+                                            }
+                                        }, [
+                                            createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'visibility' })
+                                        ]),
+                                        createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.ccv) }, [
+                                            createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
+                                        ])
                                     ])
                                 ])
                             ])
@@ -287,7 +306,7 @@ function renderBanking(acc) {
                 }
 
                 return createElement('div', {
-                    className: 'space-y-3 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 border-glow relative'
+                    className: 'banking-card border-glow'
                 }, fields);
             });
 

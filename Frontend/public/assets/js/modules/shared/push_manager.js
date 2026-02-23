@@ -46,34 +46,90 @@ export async function syncPushToken(user) {
     const comp = checkPushCompatibility();
     if (!comp.compatible) return null;
 
+    // 🚩 AMBIENTE: Evita di salvare token generati su localhost se siamo in produzione
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isProd = window.location.hostname.includes('web.app') || window.location.hostname.includes('firebaseapp.com');
+
     try {
-        // 1. Verifica permessi
         if (Notification.permission !== 'granted') {
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') return null;
         }
 
-        // 2. Registrazione Service Worker (fondamentale per getToken)
         const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
-
-        // 3. Ottieni Token
         const token = await getToken(messaging, {
             serviceWorkerRegistration: registration,
             vapidKey: VAPID_KEY
         });
 
         if (token) {
-            console.log("[PUSH] Token sincronizzato correttamente.");
             const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
 
-            // Aggiornamento atomico: aggiunge il token all'array fcmTokens
-            // e lo imposta anche come token principale fcmToken (legacy compatibility)
+            let fcmTokens = [];
+            let tokensMetadata = {};
+
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                fcmTokens = data.fcmTokens || [];
+                tokensMetadata = data.tokensMetadata || {};
+            }
+
+            // 🔍 WATCHDOG ANTI-ZOMBIE & DUPLICATI
+            const now = new Date().toISOString();
+            const deviceType = /Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+
+            // Aggiorna/Aggiunge metadati per il token corrente
+            tokensMetadata[token] = {
+                createdAt: tokensMetadata[token]?.createdAt || now,
+                lastUsed: now,
+                deviceType: deviceType,
+                userAgent: navigator.userAgent,
+                origin: window.location.origin
+            };
+
+            // Se il token non è nell'elenco, aggiungilo
+            if (!fcmTokens.includes(token)) {
+                // Se siamo in produzione e il token è locale, logghiamo ma non blocchiamo se l'utente vuole testare.
+                // Tuttavia, per sicurezza seguiamo la direttiva: "token localhost non in produzione".
+                if (isProd && isLocal) {
+                    console.warn("[PUSH] Blocca salvataggio token localhost su database produzione.");
+                    return token;
+                }
+                fcmTokens.push(token);
+            }
+
+            // 🛡️ LIMITE MASSIMO DISPOSITIVI (Watchdog)
+            // Se superiamo i 3 token, rimuoviamo i più vecchi basandoci su lastUsed
+            if (fcmTokens.length > 3) {
+                console.log(`[PUSH] Watchdog: Trovati ${fcmTokens.length} token. Pulizia in corso...`);
+                // Ordina i token per data di ultimo utilizzo decrescente
+                fcmTokens.sort((a, b) => {
+                    const timeA = tokensMetadata[a]?.lastUsed || "";
+                    const timeB = tokensMetadata[b]?.lastUsed || "";
+                    return timeB.localeCompare(timeA);
+                });
+
+                // Taglia l'array ai primi 3 (i più recenti)
+                const tokensToRemove = fcmTokens.slice(3);
+                fcmTokens = fcmTokens.slice(0, 3);
+
+                // Pulisci metadati
+                tokensToRemove.forEach(t => delete tokensMetadata[t]);
+                console.log(`[PUSH] Watchdog: Rimossi ${tokensToRemove.length} token obsoleti.`);
+            }
+
+            // Aggiornamento Atomico (Rimuove fcmToken legacy)
+            const { deleteField } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
+
             await updateDoc(userRef, {
-                fcmToken: token,
-                fcmTokens: arrayUnion(token),
-                lastTokenRefresh: new Date().toISOString()
+                fcmTokens: fcmTokens,
+                tokensMetadata: tokensMetadata,
+                fcmToken: deleteField(), // 🗑️ Cleanup legacy
+                lastTokenRefresh: now
             });
 
+            console.log("[PUSH] Sincronizzazione completata con successo.");
             return token;
         }
     } catch (e) {
@@ -99,10 +155,20 @@ export async function removePushToken(user) {
 
         if (token) {
             const userRef = doc(db, "users", user.uid);
-            await updateDoc(userRef, {
-                fcmTokens: arrayRemove(token)
-            });
-            console.log("[PUSH] Token rimosso dal database.");
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                const fcmTokens = (data.fcmTokens || []).filter(t => t !== token);
+                const tokensMetadata = data.tokensMetadata || {};
+                delete tokensMetadata[token];
+
+                await updateDoc(userRef, {
+                    fcmTokens: fcmTokens,
+                    tokensMetadata: tokensMetadata
+                });
+                console.log("[PUSH] Token e metadati rimossi dal database.");
+            }
         }
     } catch (e) {
         console.error("[PUSH] Errore rimozione token:", e);
@@ -147,8 +213,8 @@ export async function debugPushStatus() {
     console.groupEnd();
 }
 
-// Esponi al window per debug immediato
-window.debugPush = debugPushStatus;
+// Esponi al window per debug immediato (DISABILITATO IN PROD)
+// window.debugPush = debugPushStatus;
 
 /**
  * Listener per il refresh automatico del token.

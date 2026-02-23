@@ -266,8 +266,15 @@ function renderBanking(acc) {
                 createElement('span', { className: 'banking-index', textContent: `${t('account') || 'Conto'} #${idx + 1}` })
             ]),
             // IBAN
-            createElement('div', { className: 'banking-field-box' }, [
-                createMicroRow(t('iban') || 'IBAN', bank.iban || '-', true)
+            createElement('div', { className: 'banking-field-box flex-col gap-1' }, [
+                createElement('div', { className: 'flex justify-between items-center w-full' }, [
+                    createElement('span', { className: 'micro-data-label !w-auto', textContent: t('iban') || 'IBAN' }),
+                    createElement('button', {
+                        className: 'micro-btn-copy-inline relative z-10',
+                        onclick: () => { navigator.clipboard.writeText(bank.iban); showToast(t('copied') || "Copiato!"); }
+                    }, [createElement('span', { className: 'material-symbols-outlined icon-xs', textContent: 'content_copy' })])
+                ]),
+                createElement('span', { className: 'micro-data-value text-emerald-400 font-mono tracking-wider break-all text-[12px] block', textContent: bank.iban || '-' })
             ]),
             // Secondary Data
             createElement('div', { className: 'banking-grid' }, [

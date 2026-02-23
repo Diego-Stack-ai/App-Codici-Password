@@ -1,0 +1,21 @@
+Invoke-RestMethod : Errore 
+del server remoto: (401) Non 
+autorizzato.
+In riga:1 car:1
++ Invoke-RestMethod -Uri 'http
+s://firestore.googleapis.com/v
+1/projects/ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    InvalidOperation: (Syste  
+  m.Net.HttpWebRequest:Http   
+ WebRequest) [Invoke-RestM    
+ethod], WebException
+    + FullyQualifiedErrorId : 
+    WebCmdletWebResponseExce  
+  ption,Microsoft.PowerShel   
+ l.Commands.InvokeRestMeth    
+odCommand
+ 

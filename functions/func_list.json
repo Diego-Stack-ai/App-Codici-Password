@@ -1,0 +1,176 @@
+﻿{
+  "status": "success",
+  "result": [
+    {
+      "platform": "gcfv2",
+      "id": "checkDeadlines",
+      "project": "appcodici-password",
+      "region": "europe-west1",
+      "scheduleTrigger": {},
+      "entryPoint": "checkDeadlines",
+      "runtime": "nodejs20",
+      "source": {
+        "storageSource": {
+          "bucket": "gcf-v2-sources-343696844738-europe-west1",
+          "object": "checkDeadlines/function-source.zip",
+          "generation": "1771791983989261"
+        }
+      },
+      "ingressSettings": "ALLOW_ALL",
+      "environmentVariables": {
+        "FIREBASE_CONFIG": "{\"projectId\":\"appcodici-password\",\"storageBucket\":\"appcodici-password.firebasestorage.app\"}",
+        "GCLOUD_PROJECT": "appcodici-password",
+        "EVENTARC_CLOUD_EVENT_SOURCE": "projects/appcodici-password/locations/europe-west1/services/checkDeadlines",
+        "FUNCTION_TARGET": "checkDeadlines",
+        "LOG_EXECUTION_ID": "true",
+        "FUNCTION_SIGNATURE_TYPE": "http"
+      },
+      "timeoutSeconds": 60,
+      "uri": "https://europe-west1-appcodici-password.cloudfunctions.net/checkDeadlines",
+      "serviceAccount": "343696844738-compute@developer.gserviceaccount.com",
+      "availableMemoryMb": 256,
+      "cpu": 1,
+      "maxInstances": 10,
+      "concurrency": 80,
+      "labels": {
+        "deployment-scheduled": "true",
+        "firebase-functions-hash": "111b165e6e15680bb882f08ddbfc1e6d86376636",
+        "deployment-tool": "cli-firebase"
+      },
+      "runServiceId": "checkdeadlines",
+      "codebase": "default",
+      "hash": "111b165e6e15680bb882f08ddbfc1e6d86376636",
+      "state": "ACTIVE"
+    },
+    {
+      "platform": "gcfv2",
+      "id": "onNotificationTrigger",
+      "project": "appcodici-password",
+      "region": "europe-west1",
+      "eventTrigger": {
+        "eventType": "google.cloud.firestore.document.v1.created",
+        "retry": false,
+        "eventFilters": {
+          "namespace": "(default)",
+          "database": "(default)"
+        },
+        "eventFilterPathPatterns": {
+          "document": "users/{userId}/notifications/{notificationId}"
+        },
+        "region": "eur3"
+      },
+      "entryPoint": "onNotificationTrigger",
+      "runtime": "nodejs20",
+      "source": {
+        "storageSource": {
+          "bucket": "gcf-v2-sources-343696844738-europe-west1",
+          "object": "onNotificationTrigger/function-source.zip",
+          "generation": "1771791901056807"
+        }
+      },
+      "ingressSettings": "ALLOW_ALL",
+      "environmentVariables": {
+        "FIREBASE_CONFIG": "{\"projectId\":\"appcodici-password\",\"storageBucket\":\"appcodici-password.firebasestorage.app\"}",
+        "GCLOUD_PROJECT": "appcodici-password",
+        "EVENTARC_CLOUD_EVENT_SOURCE": "projects/appcodici-password/locations/europe-west1/services/onNotificationTrigger",
+        "FUNCTION_SIGNATURE_TYPE": "cloudevent",
+        "FUNCTION_TARGET": "onNotificationTrigger",
+        "LOG_EXECUTION_ID": "true"
+      },
+      "timeoutSeconds": 60,
+      "uri": "https://europe-west1-appcodici-password.cloudfunctions.net/onNotificationTrigger",
+      "serviceAccount": "343696844738-compute@developer.gserviceaccount.com",
+      "availableMemoryMb": 256,
+      "cpu": 1,
+      "maxInstances": 10,
+      "concurrency": 80,
+      "labels": {
+        "firebase-functions-hash": "111b165e6e15680bb882f08ddbfc1e6d86376636",
+        "deployment-tool": "cli-firebase"
+      },
+      "runServiceId": "onnotificationtrigger",
+      "codebase": "default",
+      "hash": "111b165e6e15680bb882f08ddbfc1e6d86376636",
+      "state": "ACTIVE"
+    },
+    {
+      "platform": "gcfv2",
+      "id": "resetTokens_Emergency",
+      "project": "appcodici-password",
+      "region": "europe-west1",
+      "httpsTrigger": {},
+      "entryPoint": "resetTokens_Emergency",
+      "runtime": "nodejs20",
+      "source": {
+        "storageSource": {
+          "bucket": "gcf-v2-sources-343696844738-europe-west1",
+          "object": "resetTokens_Emergency/function-source.zip",
+          "generation": "1771835498505453"
+        }
+      },
+      "ingressSettings": "ALLOW_ALL",
+      "environmentVariables": {
+        "FIREBASE_CONFIG": "{\"projectId\":\"appcodici-password\",\"storageBucket\":\"appcodici-password.firebasestorage.app\"}",
+        "GCLOUD_PROJECT": "appcodici-password",
+        "EVENTARC_CLOUD_EVENT_SOURCE": "projects/appcodici-password/locations/europe-west1/services/resetTokens_Emergency",
+        "FUNCTION_TARGET": "resetTokens_Emergency",
+        "LOG_EXECUTION_ID": "true"
+      },
+      "timeoutSeconds": 60,
+      "uri": "https://europe-west1-appcodici-password.cloudfunctions.net/resetTokens_Emergency",
+      "serviceAccount": "343696844738-compute@developer.gserviceaccount.com",
+      "availableMemoryMb": 256,
+      "cpu": 1,
+      "maxInstances": 10,
+      "concurrency": 80,
+      "labels": {
+        "firebase-functions-hash": "68de46748df9c64f0d4294409f9fa11f80eb7fc1",
+        "deployment-tool": "cli-firebase"
+      },
+      "runServiceId": "resettokens-emergency",
+      "codebase": "default",
+      "hash": "68de46748df9c64f0d4294409f9fa11f80eb7fc1",
+      "state": "ACTIVE"
+    },
+    {
+      "platform": "gcfv2",
+      "id": "testScadenzeOra",
+      "project": "appcodici-password",
+      "region": "europe-west1",
+      "httpsTrigger": {},
+      "entryPoint": "testScadenzeOra",
+      "runtime": "nodejs20",
+      "source": {
+        "storageSource": {
+          "bucket": "gcf-v2-sources-343696844738-europe-west1",
+          "object": "testScadenzeOra/function-source.zip",
+          "generation": "1771839363593442"
+        }
+      },
+      "ingressSettings": "ALLOW_ALL",
+      "environmentVariables": {
+        "FIREBASE_CONFIG": "{\"projectId\":\"appcodici-password\",\"storageBucket\":\"appcodici-password.firebasestorage.app\"}",
+        "GCLOUD_PROJECT": "appcodici-password",
+        "EVENTARC_CLOUD_EVENT_SOURCE": "projects/appcodici-password/locations/europe-west1/services/testScadenzeOra",
+        "FUNCTION_TARGET": "testScadenzeOra",
+        "LOG_EXECUTION_ID": "true",
+        "FUNCTION_SIGNATURE_TYPE": "http"
+      },
+      "timeoutSeconds": 60,
+      "uri": "https://europe-west1-appcodici-password.cloudfunctions.net/testScadenzeOra",
+      "serviceAccount": "343696844738-compute@developer.gserviceaccount.com",
+      "availableMemoryMb": 256,
+      "cpu": 1,
+      "maxInstances": 10,
+      "concurrency": 80,
+      "labels": {
+        "firebase-functions-hash": "454acfce80f3381d30cb0e09ba7e55bd2b1511ed",
+        "deployment-tool": "cli-firebase"
+      },
+      "runServiceId": "testscadenzeora",
+      "codebase": "default",
+      "hash": "454acfce80f3381d30cb0e09ba7e55bd2b1511ed",
+      "state": "ACTIVE"
+    }
+  ]
+}

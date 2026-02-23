@@ -178,6 +178,14 @@ async function login(email, password) {
  */
 async function logout() {
     try {
+        // Rimuovi il token push corrente prima del logout (Cleanup proattivo)
+        try {
+            const { removePushToken } = await import('./modules/shared/push_manager.js');
+            await removePushToken(auth.currentUser);
+        } catch (e) {
+            console.warn("Push token removal skipped during logout:", e);
+        }
+
         await signOut(auth);
         window.location.href = "index.html";
     } catch (error) {

@@ -159,77 +159,76 @@
                                 <!-- Suggerimento Conto Bancario -->
                             </div>
                         </div>
+                    </section>
+
+                    <!-- Coordinate Bancarie (Sezione Dinamica) -->
+                    <section id="section-banking" class="section-spacing hidden">
+                        <div class="detail-section-header justify-between">
+                            <div class="header-left-group">
+                                <span
+                                    class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
+                                <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
+                            </div>
+                            <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
+                                <span id="banking-chevron"
+                                    class="material-symbols-outlined icon-chevron-muted">expand_more</span>
+                            </button>
+                        </div>
+                        <div id="banking-content" class="flex-col-gap content-spacing hidden">
+                            <!-- Banking cards injected here -->
+                        </div>
+                    </section>
+
+                    <!-- ALLEGATI (Sezione Dinamica) -->
+                    <section id="section-attachments" class="section-spacing">
+                        <div class="detail-section-header justify-between">
+                            <div class="header-left-group">
+                                <span
+                                    class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
+                                <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
+                            </div>
+                            <button id="btn-add-attachment" type="button" class="btn-icon-header">
+                                <span class="material-symbols-outlined">add</span>
+                            </button>
+                        </div>
+                        <div id="attachments-list" class="flex-col-gap content-spacing">
+                            <!-- Injected via JS -->
+                            <p class="empty-attachments-text" data-t="no_attachments">Nessun allegato</p>
+                        </div>
+                    </section>
+
+                    <!-- NOTE -->
+                    <section class="section-spacing">
+                        <div class="detail-section-header">
+                            <span
+                                class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
+                            <h3 class="detail-section-title" data-t="notes">Note</h3>
+                        </div>
+                        <div class="detail-field-box note-box border-glow content-spacing">
+                            <p id="detail-note" class="note-text no-transform">-</p>
+                            <button id="copy-note" class="btn-icon-header" type="button">
+                                <span class="material-symbols-outlined text-sm">content_copy</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
+                    <section id="shared-management-section" class="section-spacing section-bottom hidden">
+                        <div class="detail-section-header">
+                            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
+                            <h3 class="detail-section-title" data-t="access_management">Gestione Accessi</h3>
+                        </div>
+                        <div id="guests-list" class="flex-col-gap content-spacing">
+                            <!-- Guest rows injected here -->
+                        </div>
+                    </section>
+
                 </div>
             </div>
-            </section>
+        </main>
 
-            <!-- Coordinate Bancarie (Sezione Dinamica) -->
-            <section id="section-banking" class="section-spacing hidden">
-                <div class="detail-section-header justify-between">
-                    <div class="header-left-group">
-                        <span
-                            class="material-symbols-outlined detail-section-icon icon-accent-emerald">account_balance</span>
-                        <h3 class="detail-section-title" data-t="finance_iban">Coordinate Bancarie</h3>
-                    </div>
-                    <button id="banking-toggle" type="button" class="btn-icon-header cursor-pointer">
-                        <span id="banking-chevron"
-                            class="material-symbols-outlined icon-chevron-muted">expand_more</span>
-                    </button>
-                </div>
-                <div id="banking-content" class="flex-col-gap content-spacing hidden">
-                    <!-- Banking cards injected here -->
-                </div>
-            </section>
-
-            <!-- ALLEGATI (Sezione Dinamica) -->
-            <section id="section-attachments" class="section-spacing">
-                <div class="detail-section-header justify-between">
-                    <div class="header-left-group">
-                        <span class="material-symbols-outlined detail-section-icon icon-accent-blue">attach_file</span>
-                        <h3 class="detail-section-title" data-t="attachments">Allegati</h3>
-                    </div>
-                    <button id="btn-add-attachment" type="button" class="btn-icon-header">
-                        <span class="material-symbols-outlined">add</span>
-                    </button>
-                </div>
-                <div id="attachments-list" class="flex-col-gap content-spacing">
-                    <!-- Injected via JS -->
-                    <p class="empty-attachments-text" data-t="no_attachments">Nessun allegato</p>
-                </div>
-            </section>
-
-            <!-- NOTE -->
-            <section class="section-spacing">
-                <div class="detail-section-header">
-                    <span class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
-                    <h3 class="detail-section-title" data-t="notes">Note</h3>
-                </div>
-    </div>
-    <div class="detail-field-box border-glow content-spacing">
-        <p id="detail-note" class="note-text no-transform">-</p>
-        <button id="copy-note" class="btn-icon-header" type="button">
-            <span class="material-symbols-outlined text-sm">content_copy</span>
-        </button>
-    </div>
-    </section>
-
-    <!-- SHARED MANAGEMENT (Sezione Dinamica) -->
-    <section id="shared-management-section" class="section-spacing section-bottom hidden">
-        <div class="detail-section-header">
-            <span class="material-symbols-outlined detail-section-icon icon-accent-blue">share</span>
-            <h3 class="detail-section-title" data-t="access_management">Gestione Accessi</h3>
-        </div>
-        <div id="guests-list" class="flex-col-gap content-spacing">
-            <!-- Guest rows injected here -->
-        </div>
-    </section>
-
-    </div>
-    </div>
-    </main>
-
-    <!-- FOOTER PREMIUM (Protocollo Placeholder) -->
-    <footer id="footer-placeholder" class="base-footer"></footer>
+        <!-- FOOTER PREMIUM (Protocollo Placeholder) -->
+        <footer id="footer-placeholder" class="base-footer"></footer>
 
     </div>
 

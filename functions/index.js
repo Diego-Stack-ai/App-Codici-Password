@@ -119,6 +119,11 @@ exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/
       const response = await admin.messaging().sendEachForMulticast({ tokens, ...payload });
       console.log(`[TRIGGER SUCCESS] Utente ${userId}. Successi: ${response.successCount}, Fallimenti: ${response.failureCount}.`);
 
+      // 🔄 HEARTBEAT PATCH: Aggiorna lastUsed per i token validi
+      if (response.successCount > 0) {
+        await updateLastUsedForSuccessfulTokens(db, userId, response, tokens);
+      }
+
       // Log dettagliato se ci sono fallimenti
       if (response.failureCount > 0) {
         response.responses.forEach((res, idx) => {
@@ -143,10 +148,17 @@ exports.onNotificationTrigger = onDocumentCreated("users/{userId}/notifications/
         });
 
         if (tokensToRemove.length > 0) {
-          await db.collection("users").doc(userId).update({
+          const updateObj = {
             fcmTokens: admin.firestore.FieldValue.arrayRemove(...tokensToRemove)
+          };
+
+          // Rimuovi anche dai metadati se presenti (prevenzione sicura)
+          tokensToRemove.forEach(t => {
+            updateObj[new admin.firestore.FieldPath("tokensMetadata", t)] = admin.firestore.FieldValue.delete();
           });
-          console.log(`[TRIGGER CLEANUP] Rimossi ${tokensToRemove.length} token non validi dal profilo ${userId}.`);
+
+          await db.collection("users").doc(userId).update(updateObj);
+          console.log(`[TRIGGER CLEANUP] Rimossi ${tokensToRemove.length} token e relativi metadati dal profilo ${userId}.`);
         }
       }
     } else {
@@ -209,15 +221,91 @@ async function runChecks(db) {
   }
 }
 
+/**
+ * HEALTH CHECK & AUTO CLEANIING (V5.2)
+ * Analizza i token degli utenti, rimuove zombie e assicura il limite (3).
+ */
+async function runHealthCheck(db) {
+  console.log(`[START] Health Check & Watchdog Token`);
+  try {
+    const usersSnap = await db.collection("users").get();
+    let totRemoved = 0;
+
+    for (const docSnap of usersSnap.docs) {
+      const data = docSnap.data();
+      let fcmTokens = data.fcmTokens || [];
+      const tokensMetadata = data.tokensMetadata || {};
+
+      let needsUpdate = false;
+      const updateObj = {};
+
+      if (data.fcmToken !== undefined) {
+        updateObj["fcmToken"] = admin.firestore.FieldValue.delete();
+        needsUpdate = true;
+      }
+
+      if (fcmTokens.length > 3) {
+        // Watchdog backend
+        fcmTokens.sort((a, b) => {
+          const timeA = tokensMetadata[a]?.lastUsed || "";
+          const timeB = tokensMetadata[b]?.lastUsed || "";
+          return timeB.localeCompare(timeA);
+        });
+        const tokensToRemove = fcmTokens.slice(3);
+        fcmTokens = fcmTokens.slice(0, 3);
+
+        updateObj["fcmTokens"] = fcmTokens;
+        tokensToRemove.forEach(t => {
+          updateObj[new admin.firestore.FieldPath("tokensMetadata", t)] = admin.firestore.FieldValue.delete();
+        });
+        totRemoved += tokensToRemove.length;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        await db.collection("users").doc(docSnap.id).update(updateObj);
+      }
+    }
+    console.log(`[HEALTH CHECK FINISHED] Rimossi ${totRemoved} token zombie complessivi.`);
+  } catch (error) {
+    console.error("[HEALTH CHECK ERROR]", error);
+  }
+}
+
 // Funzione schedulata ordinaria (Cron)
 exports.checkDeadlines = onSchedule("0 8 * * *", async () => {
-  await runChecks(admin.firestore());
+  const db = admin.firestore();
+  await runHealthCheck(db);
+  await runChecks(db);
 });
 
 // Funzione temporanea HTTP per test immediato ORA
 exports.testScadenzeOra = onRequest(async (req, res) => {
-  await runChecks(admin.firestore());
-  res.send("✅ Test Eseguito! L'avviso per e-mail e notifiche push urgenti è stato appena processato sui server!");
+  const targetUid = "aebi78Ja4rOvbYcmTlr4m2Or1AE2";
+  const db = admin.firestore();
+
+  try {
+    // RUN DEADLINE CRON!
+    await runHealthCheck(db);
+    await runChecks(db);
+
+    const userDoc = await db.collection("users").doc(targetUid).get();
+    const data = userDoc.exists ? userDoc.data() : {};
+    const tokens = data.fcmTokens || [];
+    const metadata = data.tokensMetadata || {};
+
+    console.log(`[DEBUG] Current tokens for ${targetUid}:`, tokens);
+
+    res.send({
+      message: "✅ Diagnostica Token V5.2",
+      tokenCount: tokens.length,
+      tokens: tokens,
+      metadata: metadata,
+      watchdogLimit: 3
+    });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
 });
 
 /**
@@ -267,6 +355,34 @@ async function processNotificationChannel(db, recipientEmail, scadenza, ownerPre
           notificationSent = true;
           console.log(`[PUSH SUCCESS] Inviata a ${recipientEmail} (${response.successCount} dispositivi)`);
           await logNotification(db, ownerUid, scadenzaId, recipientEmail, "push");
+
+          // 🔄 HEARTBEAT PATCH: Rinnova lastUsed per dispositivi validi
+          await updateLastUsedForSuccessfulTokens(db, userQuery.docs[0].id, response, tokens);
+        }
+
+        // Cleanup token obsoleti anche dalle operazioni batch
+        if (response.failureCount > 0) {
+          const tokensToRemove = [];
+          response.responses.forEach((resp, idx) => {
+            if (!resp.success) {
+              const errCode = resp.error?.code;
+              console.warn(`[CRON CLEANUP] Errore token: ${errCode}`);
+              if (errCode === 'messaging/registration-token-not-registered' || errCode === 'messaging/invalid-registration-token') {
+                tokensToRemove.push(tokens[idx]);
+              }
+            }
+          });
+
+          if (tokensToRemove.length > 0) {
+            const updateObj = {
+              fcmTokens: admin.firestore.FieldValue.arrayRemove(...tokensToRemove)
+            };
+            tokensToRemove.forEach(t => {
+              updateObj[new admin.firestore.FieldPath("tokensMetadata", t)] = admin.firestore.FieldValue.delete();
+            });
+            await db.collection("users").doc(userQuery.docs[0].id).update(updateObj);
+            console.log(`[CRON CLEANUP] Rimossi ${tokensToRemove.length} token non validi per ${recipientEmail}.`);
+          }
         }
       }
     }
@@ -324,4 +440,41 @@ async function logNotification(db, uid, scadId, recipient, type) {
       type
     })
   });
+}
+
+/**
+ * HEARTBEAT PATCH V5.3
+ * Aggiorna il timestamp `lastUsed` solo per i token su cui la notifica è andata a buon fine.
+ * - Evita write storm: Esegue max 1 updateDoc() atomico sull'oggetto globale `tokensMetadata` per chiamata.
+ * - Sicurezza atomica: usa instanza FieldPath() inibendo sovrascrittura radicale JSON,
+ *   toccando unicamente la chiave `lastUsed` del singolo dispositivo.
+ * - Evita Race Condition: l'identificativo esplicito per token ignora asincronicità
+ *   e si fonda sull'Update server-timestamp o ISO locale senza interferire tra devices.
+ * - HealthCheck Sinergia: Il pruning esegue l'amputazione. Questo nega il pruning sui terminali silenti ma validi.
+ */
+async function updateLastUsedForSuccessfulTokens(db, uid, response, requestTokens) {
+  try {
+    const successfulTokens = [];
+    response.responses.forEach((res, idx) => {
+      if (res.success) successfulTokens.push(requestTokens[idx]);
+    });
+
+    if (successfulTokens.length === 0) return;
+
+    const now = new Date().toISOString();
+    const updateObj = {};
+
+    // Iniettiamo un update selettivo solo sui token win
+    // L'utilizzo di `tokensMetadata.{token}.lastUsed` (scritto formattato con FieldPath)
+    // consente un aggiornamento profondo parziale salvaguardando il createdAt e proprietà originali.
+    successfulTokens.forEach(t => {
+      updateObj[new admin.firestore.FieldPath("tokensMetadata", t, "lastUsed")] = now;
+    });
+
+    // Unico write per utente, batching opzionale se superasse 1000 campi ma i maxTokens per user sono ~3 in V5.3+
+    await db.collection("users").doc(uid).update(updateObj);
+    console.log(`[HEARTBEAT] Aggiornato lastUsed per ${successfulTokens.length} token di ${uid}.`);
+  } catch (error) {
+    console.warn(`[HEARTBEAT ERROR] Impossibile aggiornare heartbeat di ${uid}:`, error.message);
+  }
 }

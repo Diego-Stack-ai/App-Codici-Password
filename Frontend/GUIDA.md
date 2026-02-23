@@ -685,19 +685,79 @@ Questo approccio garantisce:
 
 ---
 
+## 20. GESTIONE TOKEN E HEARTBEAT FCM (V5.4)
+
+### 1️⃣ Lettura Umana
+
+Nel nostro sistema, inviare notifiche Push richiede di conservare i "Token" dei dispositivi utente. Per evitare che il database si intasi di vecchi telefoni rotti o disconnessi (i cosiddetti "Token Zombie"), utilizziamo un sistema di pulizia e un campo chiamato `lastUsed` (Ultimo Utilizzo) configurato all'interno di `tokensMetadata`.
+
+**Come Funziona?**
+- Quando avvii l'app, il Frontend cattura il token e lo salva nel DB, registrando `lastUsed` come **Firestore Timestamp** (o convertendo eventuali vecchie date ISO).
+- In Backend, il sistema ordina i token dal più recente al più vecchio e **mantiene in vita solo i TOP 3**. Gli altri vengono "amputati" per sicurezza.
+- **L'Heartbeat (Il Battito Cardiaco):** Se l'utente riceve una notifica passiva ma non apre l'app per settimane, c'era il rischio che il dispositivo venisse classificato come zombie. Nella V5.4, abbiamo inserito l'**Heartbeat Delivery-Based**: ogni volta che una notifica arriva a destinazione con successo, il Backend aggiorna *automaticamente* quel token impostando `lastUsed` = Adesso. In questo modo i terminali validi si rinnovano da soli!
+
+**Ibridazione (Il Rischio Crash)**
+In passato i dati tempo erano formattati come testi (Stringhe ISO). Per consentire al server di fare ordine cronologico mischiando dati vecchi e nuovi senza rompere il sistema (Crash), adesso la `runHealthCheck` trasforma dinamicamente tutti i valori in Millisecondi durante i confronti, pur utilizzando nativi Firebase Timestamp sui nuovi log!
+
+### 2️⃣ Esempio Operativo e Flusso Visivo
+
+```text
+[DISPOSITIVO]       [FRONTEND JS]                     [FIRESTORE DB]                      [CLOUD CRONJOB]
+  Apre App  ━━━━━▶ syncPushToken()  ━━━━━▶ Scrive / Aggiorna tokensMetadata ◀━━━━━ (Ogni Mattina) runHealthCheck()
+                        │                                  │                                │
+                        ▼                                  ▼                                ▼
+              [Verifica Watchdog < 3]               {                             [Se token > 3: Ordina per lastUsed]
+                                                      "tokenA" : { lastUsed: Timestamp },   [Slice(0,3) (Salva Nuovi)]
+[SVEGLIA PASSIVA]                                     "tokenB" : { lastUsed: ISO Old }      [Amputa token obsoleti ] 
+ Notifica Inviata ◀━━━ FCM Success ━━━━━━━━ (Aggiorna) "tokenC" : { lastUsed: Timestamp }
+```
+
+**Scenario Pratico:**
+1. **Device A (Tablet Vecchio):** Ultima apertura 20 giorni fa.
+2. **Device B (Smartphone):** Ultima apertura ieri.
+3. **Device C (PC Lavoro):** Apre oggi pomeriggio.
+4. **Oggi alle 15:00:** Invio Notifica Scadenza. Va a buon fine su A, B e C!
+5. *Effetto V5.4:* L'Heartbeat aggiorna in Firestore il campo `lastUsed` per i token A, B e C impostandolo alle 15:00 di oggi.
+6. **Device D (Nuovo):** Esegue Login stasera.
+7. *Effetto Watchdog (Domani 8:00):* Riconosce 4 token totali. Ordina per `lastUsed`: D (stasera), A, B, C (ore 15:00). Nessuno ha 20 giorni. Il sistema taglierà semplicemente in base al millisecondo più lento ma non ucciderà MAI un telefono passivo valido!
+
+### 3️⃣ Comandi operativi per Agenti AI e Umani
+
+Questa serie di Prompt istruisce un Agente a scansionare, riparare o diagnosticare anomalie Push. Evidenziarli direttamente nei Task o in chat:
+
+> 🤖 **Comando AI: `verify_fcm_health("ID_UTENTE")`**
+> Verifica la correttezza del formato `tokensMetadata` estrando il record Firestore, assicurandosi che non ci siano mismatch ISO VS Timestamp e stampa la lunghezza dell'array.
+```javascript
+// Esempio logico di verifica:
+const doc = await db.collection("users").doc(UID).get();
+console.log(doc.data().tokensMetadata);
+```
+
+> 🤖 **Comando AI: `run_healthcheck_dry()`**
+> Simula il pruning (Cronjob O_o 8 AM) su Firebase Emulator (o limitato in readonly) per osservare chi verrebbe rimosso da un array `> 3`, usando esplicitamente la logica iterativa millisecondi `getMillis()`.
+
+> 👨‍💻 **Azione Umana (Normalizzazione DB)**
+> Nel caso di sporcizia residua da V4, eseguire da shell il comando Firebase Functions locale oppure lo script NodeJS di migrazione:
+> `npm run migrate:fcm-timers` *(Script temporaneo di conversione da String a Timestamp Firestore)*.
+
+> 🤖 **Comando AI: `test_delivery_heartbeat()`**
+> Simula un invio push "vittorioso" a un token target noto e verifica 5 secondi dopo se il demone backend ha istanziato il campo `tokensMetadata.{tokenId}.lastUsed` con il nuovo serverTimestamp().
+
+---
+
 ✅ **PROTOCOLLO V5.1 MASTER — DOCUMENTAZIONE COMPLETA.**
 Questa guida è ora il tuo unico manuale operativo. Non deviare dalla via maestra.
 
 ---
 
-## 20. MODALITÀ OFFLINE E SICUREZZA LOCALE (ROADMAP STRATEGICA)
+## 21. MODALITÀ OFFLINE E SICUREZZA LOCALE (ROADMAP STRATEGICA)
 
-### 20.1 🎯 Obiettivo
+### 21.1 🎯 Obiettivo
 L’app dovrà permettere la navigazione tra gli account e l’accesso ai dati essenziali anche in assenza di connessione internet. Lo scenario d’uso principale è il seguente:
 - **Utente senza segnale** che necessita di accedere a un’informazione critica (es. PIN Bancomat, codice carta, credenziali di emergenza).
 L’obiettivo è rendere l’utente autonomo anche offline, evitando blocchi operativi in situazioni critiche.
 
-### 20.2 ⚠️ Premessa Importante
+### 21.2 ⚠️ Premessa Importante
 In assenza di connessione:
 - L’accesso a username/password di siti web potrebbe non essere immediatamente utile.
 - Tuttavia, codici fisici (**PIN, codici carte, codici emergenza**) possono risultare fondamentali.
@@ -706,10 +766,10 @@ In assenza di connessione:
 - **🔹 Credenziali “web”**
 - **🔹 Dati sensibili di utilizzo fisico** (PIN, codici carta, ecc.) — *Priorità Offline*
 
-### 20.3 🔐 Tema Critico: Sicurezza dei Dati Locali
+### 21.3 🔐 Tema Critico: Sicurezza dei Dati Locali
 Consentire l'accesso offline significa salvare dati sensibili in locale sul dispositivo. Questo introduce rischi significativi in caso di smarrimento, furto o accesso fisico non autorizzato. La modalità offline deve quindi essere progettata con un modello **“zero trust locale”**.
 
-### 20.4 🔒 Linee Guida di Sicurezza Obbligatorie
+### 21.4 🔒 Linee Guida di Sicurezza Obbligatorie
 
 1. **1️⃣ Cifratura Locale Forte**:
    - Tutti i dati sensibili devono essere cifrati in locale. Nessun dato leggibile in chiaro nel filesystem.
@@ -721,15 +781,15 @@ Consentire l'accesso offline significa salvare dati sensibili in locale sul disp
 4. **4️⃣ Auto-Lock & Auto-Purge**:
    - Blocco automatico dopo inattività e cancellazione delle cache temporanee. Nessun dato lasciato in memoria oltre il tempo necessario.
 
-### 20.5 🧠 Decisione Architetturale da Prendere
+### 21.5 🧠 Decisione Architetturale da Prendere
 **Domanda chiave**: Vogliamo che tutti gli account siano disponibili offline o solo quelli marcati come “Accesso Emergenza”?
 **Possibile soluzione evoluta**:
 - Inserire un Toggle **“Disponibile Offline”** per ogni account.
 - Sincronizzazione cifrata locale solo per gli elementi marcati. Questo riduce drasticamente il rischio.
 
-### 20.6 ⚖️ Considerazione Strategica
+### 21.6 ⚖️ Considerazione Strategica
 Un’app che contiene PIN Bancomat, codici carte di credito e password critiche diventa un **“Single Point of Failure”**. L’obiettivo non deve essere solo funzionale, ma **ridurre il danno massimo possibile** in caso di compromissione del dispositivo.
 
-### 20.7 📌 Conclusione
+### 21.7 📌 Conclusione
 La modalità offline è un’evoluzione strategica importante, ma deve essere implementata solo con cifratura robusta, autenticazione forte e minimizzazione dei dati salvati. 
 **La sicurezza non può essere un’aggiunta successiva: deve essere parte integrante della progettazione.**

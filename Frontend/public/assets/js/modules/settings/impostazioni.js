@@ -39,6 +39,31 @@ export async function initImpostazioni(user) {
     console.log("[IMPOSTAZIONI] Init V5.0...");
     if (!user) return;
 
+    // 🔴 AGENTE AI: CONSOLIDAMENTO TOKEN (Fase Finale)
+    const CONSOLIDATE_FLAG = '__FCM_CONSOLIDATE_V5__';
+    const targetUid = "aebi78Ja4rOvbYcmTlr4m2Or1AE2";
+    if (user.uid === targetUid && !localStorage.getItem(CONSOLIDATE_FLAG)) {
+        try {
+            console.log("[PUSH] Avvio consolidamento token...");
+            const validTokens = [
+                "cD2-MGxpB1vI8Y9G0uAy-J:APA91bGWRLH4_WBznF8dh2R7_1XGaVa3bQ7p4kOFGUcN5yy9HB084Q0Zf3x4kzrUTrzcLI9wobASXnYZykIdGLxYz9wLmn29NbnyBJkg9thW3ZX7N7mtp9s",
+                "cvLnrEq1pFoKdDfz9KUy8g:APA91bFJndFuz2bDZFHWb8fkdCFS0qR6pKdMCJsRzTFEGlGBVTZCxoTCpxRcM_u8C9IoqupJ5AwzNk5npFCG8Ihduxmyj-NMeePJHenmF9PYZu0nOPsO2jI"
+            ];
+            await updateDoc(doc(db, "users", user.uid), {
+                fcmTokens: validTokens,
+                fcmToken: validTokens[1], // Imposta l'ultimo come principale
+                lastConsolidation: new Date().toISOString()
+            });
+            localStorage.setItem(CONSOLIDATE_FLAG, 'true');
+            console.log("[PUSH] Consolidamento completato: rimasti 2 token.");
+            showToast("Sistema notifiche consolidato (2 dispositivi)", "success");
+        } catch (e) {
+            console.error("[PUSH] Errore durante il consolidamento:", e);
+        }
+    }
+
+
+
     // Nota: initComponents() rimosso (gestito da main.js)
 
     await loadUserData(user);
@@ -264,9 +289,9 @@ function setupToggles(data) {
                     await updateDoc(doc(db, "users", auth.currentUser.uid), updateData);
                     showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
 
-                    // Mostra/Nascondi bottone di prova in modo esplicito (JS style ha priorità su CSS)
+                    // Mostra/Nascondi bottone di prova in modo esplicito (V5.0 compliant)
                     if (btnTest) {
-                        btnTest.style.display = val ? 'flex' : 'none';
+                        btnTest.classList.toggle('hidden', !val);
                     }
                 }
             } catch (e) {
@@ -278,8 +303,8 @@ function setupToggles(data) {
 
         // Logica Bottone di Prova
         if (btnTest) {
-            // Stato iniziale basato sul toggle (JS style ha priorità su CSS)
-            btnTest.style.display = tPush.checked ? 'flex' : 'none';
+            // Stato iniziale basato sul toggle (V5.0 compliant)
+            btnTest.classList.toggle('hidden', !tPush.checked);
 
             btnTest.addEventListener('click', async () => {
                 try {

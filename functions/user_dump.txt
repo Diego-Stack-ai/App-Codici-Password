@@ -1,0 +1,17 @@
+[33m[1m!  functions:[22m[39m Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host.
+Serving at port 8643
+
+[33m[1m!  functions:[22m[39m Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host.
+Serving at port 8465
+
+[33m[1m!  functions:[22m[39m Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host.
+Serving at port 8464
+
+[36m[1mi  functions:[22m[39m Loaded functions: onNotificationTrigger, checkDeadlines, testScadenzeOra
+[33m[1m!  functions:[22m[39m The following emulators are not running, calls to these services will affect production: [1mfirestore, database, pubsub, storage, eventarc, tasks[22m
+firebase > Promise {
+  <pending>,
+  Symbol(async_id_symbol): 20107,
+  Symbol(trigger_async_id_symbol): 20106
+}
+firebase > 

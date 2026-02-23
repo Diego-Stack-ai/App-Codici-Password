@@ -1,0 +1,26 @@
+2026-02-23T06:45:23.864111Z ? onnotificationtrigger: [TRIGGER CLEANUP] Errore token cIrtwRUhYWTwX-zScSe556:APA91bFqxC8NwfWu-BSeyqLfTMF-xfbsSxiWAooEG0Xftw1g89R97NHc3gwYh15Q7q6r2TkZz1_q4aUqB9mxdjA1K8OO9YorIJmAHfLV9DsL4H9T_6Rdss8: messaging/registration-token-not-registered
+
+2026-02-23T06:45:23.917139Z ? onnotificationtrigger: [TRIGGER CLEANUP] Rimossi 1 token non validi dal profilo aebi78Ja4rOvbYcmTlr4m2Or1AE2.
+
+2026-02-23T06:45:46.195201Z I onnotificationtrigger: 
+2026-02-23T06:45:46.214555Z ? onnotificationtrigger: [TRIGGER] Analizzando nuova notifica per K7klHYRl72WqBJ7HUjrUgeLrMKb2. Titolo: Prova Push Ô£à
+
+2026-02-23T06:45:46.268459Z ? onnotificationtrigger: [TRIGGER DEBUG] Tokens unici: 1. Push abilitato: true
+
+2026-02-23T06:45:46.320956Z ? onnotificationtrigger: [TRIGGER SUCCESS] Utente K7klHYRl72WqBJ7HUjrUgeLrMKb2. Successi: 1, Fallimenti: 0.
+
+2026-02-23T06:49:55.789121Z I onnotificationtrigger: 
+2026-02-23T06:49:55.813551Z ? onnotificationtrigger: [TRIGGER] Analizzando nuova notifica per K7klHYRl72WqBJ7HUjrUgeLrMKb2. Titolo: Prova Push Ô£à
+
+2026-02-23T06:49:55.881613Z ? onnotificationtrigger: [TRIGGER DEBUG] Tokens unici: 1. Push abilitato: true
+
+2026-02-23T06:49:55.975128Z ? onnotificationtrigger: [TRIGGER SUCCESS] Utente K7klHYRl72WqBJ7HUjrUgeLrMKb2. Successi: 1, Fallimenti: 0.
+
+2026-02-23T06:51:57.536918Z I onnotificationtrigger: 
+2026-02-23T06:51:57.555477Z ? onnotificationtrigger: [TRIGGER] Analizzando nuova notifica per K7klHYRl72WqBJ7HUjrUgeLrMKb2. Titolo: Prova Push Ô£à
+
+2026-02-23T06:51:57.592384Z ? onnotificationtrigger: [TRIGGER DEBUG] Tokens unici: 1. Push abilitato: true
+
+2026-02-23T06:51:57.658925Z ? onnotificationtrigger: [TRIGGER SUCCESS] Utente K7klHYRl72WqBJ7HUjrUgeLrMKb2. Successi: 1, Fallimenti: 0.
+
+2026-02-23T06:52:31.386689Z I onnotificationtrigger: 

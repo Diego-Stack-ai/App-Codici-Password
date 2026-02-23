@@ -642,7 +642,7 @@ input:checked+.base-switch::after {
     font-size: 9px;
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-secondary);
     letter-spacing: 0.1em;
 }
 
@@ -665,11 +665,11 @@ input:checked+.base-switch::after {
 
 /* --- 11. CARDS LIST (JS Generated) --- */
 .card-entry {
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--surface-glass);
     padding: 1rem;
     border-radius: 16px;
     /* Arrotondato */
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
     margin-bottom: 0.75rem;
 }
 

@@ -135,6 +135,14 @@
     transition: all 0.2s;
 }
 
+.detail-field-box.note-box {
+    height: auto;
+    min-height: 3.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    align-items: flex-start;
+}
+
 .detail-field-input {
     flex: 1;
     background: transparent;
@@ -165,7 +173,14 @@
     color: var(--text-primary);
 }
 
-/* --- 4. ATTACHMENTS (V5.0 Premium) --- */
+/* --- 4. UTILS & GAPS --- */
+.flex-col-gap-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* --- 5. ATTACHMENTS (V5.0 Premium) --- */
 .attachment-item {
     display: flex;
     align-items: center;
@@ -437,10 +452,26 @@
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
-    background: rgba(16, 185, 129, 0.05);
-    border-radius: 1rem;
-    border: 1px solid rgba(16, 185, 129, 0.1);
+    background: var(--surface-glass);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     position: relative;
+}
+
+.banking-subcard {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.dark .banking-subcard {
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .banking-header {
@@ -490,6 +521,8 @@
     color: var(--text-secondary);
     opacity: 0.4;
     cursor: pointer;
+    background: transparent;
+    border: none;
     transition: all 0.2s;
 }
 
