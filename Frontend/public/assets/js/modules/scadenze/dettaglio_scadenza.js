@@ -270,7 +270,7 @@ function renderScadenza(scadenza) {
 
         const cronNote = createElement('p', {
             className: 'italic text-center',
-            style: 'font-size:0.625rem;opacity:0.2;margin-top:4px',
+            style: 'font-size:0.75rem;opacity:0.2;margin-top:4px',
             textContent: '⏱ Controllo automatico ogni giorno alle 09:00'
         });
 
