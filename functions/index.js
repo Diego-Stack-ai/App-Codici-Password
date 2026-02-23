@@ -4,6 +4,7 @@
  */
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { setGlobalOptions } = require("firebase-functions");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
@@ -201,7 +202,10 @@ async function runChecks(db) {
 
         if (diffDays <= (scadenza.notificationDaysBefore || 14)) {
           const lastSent = scadenza.lastNotificationSent ? scadenza.lastNotificationSent.toDate() : null;
-          let shouldNotify = !lastSent || ((now - lastSent) / (1000 * 60 * 60 * 24)) >= (scadenza.notificationFrequency || 7);
+          // REGOLA: Invia se mai inviata, se è passata la frequenza, OPPURE se oggi è il giorno della scadenza (diffDays === 0)
+          let shouldNotify = !lastSent ||
+            ((now - lastSent) / (1000 * 60 * 60 * 24)) >= (scadenza.notificationFrequency || 7) ||
+            diffDays === 0;
 
           if (shouldNotify) {
             console.log(`[NOTIFY] Elaborazione scadenza ${scadenzaId} per ${ownerUid}`);
@@ -478,3 +482,58 @@ async function updateLastUsedForSuccessfulTokens(db, uid, response, requestToken
     console.warn(`[HEARTBEAT ERROR] Impossibile aggiornare heartbeat di ${uid}:`, error.message);
   }
 }
+
+// --- TRIGGER SALVATAGGIO SCADENZA (V5.3) ---
+// Invia immediatamente la notifica al salvataggio se la scadenza è nella finestra.
+exports.triggerScadenzaOnSave = onDocumentWritten("users/{uid}/scadenze/{sid}", async (event) => {
+  const db = admin.firestore();
+  const ownerUid = event.params.uid;
+  const scadenzaId = event.params.sid;
+  const newData = event.data.after.data();
+
+  // Esci se il documento è stato eliminato o se è archiviato (completed)
+  if (!newData || newData.status !== "active") return;
+
+  console.log(`[TRIGGER-SAVE] Controllo immediato per scadenza ${scadenzaId} di ${ownerUid}`);
+
+  try {
+    // Recupero preferenze utente
+    const userDoc = await db.collection("users").doc(ownerUid).get();
+    const ownerData = userDoc.data() || {};
+    const ownerPrefs = {
+      emailFallback: ownerData.prefs_email_sharing !== false,
+      pushEnabled: ownerData.prefs_push !== false
+    };
+
+    // Riutilizzo la logica di runChecks ma mirata solo a questo ID
+    if (!newData.dueDate || !newData.emails || newData.emails.length === 0) return;
+
+    const now = new Date();
+    const dueDate = new Date(newData.dueDate);
+    const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+    // Stessa logica del cron (Punti 202-204)
+    if (diffDays <= (newData.notificationDaysBefore || 14)) {
+      const lastSent = newData.lastNotificationSent ? newData.lastNotificationSent.toDate() : null;
+
+      // REGOLA: Invia se mai inviata, se è passata la frequenza, OPPURE se oggi è il giorno della scadenza
+      let shouldNotify = !lastSent ||
+        ((now - lastSent) / (1000 * 60 * 60 * 24)) >= (newData.notificationFrequency || 7) ||
+        diffDays === 0;
+
+      if (shouldNotify) {
+        console.log(`[TRIGGER-SAVE] INVIO IMMEDIATO per ${scadenzaId}`);
+        for (const email of newData.emails) {
+          await processNotificationChannel(db, email, newData, ownerPrefs, ownerUid, scadenzaId);
+        }
+
+        await db.collection("users").doc(ownerUid).collection("scadenze").doc(scadenzaId).update({
+          lastNotificationSent: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+  } catch (error) {
+    console.error("[TRIGGER-SAVE ERROR]", error);
+  }
+});
+
