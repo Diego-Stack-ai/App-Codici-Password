@@ -1130,7 +1130,11 @@ function syncCustomDropdowns() {
                 className: `base-dropdown-item ${opt.selected ? 'active' : ''}`,
                 dataset: { value: opt.value }
             }, [
-                createElement('span', { textContent: opt.textContent, className: 'truncate' })
+                createElement('span', {
+                    textContent: opt.textContent,
+                    className: 'truncate',
+                    dataset: opt.dataset.t ? { t: opt.dataset.t } : {}
+                })
             ]);
 
             // Add delete button for user-defined items (skip placeholders or manual triggers)
