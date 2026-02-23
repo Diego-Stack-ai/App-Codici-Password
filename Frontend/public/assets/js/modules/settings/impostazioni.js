@@ -250,9 +250,7 @@ function setupToggles(data) {
     }
 
     if (tPush) {
-        // Supporta entrambi i campi per compatibilità, preferendo prefs_push
         tPush.checked = (data.prefs_push !== undefined) ? data.prefs_push : (data.pref_push_enabled !== false);
-        const btnTest = document.getElementById('btn-test-push');
 
         tPush.addEventListener('change', async () => {
             const val = tPush.checked;
@@ -288,11 +286,6 @@ function setupToggles(data) {
 
                     await updateDoc(doc(db, "users", auth.currentUser.uid), updateData);
                     showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
-
-                    // Mostra/Nascondi bottone di prova in modo esplicito (V5.0 compliant)
-                    if (btnTest) {
-                        btnTest.classList.toggle('hidden', !val);
-                    }
                 }
             } catch (e) {
                 console.error("Error saving Push Pref:", e);
@@ -300,37 +293,6 @@ function setupToggles(data) {
                 showToast("Errore salvataggio", "error");
             }
         });
-
-        // Logica Bottone di Prova
-        if (btnTest) {
-            // Stato iniziale basato sul toggle (V5.0 compliant)
-            btnTest.classList.toggle('hidden', !tPush.checked);
-
-            btnTest.addEventListener('click', async () => {
-                try {
-                    btnTest.disabled = true;
-                    showToast("Invio notifica di prova...");
-
-                    await addDoc(collection(db, "users", auth.currentUser.uid, "notifications"), {
-                        title: "Prova Push ✅",
-                        message: "Se leggi questo messaggio, il sistema di notifiche push è configurato correttamente!",
-                        timestamp: serverTimestamp(),
-                        type: "test"
-                    });
-
-                    // Invalida cache dello storico per mostrare subito la nuova notifica
-                    const CACHE_KEY = `notifications_cache_data_${auth.currentUser.uid}`;
-                    localStorage.removeItem(CACHE_KEY);
-
-                    showToast("Notifica inviata con successo!");
-                } catch (e) {
-                    console.error("Errore invio prova:", e);
-                    showToast("Errore invio prova", "error");
-                } finally {
-                    setTimeout(() => btnTest.disabled = false, 3000);
-                }
-            });
-        }
     }
 
     if (tEmail) {

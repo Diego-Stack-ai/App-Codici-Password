@@ -793,3 +793,63 @@ Un’app che contiene PIN Bancomat, codici carte di credito e password critiche 
 ### 21.7 📌 Conclusione
 La modalità offline è un’evoluzione strategica importante, ma deve essere implementata solo con cifratura robusta, autenticazione forte e minimizzazione dei dati salvati. 
 **La sicurezza non può essere un’aggiunta successiva: deve essere parte integrante della progettazione.**
+
+---
+
+## 22. CODICE RIMOSSO — ARCHIVIO PER EVENTUALE RIPRISTINO
+
+### 22.1 Pulsante Invia Notifica di Prova (Rimosso v5.3 — 23/02/2026)
+
+**Motivo rimozione**: Le notifiche push funzionano correttamente. Il pulsante di test non serve piu in produzione.
+
+**Come ripristinarlo**: Seguire i 2 passaggi sotto.
+
+#### Passo 1 — HTML (impostazioni.html)
+
+Inserire dentro al settings-item delle Notifiche Push, dopo il div.flex-between:
+
+```html
+<button id='btn-test-push' class='btn-text-accent text-[10px] mt-1 hidden'>
+    <span class='material-symbols-outlined text-[14px]'>send</span>
+    Invia Notifica di Prova
+</button>
+```
+
+#### Passo 2 — JS (impostazioni.js)
+
+Dentro al blocco if (tPush), dopo il listener change, aggiungere:
+
+```javascript
+const btnTest = document.getElementById('btn-test-push');
+if (btnTest) {
+    btnTest.classList.toggle('hidden', !tPush.checked);
+    btnTest.addEventListener('click', async () => {
+        try {
+            btnTest.disabled = true;
+            showToast('Invio notifica di prova...');
+            await addDoc(collection(db, 'users', auth.currentUser.uid, 'notifications'), {
+                title: 'Prova Push',
+                message: 'Se leggi questo messaggio, le notifiche push funzionano!',
+                timestamp: serverTimestamp(),
+                type: 'test'
+            });
+            const CACHE_KEY = 'notifications_cache_data_' + auth.currentUser.uid;
+            localStorage.removeItem(CACHE_KEY);
+            showToast('Notifica inviata con successo!');
+        } catch (e) {
+            console.error('Errore invio prova:', e);
+            showToast('Errore invio prova', 'error');
+        } finally {
+            setTimeout(() => btnTest.disabled = false, 3000);
+        }
+    });
+}
+```
+
+Nel listener change del toggle push, dopo showToast, aggiungere:
+
+```javascript
+if (btnTest) btnTest.classList.toggle('hidden', !val);
+```
+
+> NOTA: addDoc, collection, serverTimestamp devono essere importati da Firestore.
