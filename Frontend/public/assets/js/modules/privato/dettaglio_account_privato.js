@@ -261,86 +261,98 @@ function renderBanking(acc) {
     }
 
     bankingArr.forEach((bank, idx) => {
-        const card = createElement('div', { className: 'banking-card' }, [
-            createElement('div', { className: 'banking-header' }, [
-                createElement('span', { className: 'banking-index', textContent: `${t('account') || 'Conto'} #${idx + 1}` })
-            ]),
-            // IBAN
-            createElement('div', { className: 'banking-field-box flex-col gap-1' }, [
-                createElement('div', { className: 'flex justify-between items-center w-full' }, [
-                    createElement('span', { className: 'micro-data-label !w-auto', textContent: t('iban') || 'IBAN' }),
-                    createElement('button', {
-                        className: 'micro-btn-copy-inline relative z-10',
-                        onclick: () => { navigator.clipboard.writeText(bank.iban); showToast(t('copied') || "Copiato!"); }
-                    }, [createElement('span', { className: 'material-symbols-outlined icon-xs', textContent: 'content_copy' })])
-                ]),
-                createElement('span', { className: 'micro-data-value text-emerald-400 font-mono tracking-wider break-all text-[12px] block', textContent: bank.iban || '-' })
-            ]),
-            // Secondary Data
-            createElement('div', { className: 'banking-grid' }, [
-                createElement('div', { className: 'banking-field-box h-full' }, [
-                    createMicroRow('Pass. Disp.', bank.passwordDispositiva || '••••••••', true, true)
-                ]),
-                createElement('div', { className: 'banking-field-box h-full' }, [
-                    createMicroRow('Nota', bank.nota || '-')
-                ])
-            ]),
-            // Referent
-            createElement('div', { className: 'banking-referent-box' }, [
-                createElement('div', { className: 'referent-header' }, [
-                    createElement('span', { className: 'material-symbols-outlined text-xs', textContent: 'contact_emergency' }),
-                    createElement('span', { className: 'referent-title', textContent: 'Referente' })
-                ]),
-                createElement('div', { className: 'referent-name', textContent: bank.referenteNome || '-' }),
-                createElement('div', { className: 'flex-col-gap-2' }, [
-                    createCallBtn('call', bank.referenteTelefono),
-                    createCallBtn('smartphone', bank.referenteCellulare)
-                ])
-            ]),
-            // Cards Section
-            bank.cards && bank.cards.length > 0 ? createElement('div', { className: 'cards-section' }, [
-                createElement('div', { className: 'cards-title', textContent: 'Carte / Bancomat' }),
-                ...bank.cards.map(c => createElement('div', { className: 'card-item' }, [
-                    createElement('div', { className: 'card-type', textContent: c.cardType || c.type || 'Carta' }),
-                    createMicroRow('Titolare', c.titolare || '-'),
-                    createMicroRow('Numero', c.cardNumber || '-', true),
-                    createMicroRow('Scadenza', c.expiry || '-'),
-                    createMicroRow('PIN', c.pin || '••••', true, true),
-                    createMicroRow('CCV', c.ccv || '-', true, true)
-                ]))
-            ]) : null
-        ]);
-        content.appendChild(card);
-    });
-}
+        const handleCopy = (val) => {
+            if (!val) return;
+            navigator.clipboard.writeText(val);
+            showToast(t('copied') || "Copiato!");
+        };
 
-function createMicroRow(label, value, copy = false, shield = false) {
-    const valEl = createElement('span', { className: `micro-data-value ${shield ? 'base-shield' : ''}`, textContent: value });
-    return createElement('div', { className: 'micro-data-row' }, [
-        createElement('span', { className: 'micro-data-label', textContent: label }),
-        valEl,
-        copy ? createElement('button', {
-            className: 'micro-btn-copy-inline relative z-10',
-            onclick: () => { navigator.clipboard.writeText(value); showToast(t('copied') || "Copiato!"); }
-        }, [createElement('span', { className: 'material-symbols-outlined icon-xs', textContent: 'content_copy' })]) : null,
-        shield ? createElement('button', {
-            className: 'micro-btn-copy-inline relative z-10 !bg-transparent',
-            onclick: (e) => {
-                const isMasked = valEl.classList.toggle('base-shield');
-                e.currentTarget.querySelector('span').textContent = isMasked ? 'visibility' : 'visibility_off';
+        const createReadonlyField = (label, value, icon, isPassword = false) => {
+            const id = 'bank-field-' + Math.random().toString(36).substr(2, 9);
+
+            const btnCopy = createElement('button', {
+                className: 'btn-icon-header copy-btn cursor-pointer',
+                type: 'button',
+                onclick: (e) => {
+                    e.stopPropagation();
+                    handleCopy(value);
+                }
+            }, [createElement('span', { className: 'material-symbols-outlined text-[14px]', textContent: 'content_copy' })]);
+
+            const actionsDiv = createElement('div', { className: 'detail-field-actions flex items-center gap-2' }, [btnCopy]);
+
+            if (isPassword) {
+                const btnToggle = createElement('button', {
+                    className: 'btn-icon-header btn-field-toggle cursor-pointer',
+                    type: 'button',
+                    onclick: (e) => {
+                        e.stopPropagation();
+                        const input = document.getElementById(id);
+                        const isPass = input.type === 'password' || input.classList.contains('base-shield');
+                        input.type = isPass ? 'text' : 'password';
+                        input.classList.toggle('base-shield', !isPass);
+                        e.currentTarget.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
+                    }
+                }, [createElement('span', { className: 'material-symbols-outlined text-[14px]', textContent: 'visibility' })]);
+                actionsDiv.prepend(btnToggle);
             }
-        }, [createElement('span', { className: 'material-symbols-outlined icon-xs', textContent: 'visibility' })]) : null
-    ]);
-}
 
-function createCallBtn(icon, num) {
-    return createElement('div', {
-        className: 'call-btn-row',
-        onclick: () => { if (num) window.location.href = `tel:${num.replace(/\s+/g, '')}`; }
-    }, [
-        createElement('span', { className: 'material-symbols-outlined call-icon', textContent: icon }),
-        createElement('span', { className: 'call-number', textContent: num || '-' })
-    ]);
+            return createElement('div', { className: 'glass-field-container' }, [
+                createElement('label', { className: 'view-label', textContent: label }),
+                createElement('div', { className: 'glass-field border-glow' }, [
+                    createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
+                    createElement('input', { id: id, className: `field-input w-full no-transform ${isPassword ? 'base-shield field-value-password' : ''}`, value: value || '-', readonly: true }),
+                    actionsDiv
+                ])
+            ]);
+        };
+
+        const fields = [];
+
+        if (bank.iban) fields.push(createReadonlyField('IBAN', bank.iban, 'account_balance'));
+        if (bank.passwordDispositiva) fields.push(createReadonlyField('Pass. Disp.', bank.passwordDispositiva, 'lock', true));
+        if (bank.referenteTelefono) fields.push(createReadonlyField('Tel. Banca', bank.referenteTelefono, 'call'));
+        if (bank.referenteCellulare) fields.push(createReadonlyField('Cell. Banca', bank.referenteCellulare, 'smartphone'));
+
+        // Cards
+        if (bank.cards && bank.cards.length > 0) {
+            const cardsArr = bank.cards.map((card, cIdx) => {
+                return createElement('div', { className: 'card-entry border-glow' }, [
+                    createElement('div', { className: 'card-entry-header cursor-default' }, [
+                        createElement('div', { className: 'card-entry-title-row' }, [
+                            createElement('span', { className: 'material-symbols-outlined card-entry-icon', textContent: 'credit_card' }),
+                            createElement('span', { className: 'card-entry-label', textContent: card.cardType || card.type || `Carta #${cIdx + 1}` })
+                        ])
+                    ]),
+                    createElement('div', { className: 'flex-col-gap' }, [
+                        card.titolare ? createReadonlyField('Intestatario', card.titolare, 'person') : null,
+                        card.cardNumber ? createReadonlyField('Numero', card.cardNumber, 'credit_card') : null,
+                        card.expiry ? createReadonlyField('Scadenza', card.expiry, 'calendar_month') : null,
+                        card.pin ? createReadonlyField('PIN', card.pin, 'dialpad', true) : null,
+                        card.ccv ? createReadonlyField('CCV', card.ccv, 'shield', true) : null
+                    ].filter(Boolean))
+                ]);
+            });
+
+            fields.push(createElement('div', { className: 'bank-cards-section' }, [
+                createElement('div', { className: 'bank-cards-header' }, [
+                    createElement('span', { className: 'bank-cards-title', textContent: 'Carte Associate' })
+                ]),
+                createElement('div', { className: 'flex-col-gap' }, cardsArr)
+            ]));
+        }
+
+        const cardEl = createElement('div', { className: 'bank-account-card border-glow cursor-default' }, [
+            createElement('div', { className: 'bank-header cursor-default' }, [
+                createElement('div', { className: 'bank-header-left' }, [
+                    createElement('span', { className: 'material-symbols-outlined bank-expand-icon', textContent: 'account_balance' }),
+                    createElement('span', { className: 'bank-title', textContent: bank.iban ? `Conto: ${bank.iban.substring(0, 10)}...` : `Conto Bancario #${idx + 1}` })
+                ])
+            ]),
+            createElement('div', { className: 'bank-details' }, fields)
+        ]);
+        content.appendChild(cardEl);
+    });
 }
 
 /**

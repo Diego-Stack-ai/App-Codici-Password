@@ -16,12 +16,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Fonts -->
-    <!-- Fonts -->
-    <!-- CSS Stratificato (V5.1 Master Compliant) -->
     <link rel="stylesheet" href="assets/css/core.css?v=5.0">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/dettaglio_account_privato.css?v=5.3">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
 
     <!-- CORE JS -->
@@ -68,67 +67,76 @@
                             <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                         </div>
                         <div class="flex-col-gap">
-                            <div class="flex-col-gap">
-                                <!-- [V5.1 Master] Blinded Context: Micro-form logic only for the trap to satisfy DOM warnings -->
-                                <form class="anti-autofill-trap" aria-hidden="true"
-                                    style="position: absolute; left: -9999px;" onsubmit="return false;">
-                                    <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
-                                    <input type="password" name="password_trap" autocomplete="current-password"
-                                        tabindex="-1">
-                                </form>
+                            <!-- [V5.1 Master] Blinded Context: Micro-form logic only for the trap to satisfy DOM warnings -->
+                            <form class="anti-autofill-trap" aria-hidden="true"
+                                style="position: absolute; left: -9999px;" onsubmit="return false;">
+                                <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+                                <input type="password" name="password_trap" autocomplete="current-password"
+                                    tabindex="-1">
+                            </form>
 
-                                <!-- Nome Account -->
-                                <div class="glass-field-container">
-                                    <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
-                                        Account</label>
-                                    <div class="detail-field-box border-glow">
-                                        <input id="detail-nomeAccount" readonly class="detail-field-input no-transform"
-                                            autocomplete="no-autofill" spellcheck="false">
+                            <!-- Nome Account -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-nomeAccount" data-t="account_name">Nome
+                                    Account</label>
+                                <div class="glass-field border-glow">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
+                                    <input id="detail-nomeAccount" readonly class="field-input no-transform"
+                                        autocomplete="no-autofill" spellcheck="false">
+                                    <div class="detail-field-actions">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-nomeAccount">
                                             <span class="material-symbols-outlined">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Utente -->
-                                <div class="glass-field-container">
-                                    <label class="view-label" for="detail-username" data-t="username">Utente</label>
-                                    <div class="detail-field-box border-glow">
-                                        <input id="detail-username" type="text" readonly
-                                            class="detail-field-input no-transform" autocomplete="off" autocorrect="off"
-                                            spellcheck="false">
+                            <!-- Utente -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-username" data-t="username">Utente</label>
+                                <div class="glass-field border-glow">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">person</span>
+                                    <input id="detail-username" type="text" readonly class="field-input no-transform"
+                                        autocomplete="off" autocorrect="off" spellcheck="false">
+                                    <div class="detail-field-actions">
                                         <button class="btn-icon-header copy-btn" type="button"
                                             data-field="detail-username">
                                             <span class="material-symbols-outlined">content_copy</span>
                                         </button>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div class="form-grid-2">
                                 <!-- Account -->
                                 <div class="glass-field-container">
                                     <label class="view-label" for="detail-account" data-t="account_code">Account /
                                         Codice</label>
-                                    <div class="detail-field-box border-glow">
-                                        <input id="detail-account" type="text" readonly
-                                            class="detail-field-input no-transform" autocomplete="off"
-                                            spellcheck="false">
-                                        <button class="btn-icon-header copy-btn" type="button"
-                                            data-field="detail-account">
-                                            <span class="material-symbols-outlined">content_copy</span>
-                                        </button>
+                                    <div class="glass-field border-glow">
+                                        <span class="material-symbols-outlined ml-4 opacity-40">pin</span>
+                                        <input id="detail-account" type="text" readonly class="field-input no-transform"
+                                            autocomplete="off" spellcheck="false">
+                                        <div class="detail-field-actions">
+                                            <button class="btn-icon-header copy-btn" type="button"
+                                                data-field="detail-account">
+                                                <span class="material-symbols-outlined">content_copy</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Password -->
                                 <div class="glass-field-container">
                                     <label class="view-label" for="detail-password" data-t="password">Password</label>
-                                    <div class="detail-field-box border-glow">
+                                    <div class="glass-field border-glow">
+                                        <span class="material-symbols-outlined ml-4 opacity-40">lock</span>
                                         <input id="detail-password" type="text" readonly
-                                            class="detail-field-input base-shield field-value-password no-transform"
+                                            class="field-input base-shield field-value-password no-transform"
                                             autocomplete="off" autocorrect="off" spellcheck="false">
                                         <div class="detail-field-actions">
-                                            <button id="toggle-password" class="btn-icon-header" type="button">
+                                            <button id="toggle-password" class="btn-icon-header btn-field-toggle"
+                                                type="button">
                                                 <span class="material-symbols-outlined">visibility</span>
                                             </button>
                                             <button class="btn-icon-header copy-btn" type="button"
@@ -138,26 +146,29 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Sito Web -->
-                                <div class="glass-field-container">
-                                    <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
-                                    <div class="detail-field-box border-glow">
-                                        <input id="detail-website" readonly
-                                            class="detail-field-input link-underlined no-transform">
-                                        <div class="detail-field-actions">
-                                            <button id="open-website" class="btn-icon-header" type="button">
-                                                <span class="material-symbols-outlined">open_in_new</span>
-                                            </button>
-                                            <button class="btn-icon-header copy-btn" type="button"
-                                                data-field="detail-website">
-                                                <span class="material-symbols-outlined">content_copy</span>
-                                            </button>
-                                        </div>
+                            <!-- Sito Web -->
+                            <div class="glass-field-container">
+                                <label class="view-label" for="detail-website" data-t="website">Sito Web</label>
+                                <div class="glass-field border-glow">
+                                    <span class="material-symbols-outlined ml-4 opacity-40">language</span>
+                                    <input id="detail-website" readonly
+                                        class="field-input link-underlined no-transform text-blue-400">
+                                    <div class="detail-field-actions">
+                                        <button id="open-website" class="btn-icon-header btn-field-toggle"
+                                            type="button">
+                                            <span class="material-symbols-outlined">open_in_new</span>
+                                        </button>
+                                        <button class="btn-icon-header copy-btn" type="button"
+                                            data-field="detail-website">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <!-- Suggerimento Conto Bancario -->
                             </div>
+
+                            <!-- Suggerimento Conto Bancario -->
                         </div>
                     </section>
 
@@ -204,7 +215,7 @@
                                 class="material-symbols-outlined detail-section-icon icon-accent-amber">sticky_note_2</span>
                             <h3 class="detail-section-title" data-t="notes">Note</h3>
                         </div>
-                        <div class="detail-field-box note-box border-glow content-spacing">
+                        <div class="glass-field note-box border-glow content-spacing">
                             <p id="detail-note" class="note-text no-transform">-</p>
                             <button id="copy-note" class="btn-icon-header" type="button">
                                 <span class="material-symbols-outlined text-sm">content_copy</span>

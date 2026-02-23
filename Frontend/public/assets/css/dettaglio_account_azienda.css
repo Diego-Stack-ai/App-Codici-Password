@@ -82,7 +82,8 @@
 
 /* --- 2. SECTIONS --- */
 .detail-content-wrap {
-    padding: 0 1.25rem 2.5rem;
+    padding: 0 0 2.5rem;
+    /* Removed side padding (handled by page-container) */
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -124,18 +125,18 @@
     opacity: 0.8;
 }
 
-.detail-field-box {
+.glass-field {
     display: flex;
     align-items: center;
     background: var(--surface-glass);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0 0.5rem 0 1rem;
+    border-radius: 16px;
+    padding: 0 1rem;
     height: 3.5rem;
     transition: all 0.2s;
 }
 
-.detail-field-box.note-box {
+.glass-field.note-box {
     height: auto;
     min-height: 3.5rem;
     padding-top: 1rem;
@@ -143,15 +144,34 @@
     align-items: flex-start;
 }
 
-.detail-field-input {
+.field-input {
     flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-primary) !important;
     font-size: var(--fs-xs);
     font-family: inherit;
-    outline: none;
+    outline: none !important;
     width: 100%;
+}
+
+.detail-field-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
 }
 
 .btn-icon-header {
@@ -174,6 +194,12 @@
 }
 
 /* --- 4. UTILS & GAPS --- */
+.flex-col-gap {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .flex-col-gap-2 {
     display: flex;
     flex-direction: column;
@@ -460,7 +486,7 @@
 }
 
 .banking-subcard {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-glass);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 0.75rem 1rem;
@@ -471,7 +497,7 @@
 }
 
 .dark .banking-subcard {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--surface-glass);
 }
 
 .banking-header {
@@ -591,4 +617,110 @@
     color: var(--text-secondary);
     opacity: 0.3;
     transition: transform 0.3s;
+}
+
+/* --- 10. BANKING CARDS (READONLY) --- */
+.bank-account-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    position: relative;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+    margin-bottom: 1rem;
+}
+
+.bank-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+.bank-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bank-expand-icon {
+    font-size: var(--icon-xs);
+    color: #22c55e;
+    transition: transform 0.2s;
+}
+
+.bank-title {
+    font-size: 10px;
+    font-weight: var(--font-strong-weight);
+    text-transform: uppercase;
+    color: #22c55e;
+}
+
+.bank-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.bank-cards-section {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1rem;
+}
+
+.bank-cards-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.bank-cards-title,
+.bank-cards-label {
+    font-size: 9px;
+    font-weight: var(--font-strong-weight);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+}
+
+/* --- 11. CARDS LIST (READONLY) --- */
+.card-entry {
+    background: var(--surface-glass);
+    padding: 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 0.75rem;
+}
+
+.card-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+}
+
+.card-entry-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-entry-icon {
+    font-size: var(--icon-xs);
+    color: #34d399;
+    transition: transform 0.2s;
+}
+
+.card-entry-label {
+    font-size: 10px;
+    font-weight: var(--font-strong-weight);
+    text-transform: uppercase;
+    color: #34d399;
 }

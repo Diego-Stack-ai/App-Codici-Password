@@ -213,101 +213,96 @@ function renderBanking(acc) {
                     (acc.iban ? [{ iban: acc.iban }] : []));
 
             const rows = bankingArr.map((bank, bIdx) => {
+                const handleCopy = (val) => {
+                    if (!val) return;
+                    navigator.clipboard.writeText(val);
+                    showToast(t('copied') || "Copiato!");
+                };
+
+                const createReadonlyField = (label, value, icon, isPassword = false) => {
+                    const id = 'bank-field-' + Math.random().toString(36).substr(2, 9);
+
+                    const btnCopy = createElement('button', {
+                        className: 'btn-icon-header copy-btn cursor-pointer',
+                        type: 'button',
+                        onclick: (e) => {
+                            e.stopPropagation();
+                            handleCopy(value);
+                        }
+                    }, [createElement('span', { className: 'material-symbols-outlined text-[14px]', textContent: 'content_copy' })]);
+
+                    const actionsDiv = createElement('div', { className: 'detail-field-actions flex items-center gap-2' }, [btnCopy]);
+
+                    if (isPassword) {
+                        const btnToggle = createElement('button', {
+                            className: 'btn-icon-header btn-field-toggle cursor-pointer',
+                            type: 'button',
+                            onclick: (e) => {
+                                e.stopPropagation();
+                                const input = document.getElementById(id);
+                                const isPass = input.type === 'password' || input.classList.contains('base-shield');
+                                input.type = isPass ? 'text' : 'password';
+                                input.classList.toggle('base-shield', !isPass);
+                                e.currentTarget.querySelector('span').textContent = isPass ? 'visibility_off' : 'visibility';
+                            }
+                        }, [createElement('span', { className: 'material-symbols-outlined text-[14px]', textContent: 'visibility' })]);
+                        actionsDiv.prepend(btnToggle);
+                    }
+
+                    return createElement('div', { className: 'glass-field-container' }, [
+                        createElement('label', { className: 'view-label', textContent: label }),
+                        createElement('div', { className: 'glass-field border-glow' }, [
+                            createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
+                            createElement('input', { id: id, className: `field-input w-full no-transform ${isPassword ? 'base-shield field-value-password' : ''}`, value: value || '-', readonly: true }),
+                            actionsDiv
+                        ])
+                    ]);
+                };
+
                 const fields = [];
 
-                // IBAN
-                if (bank.iban) {
-                    fields.push(createElement('div', { className: 'banking-subcard flex-col gap-1' }, [
-                        createElement('div', { className: 'flex justify-between items-center w-full' }, [
-                            createElement('span', { className: 'micro-data-label !w-auto', textContent: 'IBAN' }),
-                            createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(bank.iban) }, [
-                                createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
-                            ])
-                        ]),
-                        createElement('span', { className: 'micro-data-value text-emerald-400 font-mono tracking-wider break-all text-[12px]', textContent: bank.iban })
-                    ]));
-                }
-
-                // Password Dispositiva (Shielded)
-                if (bank.passwordDispositiva) {
-                    const passId = `bank-pass-${bIdx}`;
-                    fields.push(createElement('div', { className: 'banking-subcard' }, [
-                        createElement('div', { className: 'micro-data-row' }, [
-                            createElement('span', { className: 'micro-data-label', textContent: 'Password Disp.' }),
-                            createElement('span', { id: passId, className: 'micro-data-value text-white font-mono base-shield', textContent: bank.passwordDispositiva }),
-                            createElement('div', { className: 'flex gap-2' }, [
-                                createElement('button', {
-                                    className: 'micro-btn-copy-inline',
-                                    onclick: (e) => {
-                                        const span = document.getElementById(passId);
-                                        const isPass = span.classList.toggle('base-shield');
-                                        e.currentTarget.querySelector('span').textContent = isPass ? 'visibility' : 'visibility_off';
-                                    }
-                                }, [
-                                    createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'visibility' })
-                                ]),
-                                createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(bank.passwordDispositiva) }, [
-                                    createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
-                                ])
-                            ])
-                        ])
-                    ]));
-                }
+                if (bank.iban) fields.push(createReadonlyField('IBAN', bank.iban, 'account_balance'));
+                if (bank.passwordDispositiva) fields.push(createReadonlyField('Pass. Disp.', bank.passwordDispositiva, 'lock', true));
+                if (bank.referenteTelefono) fields.push(createReadonlyField('Tel. Banca', bank.referenteTelefono, 'call'));
+                if (bank.referenteCellulare) fields.push(createReadonlyField('Cell. Banca', bank.referenteCellulare, 'smartphone'));
 
                 // Cards
                 if (bank.cards && bank.cards.length > 0) {
-                    bank.cards.forEach((card, cIdx) => {
-                        fields.push(createElement('div', { className: 'banking-subcard' }, [
-                            createElement('div', { className: 'flex items-center gap-2 mb-2 opacity-50' }, [
-                                createElement('span', { className: 'material-symbols-outlined !text-[16px]', textContent: 'credit_card' }),
-                                createElement('span', { className: 'banking-index', textContent: card.cardType || card.type || `Carta ${cIdx + 1}` })
-                            ]),
-                            card.titolare ? createElement('div', { className: 'micro-data-row mb-1' }, [
-                                createElement('span', { className: 'micro-data-label', textContent: 'Intestatario' }),
-                                createElement('span', { className: 'micro-data-value text-white truncate', textContent: card.titolare }),
-                                createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.titolare) }, [
-                                    createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
-                                ])
-                            ]) : null,
-                            createElement('div', { className: 'micro-data-row mb-1' }, [
-                                createElement('span', { className: 'micro-data-label', textContent: 'Numero' }),
-                                createElement('span', { className: 'micro-data-value text-white font-mono', textContent: card.cardNumber || '-' }),
-                                createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.cardNumber) }, [
-                                    createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
+                    const cardsArr = bank.cards.map((card, cIdx) => {
+                        return createElement('div', { className: 'card-entry border-glow' }, [
+                            createElement('div', { className: 'card-entry-header cursor-default' }, [
+                                createElement('div', { className: 'card-entry-title-row' }, [
+                                    createElement('span', { className: 'material-symbols-outlined card-entry-icon', textContent: 'credit_card' }),
+                                    createElement('span', { className: 'card-entry-label', textContent: card.cardType || card.type || `Carta #${cIdx + 1}` })
                                 ])
                             ]),
-                            createElement('div', { className: 'micro-data-row mt-2 space-x-4' }, [
-                                createElement('div', { className: 'micro-data-row flex-1' }, [
-                                    createElement('span', { className: 'micro-data-label', textContent: 'Scad.' }),
-                                    createElement('span', { className: 'micro-data-value text-white', textContent: card.expiry || '-' })
-                                ]),
-                                createElement('div', { className: 'micro-data-row flex-1' }, [
-                                    createElement('span', { className: 'micro-data-label', textContent: 'CVV' }),
-                                    createElement('span', { className: 'micro-data-value text-white font-mono base-shield', textContent: card.ccv || '-' }),
-                                    createElement('div', { className: 'flex gap-2' }, [
-                                        createElement('button', {
-                                            className: 'micro-btn-copy-inline',
-                                            onclick: (e) => {
-                                                const span = e.currentTarget.parentElement.previousElementSibling;
-                                                const isPass = span.classList.toggle('base-shield');
-                                                e.currentTarget.querySelector('span').textContent = isPass ? 'visibility' : 'visibility_off';
-                                            }
-                                        }, [
-                                            createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'visibility' })
-                                        ]),
-                                        createElement('button', { className: 'micro-btn-copy-inline', onclick: () => copyToClipboard(card.ccv) }, [
-                                            createElement('span', { className: 'material-symbols-outlined !text-[14px]', textContent: 'content_copy' })
-                                        ])
-                                    ])
-                                ])
-                            ])
-                        ]));
+                            createElement('div', { className: 'flex-col-gap' }, [
+                                card.titolare ? createReadonlyField('Intestatario', card.titolare, 'person') : null,
+                                card.cardNumber ? createReadonlyField('Numero', card.cardNumber, 'credit_card') : null,
+                                card.expiry ? createReadonlyField('Scadenza', card.expiry, 'calendar_month') : null,
+                                card.pin ? createReadonlyField('PIN', card.pin, 'dialpad', true) : null,
+                                card.ccv ? createReadonlyField('CCV', card.ccv, 'shield', true) : null
+                            ].filter(Boolean))
+                        ]);
                     });
+
+                    fields.push(createElement('div', { className: 'bank-cards-section' }, [
+                        createElement('div', { className: 'bank-cards-header' }, [
+                            createElement('span', { className: 'bank-cards-title', textContent: 'Carte Associate' })
+                        ]),
+                        createElement('div', { className: 'flex-col-gap' }, cardsArr)
+                    ]));
                 }
 
-                return createElement('div', {
-                    className: 'banking-card border-glow'
-                }, fields);
+                return createElement('div', { className: 'bank-account-card border-glow cursor-default' }, [
+                    createElement('div', { className: 'bank-header cursor-default' }, [
+                        createElement('div', { className: 'bank-header-left' }, [
+                            createElement('span', { className: 'material-symbols-outlined bank-expand-icon', textContent: 'account_balance' }),
+                            createElement('span', { className: 'bank-title', textContent: bank.iban ? `Conto: ${bank.iban.substring(0, 10)}...` : `Conto Bancario #${bIdx + 1}` })
+                        ])
+                    ]),
+                    createElement('div', { className: 'bank-details' }, fields)
+                ]);
             });
 
             setChildren(bankingContent, rows);
