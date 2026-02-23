@@ -853,3 +853,58 @@ if (btnTest) btnTest.classList.toggle('hidden', !val);
 ```
 
 > NOTA: addDoc, collection, serverTimestamp devono essere importati da Firestore.
+
+
+### 22.2 Pulsante TEST Push in Dettaglio Scadenza (Rimosso v5.3 - 23/02/2026)
+
+**Motivo rimozione**: Le notifiche push funzionano. Il pulsante TEST nel dettaglio scadenza non serve piu.
+
+**File**: `dettaglio_scadenza.js`
+
+**Come ripristinarlo**:
+
+#### Passo 1 - Ripristinare la funzione handleTestNotification
+
+Aggiungere prima di renderScadenza():
+
+```javascript
+async function handleTestNotification() {
+    if (!currentScadenza || !auth.currentUser) return;
+    try {
+        const ok = await showConfirmModal('INVIO TEST PUSH','Vuoi inviare una notifica push di test?','Invia Test');
+        if (!ok) return;
+        const token = await getPushToken(auth.currentUser.uid);
+        if (!token) console.warn('Nessun token FCM trovato.');
+        await addNotification(auth.currentUser.uid, {
+            title: 'TEST PUSH: ' + currentScadenza.title,
+            message: 'Verifica ricezione: la notifica per questa scadenza e configurata correttamente.',
+            type: 'deadline_test',
+            scadenzaId: currentScadenzaId,
+            channel: currentScadenza.notificationChannel || 'none'
+        });
+        localStorage.removeItem('notifications_cache_data_' + auth.currentUser.uid);
+        localStorage.removeItem('notifications_cache_timestamp_' + auth.currentUser.uid);
+        showToast('Notifica di test inviata!', 'success');
+    } catch (e) {
+        console.error('Errore invio test:', e);
+        showToast('Errore durante invio', 'error');
+    }
+}
+```
+
+#### Passo 2 - Ripristinare il bottone nel renderScadenza
+
+Nella sezione Notifiche, dentro al detail-list-item del canale, aggiungere dopo il div info:
+
+```javascript
+isNotifActive ? createElement('button', {
+    className: 'btn-icon-test-push',
+    title: 'Invia Notifica di Test',
+    onclick: handleTestNotification
+}, [
+    createElement('span', { className: 'material-symbols-outlined', textContent: 'send' }),
+    createElement('span', { className: 'text-xs ml-1', textContent: 'TEST' })
+]) : null
+```
+
+> NOTA: Richiede import di addNotification e getPushToken da db.js
