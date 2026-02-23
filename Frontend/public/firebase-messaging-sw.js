@@ -20,11 +20,20 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 // Gestione notifiche quando l'app è in background
-// Nota: Non serve chiamare showNotification qui se il payload contiene già 'notification',
-// altrimenti il browser mostrerà due notifiche (quella di sistema + quella manuale).
 messaging.onBackgroundMessage((payload) => {
     console.log('[sw] Notifica ricevuta in background:', payload);
-    // Possiamo usare questo spazio per logica custom o gestire messaggi 'data' puramente.
+
+    const notificationTitle = payload.notification ? payload.notification.title : (payload.data ? payload.data.title : 'Nuova Notifica');
+    const notificationOptions = {
+        body: payload.notification ? payload.notification.body : (payload.data ? payload.data.message : ''),
+        icon: 'https://appcodici-password.web.app/assets/images/app-icon.jpg',
+        badge: 'https://appcodici-password.web.app/assets/images/app-icon.jpg',
+        data: payload.data,
+        tag: payload.data?.scadenzaId || 'generic-alert',
+        renotify: true
+    };
+
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // Gestione Click sulla Notifica

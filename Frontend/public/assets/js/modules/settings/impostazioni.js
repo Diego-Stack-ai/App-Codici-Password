@@ -6,7 +6,7 @@
 
 import { auth, db, messaging } from '../../firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, updateDoc, arrayUnion, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, arrayUnion, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
 import { syncPushToken, removePushToken, checkPushCompatibility } from '../shared/push_manager.js';
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -284,9 +284,15 @@ function setupToggles(data) {
                     await addDoc(collection(db, "users", auth.currentUser.uid, "notifications"), {
                         title: "Prova Push ✅",
                         message: "Se leggi questo messaggio, il sistema di notifiche push è configurato correttamente!",
-                        timestamp: new Date().toISOString(),
+                        timestamp: serverTimestamp(),
                         type: "test"
                     });
+
+                    // Invalida cache dello storico per mostrare subito la nuova notifica
+                    const CACHE_KEY = `notifications_cache_data_${auth.currentUser.uid}`;
+                    localStorage.removeItem(CACHE_KEY);
+
+                    showToast("Notifica inviata con successo!");
                 } catch (e) {
                     console.error("Errore invio prova:", e);
                     showToast("Errore invio prova", "error");
