@@ -597,6 +597,7 @@ async function loadPushUsers() {
                 onclick: (e) => {
                     e.stopPropagation();
                     togglePushRecipient(email, displayName);
+                    menu.classList.remove('show'); // Chiude il menu dopo la selezione
                 }
             }, [
                 createElement('div', { className: 'flex-items-center-between w-full' }, [

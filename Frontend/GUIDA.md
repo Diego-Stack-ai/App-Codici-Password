@@ -908,3 +908,46 @@ isNotifActive ? createElement('button', {
 ```
 
 > NOTA: Richiede import di addNotification e getPushToken da db.js
+---
+
+## 23. LOGICA NOTIFICHE "STUPID-PROOF" (V5.5)
+
+### 1️⃣ Filosofia del Sistema
+Il sistema di notifiche è stato reso "robusto" per evitare che l'utente manchi una scadenza a causa di impostazioni di frequenza troppo larghe o dimenticanze nel salvataggio. La logica si basa su tre pilastri:
+
+1.  **Invio Immediato al Salvataggio**: La notifica non aspetta più il cronjob delle 08:00. Se salvi una scadenza che è già nel periodo di preavviso, l'avviso parte **immediatamente**.
+2.  **Regola del "Giorno Zero" (Deadline Day)**: Indipendentemente dalla frequenza impostata (es. ogni 7 giorni), il giorno esatto della scadenza il sistema invierà **sempre** una notifica finale. Non è possibile "saltare" il giorno della scadenza.
+3.  **Aggregazione Destinatari**: Il sistema invia a tutti i soggetti coinvolti (Email principali e Utenti registrati per le Push), anche se il campo email principale è vuoto.
+
+### 2️⃣ Flusso Tecnico (Cloud Functions)
+
+Il Backend utilizza due motori paralleli che condividono la stessa logica di calcolo:
+- **Motore A (Cronjob)**: Gira ogni mattina alle 08:00 e scansiona tutte le scadenze attive.
+- **Motore B (Real-time Trigger)**: Si attiva istantaneamente quando crei o modifichi una scadenza (`onDocumentWritten`).
+
+#### La Logica di decisione (`shouldNotify`):
+```javascript
+// La notifica parte se:
+let shouldNotify = 
+    !lastSent || // 1. Non è mai stata inviata
+    ((now - lastSent) >= frequency) || // 2. È passata la frequenza impostata
+    diffDays === 0; // 3. OGGI È IL GIORNO DELLA SCADENZA (Sempre True)
+```
+
+### 3️⃣ Casi d'Uso Operativi
+
+| Scenario | Comportamento Ante V5.5 | Comportamento V5.5 (Nuovo) |
+| :--- | :--- | :--- |
+| **Salvataggio Urgente** (scade domani) | Notifica domani mattina alle 08:00 | Notifica **ISTANTANEA** appena premi Salva |
+| **Frequenza 10 giorni** (scade oggi) | Se inviata 2 giorni fa, oggi non inviava | Invia **OGGI** (Giorno Zero) ignorando la frequenza |
+| **Solo Push selezionati** | Poteva bloccarsi se l'email era vuota | Invia regolarmente ai destinatari Push |
+
+### 4️⃣ Manutenzione e Debug
+Se un utente lamenta la mancata ricezione:
+1.  **Verificare lo Stato**: La scadenza deve essere `status: "active"`.
+2.  **Verificare i Destinatari**: Controllare l'array `emails` e `pushRecipients` nel documento Firestore.
+3.  **Log Storico**: Controllare il campo `notificationLogs` dentro la scadenza per vedere la cronologia degli invii tentati dal server.
+
+---
+
+✅ **DOCUMENTAZIONE AGGIORNATA AL PROTOCOLLO V5.5.**
