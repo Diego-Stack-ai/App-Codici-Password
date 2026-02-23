@@ -269,8 +269,8 @@ function renderScadenza(scadenza) {
         ]);
 
         const cronNote = createElement('p', {
-            className: 'text-[9px] opacity-30 italic text-center mt-2',
-            textContent: '⏱ Il controllo automatico avviene ogni giorno alle 09:00'
+            className: 'text-[7px] opacity-20 italic text-center mt-1',
+            textContent: '⏱ Controllo automatico ogni giorno alle 09:00'
         });
 
         setChildren(notifCont, [item, mailReport, cronNote]);
