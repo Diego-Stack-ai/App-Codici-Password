@@ -221,11 +221,11 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 .account-card-category.badge-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .account-card-category.badge-purple {
-    color: #a855f7;
+    color: var(--color-purple);
 }
 
 .account-card-category.badge-amber {
@@ -293,7 +293,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .btn-mini-action.active {
-    color: #60a5fa;
+    color: var(--accent);
     background: rgba(59, 130, 246, 0.1);
     border-color: rgba(59, 130, 246, 0.2);
 }
@@ -350,11 +350,11 @@ html:not(.dark) .account-card-subtitle {
 
 /* Theme Accents (Semantic Renaming) */
 .theme-accent-standard {
-    background: #3b82f6;
+    background: var(--accent);
 }
 
 .theme-accent-shared {
-    background: #a855f7;
+    background: var(--color-purple);
 }
 
 .theme-accent-memo {
@@ -368,19 +368,19 @@ html:not(.dark) .account-card-subtitle {
 /* Text colors equivalent */
 /* Note: kept separate for flexibility if text differs from bg */
 .theme-text-standard {
-    color: #60a5fa;
+    color: var(--accent);
 }
 
 .theme-text-shared {
-    color: #c084fc;
+    color: var(--color-purple);
 }
 
 .theme-text-memo {
-    color: #fbbf24;
+    color: var(--status-warning);
 }
 
 .theme-text-shared-memo {
-    color: #34d399;
+    color: var(--status-success);
 }
 
 /* --- 5. LOADING & EMPTY STATES --- */
@@ -394,7 +394,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .loading-spinner-icon {
-    font-size: 3rem !important;
+    font-size: 3rem;
     animation: spin 2s linear infinite;
 }
 

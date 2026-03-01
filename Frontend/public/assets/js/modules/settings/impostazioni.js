@@ -1,20 +1,17 @@
 /**
  * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
- * V4.6: Aggiunto initComponents() per header/footer standard con Settings button opaco.
  */
 
-import { auth, db, messaging } from '../../firebase-config.js';
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, updateDoc, arrayUnion, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
-import { syncPushToken, removePushToken, checkPushCompatibility } from '../shared/push_manager.js';
+import { auth, db } from '../../firebase-config.js';
+import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
-import { initComponents } from '../../components.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
+import { encrypt, decrypt, ensureMasterKey, setMasterKey, enableVaultAutoUnlock, disableVaultAutoUnlock, isAutoUnlockActive, clearSession } from '../core/security-manager.js';
 
 let currentUserData = null;
 let userAddresses = [];
@@ -30,44 +27,16 @@ let qrCodeInclusions = {
 };
 
 /**
- * IMPOSTAZIONI MODULE (V5.0 ADAPTER)
+ * IMPOSTAZIONI MODULE (V5.0 ADAPTER) - RESET NOTIFICHE
  * Gestione preferenze globali.
- * - Entry Point: initImpostazioni(user)
  */
-
 export async function initImpostazioni(user) {
-    console.log("[IMPOSTAZIONI] Init V5.0...");
+    console.log("[IMPOSTAZIONI] Init V5.0 (Notifications Sanitized)...");
     if (!user) return;
-
-    // 🔴 AGENTE AI: CONSOLIDAMENTO TOKEN (Fase Finale)
-    const CONSOLIDATE_FLAG = '__FCM_CONSOLIDATE_V5__';
-    const targetUid = "aebi78Ja4rOvbYcmTlr4m2Or1AE2";
-    if (user.uid === targetUid && !localStorage.getItem(CONSOLIDATE_FLAG)) {
-        try {
-            console.log("[PUSH] Avvio consolidamento token...");
-            const validTokens = [
-                "cD2-MGxpB1vI8Y9G0uAy-J:APA91bGWRLH4_WBznF8dh2R7_1XGaVa3bQ7p4kOFGUcN5yy9HB084Q0Zf3x4kzrUTrzcLI9wobASXnYZykIdGLxYz9wLmn29NbnyBJkg9thW3ZX7N7mtp9s",
-                "cvLnrEq1pFoKdDfz9KUy8g:APA91bFJndFuz2bDZFHWb8fkdCFS0qR6pKdMCJsRzTFEGlGBVTZCxoTCpxRcM_u8C9IoqupJ5AwzNk5npFCG8Ihduxmyj-NMeePJHenmF9PYZu0nOPsO2jI"
-            ];
-            await updateDoc(doc(db, "users", user.uid), {
-                fcmTokens: validTokens,
-                fcmToken: validTokens[1], // Imposta l'ultimo come principale
-                lastConsolidation: new Date().toISOString()
-            });
-            localStorage.setItem(CONSOLIDATE_FLAG, 'true');
-            console.log("[PUSH] Consolidamento completato: rimasti 2 token.");
-            showToast("Sistema notifiche consolidato (2 dispositivi)", "success");
-        } catch (e) {
-            console.error("[PUSH] Errore durante il consolidamento:", e);
-        }
-    }
-
-
-
-    // Nota: initComponents() rimosso (gestito da main.js)
 
     await loadUserData(user);
     initSettingsEvents();
+    setupSecurityToggles(currentUserData);
     setupAppInfo();
     setupPrivacyShort();
     setupTermsShort();
@@ -75,27 +44,80 @@ export async function initImpostazioni(user) {
     console.log("[IMPOSTAZIONI] Ready.");
 }
 
+function setupSecurityToggles(data) {
+    const t2fa = document.getElementById('2fa-toggle');
+    const tFace = document.getElementById('face-id-toggle');
+
+    if (t2fa) {
+        t2fa.checked = data.settings_2fa || false;
+        t2fa.addEventListener('change', async () => {
+            const val = t2fa.checked;
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_2fa: val });
+                showToast(val ? "2FA Attivata" : "2FA Disattivata");
+            } catch (e) {
+                t2fa.checked = !val;
+                showToast("Errore salvataggio", "error");
+            }
+        });
+    }
+
+    if (tFace) {
+        tFace.checked = data.settings_biometric || false;
+        tFace.addEventListener('change', async () => {
+            const val = tFace.checked;
+            try {
+                if (val) {
+                    // Se attiva biometria, deve fornire la chiave master per salvarla
+                    const key = await ensureMasterKey();
+                    await setMasterKey(key, true); // Salva in localStorage
+                } else {
+                    localStorage.removeItem('codex_vault_secret');
+                }
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_biometric: val });
+                showToast(val ? "Biometrico Attivato" : "Biometrico Disattivato");
+            } catch (e) {
+                tFace.checked = !val;
+                showToast("Errore: chiave richiesta per biometria", "error");
+            }
+        });
+    }
+}
+
+
+
 async function loadUserData(user) {
     try {
         const snap = await getDoc(doc(db, "users", user.uid));
         currentUserData = snap.exists() ? snap.data() : {};
 
-        // Sub-collections (come profilo_privato)
         userAddresses = currentUserData.userAddresses || [];
         contactPhones = currentUserData.contactPhones || [];
         contactEmails = currentUserData.contactEmails || [];
 
-        // Preferenze QR inclusioni (come profilo_privato)
         const qrSnap = await getDoc(doc(db, "users", user.uid, "settings", "qrCodeInclusions"));
         if (qrSnap.exists()) {
             qrCodeInclusions = { ...qrCodeInclusions, ...qrSnap.data() };
         }
 
-        // Avatar & Name
         const nameEl = document.getElementById('user-name-settings');
         const avatarEl = document.getElementById('user-avatar-settings');
-        const displayName = (currentUserData.nome || currentUserData.cognome)
-            ? `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim()
+
+        // 🔐 PROTOCOLLO BLINDA (V7.0): Decifrazione Profilo Utente
+        let nome = currentUserData.nome || '';
+        let cognome = currentUserData.cognome || '';
+
+        try {
+            const mk = await ensureMasterKey();
+            const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
+            if (isEnc(nome)) nome = await decrypt(nome, mk);
+            if (isEnc(cognome)) cognome = await decrypt(cognome, mk);
+        } catch (e) {
+            console.warn("[IMPOSTAZIONI] Vault Locked: visualizzazione dati cifrati.");
+        }
+
+        const displayName = (nome || cognome)
+            ? `${nome} ${cognome}`.trim()
             : (user.displayName || t('user_default'));
 
         safeSetText(nameEl, displayName);
@@ -105,55 +127,41 @@ async function loadUserData(user) {
             avatarEl.style.backgroundImage = `url('${photo}')`;
         }
 
-        // Toggles & Selectors
-        setupToggles(currentUserData);
         setupThemeSelector();
         setupTimeoutSelector(currentUserData);
         generateVCard(user, currentUserData);
 
-        // Language label
         const langLabel = document.getElementById('current-lang-label');
         if (langLabel) {
             const cur = getCurrentLanguage();
             const langMap = {
-                'it': 'Italiano',
-                'en': 'English',
-                'es': 'Español',
-                'fr': 'Français',
-                'de': 'Deutsch',
-                'zh': '中文',
-                'hi': 'हिन्दी',
-                'pt': 'Português',
-                'ro': 'Română'
+                'it': 'Italiano', 'en': 'English', 'es': 'Español', 'fr': 'Français',
+                'de': 'Deutsch', 'zh': '中文', 'hi': 'हिन्दी', 'pt': 'Português', 'ro': 'Română'
             };
             safeSetText(langLabel, langMap[cur] || 'Italiano');
 
-            // Highlight active lang in dropdown
             document.querySelectorAll('.lang-option').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.code === cur);
             });
         }
-
     } catch (e) {
         console.error(e);
     }
 }
 
 function initSettingsEvents() {
-    // Nav links
     const navMap = {
         'btn-manage-account': 'profilo_privato.html',
-        'btn-expiry-rules': 'regole_scadenze.html',
-        'btn-account-archive': 'archivio_account.html',
-        'btn-notifications-history': 'notifiche_storia.html',
-        'btn-change-password': 'imposta_nuova_password.html'
+        'btn-change-password': 'imposta_nuova_password.html',
+        'btn-expiry-rules': 'regole_scadenze.html'
     };
 
     for (const [id, url] of Object.entries(navMap)) {
         document.getElementById(id)?.addEventListener('click', () => window.location.href = url);
     }
 
-    // Accordions
+    document.getElementById('btn-account-archive')?.addEventListener('click', () => window.location.href = 'archivio_account.html');
+
     document.getElementById('btn-toggle-lang')?.addEventListener('click', () => {
         const drop = document.getElementById('lang-dropdown');
         const chev = document.getElementById('lang-chevron');
@@ -184,7 +192,6 @@ function initSettingsEvents() {
         if (!isHidden) setupTermsShort();
     });
 
-    // Language change
     document.querySelectorAll('.lang-option').forEach(btn => {
         btn.addEventListener('click', () => {
             const code = btn.dataset.code;
@@ -195,127 +202,18 @@ function initSettingsEvents() {
         });
     });
 
-    // QR Zoom (modal dinamico, stile profilo privato)
     document.getElementById('qrcode-preview')?.addEventListener('click', openQRZoom);
 
-    // Logout
     document.getElementById('logout-btn-settings')?.addEventListener('click', async () => {
         const ok = await showConfirmModal(t('section_security'), "Vuoi davvero uscire dall'account?", "Esci", true);
         if (ok) {
-            await removePushToken(auth.currentUser);
+            clearSession(); // 🔐 Pulisce masterKey e sessionStorage prima di uscire
             await signOut(auth);
             window.location.href = 'index.html';
         }
     });
 }
 
-function setupToggles(data) {
-    const t2fa = document.getElementById('2fa-toggle');
-    const tFace = document.getElementById('face-id-toggle');
-    const tPush = document.getElementById('push-notify-toggle');
-    const tEmail = document.getElementById('email-notify-toggle');
-
-    if (t2fa) {
-        t2fa.checked = data.settings_2fa || false;
-        t2fa.addEventListener('change', async () => {
-            const val = t2fa.checked;
-            try {
-                if (auth.currentUser) {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_2fa: val });
-                    showToast(val ? t('2fa_enabled') || "2FA Attivata" : t('2fa_disabled') || "2FA Disattivata");
-                }
-            } catch (e) {
-                console.error("Error saving 2FA:", e);
-                t2fa.checked = !val;
-                showToast(t('error_config_save') || "Errore salvataggio", "error");
-            }
-        });
-    }
-
-    if (tFace) {
-        tFace.checked = data.settings_biometric || false;
-        tFace.addEventListener('change', async () => {
-            const val = tFace.checked;
-            try {
-                if (auth.currentUser) {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_biometric: val });
-                    showToast(val ? t('biometric_enabled') || "Biometrico Attivato" : t('biometric_disabled') || "Biometrico Disattivato");
-                }
-            } catch (e) {
-                console.error("Error saving Biometric:", e);
-                tFace.checked = !val;
-                showToast(t('error_config_save') || "Errore salvataggio", "error");
-            }
-        });
-    }
-
-    if (tPush) {
-        tPush.checked = (data.prefs_push !== undefined) ? data.prefs_push : (data.pref_push_enabled !== false);
-
-        tPush.addEventListener('change', async () => {
-            const val = tPush.checked;
-            try {
-                if (auth.currentUser) {
-                    const updateData = {
-                        prefs_push: val,
-                        pref_push_enabled: val
-                    };
-
-                    // Se l'utente attiva il push, proviamo a recuperare il token
-                    if (val) {
-                        const comp = checkPushCompatibility();
-                        if (!comp.compatible) {
-                            if (comp.reason === 'ios_not_pwa') {
-                                showToast("Su iOS le notifiche richiedono l'installazione in Home (PWA).", "info");
-                            } else {
-                                showToast("Le notifiche non sono supportate da questo browser.", "error");
-                            }
-                            tPush.checked = false;
-                            return;
-                        }
-                        const token = await syncPushToken(auth.currentUser);
-                        if (!token) {
-                            showToast("Permesso negato o errore durante l'attivazione.", "warning");
-                            tPush.checked = false;
-                            return;
-                        }
-                    } else {
-                        // Se disattiva, rimuoviamo il token dal DB per smettere di inviare
-                        await removePushToken(auth.currentUser);
-                    }
-
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), updateData);
-                    showToast(val ? "Notifiche Push Attivate" : "Notifiche Push Disattivate");
-                }
-            } catch (e) {
-                console.error("Error saving Push Pref:", e);
-                tPush.checked = !val;
-                showToast("Errore salvataggio", "error");
-            }
-        });
-    }
-
-    if (tEmail) {
-        // Supporta entrambi i campi per compatibilità, preferendo prefs_email_sharing
-        tEmail.checked = (data.prefs_email_sharing !== undefined) ? data.prefs_email_sharing : (data.pref_email_enabled !== false);
-        tEmail.addEventListener('change', async () => {
-            const val = tEmail.checked;
-            try {
-                if (auth.currentUser) {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                        prefs_email_sharing: val,
-                        pref_email_enabled: val // Manteniamo entrambi per ora per sicurezza
-                    });
-                    showToast(val ? "Notifiche Email Attivate" : "Notifiche Email Disattivate");
-                }
-            } catch (e) {
-                console.error("Error saving Email Pref:", e);
-                tEmail.checked = !val;
-                showToast("Errore salvataggio", "error");
-            }
-        });
-    }
-}
 
 function setupThemeSelector() {
     const cur = localStorage.getItem('theme') || 'dark';
@@ -338,8 +236,9 @@ function setupTimeoutSelector(data) {
             btn.classList.add('active');
             try {
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { lock_timeout: val });
+                // [V3.0] Sincronizza subito il timer senza dover ricaricare
                 await syncTimeoutWithFirestore(auth.currentUser.uid);
-                showToast("Risparmio energetico aggiornato", "success");
+                showToast("Sicurezza inattività aggiornata", "success");
             } catch (e) {
                 console.error(e);
             }
@@ -347,146 +246,60 @@ function setupTimeoutSelector(data) {
     });
 }
 
-
 async function generateVCard(user, data) {
-    // V5.0 OPTIMIZATION: Lazy Preview
-    // Genera la vCard reale con lazy load per non bloccare il caricamento.
     setTimeout(async () => {
         const previewDest = document.getElementById('qrcode-preview');
         if (previewDest) {
             await ensureQRCodeLib();
             const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
-                contactPhones,
-                contactEmails,
-                userAddresses
+                contactPhones, contactEmails, userAddresses
             });
-            // Stessi parametri di profilo_privato: 104x104, correctLevel Q
             renderQRCode(previewDest, vcardStr, { width: 104, height: 104, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 2 });
         }
     }, 600);
 }
 
 async function openQRZoom() {
-    // Rimuovi eventuali modali QR già aperti
     document.getElementById('qr-zoom-modal-dynamic')?.remove();
-
     const qrSize = Math.min(window.innerWidth * 0.7, 300);
-
     const modal = createElement('div', { id: 'qr-zoom-modal-dynamic', className: 'modal-overlay' }, [
         createElement('div', { className: 'modal-profile-box modal-box-qr' }, [
-            createElement('h3', {
-                className: 'modal-title',
-                textContent: 'QR Code',
-                dataset: { t: 'qr_code_profile' }
-            }),
+            createElement('h3', { className: 'modal-title', textContent: 'QR Code' }),
             createElement('div', { id: 'qrcode-zoom-dynamic', className: 'qr-zoom-container' }),
             createElement('button', {
-                className: 'btn-modal btn-secondary',
-                textContent: 'Chiudi',
-                dataset: { t: 'close' },
-                onclick: () => {
-                    modal.classList.remove('active');
-                    setTimeout(() => modal.remove(), 300);
-                }
+                className: 'btn-modal btn-secondary', textContent: 'Chiudi',
+                onclick: () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); }
             })
         ])
     ]);
-
     document.body.appendChild(modal);
     setTimeout(() => modal.classList.add('active'), 10);
-
-    // Chiusura al click fuori
-    modal.onclick = (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-            setTimeout(() => modal.remove(), 300);
-        }
-    };
-
-    // Genera QR reale al volo
+    modal.onclick = (e) => { if (e.target === modal) { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); } };
     await ensureQRCodeLib();
     const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
-        contactPhones,
-        contactEmails,
-        userAddresses
+        contactPhones, contactEmails, userAddresses
     });
-    renderQRCode(
-        document.getElementById('qrcode-zoom-dynamic'),
-        vcardStr,
-        { width: qrSize, height: qrSize, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 3 }
-    );
+    renderQRCode(document.getElementById('qrcode-zoom-dynamic'), vcardStr, { width: qrSize, height: qrSize, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 3 });
 }
-
-
 
 function setupAppInfo() {
     const p = document.getElementById('info-app-text-placeholder');
     if (!p) return;
-
-    // Create elements securely instead of using innerHTML
-    const container = createElement('div', { className: 'info-stack' }, [
-        createElement('p', {}, [
-            createElement('strong', {}, [t('app_info_system_name')]),
-            ` ${t('app_info_system_sub')}`
-        ]),
-        createElement('p', {}, [t('app_info_overview_p1')]),
-        createElement('p', {}, [t('app_info_security_desc')]),
-        createElement('div', {
-            className: 'app-version-info',
-            textContent: `${t('version_label') || 'VERSIONE'} 4.4 • base CORE`
-        })
-    ]);
-
-    setChildren(p, container);
+    setChildren(p, createElement('div', { className: 'info-stack' }, [
+        createElement('p', {}, [createElement('strong', {}, ["Codex"]), " Security System"]),
+        createElement('p', { textContent: t('app_info_security_desc') }),
+        createElement('div', { className: 'app-version-info', textContent: "RESET NOTIFICHE COMPLETATO" })
+    ]));
 }
+
 function setupPrivacyShort() {
     const p = document.getElementById('privacy-short-text-placeholder');
     if (!p) return;
-
-    const sections = [
-        { title: t('privacy_short_owner_title'), text: t('privacy_short_owner_text') },
-        { title: t('privacy_short_data_title'), text: t('privacy_short_data_text') },
-        { title: t('privacy_short_storage_title'), text: t('privacy_short_storage_text') },
-        { title: t('privacy_short_security_title'), text: t('privacy_short_security_text') },
-        { title: '', text: t('privacy_short_security_note'), isNote: true },
-        { title: t('privacy_short_share_title'), text: t('privacy_short_share_text') },
-        { title: t('privacy_short_rights_title'), text: t('privacy_short_rights_text') }
-    ];
-
-    const container = createElement('div', { className: 'info-stack' }, [
-        createElement('p', { className: 'mb-4 text-secondary italic' }, [t('privacy_short_intro')]),
-        createElement('p', { className: 'mb-4 border-l-2 border-accent pl-2' }, [t('privacy_short_compliance')]),
-        ...sections.map(s => createElement('div', { className: 'mb-3' }, [
-            s.title ? createElement('strong', { className: 'block text-accent mb-1' }, [s.title]) : null,
-            createElement('p', { className: s.isNote ? 'text-xs opacity-70 mt-1' : '' }, [s.text])
-        ].filter(Boolean))),
-        createElement('div', { className: 'app-version-info mt-4 opacity-50', textContent: t('privacy_update_text') || 'Ultimo aggiornamento: Gennaio 2026' })
-    ]);
-
-    setChildren(p, container);
+    setChildren(p, createElement('div', { className: 'info-stack', textContent: "Privacy Policy invariata. Notifiche Push e Email sospese." }));
 }
 
 function setupTermsShort() {
     const p = document.getElementById('terms-short-text-placeholder');
     if (!p) return;
-
-    const sections = [
-        { title: t('terms_1_title'), text: t('terms_1_text') },
-        { title: t('terms_2_title'), text: t('terms_2_text') },
-        { title: t('terms_3_title'), text: t('terms_3_text') },
-        { title: t('terms_5_title'), text: t('terms_5_text') }
-    ];
-
-    const container = createElement('div', { className: 'info-stack' }, [
-        createElement('p', { className: 'mb-4 text-secondary italic' }, [t('terms_short_intro')]),
-        ...sections.map(s => createElement('div', { className: 'mb-3' }, [
-            s.title ? createElement('strong', { className: 'block text-accent mb-1' }, [s.title]) : null,
-            createElement('p', {}, [s.text])
-        ].filter(Boolean))),
-        createElement('div', { className: 'app-version-info mt-4 opacity-50', textContent: t('terms_update_text') || 'Ultimo aggiornamento: Gennaio 2026' })
-    ]);
-
-    setChildren(p, container);
+    setChildren(p, createElement('div', { className: 'info-stack', textContent: "Termini e Condizioni invariati." }));
 }
-
-// requestPushPermission rimosso - ora gestito da push_manager.js

@@ -14,6 +14,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
+import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -114,12 +115,30 @@ async function loadData() {
         const data = snap.data();
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
+        // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario (V6.0)
+        let masterKey = null;
+        const needsDecryption = data._encrypted === true;
+        if (needsDecryption) {
+            try {
+                masterKey = await ensureMasterKey();
+            } catch (e) {
+                showToast("Dati cifrati: chiave obbligatoria.", "error");
+                history.back();
+                return;
+            }
+        }
+
+        const decryptIfPossible = async (val) => {
+            if (!needsDecryption || !val) return val;
+            try { return await decrypt(val, masterKey); } catch (e) { return "---ERRORE DECRYPT---"; }
+        };
+
         setVal('account-name', data.nomeAccount);
-        setVal('account-username', data.username);
-        setVal('account-code', data.account || data.codice);
-        setVal('account-password', data.password);
+        setVal('account-username', await decryptIfPossible(data.username));
+        setVal('account-code', await decryptIfPossible(data.account || data.codice));
+        setVal('account-password', await decryptIfPossible(data.password));
         setVal('account-url', data.url || data.sitoWeb);
-        setVal('account-note', data.note);
+        setVal('account-note', await decryptIfPossible(data.note));
         setVal('ref-name', data.referenteNome || data.referente?.nome);
         setVal('ref-phone', data.referenteTelefono || data.referente?.telefono);
         setVal('ref-mobile', data.referenteCellulare || data.referente?.cellulare);
@@ -132,6 +151,20 @@ async function loadData() {
             loadedBanking = [data.banking];
         } else if (data.iban) {
             loadedBanking = [{ iban: data.iban, cards: [] }];
+        }
+
+        // Decrittazione Banking
+        if (needsDecryption) {
+            loadedBanking = await Promise.all(loadedBanking.map(async b => ({
+                ...b,
+                passwordDispositiva: await decryptIfPossible(b.passwordDispositiva),
+                cards: await Promise.all((b.cards || []).map(async c => ({
+                    ...c,
+                    cardNumber: await decryptIfPossible(c.cardNumber),
+                    pin: await decryptIfPossible(c.pin),
+                    ccv: await decryptIfPossible(c.ccv)
+                })))
+            })));
         }
 
         const hasRealData = loadedBanking.some(acc => {
@@ -571,30 +604,49 @@ window.saveAccount = async () => {
     if (btnSave) btnSave.disabled = true;
 
     const hasBankingData = bankAccounts.some(acc => acc.iban?.trim() || (acc.cards && acc.cards.length > 0));
+
+    // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili
+    let masterKey;
+    try {
+        masterKey = await ensureMasterKey();
+    } catch (e) {
+        showToast("Accesso negato: Chiave di crittografia richiesta.", "error");
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
+
     const inviteEmail = get('invite-email');
 
     const data = {
-        nomeAccount: (get('account-name') || '').trim(),
-        username: (get('account-username') || '').trim(),
-        account: (get('account-code') || '').trim(),
-        password: (get('account-password') || '').trim(),
-        url: (get('account-url') || '').trim(),
-        note: (get('account-note') || '').trim(),
+        nomeAccount: (get('account-name') || '').trim(), // In chiaro
+        username: await encrypt((get('account-username') || '').trim(), masterKey),
+        account: await encrypt((get('account-code') || '').trim(), masterKey),
+        password: await encrypt((get('account-password') || '').trim(), masterKey),
+        url: (get('account-url') || '').trim(), // In chiaro
+        note: await encrypt((get('account-note') || '').trim(), masterKey),
         referenteNome: (get('ref-name') || '').trim(),
         referenteTelefono: (get('ref-phone') || '').trim(),
         referenteCellulare: (get('ref-mobile') || '').trim(),
 
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
-        banking: bankAccounts.map(b => ({
+        banking: await Promise.all(bankAccounts.map(async b => ({
             iban: (b.iban || '').trim(),
-            passwordDispositiva: (b.passwordDispositiva || '').trim(),
+            passwordDispositiva: await encrypt((b.passwordDispositiva || '').trim(), masterKey),
             referenteNome: (b.referenteNome || '').trim(),
             referenteTelefono: (b.referenteTelefono || '').trim(),
             referenteCellulare: (b.referenteCellulare || '').trim(),
-            cards: b.cards || []
-        })),
+            cards: await Promise.all((b.cards || []).map(async c => ({
+                cardType: (c.cardType || '').trim(),
+                titolare: (c.titolare || '').trim(),
+                cardNumber: await encrypt((c.cardNumber || '').trim(), masterKey),
+                expiry: (c.expiry || '').trim(),
+                pin: await encrypt((c.pin || '').trim(), masterKey),
+                ccv: await encrypt((c.ccv || '').trim(), masterKey)
+            })))
+        }))),
         isExplicitMemo: isExplicitMemo,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        _encrypted: true // Indicatore crittografia attiva
     };
 
     const logoPreview = document.getElementById('account-logo-preview');
@@ -755,7 +807,7 @@ window.saveAccount = async () => {
                 // Calcola Accepted Count V3.1
                 finalData.acceptedCount = Object.values(finalData.sharedWith).filter(g => g.status === 'accepted').length;
 
-                // --- AUTO-HEALING V5.1: Forza visibilità private se non ci sono inviti attivi ---
+                // --- AUTO-HEALING DI STATO V5.1: Forza visibilità private se non ci sono inviti attivi ---
                 const hasActive = Object.values(finalData.sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
                 if (!hasActive) {
                     finalData.visibility = "private";

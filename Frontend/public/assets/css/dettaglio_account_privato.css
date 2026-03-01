@@ -45,7 +45,7 @@
     right: -4px;
     width: 24px;
     height: 24px;
-    background: #3b82f6;
+    background: var(--accent);
     border-radius: 50%;
     border: none;
     display: flex;
@@ -222,7 +222,7 @@
 .micro-btn-copy-inline:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.05);
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 /* --- 4. ATTACHMENTS --- */
@@ -290,7 +290,7 @@
 }
 
 .icon-accent-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-accent-emerald {
@@ -372,7 +372,7 @@
 }
 
 .info-text {
-    font-size: 13px;
+    font-size: var(--fs-sm);
     font-weight: var(--font-weight-medium);
     /* NESSUN uppercase - è testo descrittivo normale */
     color: #0f172a;
@@ -383,7 +383,7 @@
 }
 
 .empty-attachments-text {
-    font-size: 11px;
+    font-size: var(--fs-micro);
     font-weight: var(--font-weight-medium);
     text-align: center;
     padding: 1rem 0;
@@ -419,10 +419,7 @@
 
 /* --- 7. SOURCE SELECTOR MODAL --- */
 
-/* Utility .hidden usata dal JS per mostrare/nascondere il modal */
-.hidden {
-    display: none !important;
-}
+/* .hidden è definito in core.css — non duplicare */
 
 /* Il modal di DEFAULT è nascosto (non ha .hidden rimosso dal JS) */
 #source-selector-modal {
@@ -622,15 +619,15 @@
 }
 
 .text-blue-400 {
-    color: #60a5fa;
+    color: var(--accent);
 }
 
 .text-purple-400 {
-    color: #c084fc;
+    color: var(--color-purple);
 }
 
 .text-amber-400 {
-    color: #fbbf24;
+    color: var(--status-warning);
 }
 
 
@@ -792,9 +789,9 @@
 }
 
 .card-type {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: var(--font-strong-weight);
-    color: #34d399;
+    color: var(--status-success);
     /* emerald-400 */
     text-transform: uppercase;
 }
@@ -821,7 +818,7 @@
 }
 
 .call-btn-row:hover .call-icon {
-    color: #34d399;
+    color: var(--status-success);
 }
 
 .call-number {
@@ -835,7 +832,7 @@
 }
 
 .icon-xs {
-    font-size: 14px !important;
+    font-size: var(--fs-sm);
 }
 
 /* --- Mobile/PWA Helper: Visually Hidden Inputs --- */
@@ -976,15 +973,15 @@
 
 .bank-expand-icon {
     font-size: var(--icon-xs);
-    color: #22c55e;
+    color: var(--status-success);
     transition: transform 0.2s;
 }
 
 .bank-title {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
-    color: #22c55e;
+    color: var(--status-success);
 }
 
 .bank-details {
@@ -1009,7 +1006,7 @@
 
 .bank-cards-title,
 .bank-cards-label {
-    font-size: 9px;
+    font-size: var(--fs-micro);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: var(--text-secondary);
@@ -1041,13 +1038,13 @@
 
 .card-entry-icon {
     font-size: var(--icon-xs);
-    color: #34d399;
+    color: var(--status-success);
     transition: transform 0.2s;
 }
 
 .card-entry-label {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
-    color: #34d399;
+    color: var(--status-success);
 }

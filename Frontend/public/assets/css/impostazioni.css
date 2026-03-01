@@ -98,7 +98,7 @@
 }
 
 .icon-purple {
-    color: #a855f7;
+    color: var(--color-purple);
     background: rgba(168, 85, 247, 0.1);
 }
 
@@ -581,12 +581,10 @@ h3.settings-desc {
 }
 
 /* Utils */
-.hidden {
-    display: none !important;
-}
+/* .hidden è definito in core.css — non duplicare */
 
 .mt-section {
-    margin-top: 1.25rem;
+    margin-top: 0.5rem;
 }
 
 /* Ridotto da 2rem */
@@ -607,4 +605,46 @@ h3.settings-desc {
 .legal-docs-link-box {
     margin-top: 1rem;
     text-align: center;
+}
+
+/* --- 10. MAINTENANCE BUTTONS (V6.0) --- */
+.btn-maintenance-danger,
+.btn-maintenance-accent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    font: var(--font-button);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.btn-maintenance-danger {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    color: var(--status-error);
+}
+
+.btn-maintenance-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--status-error);
+}
+
+.btn-maintenance-accent {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+}
+
+.btn-maintenance-accent:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: #6366f1;
+}
+
+.btn-maintenance-danger:active,
+.btn-maintenance-accent:active {
+    transform: scale(0.98);
 }

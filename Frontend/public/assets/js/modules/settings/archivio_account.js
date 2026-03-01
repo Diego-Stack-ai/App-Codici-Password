@@ -11,6 +11,7 @@ import { doc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, w
 import { showToast, showInputModal } from '../../ui-core.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
 import { t } from '../../translations.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 let allArchived = [];
 let currentUser = null;
@@ -203,6 +204,29 @@ async function loadArchived() {
         }
 
         allArchived = results;
+
+        // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
+        const masterKey = await ensureMasterKey().catch(() => null);
+        if (masterKey) {
+            allArchived = await Promise.all(allArchived.map(async acc => {
+                if (acc._encrypted) {
+                    try {
+                        console.log(`[DEBUG_CRYPTO] Decrypting archive item ${acc.id}:`, {
+                            name: acc.nomeAccount,
+                            username: acc.username,
+                            account: acc.account
+                        });
+                        acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
+                        acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
+                        acc.password = acc.password ? await decrypt(acc.password, masterKey) : acc.password;
+                    } catch (e) {
+                        console.error("[Archive] Decryption failed for:", acc.id, e);
+                    }
+                }
+                return acc;
+            }));
+        }
+
         filterAndRender();
     } catch (e) {
         console.error("[ARCHIVIO-EXCEPTION] Full details:", e);
@@ -377,3 +401,10 @@ function getCollectionRef(id, context) {
     if (context === 'privato') return doc(db, "users", currentUser.uid, "accounts", id);
     return doc(db, "users", currentUser.uid, "aziende", context, "accounts", id);
 }
+
+// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
+window.archivioAccount = {
+    async decryptAll() {
+        return await loadArchived();
+    }
+};

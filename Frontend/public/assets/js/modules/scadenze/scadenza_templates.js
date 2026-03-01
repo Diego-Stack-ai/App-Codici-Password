@@ -6,15 +6,7 @@
 
 export const VEHICLES = [];
 
-export const EMAILS = [
-    'estergraziano@libero.it',
-    'boschettodiego@gmail.com',
-    'amministrazione.bmservice@gmail.com',
-    'federicab040501@gmail.com',
-    'gretab180503@gmail.com',
-    'paxtibisrl@gmail.com',
-    '-'
-];
+export const EMAILS = [];
 
 /**
  * DEADLINE_RULES

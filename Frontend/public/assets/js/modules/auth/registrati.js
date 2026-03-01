@@ -41,11 +41,11 @@ export async function initRegistrati() {
  * Gestione Form Registrazione
  */
 function setupRegisterForm() {
-    const form = document.getElementById('register-form');
     const submitBtn = document.getElementById('register-submit-btn');
-    if (!form || !submitBtn) return;
+    if (!submitBtn) return;
 
-    form.addEventListener('submit', async (e) => {
+    // 🛡️ V7.0: Listener su click (dato che abbiamo rimosso il tag <form>)
+    submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
 
         const nome = document.getElementById('nome').value.trim();
@@ -81,25 +81,11 @@ function setupRegisterForm() {
         ]);
         document.body.classList.add('is-auth-progress');
 
-        const prefPush = document.getElementById('reg-pref-push')?.checked ?? true;
-        const prefEmail = document.getElementById('reg-pref-email')?.checked ?? true;
 
-        // 3. Controllo Canali Notifica
-        if (!prefPush && !prefEmail) {
-            const proceed = await showConfirmModal(t('notifications_prefs'), t('in_app_only_warn'));
-            if (!proceed) {
-                // Riabilita bottone se annulla
-                submitBtn.disabled = false;
-                clearElement(submitBtn);
-                setChildren(submitBtn, originalContent);
-                document.body.classList.remove('is-auth-progress');
-                return;
-            }
-        }
 
         try {
             console.log("[REGISTER] Creating account...");
-            const success = await register(nome, cognome, email, password, prefPush, prefEmail);
+            const success = await register(nome, cognome, email, password);
 
             if (success) {
                 showToast(t('success_registration'), "success");
@@ -182,10 +168,16 @@ function setupPasswordToggle() {
 
     btn.onclick = (e) => {
         e.preventDefault();
-        const isSecret = input.type === 'password';
-        input.type = isSecret ? 'text' : 'password';
+        const isShielded = input.classList.contains('base-shield');
+
+        if (isShielded) {
+            input.classList.remove('base-shield');
+        } else {
+            input.classList.add('base-shield');
+        }
+
         const icon = btn.querySelector('.material-symbols-outlined');
-        if (icon) icon.textContent = isSecret ? 'visibility_off' : 'visibility';
+        if (icon) icon.textContent = isShielded ? 'visibility' : 'visibility_off';
     };
 }
 

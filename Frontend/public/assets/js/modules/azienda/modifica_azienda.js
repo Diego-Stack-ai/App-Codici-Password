@@ -11,6 +11,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -80,7 +81,7 @@ async function loadAzienda() {
             return;
         }
         const data = snap.data();
-        populateForm(data);
+        await populateForm(data);
     } catch (e) {
         logError("LoadAzienda", e);
         showToast(t('error_generic'), "error");
@@ -98,6 +99,15 @@ function updateTitlesForCreation() {
 }
 
 function initFormEvents() {
+    // Gestione eliminazione card email statiche (CSP Compatibile)
+    document.querySelectorAll('.inside-card .btn-remove-item').forEach(btn => {
+        // Applica evento solo ai button statici dell'HTML originale
+        btn.addEventListener('click', function (e) {
+            const card = this.closest('.inside-card');
+            if (card) card.remove();
+        });
+    });
+
     // Logo & Photos
     document.getElementById('btn-trigger-logo')?.addEventListener('click', () => document.getElementById('logo-upload')?.click());
     document.getElementById('logo-upload')?.addEventListener('change', (e) => handleImagePreview(e, 'logo-preview', 'logo-placeholder'));
@@ -258,7 +268,7 @@ function toggleSection(id, btn) {
     }
 }
 
-function populateForm(data) {
+async function populateForm(data) {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
     set('ragione-sociale', data.ragioneSociale);
@@ -282,17 +292,33 @@ function populateForm(data) {
     set('note-azienda', data.note);
 
     if (data.emails) {
+        // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica (V6.0)
+        let masterKey = null;
+        const needsDecryption = data._encrypted === true;
+        if (needsDecryption) {
+            try { masterKey = await ensureMasterKey(); } catch (e) {
+                showToast("Dati cifrati: chiave obbligatoria per modificare.", "error");
+                history.back();
+                return;
+            }
+        }
+
+        const decryptIfPossible = async (val) => {
+            if (!needsDecryption || !val) return val;
+            try { return await decrypt(val, masterKey); } catch (e) { return "---ERRORE DECRYPT---"; }
+        };
+
         set('type-pec', data.emails.pec?.tipo || 'PEC Aziendale');
         set('email-pec', data.emails.pec?.email);
-        set('email-pec-password', data.emails.pec?.password);
+        set('email-pec-password', await decryptIfPossible(data.emails.pec?.password));
         set('email-pec-note', data.emails.pec?.note);
         set('type-amministrazione', data.emails.amministrazione?.tipo || 'Amministrazione');
         set('email-amministrazione', data.emails.amministrazione?.email);
-        set('email-amministrazione-password', data.emails.amministrazione?.password);
+        set('email-amministrazione-password', await decryptIfPossible(data.emails.amministrazione?.password));
         set('email-amministrazione-note', data.emails.amministrazione?.note);
         set('type-personale', data.emails.personale?.tipo || 'Personale');
         set('email-personale', data.emails.personale?.email);
-        set('email-personale-password', data.emails.personale?.password);
+        set('email-personale-password', await decryptIfPossible(data.emails.personale?.password));
         set('email-personale-note', data.emails.personale?.note);
 
         // Extra Sedi
@@ -301,33 +327,17 @@ function populateForm(data) {
 
         if (data.altreSedi && Array.isArray(data.altreSedi)) {
             data.altreSedi.forEach(s => addExtraSede(s));
-        } else {
-            // Tentativo recupero legacy (admin/oper) se l'array non esisteva
-            // Ma se non esisteva, è perché è la prima volta o sono vuoti.
-            // Possiamo opzionalmente aggiungere una sede vuota se vogliamo, ma meglio di no.
         }
+
         const container = document.getElementById('email-extra-container');
         if (container) clearElement(container);
 
-        // 1. Check for custom keys (legacy or manual db entries)
-        const fixedKeys = ['pec', 'amministrazione', 'personale', 'extra'];
-        Object.keys(data.emails).forEach(key => {
-            if (!fixedKeys.includes(key)) {
-                const obj = data.emails[key];
-                if (obj && typeof obj === 'object') {
-                    addExtraEmail({
-                        tipo: key, // Use key as type label
-                        email: obj.email || '',
-                        password: obj.password || '',
-                        note: obj.note || ''
-                    });
-                }
-            }
-        });
-
-        // 2. Check for new array format
+        // Extra Email (con decrittazione)
         if (data.emails.extra && Array.isArray(data.emails.extra)) {
-            data.emails.extra.forEach(item => addExtraEmail(item));
+            for (const item of data.emails.extra) {
+                const decItem = { ...item, password: await decryptIfPossible(item.password) };
+                addExtraEmail(decItem);
+            }
         }
     }
 
@@ -633,6 +643,19 @@ async function saveAzienda() {
         setChildren(btn, createElement('span', { className: 'material-symbols-outlined animate-spin text-sm', textContent: 'sync' }));
     }
 
+    // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili
+    let masterKey;
+    try {
+        masterKey = await ensureMasterKey();
+    } catch (e) {
+        showToast("Accesso negato: Chiave di crittografia richiesta.", "error");
+        if (btn) {
+            btn.disabled = false;
+            setChildren(btn, createElement('span', { className: 'material-symbols-outlined', textContent: 'save' }));
+        }
+        return;
+    }
+
     try {
         const qrConfig = {};
         document.querySelectorAll('input[data-qr-field]').forEach(cb => qrConfig[cb.dataset.qrField] = cb.checked);
@@ -673,33 +696,34 @@ async function saveAzienda() {
                 pec: document.getElementById('type-pec') ? {
                     tipo: document.getElementById('type-pec').value.trim(),
                     email: document.getElementById('email-pec')?.value.trim(),
-                    password: document.getElementById('email-pec-password')?.value.trim(),
+                    password: await encrypt(document.getElementById('email-pec-password')?.value.trim() || '', masterKey),
                     note: document.getElementById('email-pec-note')?.value.trim()
                 } : null,
                 amministrazione: document.getElementById('type-amministrazione') ? {
                     tipo: document.getElementById('type-amministrazione').value.trim(),
                     email: document.getElementById('email-amministrazione')?.value.trim(),
-                    password: document.getElementById('email-amministrazione-password')?.value.trim(),
+                    password: await encrypt(document.getElementById('email-amministrazione-password')?.value.trim() || '', masterKey),
                     note: document.getElementById('email-amministrazione-note')?.value.trim()
                 } : null,
                 personale: document.getElementById('type-personale') ? {
                     tipo: document.getElementById('type-personale').value.trim(),
                     email: document.getElementById('email-personale')?.value.trim(),
-                    password: document.getElementById('email-personale-password')?.value.trim(),
+                    password: await encrypt(document.getElementById('email-personale-password')?.value.trim() || '', masterKey),
                     note: document.getElementById('email-personale-note')?.value.trim()
                 } : null,
-                extra: Array.from(document.querySelectorAll('.email-extra-item')).map(el => ({
+                extra: await Promise.all(Array.from(document.querySelectorAll('.email-extra-item')).map(async el => ({
                     tipo: el.querySelector('.email-type')?.value.trim(),
                     email: el.querySelector('.email-value')?.value.trim(),
-                    password: el.querySelector('.email-pass')?.value.trim(),
+                    password: await encrypt(el.querySelector('.email-pass')?.value.trim() || '', masterKey),
                     note: el.querySelector('.email-note')?.value.trim(),
                     qr: el.querySelector('.email-qr')?.checked
-                })).filter(e => e.tipo || e.email)
+                })))
             },
-            note: document.getElementById('note-azienda')?.value.trim(),
+            note: await encrypt(document.getElementById('note-azienda')?.value.trim() || '', masterKey),
             qrConfig,
             altreSedi,
-            updatedAt: serverTimestamp()
+            updatedAt: serverTimestamp(),
+            _encrypted: true // Indicatore crittografia attiva
         };
 
         if (!currentAziendaId) {

@@ -8,20 +8,15 @@ import { db, auth, storage } from '../../firebase-config.js';
 import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { EMAILS, buildEmailSubject } from './scadenza_templates.js';
+
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
-const emailSubjectInput = document.getElementById('oggetto_email');
-const notifDaysInput = document.getElementById('notif_days_before');
-const notifFreqInput = document.getElementById('notif_frequency');
-const emailPrimariaSelect = document.getElementById('email_primaria_select');
-const emailSecondariaSelect = document.getElementById('email_secondaria_select');
 
 let currentUser = null;
 let currentRule = null;
@@ -62,112 +57,110 @@ export async function initAggiungiScadenza(user) {
         if (btn) {
             btn.addEventListener('click', () => setMode(mode));
         }
-        if (btn) {
-            btn.addEventListener('click', () => setMode(mode));
-        }
     });
 
     // Custom Datepicker V5.0
     initDatePickerV5('dueDate');
 
-    // Toggle Manual Email Inputs
-    setupEmailToggle(emailPrimariaSelect, 'email_primaria_input');
-    setupEmailToggle(emailSecondariaSelect, 'email_secondaria_input');
-
-    // Email Exclusion logic
-    emailPrimariaSelect?.addEventListener('change', updateEmailExclusion);
-    emailSecondariaSelect?.addEventListener('change', updateEmailExclusion);
-
-    // Preview Updates
-    ['dueDate', 'tipo_scadenza', 'modello_veicolo', 'testo_email_select'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', updatePreview);
-    });
-
     initProxyDropdowns();
     initAttachmentSystem();
-    setupNotificationChannels();
-    setupMultiSelects();
-    await loadPushUsers();
 
-    // --- FOOTER ACTIONS SYSTEM (Home Page Style) ---
-    const interval = setInterval(() => {
-        const footerCenter = document.getElementById('footer-center-actions');
-        const footerRight = document.getElementById('footer-right-actions');
+    // --- FOOTER ACTIONS SYSTEM (Event Contract V6.1) ---
+    function initFooterFromDetail(detail) {
+        const { center: footerCenter, right: footerRight } = detail;
+        if (!footerCenter || !footerRight) return;
 
-        if (footerCenter && footerRight) {
-            clearInterval(interval);
-
-            // 1. Settings Link (Right)
-            const settLink = createElement('div', { id: 'footer-settings-link' });
-            settLink.appendChild(
-                createElement('a', {
-                    href: 'impostazioni.html',
-                    className: 'btn-icon-header footer-settings-link',
-                    title: 'Impostazioni'
-                }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'tune' })
-                ])
-            );
-            clearElement(footerRight);
-            footerRight.appendChild(settLink);
-
-            // 2. Main Actions (Center)
-            clearElement(footerCenter);
-
-            const cancelBtn = createElement('button', {
-                className: 'btn-fab-action btn-fab-neutral',
-                title: t('cancel') || 'Annulla',
-                dataset: { label: t('cancel_short') || 'Annulla' },
-                onclick: () => {
-                    if (editingScadenzaId) window.location.href = `dettaglio_scadenza.html?id=${editingScadenzaId}`;
-                    else window.location.href = 'scadenze.html';
-                }
+        // 1. Settings Link (Right)
+        const settLink = createElement('div', { id: 'footer-settings-link' });
+        settLink.appendChild(
+            createElement('a', {
+                href: 'impostazioni.html',
+                className: 'btn-icon-header footer-settings-link',
+                title: 'Impostazioni'
             }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
-            ]);
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'tune' })
+            ])
+        );
+        clearElement(footerRight);
+        footerRight.appendChild(settLink);
 
-            const saveBtn = createElement('button', {
-                id: 'save-btn',
-                className: 'btn-fab-action btn-fab-scadenza',
-                title: t('save') || 'Salva Scadenza',
-                dataset: { label: t('save_short') || 'Salva' }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
-            ]);
+        // 2. Main Actions (Center)
+        clearElement(footerCenter);
 
-            const fabWrapper = createElement('div', {
-                className: 'fab-group'
-            }, [cancelBtn, saveBtn]);
+        const cancelBtn = createElement('button', {
+            className: 'btn-fab-action btn-fab-neutral',
+            title: t('cancel') || 'Annulla',
+            dataset: { label: t('cancel_short') || 'Annulla' },
+            onclick: () => {
+                if (editingScadenzaId) window.location.href = `dettaglio_scadenza.html?id=${editingScadenzaId}`;
+                else window.location.href = 'scadenze.html';
+            }
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'close' })
+        ]);
 
-            footerCenter.appendChild(fabWrapper);
-            setupSaveLogic();
+        const saveBtn = createElement('button', {
+            id: 'save-btn',
+            className: 'btn-fab-action btn-fab-scadenza',
+            title: t('save') || 'Salva Scadenza',
+            dataset: { label: t('save_short') || 'Salva' }
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
+        ]);
 
-            // 3. Animations (Home Page Style)
-            [cancelBtn, saveBtn].forEach((btn, index) => {
-                btn.animate([
-                    { transform: 'scale(0) translateY(20px)', opacity: 0 },
-                    { transform: 'scale(1) translateY(0)', opacity: 1 }
-                ], {
-                    duration: 400,
-                    delay: index * 100,
-                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    fill: 'forwards'
-                });
+        const fabWrapper = createElement('div', {
+            className: 'fab-group'
+        }, [cancelBtn, saveBtn]);
+
+        footerCenter.appendChild(fabWrapper);
+        setupSaveLogic();
+
+        // 3. Animations (Home Page Style)
+        [cancelBtn, saveBtn].forEach((btn, index) => {
+            btn.animate([
+                { transform: 'scale(0) translateY(20px)', opacity: 0 },
+                { transform: 'scale(1) translateY(0)', opacity: 1 }
+            ], {
+                duration: 400,
+                delay: index * 100,
+                easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                fill: 'forwards'
             });
-        }
-    }, 100);
+        });
+    }
 
-    // Timeout safety
-    setTimeout(() => { if (interval) clearInterval(interval); }, 5000);
+    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
+    if (window.__footerReady) {
+        initFooterFromDetail(window.__footerReady);
+    } else {
+        document.addEventListener('footer:ready', (e) => initFooterFromDetail(e.detail), { once: true });
+    }
 
     // LIST MANAGEMENT SYSTEM (Dynamic Config)
     document.querySelectorAll('.btn-manage-config-inline').forEach(btn => {
         btn.onclick = async (e) => {
             e.stopPropagation();
             const configId = btn.dataset.configId;
-            const newVal = await window.showInputModal(`Aggiungi Nuovo`, '', `Inserisci nuovo valore...`);
-            if (newVal && newVal.trim()) {
-                await addConfigItem(configId, newVal.trim());
+
+            if (configId === 'tipo_scadenza') {
+                // Chiediamo nome, periodo e frequenza per le Categorie
+                const name = await window.showInputModal(`Aggiungi Nuova Categoria`, '', `Nome categoria...`);
+                if (!name || !name.trim()) return;
+                const period = await window.showInputModal(`Giorni di preavviso`, "14", `Inserisci giorni (es. 14)`);
+                if (period === null) return;
+                const freq = await window.showInputModal(`Frequenza notifica`, "7", `Inserisci giorni (es. 7)`);
+                if (freq === null) return;
+
+                await addConfigItem(configId, {
+                    name: name.trim(),
+                    period: parseInt(period) || 14,
+                    freq: parseInt(freq) || 7
+                });
+            } else {
+                const newVal = await window.showInputModal(`Aggiungi Nuovo`, '', `Inserisci nuovo valore...`);
+                if (newVal && newVal.trim()) {
+                    await addConfigItem(configId, newVal.trim());
+                }
             }
         };
     });
@@ -181,6 +174,9 @@ export async function initAggiungiScadenza(user) {
         const pageTitle = document.querySelector('.detail-title-value');
         if (pageTitle) pageTitle.textContent = "Modifica Scadenza";
         await loadScadenzaForEdit(editingScadenzaId);
+    } else {
+        // Forza l'aggiornamento UI per la modalità di default ('automezzi') in "Aggiungi"
+        setMode(currentMode);
     }
 
     console.log("[ADD-SCADENZA] Ready.");
@@ -232,23 +228,111 @@ function updateUIButtons(activeMode) {
 
 function initialStaticLoad() {
     populateTypeSelect();
-    populateEmailSelect(emailPrimariaSelect);
-    populateEmailSelect(emailSecondariaSelect);
     updateDynamicOptions(null);
 }
 
 async function loadDynamicConfig() {
     if (!currentUser) return;
     try {
-        const [autoSnap, docSnap, genSnap] = await Promise.all([
+        const [autoSnap, docSnap, genSnap, userSnap] = await Promise.all([
             getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig")),
             getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments")),
-            getDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"))
+            getDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig")),
+            getDoc(doc(db, "users", currentUser.uid))
         ]);
 
-        unifiedConfigs.automezzi = autoSnap.exists() ? autoSnap.data() : { deadlineTypes: [], emailTemplates: [], names: [] };
-        unifiedConfigs.documenti = docSnap.exists() ? docSnap.data() : { deadlineTypes: [], emailTemplates: [], names: [] };
-        unifiedConfigs.generali = genSnap.exists() ? genSnap.data() : { deadlineTypes: [], emailTemplates: [], names: [] };
+        const rawGenData = genSnap.exists() ? genSnap.data() : {};
+
+        let notificationEmails = rawGenData.notificationEmails || [];
+        if (notificationEmails.length === 0 && userSnap.exists()) {
+            const userData = userSnap.data();
+            const contactEmails = (userData.contactEmails || []).filter(e => e && e.address).map(e => e.address);
+            if (contactEmails.length > 0) {
+                notificationEmails = contactEmails;
+                rawGenData.notificationEmails = notificationEmails;
+                if (!window._preventEmailSeed) {
+                    setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), { notificationEmails }, { merge: true });
+                    window._preventEmailSeed = true;
+                }
+            }
+        }
+
+        unifiedConfigs.generali = { deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: [], ...rawGenData };
+        populateEmailSelects(unifiedConfigs.generali.notificationEmails);
+
+        const dAuto = autoSnap.exists() ? autoSnap.data() : {
+            deadlineTypes: [
+                { name: 'Revisione Moto', freq: 7, period: 14 },
+                { name: 'Assicurazione', freq: 7, period: 14 },
+                { name: 'Revisione Auto', freq: 7, period: 14 },
+                { name: 'Bollo', freq: 7, period: 14 },
+                { name: 'Tagliando', freq: 7, period: 28 },
+                { name: 'Olio motore', freq: 7, period: 14 }
+            ],
+            models: [
+                "Moto Guzzi Nevada 750 - CJ14146",
+                "Moto Guzzi California - CC60256",
+                "Land Rover - GK910HB",
+                "Hyundai I10 - FL790AX",
+                "Rimorchio Ellebì - AA36924",
+                "Peugeot e-208 - GM277DC"
+            ],
+            emailTemplates: [
+                "l'assicurazione del motociclo targato",
+                "l'assicurazione dell'auto targata",
+                "la revisione del motociclo targato",
+                "la revisione dell'auto targata",
+                "Il bollo del motociclo targato",
+                "Il bollo dell'auto targata",
+                "Il tagliando del motociclo targato",
+                "Il tagliando dell'auto targata",
+                "Il bollo del carrello targato",
+                "Olio motore da controllare"
+            ]
+        };
+        unifiedConfigs.automezzi = { deadlineTypes: [], models: [], emailTemplates: [], names: [], ...dAuto };
+
+        const dDoc = docSnap.exists() ? docSnap.data() : {
+            deadlineTypes: [
+                { name: 'Patente', freq: 7, period: 56 },
+                { name: 'Carta Identità', freq: 14, period: 56 },
+                { name: 'Passaporto', freq: 14, period: 28 },
+                { name: 'Codice fiscale', freq: 7, period: 56 }
+            ],
+            models: [
+                "Patente - U136W4689N",
+                "Carta identità - CA55677EP",
+                "Codice fiscale - 80380000500313823013"
+            ],
+            emailTemplates: [
+                "la tua patente",
+                "Il tuo documento di Identità",
+                "Il tuo passaporto",
+                "Il tuo codice fiscale"
+            ]
+        };
+        unifiedConfigs.documenti = { deadlineTypes: [], models: [], emailTemplates: [], names: [], ...dDoc };
+
+        const dGen = genSnap.exists() ? rawGenData : {
+            deadlineTypes: [
+                { name: 'Sale Addolcitore', freq: 7, period: 14 },
+                { name: "Comodato d'uso", freq: 7, period: 28 },
+                { name: 'Federazione Italiana Vela', freq: 7, period: 70 },
+                { name: 'Visita medica', freq: 7, period: 14 },
+                { name: 'Contratto', freq: 7, period: 14 },
+                { name: 'Tessera isola ecologica', freq: 7, period: 14 }
+            ],
+            emailTemplates: [
+                "Il sale dell'addolcitore",
+                "Il comodato d'uso dell'auto targata",
+                "E' in scadenza il tuo certificato medico",
+                "E' in scadenza la tua tessera FIV",
+                "Isola ecologica"
+            ]
+        };
+        unifiedConfigs.generali = {
+            deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: rawGenData.notificationEmails || [], ...dGen
+        };
 
         updateCurrentDynamicConfig();
         finishLoad();
@@ -256,6 +340,11 @@ async function loadDynamicConfig() {
         console.error("Config Load Error", e);
     }
 }
+
+window._addNotificationEmailBtn = async (selectId = 'email_primaria_select') => {
+    const v = await showInputModal("Nuova Email", "", "Inserisci un nuovo indirizzo email...");
+    if (v && v.trim()) await addConfigItem(selectId, v.trim());
+};
 
 function updateCurrentDynamicConfig() {
     if (currentMode === 'automezzi') dynamicConfig = unifiedConfigs.automezzi;
@@ -270,7 +359,7 @@ function updateCurrentDynamicConfig() {
     dynamicConfig.names = [...allNames].sort();
 }
 
-async function addConfigItem(selectId, value) {
+async function addConfigItem(selectId, valueStringOrObject) {
     if (!currentUser) return;
     try {
         let field = '';
@@ -290,26 +379,63 @@ async function addConfigItem(selectId, value) {
             if (currentMode === 'automezzi') docName = 'deadlineConfig';
             else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
             else docName = 'generalConfig';
+        } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
+            field = 'notificationEmails';
+            docName = 'generalConfig';
         }
 
         if (!docName || !field) return;
 
         // Update local state
-        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
-            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
+        const configToUpdate = (field === 'notificationEmails') ? unifiedConfigs.generali :
+            ((currentMode === 'automezzi') ? unifiedConfigs.automezzi :
+                (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali);
 
         if (!configToUpdate[field]) configToUpdate[field] = [];
-        if (configToUpdate[field].includes(value)) return showToast("Valore già esistente", "info");
 
-        configToUpdate[field].push(value);
-        configToUpdate[field].sort();
+        let valueToPush = valueStringOrObject;
+
+        // Check for duplicates
+        if (selectId === 'tipo_scadenza') {
+            const exists = configToUpdate[field].some(item => {
+                const checkedName = typeof item === 'object' ? item.name : item;
+                const newName = typeof valueStringOrObject === 'object' ? valueStringOrObject.name : valueStringOrObject;
+                return checkedName === newName;
+            });
+            if (exists) return showToast("Valore già esistente", "info");
+        } else {
+            if (configToUpdate[field].includes(valueStringOrObject)) return showToast("Valore già esistente", "info");
+        }
+
+        configToUpdate[field].push(valueToPush);
+
+        // Sort
+        if (selectId === 'tipo_scadenza') {
+            configToUpdate[field].sort((a, b) => {
+                const nameA = typeof a === 'object' ? a.name : a;
+                const nameB = typeof b === 'object' ? b.name : b;
+                return nameA.localeCompare(nameB);
+            });
+        } else {
+            configToUpdate[field].sort();
+        }
 
         // Save to Firestore
-        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), configToUpdate, { merge: true });
+        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), {
+            [field]: configToUpdate[field]
+        }, { merge: true });
 
         showToast("Lista aggiornata!", "success");
         updateCurrentDynamicConfig();
         finishLoad(); // Re-populate and sync
+
+        setTimeout(() => {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.value = typeof valueToPush === 'object' ? valueToPush.name : valueToPush;
+                select.dispatchEvent(new Event('change'));
+            }
+        }, 100);
     } catch (e) {
         console.error("Add Config Error", e);
         showToast("Errore durante l'aggiornamento", "error");
@@ -339,24 +465,30 @@ async function editConfigItem(selectId, oldValue) {
             if (currentMode === 'automezzi') docName = 'deadlineConfig';
             else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
             else docName = 'generalConfig';
+        } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
+            field = 'notificationEmails';
+            docName = 'generalConfig';
         }
 
         if (!docName || !field) return;
 
-        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
-            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
+        const configToUpdate = (field === 'notificationEmails') ? unifiedConfigs.generali :
+            ((currentMode === 'automezzi') ? unifiedConfigs.automezzi :
+                (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali);
 
         const idx = configToUpdate[field].indexOf(oldValue);
         if (idx !== -1) {
             configToUpdate[field][idx] = newValue.trim();
             configToUpdate[field].sort();
+            // Save
+            await setDoc(doc(db, "users", currentUser.uid, "settings", docName), {
+                [field]: configToUpdate[field]
+            }, { merge: true });
+
+            showToast("Voce modificata!", "success");
+            updateCurrentDynamicConfig();
+            finishLoad();
         }
-
-        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), configToUpdate, { merge: true });
-
-        showToast("Voce modificata!", "success");
-        updateCurrentDynamicConfig();
-        finishLoad();
     } catch (e) {
         console.error("Edit Config Error", e);
         showToast("Errore durante la modifica", "error");
@@ -385,16 +517,22 @@ async function deleteConfigItem(selectId, value) {
             if (currentMode === 'automezzi') docName = 'deadlineConfig';
             else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
             else docName = 'generalConfig';
+        } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
+            field = 'notificationEmails';
+            docName = 'generalConfig';
         }
 
         if (!docName || !field) return;
 
-        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
-            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
+        const configToUpdate = (field === 'notificationEmails') ? unifiedConfigs.generali :
+            ((currentMode === 'automezzi') ? unifiedConfigs.automezzi :
+                (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali);
 
-        configToUpdate[field] = configToUpdate[field].filter(v => v !== value);
+        configToUpdate[field] = configToUpdate[field].filter(v => typeof v === 'object' ? v.name !== value : v !== value);
 
-        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), configToUpdate, { merge: true });
+        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), {
+            [field]: configToUpdate[field]
+        }, { merge: true });
 
         showToast("Voce eliminata", "success");
         updateCurrentDynamicConfig();
@@ -408,6 +546,9 @@ async function deleteConfigItem(selectId, value) {
 function finishLoad() {
     populateTypeSelect();
     updateDynamicOptions(currentRule);
+    if (unifiedConfigs.generali && unifiedConfigs.generali.notificationEmails) {
+        populateEmailSelects(unifiedConfigs.generali.notificationEmails);
+    }
 
     const namesList = document.getElementById('names-list');
     if (namesList && dynamicConfig.names) {
@@ -427,8 +568,16 @@ function populateTypeSelect() {
     const addItems = (items) => {
         if (!items || items.length === 0) return;
         items.forEach(item => {
-            const key = (typeof item === 'object') ? item.name : item;
-            typeSelect.appendChild(new Option(key, key));
+            const isObj = typeof item === 'object';
+            const key = isObj ? item.name : item;
+            const opt = new Option(key, key);
+
+            if (isObj) {
+                if (item.period !== undefined) opt.dataset.period = item.period;
+                if (item.freq !== undefined) opt.dataset.freq = item.freq;
+            }
+
+            typeSelect.appendChild(opt);
         });
     };
 
@@ -445,21 +594,6 @@ function populateTypeSelect() {
     }
 }
 
-function populateEmailSelect(select) {
-    if (!select) return;
-    const currentVal = select.value;
-    clearElement(select);
-    select.appendChild(new Option('Seleziona...', ''));
-
-    EMAILS?.forEach(email => {
-        select.appendChild(new Option(email, email));
-    });
-
-    select.appendChild(new Option('Scrivi Nuova...', 'manual'));
-
-    if (currentVal) select.value = currentVal;
-}
-
 function updateDynamicOptions(rule) {
     const modelSel = document.getElementById('modello_veicolo');
     const textSel = document.getElementById('testo_email_select');
@@ -467,16 +601,13 @@ function updateDynamicOptions(rule) {
     if (!modelSel || !textSel) return;
 
     if (currentMode !== 'generali') {
-        document.getElementById('vehicle_fields_wrapper')?.classList.remove('hidden');
-        populateSimpleSelect(modelSel, dynamicConfig.models || []);
+        if (modelSel) populateSimpleSelect(modelSel, dynamicConfig.models || []);
     }
 
-    if (dynamicConfig.emailTemplates?.length > 0 || rule?.emailTextOptions?.length > 0) {
+    if (textSel) {
         document.getElementById('testo_email_wrapper')?.classList.remove('hidden');
         const combined = [...new Set([...(dynamicConfig.emailTemplates || []), ...(rule?.emailTextOptions || [])])];
         populateSimpleSelect(textSel, combined);
-    } else {
-        document.getElementById('testo_email_wrapper')?.classList.add('hidden');
     }
 }
 
@@ -490,38 +621,25 @@ function populateSimpleSelect(select, options) {
     if (currentVal && options.includes(currentVal)) select.value = currentVal;
 }
 
-function setupEmailToggle(select, inputId) {
-    const input = document.getElementById(inputId);
-    if (!select || !input) return;
-    select.addEventListener('change', () => {
-        if (select.value === 'manual') {
-            select.parentElement.classList.add('hidden');
-            input.classList.remove('hidden');
-            input.focus();
+function populateEmailSelects(emails) {
+    ['email_primaria_select', 'email_secondaria_select'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const currentVal = sel.value;
+        clearElement(sel);
+        sel.appendChild(new Option('Seleziona email...', ''));
+
+        emails.forEach(email => {
+            sel.appendChild(new Option(email, email));
+        });
+
+        if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) {
+            sel.value = currentVal;
+        } else if (currentVal && currentVal !== 'manual') {
+            sel.appendChild(new Option(currentVal, currentVal));
+            sel.value = currentVal;
         }
     });
-    input.addEventListener('blur', () => {
-        if (!input.value.trim()) {
-            input.classList.add('hidden');
-            select.parentElement.classList.remove('hidden');
-            select.value = '';
-        }
-    });
-}
-
-function updateEmailExclusion() {
-    const val1 = emailPrimariaSelect.value;
-    const val2 = emailSecondariaSelect.value;
-    if (val1 && val2 && val1 === val2 && val1 !== "manual") {
-        emailSecondariaSelect.value = "";
-        showToast("Email già selezionata come primaria", "error");
-    }
-}
-
-function updatePreview() {
-    const objectName = typeSelect.value;
-    const detail = document.getElementById('modello_veicolo')?.value || '';
-    emailSubjectInput.value = buildEmailSubject(objectName, detail);
 }
 
 function updateAttachmentsUI() {
@@ -539,172 +657,22 @@ function updateAttachmentsUI() {
     }
 }
 
-/**
- * Logica Canali di Notifica (Push/Email)
- */
-function setupNotificationChannels() {
-    const channelSelect = document.getElementById('notif_channel_select');
-    const pushWrapper = document.getElementById('push_recipients_wrapper');
-    const emailWrapper = document.getElementById('email_recipients_wrapper');
 
-    if (!channelSelect) return;
-
-    channelSelect.addEventListener('change', () => {
-        const val = channelSelect.value;
-        if (val === 'push') {
-            pushWrapper?.classList.remove('hidden');
-            emailWrapper?.classList.add('hidden');
-        } else if (val === 'email') {
-            pushWrapper?.classList.add('hidden');
-            emailWrapper?.classList.remove('hidden');
-        } else if (val === 'both') {
-            pushWrapper?.classList.remove('hidden');
-            emailWrapper?.classList.remove('hidden');
-        } else {
-            pushWrapper?.classList.add('hidden');
-            emailWrapper?.classList.add('hidden');
-        }
-    });
-}
-
-/**
- * Caricamento Utenti per Push (dalla Rubrica)
- */
-async function loadPushUsers() {
-    if (!currentUser) return;
-    const menu = document.getElementById('push_users_menu');
-    const nativeSelect = document.getElementById('push_users_select');
-    if (!menu || !nativeSelect) return;
-
-    try {
-        const snap = await getDocs(collection(db, "users", currentUser.uid, "contacts"));
-        clearElement(menu);
-        clearElement(nativeSelect);
-
-        if (snap.empty) {
-            menu.appendChild(createElement('div', { className: 'dropdown-option disabled', textContent: 'Nessun contatto salvato' }));
-            return;
-        }
-
-        snap.forEach(docSnap => {
-            const contact = docSnap.data();
-            const displayName = `${contact.nome} ${contact.cognome || ''}`.trim();
-            const email = contact.email; // Usiamo l'email come identificatore per ora
-
-            const opt = createElement('div', {
-                className: 'base-dropdown-item',
-                dataset: { value: email, label: displayName },
-                onclick: (e) => {
-                    e.stopPropagation();
-                    togglePushRecipient(email, displayName);
-                    menu.classList.remove('show'); // Chiude il menu dopo la selezione
-                }
-            }, [
-                createElement('div', { className: 'flex-items-center-between w-full' }, [
-                    createElement('span', { textContent: displayName, className: 'truncate' }),
-                    createElement('span', {
-                        className: 'material-symbols-outlined check-icon',
-                        textContent: 'check_circle',
-                        style: 'font-size: 18px; opacity: 0;' // Visibile solo se selezionato
-                    })
-                ])
-            ]);
-            menu.appendChild(opt);
-
-            const nativeOpt = new Option(displayName, email);
-            nativeSelect.appendChild(nativeOpt);
-        });
-
-        // Se abbiamo già dei destinatari selezionati (es. caricati da Edit), aggiorniamo le label reali dalla rubrica
-        if (selectedPushRecipients.length > 0) {
-            selectedPushRecipients.forEach(r => {
-                const found = Array.from(nativeSelect.options).find(opt => opt.value === r.email);
-                if (found) r.label = found.textContent;
-            });
-            updatePushChips();
-        }
-
-    } catch (e) {
-        console.error("Load Push Users Error:", e);
-    }
-}
-
-let selectedPushRecipients = []; // Array di {email, label}
-
-function togglePushRecipient(email, label) {
-    const idx = selectedPushRecipients.findIndex(r => r.email === email);
-    if (idx === -1) {
-        selectedPushRecipients.push({ email, label });
-    } else {
-        selectedPushRecipients.splice(idx, 1);
-    }
-    updatePushChips();
-    syncNativePushSelect();
-}
-
-function updatePushChips() {
-    const container = document.getElementById('selected_push_chips');
-    const menu = document.getElementById('push_users_menu');
-    if (!container) return;
-    clearElement(container);
-
-    selectedPushRecipients.forEach(r => {
-        const chip = createElement('div', { className: 'selected-chip' }, [
-            createElement('span', { className: 'chip-text', textContent: r.label }),
-            createElement('span', {
-                className: 'material-symbols-outlined chip-remove',
-                textContent: 'cancel',
-                onclick: (e) => {
-                    e.stopPropagation();
-                    togglePushRecipient(r.email, r.label);
-                }
-            })
-        ]);
-        container.appendChild(chip);
-    });
-
-    // Sync active class in menu
-    if (menu) {
-        menu.querySelectorAll('.base-dropdown-item').forEach(opt => {
-            const val = opt.dataset.value;
-            const isActive = selectedPushRecipients.some(r => r.email === val);
-            opt.classList.toggle('active', isActive);
-
-            // Gestione spunta
-            const check = opt.querySelector('.check-icon');
-            if (check) check.style.opacity = isActive ? '1' : '0';
-        });
-    }
-}
-
-function syncNativePushSelect() {
-    const select = document.getElementById('push_users_select');
-    if (!select) return;
-    Array.from(select.options).forEach(opt => {
-        opt.selected = selectedPushRecipients.some(r => r.email === opt.value);
-    });
-}
-
-function setupMultiSelects() {
-    document.addEventListener('click', (e) => {
-        const trigger = e.target.closest('[data-multi-select] .dropdown-trigger');
-        if (trigger) {
-            e.stopPropagation();
-            const container = trigger.closest('[data-multi-select]');
-            const menu = container.querySelector('.base-dropdown-menu');
-            if (menu) menu.classList.toggle('show');
-        } else {
-            document.querySelectorAll('[data-multi-select] .base-dropdown-menu.show').forEach(m => m.classList.remove('show'));
-        }
-    });
-}
+let isSubmitting = false;
 
 function setupSaveLogic() {
-    const btnSave = document.getElementById('save-btn');
-    if (!btnSave) return;
+    const oldBtnSave = document.getElementById('save-btn');
+    if (!oldBtnSave) return;
+
+    // Rimuoviamo eventuali vecchi listener clonando il nodo
+    const btnSave = oldBtnSave.cloneNode(true);
+    oldBtnSave.parentNode.replaceChild(btnSave, oldBtnSave);
 
     btnSave.addEventListener('click', async () => {
-        if (!auth.currentUser) return;
+        if (!auth.currentUser || isSubmitting) {
+            console.log("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
+            return;
+        }
 
         const name = document.getElementById('nome_cognome').value.trim();
         const type = typeSelect.value;
@@ -715,113 +683,118 @@ function setupSaveLogic() {
         if (!date && dateInput.value) {
             const v = dateInput.value;
             if (v.includes('/')) {
-                // Convert DD/MM/YYYY to YYYY-MM-DD
                 const parts = v.split('/');
                 if (parts.length === 3) date = `${parts[2]}-${parts[1]}-${parts[0]}`;
             } else {
-                date = v; // Assume ISO
+                date = v;
             }
         }
-        const email1 = (emailPrimariaSelect.value === 'manual') ? document.getElementById('email_primaria_input').value.trim() : emailPrimariaSelect.value;
-        const email2 = (emailSecondariaSelect.value === 'manual') ? document.getElementById('email_secondaria_input').value.trim() : emailSecondariaSelect.value;
-
-        const notifChannel = document.getElementById('notif_channel_select').value;
-        const pushRecipients = selectedPushRecipients.map(r => r.email);
 
         if (!name || !type || !date) {
-            return showToast("Compila i campi obbligatori", "error");
+            return showToast("Compila i campi obbligatori (Nome, Categoria, Data)", "error");
         }
-
-        // Validazione Canali
-        if (notifChannel === 'email' || notifChannel === 'both') {
-            if (!email1) return showToast("Seleziona un'email per le notifiche", "error");
-        }
-        if (notifChannel === 'push' || notifChannel === 'both') {
-            if (pushRecipients.length === 0) return showToast("Seleziona almeno un utente per le notifiche push", "error");
-        }
-        if (notifChannel === 'none') {
-            const proceed = await showConfirmModal(t('notification_channel'), t('in_app_only_warn'));
-            if (!proceed) return;
-        }
-
-        const data = {
-            uid: currentUser.uid,
-            type,
-            veicolo_modello: document.getElementById('modello_veicolo')?.value || '',
-            email_testo_selezionato: document.getElementById('testo_email_select')?.value || '',
-            title: emailSubjectInput.value,
-            name,
-            dueDate: date,
-            notes: document.getElementById('notes').value,
-            emails: [email1, email2].filter(e => e && e !== 'manual'),
-            notificationChannel: notifChannel,
-            pushRecipients: pushRecipients,
-            notificationDaysBefore: parseInt(notifDaysInput.value),
-            notificationFrequency: parseInt(notifFreqInput.value),
-            createdAt: Timestamp.now(),
-            status: 'active',
-            completed: false
-        };
 
         try {
+            isSubmitting = true;
+            console.log("[FRONTEND-TRACE] Lock UI attivato. Singolo salvataggio in corso...");
+
+            // --- UI LOCK ---
             btnSave.disabled = true;
             clearElement(btnSave);
             setChildren(btnSave, [
                 createElement('span', { className: 'material-symbols-outlined animate-spin mr-2', textContent: 'progress_activity' }),
-                createElement('span', { id: 'save-btn-text', textContent: 'Salvataggio...' })
+                createElement('span', { id: 'save-btn-text', textContent: 'Inizio...' })
             ]);
-
             const btnText = document.getElementById('save-btn-text');
-            let finalDocId = editingScadenzaId;
 
-            // 1. Salvataggio Documento per ottenere l'ID
-            if (editingScadenzaId) {
-                await updateDoc(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), data);
-            } else {
-                const docRef = await addDoc(collection(db, "users", currentUser.uid, "scadenze"), data);
-                finalDocId = docRef.id;
-            }
-
-            // 2. Gestione Allegati (Upload sequenziale garantito)
-            const uploadedRef = [];
+            // --- 1. UPLOAD ALLEGATI (PRIMA della scrittura DB) ---
+            const uploadedAttachments = [];
             if (selectedFiles.length > 0) {
+                console.log(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
-                    if (btnText) btnText.textContent = `Caricamento ${i + 1}/${selectedFiles.length}...`;
+                    if (btnText) btnText.textContent = `Upload ${i + 1}/${selectedFiles.length}...`;
 
-                    const storagePath = `users/${currentUser.uid}/scadenze/${finalDocId}/${Date.now()}_${file.name}`;
+                    const folderId = editingScadenzaId || `new_${Date.now()}`;
+                    const storagePath = `users/${currentUser.uid}/scadenze/${folderId}/${Date.now()}_${file.name}`;
                     const sRef = ref(storage, storagePath);
+
                     const snap = await uploadBytes(sRef, file);
                     const url = await getDownloadURL(snap.ref);
 
-                    uploadedRef.push({
+                    uploadedAttachments.push({
                         name: file.name,
                         url: url,
                         type: file.type,
                         size: file.size,
                         createdAt: new Date().toISOString()
                     });
+                    console.log(`[FRONTEND-TRACE] File ${i + 1} caricato con successo.`);
                 }
             }
 
-            // 3. Update finale con la lista allegati completa (Esistenti + Nuovi)
-            const finalAttachments = [...existingAttachments, ...uploadedRef];
-            await updateDoc(doc(db, "users", currentUser.uid, "scadenze", finalDocId), {
-                attachments: finalAttachments
-            });
+            // --- 2. COSTRUZIONE DOCUMENTO UNIFICATO ---
+            if (btnText) btnText.textContent = "Salvataggio DB...";
+            const finalAttachments = [...existingAttachments, ...uploadedAttachments];
+
+            const email1Sel = document.getElementById('email_primaria_select');
+            const email1 = email1Sel?.value;
+
+            const email2Sel = document.getElementById('email_secondaria_select');
+            const email2 = email2Sel?.value;
+
+            const scadenzaData = {
+                uid: currentUser.uid,
+                name: name,
+                type: type,
+                dueDate: date,
+                veicolo_modello: document.getElementById('modello_veicolo')?.value || '',
+                notes: document.getElementById('notes').value,
+                status: 'active',
+                completed: false,
+                attachments: finalAttachments,
+                updatedAt: Timestamp.now(),
+                mode: currentMode,
+                templateText: document.getElementById('testo_email_select')?.value || '',
+                email1: email1 || '',
+                email2: email2 || '',
+                notifChannel: document.getElementById('notif_channel_select')?.value || 'email',
+                notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
+                notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
+            };
+
+            // Solo per le nuove scadenze aggiungiamo createdAt
+            if (!editingScadenzaId) {
+                scadenzaData.createdAt = Timestamp.now();
+            }
+
+            // --- 3. SCRITTURA UNICA (SINGLE WRITE) ---
+            let finalDocId = editingScadenzaId;
+            console.log("[FRONTEND-TRACE] Scrittura documento Firestore...");
+
+            if (editingScadenzaId) {
+                await updateDoc(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
+            } else {
+                const docRef = await addDoc(collection(db, "users", currentUser.uid, "scadenze"), scadenzaData);
+                finalDocId = docRef.id;
+            }
+
+            console.log(`[FRONTEND-TRACE] Documento ${finalDocId} salvato. Trigger backend atteso.`);
 
             if (btnText) btnText.textContent = "Completato!";
             showToast(editingScadenzaId ? "Scadenza aggiornata!" : "Scadenza salvata!", "success");
-            setTimeout(() => window.location.href = `dettaglio_scadenza.html?id=${finalDocId}`, 1000);
+
+            setTimeout(() => {
+                window.location.href = `dettaglio_scadenza.html?id=${finalDocId}`;
+            }, 1000);
 
         } catch (e) {
-            console.error("Errore Salvatggio:", e);
+            console.error("[FRONTEND-ERROR] Errore critico nel flusso di salvataggio:", e);
             showToast("Errore durante il salvataggio: " + e.message, "error");
             btnSave.disabled = false;
-            // Restore button content
             clearElement(btnSave);
             setChildren(btnSave, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'color: white;', textContent: 'save' })
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
             ]);
         }
     });
@@ -958,8 +931,15 @@ async function loadScadenzaForEdit(id) {
         // 2. Imposta il Mode (popola i select nativi)
         setMode(foundMode);
 
-        // 3. Riempi i campi base
+        // 3. Riempi i campi base e i menu a tendina
         document.getElementById('nome_cognome').value = data.name || '';
+        if (typeSelect && data.type) typeSelect.value = data.type;
+
+        const modVeicolo = document.getElementById('modello_veicolo');
+        if (modVeicolo && data.veicolo_modello) modVeicolo.value = data.veicolo_modello;
+
+        const notifChannel = document.getElementById('notif_channel_select');
+        if (notifChannel && data.notifChannel) notifChannel.value = data.notifChannel;
         // Date Formatting for V5.0 Custom Datepicker
         // Date Formatting for V5.0 Custom Datepicker & Robust Parsing
         const dateInput = document.getElementById('dueDate');
@@ -996,57 +976,64 @@ async function loadScadenzaForEdit(id) {
         }
         document.getElementById('notes').value = data.notes || '';
 
-        // Canale Notifica
-        const channelSelect = document.getElementById('notif_channel_select');
-        if (channelSelect) {
-            channelSelect.value = data.notificationChannel || 'email';
-            channelSelect.dispatchEvent(new Event('change'));
-            // Sync proxy dropdown manually since we changed native value
-            syncCustomDropdowns();
+        // 4. Notifiche (Valori numerici)
+        const dNotice = document.getElementById('display_notif_days');
+        const iNotice = document.getElementById('notif_days_before');
+        const period = data.notif_days_before || data.period || '14';
+        if (dNotice) dNotice.textContent = period;
+        if (iNotice) iNotice.value = period;
+
+        const dFreq = document.getElementById('display_notif_freq');
+        const iFreq = document.getElementById('notif_frequency');
+        const freq = data.notif_frequency || data.freq || '7';
+        if (dFreq) dFreq.textContent = freq;
+        if (iFreq) iFreq.value = freq;
+
+
+        const email1Input = document.getElementById('email_primaria_input');
+        const email1Select = document.getElementById('email_primaria_select');
+        const email2Input = document.getElementById('email_secondaria_input');
+        const email2Select = document.getElementById('email_secondaria_select');
+
+        let emailsList = [];
+        if (Array.isArray(data.emails)) {
+            emailsList = data.emails.map(e => typeof e === 'object' && e !== null ? (e.address || '') : e).filter(e => e);
+        } else if (data.email1 || data.email2) {
+            if (data.email1) emailsList.push(data.email1);
+            if (data.email2) emailsList.push(data.email2);
         }
 
-        // Destinatari Push
-        if (data.pushRecipients && Array.isArray(data.pushRecipients)) {
-            selectedPushRecipients = data.pushRecipients.map(email => ({ email, label: email }));
-            updatePushChips();
-            syncNativePushSelect();
-        }
+        let e1 = emailsList.length > 0 ? emailsList[0] : '';
+        let e2 = emailsList.length > 1 ? emailsList[1] : '';
 
-        // Notifiche
-        document.getElementById('notif_days_before').value = data.notificationDaysBefore || 14;
-        document.getElementById('notif_frequency').value = data.notificationFrequency || 7;
-        document.getElementById('display_notif_days').textContent = data.notificationDaysBefore || 14;
-        document.getElementById('display_notif_freq').textContent = data.notificationFrequency || 7;
-
-        // 4. Seleziona i valori nei Dropdown (Ora che sono popolati da setMode)
-        typeSelect.value = data.type || '';
-
-        const modelSel = document.getElementById('modello_veicolo');
-        if (modelSel) modelSel.value = data.veicolo_modello || '';
-
-        const textSel = document.getElementById('testo_email_select');
-        if (textSel) textSel.value = data.email_testo_selezionato || '';
-
-        // 5. Gestione Email (Primaria e Secondaria) con supporto Manuale
-        const handleEmailEdit = (select, emailsArray, index, inputId) => {
-            if (!emailsArray || !emailsArray[index]) return;
-            const email = emailsArray[index];
-            const input = document.getElementById(inputId);
-
-            if (EMAILS.includes(email)) {
-                select.value = email;
-            } else {
-                select.value = 'manual';
-                if (input) {
-                    input.value = email;
-                    input.classList.remove('hidden');
-                    select.parentElement.classList.add('hidden');
-                }
+        if (e1 && email1Select) {
+            let opt = Array.from(email1Select.options).find(o => o.value === e1);
+            if (!opt) {
+                const newOpt = new Option(e1, e1);
+                email1Select.insertBefore(newOpt, email1Select.lastElementChild);
             }
-        };
+            email1Select.value = e1;
+            if (email1Input) { email1Input.value = ''; email1Input.classList.add('hidden'); }
+        } else if (email1Select) { email1Select.value = ''; }
 
-        handleEmailEdit(emailPrimariaSelect, data.emails, 0, 'email_primaria_input');
-        handleEmailEdit(emailSecondariaSelect, data.emails, 1, 'email_secondaria_input');
+        if (e2 && email2Select) {
+            let opt = Array.from(email2Select.options).find(o => o.value === e2);
+            if (!opt) {
+                const newOpt = new Option(e2, e2);
+                email2Select.insertBefore(newOpt, email2Select.lastElementChild);
+            }
+            email2Select.value = e2;
+            if (email2Input) { email2Input.value = ''; email2Input.classList.add('hidden'); }
+        } else if (email2Select) {
+            email2Select.value = '';
+            if (email2Input) { email2Input.value = ''; email2Input.classList.add('hidden'); }
+        }
+
+        const testoEmailSelect = document.getElementById('testo_email_select');
+        if (data.templateText && testoEmailSelect) {
+            const opt = Array.from(testoEmailSelect.options).find(o => o.value === data.templateText);
+            if (opt) { testoEmailSelect.value = data.templateText; }
+        }
 
         // 6. Allegati esistenti
         existingAttachments = data.attachments || [];
@@ -1126,6 +1113,10 @@ function syncCustomDropdowns() {
                     i.classList.toggle('active', i.dataset.value === select.value);
                 });
             }
+
+            if (['testo_email_select', 'modello_veicolo'].includes(select.id)) {
+                if (typeof updatePreview === 'function') updatePreview();
+            }
         };
 
         updateSelectionUI();
@@ -1153,7 +1144,7 @@ function syncCustomDropdowns() {
 
             // Add delete button for user-defined items (skip placeholders or manual triggers)
             const isUserItem = opt.value && !['manual', ''].includes(opt.value);
-            const isManageable = ['tipo_scadenza', 'modello_veicolo', 'testo_email_select'].includes(sel.id);
+            const isManageable = ['tipo_scadenza', 'modello_veicolo', 'testo_email_select', 'email_primaria_select', 'email_secondaria_select'].includes(sel.id);
 
             if (isUserItem && isManageable) {
                 const actions = createElement('div', { className: 'dropdown-item-actions' });
@@ -1193,6 +1184,23 @@ function syncCustomDropdowns() {
                 e.stopPropagation();
                 sel.value = opt.value;
                 sel.dispatchEvent(new Event('change'));
+
+                // --- Nuovo: Aggiorna campi notifica se presenti nel dataset dell'opzione ---
+                if (sel.id === 'tipo_scadenza') {
+                    if (opt.dataset.period) {
+                        const displayPeriod = document.getElementById('display_notif_days');
+                        const inputPeriod = document.getElementById('notif_days_before');
+                        if (displayPeriod) displayPeriod.textContent = opt.dataset.period;
+                        if (inputPeriod) inputPeriod.value = opt.dataset.period;
+                    }
+                    if (opt.dataset.freq) {
+                        const displayFreq = document.getElementById('display_notif_freq');
+                        const inputFreq = document.getElementById('notif_frequency');
+                        if (displayFreq) displayFreq.textContent = opt.dataset.freq;
+                        if (inputFreq) inputFreq.value = opt.dataset.freq;
+                    }
+                }
+
                 parent.classList.remove('show');
             };
             parent.appendChild(item);
@@ -1200,3 +1208,32 @@ function syncCustomDropdowns() {
     });
 }
 
+function updatePreview() {
+    const previewArea = document.getElementById('oggetto_email');
+    if (!previewArea) return;
+
+    const templateText = document.getElementById('testo_email_select')?.value || '';
+    if (!templateText) {
+        previewArea.value = '';
+        return;
+    }
+
+    let compiledText = '';
+    if (currentMode === 'automezzi') {
+        const vehicle = document.getElementById('modello_veicolo')?.value || '';
+        const vehicleStr = vehicle ? ` ${vehicle.trim()}` : '';
+        compiledText = `E' in scadenza ${templateText.trim()}${vehicleStr}`;
+    } else if (currentMode === 'documenti') {
+        const vehicle = document.getElementById('modello_veicolo')?.value || '';
+        let code = vehicle.trim();
+        if (code.includes(' - ')) {
+            code = code.split(' - ')[1].trim();
+        }
+        const vehicleStr = code ? ` ${code}` : '';
+        compiledText = `E' in scadenza ${templateText.trim()}${vehicleStr}`;
+    } else {
+        compiledText = `E' in scadenza ${templateText.trim()}`;
+    }
+
+    previewArea.value = compiledText;
+}

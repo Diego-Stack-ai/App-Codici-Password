@@ -140,7 +140,8 @@
 }
 
 /* --- 2. LAYOUT & SECTIONS --- */
-.form-section {
+/* .base-container prefisso: specificità 0,2,0 supera .card { height } — garantisce espansione naturale */
+.base-container .form-section {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 20px;
@@ -148,8 +149,8 @@
     overflow: visible;
     position: relative;
     z-index: 10;
-    height: auto !important;
-    /* Forza espansione naturale */
+    height: auto;
+    /* Espansione naturale */
     display: flex;
     flex-direction: column;
 }
@@ -204,10 +205,11 @@
 }
 
 /* --- 3. PLANNING ELEMENTS --- */
+/* .planning-grid: sempre 2 colonne (override media-query generali) */
+/* La specificità + ordine in cascade garantisce 2 colonne senza !important */
 .planning-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr) !important;
-    /* Sempre 2 colonne */
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
 }
 
@@ -300,7 +302,7 @@
 }
 
 .btn-manage-config span {
-    font-size: 1.1rem !important;
+    font-size: 1.1rem;
 }
 
 .base-dropdown-item {
@@ -318,50 +320,50 @@
 
 .btn-edit-opt,
 .btn-delete-opt {
-    opacity: 1;
-    /* Piena opacità per contrasto */
+    opacity: 0.7;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.05);
-    /* Sfondo leggero per l'icona */
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
     width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 2px;
 }
 
 .btn-edit-opt {
-    color: #60a5fa;
-    /* Blu-400 più bilanciato */
+    color: var(--accent);
 }
 
 .btn-delete-opt {
-    color: #f87171;
-    /* Rosso Corallo vivo */
+    color: var(--status-error);
 }
 
 .btn-edit-opt:hover {
-    background: rgba(96, 165, 250, 0.15);
-    color: #fff;
+    background: transparent;
+    color: var(--accent);
     transform: scale(1.1);
+    opacity: 1;
 }
 
 .btn-delete-opt:hover {
-    background: rgba(248, 113, 113, 0.15);
-    color: #fff;
+    background: transparent;
+    color: var(--status-error);
+    /* Rosso più vivo */
     transform: scale(1.1);
+    opacity: 1;
 }
 
 .btn-edit-opt span,
 .btn-delete-opt span {
-    font-size: 1.1rem !important;
+    font-size: 1.1rem;
 }
 
 .label-icon {
-    font-size: 1rem !important;
+    font-size: 1rem;
 }
 
 .input-textarea {
@@ -377,12 +379,13 @@
     padding: 0;
 }
 
-.base-dropdown .dropdown-trigger {
-    height: auto !important;
-    padding: 0.75rem 1rem !important;
-    border-radius: 16px !important;
-    background: var(--card-bg) !important;
-    border: 1px solid var(--card-border) !important;
+/* Dropdown trigger override — specificity raised via .form-section parent */
+.form-section .base-dropdown .dropdown-trigger {
+    height: auto;
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     min-height: 64px;
     /* Allineamento con settings-item */
 }
@@ -393,6 +396,14 @@
     gap: 1rem;
     overflow: hidden;
     flex: 1;
+    min-width: 0;
+}
+
+.dropdown-label.truncate {
+    display: block;
+    min-width: 0;
+    flex: 1;
+    text-align: left;
 }
 
 .dropdown-icon-box {
@@ -416,26 +427,42 @@
     flex-shrink: 0;
 }
 
+.dropdown-with-action {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.dropdown-with-action .base-dropdown {
+    flex: 1;
+    min-width: 0;
+}
+
 .btn-manage-config-inline {
+    margin-top: 16px;
+    /* Aligns visually with the 64px tall trigger button ( (64 - 32) / 2 = 16 ) */
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-    background: rgba(255, 255, 255, 0.05);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.2s;
-    padding: 0;
+    padding: 2px;
+    opacity: 0.6;
 }
 
 .btn-manage-config-inline:hover {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: #3b82f6;
-    color: #3b82f6;
-    transform: scale(1.05);
+    background: transparent;
+    color: var(--accent);
+    transform: scale(1.1);
+    opacity: 1;
 }
 
 .dropdown-label {
@@ -444,64 +471,64 @@
     color: var(--text-primary);
 }
 
-/* Modifica stile Menu a tendina aperto per matchare Configurazione */
-.base-dropdown {
-    display: flex !important;
-    flex-direction: column !important;
-    height: auto !important;
-    width: 100% !important;
+/* Dropdown layout override — specificity raised */
+.form-section .base-dropdown {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    width: 100%;
 }
 
-.base-dropdown-menu {
-    position: relative !important;
+.form-section .base-dropdown-menu {
+    position: relative;
     /* Forza il posizionamento relativo per spingere il contenuto */
-    top: 0 !important;
-    width: 100% !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 0.5rem 0 !important;
+    top: 0;
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0;
     margin-top: 0.5rem;
     display: none;
     /* Gestito dalla classe .show */
     flex-direction: column;
     gap: 0.6rem;
-    box-shadow: none !important;
-    max-height: none !important;
+    box-shadow: none;
+    max-height: none;
     /* Rimuovo limiti di altezza per l'espansione totale */
-    overflow: visible !important;
+    overflow: visible;
     z-index: 1;
 }
 
-.base-dropdown-menu.show {
-    display: flex !important;
+.form-section .base-dropdown-menu.show {
+    display: flex;
 }
 
-.base-dropdown-item {
-    background: rgba(30, 64, 175, 0.25) !important;
+.form-section .base-dropdown-item {
+    background: rgba(30, 64, 175, 0.25);
     /* Blu medio bilanciato */
-    border: 1px solid rgba(59, 130, 246, 0.2) !important;
-    border-radius: 14px !important;
-    padding: 0.85rem 1rem !important;
-    margin-bottom: 0 !important;
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    color: var(--text-primary) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-primary);
     backdrop-filter: blur(15px);
 }
 
-.base-dropdown-item:hover {
-    background: rgba(30, 64, 175, 0.45) !important;
+.form-section .base-dropdown-item:hover {
+    background: rgba(30, 64, 175, 0.45);
     /* Più intenso all'hover */
-    border-color: rgba(96, 165, 250, 0.5) !important;
+    border-color: rgba(96, 165, 250, 0.5);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.base-dropdown-item.active {
-    background: rgba(59, 130, 246, 0.1) !important;
-    border-color: var(--accent) !important;
-    color: var(--accent) !important;
+.form-section .base-dropdown-item.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .input-wrapper.read-only {
@@ -659,16 +686,14 @@
 }
 
 /* --- 7. UTILS --- */
-.hidden {
-    display: none !important;
-}
+/* .hidden è definito in core.css — non duplicare */
 
 .icon-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-purple {
-    color: #a855f7;
+    color: var(--color-purple);
 }
 
 .icon-emerald {
@@ -694,7 +719,7 @@
 }
 
 .form-group {
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.75rem;
     /* Ridotto da 1.5rem */
 }
 

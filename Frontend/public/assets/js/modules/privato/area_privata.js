@@ -15,6 +15,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // State locale per evitare reload inutili
 let _isInitialized = false;
@@ -141,7 +142,33 @@ async function loadTopAccounts(uid) {
             return;
         }
 
-        const items = snap.docs.map(doc => createMicroAccountCard(doc.id, doc.data()));
+        // 🔐 PRE-SBLOCCO SILENZIOSO (Auto-Unlock Ready)
+        const masterKey = await ensureMasterKey().catch(() => null);
+
+        const items = await Promise.all(snap.docs.map(async d => {
+            const data = d.data();
+
+            // Decrittazione preventiva prima della creazione card
+            if (data._encrypted && masterKey) {
+                try {
+                    console.log(`[DEBUG_CRYPTO] Decrypting account ${d.id}:`, {
+                        username: data.username,
+                        account: data.account,
+                        password: data.password ? (typeof data.password === 'string' ? `${data.password.substring(0, 10)}...` : typeof data.password) : 'N/A'
+                    });
+                    data.username = data.username ? await decrypt(data.username, masterKey) : data.username;
+                    data.account = data.account ? await decrypt(data.account, masterKey) : data.account;
+                    data.password = data.password ? await decrypt(data.password, masterKey) : data.password;
+                    if (data.email && data.email.includes(':')) {
+                        data.email = await decrypt(data.email, masterKey);
+                    }
+                } catch (e) {
+                    console.error("[AreaPrivata] Decryption failed for:", d.id, e);
+                }
+            }
+            return createMicroAccountCard(d.id, data);
+        }));
+
         setChildren(list, items);
     } catch (e) {
         logError("TopAccounts", e);

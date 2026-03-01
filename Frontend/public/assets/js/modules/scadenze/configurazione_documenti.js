@@ -11,9 +11,23 @@ import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 
 const DEFAULT_CONFIG = {
-    deadlineTypes: [],
-    models: [],
-    emailTemplates: []
+    deadlineTypes: [
+        { name: 'Patente', freq: 7, period: 56 },
+        { name: 'Carta Identità', freq: 14, period: 56 },
+        { name: 'Passaporto', freq: 14, period: 28 },
+        { name: 'Codice fiscale', freq: 7, period: 56 }
+    ],
+    models: [
+        "Patente - U136W4689N",
+        "Carta identità - CA55677EP",
+        "Codice fiscale - 80380000500313823013"
+    ],
+    emailTemplates: [
+        "la tua patente",
+        "Il tuo documento di Identità",
+        "Il tuo passaporto",
+        "Il tuo codice fiscale"
+    ]
 };
 
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));

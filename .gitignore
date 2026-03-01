@@ -70,3 +70,5 @@ node_modules/
 
 # IDX config
 .idx/
+serviceAccountKey.json
+scripts_import_dati/serviceAccountKey.json

@@ -8,6 +8,8 @@
     /* 12px - Menu compatti, Badge, FAB labels */
     --fs-xs: 0.85rem;
     /* 13.6px - Label campi, Placeholder, Testi secondari */
+    --fs-sm: 0.875rem;
+    /* 14px - Testi descrittivi, info-text, note compatte */
     --fs-base: 1rem;
     /* 16px - Testo standard, Input */
     --fs-md: 1.1rem;

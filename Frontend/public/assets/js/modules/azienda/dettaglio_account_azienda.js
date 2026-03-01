@@ -17,6 +17,7 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -85,6 +86,37 @@ async function loadAccount() {
         }
 
         originalData = { id: docSnap.id, ...docSnap.data() };
+
+        // 🔐 DECRIPTAZIONE (Auto-Unlock Compliant)
+        if (originalData._encrypted) {
+            try {
+                const masterKey = await ensureMasterKey();
+                const decryptIfPossible = async (val) => {
+                    if (!val) return val;
+                    try { return await decrypt(val, masterKey); } catch (e) { return "---"; }
+                };
+
+                originalData.username = await decryptIfPossible(originalData.username);
+                originalData.account = await decryptIfPossible(originalData.account);
+                originalData.password = await decryptIfPossible(originalData.password);
+
+                if (Array.isArray(originalData.banking)) {
+                    originalData.banking = await Promise.all(originalData.banking.map(async b => ({
+                        ...b,
+                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva),
+                        cards: await Promise.all((b.cards || []).map(async c => ({
+                            ...c,
+                            cardNumber: await decryptIfPossible(c.cardNumber),
+                            pin: await decryptIfPossible(c.pin),
+                            ccv: await decryptIfPossible(c.ccv)
+                        })))
+                    })));
+                }
+            } catch (e) {
+                console.warn("[Dettaglio Azienda] Decrittazione saltata o annullata.");
+                showToast("Dati cifrati: sbloccare la Vault per visualizzare.", "warning");
+            }
+        }
 
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
@@ -311,6 +343,17 @@ function renderBanking(acc) {
 }
 
 function setupActions() {
+    // Phone Call Buttons (CSP Compliant)
+    document.getElementById('btn-call-ref-phone')?.addEventListener('click', () => {
+        const val = document.getElementById('ref-phone')?.value;
+        if (val) window.location.href = `tel:${val.replace(/\s+/g, '')}`;
+    });
+
+    document.getElementById('btn-call-ref-mobile')?.addEventListener('click', () => {
+        const val = document.getElementById('ref-mobile')?.value;
+        if (val) window.location.href = `tel:${val.replace(/\s+/g, '')}`;
+    });
+
     // Copy Buttons logic
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.onclick = () => {
@@ -651,7 +694,7 @@ async function renderGuests(guests) {
         try {
             const docRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentId);
             await updateDoc(docRef, { sharedWith: updatedGuests });
-        } catch (e) { console.error("SelfHealing update failed", e); }
+        } catch (e) { console.error("Auto-Healing di Stato update failed", e); }
     }
 }
 
@@ -779,7 +822,7 @@ async function revokeRecipientV3(email) {
             let hasActiveGests = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
             let newVisibility = hasActiveGests ? "shared" : "private";
 
-            // V5.2 AUTO-HEALING: Se torna privato e non era un Memo esplicito, torna ad essere Account
+            // V5.2 AUTO-HEALING DI STATO: Se torna privato e non era un Memo esplicito, torna ad essere Account
             let newType = data.type;
             if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
                 newType = 'account';
@@ -841,3 +884,13 @@ function setupReadOnlyUI() {
     const btnEdit = document.getElementById('btn-edit-footer');
     if (btnEdit) btnEdit.remove();
 }
+
+// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
+window.dettaglioAccountAzienda = {
+    async decryptAll() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accountId = urlParams.get('id');
+        const bizId = urlParams.get('aziendaId');
+        if (accountId && bizId) return await loadAccount(bizId, accountId);
+    }
+};

@@ -12,6 +12,16 @@ import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
+import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
+
+// 🛡️ ESPOSIZIONE GLOBALE (V3.2 — Audit Ready)
+window.ensureMasterKey = ensureMasterKey;
+window.clearSession = clearSession;
+window.isAutoUnlockActive = isAutoUnlockActive;
+window.encrypt = encrypt;
+window.decrypt = decrypt;
+
+export { encrypt, decrypt };
 
 function createCopyBtn(text) {
     return createElement('button', {
@@ -39,7 +49,7 @@ let profileLabels = {
     addressTypes: ['Residenza', 'Domicilio', 'Ufficio', 'Altro'],
     utilityTypes: ['Codice POD', 'Contatore Acqua', 'Contatore Metano', 'Fibra', 'Altro'],
     phoneLabels: ['Cellulare', 'Fisso', 'Principale', 'Altro'],
-    emailLabels: ['Personale', 'Lavoro', 'Principale', 'Altro'],
+    emailLabels: ['Personale', 'Lavoro', 'Principale', 'Email di recupero', 'Altro'],
     documentTypes: ['Carta Identità', 'Patente', 'Codice Fiscale', 'Passaporto', 'Altro']
 };
 
@@ -92,9 +102,86 @@ async function loadUserData(user) {
 
         currentUserData = userDoc.data();
 
+        // 🔐 PROTOCOLLO BLINDA (V6.1.5): Decrittazione Granulare Universale
+        const masterKey = await ensureMasterKey();
+        if (masterKey) {
+            const isEncryptedValue = (val) => {
+                if (!val || typeof val !== 'string' || val.length < 30) return false;
+                return /^[A-Za-z0-9+/]+={0,2}$/.test(val);
+            };
+
+            const decryptIfPossible = async (val) => {
+                if (val === undefined || val === null) return '';
+                if (!isEncryptedValue(val)) return val;
+                try { return await decrypt(val, masterKey); } catch (e) { return val; }
+            };
+
+            // Dati personali
+            currentUserData.nome = await decryptIfPossible(currentUserData.nome);
+            currentUserData.cognome = await decryptIfPossible(currentUserData.cognome);
+            currentUserData.birth_place = await decryptIfPossible(currentUserData.birth_place);
+            currentUserData.note = await decryptIfPossible(currentUserData.note);
+
+            // Telefoni
+            if (Array.isArray(currentUserData.contactPhones)) {
+                currentUserData.contactPhones = await Promise.all(currentUserData.contactPhones.map(async p => ({
+                    ...p,
+                    number: await decryptIfPossible(p.number)
+                })));
+            }
+
+            // Indirizzi
+            if (Array.isArray(currentUserData.userAddresses)) {
+                currentUserData.userAddresses = await Promise.all(currentUserData.userAddresses.map(async a => ({
+                    ...a,
+                    address: await decryptIfPossible(a.address),
+                    civic: await decryptIfPossible(a.civic),
+                    city: await decryptIfPossible(a.city),
+                    cap: await decryptIfPossible(a.cap),
+                    province: await decryptIfPossible(a.province),
+                    utilities: await Promise.all((a.utilities || []).map(async u => ({
+                        ...u,
+                        value: await decryptIfPossible(u.value)
+                    })))
+                })));
+            }
+
+            // Documenti (Copertura Totale)
+            if (Array.isArray(currentUserData.documenti)) {
+                currentUserData.documenti = await Promise.all(currentUserData.documenti.map(async d => ({
+                    ...d,
+                    num_serie: await decryptIfPossible(d.num_serie),
+                    cf_value: await decryptIfPossible(d.cf_value),
+                    id_number: await decryptIfPossible(d.id_number),
+                    license_number: await decryptIfPossible(d.license_number),
+                    cf: await decryptIfPossible(d.cf),
+                    rilasciato_da: await decryptIfPossible(d.rilasciato_da),
+                    luogo_rilascio: await decryptIfPossible(d.luogo_rilascio),
+                    username: await decryptIfPossible(d.username),
+                    password: await decryptIfPossible(d.password),
+                    pin: await decryptIfPossible(d.pin),
+                    puk: await decryptIfPossible(d.puk),
+                    codice_app: await decryptIfPossible(d.codice_app),
+                    note: await decryptIfPossible(d.note)
+                })));
+            }
+
+            // Email
+            if (Array.isArray(currentUserData.contactEmails)) {
+                currentUserData.contactEmails = await Promise.all(currentUserData.contactEmails.map(async e => ({
+                    ...e,
+                    password: await decryptIfPossible(e.password),
+                    note: await decryptIfPossible(e.note)
+                })));
+            }
+            console.log("[VaultCheck] Decrittazione granulare V6.1.5 completata.");
+        }
+
         // Hero Header
-        const fullName = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim() || user.displayName || 'Utente';
-        if (nameDisplay) nameDisplay.textContent = fullName;
+        const fullNameRaw = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim();
+        const finalFullName = (fullNameRaw && !fullNameRaw.includes('[ERROR]')) ? fullNameRaw : (user.displayName || 'Utente');
+
+        if (nameDisplay) nameDisplay.textContent = finalFullName;
         if (avatarImg) avatarImg.src = currentUserData.photoURL || user.photoURL || "assets/images/user-avatar-5.png";
 
         // View Population
@@ -169,7 +256,10 @@ function renderPhonesView() {
 }
 
 function createPhoneCard(phone, idx) {
-    const card = createElement('div', { className: 'form-card' }, [
+    const card = createElement('div', {
+        className: 'form-card',
+        style: 'margin-bottom: 1.25rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: none;'
+    }, [
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'card-icon-stack' }, [
                 createElement('div', { className: 'card-icon-box' }, [
@@ -214,37 +304,54 @@ window.addPhone = async () => {
         { key: 'number', label: 'Numero', icon: 'call' }
     ];
     showProfileModal('Aggiungi Telefono', fields, {}, async (newData) => {
-        contactPhones.push(newData);
-        await updateDoc(doc(db, "users", currentUserUid), { contactPhones });
-        renderPhonesView();
-        showToast(t('success_save'), "success");
+        try {
+            contactPhones.push(newData);
+            await syncData();
+            renderPhonesView();
+            showToast(t('success_save'), "success");
+        } catch (e) {
+            contactPhones.pop();
+            console.error('[addPhone] Errore:', e);
+            showToast("Errore durante il salvataggio del telefono.", "error");
+        }
     });
 };
 
 window.editPhone = async (idx) => {
     const phone = contactPhones[idx];
-    // Ensure label exists
-    if (!phone.label) {
-        phone.label = profileLabels.phoneLabels[0];
-    }
+    if (!phone.label) phone.label = profileLabels.phoneLabels[0];
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
         { key: 'number', label: 'Numero', icon: 'call' }
     ];
     showProfileModal('Modifica Telefono', fields, phone, async (newData) => {
-        contactPhones[idx] = newData;
-        await updateDoc(doc(db, "users", currentUserUid), { contactPhones });
-        renderPhonesView();
-        showToast(t('success_save'), "success");
+        const backup = { ...contactPhones[idx] };
+        try {
+            contactPhones[idx] = newData;
+            await syncData();
+            renderPhonesView();
+            showToast(t('success_save'), "success");
+        } catch (e) {
+            contactPhones[idx] = backup;
+            console.error('[editPhone] Errore:', e);
+            showToast("Errore durante la modifica del telefono.", "error");
+        }
     });
 };
 
 window.deletePhone = async (idx) => {
     if (!confirm(t('confirm_delete') || 'Eliminare questo telefono?')) return;
-    contactPhones.splice(idx, 1);
-    await updateDoc(doc(db, "users", currentUserUid), { contactPhones });
-    renderPhonesView();
-    showToast(t('success_delete') || 'Telefono eliminato', "success");
+    const backup = [...contactPhones];
+    try {
+        contactPhones.splice(idx, 1);
+        await syncData();
+        renderPhonesView();
+        showToast(t('success_delete') || 'Telefono eliminato', "success");
+    } catch (e) {
+        contactPhones = backup;
+        console.error('[deletePhone] Errore:', e);
+        showToast("Errore durante l'eliminazione del telefono.", "error");
+    }
 };
 
 /**
@@ -610,7 +717,10 @@ function renderAddressesView() {
 }
 
 function createAddressCard(addr, idx) {
-    const card = createElement('div', { className: 'form-card' }, [
+    const card = createElement('div', {
+        className: 'form-card',
+        style: 'margin-bottom: 1.25rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: none;'
+    }, [
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'card-icon-stack' }, [
                 createElement('div', { className: 'card-icon-box' }, [
@@ -712,7 +822,10 @@ function renderEmailsView() {
     btnAdd.onclick = () => window.editEmail(-1);
 
     const items = contactEmails.map((e, idx) => {
-        return createElement('div', { className: 'form-card' }, [
+        return createElement('div', {
+            className: 'form-card',
+            style: 'margin-bottom: 1.25rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: none;'
+        }, [
             createElement('div', { className: 'card-header-row' }, [
                 createElement('div', { className: 'field-header' }, [
                     createElement('input', {
@@ -735,7 +848,7 @@ function renderEmailsView() {
             ]),
             createElement('div', { className: 'card-fields-container' }, [
                 createElement('div', { className: 'field-value-row' }, [
-                    createElement('span', { className: 'data-value', textContent: e.address || '-' }),
+                    createElement('span', { className: 'data-value truncate', textContent: e.address || '-' }),
                     createCopyBtn(e.address)
                 ]),
                 e.password ? createElement('div', { className: 'field-value-row' }, [
@@ -756,10 +869,14 @@ function renderEmailsView() {
                         ]),
                         createCopyBtn(e.password)
                     ])
-                ]) : createElement('span', { className: 'data-value-sub', textContent: 'No PWD' })
+                ]) : createElement('span', { className: 'data-value-sub', textContent: 'No PWD' }),
+                e.note ? createElement('div', { className: 'note-display-lite', style: 'margin-top: 8px; font-size: 11px; opacity: 0.6; color: var(--text-secondary); line-height: 1.4; border-left: 2px solid var(--accent); padding-left: 8px;' }, [
+                    createElement('span', { textContent: e.note })
+                ]) : null
             ])
         ]);
     });
+
     setChildren(container, [btnAdd, ...items]);
 }
 
@@ -767,45 +884,63 @@ window.addEmail = async () => {
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
         { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
-        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' }
+        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' },
+        { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' }
     ];
     showProfileModal('Aggiungi Email', fields, { label: profileLabels.emailLabels[0] }, async (newData) => {
-        contactEmails.push(newData);
-        await updateDoc(doc(db, "users", currentUserUid), { contactEmails });
-        renderEmailsView();
-        showToast(t('success_save'), "success");
+        try {
+            contactEmails.push(newData);
+            await syncData(); // [FIX] cifratura via syncData invece di updateDoc diretto
+            renderEmailsView();
+            showToast(t('success_save'), "success");
+        } catch (e) {
+            contactEmails.pop(); // rollback locale
+            console.error('[addEmail] Errore:', e);
+            showToast("Errore durante il salvataggio dell'email.", "error");
+        }
     });
 };
 
 window.editEmail = async (idx) => {
-    if (idx === -1) {
-        window.addEmail();
-        return;
-    }
+    if (idx === -1) { window.addEmail(); return; }
     const email = contactEmails[idx];
-    // Ensure label exists
-    if (!email.label) {
-        email.label = profileLabels.emailLabels[0];
-    }
+    if (!email.label) email.label = profileLabels.emailLabels[0];
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
         { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
-        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' }
+        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' },
+        { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' }
     ];
     showProfileModal('Modifica Email', fields, email, async (newData) => {
-        contactEmails[idx] = newData;
-        await updateDoc(doc(db, "users", currentUserUid), { contactEmails });
-        renderEmailsView();
-        showToast(t('success_save'), "success");
+        const backup = { ...contactEmails[idx] };
+        try {
+            contactEmails[idx] = newData;
+            await syncData(); // [FIX] cifratura via syncData invece di updateDoc diretto
+            renderEmailsView();
+            showToast(t('success_save'), "success");
+        } catch (e) {
+            contactEmails[idx] = backup; // rollback locale
+            console.error('[editEmail] Errore:', e);
+            showToast("Errore durante la modifica dell'email.", "error");
+        }
     });
 };
 
 window.deleteEmail = async (idx) => {
     if (!confirm(t('confirm_delete') || 'Eliminare questa email?')) return;
-    contactEmails.splice(idx, 1);
-    await updateDoc(doc(db, "users", currentUserUid), { contactEmails });
-    renderEmailsView();
-    showToast(t('success_delete') || 'Email eliminata', "success");
+    const backup = [...contactEmails];
+    try {
+        contactEmails.splice(idx, 1);
+        await syncData(); // [FIX] usa syncData — filtra + cifra + scrive
+        contactEmails = (contactEmails || []).filter(e => e != null); // assicura array locale pulito
+        renderEmailsView();
+        console.log(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
+        showToast(t('success_delete') || 'Email eliminata con successo', "success");
+    } catch (e) {
+        contactEmails = backup; // rollback locale
+        console.error('[deleteEmail] Errore:', e);
+        showToast("Errore durante l'eliminazione. Riprova.", "error");
+    }
 };
 
 /**
@@ -824,13 +959,19 @@ function renderDocumentiView() {
 
     const items = userDocuments.map((docItem, idx) => {
         const num = docItem.num_serie || docItem.cf_value || docItem.id_number || docItem.license_number || docItem.cf || '-';
+        const subDetails = [];
+        if (docItem.categoria) subDetails.push(docItem.categoria);
+        if (docItem.rilasciato_da) subDetails.push(docItem.rilasciato_da);
+        if (docItem.luogo_rilascio) subDetails.push(docItem.luogo_rilascio);
+        if (docItem.id_number) subDetails.push(docItem.id_number);
+
         return createElement('div', { className: 'form-card' }, [
             createElement('div', { className: 'card-header-row' }, [
                 createElement('div', { className: 'card-icon-stack' }, [
                     createElement('div', { className: 'card-icon-box' }, [
                         createElement('span', { className: 'material-symbols-outlined filled', textContent: 'description' })
                     ]),
-                    createElement('span', { className: 'data-label', textContent: docItem.type })
+                    createElement('span', { className: 'card-title-accent', textContent: docItem.type })
                 ]),
                 createElement('div', { className: 'card-actions-row' }, [
                     createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-doc', idx } }, [
@@ -847,7 +988,33 @@ function renderDocumentiView() {
                         createElement('span', { className: 'data-value', textContent: num }),
                         createCopyBtn(num)
                     ]),
-                    createElement('span', { className: 'data-value-sub', textContent: docItem.expiry_date ? formatDateToIT(docItem.expiry_date) : '' })
+                    subDetails.length > 0 ? createElement('span', { className: 'data-value-sub', style: 'display: block; margin-bottom: 4px;', textContent: subDetails.join(' - ') }) : null,
+                    docItem.pin || docItem.puk || docItem.codice_app ? createElement('div', { className: 'flex-col-gap', style: 'margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;' }, [
+                        docItem.pin ? createElement('div', { className: 'field-value-row' }, [
+                            createElement('span', { className: 'data-label-xs', style: 'width: 80px;', textContent: 'PIN:' }),
+                            createElement('span', { className: 'data-value-sm', textContent: docItem.pin }),
+                            createCopyBtn(docItem.pin)
+                        ]) : null,
+                        docItem.puk ? createElement('div', { className: 'field-value-row' }, [
+                            createElement('span', { className: 'data-label-xs', style: 'width: 80px;', textContent: 'PUK:' }),
+                            createElement('span', { className: 'data-value-sm', textContent: docItem.puk }),
+                            createCopyBtn(docItem.puk)
+                        ]) : null,
+                        docItem.codice_app ? createElement('div', { className: 'field-value-row' }, [
+                            createElement('span', { className: 'data-label-xs', style: 'width: 80px;', textContent: 'Cod. App:' }),
+                            createElement('span', { className: 'data-value-sm', textContent: docItem.codice_app }),
+                            createCopyBtn(docItem.codice_app)
+                        ]) : null
+                    ]) : null,
+                    docItem.data_rilascio ? createElement('div', { className: 'flex-center-row', style: 'gap: 4px; opacity: 0.8; margin-top: 8px; margin-bottom: 2px;' }, [
+                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'history' }),
+                        createElement('span', { className: 'data-value-sub', textContent: `Emesso: ${formatDateToIT(docItem.data_rilascio)}` })
+                    ]) : null,
+                    docItem.expiry_date ? createElement('div', { className: 'flex-center-row', style: 'gap: 4px; opacity: 0.8;' }, [
+                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'event' }),
+                        createElement('span', { className: 'data-value-sub', textContent: `Scadenza: ${formatDateToIT(docItem.expiry_date)}` })
+                    ]) : null,
+                    docItem.note ? createElement('p', { className: 'note-text', style: 'margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;', textContent: docItem.note }) : null
                 ])
             ])
         ]);
@@ -883,44 +1050,162 @@ function setupDelegation() {
     });
 }
 
-// Internal Logic (Simulated common logic as previously refactored)
 async function syncData() {
+    console.log("[VaultCheck] Avvio sincronizzazione protetta...");
     try {
-        await updateDoc(doc(db, "users", currentUserUid), {
-            userAddresses, contactPhones, contactEmails, documenti: userDocuments
-        });
+        const user = auth.currentUser;
+        if (!user) {
+            showToast("Sessione scaduta: ricarica la pagina.", "error");
+            return;
+        }
+
+        // Sanificazione array
+        userAddresses = (userAddresses || []).filter(a => a != null);
+        contactPhones = (contactPhones || []).filter(p => p != null);
+        contactEmails = (contactEmails || []).filter(e => e != null);
+        userDocuments = (userDocuments || []).filter(d => d != null);
+
+        // Verifica MasterKey
+        const masterKey = await ensureMasterKey();
+        if (!masterKey) {
+            showToast("Chiave Master mancante: impossibile cifrare.", "error");
+            return;
+        }
+
+        console.log("[VaultCheck] Cifratura in corso...");
+
+        // Cifratura Documenti (Selective Encryption V7.5)
+        const encryptedDocuments = await Promise.all(userDocuments.map(async d => ({
+            ...d,
+            num_serie: await encrypt(d.num_serie || '', masterKey),
+            cf_value: await encrypt(d.cf_value || '', masterKey),
+            id_number: await encrypt(d.id_number || '', masterKey),
+            license_number: await encrypt(d.license_number || '', masterKey),
+            cf: await encrypt(d.cf || '', masterKey),
+            username: await encrypt(d.username || '', masterKey),
+            password: await encrypt(d.password || '', masterKey),
+            pin: await encrypt(d.pin || '', masterKey),
+            puk: await encrypt(d.puk || '', masterKey),
+            codice_app: await encrypt(d.codice_app || '', masterKey),
+            note: await encrypt(d.note || '', masterKey)
+        })));
+
+        // Cifratura Email (Selective: solo password e note)
+        const encryptedEmails = await Promise.all(contactEmails.map(async e => ({
+            ...e,
+            password: await encrypt(e.password || '', masterKey),
+            note: await encrypt(e.note || '', masterKey)
+        })));
+
+        // Cifratura Indirizzi (V7.5: Indirizzo in chiaro, solo Utenze cifrate)
+        const encryptedAddresses = await Promise.all(userAddresses.map(async a => ({
+            ...a,
+            // address, civic, city, cap, province rimangono in chiaro
+            utilities: await Promise.all((a.utilities || []).map(async u => ({
+                ...u,
+                value: await encrypt(u.value || '', masterKey)
+            })))
+        })));
+
+        // Cifratura Telefoni (V7.5: Numero in chiaro)
+        const encryptedPhones = [...contactPhones];
+
+        // Commit finale su Firestore
+        const finalUpdate = {
+            nome: currentUserData.nome || '', // V7.5 In Chiaro
+            cognome: currentUserData.cognome || '', // V7.5 In Chiaro
+            birth_date: currentUserData.birth_date || '', // plaintext
+            birth_place: currentUserData.birth_place || '', // V7.5 In Chiaro
+            birth_province: currentUserData.birth_province || '', // plaintext
+            note: await encrypt(currentUserData.note || '', masterKey),
+            userAddresses: encryptedAddresses,
+            contactPhones: encryptedPhones,
+            contactEmails: encryptedEmails,
+            documenti: encryptedDocuments,
+            _encrypted: true
+        };
+
+        // Rimuovi eventuali undefined residui per sicurezza Firebase
+        Object.keys(finalUpdate).forEach(key => finalUpdate[key] === undefined && delete finalUpdate[key]);
+
+        await updateDoc(doc(db, "users", user.uid), finalUpdate);
+
+        console.log("[VaultCheck] Sincronizzazione V6.1 completata con successo.");
         showToast(t('success_save'), "success");
-    } catch (e) { logError("SyncData", e); showToast(t('error_generic'), "error"); }
+    } catch (e) {
+        logError("SyncData", e);
+        showToast("Errore di sicurezza durante il salvataggio.", "error");
+    }
 }
 
 async function deleteAddress(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo indirizzo?')) return;
-    userAddresses.splice(idx, 1);
-    await syncData(); renderAddressesView();
+    try {
+        userAddresses.splice(idx, 1);
+        userAddresses = userAddresses.filter(a => a !== undefined && a !== null);
+        await syncData();
+        renderAddressesView();
+        console.log(`[Address] Eliminato indirizzo #${idx}. Rimanenti: ${userAddresses.length}`);
+    } catch (e) {
+        console.error('[Address] Errore eliminazione:', e);
+        showToast('Errore durante l\'eliminazione dell\'indirizzo.', 'error');
+    }
 }
 
 async function deleteUtility(aIdx, uIdx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questa utenza?')) return;
-    userAddresses[aIdx].utilities.splice(uIdx, 1);
-    await syncData(); renderAddressesView();
+    try {
+        userAddresses[aIdx].utilities.splice(uIdx, 1);
+        userAddresses[aIdx].utilities = (userAddresses[aIdx].utilities || []).filter(u => u !== undefined && u !== null);
+        await syncData();
+        renderAddressesView();
+        console.log(`[Utility] Eliminata utenza #${uIdx} dall'indirizzo #${aIdx}`);
+    } catch (e) {
+        console.error('[Utility] Errore eliminazione:', e);
+        showToast('Errore durante l\'eliminazione dell\'utenza.', 'error');
+    }
 }
 
 async function deletePhone(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo numero?')) return;
-    contactPhones.splice(idx, 1);
-    await syncData(); renderPhonesView();
+    try {
+        contactPhones.splice(idx, 1);
+        contactPhones = contactPhones.filter(p => p !== undefined && p !== null);
+        await syncData();
+        renderPhonesView();
+        console.log(`[Phone] Eliminato numero #${idx}. Rimanenti: ${contactPhones.length}`);
+    } catch (e) {
+        console.error('[Phone] Errore eliminazione:', e);
+        showToast('Errore durante l\'eliminazione del numero.', 'error');
+    }
 }
 
 async function deleteEmail(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questa email?')) return;
-    contactEmails.splice(idx, 1);
-    await syncData(); renderEmailsView();
+    try {
+        contactEmails.splice(idx, 1);
+        contactEmails = contactEmails.filter(e => e !== undefined && e !== null);
+        await syncData();
+        renderEmailsView();
+        console.log(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
+    } catch (e) {
+        console.error('[Email] Errore eliminazione:', e);
+        showToast('Errore durante l\'eliminazione dell\'email.', 'error');
+    }
 }
 
 async function deleteDocumento(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo documento?')) return;
-    userDocuments.splice(idx, 1);
-    await syncData(); renderDocumentiView();
+    try {
+        userDocuments.splice(idx, 1);
+        userDocuments = userDocuments.filter(d => d !== undefined && d !== null);
+        await syncData();
+        renderDocumentiView();
+        console.log(`[Doc] Eliminato documento #${idx}. Rimanenti: ${userDocuments.length}`);
+    } catch (e) {
+        console.error('[Doc] Errore eliminazione:', e);
+        showToast('Errore durante l\'eliminazione del documento.', 'error');
+    }
 }
 
 // Global exposure for Modal Handlers (Simulated as legacy window pattern but inside module)
@@ -945,7 +1230,18 @@ function showProfileModal(title, fields, currentValues, onSave) {
             createElement('div', { className: 'modal-accent-bar' })
         ]);
 
-        const form = createElement('div', { className: 'flex-col-gap' });
+        // 🛡️ Trappola Anti-autofill V7.0 (Sempre presente all'inizio del form)
+        const trap = createElement('div', { className: 'anti-autofill-trap', ariaHidden: 'true', style: 'position: absolute; left: -9999px;' }, [
+            createElement('input', { type: 'text', name: 'user_login_trap', autocomplete: 'username', tabindex: '-1' }),
+            createElement('input', { type: 'password', name: 'password_trap', autocomplete: 'current-password', tabindex: '-1' })
+        ]);
+
+        const form = createElement('div', { className: 'flex-col-gap', style: 'padding-bottom: 2rem;' });
+        form.appendChild(trap);
+        const formScroll = createElement('div', {
+            className: 'modal-form-scroll vertical-scroll',
+            style: 'max-height: 65vh; overflow-y: auto; padding-right: 5px;'
+        }, [form]);
         const inputs = {};
 
         fields.forEach(f => {
@@ -993,27 +1289,88 @@ function showProfileModal(title, fields, currentValues, onSave) {
 
                                 sel.value = opt;
                                 txt.textContent = opt;
+                                sel.dispatchEvent(new Event('change'));
                                 menu.classList.remove('show');
                             }
                         }))
                     )
                 ]);
-            } else {
-                // --- STANDARD INPUT LOGIC ---
-                valueInput = createElement('input', {
-                    type: f.type || 'text',
-                    className: 'glass-field-input',
+            } else if (f.type === 'textarea' || f.key === 'note') {
+                // --- TEXTAREA LOGIC (Auto-expanding) ---
+                valueInput = createElement('textarea', {
+                    className: 'glass-field-input vertical-scroll',
                     value: val,
                     placeholder: f.label,
-                    style: 'width: 100%; border: none; background: transparent; color: inherit; padding: 0;'
+                    style: 'width: 100%; border: none; background: transparent; color: inherit; padding: 12px 14px; resize: none; min-height: 150px; font-family: inherit; line-height: 1.6;',
+                    oninput: (e) => {
+                        e.target.style.height = 'auto';
+                        e.target.style.height = (e.target.scrollHeight) + 'px';
+                    }
                 });
                 finalInputEl = valueInput;
+                // Initial size trigger
+                setTimeout(() => {
+                    valueInput.style.height = 'auto';
+                    valueInput.style.height = (valueInput.scrollHeight) + 'px';
+                }, 100);
+            } else {
+                // --- STANDARD INPUT LOGIC ---
+                const k = (f.key || '').toLowerCase();
+                const isSensitive = k.includes('pin') || k.includes('puk') || k.includes('password') ||
+                    k.includes('num_serie') || k.includes('cf') || k.includes('username') ||
+                    k.includes('id_number') || k.includes('license') || k.includes('app_code');
+
+                const inputEl = createElement('input', {
+                    type: 'text',
+                    className: `glass-field-input ${isSensitive ? 'base-shield' : ''}`,
+                    value: val,
+                    placeholder: f.label,
+                    style: 'flex: 1; border: none; background: transparent; color: inherit; padding: 0; min-width: 0;',
+                    autocomplete: 'off',
+                    autocorrect: 'off',
+                    spellcheck: 'false'
+                });
+                valueInput = inputEl;
+
+                if (isSensitive) {
+                    const toggleBtn = createElement('button', {
+                        className: 'btn-view-toggle',
+                        style: 'background: transparent; border: none; color: var(--accent-primary, #6366f1); cursor: pointer; padding: 0 8px; display: flex; align-items: center; justify-content: center; min-width: 40px; opacity: 0.8;',
+                        onclick: (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const icon = toggleBtn.querySelector('span');
+                            if (inputEl.classList.contains('base-shield')) {
+                                inputEl.classList.remove('base-shield');
+                                icon.textContent = 'visibility';
+                                toggleBtn.style.opacity = '1';
+                            } else {
+                                inputEl.classList.add('base-shield');
+                                icon.textContent = 'visibility_off';
+                                toggleBtn.style.opacity = '0.8';
+                            }
+                        }
+                    }, [
+                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 22px; color: inherit;', textContent: 'visibility_off' })
+                    ]);
+                    // Wrapper box per allineare input e occhio
+                    finalInputEl = createElement('div', {
+                        className: 'flex-center-row',
+                        style: 'width: 100%; display: flex; align-items: center;'
+                    }, [inputEl, toggleBtn]);
+                } else {
+                    finalInputEl = inputEl;
+                }
             }
 
             // Container
+            const isLong = f.type === 'textarea' || f.key === 'note';
             const fieldContainer = createElement('div', { className: 'glass-field-container' }, [
                 createElement('label', { className: 'view-label', textContent: f.label }),
-                createElement('div', { className: 'glass-field-box', style: 'padding-left: 1rem;' }, [
+                createElement('div', {
+                    className: 'glass-field-box',
+                    style: isLong ? 'display: block; padding: 0;' : 'padding-left: 1rem;'
+                }, [
                     finalInputEl
                 ])
             ]);
@@ -1054,7 +1411,7 @@ function showProfileModal(title, fields, currentValues, onSave) {
             setTimeout(() => modal.remove(), 300);
         }
 
-        setChildren(modalBox, [header, form, actions]);
+        setChildren(modalBox, [header, formScroll, actions]);
         modal.appendChild(modalBox);
         document.body.appendChild(modal);
         // Force reflow
@@ -1078,21 +1435,33 @@ async function editSection(sectionId) {
         ];
         showProfileModal('Dati Personali', fields, currentUserData, async (newData) => {
             try {
-                await updateDoc(doc(db, "users", currentUserUid), newData);
-                Object.assign(currentUserData, newData);
+                const masterKey = await ensureMasterKey();
+                const clearData = {
+                    nome: newData.nome || '',
+                    cognome: newData.cognome || '',
+                    birth_date: newData.birth_date || '',
+                    birth_place: newData.birth_place || '',
+                    birth_province: newData.birth_province || ''
+                };
+                await updateDoc(doc(db, "users", currentUserUid), clearData);
+                Object.assign(currentUserData, newData); // mantieni valori in chiaro in memoria
                 await loadUserData(auth.currentUser);
                 showToast(t('success_save'), "success");
             } catch (e) { logError("EditSection", e); showToast(t('error_generic'), "error"); }
         });
     } else if (sectionId === 'note') {
-        const fields = [{ key: 'note', label: 'Note', icon: 'description' }];
+        const fields = [{ key: 'note', label: 'Note', type: 'textarea', icon: 'description' }];
         showProfileModal('Note Anagrafica', fields, currentUserData, async (newData) => {
             try {
-                await updateDoc(doc(db, "users", currentUserUid), newData);
-                currentUserData.note = newData.note;
+                // [FIX] Cifra la nota prima di scrivere su Firestore
+                const masterKey = await ensureMasterKey();
+                const encryptedNote = await encrypt(newData.note || '', masterKey);
+                await updateDoc(doc(db, "users", currentUserUid), { note: encryptedNote });
+                currentUserData.note = newData.note; // mantieni in memoria il valore in chiaro
+                // Ricarica il profilo (loadUserData decripta automaticamente)
                 await loadUserData(auth.currentUser);
                 showToast(t('success_save'), "success");
-            } catch (e) { logError("EditSectionNotice", e); showToast(t('error_generic'), "error"); }
+            } catch (e) { logError("EditSectionNote", e); showToast(t('error_generic'), "error"); }
         });
     }
 }
@@ -1124,42 +1493,109 @@ window.editAddress = async (idx) => {
 
 window.editUserDocument = async (idx) => {
     const isNew = idx === -1;
-    const docItem = isNew ? { type: profileLabels.documentTypes[0], num_serie: '', expiry_date: '' } : userDocuments[idx];
+    let tempDoc = isNew ? { type: profileLabels.documentTypes[0], num_serie: '', expiry_date: '' } : { ...userDocuments[idx] };
 
-    // Ensure type exists for old documents
-    if (!docItem.type) {
-        docItem.type = profileLabels.documentTypes[0];
-    }
+    const getDocumentFields = (type) => {
+        const base = [
+            { key: 'type', label: 'Tipo Documento', icon: 'badge', type: 'select', options: profileLabels.documentTypes, configKey: 'documentTypes' }
+        ];
 
-    // Supporto per carichi legacy o mappature diverse
-    const currentNum = docItem.num_serie || docItem.cf_value || docItem.license_number || docItem.id_number || '';
+        const typeLower = (type || '').toLowerCase();
 
-    const fields = [
-        { key: 'type', label: 'Tipo Documento', icon: 'badge', type: 'select', options: profileLabels.documentTypes, configKey: 'documentTypes' },
-        { key: 'num_serie', label: 'Numero / Codice', icon: 'numbers' },
-        { key: 'expiry_date', label: 'Scadenza', type: 'date', icon: 'calendar_today' }
-    ];
-
-    // Preparazione valori correnti per il modal (normalizzazione temporanea)
-    const modalValues = { ...docItem, num_serie: currentNum };
-
-    showProfileModal(isNew ? 'Nuovo Documento' : 'Modifica Documento', fields, modalValues, async (newData) => {
-        // Normalizzazione chiavi per compatibilità Firebase
-        if (newData.type && newData.type.toLowerCase().includes('patente')) {
-            newData.license_number = newData.num_serie;
+        if (typeLower.includes('identità')) {
+            return [
+                ...base,
+                { key: 'num_serie', label: 'Numero Carta', icon: 'numbers' },
+                { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
+                { key: 'luogo_rilascio', label: t('label_release_place'), icon: 'location_on' },
+                { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
+                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
+                { key: 'username', label: 'Username / CF', icon: 'person' },
+                { key: 'password', label: 'Password', icon: 'lock' },
+                { key: 'pin', label: t('label_pin'), icon: 'password' },
+                { key: 'puk', label: t('label_puk'), icon: 'security' },
+                { key: 'codice_app', label: t('label_app_code'), icon: 'apps' },
+                { key: 'note', label: 'Note', icon: 'description' }
+            ];
+        } else if (typeLower.includes('patente')) {
+            return [
+                ...base,
+                { key: 'num_serie', label: 'Patente', icon: 'numbers' },
+                { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
+                { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
+                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
+                { key: 'note', label: 'Note', icon: 'description' }
+            ];
+        } else if (typeLower.includes('fiscale')) {
+            return [
+                ...base,
+                { key: 'num_serie', label: 'Codice Fiscale', icon: 'badge' },
+                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
+                { key: 'id_number', label: t('label_id_number'), icon: 'numbers' },
+                { key: 'note', label: 'Note', icon: 'description' }
+            ];
+        } else if (typeLower.includes('passaporto')) {
+            return [
+                ...base,
+                { key: 'num_serie', label: 'Numero Passaporto', icon: 'numbers' },
+                { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
+                { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
+                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
+                { key: 'note', label: 'Note', icon: 'description' }
+            ];
         }
-        if (newData.type && newData.type.toLowerCase().includes('fiscale')) {
-            newData.cf_value = newData.num_serie;
-        }
 
-        if (isNew) {
-            userDocuments.push(newData);
-        } else {
-            Object.assign(userDocuments[idx], newData);
+        return [
+            ...base,
+            { key: 'num_serie', label: 'Numero / Codice', icon: 'numbers' },
+            { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
+            { key: 'note', label: 'Note', icon: 'description' }
+        ];
+    };
+
+    const openModal = (currentVals) => {
+        const fields = getDocumentFields(currentVals.type);
+        showProfileModal(isNew ? 'Nuovo Documento' : 'Modifica Documento', fields, currentVals, async (newData) => {
+            // Merge remaining temp fields if any (to avoid losing data when switching types)
+            const finalData = { ...currentVals, ...newData };
+
+            // Normalize for legacy compatibility if needed
+            if (finalData.type.toLowerCase().includes('patente')) finalData.license_number = finalData.num_serie;
+            if (finalData.type.toLowerCase().includes('fiscale')) finalData.cf_value = finalData.num_serie;
+
+            if (isNew) {
+                userDocuments.push(finalData);
+            } else {
+                userDocuments[idx] = finalData;
+            }
+            await syncData();
+            renderDocumentiView();
+        });
+
+        // Add change listener to the type select
+        const modal = document.getElementById('profile-edit-modal');
+        const typeSelect = modal?.querySelector('select');
+        if (typeSelect) {
+            typeSelect.onchange = (e) => {
+                const newType = e.target.value;
+                // Capture current values from inputs before refreshing
+                const currentInputs = modal.querySelectorAll('input');
+                const capturedData = { ...currentVals, type: newType };
+                currentInputs.forEach(inp => {
+                    const key = inp.closest('.glass-field-container')?.querySelector('.view-label')?.textContent;
+                    // We need a better way to map label back to key, or just find by key if we had IDs
+                    // But in showProfileModal we stored inputs in a local 'inputs' object.
+                    // Instead of brittle DOM traversal, let's just use the current values and the new type for now.
+                    // Or better: modify showProfileModal to support updating fields.
+                });
+
+                // For now, just re-open with new type
+                openModal({ ...currentVals, type: newType });
+            };
         }
-        await syncData();
-        renderDocumentiView();
-    });
+    };
+
+    openModal(tempDoc);
 };
 
 window.addUtility = async (addrIdx) => {
@@ -1186,5 +1622,29 @@ window.editUtility = async (addrIdx, uIdx) => {
         await syncData();
         renderAddressesView();
     });
+};
+
+// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
+window.profiloPrivato = {
+    async decryptAll() {
+        if (typeof auth.currentUser === 'object') {
+            return await loadUserData(auth.currentUser);
+        }
+    },
+    async encryptAllIfNeeded() {
+        // Logica di self-healing: se dati sono in chiaro e masterKey è pronta, cifra e salva.
+        const masterKey = await ensureMasterKey().catch(() => null);
+        if (!masterKey || !currentUserData) return;
+
+        if (!currentUserData._encrypted) {
+            console.log("[VaultCheck] Avvio cifratura profilo...");
+            // Esempio: cifra la nota se presente
+            if (currentUserData.note && currentUserData.note.length < 60) {
+                currentUserData.note = await encrypt(currentUserData.note, masterKey);
+                currentUserData._encrypted = true;
+                await syncData();
+            }
+        }
+    }
 };
 

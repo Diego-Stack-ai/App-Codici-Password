@@ -11,9 +11,34 @@ import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 
 const DEFAULT_CONFIG = {
-    deadlineTypes: [],
-    models: [],
-    emailTemplates: []
+    deadlineTypes: [
+        { name: 'Revisione Moto', freq: 7, period: 14 },
+        { name: 'Assicurazione', freq: 7, period: 14 },
+        { name: 'Revisione Auto', freq: 7, period: 14 },
+        { name: 'Bollo', freq: 7, period: 14 },
+        { name: 'Tagliando', freq: 7, period: 28 },
+        { name: 'Olio motore', freq: 7, period: 14 }
+    ],
+    models: [
+        "Moto Guzzi Nevada 750 - CJ14146",
+        "Moto Guzzi California - CC60256",
+        "Land Rover - GK910HB",
+        "Hyundai I10 - FL790AX",
+        "Rimorchio Ellebì - AA36924",
+        "Peugeot e-208 - GM277DC"
+    ],
+    emailTemplates: [
+        "l'assicurazione del motociclo targato",
+        "l'assicurazione dell'auto targata",
+        "la revisione del motociclo targato",
+        "la revisione dell'auto targata",
+        "Il bollo del motociclo targato",
+        "Il bollo dell'auto targata",
+        "Il tagliando del motociclo targato",
+        "Il tagliando dell'auto targata",
+        "Il bollo del carrello targato",
+        "Olio motore da controllare"
+    ]
 };
 
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));

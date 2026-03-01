@@ -78,11 +78,6 @@ export async function initConfigurazioneRegoleGenerali(user) {
     await module.initConfigurazioneGenerali(user);
 }
 
-export async function initStoricoNotifiche(user) {
-    const module = await import('./modules/settings/notifiche_storia.js');
-    await module.initNotificheStoria(user);
-}
-
 export async function initPrivacy() { console.log("[Router] Privacy Page Loaded"); }
 export async function initTermini() { console.log("[Router] Termini Page Loaded"); }
 
@@ -109,7 +104,7 @@ export async function initScadenze(user) {
 }
 
 export async function initAggiungiScadenza(user) {
-    const module = await import('./modules/scadenze/aggiungi_scadenza.js');
+    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=2.3');
     await module.initAggiungiScadenza(user);
 }
 
@@ -124,10 +119,6 @@ export async function initListaAziende(user) {
     if (module.initListaAziende) await module.initListaAziende(user);
 }
 
-export async function initAggiungiAzienda(user) {
-    const module = await import('./modules/azienda/aggiungi_azienda.js');
-    if (module.initAggiungiAzienda) await module.initAggiungiAzienda(user);
-}
 
 export async function initModificaAzienda(user) {
     const module = await import('./modules/azienda/modifica_azienda.js');
@@ -144,21 +135,6 @@ export async function initAccountAziendaList(user) {
     if (module.initAccountAziendaList) await module.initAccountAziendaList(user);
 }
 
-export async function initAggiungiNuovaAzienda(user) {
-    const module = await import('./modules/azienda/aggiungi_azienda.js');
-    if (module.initAggiungiAzienda) await module.initAggiungiAzienda(user);
-}
-
-export async function initAggiungiAccountAzienda(user) {
-    const module = await import('./modules/azienda/aggiungi_account_azienda.js');
-    if (module.initAggiungiAccountAzienda) await module.initAggiungiAccountAzienda(user);
-}
-
-export async function initModificaAccountAzienda(user) {
-    const module = await import('./modules/azienda/modifica_account_azienda.js');
-    if (module.initModificaAccountAzienda) await module.initModificaAccountAzienda(user);
-}
-
 export async function initDettaglioAccountAzienda(user) {
     const module = await import('./modules/azienda/dettaglio_account_azienda.js');
     if (module.initDettaglioAccountAzienda) await module.initDettaglioAccountAzienda(user);
@@ -167,10 +143,4 @@ export async function initDettaglioAccountAzienda(user) {
 export async function initFormAccountAzienda(user) {
     const module = await import('./modules/azienda/form_account_azienda.js');
     if (module.initFormAccountAzienda) await module.initFormAccountAzienda(user);
-}
-
-// --- 6. UTILITIES ---
-export async function initGestioneAllegati(user) {
-    const module = await import('./modules/azienda/gestione_allegati.js');
-    if (module.initGestioneAllegati) await module.initGestioneAllegati(user);
 }

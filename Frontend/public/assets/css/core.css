@@ -87,6 +87,10 @@ body,
     --status-success: #10b981;
     --status-warning: #f59e0b;
     --status-error: #ef4444;
+
+    /* BRAND PALETTE EXTENSIONS */
+    --color-purple: #a855f7;
+    /* violet-500 — badge condivisione, account azienda */
 }
 
 /* -----------------------

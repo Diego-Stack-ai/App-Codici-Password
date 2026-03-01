@@ -74,6 +74,12 @@
                 </div>
 
                 <div class="detail-content-wrap">
+                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
+                    <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
+                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
+                    </div>
+
                     <!-- Section: Referente -->
                     <section class="detail-section">
                         <button class="accordion-trigger-premium group" id="toggle-referente-btn">

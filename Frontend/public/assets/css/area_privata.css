@@ -26,7 +26,7 @@
 }
 
 .matrix-card .matrix-icon-box span {
-    font-size: 120px !important;
+    font-size: 120px;
     /* Icona che "prende tutta la card" */
     line-height: 1;
 }
@@ -59,8 +59,8 @@
 }
 
 .micro-account-avatar-box {
-    width: 34px !important;
-    height: 34px !important;
+    width: 34px;
+    height: 34px;
 }
 
 .micro-account-avatar-box .micro-item-badge-dot {
@@ -130,14 +130,14 @@
 
 .matrix-icon-box .material-symbols-outlined {
     font-size: 26px;
-    color: #fff;
+    color: white;
     font-variation-settings: 'FILL' 1;
 }
 
 /* Color Variants (Gradients) */
 .icon-blue {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: #fff;
+    background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
+    color: white;
 }
 
 .icon-amber {
@@ -146,11 +146,11 @@
 
 .icon-orange {
     background: linear-gradient(135deg, var(--status-warning) 0%, #ea580c 100%);
-    color: #fff;
+    color: white;
 }
 
 .card-blue .matrix-icon-box {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
 }
 
 .card-red .matrix-icon-box {

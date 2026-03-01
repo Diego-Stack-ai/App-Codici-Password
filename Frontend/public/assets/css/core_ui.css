@@ -269,8 +269,8 @@
     margin: 1.5rem 0;
     padding: 1.1rem 1.5rem;
     border-radius: 20px;
-    border: none !important;
-    outline: none !important;
+    border: none;
+    outline: none;
     background: rgba(255, 255, 255, 0.6);
     color: var(--text-primary);
     font: var(--font-input);
@@ -369,8 +369,8 @@
     justify-content: center;
     height: 3.5rem;
     padding: 0 1rem;
-    margin: 0 !important;
-    /* Forza la rimozione di margini ereditati */
+    margin: 0;
+    /* Reset margini ereditati */
     border-radius: 18px;
     border: 1px solid transparent;
     font: var(--font-button);
@@ -520,17 +520,18 @@
     box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
+/* btn-fab-neutral: definito dopo btn-fab-action — la cascade garantisce override senza !important */
 .btn-fab-neutral {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    color: var(--text-primary) !important;
+    color: var(--text-primary);
 }
 
 .dark .btn-fab-neutral {
     background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* Secondary Footer Buttons (Theme, Settings) */
@@ -562,7 +563,7 @@
 }
 
 .btn-footer-secondary span {
-    font-size: 20px !important;
+    font-size: var(--icon-md);
 }
 
 .dark .btn-footer-secondary {

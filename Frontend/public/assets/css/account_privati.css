@@ -221,11 +221,11 @@ html:not(.dark) .account-card .swipe-content {
 }
 
 .account-card-category.badge-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .account-card-category.badge-purple {
-    color: #a855f7;
+    color: var(--color-purple);
 }
 
 .account-card-category.badge-amber {
@@ -293,7 +293,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .btn-mini-action.active {
-    color: #60a5fa;
+    color: var(--accent);
     background: rgba(59, 130, 246, 0.1);
     border-color: rgba(59, 130, 246, 0.2);
 }
@@ -349,11 +349,11 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .bg-blue-500 {
-    background: #3b82f6;
+    background: var(--accent);
 }
 
 .bg-purple-500 {
-    background: #a855f7;
+    background: var(--color-purple);
 }
 
 .bg-amber-500 {
@@ -366,19 +366,19 @@ html:not(.dark) .account-card-subtitle {
 
 /* Text colors */
 .text-blue-400 {
-    color: #60a5fa;
+    color: var(--accent);
 }
 
 .text-purple-400 {
-    color: #c084fc;
+    color: var(--color-purple);
 }
 
 .text-amber-400 {
-    color: #fbbf24;
+    color: var(--status-warning);
 }
 
 .text-emerald-400 {
-    color: #34d399;
+    color: var(--status-success);
 }
 
 /* --- 5. LOADING & EMPTY --- */
@@ -392,7 +392,7 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .loading-spinner-icon {
-    font-size: 3rem !important;
+    font-size: 3rem;
     /* Animation handled globally by .animate-spin in core_ui.css */
 }
 

@@ -246,6 +246,8 @@ function createScadenzaCard(scadenza) {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
     ]);
 
+    const cardTitle = scadenza.type || scadenza.title || 'Scadenza Generale';
+
     // 2. CONTENUTO VISIBILE (Sopra)
     const swipeContent = createElement('div', { className: 'swipe-content' }, [
         createElement('div', { className: 'deadline-card-layout' }, [
@@ -254,8 +256,8 @@ function createScadenzaCard(scadenza) {
                     createElement('span', { className: 'material-symbols-outlined filled', textContent: scadenza.icon || 'event_note' })
                 ]),
                 createElement('div', { className: 'deadline-card-info-group' }, [
-                    createElement('span', { className: 'deadline-card-category', textContent: (scadenza.category || 'SCADENZA').toUpperCase() }),
-                    createElement('h4', { className: 'deadline-card-title', textContent: scadenza.title }),
+                    createElement('span', { className: 'deadline-card-category', textContent: (scadenza.category || scadenza.type || 'SCADENZA').toUpperCase() }),
+                    createElement('h4', { className: 'deadline-card-title', textContent: cardTitle }),
                     createElement('p', { className: 'deadline-card-subtitle', textContent: `Ref: ${scadenza.name || 'Generale'}` })
                 ])
             ]),
@@ -344,42 +346,41 @@ async function deleteScadenza(id) {
 // --- FAB (Add Button) ---
 
 function setupFAB() {
-    // Cerca il footer per 2 secondi max
-    let attempts = 0;
-    const interval = setInterval(() => {
-        attempts++;
-        const footerCenter = document.getElementById('footer-center-actions');
+    function initFABFromFooter(detail) {
+        const { center: footerCenter } = detail;
+        if (!footerCenter) return;
+        clearElement(footerCenter);
 
-        if (footerCenter) {
-            clearInterval(interval);
-            clearElement(footerCenter);
+        // Crea il pulsante Aggiungi (+)
+        const addBtn = createElement('button', {
+            className: 'btn-fab-action btn-fab-scadenza',
+            title: t('add_deadline') || 'Aggiungi Scadenza',
+            dataset: { label: t('add_short') || 'Aggiungi' },
+            onclick: () => window.location.href = 'aggiungi_scadenza.html'
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
+        ]);
 
-            // Crea il pulsante Aggiungi (+)
-            const addBtn = createElement('button', {
-                className: 'btn-fab-action btn-fab-scadenza',
-                title: t('add_deadline') || 'Aggiungi Scadenza',
-                dataset: { label: t('add_short') || 'Aggiungi' },
-                onclick: () => window.location.href = 'aggiungi_scadenza.html'
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
-            ]);
+        const fabGroup = createElement('div', { className: 'fab-group' }, [addBtn]);
+        footerCenter.appendChild(fabGroup);
 
-            const fabGroup = createElement('div', { className: 'fab-group' }, [addBtn]);
-            footerCenter.appendChild(fabGroup);
+        // Animazione Entrata (Home Page Style)
+        addBtn.animate([
+            { transform: 'scale(0) translateY(20px)', opacity: 0 },
+            { transform: 'scale(1) translateY(0)', opacity: 1 }
+        ], {
+            duration: 400,
+            easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+            fill: 'forwards'
+        });
+    }
 
-            // Animazione Entrata (Home Page Style)
-            addBtn.animate([
-                { transform: 'scale(0) translateY(20px)', opacity: 0 },
-                { transform: 'scale(1) translateY(0)', opacity: 1 }
-            ], {
-                duration: 400,
-                easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                fill: 'forwards'
-            });
-        }
-
-        if (attempts > 20) clearInterval(interval); // Timeout 2s
-    }, 100);
+    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
+    if (window.__footerReady) {
+        initFABFromFooter(window.__footerReady);
+    } else {
+        document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
+    }
 }
 
 // --- UTILITY PER LA HOME PAGE (ESPORTATA) ---
@@ -434,12 +435,14 @@ export async function loadUrgentDeadlinesCount(user) {
                     const daysUntil = Math.ceil((deadline.due - today) / (1000 * 60 * 60 * 24));
                     const badgeText = daysUntil < 0 ? 'Scaduto' : (daysUntil === 0 ? 'Oggi' : (daysUntil === 1 ? 'Domani' : `${daysUntil}g`));
 
+                    const cardTitle = deadline.type || deadline.title || 'Scadenza Generale';
+
                     return createElement('div', { className: 'micro-list-item' }, [
                         createElement('div', { className: 'item-content' }, [
                             createElement('div', { className: 'item-icon-box' }, [
                                 createElement('span', { className: 'material-symbols-outlined', textContent: deadline.icon || 'event' })
                             ]),
-                            createElement('span', { className: 'item-title', textContent: deadline.title })
+                            createElement('span', { className: 'item-title', textContent: cardTitle })
                         ]),
                         createElement('span', { className: 'item-badge', textContent: badgeText })
                     ]);

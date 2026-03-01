@@ -5,7 +5,7 @@
     <!-- Anti-flicker & Theme Master (V5.0) -->
     <script src="assets/js/theme-init.js"></script>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
+        content="default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' https://*.firebaseapp.com https://apis.google.com https://www.googletagmanager.com https://www.gstatic.com https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com wss://*.firebaseio.com; frame-src 'self' https://*.firebaseapp.com https://www.gstatic.com;">
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -62,13 +62,13 @@
                             <h3 class="detail-section-title" data-t="access_credentials">Credenziali Accesso</h3>
                         </div>
                         <div class="flex-col-gap">
-                            <!-- [V5.1 Master] Blinded Context: Micro-form logic only for the trap to satisfy DOM warnings -->
-                            <form class="anti-autofill-trap" aria-hidden="true"
-                                style="position: absolute; left: -9999px;" onsubmit="return false;">
+                            <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
+                            <div class="anti-autofill-trap" aria-hidden="true"
+                                style="position: absolute; left: -9999px;">
                                 <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
                                 <input type="password" name="password_trap" autocomplete="current-password"
                                     tabindex="-1">
-                            </form>
+                            </div>
 
                             <!-- Nome Account -->
                             <div class="glass-field-container">
@@ -127,7 +127,7 @@
                                     <div class="glass-field border-glow">
                                         <span class="material-symbols-outlined ml-4 opacity-40">lock</span>
                                         <input id="detail-password" type="text" readonly
-                                            class="field-input base-shield field-value-password no-transform"
+                                            class="field-input field-value-password no-transform base-shield"
                                             autocomplete="off" autocorrect="off" spellcheck="false">
                                         <div class="detail-field-actions">
                                             <button id="toggle-password" class="btn-icon-header btn-field-toggle"
@@ -216,8 +216,8 @@
                                         <input id="ref-phone" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
-                                            <button class="btn-icon-header btn-field-toggle" type="button"
-                                                onclick="if(document.getElementById('ref-phone').value) window.location.href=`tel:${document.getElementById('ref-phone').value.replace(/\s+/g,'')}`">
+                                            <button id="btn-call-ref-phone" class="btn-icon-header btn-field-toggle"
+                                                type="button">
                                                 <span class="material-symbols-outlined">phone_forwarded</span>
                                             </button>
                                             <button class="btn-icon-header copy-btn" type="button"
@@ -235,8 +235,8 @@
                                         <input id="ref-mobile" readonly class="field-input no-transform"
                                             autocomplete="off">
                                         <div class="detail-field-actions">
-                                            <button class="btn-icon-header btn-field-toggle" type="button"
-                                                onclick="if(document.getElementById('ref-mobile').value) window.location.href=`tel:${document.getElementById('ref-mobile').value.replace(/\s+/g,'')}`">
+                                            <button id="btn-call-ref-mobile" class="btn-icon-header btn-field-toggle"
+                                                type="button">
                                                 <span class="material-symbols-outlined">phone_forwarded</span>
                                             </button>
                                             <button class="btn-icon-header copy-btn" type="button"

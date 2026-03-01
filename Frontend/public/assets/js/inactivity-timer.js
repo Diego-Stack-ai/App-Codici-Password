@@ -1,6 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { disableVaultAutoUnlock } from './modules/core/security-manager.js';
 
 /**
  * PROTOCOLLO BASE INACTIVITY TIMER (TITAN-LOCK v1.0)
@@ -8,7 +9,9 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-
  */
 
 let inactivityTimeout;
-let logoutTimerMs = 3 * 60 * 1000; // Default 3 minuti
+let softLockTimeout;
+let logoutTimerMs = 3 * 60 * 1000; // Default Hard Logout 3 minuti
+let softLockTimerMs = 1 * 60 * 1000; // Default Soft Lock 1 minuto
 let isInitialized = false;
 
 /**
@@ -29,8 +32,10 @@ export function initInactivityTimer() {
         }
     });
 
-    // Controllo quando l'utente torna sulla pagina (es. dopo aver cambiato tab)
-    window.addEventListener('focus', checkLastActivity);
+    // Controllo quando l'utente torna sulla pagina
+    window.addEventListener('focus', () => {
+        checkLastActivity();
+    });
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') checkLastActivity();
     });
@@ -66,9 +71,21 @@ function checkLastActivity() {
     const lastActive = localStorage.getItem('titan_last_activity');
     if (lastActive) {
         const elapsed = Date.now() - parseInt(lastActive);
+
+        // Livello 2: Hard Logout
         if (elapsed > logoutTimerMs) {
-            console.warn(`[Titan-Lock] Sessione scaduta: ${Math.round(elapsed / 1000)}s passati.`);
+            console.warn(`[Titan-Lock] Hard Logout: ${Math.round(elapsed / 1000)}s passati.`);
             performAutoLogout();
+            return;
+        }
+
+        // Livello 1: Soft Lock
+        if (elapsed > softLockTimerMs) {
+            console.warn(`[Titan-Lock] Soft Lock: ${Math.round(elapsed / 1000)}s passati.`);
+            try {
+                const { softLock } = import.meta.glob ? {} : window; // Fallback se non exportato correttamente
+                if (typeof window.softLock === 'function') window.softLock();
+            } catch (e) { }
         }
     }
 }
@@ -80,6 +97,14 @@ function recordActivity() {
     localStorage.setItem('titan_last_activity', Date.now().toString());
 
     if (inactivityTimeout) clearTimeout(inactivityTimeout);
+    if (softLockTimeout) clearTimeout(softLockTimeout);
+
+    // Imposta Timer Soft Lock
+    softLockTimeout = setTimeout(() => {
+        if (typeof window.softLock === 'function') window.softLock();
+    }, softLockTimerMs);
+
+    // Imposta Timer Hard Logout
     inactivityTimeout = setTimeout(performAutoLogout, logoutTimerMs);
 }
 
@@ -88,9 +113,24 @@ function recordActivity() {
  */
 async function performAutoLogout() {
     try {
-        // Evitiamo loop se siamo già nella pagina di login
         const currentPage = window.location.pathname.split('/').pop();
         if (currentPage === 'index.html' || currentPage === '') return;
+
+        // [V3.0] LOCK VAULT FIRST (Clear Session Storage & Memory)
+        // Questo protegge i dati immediatamente senza attendere il logout di Firebase.
+        try {
+            disableVaultAutoUnlock();
+            console.log("[Titan-Lock] Vault bloccata per inattività.");
+        } catch (e) { }
+
+        // [V3.0] Decidi se fare logout completo o solo blocco Vault
+        // Se il timeout è molto breve (es. < 1 min), facciamo solo blocco Vault + reload
+        // Se è lungo, facciamo logout completo.
+        if (logoutTimerMs <= 60000) {
+            console.log("[Titan-Lock] Timeout breve: Ricarico per forzare blocco UI.");
+            window.location.reload();
+            return;
+        }
 
         console.log("[Titan-Lock] Eseguo logout automatico...");
         if (auth.currentUser) {
@@ -119,6 +159,7 @@ function startMonitoring() {
  */
 function stopMonitoring() {
     if (inactivityTimeout) clearTimeout(inactivityTimeout);
+    if (softLockTimeout) clearTimeout(softLockTimeout);
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     events.forEach(name => {
         document.removeEventListener(name, recordActivity);

@@ -337,10 +337,7 @@ html:not(.dark) .deadline-card-subtitle {
     min-height: 200px;
 }
 
-/* Helpers */
-.hidden {
-    display: none !important;
-}
+/* .hidden è definito in core.css — non duplicare */
 
 @keyframes slideInUp {
     from {

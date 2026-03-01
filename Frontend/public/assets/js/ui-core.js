@@ -12,7 +12,7 @@ function init() {
     // Inizializza UX bloccata
     initLockedUX();
 
-    // Inizializza Collapsibles (Accordion System V3.9)
+    // Inizializza Collapsibles (Accordion System V7.0)
     initCollapsibles();
 }
 
@@ -282,7 +282,7 @@ window.showInputModal = showInputModal;
  * Gestisce la visibilità delle credenziali nelle liste (User, Account, Password).
  */
 export function toggleTripleVisibility(id) {
-    // V5.0 Support: Target both new .account-card and legacy .micro-account-card
+    // V7.0 Support: Target both new .account-card and legacy .micro-account-card
     const card = document.querySelector(`.account-card[data-id="${id}"]`) || document.querySelector(`.micro-account-card[data-id="${id}"]`) || document.getElementById(`acc-${id}`);
     if (!card) return;
 

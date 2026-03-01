@@ -19,8 +19,6 @@ import { sanitizeEmail } from './utils.js';
 
 /**
  * Recupera le scadenze per un determinato utente.
- * @param {string} userId - L'ID dell'utente (email o UID).
- * @returns {Promise<Array>} Una promise che risolve in un array di oggetti scadenza.
  */
 async function getScadenze(userId) {
     if (!userId) return [];
@@ -33,11 +31,6 @@ async function getScadenze(userId) {
     return scadenze;
 }
 
-/**
- * Recupera una singola scadenza.
- * @param {string} userId 
- * @param {string} scadenzaId 
- */
 async function getScadenza(userId, scadenzaId) {
     const docRef = doc(db, "users", userId, "scadenze", scadenzaId);
     const docSnap = await getDoc(docRef);
@@ -48,34 +41,17 @@ async function getScadenza(userId, scadenzaId) {
     }
 }
 
-/**
- * Aggiunge una nuova scadenza.
- * @param {string} userId - L'ID dell'utente.
- * @param {Object} scadenza - L'oggetto scadenza da aggiungere.
- * @returns {Promise<string>} L'ID del nuovo documento creato.
- */
 async function addScadenza(userId, scadenza) {
     if (!userId) throw new Error("User ID mancante");
     const docRef = await addDoc(collection(db, "users", userId, "scadenze"), scadenza);
     return docRef.id;
 }
 
-/**
- * Aggiorna una scadenza esistente.
- * @param {string} userId - L'ID dell'utente.
- * @param {string} scadenzaId - L'ID della scadenza.
- * @param {Object} updates - I campi da aggiornare.
- */
 async function updateScadenza(userId, scadenzaId, updates) {
     const scadenzaRef = doc(db, "users", userId, "scadenze", scadenzaId);
     await updateDoc(scadenzaRef, updates);
 }
 
-/**
- * Elimina una scadenza.
- * @param {string} userId - L'ID dell'utente.
- * @param {string} scadenzaId - L'ID della scadenza.
- */
 async function deleteScadenza(userId, scadenzaId) {
     const scadenzaRef = doc(db, "users", userId, "scadenze", scadenzaId);
     await deleteDoc(scadenzaRef);
@@ -118,9 +94,6 @@ async function deleteAccount(userId, accountId) {
 
 // --- SISTEMA DI CONDIVISIONE & INVITI ---
 
-/**
- * Invia un invito di condivisione.
- */
 async function sendInvitation(data) {
     const inviteData = {
         ...data,
@@ -131,9 +104,6 @@ async function sendInvitation(data) {
     return docRef.id;
 }
 
-/**
- * Recupera gli inviti pendenti per un'email.
- */
 async function getPendingInvitations(email) {
     const q = query(collection(db, "invites"),
         where("recipientEmail", "==", email),
@@ -145,6 +115,7 @@ async function getPendingInvitations(email) {
 
 /**
  * Accetta o rifiuta un invito (V5.1 Master - Atomic).
+ * Notifiche rimosse (Reset Notifiche).
  */
 async function respondToInvitation(inviteId, accept, guestUid, guestEmail) {
     const inviteRef = doc(db, "invites", inviteId);
@@ -159,7 +130,6 @@ async function respondToInvitation(inviteId, accept, guestUid, guestEmail) {
         const status = accept ? 'accepted' : 'rejected';
         const sKey = sanitizeEmail(guestEmail || invite.recipientEmail);
 
-        // Path dinamico per account (Privato o Azienda)
         let accPath = invite.aziendaId
             ? `users/${invite.ownerId}/aziende/${invite.aziendaId}/accounts/${invite.accountId}`
             : `users/${invite.ownerId}/accounts/${invite.accountId}`;
@@ -170,18 +140,15 @@ async function respondToInvitation(inviteId, accept, guestUid, guestEmail) {
             let accData = accSnap.data();
             let sharedWith = accData.sharedWith || {};
 
-            // Aggiorna mappa condivisione
             if (sharedWith[sKey]) {
                 sharedWith[sKey].status = status;
                 if (accept) sharedWith[sKey].uid = guestUid;
             }
 
-            // Auto-Healing: ricalcolo contatori e visibilità
             const newCount = Object.values(sharedWith).filter(g => g.status === 'accepted').length;
             const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
             const newVisibility = hasActive ? "shared" : "private";
 
-            // V5.2 AUTO-HEALING: Se torna privato e non era un Memo esplicito, torna ad essere Account
             let newType = accData.type;
             if (newVisibility === 'private' && accData.type === 'memo' && accData.isExplicitMemo !== true) {
                 newType = 'account';
@@ -196,29 +163,17 @@ async function respondToInvitation(inviteId, accept, guestUid, guestEmail) {
             });
         }
 
-        // Aggiorna l'invito
         transaction.update(inviteRef, {
             status: status,
             guestUid: accept ? guestUid : null,
             respondedAt: new Date().toISOString()
-        });
-
-        // Notifica per il proprietario
-        const notifRef = doc(collection(db, "users", invite.ownerId, "notifications"));
-        transaction.set(notifRef, {
-            title: accept ? "Invito Accettato" : "Invito Rifiutato",
-            message: `${guestEmail || invite.recipientEmail} ha ${accept ? 'accettato' : 'rifiutato'} l'invito.`,
-            type: "share_response",
-            accountId: invite.accountId,
-            guestEmail: guestEmail || invite.recipientEmail,
-            timestamp: new Date().toISOString(),
-            read: false
         });
     });
 }
 
 /**
  * Revoca l'accesso a un account (V5.1 Master - Atomic).
+ * Notifiche rimosse.
  */
 async function revokeAccess(ownerId, accountId, guestEmail, aziendaId = null) {
     const sKey = sanitizeEmail(guestEmail);
@@ -238,7 +193,6 @@ async function revokeAccess(ownerId, accountId, guestEmail, aziendaId = null) {
         let data = accSnap.data();
         let sharedWith = data.sharedWith || {};
 
-        // Rimuovi dalla mappa
         delete sharedWith[sKey];
 
         const newCount = Object.values(sharedWith).filter(g => g.status === 'accepted').length;
@@ -252,26 +206,10 @@ async function revokeAccess(ownerId, accountId, guestEmail, aziendaId = null) {
             updatedAt: new Date().toISOString()
         });
 
-        // Elimina l'invito
         transaction.delete(invRef);
-
-        // Notifica
-        const notifRef = doc(collection(db, "users", ownerId, "notifications"));
-        transaction.set(notifRef, {
-            title: "Accesso Revocato",
-            message: `Hai revocato l'accesso a ${guestEmail}.`,
-            type: "share_revoked",
-            accountId: accountId,
-            guestEmail: guestEmail,
-            timestamp: new Date().toISOString(),
-            read: false
-        });
     });
 }
 
-/**
- * Recupera gli account condivisi CON l'utente attuale.
- */
 async function getSharedAccounts(guestUid) {
     const q = query(collectionGroup(db, "accounts"), where("sharedWith", "array-contains", guestUid));
     const snap = await getDocs(q);
@@ -291,9 +229,6 @@ async function addContact(userId, contact) {
     return docRef.id;
 }
 
-/**
- * Recupera dati base di un altro utente (Nome, Avatar) tramite email.
- */
 async function getPublicUserDataByEmail(email) {
     const q = query(collection(db, "users"), where("email", "==", email));
     const snap = await getDocs(q);
@@ -305,36 +240,6 @@ async function getPublicUserDataByEmail(email) {
             cognome: data.cognome || '',
             photoURL: data.photoURL || data.avatar || ''
         };
-    }
-    return null;
-}
-
-/**
- * Aggiunge una notifica direttamente nella collezione dell'utente.
- */
-async function addNotification(userId, notification) {
-    if (!userId) throw new Error("User ID mancante");
-    const notifRef = collection(db, "users", userId, "notifications");
-    await addDoc(notifRef, {
-        ...notification,
-        timestamp: new Date().toISOString(),
-        read: false
-    });
-}
-
-/**
- * Recupera il token push dell'utente (se esistente).
- */
-async function getPushToken(userId) {
-    const userRef = doc(db, "users", userId);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-        const data = userSnap.data();
-        // Supporta sia il campo singolo che l'array (per multi-device)
-        if (data.fcmToken) return data.fcmToken;
-        if (data.fcmTokens && data.fcmTokens.length > 0) {
-            return data.fcmTokens[data.fcmTokens.length - 1]; // Prende l'ultimo registrato
-        }
     }
     return null;
 }
@@ -357,7 +262,5 @@ export {
     getSharedAccounts,
     getContacts,
     addContact,
-    getPublicUserDataByEmail,
-    addNotification,
-    getPushToken
+    getPublicUserDataByEmail
 };

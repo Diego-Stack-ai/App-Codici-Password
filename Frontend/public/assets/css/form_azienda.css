@@ -229,23 +229,23 @@
     margin-left: 0.5rem;
 }
 
-/* --- TEXTAREA / NOTE BOX --- */
-.note-box {
-    height: auto !important;
+/* note-box: .glass-card .note-box ha specificità 0,2,0 — supera .detail-field-box (0,1,0) */
+.glass-card .note-box {
+    height: auto;
     min-height: 80px;
     align-items: flex-start;
     padding: 0.75rem;
-    background: transparent !important;
+    background: transparent;
     /* Rimuove base grigia */
 }
 
 .form-textarea {
     width: 100%;
     min-height: 70px;
-    background: transparent !important;
-    border: none !important;
-    color: var(--text-primary) !important;
-    outline: none !important;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    outline: none;
     resize: none;
     font: var(--font-input);
     font-size: var(--fs-xs);
@@ -363,13 +363,12 @@
     transition: max-height 0.35s ease;
 }
 
-/* Extra Items (Email, Sede, Attachments) */
+/* .inside-card padding: specificità sufficiente — !important rimosso */
 .inside-card,
 .email-extra-item,
 .extra-sede-item {
     background: rgba(255, 255, 255, 0.05);
-    padding: 0.75rem !important;
-    /* Sovrascrive padding parent come glass-card */
+    padding: 0.75rem;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
@@ -557,9 +556,7 @@
 }
 
 /* --- 8. UTILITIES --- */
-.hidden {
-    display: none !important;
-}
+/* .hidden è definito in core.css — non duplicare */
 
 .mt-content {
     margin-top: 0.75rem;

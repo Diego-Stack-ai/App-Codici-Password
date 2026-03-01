@@ -12,6 +12,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components.js';
 import { SwipeList } from '../../swipe-list-v6.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -183,6 +184,29 @@ async function loadAccounts() {
         }).filter(a => !a.isArchived);
 
         allAccounts = [...ownAccounts, ...sharedWithMe];
+
+        // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
+        const masterKey = await ensureMasterKey().catch(() => null);
+        if (masterKey) {
+            allAccounts = await Promise.all(allAccounts.map(async acc => {
+                if (acc._encrypted) {
+                    try {
+                        console.log(`[DEBUG_CRYPTO] Decrypting account ${acc.id}:`, {
+                            name: acc.nomeAccount,
+                            username: acc.username,
+                            account: acc.account
+                        });
+                        acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
+                        acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
+                        acc.password = acc.password ? await decrypt(acc.password, masterKey) : acc.password;
+                    } catch (e) {
+                        console.error("[Accounts] Decryption failed for:", acc.id, e);
+                    }
+                }
+                return acc;
+            }));
+        }
+
         filterAndRender();
     } catch (e) {
         logError("LoadAccounts", e);
@@ -396,4 +420,11 @@ async function handleDelete(item) {
         filterAndRender();
     } catch (e) { logError("Delete", e); }
 }
+
+// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
+window.accountPrivati = {
+    async decryptAll() {
+        if (currentUser) return await loadAccounts(currentUser);
+    }
+};
 

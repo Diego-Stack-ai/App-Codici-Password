@@ -66,12 +66,11 @@
                 </div>
 
                 <div class="detail-content-wrap">
-                    <!-- [V5.1 Master] Blinded Context: Micro-form logic only for the trap to satisfy DOM warnings -->
-                    <form class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;"
-                        onsubmit="return false;">
+                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
+                    <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
                         <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
                         <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
-                    </form>
+                    </div>
 
                     <!-- 1. Dati Principali -->
                     <section>

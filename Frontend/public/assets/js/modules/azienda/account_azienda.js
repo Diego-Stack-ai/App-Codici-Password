@@ -11,6 +11,7 @@ import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -103,6 +104,24 @@ async function loadAccounts() {
         const colRef = collection(db, "users", currentUser.uid, "aziende", currentAziendaId, "accounts");
         const snap = await getDocs(colRef);
         allAccounts = snap.docs.map(d => ({ id: d.id, ...d.data(), isOwner: true })); // Assumiamo owner per ora in azienda
+
+        // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
+        const masterKey = await ensureMasterKey().catch(() => null);
+        if (masterKey) {
+            allAccounts = await Promise.all(allAccounts.map(async acc => {
+                if (acc._encrypted) {
+                    try {
+                        acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
+                        acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
+                        acc.password = acc.password ? await decrypt(acc.password, masterKey) : acc.password;
+                    } catch (e) {
+                        console.warn("[Azienda] Decryption failed for:", acc.id);
+                    }
+                }
+                return acc;
+            }));
+        }
+
         filterAndRender();
     } catch (e) {
         logError("LoadAccounts", e);
@@ -302,3 +321,10 @@ async function handleDelete(item) {
         filterAndRender();
     } catch (e) { logError("Delete", e); }
 }
+
+// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
+window.accountAzienda = {
+    async decryptAll() {
+        if (currentAziendaId) return await loadAccounts(currentAziendaId);
+    }
+};

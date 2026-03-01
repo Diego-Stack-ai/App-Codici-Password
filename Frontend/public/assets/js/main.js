@@ -1,6 +1,6 @@
 /**
- * PROTOCOLLO BASE MAIN ENTRY POINT (V4.4)
- * Coordina l'inizializzazione dei moduli UI dell'applicazione.
+ * PROTOCOLLO MASTER MAIN ENTRY POINT (V7.0)
+ * Coordina l'inizializzazione dei moduli UI dell'applicazione secondo il PROTOCOLLO V7.0.
  * Refactor: Rimozione innerHTML, uso dom-utils.js, centralizzazione in components.js.
  */
 
@@ -52,9 +52,10 @@ import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js';
+import { ensureMasterKey } from './modules/core/security-manager.js';
 
-// Inizializza il controllo inattività globalmente (SOSPESO TEMPORANEAMENTE PER SVILUPPO)
-// initInactivityTimer();
+// Inizializza il controllo inattività globalmente
+initInactivityTimer();
 
 function getCurrentPage() {
     const path = window.location.pathname;
@@ -85,21 +86,14 @@ function getCurrentPage() {
     if (path.includes('configurazione_automezzi')) return 'automezzi';
     if (path.includes('configurazione_documenti')) return 'documenti';
     if (path.includes('configurazione_generali')) return 'regole_generali';
-    if (path.includes('notifiche_storia')) return 'storico';
 
     // Azienda & Allegati
     if (path.includes('lista_aziende')) return 'lista_aziende';
-    if (path.includes('aggiungi_nuova_azienda')) return 'aggiungi_nuova_azienda';
-    if (path.includes('aggiungi_azienda')) return 'aggiungi_azienda';
     if (path.includes('modifica_azienda')) return 'modifica_azienda';
     if (path.includes('dati_azienda')) return 'dati_azienda';
-    if (path.includes('account_azienda_list')) return 'account_azienda_list';
-    if (path.includes('aggiungi_account_azienda')) return 'aggiungi_account_azienda';
-    if (path.includes('modifica_account_azienda')) return 'modifica_account_azienda';
     if (path.includes('dettaglio_account_azienda')) return 'dettaglio_account_azienda';
     if (path.includes('form_account_azienda')) return 'form_account_azienda';
     if (path.endsWith('account_azienda.html')) return 'account_azienda';
-    if (path.includes('gestione_allegati')) return 'gestione_allegati';
 
     if (path.includes('privacy')) return 'privacy';
     if (path.includes('termini')) return 'termini';
@@ -107,13 +101,52 @@ function getCurrentPage() {
     return 'index';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 🔐 BLOCCO SENTINELLA V5.1 - Previene il doppio bootstrap
-    if (window.__V5_BOOTSTRAPPED__) {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 🔐 BLOCCO SENTINELLA V7.0 - Previene il doppio bootstrap
+    if (window.__V7_BOOTSTRAPPED__) {
         console.warn("⚠️ Rilevato tentativo di doppio bootstrap. Blocco sentinella attivo.");
         return;
     }
-    window.__V5_BOOTSTRAPPED__ = true;
+    window.__V7_BOOTSTRAPPED__ = true;
+
+    // 🚀 PWA MODE & SERVICE WORKER (V7.0 STABLE)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('./sw.js');
+                console.log('[PWA] Service Worker registrato con successo:', registration.scope);
+
+                // Gestione Aggiornamenti
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // C'è un nuovo worker e uno vecchio è già attivo
+                            console.log('[PWA] Nuovo aggiornamento disponibile.');
+                            if (window.showToast) {
+                                showToast("Nuovo aggiornamento disponibile! Ricarica per applicare.", "info");
+                                // Opzionale: forzare il ricaricamento dopo un po' o tramite pulsante
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 3000);
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('[PWA] Registrazione Service Worker fallita:', error);
+            }
+        });
+
+        // Forza il reload quando il nuovo SW prende il controllo
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
+    }
 
     // 1. Policy UX (Lockdown menu/selezione)
     initLockedUX();
@@ -142,10 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // setupAccountCards(); // Delegato ai moduli pagina se serve
     }
 
-    // 4. GLOBAL SECURITY & INVITE CHECK & PRIVATE ROUTING
     let inviteUnsubscribe = null;
-    let sentInviteUnsubscribe = null;
-    let notificationUnsubscribe = null; // Spostato qui per pulizia sistematica
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -154,16 +184,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
-                    const userData = userDoc.data();
                     console.log("[AUTH-DEBUG] User document found.");
                 } else {
                     console.warn("[AUTH-DEBUG] User document NOT found in Firestore.");
                 }
-            } catch (err) {
-                console.error("[AUTH-DEBUG] Permission record check failed:", err.message);
-            }
 
-            try {
+                // 🔐 PROTOCOLLO BLINDA (V7.0 MASTER)
+                // Se la pagina è privata, assicuriamoci che il Vault sia sbloccato
+                const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
+                if (!publicPages.includes(currentPage)) {
+                    try {
+                        await ensureMasterKey();
+                    } catch (e) {
+                        console.error("[BLINDA] Vault lock required.");
+                        // Se l'utente annulla lo sblocco su una pagina privata, potremmo volerlo reindirizzare
+                        // o lasciare i dati cifrati (che verrebbero visti come "---").
+                    }
+                }
+
                 // ROUTER - Step 2: Inizializza Pagina Privata
                 switch (currentPage) {
                     case 'home': await Pages.initHomePage(user); break;
@@ -185,20 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'automezzi': await Pages.initConfigurazioneAutomezzi(user); break;
                     case 'documenti': await Pages.initConfigurazioneDocumenti(user); break;
                     case 'regole_generali': await Pages.initConfigurazioneRegoleGenerali(user); break;
-                    case 'storico': await Pages.initStoricoNotifiche(user); break;
 
                     case 'lista_aziende': await Pages.initListaAziende(user); break;
-                    case 'aggiungi_nuova_azienda': await Pages.initAggiungiNuovaAzienda(user); break;
-                    case 'aggiungi_azienda': await Pages.initAggiungiAzienda(user); break;
                     case 'modifica_azienda': await Pages.initModificaAzienda(user); break;
                     case 'dati_azienda': await Pages.initDatiAzienda(user); break;
                     case 'account_azienda': await Pages.initAccountAziendaList(user); break;
-                    case 'account_azienda_list': await Pages.initAccountAziendaList(user); break;
-                    case 'aggiungi_account_azienda': await Pages.initAggiungiAccountAzienda(user); break;
-                    case 'modifica_account_azienda': await Pages.initModificaAccountAzienda(user); break;
                     case 'dettaglio_account_azienda': await Pages.initDettaglioAccountAzienda(user); break;
                     case 'form_account_azienda': await Pages.initFormAccountAzienda(user); break;
-                    case 'gestione_allegati': await Pages.initGestioneAllegati(user); break;
                 }
 
                 // GLOBAL REALTIME INVITE LISTENER (HARDENING V2)
@@ -220,30 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // GLOBAL NOTIFICATION LISTENER (V5.4 - Owner Confirmation)
-                if (notificationUnsubscribe) notificationUnsubscribe();
-                const qNotif = query(
-                    collection(db, "users", user.uid, "notifications"),
-                    where("read", "==", false),
-                    where("type", "in", ["share_response", "share_revoked"])
-                );
-                notificationUnsubscribe = onSnapshot(qNotif, (snap) => {
-                    snap.docChanges().forEach((change) => {
-                        if (change.type === "added") {
-                            showNotificationModal(change.doc.id, change.doc.data());
-                        }
-                    });
-                }, (err) => {
-                    console.error("[V5.4-DEBUG] Error in Notification listener:", err.message);
-                });
-
             } catch (error) {
                 console.error("Global Check Error:", error);
             }
         } else {
             if (inviteUnsubscribe) inviteUnsubscribe();
-            if (sentInviteUnsubscribe) sentInviteUnsubscribe();
-            if (notificationUnsubscribe) notificationUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
                 // window.location.href = 'index.html'; // Scommentare in prod
@@ -289,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * NOTIFICATION SYSTEM (V5.4 - Results with OK Confirmation)
+     * NOTIFICATION SYSTEM (V7.0 - Results with OK Confirmation)
      */
     function showNotificationModal(notifId, data) {
         if (document.getElementById(`notif-modal-${notifId}`)) return;
@@ -327,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * REJECTION SYSTEM (Global Notifier) - HARDENING V2.3
+     * REJECTION SYSTEM (Global Notifier) - HARDENING V7.0
      */
     function showRejectionModal(inviteId, data) {
         if (document.getElementById(`reject-modal-${inviteId}`)) return;
@@ -436,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`[V3.1-DEBUG] --- handleInviteResponse ---`);
             console.log(`[V3.1-DEBUG] User: ${currentUserEmail} (UID: ${currentUid}), Action: ${status}`);
 
-            // --- RETRY LOGIC (Harden V3.1) ---
+            // --- RETRY LOGIC (Harden V7.0) ---
             let invSnap = null;
             let inviteRef = doc(db, "invites", inviteId);
 
@@ -464,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("Non sei autorizzato a rispondere a questo invito.");
             }
 
-            // --- ATOMIC TRANSACTION V3.1 ---
+            // --- ATOMIC TRANSACTION V7.0 ---
             console.log("[V3.1-DEBUG] Executing runTransaction...");
             await runTransaction(db, async (transaction) => {
                 console.log(`[V3.1-DEBUG] Transaction started for invite: ${inviteId}`);
@@ -521,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
                 const newVisibility = hasActive ? "shared" : "private";
 
-                // V5.2 AUTO-HEALING: Se torna privato e non era un Memo esplicito, torna ad essere Account
+                // V7.0 AUTO-HEALING DI STATO: Se torna privato e non era un Memo esplicito, torna ad essere Account
                 let newType = data.type;
                 if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
                     console.log("[V3.1-DEBUG] Auto-Healing: Reverting shared-memo to account type.");
@@ -544,21 +556,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     respondedAt: new Date().toISOString()
                 });
 
-                if (ownerId && ownerId !== auth.currentUser?.uid) {
-                    const notifRef = doc(collection(db, "users", ownerId, "notifications"));
-                    transaction.set(notifRef, {
-                        title: status === 'accepted' ? "Invito Accettato" : "Invito Rifiutato",
-                        message: `${currentUserEmail} ha ${status === 'accepted' ? 'accettato' : 'rifiutato'} l'invito.`,
-                        accountName: data.nomeAccount || 'Senza Nome',
-                        type: "share_response",
-                        accountId: accId,
-                        aziendaId: storedInvite.aziendaId || null,
-                        guestEmail: currentUserEmail,
-                        timestamp: new Date().toISOString(),
-                        read: false
-                    });
-                    console.log("[V3.1-DEBUG] Notification queued for owner.");
-                }
                 console.log("[V3.1-DEBUG] Updates queued in transaction.");
             });
 
@@ -597,4 +594,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => document.body.classList.add('revealed'), 100);
 });
 
-console.log("PROTOCOLLO BASE (v5.0-HARDENED) Initialized");
+console.log("PROTOCOLLO V7.0 MASTER Initialized");

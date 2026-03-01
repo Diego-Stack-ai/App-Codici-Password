@@ -10,7 +10,7 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-t="title_config_vehicles">Configurazione Automezzi - PROTOCOLLO BASE V5.0</title>
+    <title data-t="vehicles_config_title">Configurazione Automezzi - PROTOCOLLO BASE V5.0</title>
 
     <!-- PWA / Mobile Capable -->
     <link rel="manifest" href="manifest.json?v=5.0" />
@@ -49,20 +49,20 @@
 
                 <div class="saetta-master"></div>
 
-                <!-- 1. Oggetti Email / Tipi Scadenza -->
+                <!-- 1. Tipi Scadenza / Oggetti Email -->
                 <div class="settings-group">
                     <div class="settings-item collapsible-header" data-target="container-types" role="button"
                         aria-expanded="false" data-t-aria="aria_toggle_section">
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-blue">
-                                <span class="material-symbols-outlined">mail</span>
+                                <span class="material-symbols-outlined">directions_car</span>
                             </div>
                             <div class="settings-item-info">
-                                <h3 class="settings-label" data-t="section_email_subject">Oggetti Email</h3>
+                                <h3 class="settings-label" data-t="email_subjects">Tipi Scadenza</h3>
                             </div>
                             <div class="settings-header-actions">
                                 <button type="button" id="btn-add-type" class="btn-icon-add"
-                                    data-t-aria="aria_add_new_subject">
+                                    data-t-aria="aria_add_new_type">
                                     <span class="material-symbols-outlined">add</span>
                                 </button>
                                 <span class="material-symbols-outlined arrow-icon">expand_more</span>
@@ -80,10 +80,10 @@
                         aria-expanded="false" data-t-aria="aria_toggle_section">
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-amber">
-                                <span class="material-symbols-outlined">directions_car</span>
+                                <span class="material-symbols-outlined">minor_crash</span>
                             </div>
                             <div class="settings-item-info">
-                                <h3 class="settings-label" data-t="section_vehicle_model">Modelli & Targhe</h3>
+                                <h3 class="settings-label" data-t="models_plates">Modelli & Targhe</h3>
                             </div>
                             <div class="settings-header-actions">
                                 <button type="button" id="btn-add-model" class="btn-icon-add"
@@ -99,16 +99,16 @@
                     </div>
                 </div>
 
-                <!-- 3. Template Email -->
+                <!-- 3. Testi E-Mail -->
                 <div class="settings-group">
                     <div class="settings-item collapsible-header" data-target="container-templates" role="button"
                         aria-expanded="false" data-t-aria="aria_toggle_section">
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-purple">
-                                <span class="material-symbols-outlined">description</span>
+                                <span class="material-symbols-outlined">mail</span>
                             </div>
                             <div class="settings-item-info">
-                                <h3 class="settings-label" data-t="section_email_template">Template Messaggi</h3>
+                                <h3 class="settings-label" data-t="email_templates">Testo E-Mail</h3>
                             </div>
                             <div class="settings-header-actions">
                                 <button type="button" id="btn-add-template" class="btn-icon-add"
@@ -133,9 +133,14 @@
                         </div>
                         <div class="syntax-inline-container">
                             <div class="syntax-row">
+                                <span class="config-item-desc" data-t="subject_label">Oggetto:</span>
                                 <span class="config-badge config-badge-blue" data-t="object_tag">[Oggetto]</span>
-                                <span class="config-badge config-badge-amber" data-t="model_tag">[Modello]</span>
-                                <span class="config-badge config-badge-purple" data-t="plate_tag">[Targa]</span>
+                                <span class="config-badge config-badge-amber" data-t="plate_tag">[Targa]</span>
+                            </div>
+                            <div class="syntax-row">
+                                <span class="config-item-desc" data-t="body_label">Corpo:</span>
+                                <span class="config-badge config-badge-blue" data-t="object_tag">[Oggetto]</span>
+                                <span class="config-badge config-badge-emerald" data-t="data_tag">[Data]</span>
                             </div>
                         </div>
                     </div>

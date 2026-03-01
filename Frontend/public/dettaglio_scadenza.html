@@ -88,33 +88,45 @@
                     </div>
                 </div>
 
-                <!-- Email Preview Section -->
-                <div class="detail-section">
+                <!-- Notifiche: Email -->
+                <div id="section-emails" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-purple">mail</span>
-                        <h3 class="detail-section-title" data-t="notification_preview">Anteprima Avviso</h3>
+                        <span class="material-symbols-outlined icon-amber">mail</span>
+                        <h3 class="detail-section-title" data-t="emails_dest">Destinatari Email</h3>
                     </div>
-                    <div class="detail-email-preview">
-                        <p id="display-testo-email" class="detail-email-text">...</p>
+                    <div class="detail-notes-box flex-col-gap-1">
+                        <div id="detail-email1" class="detail-notes-text font-strong">-</div>
+                        <div id="detail-email2" class="detail-notes-text" style="opacity: 0.6;">-</div>
                     </div>
                 </div>
 
-                <!-- Destinatari Section -->
-                <div id="display-destinatari-wrapper" class="detail-section">
+                <!-- Pianificazione (Preavviso e Frequenza) -->
+                <div id="section-planning" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-blue">alternate_email</span>
-                        <h3 class="detail-section-title" data-t="recipients">Destinatari Invio</h3>
+                        <span class="material-symbols-outlined icon-emerald">timer</span>
+                        <h3 class="detail-section-title" data-t="planning">Pianificazione Notifiche</h3>
                     </div>
-                    <div id="display-destinatari" class="detail-list-group"></div>
+                    <div class="detail-notes-box" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <div class="config-badge config-badge-blue">
+                            <span data-t="notice">Preavviso:</span> <span id="detail-preavviso"
+                                class="font-strong">-</span>
+                        </div>
+                        <div class="config-badge config-badge-amber">
+                            <span data-t="replica">Replica:</span> <span id="detail-frequenza"
+                                class="font-strong">-</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Notifiche Section -->
-                <div id="display-notifications-wrapper" class="detail-section">
+                <!-- Template Testo Email -->
+                <div id="section-template" class="detail-section hidden">
                     <div class="detail-section-header">
-                        <span class="material-symbols-outlined icon-emerald">notifications_active</span>
-                        <h3 class="detail-section-title">Canali di Notifica</h3>
+                        <span class="material-symbols-outlined icon-purple">description</span>
+                        <h3 class="detail-section-title" data-t="email_template">Testo Email</h3>
                     </div>
-                    <div id="display-notifications" class="detail-list-group"></div>
+                    <div class="detail-notes-box">
+                        <p id="detail-template" class="detail-notes-text italic" style="margin: 0;">-</p>
+                    </div>
                 </div>
 
                 <!-- Allegati Section -->

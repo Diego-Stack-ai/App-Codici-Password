@@ -47,20 +47,20 @@ export function setupPasswordToggles() {
             if (!input) return;
 
             const icon = this.querySelector('.material-symbols-outlined');
+            const isPasswordType = input.type === 'password' || input.type === 'text';
 
-            // 1. Supporto Base Shield (Standard Moderno)
-            if (input.classList.contains('base-shield') || input.id === 'password' || input.id === 'account-password') {
+            if (isPasswordType) {
+                const isNowVisible = input.type === 'text';
+                input.type = isNowVisible ? 'password' : 'text';
+                if (icon) icon.textContent = isNowVisible ? 'visibility' : 'visibility_off';
+
+                // Rimuovi anche base-shield se presente per evitare conflitti
+                input.classList.remove('base-shield');
+            } else if (input.classList.contains('base-shield')) {
+                // Fallback Legacy per chi usa solo base-shield CSS
                 input.classList.toggle('base-shield');
                 const isShielded = input.classList.contains('base-shield');
                 if (icon) icon.textContent = isShielded ? 'visibility' : 'visibility_off';
-                return;
-            }
-
-            // 2. Fallback per type="password" (Standard Legacy)
-            if (input.type === 'password' || input.type === 'text') {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                if (icon) icon.textContent = isPassword ? 'visibility' : 'visibility_off';
             }
         });
     });

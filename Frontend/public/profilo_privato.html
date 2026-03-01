@@ -49,7 +49,7 @@
                     <!-- Avatar & QR Code Side by Side -->
                     <div class="hero-avatar-qr-row">
                         <div class="avatar-group">
-                            <div id="avatar-trigger" class="profile-avatar-xl border-glow cursor-pointer"
+                            <div id="avatar-trigger" class="profile-avatar-xl cursor-pointer"
                                 data-action="trigger-click" data-target="avatar-input">
                                 <img id="profile-avatar" src="assets/images/user-avatar-5.png" alt="Profile">
                                 <div class="profile-avatar-overlay">
@@ -72,6 +72,12 @@
                 </div>
 
                 <div class="detail-content-wrap">
+                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
+                    <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
+                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
+                    </div>
+
                     <!-- 1. ANAGRAFICA -->
                     <div class="form-section">
                         <div class="form-section-header">

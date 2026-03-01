@@ -11,8 +11,21 @@ import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 
 const DEFAULT_CONFIG = {
-    deadlineTypes: [],
-    emailTemplates: []
+    deadlineTypes: [
+        { name: 'Sale Addolcitore', freq: 7, period: 14 },
+        { name: "Comodato d'uso", freq: 7, period: 28 },
+        { name: 'Federazione Italiana Vela', freq: 7, period: 70 },
+        { name: 'Visita medica', freq: 7, period: 14 },
+        { name: 'Contratto', freq: 7, period: 14 },
+        { name: 'Tessera isola ecologica', freq: 7, period: 14 }
+    ],
+    emailTemplates: [
+        "Il sale dell'addolcitore",
+        "Il comodato d'uso dell'auto targata",
+        "E' in scadenza il tuo certificato medico",
+        "E' in scadenza la tua tessera FIV",
+        "Isola ecologica"
+    ]
 };
 
 let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));

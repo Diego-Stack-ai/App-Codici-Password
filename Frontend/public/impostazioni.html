@@ -12,7 +12,7 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-t="title_settings">Impostazioni - PROTOCOLLO BASE V5.0</title>
 
-    <!-- PWA / Mobile Capable -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="manifest" href="manifest.json?v=5.0" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/images/app-icon.png">
     <meta name="mobile-web-app-capable" content="yes">
@@ -145,71 +145,36 @@
                         </div>
                     </div>
 
-                    <!-- Link Rapidi -->
-                    <button class="settings-item group" id="btn-expiry-rules">
-                        <div class="row-layout">
-                            <div class="settings-icon-box icon-amber">
-                                <span class="material-symbols-outlined">calendar_month</span>
-                            </div>
-                            <span class="settings-label" data-t="expiry_rules_title_page">Regole invio scadenze</span>
-                        </div>
-                        <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
-                    </button>
-
+                    <!-- Archivio -->
                     <button class="settings-item group" id="btn-account-archive">
                         <div class="row-layout">
-                            <div class="settings-icon-box icon-purple">
+                            <div class="settings-icon-box icon-amber">
                                 <span class="material-symbols-outlined">archive</span>
                             </div>
-                            <span class="settings-label" data-t="account_archive">Archivio Account</span>
+                            <div class="settings-item-info">
+                                <span class="settings-label" data-t="account_archive">Archivio Account</span>
+                                <span class="settings-desc" data-t="account_archive_desc">Recupera o elimina
+                                    definit.</span>
+                            </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
                     </button>
 
-                    <button class="settings-item group" id="btn-notifications-history">
+                    <!-- Regole Scadenze (Categorie) -->
+                    <button class="settings-item group" id="btn-expiry-rules">
                         <div class="row-layout">
-                            <div class="settings-icon-box icon-blue">
-                                <span class="material-symbols-outlined">notifications</span>
+                            <div class="settings-icon-box icon-purple">
+                                <span class="material-symbols-outlined">rule</span>
                             </div>
-                            <span class="settings-label" data-t="notifications_history_title">Storico Notifiche</span>
+                            <div class="settings-item-info">
+                                <span class="settings-label" data-t="expiry_rules">Categorie Scadenze</span>
+                                <span class="settings-desc">Gestisci liste e tipologie</span>
+                            </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
                     </button>
+
                 </div>
-
-                <!-- Preferenze Notifiche -->
-                <div class="settings-container mt-section">
-                    <h3 class="settings-desc" data-t="notifications_prefs">Preferenze Notifiche</h3>
-
-                    <div class="settings-item">
-                        <div class="row-layout">
-                            <div class="settings-icon-box icon-blue">
-                                <span class="material-symbols-outlined">notifications_active</span>
-                            </div>
-                            <div class="settings-item-info">
-                                <span class="settings-label" data-t="pref_push_label">Notifiche Push</span>
-                                <span class="settings-desc" data-t="pref_push_desc">Ricevi avvisi sul
-                                    cellulare</span>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="push-notify-toggle" class="settings-toggle">
-                    </div>
-
-                    <div class="settings-item">
-                        <div class="row-layout">
-                            <div class="settings-icon-box icon-emerald">
-                                <span class="material-symbols-outlined">mail</span>
-                            </div>
-                            <div class="settings-item-info">
-                                <span class="settings-label" data-t="pref_email_label">Notifiche Email</span>
-                                <span class="settings-desc" data-t="pref_email_desc">Ricevi avvisi via posta</span>
-                            </div>
-                        </div>
-                        <input type="checkbox" id="email-notify-toggle" class="settings-toggle">
-                    </div>
-                </div>
-
-
 
                 <!-- Sicurezza e Accesso -->
                 <div class="settings-container mt-section">
@@ -251,15 +216,15 @@
                         <input type="checkbox" id="face-id-toggle" class="settings-toggle">
                     </div>
 
-                    <!-- Blocco Inattività -->
+                    <!-- Sicurezza e Inattività (Protocollo V6.4 Unified) -->
                     <div class="settings-item settings-item-stack">
                         <div class="settings-item-header-row">
                             <div class="settings-icon-box icon-purple">
-                                <span class="material-symbols-outlined">timer</span>
+                                <span class="material-symbols-outlined">security</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label" data-t="lock_inactivity">Blocco Inattività</span>
-                                <span class="settings-desc" data-t="lock_inactivity_desc">Autolock schermo</span>
+                                <span class="settings-label" data-t="lock_inactivity">Sicurezza e Inattività</span>
+                                <span class="settings-desc">Timeout per blocco auto o chiusura Vault</span>
                             </div>
                         </div>
                         <div class="settings-controls-row" id="lock-timer-selector">
@@ -268,8 +233,12 @@
                             <button class="timer-btn timer-btn-flex" data-val="1">1'</button>
                             <button class="timer-btn timer-btn-flex" data-val="3">3'</button>
                             <button class="timer-btn timer-btn-flex" data-val="5">5'</button>
+                            <button class="timer-btn timer-btn-flex" data-val="720">12h</button>
                         </div>
                     </div>
+
+                    <!-- 🔐 SEZIONE MANUTENZIONE RIMOSSA (V6.2 CLEANUP) -->
+
                 </div>
 
                 <!-- Supporto e Info -->

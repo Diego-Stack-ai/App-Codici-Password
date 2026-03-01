@@ -2,7 +2,7 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { auth } from './firebase-config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
-import { removePushToken } from './modules/shared/push_manager.js';
+
 
 /**
  * Inizializza i componenti condivisi (Header/Footer)
@@ -29,7 +29,7 @@ export async function initComponents() {
             const headerRight = createElement('div', { id: 'header-right', className: 'header-right' });
 
             if (isHome) {
-                // EXCEPTION 2.1: Home Page Left -> Avatar Utente (V3.9 Standard)
+                // EXCEPTION 2.1: Home Page Left -> Avatar Utente (V7.0 Standard)
                 const avatarLink = createElement('div', {
                     id: 'header-user-avatar',
                     className: 'header-avatar-box cursor-pointer',
@@ -105,12 +105,15 @@ export async function initComponents() {
             // Title / Greeting (per tutte le pagine non-auth)
             if (!isAuth) {
                 if (isHome) {
+                    const user = auth.currentUser;
+                    const initialName = user?.displayName?.split(' ')[0] || 'Utente';
+
                     const greetingCont = createElement('div', {
                         className: 'flex flex-col items-center cursor-pointer',
                         onclick: () => window.location.href = 'profilo_privato.html'
                     }, [
                         createElement('span', { id: 'home-greeting-text', className: 'text-[9px] opacity-30 uppercase font-black tracking-widest', textContent: timeGreeting }),
-                        createElement('h1', { id: 'home-user-name', className: 'header-title', textContent: 'Utente' })
+                        createElement('h1', { id: 'home-user-name', className: 'header-title', textContent: initialName })
                     ]);
                     headerCenter.appendChild(greetingCont);
                 } else {
@@ -137,7 +140,7 @@ export async function initComponents() {
                                 if (typeof window.showLogoutModal === 'function') {
                                     const confirmed = await window.showLogoutModal();
                                     if (confirmed) {
-                                        await removePushToken(auth.currentUser);
+
                                         await signOut(auth);
                                         window.location.href = 'index.html';
                                     }
@@ -238,9 +241,23 @@ export async function initComponents() {
 
             const footer = createElement('footer', { className: 'base-footer' }, [footerContent]);
             footerPh.appendChild(footer);
+
+            // ── CONTRATTO ARCHITETTURALE V7.0 ──
+            // Evento dispatchato UNA SOLA VOLTA dopo che il footer è nel DOM.
+            // window.__footerReady memorizza lo stato per i moduli che si registrano tardi
+            // (race condition con onAuthStateChanged che è asincrono).
+            const footerReadyDetail = {
+                left: footerLeft,
+                center: footerCenter,
+                right: footerRight
+            };
+            window.__footerReady = footerReadyDetail;
+            document.dispatchEvent(new CustomEvent('footer:ready', {
+                detail: footerReadyDetail
+            }));
         }
 
-        console.log("PROTOCOLLO BASE Components Initialized (DOM Safe) V4.5");
+        console.log("PROTOCOLLO V7.0 MASTER Components Initialized (DOM Safe)");
 
     } catch (e) {
         console.error("Errore inizializzazione componenti:", e);

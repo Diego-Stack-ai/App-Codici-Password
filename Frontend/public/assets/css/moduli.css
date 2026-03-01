@@ -86,8 +86,8 @@
 
 .input {
     flex: 1;
-    background: transparent !important;
-    border: none !important;
+    background: transparent;
+    border: none;
     border-radius: 0;
     padding: 1rem 0;
     /* Padding solo sopra/sotto ora che il wrapper ha il padding laterale */
@@ -345,7 +345,8 @@
 }
 
 .base-dropdown-full {
-    width: 100% !important;
+    width: 100%;
+    /* Nessun conflitto — !important rimosso */
 }
 
 .base-btn-secondary {
@@ -405,7 +406,8 @@
 }
 
 .dark .base-dropdown-item:hover {
-    background: rgba(56, 189, 248, 0.15) !important;
+    /* specificità 0,2,1 — supera .base-dropdown-item:hover (0,1,1) senza !important */
+    background: rgba(56, 189, 248, 0.15);
     color: #fff;
 }
 

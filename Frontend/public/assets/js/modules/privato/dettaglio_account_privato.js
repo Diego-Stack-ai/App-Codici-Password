@@ -17,6 +17,7 @@ import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
 import { initComponents } from '../../components.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -109,6 +110,36 @@ async function loadAccount() {
 
         accountData = { id: snap.id, ...snap.data() };
         if (!isReadOnly) updateDoc(docRef, { views: increment(1) }).catch(console.warn);
+
+        // 🔐 PROTOCOLLO BLINDA (Auto-Unlock Compliant)
+        if (accountData._encrypted) {
+            try {
+                const masterKey = await ensureMasterKey();
+                const decryptIfPossible = async (val) => {
+                    if (!val) return val;
+                    try { return await decrypt(val, masterKey); } catch (e) { return "---"; }
+                };
+
+                accountData.username = await decryptIfPossible(accountData.username);
+                accountData.account = await decryptIfPossible(accountData.account);
+                accountData.password = await decryptIfPossible(accountData.password);
+                if (Array.isArray(accountData.banking)) {
+                    accountData.banking = await Promise.all(accountData.banking.map(async b => ({
+                        ...b,
+                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva),
+                        cards: await Promise.all((b.cards || []).map(async c => ({
+                            ...c,
+                            cardNumber: await decryptIfPossible(c.cardNumber),
+                            pin: await decryptIfPossible(c.pin),
+                            ccv: await decryptIfPossible(c.ccv)
+                        })))
+                    })));
+                }
+            } catch (e) {
+                console.warn("[Dettaglio] Decrittazione saltata o annullata.");
+                showToast("Dati cifrati: sbloccare la Vault per visualizzare.", "warning");
+            }
+        }
 
         renderAccount(accountData);
         await loadAttachments();
@@ -301,7 +332,7 @@ function renderBanking(acc) {
                 createElement('label', { className: 'view-label', textContent: label }),
                 createElement('div', { className: 'glass-field border-glow' }, [
                     createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
-                    createElement('input', { id: id, className: `field-input w-full no-transform ${isPassword ? 'base-shield field-value-password' : ''}`, value: value || '-', readonly: true }),
+                    createElement('input', { id: id, className: `field-input w-full no-transform ${isPassword ? 'base-shield field-value-password' : ''}`, value: value || '-', readonly: true, autocomplete: 'new-password' }),
                     actionsDiv
                 ])
             ]);
@@ -446,7 +477,7 @@ async function revokeRecipientV3(email) {
             let hasActiveGests = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
             let newVisibility = hasActiveGests ? "shared" : "private";
 
-            // V5.2 AUTO-HEALING: Se torna privato e non era un Memo esplicito, torna ad essere Account
+            // V5.2 AUTO-HEALING DI STATO: Se torna privato e non era un Memo esplicito, torna ad essere Account
             let newType = data.type;
             if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
                 newType = 'account';
@@ -870,3 +901,12 @@ function checkRealBankingData(acc) {
         return hasIban || hasDisp || hasCards || hasRef;
     });
 }
+
+// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
+window.dettaglioAccountPrivato = {
+    async decryptAll() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accountId = urlParams.get('id');
+        if (accountId) return await loadAccount(accountId);
+    }
+};

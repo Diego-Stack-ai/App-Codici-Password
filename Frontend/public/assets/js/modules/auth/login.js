@@ -91,11 +91,11 @@ function setupLanguageSelector() {
  * Validazione e Invio Form Login
  */
 function setupLoginForm() {
-    const form = document.getElementById('login-form');
     const submitBtn = document.getElementById('login-submit-btn');
-    if (!form || !submitBtn) return;
+    if (!submitBtn) return;
 
-    form.addEventListener('submit', async (e) => {
+    // 🛡️ V7.0: Listener su click (dato che abbiamo rimosso il tag <form>)
+    submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
 
         const emailEl = document.getElementById('email');
@@ -180,18 +180,17 @@ function setupPasswordToggle() {
         e.preventDefault();
         e.stopPropagation();
 
-        const isSecret = input.type === 'password' || input.classList.contains('base-shield');
+        const isShielded = input.classList.contains('base-shield');
 
-        if (isSecret) {
-            input.type = 'text';
+        if (isShielded) {
             input.classList.remove('base-shield');
         } else {
-            input.type = 'password';
+            input.classList.add('base-shield');
         }
 
         const icon = btn.querySelector('.material-symbols-outlined');
         if (icon) {
-            icon.textContent = isSecret ? 'visibility_off' : 'visibility';
+            icon.textContent = isShielded ? 'visibility' : 'visibility_off';
         }
     });
 }

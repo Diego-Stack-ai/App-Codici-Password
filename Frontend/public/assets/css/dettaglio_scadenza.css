@@ -251,7 +251,7 @@
 }
 
 .icon-purple {
-    color: #a855f7;
+    color: var(--color-purple);
 }
 
 .icon-emerald {
@@ -259,7 +259,7 @@
 }
 
 .icon-blue {
-    color: #3b82f6;
+    color: var(--accent);
 }
 
 .icon-amber {
@@ -271,6 +271,4 @@
     opacity: 0.5;
 }
 
-.hidden {
-    display: none !important;
-}
+/* .hidden è definito in core.css — non duplicare */

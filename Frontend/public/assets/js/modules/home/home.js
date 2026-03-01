@@ -9,9 +9,10 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 /**
- * HOME PAGE MODULE (V5.0 ADAPTER)
+ * HOME PAGE MODULE (V5.0 ADAPTER) - RESET NOTIFICHE
  * Gestisce l'interfaccia della Home Page.
  * - Entry Point: initHomePage(user) (chiamato da main.js)
  */
@@ -26,7 +27,7 @@ export async function initHomePage(user) {
         return;
     }
 
-    console.log("[HOME] Init V5.0 Dashboard...", user.email);
+    console.log("[HOME] Init V5.0 Dashboard (Notifications Disabled)...", user.email);
     currentUser = user;
 
     try {
@@ -39,19 +40,6 @@ export async function initHomePage(user) {
 
         // Renderizza Scadenze e Urgenze
         await renderDashboardDeadlines(user);
-
-        // --- SETUP FLUSSO & PUSH SYNC (V5.0) ---
-        const { initSetupFlusso } = await import('./setup_flusso.js');
-        const { syncPushToken, listenForTokenRefresh } = await import('../shared/push_manager.js');
-
-        await initSetupFlusso(user);
-
-        // Auto-healing dei token se le notifiche sono attive
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists() && userDoc.data().prefs_push !== false) {
-            await syncPushToken(user);
-            listenForTokenRefresh(user);
-        }
 
         // Inizializza Listeners (Logout, Tema, Avatar Fallback)
         initHomeListeners();
@@ -87,7 +75,13 @@ function initHomeListeners() {
  * Gestisce il rendering dell'utente nell'Header
  * (Foto, Nome, Saluto)
  */
+/**
+ * Gestisce il rendering dell'utente nell'Header
+ * (Foto, Nome, Saluto)
+ */
 async function renderHeaderUser(user) {
+    if (!user) return;
+
     // Riferimenti DOM
     const uAvatar = document.getElementById('header-user-avatar');
     const uGreeting = document.getElementById('home-greeting-text');
@@ -101,34 +95,69 @@ async function renderHeaderUser(user) {
 
     if (uGreeting) uGreeting.textContent = timeGreeting;
 
-    // 2. Nome Utente (Fallback su Auth displayName o email)
-    // Helper formattazione nome
+    // 2. Helper formattazione nome (Sicuro)
     const toFriendlyName = (name) => {
-        if (!name) return "";
+        if (!name || typeof name !== 'string') return "";
         return name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
-    // 2. Fallback immediato Nome
+    // 3. Fallback immediato Nome (Auth)
     let displayName = toFriendlyName(user.displayName || user.email.split('@')[0]);
-    if (uName) uName.textContent = displayName;
+    if (uName && !uName.textContent) uName.textContent = displayName;
 
-    // 3. Foto Utente (Auth)
+    // 4. Foto Utente (Auth)
     if (user.photoURL && uAvatar) setAvatarImage(uAvatar, user.photoURL);
 
-    // 4. Firestore Profile Sync
+    // 5. Firestore Profile Sync
     try {
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
             const data = docSnap.data();
-            const fullName = toFriendlyName(`${data.nome || ''} ${data.cognome || ''}`.trim());
-            if (fullName) uName.textContent = fullName;
+
+            // 🔐 PROTOCOLLO BLINDA (V7.0): Decifrazione Profilo Utente
+            let nomeRaw = data.nome;
+            let cognomeRaw = data.cognome;
+
+            // Se sono oggetti (legacy), li ignoriamo o li convertiamo in stringa vuota per evitare crash
+            if (nomeRaw && typeof nomeRaw !== 'string') nomeRaw = "";
+            if (cognomeRaw && typeof cognomeRaw !== 'string') cognomeRaw = "";
+
+            let nome = nomeRaw || '';
+            let cognome = cognomeRaw || '';
+
+            try {
+                // Tentativo di sblocco silenzioso
+                if (window.isAutoUnlockActive && window.isAutoUnlockActive()) {
+                    const mk = await ensureMasterKey();
+                    const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
+                    if (isEnc(nome)) nome = await decrypt(nome, mk);
+                    if (isEnc(cognome)) cognome = await decrypt(cognome, mk);
+                }
+            } catch (e) {
+                console.warn("[HOME] Vault Locked: visualizzazione dati o fallback.");
+            }
+
+            // Se dopo il tentativo abbiamo dei dati validi (e non placeholder di errore)
+            const finalNome = (nome && !nome.includes('[ERROR]')) ? nome : '';
+            const finalCognome = (cognome && !cognome.includes('[ERROR]')) ? cognome : '';
+
+            const fullName = toFriendlyName(`${finalNome} ${finalCognome}`.trim());
+
+            // Se abbiamo un nome da Firestore lo usiamo, altrimenti teniamo il displayName
+            if (fullName && fullName.length > 1) {
+                if (uName) uName.textContent = fullName;
+            } else if (displayName) {
+                if (uName) uName.textContent = displayName;
+            }
 
             const firestorePhoto = data.photoURL || data.avatar;
             if (firestorePhoto && uAvatar) setAvatarImage(uAvatar, firestorePhoto);
         }
-    } catch (e) { console.warn("Errore profilo Firestore:", e); }
+    } catch (e) {
+        console.warn("Errore profilo Firestore:", e);
+    }
 }
 
 // Helper per impostare l'immagine avatar
@@ -236,96 +265,98 @@ function renderMiniItem(item, today) {
     else if (diffDays === 1) labelText = t('tomorrow');
     else labelText = `${diffDays}g`;
 
+    const titleText = item.type || item.title || 'Scadenza Generale';
+
     return createElement('div', { className: 'dashboard-list-item' }, [
         createElement('div', { className: 'item-icon-box' }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: item.icon || 'event' })
         ]),
-        createElement('span', { className: 'item-title', textContent: item.title }),
+        createElement('span', { className: 'item-title', textContent: titleText }),
         createElement('span', { className: 'item-badge', textContent: labelText })
     ]);
 }
 
 // --- FAB GROUP (Quick Add Actions) ---
 function setupFABGroup(aziendes = []) {
-    // Cerca il footer per 2 secondi max
-    let attempts = 0;
-    const interval = setInterval(() => {
-        attempts++;
-        // Nota: In Home Page il footer è iniettato da main.js o è statico? 
-        // Se è placeholder, main.js lo riempie. Dobbiamo agganciarci al centro.
-        // Ma wait... Home Page ha un footer-placeholder vuoto alla riga 95.
-        // main.js caricherà il componente footer standard.
-        // Dobbiamo trovare #footer-center-actions DOPO che il footer è stato caricato.
+    function initFABFromFooter(detail) {
+        const { center: footerCenter } = detail;
+        if (!footerCenter) return;
+        clearElement(footerCenter);
 
-        const footerCenter = document.getElementById('footer-center-actions');
+        // Container Gruppo
+        const fabGroup = createElement('div', { className: 'fab-group' });
 
-        if (footerCenter) {
-            clearInterval(interval);
-            clearElement(footerCenter);
+        // 1. Privato (SX)
+        const btnPrivato = createElement('button', {
+            className: 'btn-fab-action btn-fab-privato',
+            title: 'Nuovo Privato',
+            dataset: { label: 'Privato' },
+            onclick: () => window.location.href = 'form_account_privato.html'
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'person_add' })
+        ]);
 
-            // Container Gruppo
-            const fabGroup = createElement('div', { className: 'fab-group' });
+        // 2. Scadenza (Centro - Principale)
+        const btnScadenza = createElement('button', {
+            className: 'btn-fab-action btn-fab-scadenza',
+            title: 'Nuova Scadenza',
+            dataset: { label: 'Scadenza' },
+            onclick: () => window.location.href = 'aggiungi_scadenza.html'
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'event' })
+        ]);
 
-            // 1. Privato (SX)
-            const btnPrivato = createElement('button', {
-                className: 'btn-fab-action btn-fab-privato',
-                title: 'Nuovo Privato',
-                dataset: { label: 'Privato' },
-                onclick: () => window.location.href = 'form_account_privato.html'
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'person_add' })
-            ]);
-
-            // 2. Scadenza (Centro - Principale)
-            const btnScadenza = createElement('button', {
-                className: 'btn-fab-action btn-fab-scadenza',
-                title: 'Nuova Scadenza',
-                dataset: { label: 'Scadenza' },
-                onclick: () => window.location.href = 'aggiungi_scadenza.html'
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'event' })
-            ]);
-
-            // 3. Azienda (Dynamic Redirect)
-            const btnAzienda = createElement('button', {
-                className: 'btn-fab-action btn-fab-azienda',
-                title: 'Nuovo Account Azienda',
-                dataset: { label: 'Azienda' },
-                onclick: () => {
-                    if (aziendes.length === 1) {
-                        window.location.href = `form_account_azienda.html?aziendaId=${aziendes[0].id}`;
-                    } else if (aziendes.length > 1) {
-                        window.location.href = 'lista_aziende.html?select=1';
-                    } else {
-                        window.location.href = 'modifica_azienda.html';
-                    }
+        // 3. Azienda (Dynamic Redirect)
+        const btnAzienda = createElement('button', {
+            className: 'btn-fab-action btn-fab-azienda',
+            title: 'Nuovo Account Azienda',
+            dataset: { label: 'Azienda' },
+            onclick: () => {
+                if (aziendes.length === 1) {
+                    window.location.href = `form_account_azienda.html?aziendaId=${aziendes[0].id}`;
+                } else if (aziendes.length > 1) {
+                    window.location.href = 'lista_aziende.html?select=1';
+                } else {
+                    window.location.href = 'modifica_azienda.html';
                 }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'domain_add' })
-            ]);
+            }
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'domain_add' })
+        ]);
 
-            // Assemblaggio
-            fabGroup.appendChild(btnPrivato);
-            fabGroup.appendChild(btnScadenza);
-            fabGroup.appendChild(btnAzienda);
+        // Assemblaggio
+        fabGroup.appendChild(btnPrivato);
+        fabGroup.appendChild(btnScadenza);
+        fabGroup.appendChild(btnAzienda);
 
-            footerCenter.appendChild(fabGroup);
+        footerCenter.appendChild(fabGroup);
 
-            // Animazione Entrata Sequenziale
-            const buttons = [btnPrivato, btnScadenza, btnAzienda];
-            buttons.forEach((btn, index) => {
-                btn.animate([
-                    { transform: 'scale(0) translateY(20px)', opacity: 0 },
-                    { transform: 'scale(1) translateY(0)', opacity: 1 }
-                ], {
-                    duration: 400,
-                    delay: 500 + (index * 100), // Delay extra per aspettare caricamento footer
-                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    fill: 'backwards'
-                });
+        // Animazione Entrata Sequenziale
+        const buttons = [btnPrivato, btnScadenza, btnAzienda];
+        buttons.forEach((btn, index) => {
+            btn.animate([
+                { transform: 'scale(0) translateY(20px)', opacity: 0 },
+                { transform: 'scale(1) translateY(0)', opacity: 1 }
+            ], {
+                duration: 400,
+                delay: 500 + (index * 100),
+                easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                fill: 'backwards'
             });
-        }
+        });
+    }
 
-        if (attempts > 50) clearInterval(interval); // Timeout 5s esteso per attesa fetch
-    }, 100);
+    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
+    if (window.__footerReady) {
+        initFABFromFooter(window.__footerReady);
+    } else {
+        document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
+    }
 }
+// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
+window.areaPrivata = {
+    async decryptAll() {
+        const user = auth.currentUser;
+        if (user) return await initHomePage(user);
+    }
+};

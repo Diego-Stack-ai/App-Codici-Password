@@ -45,7 +45,7 @@ export function observeAuth(callback) {
  * @param {string} email - User's email.
  * @param {string} password - User's password.
  */
-async function register(nome, cognome, email, password, prefPush = true, prefEmail = true) {
+async function register(nome, cognome, email, password) {
     try {
         // Client-side Password Validation (Protocollo 12-3-3)
         if (password.length < 12) {
@@ -75,9 +75,7 @@ async function register(nome, cognome, email, password, prefPush = true, prefEma
             email: email,
             createdAt: new Date(),
             photoURL: "",
-            settings: { theme: 'system' },
-            pref_push_enabled: prefPush,
-            pref_email_enabled: prefEmail
+            settings: { theme: 'system' }
         });
 
         // Send email verification (optional but recommended)
@@ -178,13 +176,7 @@ async function login(email, password) {
  */
 async function logout() {
     try {
-        // Rimuovi il token push corrente prima del logout (Cleanup proattivo)
-        try {
-            const { removePushToken } = await import('./modules/shared/push_manager.js');
-            await removePushToken(auth.currentUser);
-        } catch (e) {
-            console.warn("Push token removal skipped during logout:", e);
-        }
+        // Cleanup proattivo sessione
 
         await signOut(auth);
         window.location.href = "index.html";

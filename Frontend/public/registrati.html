@@ -65,27 +65,32 @@
                 <h1 class="title" data-t="register_page_title">Registrati</h1>
                 <p class="subtitle" data-t="register_subtitle">Crea il tuo account sicuro</p>
 
-                <!-- Form Registrazione -->
-                <form id="register-form">
+                <!-- Form Registrazione (V7.0 Blindato) -->
+                <div id="register-form">
+                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
+                    <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
+                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
+                    </div>
 
                     <!-- Nome & Cognome -->
                     <div class="form-row">
                         <div class="form-group">
                             <label class="label" for="nome" data-t="label_name">Nome</label>
-                            <input id="nome" name="nome" type="text" required class="input"
-                                data-t-placeholder="label_name" placeholder="Mario">
+                            <input id="nome" type="text" required class="input" data-t-placeholder="label_name"
+                                placeholder="Mario" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label class="label" for="cognome" data-t="label_surname">Cognome</label>
-                            <input id="cognome" name="cognome" type="text" required class="input"
-                                data-t-placeholder="label_surname" placeholder="Rossi">
+                            <input id="cognome" type="text" required class="input" data-t-placeholder="label_surname"
+                                placeholder="Rossi" autocomplete="off">
                         </div>
                     </div>
 
                     <!-- Email -->
                     <div class="form-group">
                         <label class="label" for="email" data-t="email_label">Email</label>
-                        <input id="email" name="email" type="email" autocomplete="username" required class="input"
+                        <input id="email" type="email" autocomplete="off" required class="input"
                             data-t-placeholder="email_placeholder" placeholder="mario.rossi@email.com">
                     </div>
 
@@ -93,8 +98,8 @@
                     <div class="form-group">
                         <label class="label" for="password" data-t="password_label_reg">Password</label>
                         <div class="password-wrapper">
-                            <input id="password" name="password" type="password" autocomplete="new-password" required
-                                class="input" data-t-placeholder="password_placeholder_reg" placeholder="********">
+                            <input id="password" type="text" autocomplete="off" required class="input base-shield"
+                                data-t-placeholder="password_placeholder_reg" placeholder="********">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
                                 aria-label="Mostra Password" data-t-aria="show_hide_data">
                                 <span class="material-symbols-outlined">visibility</span>
@@ -106,52 +111,18 @@
                     <div class="form-group">
                         <label class="label" for="confirm-password" data-t="confirm_password_label">Conferma
                             Password</label>
-                        <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password"
-                            required class="input" data-t-placeholder="password_placeholder_reg" placeholder="********">
+                        <input id="confirm-password" type="text" autocomplete="off" required class="input base-shield"
+                            data-t-placeholder="password_placeholder_reg" placeholder="********">
                     </div>
 
-                    <!-- Preferenze Notifiche (V5.0) -->
-                    <div class="form-group registration-notifications-box">
-                        <p class="label-sm mb-3" data-t="notifications_prefs">Preferenze Notifiche</p>
-
-                        <div class="flex-col-gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                            <!-- Push -->
-                            <div class="flex-between-row">
-                                <div class="flex-col">
-                                    <span class="text-sm font-medium text-white" data-t="pref_push_label">Notifiche Push
-                                        (Device)</span>
-                                    <span class="text-xs opacity-50" data-t="pref_push_desc">Ricevi avvisi sul
-                                        cellulare</span>
-                                </div>
-                                <label class="cursor-pointer">
-                                    <input type="checkbox" id="reg-pref-push" class="base-switch-hidden" checked>
-                                    <div class="base-switch"></div>
-                                </label>
-                            </div>
-
-                            <!-- Email -->
-                            <div class="flex-between-row">
-                                <div class="flex-col">
-                                    <span class="text-sm font-medium text-white" data-t="pref_email_label">Notifiche
-                                        Email</span>
-                                    <span class="text-xs opacity-50" data-t="pref_email_desc">Ricevi avvisi via
-                                        posta</span>
-                                </div>
-                                <label class="cursor-pointer">
-                                    <input type="checkbox" id="reg-pref-email" class="base-switch-hidden" checked>
-                                    <div class="base-switch"></div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" id="register-submit-btn" class="btn-primary" data-t="create_account_btn">
+                    <button type="button" id="register-submit-btn" class="btn-primary" data-t="create_account_btn">
                         <span class="material-symbols-outlined">person_add_alt</span>
                         Nuova registrazione
                     </button>
 
-                </form>
+                </div>
 
                 <!-- Login Link -->
                 <div class="auth-footer-links">
