@@ -119,32 +119,33 @@ export async function ensureMasterKey(options = {}) {
     // 1. Cache-hit in memoria (se non forzato)
     if (_masterKey && !forceReload) return _masterKey;
 
-    // 2. Ripristino da sessionStorage (silenzioso)
+    // 2. Ripristino da sessionStorage (silenzioso ma segnalato se nuovo)
     const sessionKey = _loadKeyFromSession();
-    if (sessionKey) {
+    if (sessionKey && !forceReload) {
         _masterKey = sessionKey;
-        _isSoftLocked = false; // Lo sblocco esplicito disattiva il soft lock
-        // Se recuperato da sessione, manteniamo attivo l'auto-unlock per coerenza navigazione
+        _isSoftLocked = false;
         _vaultAutoUnlock = true;
         updateGlobalState();
         return _masterKey;
     }
 
-    // 3. Tentativo biometrico (silenzioso)
-    const recovered = await tryBiometricUnlock();
-    if (recovered) {
-        _masterKey = recovered;
-        // Salviamo automaticamente in sessione per evitare prompt al cambio pagina
-        _saveKeyToSession(_masterKey, 24 * 60 * 60 * 1000); // 24h per biometria
-        updateGlobalState();
-        return _masterKey;
+    // 3. Tentativo biometrico (solo se non forzato)
+    if (!forceReload) {
+        const recovered = await tryBiometricUnlock();
+        if (recovered) {
+            _masterKey = recovered;
+            _saveKeyToSession(_masterKey, 24 * 60 * 60 * 1000);
+            updateGlobalState();
+            showToast("Vault sbloccato automaticamente (Biometria)", "success");
+            return _masterKey;
+        }
     }
 
-    // 4. Richiesta manuale
+    // 4. Richiesta manuale (Sempre se forceReload è true o altri falliscono)
     const pass = await showInputModal(
         "SBLOCCO VAULT",
-        "",
-        "Inserisci password crittografia"
+        "Inserisci la password principale per visualizzare i dati criptati.",
+        "Password Master"
     );
 
     if (pass) {
@@ -152,15 +153,29 @@ export async function ensureMasterKey(options = {}) {
         const cleanPass = pass.trim();
         _masterKey = cleanPass;
         _isSoftLocked = false;
-        // [PROFESSIONAL FIX] Salviamo SEMPRE in sessionStorage (almeno per la sessione)
-        // per evitare che navigando tra le pagine venga richiesto il codice ogni volta.
         _saveKeyToSession(_masterKey, null);
         _vaultAutoUnlock = true;
         updateGlobalState();
+        showToast("Vault sbloccata correttamente!", "success");
         return _masterKey;
     }
 
     throw new Error("Chiave di crittografia non fornita.");
+}
+
+/**
+ * [V7.6] RESET TOTALE VAULT
+ * Pulisce ogni traccia della chiave (Sessione + Locale) per permettere un ripristino manuale campo per campo.
+ */
+export function resetVault() {
+    _masterKey = null;
+    _vaultAutoUnlock = false;
+    _isSoftLocked = false;
+    _clearSessionStorage();
+    localStorage.removeItem(STORAGE_KEY);
+    updateGlobalState();
+    showToast("Cache Vault pulita. Ricarica la pagina per sbloccare manualmente.", "info");
+    setTimeout(() => window.location.reload(), 1500);
 }
 
 export async function setMasterKey(pass, saveForBiometrics = false) {
@@ -208,6 +223,7 @@ window.clearSession = clearSession;
 window.softLock = softLock;
 window.isSoftLocked = isSoftLocked;
 window.isAutoUnlockActive = isAutoUnlockActive;
+window.resetVault = resetVault;
 window.encrypt = encrypt;
 window.decrypt = decrypt;
 

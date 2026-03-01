@@ -65,16 +65,11 @@
 
                 <!-- Form Autenticazione (V7.0 Blindato) -->
                 <div id="login-form">
-                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
-                    <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
-                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
-                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
-                    </div>
 
                     <!-- Email / Username -->
                     <div class="form-group">
                         <label class="label" for="email" data-t="username_label">Username</label>
-                        <input id="email" type="text" autocomplete="off" required class="input"
+                        <input id="email" type="email" autocomplete="username" required class="input"
                             data-t-placeholder="username_placeholder" placeholder="Email o Username">
                     </div>
 
@@ -82,8 +77,9 @@
                     <div class="form-group">
                         <label class="label" for="password" data-t="password_label">Password</label>
                         <div class="password-wrapper">
-                            <input id="password" type="text" autocomplete="off" required class="input base-shield"
-                                placeholder="********" data-t-placeholder="password_placeholder">
+                            <input id="password" type="password" autocomplete="current-password" required
+                                class="input base-shield" placeholder="********"
+                                data-t-placeholder="password_placeholder">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
                                 aria-label="Mostra Password" data-t-aria="show_hide_data">
                                 <span class="material-symbols-outlined">visibility</span>

@@ -147,7 +147,16 @@ async function renderHeaderUser(user) {
 
             // Se abbiamo un nome da Firestore lo usiamo, altrimenti teniamo il displayName
             if (fullName && fullName.length > 1) {
-                if (uName) uName.textContent = fullName;
+                if (uName) {
+                    uName.textContent = fullName;
+                    uName.style.cursor = 'pointer';
+                    uName.title = "Clicca per resettare il Vault se vedi errori";
+                    uName.onclick = () => {
+                        if (confirm("Vuoi resettare la cache del Vault? Dovrai reinserire la Password Master.")) {
+                            if (window.resetVault) window.resetVault();
+                        }
+                    };
+                }
             } else if (displayName) {
                 if (uName) uName.textContent = displayName;
             }
