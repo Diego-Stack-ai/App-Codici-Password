@@ -43,11 +43,7 @@ async function deriveKey(password, salt) {
     const encoder = new TextEncoder();
     const encodedPass = encoder.encode(cleanPass);
 
-    console.log(`[CRYPTO-AUDIT] Deriving Key...`, {
-        passLength: cleanPass.length,
-        saltLength: salt.length,
-        iterations: ITERATIONS
-    });
+    /* [CRYPTO-AUDIT] Derivazione chiave in corso... */
 
     const passwordKey = await crypto.subtle.importKey(
         "raw",
@@ -70,9 +66,7 @@ async function deriveKey(password, salt) {
         ["encrypt", "decrypt"]
     );
 
-    // [DIAGNOSTIC LOG] Esporta la chiave (hash derivato) per confronto cross-platform
-    const exported = await crypto.subtle.exportKey("raw", key);
-    console.log(`[CRYPTO-AUDIT] Hash Derivato (HEX): ${toHex(exported)}`);
+    /* [DIAGNOSTIC LOG REMOVED FOR PRODUCTION] */
 
     return key;
 }
@@ -136,9 +130,7 @@ export async function decrypt(base64Data, password) {
         const iv = combined.slice(SALT_SIZE, SALT_SIZE + IV_SIZE);
         const ciphertext = combined.slice(SALT_SIZE + IV_SIZE);
 
-        // [SAFARI-AUDIT V7.12] Diagnostica WebKit
-        console.log("IV length:", iv.length, "IV byteOffset:", iv.byteOffset);
-        console.log("Cipher length:", ciphertext.length, "Cipher byteOffset:", ciphertext.byteOffset);
+        /* [SAFARI-AUDIT V7.12] Diagnostica WebKit silenziata */
 
         // [PROCEDURA SAFARI-SAFE V7.15] WebKit richiede buffer allineati per TUTTO
         // Creiamo copie fisiche indipendenti per Salt, IV e Ciphertext.

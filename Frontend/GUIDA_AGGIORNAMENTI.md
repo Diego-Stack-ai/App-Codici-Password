@@ -50,5 +50,20 @@ Definizione dei nuovi standard di accesso e protezione dati.
 
 ---
 
+## 6. MECCANISMI TEMPORANEI DI SICUREZZA (V7.16 Cleanup)
+In fase di consolidamento post-fix per Safari iOS, sono stati mantenuti alcuni paracadute tecnici gestiti tramite la costante `SAFE_MODE` in `home.js`.
+
+- **Protezioni Attive (SAFE_MODE = true)**:
+    - **Banner di Auto-Cura**: Rileva errori di decriptazione su mobile e offre il reset immediato del Vault.
+    - **Reset Manuale via Nome**: Permette di forzare lo sblocco cliccando sul nome utente in Header.
+    - **Regex Flessibile**: La regex `isEnc` in `home.js` accetta varianti Base64 non standard per compensare i limiti di WebKit.
+
+- **Roadmap Rimozione**:
+    - Questi meccanismi dovranno essere rimossi nella **V8.0 definitiva**.
+    - La rimozione avverrà solo dopo una settimana di test confermati su Chrome Desktop e Safari iOS (17.x+).
+    - In V8.0, la costante `SAFE_MODE` verrà eliminata e il codice ripulito dalle logiche di fallback.
+
+---
+
 ### 📝 Note per l'Agente AI:
 Quando lavori su queste sezioni, documenta qui ogni progresso. Se l'utente approva un nuovo stile o una nuova logica, prepara lo snippet per il trasferimento nel **Protocollo Master**.

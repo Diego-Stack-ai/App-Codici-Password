@@ -11,6 +11,9 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
+// [V7.16] FLAG DI SICUREZZA TEMPORANEO - Permette di attivare/disattivare i meccanismi di debug/auto-cura
+const SAFE_MODE = true;
+
 /**
  * HOME PAGE MODULE (V5.0 ADAPTER) - RESET NOTIFICHE
  * Gestisce l'interfaccia della Home Page.
@@ -164,8 +167,10 @@ async function renderHeaderUser(user) {
             const hasError = (s) => s && s.includes('--ERRORE--');
 
             if (hasError(nome) || hasError(cognome)) {
-                console.error("[HOME] Decryption Error detected in profile.");
-                showSelfHealingBanner();
+                if (SAFE_MODE) {
+                    console.error("[HOME] Decryption Error detected in profile.");
+                    showSelfHealingBanner();
+                }
             }
 
             const finalNome = (!hasError(nome)) ? nome : '';
@@ -177,13 +182,15 @@ async function renderHeaderUser(user) {
             if (fullName && fullName.length > 1) {
                 if (uName) {
                     uName.textContent = fullName;
-                    uName.style.cursor = 'pointer';
-                    uName.title = "Clicca per resettare il Vault se vedi errori";
-                    uName.onclick = () => {
-                        if (confirm("Vuoi resettare la cache del Vault? Dovrai reinserire la Password Master.")) {
-                            if (window.resetVault) window.resetVault();
-                        }
-                    };
+                    if (SAFE_MODE) {
+                        uName.style.cursor = 'pointer';
+                        uName.title = "Clicca per resettare il Vault se vedi errori";
+                        uName.onclick = () => {
+                            if (confirm("Vuoi resettare la cache del Vault? Dovrai reinserire la Password Master.")) {
+                                if (window.resetVault) window.resetVault();
+                            }
+                        };
+                    }
                 }
             } else if (displayName) {
                 if (uName) uName.textContent = displayName;

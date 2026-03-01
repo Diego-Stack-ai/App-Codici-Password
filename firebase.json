@@ -28,10 +28,6 @@
     ],
     "rewrites": [
       {
-        "source": "/test-crypto.html",
-        "destination": "/test-crypto.html"
-      },
-      {
         "source": "**",
         "destination": "/index.html"
       }
