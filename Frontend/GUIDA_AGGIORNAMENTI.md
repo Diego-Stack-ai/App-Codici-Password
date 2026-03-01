@@ -54,10 +54,10 @@ Definizione dei nuovi standard di accesso e protezione dati.
 Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato".
 
 - **Configurazione Produzione (V8.0)**:
-    - **Timeout "Subito" rimosso**: L'opzione "Subito" è stata eliminata da tutte le liste per garantire una gestione sessione più stabile.
+    - **Timeout "Subito" rimosso definitivamente**: L'opzione è stata eliminata da tutti i menu e la logica core (fallback su 1min per vecchi profili).
     - **Timeout Disponibili**: 1 min, 3 min (default), 5 min.
-    - `DEV_MODE = false`: In produzione, l'opzione "12 ore" è nascosta. (Restaurabile solo via sorgente per test).
-    - `SAFE_MODE = false`: Banner di auto-cura e reset manuale sul nome utente sono ora nascosti per un'interfaccia pulita.
+    - `DEV_MODE = false`: Opzione "12 ore" nascosta (visibile solo per test in DEV_MODE = true).
+    - `SAFE_MODE = false`: Banner auto-cura e reset Vault sul Nome nascosti (interfaccia pulita).
 
 - **Status Crittografia**:
     - ✅ Stabilizzata su Safari iOS 17.x grazie al protocollo Memory-Clean.

@@ -50,13 +50,12 @@ export async function syncTimeoutWithFirestore(uid) {
         const snap = await getDoc(docRef);
         if (snap.exists()) {
             const data = snap.data();
-            const minutes = data.lock_timeout ?? 3;
+            let minutes = data.lock_timeout ?? 3;
 
-            if (minutes === 0) {
-                logoutTimerMs = 15 * 1000; // "Subito" = 15 secondi (evita lock loop istantaneo)
-            } else {
-                logoutTimerMs = minutes * 60 * 1000;
-            }
+            // [V8.0] 'Subito' (0) rimosso definitivamente. Fallback su 1 min per vecchi profili.
+            if (minutes === 0) minutes = 1;
+
+            logoutTimerMs = minutes * 60 * 1000;
             console.log(`[Titan-Lock] Timeout impostato a: ${minutes} min (${logoutTimerMs}ms)`);
         }
     } catch (e) {
