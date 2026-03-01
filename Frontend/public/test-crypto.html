@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Audit - Test Comparativo</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+            background: #121212;
+            color: #fff;
+        }
+
+        .card {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        code {
+            background: #000;
+            padding: 10px;
+            display: block;
+            word-break: break-all;
+            margin: 10px 0;
+            border-radius: 6px;
+            color: #0f0;
+            border: 1px solid #1f1;
+        }
+
+        h1 {
+            color: #3b82f6;
+        }
+
+        .status {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Crypto Audit V7.7</h1>
+    <div class="card">
+        <h3>Parametri di Test:</h3>
+        <ul>
+            <li>Password: <strong>Test123</strong></li>
+            <li>Salt: <strong>[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]</strong></li>
+            <li>Iterazioni: <strong>100.000</strong></li>
+            <li>Algoritmo: <strong>PBKDF2 -> AES-GCM 256</strong></li>
+        </ul>
+        <p class="status" id="status">Esecuzione test...</p>
+    </div>
+
+    <div class="card">
+        <h3>Risultato Hash Derivato (HEX):</h3>
+        <code id="result-hex">Calcolo in corso...</code>
+    </div>
+
+    <div class="card">
+        <h3>Diagnostica Browser:</h3>
+        <code id="user-agent">...</code>
+    </div>
+
+    <script>
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+
+        async function runTest() {
+            const password = "Test123";
+            const salt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+            const iterations = 100000;
+
+            try {
+                const encoder = new TextEncoder();
+                const cleanPass = password.normalize('NFC').trim();
+                const encodedPass = encoder.encode(cleanPass);
+
+                const passwordKey = await crypto.subtle.importKey(
+                    "raw",
+                    encodedPass,
+                    "PBKDF2",
+                    false,
+                    ["deriveKey"]
+                );
+
+                const key = await crypto.subtle.deriveKey(
+                    {
+                        name: "PBKDF2",
+                        salt: salt,
+                        iterations: iterations,
+                        hash: "SHA-256"
+                    },
+                    passwordKey,
+                    { name: "AES-GCM", length: 256 },
+                    true,
+                    ["encrypt", "decrypt"]
+                );
+
+                const exported = await crypto.subtle.exportKey("raw", key);
+                const hex = Array.from(new Uint8Array(exported))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+
+                document.getElementById('result-hex').textContent = hex;
+                document.getElementById('status').textContent = "Test Completato con Successo!";
+                document.getElementById('status').style.color = "#4ade80";
+
+            } catch (err) {
+                document.getElementById('result-hex').textContent = "ERROR: " + err.message;
+                document.getElementById('status').textContent = "Test FALLITO!";
+                document.getElementById('status').style.color = "#ef4444";
+                console.error(err);
+            }
+        }
+
+        runTest();
+    </script>
+</body>
+
+</html>
