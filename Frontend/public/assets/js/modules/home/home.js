@@ -132,8 +132,28 @@ async function renderHeaderUser(user) {
                 if (window.isAutoUnlockActive && window.isAutoUnlockActive()) {
                     const mk = await ensureMasterKey();
                     const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
-                    if (isEnc(nome)) nome = await decrypt(nome, mk);
-                    if (isEnc(cognome)) cognome = await decrypt(cognome, mk);
+
+                    let nameDecrypted = false;
+                    if (isEnc(nome)) {
+                        const temp = await decrypt(nome, mk);
+                        if (temp !== "--ERRORE--") {
+                            nome = temp;
+                            nameDecrypted = true;
+                        }
+                    }
+                    if (isEnc(cognome)) {
+                        const temp = await decrypt(cognome, mk);
+                        if (temp !== "--ERRORE--") {
+                            cognome = temp;
+                            nameDecrypted = true;
+                        }
+                    }
+
+                    // Se abbiamo decifrato con successo almeno un campo, la chiave è valida!
+                    if (nameDecrypted && !sessionStorage.getItem('vault_verified')) {
+                        import('../../ui-core.js').then(ui => ui.showToast("Password Master Corretta!", "success"));
+                        sessionStorage.setItem('vault_verified', 'true');
+                    }
                 }
             } catch (e) {
                 console.warn("[HOME] Vault Locked: visualizzazione dati o fallback.");
