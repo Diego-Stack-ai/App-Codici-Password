@@ -51,12 +51,13 @@ Definizione dei nuovi standard di accesso e protezione dati.
 ---
 
 ## 6. MECCANISMI TEMPORANEI DI SICUREZZA (V8.0 Prodotto Blindato)
-Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato". I meccanismi di debug sono stati silenziati ma rimangono presenti nel codice come "interruttori di emergenza".
+Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato".
 
 - **Configurazione Produzione (V8.0)**:
-    - `DEV_MODE = false`: Le opzioni di timeout estese (12h) e "Subito" sono rimosse dalla UI delle Impostazioni per garantire la massima sicurezza dell'utente finale.
-    - `SAFE_MODE = false`: Il banner di auto-cura e il reset manuale sul nome utente sono stati nascosti. L'interfaccia è ora pulita e priva di elementi di disturbo.
-    - **Timeout Restituiti**: 1 min, 3 min (default), 5 min.
+    - **Timeout "Subito" rimosso**: L'opzione "Subito" è stata eliminata da tutte le liste per garantire una gestione sessione più stabile.
+    - **Timeout Disponibili**: 1 min, 3 min (default), 5 min.
+    - `DEV_MODE = false`: In produzione, l'opzione "12 ore" è nascosta. (Restaurabile solo via sorgente per test).
+    - `SAFE_MODE = false`: Banner di auto-cura e reset manuale sul nome utente sono ora nascosti per un'interfaccia pulita.
 
 - **Status Crittografia**:
     - ✅ Stabilizzata su Safari iOS 17.x grazie al protocollo Memory-Clean.
@@ -64,7 +65,7 @@ Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato
     - ✅ Rimozione totale di console.log con dati sensibili (HEX, Salt, IV).
 
 - **Roadmap Futura**:
-    - La rimozione fisica definitiva di `SAFE_MODE` e `DEV_MODE` dal codice sorgente avverrà solo dopo la fase di monitoraggio post-blindatura.
+    - Questa configurazione rimarrà la base stabile per la produzione. Le costanti `SAFE_MODE` e `DEV_MODE` fungeranno da interruttori di manutenzione rapidi.
 
 ---
 

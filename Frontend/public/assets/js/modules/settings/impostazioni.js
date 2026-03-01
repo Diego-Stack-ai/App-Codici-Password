@@ -238,8 +238,10 @@ function setupTimeoutSelector(data) {
     const btns = selector.querySelectorAll('.timer-btn');
     btns.forEach(btn => {
         const val = parseInt(btn.dataset.val);
-        // Nascondi 0 (Subito) e 720 (12h) se non in DEV_MODE
-        if (!DEV_MODE && (val === 0 || val === 720)) {
+        // [V8.0] 'Subito' (0) rimosso. 12h (720) visibile solo in DEV_MODE.
+        if (val === 0) {
+            btn.style.display = 'none';
+        } else if (!DEV_MODE && val === 720) {
             btn.style.display = 'none';
         }
 
