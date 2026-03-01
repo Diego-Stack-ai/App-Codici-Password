@@ -202,7 +202,11 @@ function showSelfHealingBanner() {
     }, [
         createElement('p', {
             textContent: "⚠️ Rilevato errore nei dati. La tua chiave potrebbe essere obsoleta.",
-            style: 'color: #ef4444; margin-bottom: 10px; font-weight: bold;'
+            style: 'color: #ef4444; margin-bottom: 5px; font-weight: bold;'
+        }),
+        createElement('p', {
+            textContent: window.lastCryptoError || "Errore sconosciuto (probabile offset buffer Safari)",
+            style: 'color: #ef4444; font-size: 10px; opacity: 0.7; margin-bottom: 10px; font-family: monospace;'
         }),
         createElement('button', {
             className: 'btn-primary',

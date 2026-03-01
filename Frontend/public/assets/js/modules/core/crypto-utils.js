@@ -136,40 +136,39 @@ export async function decrypt(base64Data, password) {
         const iv = combined.slice(SALT_SIZE, SALT_SIZE + IV_SIZE);
         const ciphertext = combined.slice(SALT_SIZE + IV_SIZE);
 
-        // [SAFARI-AUDIT V7.11] Log estremo per debug WebKit
-        console.log("IV length:", iv.length);
-        console.log("Cipher length:", ciphertext.length);
-        console.log("Cipher byteOffset:", ciphertext.byteOffset);
-        console.log("Cipher buffer length:", ciphertext.buffer.byteLength);
+        // [SAFARI-AUDIT V7.12] Diagnostica WebKit
+        console.log("IV length:", iv.length, "IV byteOffset:", iv.byteOffset);
+        console.log("Cipher length:", ciphertext.length, "Cipher byteOffset:", ciphertext.byteOffset);
 
         const key = await deriveKey(password, salt);
 
-        // [SAFARI iOS FIX] WebKit è estremamente rigido sugli offset degli ArrayBuffer.
-        // Creiamo copie "pulite" (byteOffset = 0) per garantire la compatibilità.
+        // [PROCEDURA SAFARI-SAFE] WebKit richiede buffer allineati (byteOffset = 0)
+        // Creiamo copie fisiche indipendenti per garantire l'allineamento.
         const ivClean = new Uint8Array(iv.length);
         ivClean.set(iv);
 
         const ctClean = new Uint8Array(ciphertext.length);
         ctClean.set(ciphertext);
 
+        // Decriptazione standard WebCrypto con parametri rigidi
         const decoded = await crypto.subtle.decrypt(
             {
                 name: "AES-GCM",
-                iv: ivClean,
-                tagLength: 128 // Esplicito 128-bit tag
+                iv: ivClean, // Usiamo la copia pulita
+                tagLength: 128
             },
             key,
-            ctClean.buffer // Passiamo il buffer pulito (byteOffset 0)
+            ctClean.buffer // Passiamo il buffer della copia (byteOffset è sempre 0)
         );
 
         return new TextDecoder().decode(decoded);
     } catch (e) {
-        console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", {
-            message: e.message,
-            name: e.name,
-            reason: e.name === 'OperationError' ? 'Wrong Key or Corrupted Tag/Buffer' : 'Structure Error',
-            stack: e.stack
-        });
+        const errorDetail = `${e.name}: ${e.message}`;
+        console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", errorDetail);
+
+        // Esponiamo l'errore globalmente per il banner di debug
+        window.lastCryptoError = errorDetail;
+
         return "--ERRORE--";
     }
 }
