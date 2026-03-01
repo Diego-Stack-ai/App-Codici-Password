@@ -30,7 +30,17 @@ const STORAGE_KEY = 'codex_vault_secret';
 
 function _saveKeyToSession(key, durationMs) {
     try {
-        sessionStorage.setItem(SS_KEY, btoa(unescape(encodeURIComponent(key))));
+        if (!key) return;
+        // [SAFARI COMPAT] Normalizzazione prima del salvataggio
+        const cleanKey = String(key).normalize('NFC').trim();
+        const encoded = btoa(unescape(encodeURIComponent(cleanKey)));
+
+        console.log(`[SECURITY-AUDIT] Saving to Session...`, {
+            keyLength: cleanKey.length,
+            duration: durationMs || 'Session'
+        });
+
+        sessionStorage.setItem(SS_KEY, encoded);
         if (durationMs && durationMs !== Infinity) {
             sessionStorage.setItem(SS_EXPIRY, (Date.now() + durationMs).toString());
         } else {
@@ -38,7 +48,7 @@ function _saveKeyToSession(key, durationMs) {
         }
         updateGlobalState();
     } catch (e) {
-        console.warn('[Security] Impossibile salvare in sessionStorage:', e);
+        console.warn('[SECURITY-AUDIT] sessionStorage save failed:', e);
     }
 }
 
@@ -46,13 +56,18 @@ function _loadKeyFromSession() {
     try {
         const expiry = sessionStorage.getItem(SS_EXPIRY);
         if (expiry && Date.now() > parseInt(expiry)) {
+            console.log("[SECURITY-AUDIT] Session key expired.");
             _clearSessionStorage();
             return null;
         }
         const stored = sessionStorage.getItem(SS_KEY);
         if (!stored) return null;
-        return decodeURIComponent(escape(atob(stored)));
+        const decoded = decodeURIComponent(escape(atob(stored)));
+
+        console.log(`[SECURITY-AUDIT] Loaded from Session. Key Length: ${decoded.length}`);
+        return decoded;
     } catch (e) {
+        console.error("[SECURITY-AUDIT] Session load error:", e);
         _clearSessionStorage();
         return null;
     }
@@ -195,14 +210,25 @@ async function tryBiometricUnlock() {
         const snap = await getDoc(doc(db, "users", user.uid));
         if (!snap.exists() || !snap.data().settings_biometric) return null;
 
-        const secret = atob(encryptedSecret);
+        // [SAFARI COMPAT] Decodifica e Normalizzazione
+        const secret = decodeURIComponent(escape(atob(encryptedSecret))).normalize('NFC').trim();
+
+        console.log(`[SECURITY-AUDIT] Biometric recovered successfully. Length: ${secret.length}`);
         showToast("Accesso Biometrico Confermato", "success");
         return secret;
-    } catch (e) { return null; }
+    } catch (e) {
+        console.error("[SECURITY-AUDIT] Biometric recovery failed:", e);
+        return null;
+    }
 }
 
 async function enableBiometricUnlock(pass) {
-    localStorage.setItem(STORAGE_KEY, btoa(pass));
+    if (!pass) return;
+    const cleanPass = String(pass).normalize('NFC').trim();
+    const encoded = btoa(unescape(encodeURIComponent(cleanPass)));
+    localStorage.setItem(STORAGE_KEY, encoded);
+
+    console.log(`[SECURITY-AUDIT] Biometric enabled. Secret stored (Base64).`);
     showToast("Biometria configurata localmente", "success");
 }
 

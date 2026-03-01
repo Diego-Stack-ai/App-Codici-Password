@@ -1,29 +1,63 @@
 /**
- * CRYPTO UTILS (V1.0)
+ * CRYPTO UTILS (V1.1 - Safari/WebKit Optimized)
  * Protocollo di crittografia client-side per dati sensibili.
- * Utilizza Web Crypto API (SubtleCrypto) con AES-GCM e PBKDF2.
+ * Ottimizzato per compatibilità cross-platform (Chrome/Safari iOS).
  */
 
 const ITERATIONS = 100000;
 const SALT_SIZE = 16;
 const IV_SIZE = 12;
 
+// Helper: Uint8Array -> Hex
+const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+// Helper: Uint8Array -> Base64 (Safe per Safari)
+const bufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+};
+
+// Helper: Base64 -> Uint8Array (Safe per Safari)
+const base64ToBuffer = (base64) => {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+};
+
 /**
  * Deriva una chiave CryptoKey da una password testuale.
- * @param {string} password 
- * @param {Uint8Array} salt 
+ * Include normalizzazione Unicode NFC per compatibilità Safari.
  */
 async function deriveKey(password, salt) {
+    if (!password) throw new Error("Password mancante per derivazione");
+
+    // [SAFARI FIX] Normalizzazione NFC + Trim
+    const cleanPass = String(password).normalize('NFC').trim();
     const encoder = new TextEncoder();
+    const encodedPass = encoder.encode(cleanPass);
+
+    console.log(`[CRYPTO-AUDIT] Deriving Key...`, {
+        passLength: cleanPass.length,
+        saltLength: salt.length,
+        iterations: ITERATIONS
+    });
+
     const passwordKey = await crypto.subtle.importKey(
         "raw",
-        encoder.encode(password),
+        encodedPass,
         "PBKDF2",
         false,
         ["deriveKey"]
     );
 
-    return crypto.subtle.deriveKey(
+    const key = await crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
             salt: salt,
@@ -32,85 +66,81 @@ async function deriveKey(password, salt) {
         },
         passwordKey,
         { name: "AES-GCM", length: 256 },
-        false,
+        true, // Rendiamo esportabile per il log diagnostico
         ["encrypt", "decrypt"]
     );
+
+    // [DIAGNOSTIC LOG] Esporta la chiave (hash derivato) per confronto cross-platform
+    const exported = await crypto.subtle.exportKey("raw", key);
+    console.log(`[CRYPTO-AUDIT] Hash Derivato (HEX): ${toHex(exported)}`);
+
+    return key;
 }
 
 /**
  * Cifra una stringa usando una password.
- * @param {string} text 
- * @param {string} password 
- * @returns {Promise<string>} Stringa base64 contenente [salt + iv + ciphertext]
  */
 export async function encrypt(text, password) {
     if (!text || !password) return text;
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(text);
-    const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
-    const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(String(text));
+        const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
+        const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
 
-    const key = await deriveKey(password, salt);
+        const key = await deriveKey(password, salt);
 
-    const ciphertext = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv: iv },
-        key,
-        data
-    );
+        const ciphertext = await crypto.subtle.encrypt(
+            { name: "AES-GCM", iv: iv },
+            key,
+            data
+        );
 
-    // Uniamo salt, iv e ciphertext in un unico buffer
-    const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
-    combined.set(salt, 0);
-    combined.set(iv, salt.length);
-    combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
+        const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+        combined.set(salt, 0);
+        combined.set(iv, salt.length);
+        combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
 
-    // Convertiamo in base64 per lo storage su Firestore
-    return btoa(String.fromCharCode.apply(null, combined));
+        return bufferToBase64(combined);
+    } catch (e) {
+        console.error("[CRYPTO-AUDIT] Encryption failed:", e);
+        return text;
+    }
 }
 
 /**
  * Decifra una stringa cifrata.
- * @param {string} base64Data 
- * @param {string} password 
- * @returns {Promise<string>} Stringa decifrata
  */
 export async function decrypt(base64Data, password) {
-    // 1. Validazione Input
     if (!base64Data || !password) return base64Data;
 
-    // Se l'input non è una stringa (es. oggetto legacy), lo ignoriamo restituendo vuoto o loggando
-    if (typeof base64Data !== 'string') {
-        console.warn("[CRYPTO] Tentativo di decifrare un valore non stringa:", base64Data);
-        // Se è un oggetto con formato legacy {iv, ciphertext}, potremmo volerlo gestire, 
-        // ma il protocollo V7.0 prevede stringhe Base64.
-        return typeof base64Data === 'object' ? JSON.stringify(base64Data) : String(base64Data);
-    }
-
     try {
-        // 2. Normalizzazione Base64URL (sostituzione - e _ con + e /)
-        let normalized = base64Data.replace(/-/g, '+').replace(/_/g, '/');
+        // Normalizzazione stringa Base64
+        let normalized = String(base64Data).trim().replace(/-/g, '+').replace(/_/g, '/');
 
-        // 3. Validazione Base64 tramite Regex (caratteri ammessi e padding)
+        // Check regex base64
         const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
         if (!base64Regex.test(normalized)) {
-            // [FAIL-SAFE V7.4] Se non è base64 valido, restituiamo il dato originale (legacy o plaintext) 
-            // evitando errori bloccanti, ma segnalando il caso con un warning diagnostico.
-            console.warn("[CRYPTO] Dato non cifrato o Base64 non valido rilevato:", base64Data);
+            console.warn("[CRYPTO-AUDIT] Not a valid Base64 string:", base64Data.substring(0, 10) + "...");
             return base64Data;
         }
 
-        // 4. Decodifica Base64 -> Buffer
-        const binaryString = atob(normalized);
-        const combined = new Uint8Array(binaryString.split("").map(c => c.charCodeAt(0)));
+        const combined = base64ToBuffer(normalized);
 
         if (combined.length < SALT_SIZE + IV_SIZE) {
-            throw new Error("Dati insufficienti per salt e iv.");
+            throw new Error(`Dati troppo corti: ${combined.length} bytes`);
         }
 
         const salt = combined.slice(0, SALT_SIZE);
         const iv = combined.slice(SALT_SIZE, SALT_SIZE + IV_SIZE);
         const ciphertext = combined.slice(SALT_SIZE + IV_SIZE);
+
+        console.log(`[CRYPTO-AUDIT] Decrypting...`, {
+            combinedLength: combined.length,
+            ivLength: iv.length,
+            ciphertextLength: ciphertext.length
+        });
 
         const key = await deriveKey(password, salt);
 
@@ -122,12 +152,12 @@ export async function decrypt(base64Data, password) {
 
         return new TextDecoder().decode(decoded);
     } catch (e) {
-        console.error("[CRYPTO ERROR] Decryption failed. Possible wrong password or data corruption.", {
-            error: e.message,
-            dataType: typeof base64Data,
-            dataLength: base64Data?.length
+        console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", {
+            message: e.message,
+            name: e.name,
+            stack: e.stack,
+            base64Snippet: base64Data?.substring(0, 20)
         });
-        // Invece di lanciare errore e bloccare la UI, restituiamo un placeholder
         return "--ERRORE--";
     }
 }
