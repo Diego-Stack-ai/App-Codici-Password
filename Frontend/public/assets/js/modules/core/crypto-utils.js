@@ -136,21 +136,30 @@ export async function decrypt(base64Data, password) {
         const iv = combined.slice(SALT_SIZE, SALT_SIZE + IV_SIZE);
         const ciphertext = combined.slice(SALT_SIZE + IV_SIZE);
 
+        // [SAFARI-AUDIT V7.11] Log estremo per debug WebKit
         console.log("IV length:", iv.length);
         console.log("Cipher length:", ciphertext.length);
-        console.log("TagLength used:", 128);
+        console.log("Cipher byteOffset:", ciphertext.byteOffset);
+        console.log("Cipher buffer length:", ciphertext.buffer.byteLength);
 
         const key = await deriveKey(password, salt);
 
-        // [SAFARI iOS FIX] Forza tagLength a 128 e usa ArrayBuffer pulito
+        // [SAFARI iOS FIX] WebKit è estremamente rigido sugli offset degli ArrayBuffer.
+        // Creiamo copie "pulite" (byteOffset = 0) per garantire la compatibilità.
+        const ivClean = new Uint8Array(iv.length);
+        ivClean.set(iv);
+
+        const ctClean = new Uint8Array(ciphertext.length);
+        ctClean.set(ciphertext);
+
         const decoded = await crypto.subtle.decrypt(
             {
                 name: "AES-GCM",
-                iv: iv,
-                tagLength: 128 // Esplicito per WebKit
+                iv: ivClean,
+                tagLength: 128 // Esplicito 128-bit tag
             },
             key,
-            ciphertext.buffer.slice(ciphertext.byteOffset, ciphertext.byteOffset + ciphertext.byteLength)
+            ctClean.buffer // Passiamo il buffer pulito (byteOffset 0)
         );
 
         return new TextDecoder().decode(decoded);
@@ -158,7 +167,7 @@ export async function decrypt(base64Data, password) {
         console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", {
             message: e.message,
             name: e.name,
-            reason: e.name === 'OperationError' ? 'Wrong Key or Corrupted Tag' : 'Structure Error',
+            reason: e.name === 'OperationError' ? 'Wrong Key or Corrupted Tag/Buffer' : 'Structure Error',
             stack: e.stack
         });
         return "--ERRORE--";

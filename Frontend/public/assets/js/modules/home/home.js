@@ -139,9 +139,16 @@ async function renderHeaderUser(user) {
                 console.warn("[HOME] Vault Locked: visualizzazione dati o fallback.");
             }
 
-            // Se dopo il tentativo abbiamo dei dati validi (e non placeholder di errore)
-            const finalNome = (nome && !nome.includes('[ERROR]')) ? nome : '';
-            const finalCognome = (cognome && !cognome.includes('[ERROR]')) ? cognome : '';
+            // [FIX V7.11] Controllo errore corretto (--ERRORE-- invece di [ERROR])
+            const hasError = (s) => s && s.includes('--ERRORE--');
+
+            if (hasError(nome) || hasError(cognome)) {
+                console.error("[HOME] Decryption Error detected in profile.");
+                showSelfHealingBanner();
+            }
+
+            const finalNome = (!hasError(nome)) ? nome : '';
+            const finalCognome = (!hasError(cognome)) ? cognome : '';
 
             const fullName = toFriendlyName(`${finalNome} ${finalCognome}`.trim());
 
@@ -178,6 +185,38 @@ function setAvatarImage(element, url) {
 
     if (img) {
         img.src = url;
+    }
+}
+
+/**
+ * [V7.11] MOSTRA BANNER DI AUTO-CURA
+ * Se viene rilevato un errore di decriptazione, mostra un pulsante di emergenza.
+ */
+function showSelfHealingBanner() {
+    if (document.getElementById('self-healing-banner')) return;
+
+    const banner = createElement('div', {
+        id: 'self-healing-banner',
+        className: 'card border-glow',
+        style: 'background: rgba(239, 68, 68, 0.1); border-color: #ef4444; margin: 15px; padding: 15px; text-align: center;'
+    }, [
+        createElement('p', {
+            textContent: "⚠️ Rilevato errore nei dati. La tua chiave potrebbe essere obsoleta.",
+            style: 'color: #ef4444; margin-bottom: 10px; font-weight: bold;'
+        }),
+        createElement('button', {
+            className: 'btn-primary',
+            style: 'background: #ef4444; color: white; width: 100%; border-radius: 8px; border: none; padding: 10px;',
+            textContent: 'RIPRISTINA VAULT (RE-INSERISCI PASSWORD)',
+            onclick: () => {
+                if (window.resetVault) window.resetVault();
+            }
+        })
+    ]);
+
+    const pageContainer = document.querySelector('.page-container');
+    if (pageContainer) {
+        pageContainer.prepend(banner);
     }
 }
 
