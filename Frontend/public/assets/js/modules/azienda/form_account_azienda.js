@@ -138,6 +138,8 @@ async function loadData() {
         setVal('account-code', await decryptIfPossible(data.account || data.codice));
         setVal('account-password', await decryptIfPossible(data.password));
         setVal('account-url', data.url || data.sitoWeb);
+        setVal('account-numero-iscrizione', await decryptIfPossible(data.numeroIscrizione));
+        setVal('account-codice-societa', await decryptIfPossible(data.codiceSocieta));
         setVal('account-note', await decryptIfPossible(data.note));
         setVal('ref-name', data.referenteNome || data.referente?.nome);
         setVal('ref-phone', data.referenteTelefono || data.referente?.telefono);
@@ -623,6 +625,8 @@ window.saveAccount = async () => {
         account: await encrypt((get('account-code') || '').trim(), masterKey),
         password: await encrypt((get('account-password') || '').trim(), masterKey),
         url: (get('account-url') || '').trim(), // In chiaro
+        numeroIscrizione: await encrypt((get('account-numero-iscrizione') || '').trim(), masterKey),
+        codiceSocieta: await encrypt((get('account-codice-societa') || '').trim(), masterKey),
         note: await encrypt((get('account-note') || '').trim(), masterKey),
         referenteNome: (get('ref-name') || '').trim(),
         referenteTelefono: (get('ref-phone') || '').trim(),

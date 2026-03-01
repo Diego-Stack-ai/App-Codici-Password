@@ -35,11 +35,6 @@ function _saveKeyToSession(key, durationMs) {
         const cleanKey = String(key).normalize('NFC').trim();
         const encoded = btoa(unescape(encodeURIComponent(cleanKey)));
 
-        console.log(`[SECURITY-AUDIT] Saving to Session...`, {
-            keyLength: cleanKey.length,
-            duration: durationMs || 'Session'
-        });
-
         sessionStorage.setItem(SS_KEY, encoded);
         if (durationMs && durationMs !== Infinity) {
             sessionStorage.setItem(SS_EXPIRY, (Date.now() + durationMs).toString());
@@ -56,7 +51,6 @@ function _loadKeyFromSession() {
     try {
         const expiry = sessionStorage.getItem(SS_EXPIRY);
         if (expiry && Date.now() > parseInt(expiry)) {
-            console.log("[SECURITY-AUDIT] Session key expired.");
             _clearSessionStorage();
             return null;
         }
@@ -64,7 +58,6 @@ function _loadKeyFromSession() {
         if (!stored) return null;
         const decoded = decodeURIComponent(escape(atob(stored)));
 
-        console.log(`[SECURITY-AUDIT] Loaded from Session. Key Length: ${decoded.length}`);
         return decoded;
     } catch (e) {
         console.error("[SECURITY-AUDIT] Session load error:", e);
@@ -108,7 +101,6 @@ export function softLock() {
     _isSoftLocked = true;
     _masterKey = null; // Rimuoviamo dalla memoria volatile
     updateGlobalState();
-    console.log("[Titan-Lock] Soft Lock Attivato.");
 }
 
 export function isSoftLocked() {
@@ -159,7 +151,7 @@ export async function ensureMasterKey(options = {}) {
     // 4. Richiesta manuale (Sempre se forceReload è true o altri falliscono)
     const pass = await showInputModal(
         "SBLOCCO VAULT",
-        "Inserisci la password principale per visualizzare i dati criptati.",
+        "Inserisci la password principale.",
         "Password Master"
     );
 
@@ -213,7 +205,6 @@ async function tryBiometricUnlock() {
         // [SAFARI COMPAT] Decodifica e Normalizzazione
         const secret = decodeURIComponent(escape(atob(encryptedSecret))).normalize('NFC').trim();
 
-        console.log(`[SECURITY-AUDIT] Biometric recovered successfully. Length: ${secret.length}`);
         showToast("Accesso Biometrico Confermato", "success");
         return secret;
     } catch (e) {
@@ -228,7 +219,6 @@ async function enableBiometricUnlock(pass) {
     const encoded = btoa(unescape(encodeURIComponent(cleanPass)));
     localStorage.setItem(STORAGE_KEY, encoded);
 
-    console.log(`[SECURITY-AUDIT] Biometric enabled. Secret stored (Base64).`);
     showToast("Biometria configurata localmente", "success");
 }
 

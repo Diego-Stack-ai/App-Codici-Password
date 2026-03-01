@@ -146,24 +146,20 @@ async function loadUserData(user) {
                 })));
             }
 
-            // Documenti (Copertura Totale)
+            // Documenti (Copertura Totale V7.0)
             if (Array.isArray(currentUserData.documenti)) {
-                currentUserData.documenti = await Promise.all(currentUserData.documenti.map(async d => ({
-                    ...d,
-                    num_serie: await decryptIfPossible(d.num_serie),
-                    cf_value: await decryptIfPossible(d.cf_value),
-                    id_number: await decryptIfPossible(d.id_number),
-                    license_number: await decryptIfPossible(d.license_number),
-                    cf: await decryptIfPossible(d.cf),
-                    rilasciato_da: await decryptIfPossible(d.rilasciato_da),
-                    luogo_rilascio: await decryptIfPossible(d.luogo_rilascio),
-                    username: await decryptIfPossible(d.username),
-                    password: await decryptIfPossible(d.password),
-                    pin: await decryptIfPossible(d.pin),
-                    puk: await decryptIfPossible(d.puk),
-                    codice_app: await decryptIfPossible(d.codice_app),
-                    note: await decryptIfPossible(d.note)
-                })));
+                currentUserData.documenti = await Promise.all(currentUserData.documenti.map(async d => {
+                    const dec = { ...d };
+                    const fields = [
+                        'num_serie', 'cf_value', 'id_number', 'license_number', 'cf',
+                        'rilasciato_da', 'luogo_rilascio', 'username', 'password',
+                        'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
+                    ];
+                    for (const f of fields) {
+                        if (dec[f]) dec[f] = await decryptIfPossible(dec[f]);
+                    }
+                    return dec;
+                }));
             }
 
             // Email
@@ -989,32 +985,84 @@ function renderDocumentiView() {
                         createCopyBtn(num)
                     ]),
                     subDetails.length > 0 ? createElement('span', { className: 'data-value-sub', style: 'display: block; margin-bottom: 4px;', textContent: subDetails.join(' - ') }) : null,
-                    docItem.pin || docItem.puk || docItem.codice_app ? createElement('div', { className: 'flex-col-gap', style: 'margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;' }, [
-                        docItem.pin ? createElement('div', { className: 'field-value-row' }, [
-                            createElement('span', { className: 'data-label-xs', style: 'width: 80px;', textContent: 'PIN:' }),
-                            createElement('span', { className: 'data-value-sm', textContent: docItem.pin }),
+
+                    // Blocco Dati Accesso / Sicurezza (PIN, PUK, Username, Password)
+                    (docItem.username || docItem.password || docItem.pin || docItem.puk || docItem.codice_app) ? createElement('div', {
+                        className: 'flex-col-gap-xs',
+                        style: 'margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;'
+                    }, [
+                        docItem.username ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
+                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'USERNAME:' }),
+                            createElement('span', { className: 'data-value truncate', style: 'flex: 1;', textContent: docItem.username }),
+                            createCopyBtn(docItem.username)
+                        ]) : null,
+
+                        docItem.password ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
+                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'PASSWORD:' }),
+                            createElement('span', {
+                                className: 'data-value base-shield',
+                                style: 'flex: 1;',
+                                textContent: docItem.password,
+                                dataset: { pwd: docItem.password, visible: 'false' }
+                            }),
+                            createElement('div', { className: 'flex-center-row', style: 'gap: 4px;' }, [
+                                createElement('button', {
+                                    className: 'btn-action-mini',
+                                    onclick: (e) => {
+                                        const span = e.currentTarget.parentElement.parentElement.querySelector('.data-value');
+                                        const isVisible = span.dataset.visible === 'true';
+                                        span.classList.toggle('base-shield', isVisible);
+                                        span.dataset.visible = !isVisible;
+                                        e.currentTarget.querySelector('span').textContent = isVisible ? 'visibility' : 'visibility_off';
+                                    }
+                                }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'visibility' })]),
+                                createCopyBtn(docItem.password)
+                            ])
+                        ]) : null,
+
+                        docItem.pin ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
+                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'PIN:' }),
+                            createElement('span', { className: 'data-value', style: 'flex: 1;', textContent: docItem.pin }),
                             createCopyBtn(docItem.pin)
                         ]) : null,
-                        docItem.puk ? createElement('div', { className: 'field-value-row' }, [
-                            createElement('span', { className: 'data-label-xs', style: 'width: 80px;', textContent: 'PUK:' }),
-                            createElement('span', { className: 'data-value-sm', textContent: docItem.puk }),
+
+                        docItem.puk ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
+                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'PUK:' }),
+                            createElement('span', { className: 'data-value', style: 'flex: 1;', textContent: docItem.puk }),
                             createCopyBtn(docItem.puk)
                         ]) : null,
+
                         docItem.codice_app ? createElement('div', { className: 'field-value-row' }, [
-                            createElement('span', { className: 'data-label-xs', style: 'width: 80px;', textContent: 'Cod. App:' }),
-                            createElement('span', { className: 'data-value-sm', textContent: docItem.codice_app }),
+                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'APP CODE:' }),
+                            createElement('span', { className: 'data-value', style: 'flex: 1;', textContent: docItem.codice_app }),
                             createCopyBtn(docItem.codice_app)
                         ]) : null
+                    ].filter(Boolean)) : null,
+
+                    createElement('div', { className: 'flex-col-gap-xs', style: 'margin-top: 10px; opacity: 0.8;' }, [
+                        docItem.data_rilascio ? createElement('div', { className: 'flex-center-row', style: 'gap: 6px;' }, [
+                            createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'history' }),
+                            createElement('span', { className: 'data-value-sub', textContent: `Emesso: ${formatDateToIT(docItem.data_rilascio)}` })
+                        ]) : null,
+
+                        docItem.expiry_date ? createElement('div', { className: 'flex-center-row', style: 'gap: 6px;' }, [
+                            createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'event' }),
+                            createElement('span', { className: 'data-value-sub', textContent: `Scadenza: ${formatDateToIT(docItem.expiry_date)}` })
+                        ]) : null
+                    ].filter(Boolean)),
+
+                    docItem.home_page ? createElement('div', { className: 'flex-center-row', style: 'gap: 6px; margin-top: 10px;' }, [
+                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 18px; color: var(--accent);', textContent: 'language' }),
+                        createElement('a', {
+                            href: docItem.home_page.startsWith('http') ? docItem.home_page : `https://${docItem.home_page}`,
+                            target: '_blank',
+                            className: 'data-value-sub truncate underline',
+                            style: 'color: var(--accent);',
+                            textContent: docItem.home_page
+                        })
                     ]) : null,
-                    docItem.data_rilascio ? createElement('div', { className: 'flex-center-row', style: 'gap: 4px; opacity: 0.8; margin-top: 8px; margin-bottom: 2px;' }, [
-                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'history' }),
-                        createElement('span', { className: 'data-value-sub', textContent: `Emesso: ${formatDateToIT(docItem.data_rilascio)}` })
-                    ]) : null,
-                    docItem.expiry_date ? createElement('div', { className: 'flex-center-row', style: 'gap: 4px; opacity: 0.8;' }, [
-                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'event' }),
-                        createElement('span', { className: 'data-value-sub', textContent: `Scadenza: ${formatDateToIT(docItem.expiry_date)}` })
-                    ]) : null,
-                    docItem.note ? createElement('p', { className: 'note-text', style: 'margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;', textContent: docItem.note }) : null
+
+                    docItem.note ? createElement('p', { className: 'note-text', style: 'margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; font-style: italic;', textContent: docItem.note }) : null
                 ])
             ])
         ]);
@@ -1075,20 +1123,18 @@ async function syncData() {
         console.log("[VaultCheck] Cifratura in corso...");
 
         // Cifratura Documenti (Selective Encryption V7.5)
-        const encryptedDocuments = await Promise.all(userDocuments.map(async d => ({
-            ...d,
-            num_serie: await encrypt(d.num_serie || '', masterKey),
-            cf_value: await encrypt(d.cf_value || '', masterKey),
-            id_number: await encrypt(d.id_number || '', masterKey),
-            license_number: await encrypt(d.license_number || '', masterKey),
-            cf: await encrypt(d.cf || '', masterKey),
-            username: await encrypt(d.username || '', masterKey),
-            password: await encrypt(d.password || '', masterKey),
-            pin: await encrypt(d.pin || '', masterKey),
-            puk: await encrypt(d.puk || '', masterKey),
-            codice_app: await encrypt(d.codice_app || '', masterKey),
-            note: await encrypt(d.note || '', masterKey)
-        })));
+        const encryptedDocuments = await Promise.all(userDocuments.map(async d => {
+            const enc = { ...d };
+            const fields = [
+                'num_serie', 'cf_value', 'id_number', 'license_number', 'cf',
+                'rilasciato_da', 'luogo_rilascio', 'username', 'password',
+                'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
+            ];
+            for (const f of fields) {
+                if (enc[f]) enc[f] = await encrypt(enc[f] || '', masterKey);
+            }
+            return enc;
+        }));
 
         // Cifratura Email (Selective: solo password e note)
         const encryptedEmails = await Promise.all(contactEmails.map(async e => ({
@@ -1510,6 +1556,7 @@ window.editUserDocument = async (idx) => {
                 { key: 'luogo_rilascio', label: t('label_release_place'), icon: 'location_on' },
                 { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
                 { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
+                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
                 { key: 'username', label: 'Username / CF', icon: 'person' },
                 { key: 'password', label: 'Password', icon: 'lock' },
                 { key: 'pin', label: t('label_pin'), icon: 'password' },
@@ -1521,6 +1568,7 @@ window.editUserDocument = async (idx) => {
             return [
                 ...base,
                 { key: 'num_serie', label: 'Patente', icon: 'numbers' },
+                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
                 { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
                 { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
                 { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
@@ -1530,6 +1578,7 @@ window.editUserDocument = async (idx) => {
             return [
                 ...base,
                 { key: 'num_serie', label: 'Codice Fiscale', icon: 'badge' },
+                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
                 { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
                 { key: 'id_number', label: t('label_id_number'), icon: 'numbers' },
                 { key: 'note', label: 'Note', icon: 'description' }
@@ -1538,6 +1587,7 @@ window.editUserDocument = async (idx) => {
             return [
                 ...base,
                 { key: 'num_serie', label: 'Numero Passaporto', icon: 'numbers' },
+                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
                 { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
                 { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
                 { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
@@ -1548,6 +1598,7 @@ window.editUserDocument = async (idx) => {
         return [
             ...base,
             { key: 'num_serie', label: 'Numero / Codice', icon: 'numbers' },
+            { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
             { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
             { key: 'note', label: 'Note', icon: 'description' }
         ];

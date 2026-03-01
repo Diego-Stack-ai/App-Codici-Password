@@ -6,28 +6,19 @@ Protocollo – Istruzioni Base Pagine – Core + Performance & Sicurezza
 1. Istruzioni per la Base delle Pagine
 1.1 Background Universale
 
-Effetto unico: tutte le pagine condividono lo stesso sfondo con gradiente e l’effetto 
+Effetto unico: tutte le pagine condividono lo stesso sfondo con gradiente e l’effetto illuminazione (glow).
+- **body.base-bg**: Gestisce lo sfondo globale.
+- **.base-container**: Il box strutturale (max 60rem).
+- **.base-glow**: L'effetto luce ambientale (fixed).
+1.2.1 Auth Pages (Servizio)
+Pagine: index.html (Login), registrati.html, reset_password.html, imposta_nuova_password.html.
 
-1.2 Categorie di Pagine
-1.2.1 Pagine “Servizio”
-
-Pagine: index.html (Login), registrati.html, reset_password.html, imposta_nuova_password.html
-
-Modalità Dark fissa (Nero).
-
-Nessun header/footer standard e impossibilità di cambiare tema.
-
-Container: obbligo di utilizzo classe .card con .border-glow.
-
-Saetta System (Premium): ogni card deve contenere il doppio effetto:
-
-.saetta-master (Lo shimmer metallico di sfondo, 4s, intensità 8%).
-
-.saetta-drop (La linea verticale blu che cade, 3s).
-
-Selettore Lingua: nelle pagine di accesso (index, registrati), il selettore lingua deve essere ancorato dentro la card in alto a destra (.lang-selector-container inside .card).
-
-Responsive: sotto i 480px, la card si adatta a width: 90% con max-width: 360px per mantenere l’estetica "compatta". Da aggiornare ?
+- **Vault Protocol**: Obbligo classe `.vault` per centrare il contenuto.
+- **Dark Mode**: Forzata via `protocol-forced-dark` sul tag `<html>`.
+- **Card Design**: Obbligo classe `.card` con `.border-glow`.
+- **Saetta System (Premium)**: Ogni card deve avere `.saetta-master` (shimmer 8%) e `.saetta-drop` (linea blu).
+- **Selettore Lingua**: Ancorato dentro la card in alto a destra (`.lang-selector-container`).
+- **Responsive**: Transizione fluida, card compatta 90% (<480px).
 
 1.2.2 Pagine “Contenuto”
 
@@ -78,14 +69,17 @@ Centro: eventuali icone funzionali alla pagina.
 
 Destra: Icona "Impostazioni" (Icona: tune) sempre presente (tranne nella pagina Impostazioni).
 
-Stile Icone e Colori
-
 Minimalismo: icone senza bordi, cerchi o sfondi, “nude”.
-
 Colore dinamico: icone e titolo diventano bianche o scure in base al tema.
 
-
-2. Eccezioni Layout Specifiche
+2. **Gerarchia CSS Obbligatoria (V7.0 MASTER)**
+Non caricare mai `operatore.css`. Usa l'ordine gerarchico:
+1. `core.css` (Variabili e Temi)
+2. `core_fonts.css` (Manrope & Material Symbols)
+3. `core_fascie.css` (Layout Header/Footer/Safe-Area)
+4. `core_ui.css` (Componenti Globali: Toast, Modali)
+5. `moduli.css` (Layout condivisi)
+6. `pagina.css` (Stili specifici della pagina)
 2.1 Home Page (home_page.html)
 
 Header SX: avatar utente (link a Profilo Privato), senza Back.
@@ -127,7 +121,7 @@ Small Mobile ≤400px
 
 Adattamento UI Form e dati su Mobile: colonna singola sotto 480px, spaziature 10–14px su piccoli schermi, nessun campo tagliato/sovrapposto, scroll verticale fluido, touch target ≥36px.
 
-Checklist di validazione: CSS operatore.css collegato, console pulita, layout responsive, modali centrate, card leggibili, traduzioni applicate.
+Checklist di validazione: Gerarchia CSS V7.0 collegata, console pulita, layout responsive, modali centrate, card leggibili, traduzioni applicate via `data-i18n="ready"`.
 
 Performance, Cache e Sicurezza: AppState centrale, IndexedDB TTL 15 min, Sync in background, Service Worker cache CSS/JS/font/icone, logout/reset AppState.
 
@@ -150,7 +144,7 @@ function renderPage() {
 
 5. Note Operative
 
-Inclusione CSS/JS: prima il comune (operatore.css), poi eventuali aggiunte relative alla pagina.
+Inclusione CSS/JS: seguire rigorosamente il mapping di `GUIDA.md`.
 
 Checklist valida per tutte le pagine.
 
@@ -203,8 +197,7 @@ Utilizzare sempre showLogoutModal() per la conferma di uscita standardizzata.
 Note Tecniche
 
 ui-core.js inietta dinamicamente l'HTML necessario nel <body>, non serve copiare codice HTML nelle singole pagine.
-
-Il CSS è gestito centralmente in operatore.css.
+Il CSS è gestito centralmente in `core_ui.css`.
 
 7. Specifiche Pagine e Layout Critici
 7.1 Area Privata (area_privata.html)
@@ -233,9 +226,7 @@ Collegamenti corretti a JS e CSS modulari.
 8.2 Controlli CSS
 
 Nessuno style inline o tailwind deve esere presente nelle pagine.
-
-Tutte le proprietà CSS migrate in operatore.css.
-
+Tutte le proprietà CSS migrate nei moduli V7.0.
 Nessun mix Tailwind/Design System: classi atomiche sostituite da classi coerenti del protocollo.
 
 Verifica assenza vulnerabilità CSS.

@@ -126,6 +126,12 @@ async function loadData() {
         setVal('account-url', data.url || data.sitoWeb);
         setVal('account-note', await decryptIfPossible(data.note));
 
+        // Referente (Root or Object support)
+        const ref = data.referente || {};
+        setVal('ref-name', data.referenteNome || ref.nome);
+        setVal('ref-phone', data.referenteTelefono || ref.telefono);
+        setVal('ref-mobile', data.referenteCellulare || ref.cellulare);
+
         // Banking & Cards (Normalize & Validate)
         let loadedBanking = [];
         if (Array.isArray(data.banking)) {
@@ -639,6 +645,9 @@ window.saveAccount = async () => {
         url: (get('account-url') || '').trim(), // In chiaro
         note: await encrypt((get('account-note') || '').trim(), masterKey),
         logo: logoSrc || null,
+        referenteNome: (document.getElementById('ref-name')?.value || '').trim(),
+        referenteTelefono: (document.getElementById('ref-phone')?.value || '').trim(),
+        referenteCellulare: (document.getElementById('ref-mobile')?.value || '').trim(),
 
         // V3.1: Deterministc Types
         type: (isMemoUI || isMemoSharedUI) ? "memo" : "account",

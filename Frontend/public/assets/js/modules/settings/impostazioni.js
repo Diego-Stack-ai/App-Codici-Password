@@ -14,7 +14,7 @@ import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_uti
 import { encrypt, decrypt, ensureMasterKey, setMasterKey, enableVaultAutoUnlock, disableVaultAutoUnlock, isAutoUnlockActive, clearSession } from '../core/security-manager.js';
 
 // [V8.0] FLAG AMBIENTE
-const DEV_MODE = false; // In produzione
+const DEV_MODE = true; // In fase di test 12 ore visibili
 
 let currentUserData = null;
 let userAddresses = [];
@@ -107,20 +107,46 @@ async function loadUserData(user) {
         const avatarEl = document.getElementById('user-avatar-settings');
 
         // 🔐 PROTOCOLLO BLINDA (V7.0): Decifrazione Profilo Utente
-        let nome = currentUserData.nome || '';
-        let cognome = currentUserData.cognome || '';
-
         try {
             const mk = await ensureMasterKey();
             const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
-            if (isEnc(nome)) nome = await decrypt(nome, mk);
-            if (isEnc(cognome)) cognome = await decrypt(cognome, mk);
+
+            // 1. Dati Anagrafici
+            if (isEnc(currentUserData.nome)) currentUserData.nome = await decrypt(currentUserData.nome, mk);
+            if (isEnc(currentUserData.cognome)) currentUserData.cognome = await decrypt(currentUserData.cognome, mk);
+            if (isEnc(currentUserData.birth_place)) currentUserData.birth_place = await decrypt(currentUserData.birth_place, mk);
+            if (isEnc(currentUserData.cf)) currentUserData.cf = await decrypt(currentUserData.cf, mk);
+
+            // 2. Telefoni
+            if (Array.isArray(contactPhones)) {
+                for (let p of contactPhones) {
+                    if (isEnc(p.number)) p.number = await decrypt(p.number, mk);
+                }
+            }
+
+            // 3. Email
+            if (Array.isArray(contactEmails)) {
+                for (let e of contactEmails) {
+                    if (isEnc(e.password)) e.password = await decrypt(e.password, mk);
+                    if (isEnc(e.note)) e.note = await decrypt(e.note, mk);
+                }
+            }
+
+            // 4. Indirizzi
+            if (Array.isArray(userAddresses)) {
+                for (let a of userAddresses) {
+                    if (isEnc(a.address)) a.address = await decrypt(a.address, mk);
+                    if (isEnc(a.city)) a.city = await decrypt(a.city, mk);
+                    if (isEnc(a.cap)) a.cap = await decrypt(a.cap, mk);
+                    if (isEnc(a.civic)) a.civic = await decrypt(a.civic, mk);
+                }
+            }
         } catch (e) {
-            console.warn("[IMPOSTAZIONI] Vault Locked: visualizzazione dati cifrati.");
+            console.warn("[IMPOSTAZIONI] Vault Locked o Errore Decriptazione:", e);
         }
 
-        const displayName = (nome || cognome)
-            ? `${nome} ${cognome}`.trim()
+        const displayName = (currentUserData.nome || currentUserData.cognome)
+            ? `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim()
             : (user.displayName || t('user_default'));
 
         safeSetText(nameEl, displayName);
@@ -269,7 +295,10 @@ async function generateVCard(user, data) {
             const vcardStr = buildVCard(currentUserData, qrCodeInclusions, {
                 contactPhones, contactEmails, userAddresses
             });
-            renderQRCode(previewDest, vcardStr, { width: 104, height: 104, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 2 });
+            // Optimization: Defer rendering to prevent blocking the main thread (fixes Violation 'load' handler)
+            setTimeout(() => {
+                renderQRCode(previewDest, vcardStr, { width: 104, height: 104, colorDark: "#000000", colorLight: "#E3F2FD", correctLevel: 2 });
+            }, 0);
         }
     }, 600);
 }

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Importatore Aziende Massivo V1.0</title>
+
+    <!-- Design System -->
+    <link rel="stylesheet" href="assets/css/core.css">
+    <link rel="stylesheet" href="assets/css/core_ui.css">
+
+    <style>
+        :root {
+            --accent-primary: #3b82f6;
+            --accent-success: #10b981;
+            --bg-glass: rgba(15, 15, 25, 0.82);
+            --border-glass: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1a1a2e, #050510);
+            color: #e2e8f0;
+            padding: 24px;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+
+        .import-container {
+            max-width: 800px;
+            margin: 60px auto;
+            background: var(--bg-glass);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            border-radius: 28px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(to bottom right, #fff, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        .azienda-list {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .azienda-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .azienda-item:last-child {
+            border: none;
+        }
+
+        .btn-import {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-import:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-import:active {
+            transform: translateY(0);
+        }
+
+        .btn-import:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-msg {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #60a5fa;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="import-container">
+        <div class="header">
+            <h1>🏢 Importazione Aziende Richieste</h1>
+            <p>Rilevate 5 aziende pronte per il caricamento nella Vault.</p>
+        </div>
+
+        <div class="azienda-list">
+            <div class="azienda-item">🔹 BM Service srl</div>
+            <div class="azienda-item">🔹 D'Alessio Food</div>
+            <div class="azienda-item">🔹 EGF LOGISTICA SRL</div>
+            <div class="azienda-item">🔹 Venti18 srl <span
+                    style="font-size: 10px; color: #fbbf24; background: rgba(251, 191, 36, 0.1); padding: 2px 6px; border-radius: 10px; margin-left: auto;">CONTROLLO
+                    NOTE ATTIVO</span></div>
+            <div class="azienda-item">🔹 Pax Tibi srl</div>
+        </div>
+
+        <button id="btn-start" class="btn-import">AVVIA IMPORTAZIONE ORA</button>
+        <div id="status" class="status-msg"></div>
+    </div>
+
+    <script type="module">
+        import { runMassiveImport } from './assets/js/import_aziende_script.js';
+
+        const btn = document.getElementById('btn-start');
+        const status = document.getElementById('status');
+
+        btn.onclick = async () => {
+            btn.disabled = true;
+            btn.textContent = "IMPORTAZIONE IN CORSO...";
+            status.textContent = "Verifica sessione e Master Key...";
+
+            try {
+                await runMassiveImport();
+            } catch (e) {
+                console.error(e);
+                btn.disabled = false;
+                btn.textContent = "ERRORE - RIPROVA";
+                status.textContent = "Errore durante l'importazione. Verifica la Vault.";
+            }
+        };
+    </script>
+</body>
+
+</html>

@@ -56,7 +56,6 @@ export async function syncTimeoutWithFirestore(uid) {
             if (minutes === 0) minutes = 1;
 
             logoutTimerMs = minutes * 60 * 1000;
-            console.log(`[Titan-Lock] Timeout impostato a: ${minutes} min (${logoutTimerMs}ms)`);
         }
     } catch (e) {
         console.error("[Titan-Lock] Errore sincronizzazione timeout:", e);

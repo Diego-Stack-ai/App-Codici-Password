@@ -99,6 +99,8 @@ async function loadAccount() {
                 originalData.username = await decryptIfPossible(originalData.username);
                 originalData.account = await decryptIfPossible(originalData.account);
                 originalData.password = await decryptIfPossible(originalData.password);
+                originalData.numeroIscrizione = await decryptIfPossible(originalData.numeroIscrizione);
+                originalData.codiceSocieta = await decryptIfPossible(originalData.codiceSocieta);
 
                 if (Array.isArray(originalData.banking)) {
                     originalData.banking = await Promise.all(originalData.banking.map(async b => ({
@@ -172,7 +174,9 @@ function render(acc) {
         'detail-username': acc.username,
         'detail-account': acc.account || acc.codice,
         'detail-password': acc.password,
-        'detail-website': acc.url || acc.sitoWeb
+        'detail-website': acc.url || acc.sitoWeb,
+        'detail-numero-iscrizione': acc.numeroIscrizione,
+        'detail-codice-societa': acc.codiceSocieta
     };
     for (const [id, val] of Object.entries(map)) {
         const el = document.getElementById(id);

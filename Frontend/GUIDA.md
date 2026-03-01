@@ -728,17 +728,18 @@ Ogni volta che viene effettuata una modifica agli asset core o al design system,
 ### 1️⃣ Spiegazione Umana
 Per garantire un'esperienza "Premium" ed evitare prompt ripetitivi, abbiamo unificato la logica di Sicurezza tra la **Sessione App** e la **Vault Crittografica**. La MasterKey viene "ricordata" in modo sicuro (`sessionStorage`) per tutta la durata della sessione. Il "Blocco Inattività" (Titan-Lock) agisce come un cane da guardia automatico.
 
-### 2️⃣ Architettura dei Controlli (Titan-Lock & soglie)
-Le impostazioni gestiscono il timeout di sicurezza con due soglie sincronizzate:
-1.  **Soft Lock (60s)**: Oscuramento dell'interfaccia se l'utente non interagisce.
-2.  **Hard Lock (180s)**: Chiusura totale della Vault e Logout forzato per massima protezione.
+### 2️⃣ Architettura dei Controlli (Titan-Lock V8.0)
+Per garantire stabilità, il timeout è stato unificato e semplificato rispetto alla V7.0:
+1.  **Soglie Selezionabili**: L'utente può scegliere tra 1 min, 3 min (default) o 5 min.
+2.  **Hard Logout**: Al termine del timeout scelto, la Vault viene bloccata e viene eseguito il logout forzato.
+3.  **Dev Mode**: L'opzione 12 ore è riservata esclusivamente allo sviluppo (`DEV_MODE = true`).
 
 ### 3️⃣ Protocollo Agente AI (Security Watchdog)
 > 🤖 **Protocollo AI — Comando Categorico: AUDIT_SECURITY_HARDENING**
 > `enforce_security_v7()`
 > 1. **VAULT CHECK**: Valida l'uso di `sessionStorage` per la permanenza della MasterKey.
 > 2. **AES-GCM**: Imponi la crittografia su ogni campo marcato come sensibile.
-> 3. **TITAN-LOCK**: Riscontra le soglie sincronizzate: 60s (Soft) / 180s (Hard).
+> 3. **TITAN-LOCK**: Riscontra le soglie V8.0: 1, 3 o 5 min. Blocco immediato di ogni occorrenza "Subito" (0).
 > 4. **BIOMETRIC FIRST**: Imponi il tentativo biometrico prima di ogni prompt manuale.
 > 5. **SINGLE UNLOCK**: Impedisci ri-richieste di password se la Vault è già indicata come aperta.
 
@@ -765,8 +766,9 @@ const val = data._encrypted ? await decrypt(data.password, masterKey) : data.pas
 
 ### Note operative per la Sicurezza:
 - **Zero Plaintext**: Nessun valore sensibile in chiaro nella Firebase Console.
-- **Cripto-Healing**: Bonifica automatica record legacy al primo accesso o tramite tool.
-- **Titan-Lock Reference**: Fare riferimento alla Sezione 20 per le soglie di inattività.
+- **Cripto-Healing**: Bonifica automatica record legacy; interfaccia di controllo nascosta in produzione tramite `SAFE_MODE = false`.
+- **Crypto Silence**: Divieto assoluto di logging di chiavi, salt o IV (Vedi Sezione 22).
+- **Titan-Lock Reference**: Fare riferimento alla Sezione 22 per le nuove soglie V8.0.
 
 ### 21.1 Cassaforte Intelligente e Cifratura Selettiva (V7.5)
 Il protocollo V7.5 evolve il "Total Blinding" verso una **Cifratura Selettiva** per bilanciare sicurezza estrema e usabilità (ricerca, performance).
@@ -792,7 +794,115 @@ Non chiamare mai `atob()` direttamente nel codice dei moduli. Usa sempre la funz
 
 ---
 
-## 22. GO-LIVE & CHECKLIST OPERATIVA V7.0
+## 22. PROTOCOLLO VAULT & SESSION HARDENING (V8.0 PRODOTTO BLINDATO)
+
+### Spiegazione umana:
+La sicurezza della cassaforte (Vault) della V8.0 si basa sulla **certezza della sessione**. Abbiamo rimosso l'opzione "Subito" perché creava instabilità e loop di sblocco inutili; ora la sessione è granitica con tempi minimi di 1 minuto. Il sistema distingue ora nettamente tra **Ambiente di Sviluppo** (`DEV_MODE`), dove possiamo testare sessioni lunghe (12 ore), e **Produzione**, dove l'app è "Blindata". La `SAFE_MODE` funge da paracadute invisibile: i meccanismi di auto-cura ci sono, ma non sporcano l'interfaccia dell'utente finché non servono davvero.
+
+### Esempio tecnico (Configurazione & Fallback):
+```javascript
+// [V8.0] Logica nel caricamento del timer (inactivity-timer.js)
+let minutes = data.lock_timeout ?? 3;
+
+// Fallback obbligatorio: se un vecchio profilo ha il valore "0" (Subito),
+// il sistema lo converte forzatamente in 1 minuto.
+if (minutes === 0) minutes = 1; 
+
+// [V8.0] Stati di visibilità (home.js / impostazioni.js)
+const DEV_MODE = false;  // In produzione: nasconde l'opzione 12h
+const SAFE_MODE = false; // In produzione: nasconde reset vault e banner auto-cura
+```
+
+> 🤖 **Protocollo AI — Comando Categorico: AUDIT_VAULT_PROD_V8**
+> `audit_vault_v8([file_o_moduli])`
+> 1.  **NO_SUBITO_CHECK**: Elimina ogni occorrenza residua di "Subito" o valore `0` nei selettori e nelle traduzioni.
+> 2.  **TIMEOUT_VALIDATION**: Verifica che la lista timeout sia limitata a [1, 3, 5] min (o 12h solo se `DEV_MODE=true`).
+> 3.  **MODE_ISOLATION**: Riscontra che i flag `DEV_MODE` e `SAFE_MODE` siano rigorosamente `false` per i file pronti al deploy.
+> 4.  **CRYPTO_SILENCE**: Valida l'assenza totale di log con dati sensibili (Salt, IV, Chiavi HEX) in favore di soli codici errore asettici.
+> 5.  **FALLBACK_ENFORCEMENT**: Verifica la presenza della logica `if (minutes === 0) minutes = 1` nello script di sincronizzazione.
+
+---
+
+## 23. PROTOCOLLO DI TEST & AUDIT BACKEND (V8.0)
+
+### Spiegazione umana:
+Per garantire che il database sia sempre coerente e che la crittografia sia applicata correttamente a ogni nuova scrittura, utilizziamo uno script di audit atomico. Questo test crea record dummy (falsi) sia in ambito Privato che Ditta, verifica che il flag `_encrypted: true` sia presente e che i dati sensibili non siano leggibili in chiaro su Firebase Console prima di ritornare il risultato.
+
+### Esempio Tecnico (Script di Audit):
+```javascript
+/**
+ * Comando Agente AI — Creazione e Audit Account (V8.0 BLINDATO)
+ * Protocollo — Vault Blindato & Firebase Integrity Check
+ */
+async function audit_create_and_verify_accounts_v8() {
+    const masterKey = await ensureMasterKey(); // Assicura che la chiave sia presente
+
+    // 1️⃣ Creazione Account Privato (Cifrato)
+    const privateAccount = {
+        type: "account",
+        visibility: "private",
+        isExplicitMemo: false,
+        nomeAccount: "Test Privato", // In chiaro per ricerca
+        utente: await encrypt("utente_privato", masterKey), // BLINDATO
+        password: await encrypt("PasswordTest123!", masterKey), // BLINDATO
+        codice: await encrypt("CODICE123", masterKey), // BLINDATO
+        note: await encrypt("Memo di test privato", masterKey), // BLINDATO
+        sharedWith: {},
+        _encrypted: true // Flag V8.0
+    };
+
+    const privateRef = doc(db, `users/${currentUser.uid}/accounts/${generateId()}`);
+    await runTransaction(db, async (t) => t.set(privateRef, privateAccount));
+
+    // 2️⃣ Creazione Account Ditta (Cifrato)
+    const companyAccount = {
+        type: "account",
+        visibility: "private",
+        isExplicitMemo: false,
+        nomeAccount: "Test Ditta",
+        utente: await encrypt("utente_ditta", masterKey),
+        password: await encrypt("DittaPass456!", masterKey),
+        codice: await encrypt("DITTA789", masterKey),
+        note: await encrypt("Memo aziendale completo", masterKey),
+        aziendaId: "azienda_test",
+        sharedWith: {},
+        _encrypted: true
+    };
+
+    const companyRef = doc(db, `users/${currentUser.uid}/aziende/azienda_test/accounts/${generateId()}`);
+    await runTransaction(db, async (t) => t.set(companyRef, companyAccount));
+
+    // 3️⃣ Audit su Firebase (Verifica strutturale)
+    const snapPrivate = await getDoc(privateRef);
+    const snapCompany = await getDoc(companyRef);
+
+    const auditResults = {
+        privateAccountComplete: snapPrivate.exists() && snapPrivate.data()._encrypted === true,
+        companyAccountComplete: snapCompany.exists() && snapCompany.data()._encrypted === true,
+        cryptoBlindness: snapPrivate.data().password !== "PasswordTest123!", // Verifica cifratura
+        allFieldsPresent: false
+    };
+
+    const requiredFields = ["nomeAccount","utente","password","codice","note","visibility","type","_encrypted"];
+    const checkFields = (docData) => requiredFields.every(f => docData.hasOwnProperty(f));
+
+    auditResults.allFieldsPresent = checkFields(snapPrivate.data()) && checkFields(snapCompany.data());
+
+    return auditResults; // Restituisce il risultato nel silenzio (Zero Log)
+}
+```
+
+> 🤖 **Protocollo AI — Comando Categorico: AUDIT_BACKEND_INTEGRITY**
+> `audit_create_and_verify_accounts_v8()`
+> 1. **ATOMIC_WRITE**: Usa solo `runTransaction` per le scritture di test.
+> 2. **CRYPTO_CHECK**: Fallire il test se `_encrypted` è falso o se i dati sensibili nel DB sono in chiaro.
+> 3. **ZERO_LOG**: Non stampare mai i risultati in console; restituire solo l'oggetto `auditResults`.
+
+---
+
+---
+
+## 24. GO-LIVE & CHECKLIST OPERATIVA V7.0
 
 ### 1️⃣ Procedura di Rilascio Pro
 Il Go-Live standardizza l'inserimento dei dati reali garantendo la massima sicurezza end-to-end.

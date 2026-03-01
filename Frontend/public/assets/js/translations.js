@@ -63,6 +63,8 @@ export const translations = {
         general_notes: "Note Generali",
         save_company: "Salva Azienda",
         legal_form: "Forma Giuridica",
+        numero_iscrizione: "Numero Iscrizione",
+        codice_societa: "Codice Società",
 
         // LOGIN PAGE
         login_title: "Accedi",
@@ -678,7 +680,10 @@ export const translations = {
         uploaded: "Caricato",
         new: "Nuovo",
         office_type_placeholder: "TIPO SEDE (ES. OPERATIVA)",
-        email_type_placeholder: "TIPO EMAIL (ES. ORDINI)"
+        email_type_placeholder: "TIPO EMAIL (ES. ORDINI)",
+        delete_mode_select: "Seleziona l'azienda da eliminare",
+        confirm_delete_company_title: "ELIMINAZIONE DEFINITIVA",
+        confirm_delete_company_msg: "Sei sicuro di voler eliminare \"{name}\"? Questa operazione cancellerà anche tutti gli account associati."
     },
     en: {
         home: "Home",
@@ -1302,8 +1307,11 @@ export const translations = {
         notes_placeholder: "Additional notes...",
         uploaded: "Uploaded",
         new: "New",
-        office_type_placeholder: "OFFICE TYPE (E.G. OPERATIVE)",
-        email_type_placeholder: "EMAIL TYPE (E.G. ORDERS)"
+        office_type_placeholder: "OFFICE TYPE (E.G. OPERATIONAL)",
+        email_type_placeholder: "EMAIL TYPE (E.G. ORDERS)",
+        delete_mode_select: "Select the company to delete",
+        confirm_delete_company_title: "PERMANENT DELETION",
+        confirm_delete_company_msg: "Are you sure you want to delete \"{name}\"? This will also delete all associated accounts."
     },
     es: {
         // GLOBAL

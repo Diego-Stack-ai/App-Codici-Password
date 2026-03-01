@@ -1,0 +1,10 @@
+--- REPORT AUDIT ACCOUNT PRIVATI ---
+Utente: brP8B2YxaESJTf9nydYzckQUnVf1 | Totale: 107 | Criptati: 107 | Oggi: 107
+DOPPIONI TROVATI:
+- "Fineco" appare 2 volte (IDs: HyRdhNXXW1fJa6PrqkAP, RTbke8CIkIFkuTztOuTn)
+- "App My Edison" appare 2 volte (IDs: WpJLqcV1DbAQ7s9IPc2B, uw5X4wHwt4aZYyY0OsON)
+-------------------------------------
+STATISTICHE GLOBALI:
+- Totale Account Privati: 107
+- Criptati (V8.0 OK):   107
+- Importati Oggi:        107

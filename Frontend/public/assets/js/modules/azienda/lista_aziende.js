@@ -5,9 +5,9 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 
@@ -15,6 +15,7 @@ import { logError } from '../../utils.js';
 let allAziende = [];
 let sortOrder = 'asc';
 let currentUser = null;
+let isDeleteMode = false;
 
 const companyPalettes = [
     { key: 'blue', label: 'Blue' },
@@ -83,12 +84,24 @@ async function initProtocolUI() {
             id: 'add-azienda-btn',
             className: 'btn-fab-action btn-fab-scadenza',
             title: 'Aggiungi Azienda',
-            onclick: () => window.location.replace('modifica_azienda.html')
+            onclick: () => {
+                if (isDeleteMode) toggleDeleteMode();
+                window.location.replace('modifica_azienda.html');
+            }
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
         ]);
 
-        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [addBtn]));
+        const deleteBtn = createElement('button', {
+            id: 'delete-mode-btn',
+            className: `btn-fab-action ${isDeleteMode ? 'btn-fab-neutral' : 'btn-fab-danger'}`,
+            title: isDeleteMode ? 'Esci da Elimina' : 'Elimina Azienda',
+            onclick: toggleDeleteMode
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: isDeleteMode ? 'close' : 'delete' })
+        ]);
+
+        setChildren(fCenter, createElement('div', { className: 'fab-group' }, [addBtn, deleteBtn]));
     }
 }
 
@@ -144,16 +157,25 @@ function createAziendaCard(a) {
     const isPinned = !!a.isPinned;
 
     return createElement('div', {
-        className: `azienda-card card-${palKey} border-glow adaptive-shadow`,
+        className: `azienda-card card-${palKey} border-glow adaptive-shadow ${isDeleteMode ? 'is-delete-mode' : ''}`,
         onclick: (e) => {
             if (e.target.closest('button')) return;
+            if (isDeleteMode) {
+                deleteAziendaList(a.id, a.ragioneSociale);
+                return;
+            }
             window.location.replace(`account_azienda.html?id=${a.id}`);
         }
     }, [
+        // Delete Indicator (Solo in modalità elimina)
+        isDeleteMode ? createElement('div', { className: 'delete-indicator' }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete_forever' })
+        ]) : null,
         // Pin Button
         createElement('button', {
             type: 'button',
             className: `btn-pin-azienda${isPinned ? ' is-pinned' : ''}`,
+            style: isDeleteMode ? 'display: none' : '',
             onclick: (e) => { e.stopPropagation(); togglePin(a.id); }
         }, [
             createElement('span', {
@@ -226,3 +248,28 @@ async function togglePin(id) {
     }
 }
 
+function toggleDeleteMode() {
+    isDeleteMode = !isDeleteMode;
+    if (isDeleteMode) {
+        showToast(t('delete_mode_select') || "Seleziona l'azienda da eliminare", "info");
+    }
+    initProtocolUI(); // Aggiorna i pulsanti footer
+    renderAziende(); // Aggiorna le card
+}
+
+async function deleteAziendaList(id, name) {
+    const title = t('confirm_delete_company_title') || "ELIMINAZIONE DEFINITIVA";
+    const msg = (t('confirm_delete_company_msg') || "Sei sicuro di voler eliminare \"{name}\"? Questa operazione cancellerà anche tutti gli account associati.").replace('{name}', name);
+
+    if (!await showConfirmModal(title, msg)) return;
+
+    try {
+        await deleteDoc(doc(db, "users", auth.currentUser.uid, "aziende", id));
+        showToast(t('success_deleted') || "Azienda eliminata", "success");
+        allAziende = allAziende.filter(a => a.id !== id);
+        renderAziende();
+    } catch (e) {
+        logError("DeleteList", e);
+        showToast(t('error_generic') || "Errore durante l'eliminazione", "error");
+    }
+}

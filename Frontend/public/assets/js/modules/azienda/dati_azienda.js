@@ -162,6 +162,33 @@ async function loadData(uid) {
         const snap = await getDoc(doc(db, "users", uid, "aziende", currentAziendaId));
         if (snap.exists()) {
             currentAziendaData = snap.data();
+
+            // 🔐 PROTOCOLLO BLINDA (V6.0): Decrittazione automatica dati sensibili (Note e Passwords)
+            if (currentAziendaData._encrypted) {
+                try {
+                    const mk = await ensureMasterKey();
+                    const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
+
+                    if (isEnc(currentAziendaData.note)) {
+                        currentAziendaData.note = await decrypt(currentAziendaData.note, mk);
+                    }
+
+                    if (currentAziendaData.emails) {
+                        const e = currentAziendaData.emails;
+                        if (e.pec && isEnc(e.pec.password)) e.pec.password = await decrypt(e.pec.password, mk);
+                        if (e.amministrazione && isEnc(e.amministrazione.password)) e.amministrazione.password = await decrypt(e.amministrazione.password, mk);
+                        if (e.personale && isEnc(e.personale.password)) e.personale.password = await decrypt(e.personale.password, mk);
+                        if (Array.isArray(e.extra)) {
+                            for (let ext of e.extra) {
+                                if (isEnc(ext.password)) ext.password = await decrypt(ext.password, mk);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn("[DATI-AZIENDA] Vault Locked: alcune note potrebbero apparire cifrate.");
+                }
+            }
+
             populateFields(currentAziendaData);
             handleLogoAndQR(currentAziendaData);
             renderAllegati(currentAziendaData.allegati);
@@ -409,12 +436,15 @@ async function handleLogoAndQR(data) {
     // Render Preview leggero (88x88 → box 100px con padding 6px) — non blocca il load
     const qrCont = document.getElementById('qrcode-container');
     if (qrCont && currentVCard) {
-        renderQRCode(qrCont, currentVCard, {
-            width: 88,
-            height: 88,
-            colorDark: "#000000",
-            colorLight: "#E3F2FD"
-        });
+        // Optimization: Defer rendering (V7.0) to avoid 'load' handler violation
+        setTimeout(() => {
+            renderQRCode(qrCont, currentVCard, {
+                width: 88,
+                height: 88,
+                colorDark: "#000000",
+                colorLight: "#E3F2FD"
+            });
+        }, 50);
     }
     // Il QR zoom 300x300 viene generato in openQRZoom() alla prima apertura (lazy)
 }

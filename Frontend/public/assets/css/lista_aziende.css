@@ -303,3 +303,55 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
+
+/* --- 10. DELETE MODE --- */
+.azienda-card.is-delete-mode {
+    border-color: var(--status-error);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    animation: card-shake 0.5s ease-in-out infinite;
+}
+
+@keyframes card-shake {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    25% {
+        transform: rotate(0.5deg) scale(0.99);
+    }
+
+    50% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    75% {
+        transform: rotate(-0.5deg) scale(0.99);
+    }
+
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+.azienda-card.is-delete-mode .card-actions {
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.delete-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    background: var(--status-error);
+    color: white;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}

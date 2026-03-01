@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Importatore Massivo Blindato V8.0</title>
+
+    <!-- Design System -->
+    <link rel="stylesheet" href="assets/css/core.css">
+    <link rel="stylesheet" href="assets/css/core_ui.css">
+
+    <style>
+        :root {
+            --accent-primary: #3b82f6;
+            --accent-success: #10b981;
+            --accent-error: #ef4444;
+            --bg-glass: rgba(15, 15, 25, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: #050510;
+            color: white;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        .import-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .textarea-box {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            color: #aaa;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: none;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .textarea-box:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            color: white;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-action {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-success {
+            background: var(--accent-success);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-primary:disabled,
+        .btn-success:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .preview-table-wrap {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            color: #888;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: #ddd;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        .status-pending {
+            background: rgba(255, 255, 255, 0.1);
+            color: #888;
+        }
+
+        .status-done {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-success);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-error);
+        }
+
+        .progress-bar-wrap {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        #progress-inner {
+            height: 100%;
+            background: var(--accent-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .info-panel {
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="base-bg">
+    <div class="import-container">
+        <div class="header">
+            <h1>🛡️ Importatore Massivo Blindato V8.0</h1>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">Copia e incolla i dati da Excel o Sheets per
+                inserirli nella Vault.</p>
+        </div>
+
+        <textarea id="import-area" class="textarea-box"
+            placeholder="Nome_Account	Utente	Account	Password	Sito_Web	Nota	Referente_Nome	Referente_Tel	Referente_Cell	Numero_Iscrizione	Codice_società (Separati da TAB)"></textarea>
+
+        <div class="controls">
+            <button id="btn-preview" class="btn-action btn-primary">Anteprima Dati</button>
+            <button id="btn-import" class="btn-action btn-success" disabled>Avvia Importazione</button>
+        </div>
+
+        <div id="progress-container" class="progress-bar-wrap">
+            <div id="progress-inner"></div>
+        </div>
+
+        <div id="preview-wrap" class="preview-table-wrap hidden">
+            <table id="preview-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>User</th>
+                        <th>Account</th>
+                        <th>Password</th>
+                        <th>Stato</th>
+                    </tr>
+                </thead>
+                <tbody id="preview-body"></tbody>
+            </table>
+        </div>
+
+        <div class="info-panel">
+            <strong>Istruzioni:</strong><br>
+            1. Sblocca la Vault nell'app principale prima di procedere.<br>
+            2. Copia le colonne da Excel (devono essere in ordine: Nome Account, Utente, Account/Codice, Password, Sito,
+            Nota, Nome Referente, Tel Referente, Cell Referente, Numero Iscrizione, Codice Società).<br>
+            3. Gli account verranno creati come <strong>Privati</strong> e <strong>Cifrati AES-256-GCM</strong>.
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { auth, db } from './assets/js/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { collection, addDoc, runTransaction, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { encrypt, ensureMasterKey } from './assets/js/modules/core/security-manager.js';
+        import { showToast } from './assets/js/ui-core.js';
+
+        let parsedData = [];
+        let currentUser = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentAziendaId = urlParams.get('aziendaId');
+
+        onAuthStateChanged(auth, user => {
+            currentUser = user;
+            if (!user) {
+                alert("Effettua il login nell'app principale per usare questo strumento.");
+            }
+        });
+
+        const importArea = document.getElementById('import-area');
+        const btnPreview = document.getElementById('btn-preview');
+        const btnImport = document.getElementById('btn-import');
+        const previewWrap = document.getElementById('preview-wrap');
+        const previewBody = document.getElementById('preview-body');
+        const progressContainer = document.getElementById('progress-container');
+        const progressInner = document.getElementById('progress-inner');
+
+        btnPreview.onclick = () => {
+            const raw = importArea.value.trim();
+            if (!raw) return;
+
+            const lines = raw.split('\n');
+            parsedData = lines.map(line => {
+                const cols = line.split('\t');
+                return {
+                    nome: cols[0] || '',
+                    user: cols[1] || '',
+                    account: cols[2] || '',
+                    pass: cols[3] || '',
+                    url: cols[4] || '',
+                    note: cols[5] || '',
+                    refNome: cols[6] || '',
+                    refTel: cols[7] || '',
+                    refCell: cols[8] || '',
+                    numIscrizione: cols[9] || '',
+                    codSocieta: cols[10] || ''
+                };
+            }).filter(d => d.nome);
+
+            renderPreview();
+            btnImport.disabled = false;
+            previewWrap.classList.remove('hidden');
+        };
+
+        function renderPreview() {
+            previewBody.innerHTML = '';
+            parsedData.slice(0, 10).forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.nome}</td>
+                    <td>${row.user}</td>
+                    <td>${row.account}</td>
+                    <td>••••••••</td>
+                    <td><span class="status-badge status-pending">In attesa</span></td>
+                `;
+                previewBody.appendChild(tr);
+            });
+            if (parsedData.length > 10) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="5" style="text-align:center; padding: 15px;">... e altri ${parsedData.length - 10} account ...</td>`;
+                previewBody.appendChild(tr);
+            }
+        }
+
+        btnImport.onclick = async () => {
+            if (!currentUser) return;
+
+            let key;
+            try {
+                key = await ensureMasterKey();
+            } catch (e) {
+                alert("Vault bloccata! Inserisci la password principale nell'app prima di procedere.");
+                return;
+            }
+
+            btnImport.disabled = true;
+            btnPreview.disabled = true;
+            progressContainer.style.display = 'block';
+
+            let count = 0;
+            const total = parsedData.length;
+
+            for (let i = 0; i < total; i++) {
+                const item = parsedData[i];
+                try {
+                    const payload = {
+                        nomeAccount: item.nome,
+                        username: await encrypt(item.user, key),
+                        account: await encrypt(item.account, key),
+                        password: await encrypt(item.pass, key),
+                        url: item.url || '',
+                        referenteNome: item.refNome || '',
+                        referenteTelefono: item.refTel || '',
+                        referenteCellulare: item.refCell || '',
+                        numeroIscrizione: await encrypt(item.numIscrizione, key),
+                        codiceSocieta: await encrypt(item.codSocieta, key),
+                        note: await encrypt(item.note, key),
+                        type: "account",
+                        visibility: "private",
+                        _encrypted: true,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    const colPath = currentAziendaId
+                        ? `users/${currentUser.uid}/aziende/${currentAziendaId}/accounts`
+                        : `users/${currentUser.uid}/accounts`;
+
+                    await addDoc(collection(db, colPath), payload);
+                    count++;
+                    progressInner.style.width = `${(count / total) * 100}%`;
+                } catch (e) {
+                    console.error("Errore importazione riga:", i, e);
+                }
+            }
+
+            alert(`Importazione completata: ${count} account su ${total} inseriti.`);
+            btnPreview.disabled = false;
+            importArea.value = '';
+
+            if (currentAziendaId) {
+                window.location.href = `account_azienda.html?id=${currentAziendaId}`;
+            } else {
+                window.location.href = 'account_privati.html';
+            }
+        };
+    </script>
+</body>
+
+</html>

@@ -123,6 +123,7 @@ async function loadAccount() {
                 accountData.username = await decryptIfPossible(accountData.username);
                 accountData.account = await decryptIfPossible(accountData.account);
                 accountData.password = await decryptIfPossible(accountData.password);
+                accountData.note = await decryptIfPossible(accountData.note);
                 if (Array.isArray(accountData.banking)) {
                     accountData.banking = await Promise.all(accountData.banking.map(async b => ({
                         ...b,
@@ -199,6 +200,11 @@ function renderAccount(acc) {
         const el = document.getElementById(id);
         if (el) el.value = val || '';
     }
+
+    // Toggle Referente Section visibility
+    const hasRefData = !!(map['detail-referenteNome'] || map['detail-referenteTelefono'] || map['detail-referenteCellulare']);
+    const secRef = document.getElementById('section-referente');
+    if (secRef) secRef.classList.toggle('hidden', !hasRefData);
 
     // Banking
     renderBanking(acc);
