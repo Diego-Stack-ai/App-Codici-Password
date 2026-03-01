@@ -139,15 +139,21 @@ export async function decrypt(base64Data, password) {
         console.log(`[CRYPTO-AUDIT] Decrypting...`, {
             combinedLength: combined.length,
             ivLength: iv.length,
-            ciphertextLength: ciphertext.length
+            ciphertextLength: ciphertext.length,
+            isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
         });
 
         const key = await deriveKey(password, salt);
 
+        // [SAFARI iOS FIX] Forza tagLength a 128 e usa ArrayBuffer pulito
         const decoded = await crypto.subtle.decrypt(
-            { name: "AES-GCM", iv: iv },
+            {
+                name: "AES-GCM",
+                iv: iv,
+                tagLength: 128 // Esplicito per WebKit
+            },
             key,
-            ciphertext
+            ciphertext.buffer.slice(ciphertext.byteOffset, ciphertext.byteOffset + ciphertext.byteLength)
         );
 
         return new TextDecoder().decode(decoded);
@@ -155,8 +161,8 @@ export async function decrypt(base64Data, password) {
         console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", {
             message: e.message,
             name: e.name,
-            stack: e.stack,
-            base64Snippet: base64Data?.substring(0, 20)
+            reason: e.name === 'OperationError' ? 'Wrong Key or Corrupted Tag' : 'Structure Error',
+            stack: e.stack
         });
         return "--ERRORE--";
     }

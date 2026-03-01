@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v7.7-master';
+const CACHE_NAME = 'codex-v7.8-master';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
