@@ -122,8 +122,12 @@ export async function decrypt(base64Data, password) {
 
         return new TextDecoder().decode(decoded);
     } catch (e) {
-        console.error("Decryption failed:", e, "Input:", base64Data);
-        // Invece di lanciare errore e bloccare la UI, restituiamo un placeholder o il dato originale
-        return "--- [ERROR] ---";
+        console.error("[CRYPTO ERROR] Decryption failed. Possible wrong password or data corruption.", {
+            error: e.message,
+            dataType: typeof base64Data,
+            dataLength: base64Data?.length
+        });
+        // Invece di lanciare errore e bloccare la UI, restituiamo un placeholder
+        return "--ERRORE--";
     }
 }

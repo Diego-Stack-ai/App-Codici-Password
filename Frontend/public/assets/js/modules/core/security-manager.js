@@ -148,11 +148,12 @@ export async function ensureMasterKey(options = {}) {
     );
 
     if (pass) {
-        _masterKey = pass;
+        // [HEALING V7.5] Trim automatico della password per evitare errori comuni su Mobile (spazi extra)
+        const cleanPass = pass.trim();
+        _masterKey = cleanPass;
         _isSoftLocked = false;
         // [PROFESSIONAL FIX] Salviamo SEMPRE in sessionStorage (almeno per la sessione)
         // per evitare che navigando tra le pagine venga richiesto il codice ogni volta.
-        // La durata di default è "Sessione" (fino a chiusura tab).
         _saveKeyToSession(_masterKey, null);
         _vaultAutoUnlock = true;
         updateGlobalState();
