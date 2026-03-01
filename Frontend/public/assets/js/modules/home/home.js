@@ -11,8 +11,8 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
-// [V7.16] FLAG DI SICUREZZA TEMPORANEO - Permette di attivare/disattivare i meccanismi di debug/auto-cura
-const SAFE_MODE = true;
+// [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
+const SAFE_MODE = false;
 
 /**
  * HOME PAGE MODULE (V5.0 ADAPTER) - RESET NOTIFICHE

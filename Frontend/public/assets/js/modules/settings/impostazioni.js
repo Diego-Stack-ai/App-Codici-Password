@@ -13,6 +13,9 @@ import { safeSetText, setChildren, createElement, clearElement } from '../../dom
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { encrypt, decrypt, ensureMasterKey, setMasterKey, enableVaultAutoUnlock, disableVaultAutoUnlock, isAutoUnlockActive, clearSession } from '../core/security-manager.js';
 
+// [V8.0] FLAG AMBIENTE
+const DEV_MODE = false; // In produzione
+
 let currentUserData = null;
 let userAddresses = [];
 let contactPhones = [];
@@ -228,15 +231,25 @@ function setupThemeSelector() {
 
 function setupTimeoutSelector(data) {
     const cur = data.lock_timeout ?? 3;
-    document.querySelectorAll('#lock-timer-selector .timer-btn').forEach(btn => {
-        if (parseInt(btn.dataset.val) === cur) btn.classList.add('active');
+    const selector = document.getElementById('lock-timer-selector');
+    if (!selector) return;
+
+    // [V8.0] Filtro opzioni in base a DEV_MODE
+    const btns = selector.querySelectorAll('.timer-btn');
+    btns.forEach(btn => {
+        const val = parseInt(btn.dataset.val);
+        // Nascondi 0 (Subito) e 720 (12h) se non in DEV_MODE
+        if (!DEV_MODE && (val === 0 || val === 720)) {
+            btn.style.display = 'none';
+        }
+
+        if (val === cur) btn.classList.add('active');
+
         btn.addEventListener('click', async () => {
-            const val = parseInt(btn.dataset.val);
             document.querySelectorAll('#lock-timer-selector .timer-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             try {
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { lock_timeout: val });
-                // [V3.0] Sincronizza subito il timer senza dover ricaricare
                 await syncTimeoutWithFirestore(auth.currentUser.uid);
                 showToast("Sicurezza inattività aggiornata", "success");
             } catch (e) {

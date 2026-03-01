@@ -50,18 +50,21 @@ Definizione dei nuovi standard di accesso e protezione dati.
 
 ---
 
-## 6. MECCANISMI TEMPORANEI DI SICUREZZA (V7.16 Cleanup)
-In fase di consolidamento post-fix per Safari iOS, sono stati mantenuti alcuni paracadute tecnici gestiti tramite la costante `SAFE_MODE` in `home.js`.
+## 6. MECCANISMI TEMPORANEI DI SICUREZZA (V8.0 Prodotto Blindato)
+Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato". I meccanismi di debug sono stati silenziati ma rimangono presenti nel codice come "interruttori di emergenza".
 
-- **Protezioni Attive (SAFE_MODE = true)**:
-    - **Banner di Auto-Cura**: Rileva errori di decriptazione su mobile e offre il reset immediato del Vault.
-    - **Reset Manuale via Nome**: Permette di forzare lo sblocco cliccando sul nome utente in Header.
-    - **Regex Flessibile**: La regex `isEnc` in `home.js` accetta varianti Base64 non standard per compensare i limiti di WebKit.
+- **Configurazione Produzione (V8.0)**:
+    - `DEV_MODE = false`: Le opzioni di timeout estese (12h) e "Subito" sono rimosse dalla UI delle Impostazioni per garantire la massima sicurezza dell'utente finale.
+    - `SAFE_MODE = false`: Il banner di auto-cura e il reset manuale sul nome utente sono stati nascosti. L'interfaccia è ora pulita e priva di elementi di disturbo.
+    - **Timeout Restituiti**: 1 min, 3 min (default), 5 min.
 
-- **Roadmap Rimozione**:
-    - Questi meccanismi dovranno essere rimossi nella **V8.0 definitiva**.
-    - La rimozione avverrà solo dopo una settimana di test confermati su Chrome Desktop e Safari iOS (17.x+).
-    - In V8.0, la costante `SAFE_MODE` verrà eliminata e il codice ripulito dalle logiche di fallback.
+- **Status Crittografia**:
+    - ✅ Stabilizzata su Safari iOS 17.x grazie al protocollo Memory-Clean.
+    - ✅ Regex `isEnc` ottimizzata per tolleranza Base64 senza log di debug.
+    - ✅ Rimozione totale di console.log con dati sensibili (HEX, Salt, IV).
+
+- **Roadmap Futura**:
+    - La rimozione fisica definitiva di `SAFE_MODE` e `DEV_MODE` dal codice sorgente avverrà solo dopo la fase di monitoraggio post-blindatura.
 
 ---
 
