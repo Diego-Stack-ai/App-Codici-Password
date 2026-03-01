@@ -136,12 +136,9 @@ export async function decrypt(base64Data, password) {
         const iv = combined.slice(SALT_SIZE, SALT_SIZE + IV_SIZE);
         const ciphertext = combined.slice(SALT_SIZE + IV_SIZE);
 
-        console.log(`[CRYPTO-AUDIT] Decrypting...`, {
-            combinedLength: combined.length,
-            ivLength: iv.length,
-            ciphertextLength: ciphertext.length,
-            isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-        });
+        console.log("IV length:", iv.length);
+        console.log("Cipher length:", ciphertext.length);
+        console.log("TagLength used:", 128);
 
         const key = await deriveKey(password, salt);
 
