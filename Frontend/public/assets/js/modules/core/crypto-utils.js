@@ -140,25 +140,28 @@ export async function decrypt(base64Data, password) {
         console.log("IV length:", iv.length, "IV byteOffset:", iv.byteOffset);
         console.log("Cipher length:", ciphertext.length, "Cipher byteOffset:", ciphertext.byteOffset);
 
-        const key = await deriveKey(password, salt);
+        // [PROCEDURA SAFARI-SAFE V7.15] WebKit richiede buffer allineati per TUTTO
+        // Creiamo copie fisiche indipendenti per Salt, IV e Ciphertext.
+        const saltClean = new Uint8Array(salt.length);
+        saltClean.set(salt);
 
-        // [PROCEDURA SAFARI-SAFE] WebKit richiede buffer allineati (byteOffset = 0)
-        // Creiamo copie fisiche indipendenti per garantire l'allineamento.
         const ivClean = new Uint8Array(iv.length);
         ivClean.set(iv);
 
         const ctClean = new Uint8Array(ciphertext.length);
         ctClean.set(ciphertext);
 
+        const key = await deriveKey(password, saltClean);
+
         // Decriptazione standard WebCrypto con parametri rigidi
         const decoded = await crypto.subtle.decrypt(
             {
                 name: "AES-GCM",
-                iv: ivClean, // Usiamo la copia pulita
+                iv: ivClean,
                 tagLength: 128
             },
             key,
-            ctClean.buffer // Passiamo il buffer della copia (byteOffset è sempre 0)
+            ctClean // Passiamo l'oggetto Uint8Array direttamente (più stabile su Safari)
         );
 
         return new TextDecoder().decode(decoded);

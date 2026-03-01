@@ -131,7 +131,8 @@ async function renderHeaderUser(user) {
                 // Tentativo di sblocco silenzioso
                 if (window.isAutoUnlockActive && window.isAutoUnlockActive()) {
                     const mk = await ensureMasterKey();
-                    const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
+                    // [FIX V7.15] Regex più tollerante per Safari (include URL-safe e padding flessibile)
+                    const isEnc = (v) => v && typeof v === 'string' && v.trim().length > 20 && /^[A-Za-z0-9+/=_-]+$/.test(v.trim());
 
                     let nameDecrypted = false;
                     if (isEnc(nome)) {
