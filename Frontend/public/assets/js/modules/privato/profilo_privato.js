@@ -186,7 +186,7 @@ async function loadUserData(user) {
 
         // View Population
         const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
-        set('nome-view', fullName);
+        set('nome-view', finalFullName);
 
         // CF Mapping: Always derived from Documents list (as requested)
         let cf = '';
