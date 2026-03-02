@@ -103,7 +103,10 @@ async function loadConfig() {
             if (!currentConfig.models) currentConfig.models = [];
             if (!currentConfig.emailTemplates) currentConfig.emailTemplates = [];
         } else {
+            // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
             currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            console.log("[CONF-AUTO] Prima visita: salvataggio config default su Firebase...");
+            await setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"), currentConfig);
         }
         renderAll();
     } catch (e) {
