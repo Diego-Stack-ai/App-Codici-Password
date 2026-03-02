@@ -295,7 +295,7 @@ async function loadDynamicConfig() {
         if (!autoSnap.exists()) {
             setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"), defaultAuto);
         }
-        unifiedConfigs.automezzi = { deadlineTypes: [], models: [], emailTemplates: [], names: [], ...dAuto };
+        unifiedConfigs.automezzi = { deadlineTypes: [], models: [], emailTemplates: [], names: [], notificationEmails: [], ...dAuto };
 
         // --- DOCUMENTI ---
         const defaultDoc = {
@@ -321,7 +321,7 @@ async function loadDynamicConfig() {
         if (!docSnap.exists()) {
             setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), defaultDoc);
         }
-        unifiedConfigs.documenti = { deadlineTypes: [], models: [], emailTemplates: [], names: [], ...dDoc };
+        unifiedConfigs.documenti = { deadlineTypes: [], models: [], emailTemplates: [], names: [], notificationEmails: [], ...dDoc };
 
         // --- GENERALI ---
         const defaultGen = {
@@ -371,12 +371,11 @@ function updateCurrentDynamicConfig() {
     else if (currentMode === 'documenti') dynamicConfig = unifiedConfigs.documenti;
     else if (currentMode === 'generali') dynamicConfig = unifiedConfigs.generali;
 
-    const allNames = new Set([
-        ...(unifiedConfigs.automezzi?.names || []),
-        ...(unifiedConfigs.documenti?.names || []),
-        ...(unifiedConfigs.generali?.names || [])
-    ]);
-    dynamicConfig.names = [...allNames].sort();
+    // names: solo quelli della modalità corrente (contestuali)
+    dynamicConfig.names = (dynamicConfig.names || []).sort();
+
+    // notificationEmails: quelli della modalità corrente
+    populateEmailSelects(dynamicConfig.notificationEmails || []);
 }
 
 async function addConfigItem(selectId, valueStringOrObject) {
@@ -401,15 +400,17 @@ async function addConfigItem(selectId, valueStringOrObject) {
             else docName = 'generalConfig';
         } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
             field = 'notificationEmails';
-            docName = 'generalConfig';
+            // Opzione B: email per modalità corrente
+            if (currentMode === 'automezzi') docName = 'deadlineConfig';
+            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
+            else docName = 'generalConfig';
         }
 
         if (!docName || !field) return;
 
-        // Update local state
-        const configToUpdate = (field === 'notificationEmails') ? unifiedConfigs.generali :
-            ((currentMode === 'automezzi') ? unifiedConfigs.automezzi :
-                (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali);
+        // Update local state — per notificationEmails usa il config della modalità corrente
+        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
+            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
 
         if (!configToUpdate[field]) configToUpdate[field] = [];
 
@@ -811,6 +812,16 @@ function setupSaveLogic() {
                     { names: arrayUnion(name) },
                     { merge: true }
                 ).catch(e => console.warn('[TRACE] names update failed:', e));
+
+                // Salva anche le email nel config della modalità corrente (Opzione B)
+                const emailsToSave = [email1, email2].filter(e => e && e.trim() && e !== 'manual');
+                if (emailsToSave.length > 0) {
+                    setDoc(
+                        doc(db, "users", currentUser.uid, "settings", configDocName),
+                        { notificationEmails: arrayUnion(...emailsToSave) },
+                        { merge: true }
+                    ).catch(e => console.warn('[TRACE] emails update failed:', e));
+                }
             }
 
             if (btnText) btnText.textContent = "Completato!";
