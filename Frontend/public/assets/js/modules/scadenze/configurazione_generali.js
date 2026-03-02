@@ -91,6 +91,16 @@ async function loadConfig() {
             console.log("[CONF-GEN] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig);
         }
+        // Documento esistente ma deadlineTypes vuoto → re-seed
+        if (currentConfig.deadlineTypes.length === 0) {
+            console.log("[CONF-GEN] deadlineTypes vuoto: ripristino valori default...");
+            currentConfig.deadlineTypes = JSON.parse(JSON.stringify(DEFAULT_CONFIG.deadlineTypes));
+            await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig, { merge: true });
+        }
+        if (currentConfig.emailTemplates.length === 0) {
+            currentConfig.emailTemplates = JSON.parse(JSON.stringify(DEFAULT_CONFIG.emailTemplates));
+            await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig, { merge: true });
+        }
         renderAll();
     } catch (e) {
         console.error(e);

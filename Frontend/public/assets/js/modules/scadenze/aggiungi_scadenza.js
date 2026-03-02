@@ -342,8 +342,13 @@ async function loadDynamicConfig() {
             ]
         };
         const dGen = genSnap.exists() ? rawGenData : defaultGen;
-        if (!genSnap.exists()) {
-            setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), defaultGen);
+        // Seed se documento assente O se deadlineTypes è vuoto (documento incompleto)
+        const needsSeedGen = !genSnap.exists() || !rawGenData.deadlineTypes || rawGenData.deadlineTypes.length === 0;
+        if (needsSeedGen) {
+            const mergedGen = { ...defaultGen, notificationEmails: rawGenData.notificationEmails || [] };
+            setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), mergedGen, { merge: true });
+            dGen.deadlineTypes = defaultGen.deadlineTypes;
+            dGen.emailTemplates = dGen.emailTemplates && dGen.emailTemplates.length > 0 ? dGen.emailTemplates : defaultGen.emailTemplates;
         }
         unifiedConfigs.generali = {
             deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: rawGenData.notificationEmails || [], ...dGen
