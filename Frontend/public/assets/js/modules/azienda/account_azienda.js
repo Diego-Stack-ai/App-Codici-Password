@@ -81,11 +81,7 @@ function setupUI() {
         });
     }
 
-    // 3. Bulk Import Button Link
-    const importBtn = document.getElementById('btn-bulk-import');
-    if (importBtn && currentAziendaId) {
-        importBtn.href = `tools_import_massivo.html?aziendaId=${currentAziendaId}`;
-    }
+
 
     // 4. Footer FAB (Add Account)
     const fCenter = document.getElementById('footer-center-actions');

@@ -178,18 +178,7 @@ export async function initComponents() {
             const isOnSettings = path.includes('impostazioni.html');
             const footerLeft = createElement('div', { className: 'header-left' });
 
-            if (!isOnSettings) {
-                footerLeft.appendChild(
-                    createElement('button', {
-                        id: isHome ? 'theme-toggle-home' : 'theme-toggle-standard',
-                        className: 'btn-footer-secondary',
-                        title: 'Cambia Tema',
-                        onclick: () => document.documentElement.classList.toggle('dark')
-                    }, [
-                        createElement('span', { className: 'material-symbols-outlined', textContent: 'contrast' })
-                    ])
-                );
-            }
+
 
             const footerCenter = createElement('div', { id: 'footer-center-actions', className: 'header-center' });
 

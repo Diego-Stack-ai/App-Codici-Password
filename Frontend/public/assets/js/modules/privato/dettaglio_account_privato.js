@@ -7,7 +7,8 @@ import { auth, db, storage } from '../../firebase-config.js';
 import { observeAuth } from '../../auth.js';
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc,
-    deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy
+    deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy,
+    addDoc
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject

@@ -245,7 +245,7 @@ function initSettingsEvents() {
 
 
 function setupThemeSelector() {
-    const cur = localStorage.getItem('theme') || 'dark';
+    const cur = localStorage.getItem('theme') || 'auto';
     document.querySelectorAll('.theme-btn').forEach(btn => {
         if (btn.dataset.theme === cur) btn.classList.add('active');
         btn.addEventListener('click', () => {
