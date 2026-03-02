@@ -260,7 +260,8 @@ async function loadDynamicConfig() {
         unifiedConfigs.generali = { deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: [], ...rawGenData };
         populateEmailSelects(unifiedConfigs.generali.notificationEmails);
 
-        const dAuto = autoSnap.exists() ? autoSnap.data() : {
+        // --- AUTOMEZZI ---
+        const defaultAuto = {
             deadlineTypes: [
                 { name: 'Revisione Moto', freq: 7, period: 14 },
                 { name: 'Assicurazione', freq: 7, period: 14 },
@@ -290,9 +291,14 @@ async function loadDynamicConfig() {
                 "Olio motore da controllare"
             ]
         };
+        const dAuto = autoSnap.exists() ? autoSnap.data() : defaultAuto;
+        if (!autoSnap.exists()) {
+            setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"), defaultAuto);
+        }
         unifiedConfigs.automezzi = { deadlineTypes: [], models: [], emailTemplates: [], names: [], ...dAuto };
 
-        const dDoc = docSnap.exists() ? docSnap.data() : {
+        // --- DOCUMENTI ---
+        const defaultDoc = {
             deadlineTypes: [
                 { name: 'Patente', freq: 7, period: 56 },
                 { name: 'Carta Identità', freq: 14, period: 56 },
@@ -311,9 +317,14 @@ async function loadDynamicConfig() {
                 "Il tuo codice fiscale"
             ]
         };
+        const dDoc = docSnap.exists() ? docSnap.data() : defaultDoc;
+        if (!docSnap.exists()) {
+            setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), defaultDoc);
+        }
         unifiedConfigs.documenti = { deadlineTypes: [], models: [], emailTemplates: [], names: [], ...dDoc };
 
-        const dGen = genSnap.exists() ? rawGenData : {
+        // --- GENERALI ---
+        const defaultGen = {
             deadlineTypes: [
                 { name: 'Sale Addolcitore', freq: 7, period: 14 },
                 { name: "Comodato d'uso", freq: 7, period: 28 },
@@ -330,6 +341,10 @@ async function loadDynamicConfig() {
                 "Isola ecologica"
             ]
         };
+        const dGen = genSnap.exists() ? rawGenData : defaultGen;
+        if (!genSnap.exists()) {
+            setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), defaultGen);
+        }
         unifiedConfigs.generali = {
             deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: rawGenData.notificationEmails || [], ...dGen
         };
