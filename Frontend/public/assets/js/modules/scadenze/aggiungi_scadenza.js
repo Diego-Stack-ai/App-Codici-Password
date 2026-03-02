@@ -5,7 +5,7 @@
  */
 
 import { db, auth, storage } from '../../firebase-config.js';
-import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
@@ -800,6 +800,18 @@ function setupSaveLogic() {
             }
 
             console.log(`[FRONTEND-TRACE] Documento ${finalDocId} salvato. Trigger backend atteso.`);
+
+            // Aggiorna il campo 'names' nel documento config corretto per l'autocomplete
+            if (!editingScadenzaId && name) {
+                let configDocName = 'generalConfig';
+                if (currentMode === 'automezzi') configDocName = 'deadlineConfig';
+                else if (currentMode === 'documenti') configDocName = 'deadlineConfigDocuments';
+                setDoc(
+                    doc(db, "users", currentUser.uid, "settings", configDocName),
+                    { names: arrayUnion(name) },
+                    { merge: true }
+                ).catch(e => console.warn('[TRACE] names update failed:', e));
+            }
 
             if (btnText) btnText.textContent = "Completato!";
             showToast(editingScadenzaId ? "Scadenza aggiornata!" : "Scadenza salvata!", "success");
