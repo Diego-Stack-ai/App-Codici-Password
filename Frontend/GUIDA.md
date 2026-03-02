@@ -639,16 +639,45 @@ Come stabilito dal Protocollo UX, le scadenze non usano bottoni invasivi:
 > 4. **UI SYNC**: Valida che il colore della card muti matematicamente in base al tempo residuo.
 > 5. **BADGE LOGIC**: Il conteggio urgente deve essere calcolato localmente per risparmiare letture asincrone.
 
-### 17.4 Il Motore di Sintassi e Notifiche Email (Triple DB Mode)
-Il sistema scadenze abbandona il monolite per operare su tre configurazioni atomiche separate e personalizzabili, per fornire opzioni granulari ed intelligenza ai placeholder:
-- **Automezzi** (`deadlineConfig`): per gestire Modelli, Targhe e Assicurazioni.
-- **Documenti** (`deadlineConfigDocuments`): per gestire Intestatari e Patenti/ID.
-- **Generali** (`generalConfig`): per gestire oggetti liberi come Corsi o Affitti.
+### 17.4 Il Motore di Sintassi e Notifiche Email (Triple DB Mode — Opzione B)
+Il sistema scadenze opera su **tre configurazioni atomiche separate** in Firestore, ognuna con i propri campi completi e indipendenti. Questo garantisce contesti **contestuali e non inquinati** tra le tre modalità operative.
+
+#### Struttura Completa dei 3 Documenti Config:
+
+```
+users/{uid}/settings/
+  ├── deadlineConfig              ← Modalità: Automezzi
+  │     deadlineTypes: [{name, period, freq}, ...]  Tipi di scadenza (es. Revisione, Assicurazione)
+  │     models: [...]             Veicoli disponibili (es. "Land Rover - GK910HB")
+  │     emailTemplates: [...]     Testi email per gli avvisi
+  │     names: [...]              Intestatari usati → autocomplete contestuale (solo veicoli)
+  │     notificationEmails: [...] Email destinatari → proprie per questa modalità
+  │
+  ├── deadlineConfigDocuments     ← Modalità: Documenti
+  │     deadlineTypes: [{name, period, freq}, ...]  Tipi (es. Patente, Passaporto)
+  │     models: [...]             Documenti campione (es. "Patente - U136W4689N")
+  │     emailTemplates: [...]     Testi email per documenti
+  │     names: [...]              Intestatari → autocomplete contestuale (solo persone/doc)
+  │     notificationEmails: [...] Email destinatari → proprie per questa modalità
+  │
+  └── generalConfig               ← Modalità: Generali
+        deadlineTypes: [{name, period, freq}, ...]  Tipi liberi (es. Sale Addolcitore, Contratto)
+        emailTemplates: [...]     Testi email generici
+        names: [...]              Intestatari → autocomplete contestuale (solo generali)
+        notificationEmails: [...] Email destinatari → proprie per questa modalità
+```
+
+#### Regole Operative (Opzione B):
+1. **Contestualità**: I menu `names` e `notificationEmails` cambiano automaticamente al cambio di tab (Automezzi / Documenti / Generali) nel form "Aggiungi Scadenza".
+2. **Seed Automatico**: Se un documento config non esiste o ha `deadlineTypes: []` vuoto, il sistema inizializza i valori di default su Firebase automaticamente al primo accesso — sia dalle pagine di configurazione che dal form di inserimento scadenza.
+3. **Accumulo Progressivo**: Ad ogni nuova scadenza salvata, il nome dell'intestatario e le email usate vengono aggiunti automaticamente via `arrayUnion` nel config della modalità corrente (nessun duplicato).
+4. **Backfill Retroattivo**: Lo script `scripts_import_dati/backfill_names.js` popola retroattivamente `names` e `notificationEmails` leggendo tutte le scadenze esistenti, divise per modalità.
 
 **Il Parsing Automatico dell'Oggetto (Syntax Builder)**:
 Tramite la funzione `buildEmailSubject(objectName, detail)` in `scadenza_templates.js`, il front-end genera a tempo di record l'oggetto email. Se l'utente unisce la tipologia "L'Assicurazione" e la targa "AB123CD", l'app pre-assemblerà matematicamente la stringa:
-> *"L'Assicurazione dell'auto targata AB123CD e in scadenza con data DD/MM/YYYY"*
+> *"L'Assicurazione dell'auto targata AB123CD è in scadenza con data DD/MM/YYYY"*
 Questa logica riduce l'errore umano ed è pronta per essere pescata dai demoni di background per l'invio delle comunicazioni primarie (`email1`) e secondarie (`email2`).
+
 
 ### 17.5 Algoritmo di Calcolo "Urgenze e Avvisi in Home"
 Le allerte per le scadenze non sono hardcoded, ma variano per ciascun record in base alla direttiva `notificationDaysBefore` (i "Giorni di preavviso" salvati).
