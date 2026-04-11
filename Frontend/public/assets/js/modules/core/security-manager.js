@@ -151,8 +151,8 @@ export async function ensureMasterKey(options = {}) {
     // 4. Richiesta manuale (Sempre se forceReload è true o altri falliscono)
     const pass = await showInputModal(
         "SBLOCCO VAULT",
-        "Inserisci la password principale.",
-        "Password Master"
+        '',
+        "Inserisci la password principale..."
     );
 
     if (pass) {

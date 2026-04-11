@@ -230,9 +230,10 @@ export function showInputModal(title, initialValue = '', placeholder = '') {
         modal = createElement('div', { id: modalId, className: 'modal-overlay' });
 
         const input = createElement('input', {
-            type: 'text',
+            type: 'password',
             value: initialValue,
             placeholder: placeholder,
+            autocomplete: 'current-password',
             className: 'glass-field modal-input-glass'
         });
 
