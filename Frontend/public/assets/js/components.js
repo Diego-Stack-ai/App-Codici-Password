@@ -219,17 +219,14 @@ export async function initComponents() {
                 }
             }
 
-            // Inseriamo lo spacer prima del footer per spingere il contenuto su
-            const spacer = createElement('div', { className: 'spacer-footer' });
-            footerPh.parentNode.insertBefore(spacer, footerPh);
-
+            // FIX V8.1: Il placeholder HTML è già <footer class="base-footer">.
+            // Iniettare un secondo <footer> annidato causa doppia mascheratura CSS
+            // (backdrop-filter + mask-image sovrapposti) → footer completamente invisibile.
+            // Soluzione: popolare DIRETTAMENTE il placeholder esistente senza wrap aggiuntivo.
             const footerContent = createElement('div', { id: 'footer-content', className: 'header-balanced-container' }, [
                 footerLeft, footerCenter, footerRight
             ]);
             setChildren(footerPh, footerContent);
-
-            const footer = createElement('footer', { className: 'base-footer' }, [footerContent]);
-            footerPh.appendChild(footer);
 
             // ── CONTRATTO ARCHITETTURALE V7.0 ──
             // Evento dispatchato UNA SOLA VOLTA dopo che il footer è nel DOM.
