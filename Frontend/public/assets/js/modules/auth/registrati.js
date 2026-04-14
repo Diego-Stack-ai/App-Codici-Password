@@ -168,16 +168,16 @@ function setupPasswordToggle() {
 
     btn.onclick = (e) => {
         e.preventDefault();
-        const isShielded = input.classList.contains('base-shield');
+        // Alterna il tipo di input tra password e text
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
 
-        if (isShielded) {
-            input.classList.remove('base-shield');
-        } else {
-            input.classList.add('base-shield');
-        }
-
+        // Aggiorna l'icona
         const icon = btn.querySelector('.material-symbols-outlined');
-        if (icon) icon.textContent = isShielded ? 'visibility' : 'visibility_off';
+        if (icon) icon.textContent = isPassword ? 'visibility_off' : 'visibility';
+
+        // Rimuovi la classe base-shield per evitare conflitti
+        input.classList.remove('base-shield');
     };
 }
 

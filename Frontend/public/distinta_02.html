@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISTINTA 02</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHQ3HjuEEIS8bn5KMh6N3UoM6kZ2MYGL4&libraries=marker,geometry&v=weekly" defer></script>
+    <style>
+        :root { --p: #4f46e5; --sidebar-w: 400px; }
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .main-container { display: flex; height: 100vh; }
+        #sidebar { width: var(--sidebar-w); height: 100%; background: white; display: flex; flex-direction: column; z-index: 100; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
+        .header { padding: 24px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; }
+        #stop-list { flex: 1; overflow-y: auto; padding: 15px; background: #f1f5f9; }
+        .stop-card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; gap: 14px; align-items: center; border: 1.5px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
+        .stop-card:hover { border-color: var(--p); transform: translateX(5px); }
+        .stop-num { width: 30px; height: 30px; background: var(--p); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0; }
+        .nav-btn { background: #22c55e; color: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        #map { flex: 1; height: 100%; }
+        .depot-tag { background: #475569; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; }
+        @media (max-width: 800px) { .main-container { flex-direction: column; } #sidebar { width: 100%; height: 50%; } #map { height: 50%; } }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div id="sidebar">
+            <div class="header">
+                <div style="font-size:0.75rem; opacity:0.8; font-weight:800; text-transform:uppercase; margin-bottom:4px;">Logistica Operativa</div>
+                <h1 style="margin:0; font-size:1.5rem; letter-spacing:-0.01em; text-transform:capitalize;">distinta 02</h1>
+                <div style="margin-top:6px; font-size:0.85rem; font-weight:600; color: #a5b4fc;">Creato con OR-Tools</div>
+            </div>
+            <div id="stop-list">
+                
+            <div class="stop-card" style="background:#f8fafc;">
+                <div style="color:#475569;"><span class="material-icons-round">home</span></div>
+                <div class="stop-info">
+                    <span class="depot-tag">PARTENZA</span><br>
+                    <b style="font-size:0.9rem;">DEPOSITO VEGGIANO</b>
+                </div>
+            </div>
+            <div class="stop-card" onclick="panTo(1)">
+                <div class="stop-num">1</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">GUGLIELMO MARCONI</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA MARTIRI 1</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1892</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.397742,11.979584" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(2)">
+                <div class="stop-num">2</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">Don Orione</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">Via Matteotti, 1</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P11501</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.415837,12.004870" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(3)">
+                <div class="stop-num">3</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">LEONARDO DA VINCI</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA MONTALE 2</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2381</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.388059,12.010178" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(4)">
+                <div class="stop-num">4</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">DON MILANI-TEMPO PIENO</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">PIAZZA MAZZINI 2</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P6894</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1881</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.386114,12.072202" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(5)">
+                <div class="stop-num">5</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">A. MANZONI</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA A. VOLTA 3</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P6895</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1902</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.386115,12.074676" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(6)">
+                <div class="stop-num">6</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">F.LLI BANDIERA</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA MARZABOTTO 68</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2127</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.377117,12.132053" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(7)">
+                <div class="stop-num">7</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">MARIO CHIEREGHIN</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA PALMIRO TOGLIATTI 831</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P8936</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.202059,12.278174" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(8)">
+                <div class="stop-num">8</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">Mario Merlin - Tempo Pieno</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">Via Ridotto Madonna</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1721</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.197347,12.277143" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(9)">
+                <div class="stop-num">9</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">P.E. Venturini</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">Via P. Cicogna , 2</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2101</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.194568,12.285542" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(10)">
+                <div class="stop-num">10</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">S. Todaro</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">Via S. Marco 25</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1723</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.197651,12.296395" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(11)">
+                <div class="stop-num">11</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">Paolo Vi</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">Via Acacia, N.18</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2110</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1835</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.197651,12.296395" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(12)">
+                <div class="stop-num">12</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">GIUSEPPE MARCHETTI</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIALE REPUBBLICA 2</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P8994</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.197651,12.296395" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(13)">
+                <div class="stop-num">13</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">PIER ANTONIO GREGORUTTI</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">CALLE SANTA CROCE 1222</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P8640</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.222955,12.282114" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(14)">
+                <div class="stop-num">14</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">IPPOLITO NIEVO</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA BASSA GAMBARARE N. 16</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2177</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2673</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.420994,12.152135" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(15)">
+                <div class="stop-num">15</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">ADAMO VOLPATO</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">PIAZZA IV NOVEMBRE N.49</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2309</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.524057,12.155541" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(16)">
+                <div class="stop-num">16</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">ALESSANDRO MANZONI-BALLO'</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA E. TOTI 1</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2431</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.490264,12.094935" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(17)">
+                <div class="stop-num">17</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">EDMONDO DE AMICIS</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA VITTORIO VENETO 27</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2314</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1754</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.465349,12.115126" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(18)">
+                <div class="stop-num">18</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">EDMONDO DE AMICIS</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA BATTISTI 52</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2380</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1894</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.465349,12.115126" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(19)">
+                <div class="stop-num">19</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">DANIELE MANIN</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA BRUSAURA 12</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2315</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1755</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.414024,12.094467" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(20)">
+                <div class="stop-num">20</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">SAN GIOVANNI BOSCO</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA ARINO 40</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2317</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1756</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.425645,12.071323" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(21)">
+                <div class="stop-num">21</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">GIOTTO</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA TINTORETTO 3</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2316</span> <span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1752</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.426601,12.070256" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(22)">
+                <div class="stop-num">22</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">Primaria Leonardo Da Vinci Pianiga</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">Via Patriarcato, 22</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2311</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.457056,12.031156" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(23)">
+                <div class="stop-num">23</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">Primaria Edmondo De Amicis Mellaredo</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">Via Noalese Nord, 55</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P2310</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.465726,11.996649" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" onclick="panTo(24)">
+                <div class="stop-num">24</div>
+                <div style="flex:1;">
+                    <b style="font-size:0.85rem; color:#1e293b;">DON MILANI</b><br>
+                    <small style="color:#64748b; font-size:0.75rem;">VIA DOMENICO SCHIAVO</small>
+                    <div style="margin-top: 4px;"><span style='background:#e2e8f0; border-radius:4px; padding:2px 4px; font-size:0.6rem; color:#475569;'>P1720</span></div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=45.505548,11.423667" class="nav-btn" onclick="event.stopPropagation()">
+                    <span class="material-icons-round">navigation</span>
+                </a>
+            </div>
+            <div class="stop-card" style="background:#f8fafc;">
+                <div style="color:#475569;"><span class="material-icons-round">flag</span></div>
+                <div class="stop-info">
+                    <span class="depot-tag">RIENTRO</span><br>
+                    <b style="font-size:0.9rem;">DEPOSITO VEGGIANO</b>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+    <script>
+        const data = [{"nome": "DEPOSITO VEGGIANO", "indirizzo": "Via Alessandro Volta 25/a, 35030 Veggiano (PD)", "lat": 45.442805, "lon": 11.714498, "ddts": []}, {"nome": "GUGLIELMO MARCONI", "indirizzo": "VIA MARTIRI 1", "lat": 45.39774180574694, "lon": 11.97958393967491, "ddts": ["P1892"]}, {"nome": "Don Orione", "indirizzo": "Via Matteotti, 1", "lat": 45.4158368, "lon": 12.00487, "ddts": ["P11501"]}, {"nome": "LEONARDO DA VINCI", "indirizzo": "VIA MONTALE 2", "lat": 45.3880594, "lon": 12.0101781, "ddts": ["P2381"]}, {"nome": "DON MILANI-TEMPO PIENO", "indirizzo": "PIAZZA MAZZINI 2", "lat": 45.386114, "lon": 12.0722024, "ddts": ["P6894", "P1881"]}, {"nome": "A. MANZONI", "indirizzo": "VIA A. VOLTA 3", "lat": 45.3861149, "lon": 12.0746756, "ddts": ["P6895", "P1902"]}, {"nome": "F.LLI BANDIERA", "indirizzo": "VIA MARZABOTTO 68", "lat": 45.377117, "lon": 12.1320531, "ddts": ["P2127"]}, {"nome": "MARIO CHIEREGHIN", "indirizzo": "VIA PALMIRO TOGLIATTI 831", "lat": 45.2020595, "lon": 12.2781736, "ddts": ["P8936"]}, {"nome": "Mario Merlin - Tempo Pieno", "indirizzo": "Via Ridotto Madonna", "lat": 45.1973468, "lon": 12.2771434, "ddts": ["P1721"]}, {"nome": "P.E. Venturini", "indirizzo": "Via P. Cicogna , 2", "lat": 45.1945681, "lon": 12.2855416, "ddts": ["P2101"]}, {"nome": "S. Todaro", "indirizzo": "Via S. Marco 25", "lat": 45.1976506, "lon": 12.2963948, "ddts": ["P1723"]}, {"nome": "Paolo Vi", "indirizzo": "Via Acacia, N.18", "lat": 45.1976506, "lon": 12.2963948, "ddts": ["P2110", "P1835"]}, {"nome": "GIUSEPPE MARCHETTI", "indirizzo": "VIALE REPUBBLICA 2", "lat": 45.1976506, "lon": 12.2963948, "ddts": ["P8994"]}, {"nome": "PIER ANTONIO GREGORUTTI", "indirizzo": "CALLE SANTA CROCE 1222", "lat": 45.2229552, "lon": 12.2821142, "ddts": ["P8640"]}, {"nome": "IPPOLITO NIEVO", "indirizzo": "VIA BASSA GAMBARARE N. 16", "lat": 45.4209939, "lon": 12.1521347, "ddts": ["P2177", "P2673"]}, {"nome": "ADAMO VOLPATO", "indirizzo": "PIAZZA IV NOVEMBRE N.49", "lat": 45.5240565, "lon": 12.1555409, "ddts": ["P2309"]}, {"nome": "ALESSANDRO MANZONI-BALLO'", "indirizzo": "VIA E. TOTI 1", "lat": 45.4902639, "lon": 12.0949353, "ddts": ["P2431"]}, {"nome": "EDMONDO DE AMICIS", "indirizzo": "VIA VITTORIO VENETO 27", "lat": 45.46534895929214, "lon": 12.11512584562024, "ddts": ["P2314", "P1754"]}, {"nome": "EDMONDO DE AMICIS", "indirizzo": "VIA BATTISTI 52", "lat": 45.46534895929214, "lon": 12.11512584562024, "ddts": ["P2380", "P1894"]}, {"nome": "DANIELE MANIN", "indirizzo": "VIA BRUSAURA 12", "lat": 45.4140241, "lon": 12.0944674, "ddts": ["P2315", "P1755"]}, {"nome": "SAN GIOVANNI BOSCO", "indirizzo": "VIA ARINO 40", "lat": 45.4256448, "lon": 12.0713225, "ddts": ["P2317", "P1756"]}, {"nome": "GIOTTO", "indirizzo": "VIA TINTORETTO 3", "lat": 45.4266008, "lon": 12.0702557, "ddts": ["P2316", "P1752"]}, {"nome": "Primaria Leonardo Da Vinci Pianiga", "indirizzo": "Via Patriarcato, 22", "lat": 45.457056, "lon": 12.0311559, "ddts": ["P2311"]}, {"nome": "Primaria Edmondo De Amicis Mellaredo", "indirizzo": "Via Noalese Nord, 55", "lat": 45.465726, "lon": 11.9966488, "ddts": ["P2310"]}, {"nome": "DON MILANI", "indirizzo": "VIA DOMENICO SCHIAVO", "lat": 45.5055477, "lon": 11.4236674, "ddts": ["P1720"]}, {"nome": "DEPOSITO VEGGIANO", "indirizzo": "Via Alessandro Volta 25/a, 35030 Veggiano (PD)", "lat": 45.442805, "lon": 11.714498, "ddts": []}];
+        let map, markers = [];
+
+        async function initMap() {
+            const { Map } = await google.maps.importLibrary("maps");
+            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+            
+            const centerP = data.find(p => p.lat) || {lat: 45.4428, lon: 11.7145};
+            map = new Map(document.getElementById("map"), { zoom: 12, center: { lat: centerP.lat, lng: centerP.lon }, mapId: 'DEMO_MAP_ID' });
+            
+            const bounds = new google.maps.LatLngBounds();
+
+            data.forEach((p, i) => {
+                const isD = (i === 0 || i === data.length - 1);
+                if (p.lat && p.lon) {
+                    const m = new AdvancedMarkerElement({
+                        map,
+                        position: { lat: p.lat, lng: p.lon },
+                        content: createPin(i, isD),
+                        title: p.nome
+                    });
+                    markers[i] = m;
+                    bounds.extend(m.position);
+                }
+            });
+            
+            map.fitBounds(bounds);
+
+            const pathData = data.filter(p => p.lat).map(p => ({ lat: p.lat, lng: p.lon }));
+            new google.maps.Polyline({ 
+                path: pathData, 
+                strokeColor: "#4f46e5", strokeOpacity: 0.6, strokeWeight: 4, map 
+            });
+        }
+
+        function createPin(idx, isD) {
+            const d = document.createElement("div"); d.style.background = isD ? "#475569" : "#4f46e5";
+            d.style.color = "white"; d.style.width = "26px"; d.style.height = "26px"; d.style.borderRadius = "50%"; 
+            d.style.display = "flex"; d.style.alignItems = "center"; d.style.justifyContent = "center";
+            d.style.fontSize = "11px"; d.style.fontWeight = "900"; d.style.border = "3px solid white";
+            d.innerText = isD ? "" : idx; if(isD) d.innerHTML = '<span class="material-icons-round" style="font-size:14px">home</span>';
+            return d;
+        }
+
+        function panTo(i) { if(markers[i]) { map.panTo(markers[i].position); map.setZoom(17); } }
+        window.addEventListener('load', initMap);
+    </script>
+</body>
+</html>
