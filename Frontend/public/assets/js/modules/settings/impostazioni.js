@@ -234,9 +234,10 @@ function initSettingsEvents() {
     document.getElementById('qrcode-preview')?.addEventListener('click', openQRZoom);
 
     document.getElementById('logout-btn-settings')?.addEventListener('click', async () => {
-        const ok = await showConfirmModal(t('section_security'), "Vuoi davvero uscire dall'account?", "Esci", true);
+        const ok = await showConfirmModal(t('section_security') || 'Sicurezza', "Vuoi davvero uscire dall'account?", "Esci", "Annulla");
         if (ok) {
-            clearSession(); // 🔐 Pulisce masterKey e sessionStorage prima di uscire
+            clearSession(); // 🔐 Pulisce masterKey e sessionStorage
+            localStorage.removeItem('codex_vault_secret'); // 🔐 Rimuove chiave biometrica salvata
             await signOut(auth);
             window.location.href = 'index.html';
         }
