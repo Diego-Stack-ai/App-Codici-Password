@@ -180,38 +180,19 @@ function setupPasswordToggle() {
         e.preventDefault();
         e.stopPropagation();
 
-        const isShielded = input.classList.contains('base-shield');
-
-        if (isShielded) {
+        const isPassword = input.type === 'password';
+        
+        if (isPassword) {
+            input.type = 'text';
             input.classList.remove('base-shield');
         } else {
+            input.type = 'password';
             input.classList.add('base-shield');
         }
 
         const icon = btn.querySelector('.material-symbols-outlined');
         if (icon) {
-            icon.textContent = isShielded ? 'visibility' : 'visibility_off';
+            icon.textContent = isPassword ? 'visibility_off' : 'visibility';
         }
     });
-        const btn = document.getElementById('btn-toggle-password');
-        const input = document.getElementById('password');
-        if (!btn || !input) return;
-
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Alterna il tipo di input tra password e text
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
-
-            // Aggiorna l'icona
-            const icon = btn.querySelector('.material-symbols-outlined');
-            if (icon) {
-                icon.textContent = isPassword ? 'visibility_off' : 'visibility';
-            }
-
-            // Rimuovi la classe base-shield per evitare conflitti
-            input.classList.remove('base-shield');
-        });
 }
