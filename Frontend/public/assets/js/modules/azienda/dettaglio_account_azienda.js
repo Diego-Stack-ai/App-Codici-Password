@@ -101,6 +101,7 @@ async function loadAccount() {
                 originalData.password = await decryptIfPossible(originalData.password);
                 originalData.numeroIscrizione = await decryptIfPossible(originalData.numeroIscrizione);
                 originalData.codiceSocieta = await decryptIfPossible(originalData.codiceSocieta);
+                originalData.note = await decryptIfPossible(originalData.note);
 
                 if (Array.isArray(originalData.banking)) {
                     originalData.banking = await Promise.all(originalData.banking.map(async b => ({

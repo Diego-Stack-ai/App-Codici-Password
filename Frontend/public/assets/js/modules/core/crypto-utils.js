@@ -111,7 +111,7 @@ export async function decrypt(base64Data, password) {
 
     try {
         // Normalizzazione stringa Base64
-        let normalized = String(base64Data).trim().replace(/-/g, '+').replace(/_/g, '/');
+        let normalized = String(base64Data).replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
 
         // Check regex base64
         const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
