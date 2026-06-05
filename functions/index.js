@@ -1,10 +1,14 @@
 /**
- * BACKEND CORE (V7.0 - NODEMAILER + APP PASSWORD)
+ * BACKEND CORE (V7.3 - NODEMAILER + APP PASSWORD)
  * Sistema notifiche scadenze via Gmail (App Password).
- * Schedulato ogni mattina alle 08:00 (Europe/Rome).
+ *
+ * Due funzioni:
+ * 1. checkDeadlines    → schedulata ogni giorno alle 08:00 (repliche + email finale)
+ * 2. onScadenzaCreated → trigger Firestore, invio immediato se preavviso già nella finestra
  */
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
@@ -17,102 +21,36 @@ setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
 
-// ─────────────────────────────────────────────
-// FUNZIONE SCHEDULATA — ogni giorno alle 08:00
-// ─────────────────────────────────────────────
-exports.checkDeadlines = onSchedule(
-    {
-        schedule: "0 8 * * *",
-        timeZone: "Europe/Rome",
-        secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
-        region: "europe-west1",
-        memory: "256MiB",
-        timeoutSeconds: 120,
-    },
-    async () => {
-        const db = admin.firestore();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+// ─────────────────────────────────────────────────────────────
+// UTILITY — Crea il trasportatore Nodemailer
+// ─────────────────────────────────────────────────────────────
+function createTransporter(gmailUser, gmailPass) {
+    return nodemailer.createTransport({
+        service: "gmail",
+        auth: { user: gmailUser, pass: gmailPass },
+    });
+}
 
-        const gmailUser = GMAIL_USER.value();
-        const gmailPass = GMAIL_APP_PASSWORD.value();
+// ─────────────────────────────────────────────────────────────
+// UTILITY — Componi e invia una email per una scadenza
+// ─────────────────────────────────────────────────────────────
+async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
+    const dueDate = new Date(s.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
 
-        // Configura trasportatore Nodemailer con App Password
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: gmailUser,
-                pass: gmailPass,
-            },
-        });
+    const dueDateFormatted = dueDate.toLocaleDateString("it-IT", {
+        day: "2-digit", month: "long", year: "numeric",
+    });
 
-        console.log(`[START] Controllo scadenze: ${today.toISOString().split("T")[0]}`);
+    const templateText = s.templateText || s.type || "una scadenza";
+    const veicolo = s.veicolo_modello ? ` ${s.veicolo_modello}` : "";
 
-        try {
-            // Legge tutti gli utenti
-            const usersSnap = await db.collection("users").get();
+    const giorniLabel =
+        diffDays === 0 ? "⚠️ OGGI" :
+        diffDays === 1 ? "domani" :
+        `tra ${diffDays} giorni`;
 
-            for (const userDoc of usersSnap.docs) {
-                const uid = userDoc.id;
-                const scadenzeSnap = await db
-                    .collection("users").doc(uid)
-                    .collection("scadenze")
-                    .where("completed", "==", false)
-                    .get();
-
-                for (const sDoc of scadenzeSnap.docs) {
-                    const s = sDoc.data();
-
-                    // Controlla che abbia almeno un destinatario e una data
-                    if (!s.email1 || !s.dueDate) continue;
-
-                    // Calcola giorni mancanti alla scadenza
-                    const dueDate = new Date(s.dueDate);
-                    dueDate.setHours(0, 0, 0, 0);
-                    const diffMs = dueDate - today;
-                    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-                    const daysBefore = s.notif_days_before || 14;
-                    const freqDays = s.notif_frequency || 7;
-
-                    // Scadenze già passate: nessuna email
-                    if (diffDays < 0) continue;
-
-                    // Fuori dalla finestra di preavviso: troppo presto
-                    if (diffDays > daysBefore) continue;
-
-                    // Giorno della scadenza (diffDays == 0): invia SEMPRE l'email finale
-                    // Negli altri giorni: rispetta la frequenza
-                    if (diffDays > 0) {
-                        const lastNotified = s.lastNotifiedAt
-                            ? new Date(s.lastNotifiedAt)
-                            : null;
-
-                        if (lastNotified) {
-                            const daysSinceLast = Math.floor(
-                                (today - lastNotified) / (1000 * 60 * 60 * 24)
-                            );
-                            if (daysSinceLast < freqDays) continue;
-                        }
-                    }
-
-                    // Componi il testo dell'email
-                    const templateText = s.templateText || s.type || "una scadenza";
-                    const veicolo = s.veicolo_modello ? ` ${s.veicolo_modello}` : "";
-                    const dueDateFormatted = dueDate.toLocaleDateString("it-IT", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                    });
-
-                    const giorniLabel =
-                        diffDays === 0
-                            ? "⚠️ OGGI"
-                            : diffDays === 1
-                                ? "domani"
-                                : `tra ${diffDays} giorni`;
-
-                    const emailBody = `
+    const emailBody = `
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -159,34 +97,147 @@ exports.checkDeadlines = onSchedule(
 </body>
 </html>`;
 
-                    const recipients = [s.email1, s.email2]
-                        .filter(Boolean)
-                        .join(", ");
+    const recipients = [s.email1, s.email2].filter(Boolean).join(", ");
 
-                    const mailOptions = {
-                        from: `"Codex Notifiche" <${gmailUser}>`,
-                        to: recipients,
-                        subject: `⚠️ Scadenza in arrivo — ${s.type || templateText}`,
-                        html: emailBody,
-                    };
+    await transporter.sendMail({
+        from: `"Codex Notifiche" <${gmailUser}>`,
+        to: recipients,
+        subject: `⚠️ Scadenza in arrivo — ${s.type || templateText}`,
+        html: emailBody,
+    });
+
+    // Aggiorna lastNotifiedAt per evitare duplicati dallo scheduler
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    await docRef.update({
+        lastNotifiedAt: today.toISOString().split("T")[0],
+    });
+
+    console.log(`[OK] Email inviata → ${recipients} (diffDays: ${diffDays})`);
+}
+
+// ─────────────────────────────────────────────────────────────
+// FUNZIONE 1 — Schedulata ogni giorno alle 08:00
+// ─────────────────────────────────────────────────────────────
+exports.checkDeadlines = onSchedule(
+    {
+        schedule: "0 8 * * *",
+        timeZone: "Europe/Rome",
+        secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 120,
+    },
+    async () => {
+        const db = admin.firestore();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const gmailUser = GMAIL_USER.value();
+        const gmailPass = GMAIL_APP_PASSWORD.value();
+        const transporter = createTransporter(gmailUser, gmailPass);
+
+        console.log(`[SCHEDULER] Controllo scadenze: ${today.toISOString().split("T")[0]}`);
+
+        try {
+            const usersSnap = await db.collection("users").get();
+
+            for (const userDoc of usersSnap.docs) {
+                const uid = userDoc.id;
+                const scadenzeSnap = await db
+                    .collection("users").doc(uid)
+                    .collection("scadenze")
+                    .where("completed", "==", false)
+                    .get();
+
+                for (const sDoc of scadenzeSnap.docs) {
+                    const s = sDoc.data();
+                    if (!s.email1 || !s.dueDate) continue;
+
+                    const dueDate = new Date(s.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+                    const diffMs = dueDate - today;
+                    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+                    const daysBefore = s.notif_days_before || 14;
+                    const freqDays = s.notif_frequency || 7;
+
+                    // Scadenze già passate: stop
+                    if (diffDays < 0) continue;
+                    // Fuori dalla finestra: troppo presto
+                    if (diffDays > daysBefore) continue;
+
+                    // Giorno 0: invia SEMPRE
+                    // Altri giorni: rispetta la frequenza
+                    if (diffDays > 0) {
+                        const lastNotified = s.lastNotifiedAt
+                            ? new Date(s.lastNotifiedAt) : null;
+                        if (lastNotified) {
+                            const daysSinceLast = Math.floor(
+                                (today - lastNotified) / (1000 * 60 * 60 * 24)
+                            );
+                            if (daysSinceLast < freqDays) continue;
+                        }
+                    }
 
                     try {
-                        await transporter.sendMail(mailOptions);
-                        console.log(`[OK] Email inviata per scadenza ${sDoc.id} → ${recipients}`);
-
-                        // Aggiorna lastNotifiedAt per evitare duplicati
-                        await sDoc.ref.update({
-                            lastNotifiedAt: today.toISOString().split("T")[0],
-                        });
+                        await sendScadenzaEmail(transporter, gmailUser, s, diffDays, sDoc.ref);
                     } catch (emailErr) {
-                        console.error(`[EMAIL FAILED] Scadenza ${sDoc.id}:`, emailErr.message);
+                        console.error(`[EMAIL FAILED] ${sDoc.id}:`, emailErr.message);
                     }
                 }
             }
 
-            console.log("[END] Controllo scadenze completato.");
+            console.log("[SCHEDULER] Controllo completato.");
         } catch (err) {
             console.error("[CRITICAL ERROR]", err.message);
+        }
+    }
+);
+
+// ─────────────────────────────────────────────────────────────
+// FUNZIONE 2 — Trigger Firestore: invio immediato alla creazione
+// ─────────────────────────────────────────────────────────────
+exports.onScadenzaCreated = onDocumentCreated(
+    {
+        document: "users/{uid}/scadenze/{scadenzaId}",
+        secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+    },
+    async (event) => {
+        const s = event.data.data();
+        const docRef = event.data.ref;
+
+        // Verifica campi minimi
+        if (!s.email1 || !s.dueDate || s.completed) return;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const dueDate = new Date(s.dueDate);
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffMs = dueDate - today;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+        const daysBefore = s.notif_days_before || 14;
+
+        // Scadenza già passata o fuori dalla finestra → niente da fare
+        if (diffDays < 0 || diffDays > daysBefore) return;
+
+        console.log(`[TRIGGER] Nuova scadenza creata — diffDays: ${diffDays}, preavviso: ${daysBefore}`);
+
+        const gmailUser = GMAIL_USER.value();
+        const gmailPass = GMAIL_APP_PASSWORD.value();
+        const transporter = createTransporter(gmailUser, gmailPass);
+
+        try {
+            await sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef);
+            console.log(`[TRIGGER] Email immediata inviata per scadenza ${event.params.scadenzaId}`);
+        } catch (err) {
+            console.error(`[TRIGGER EMAIL FAILED]:`, err.message);
         }
     }
 );
