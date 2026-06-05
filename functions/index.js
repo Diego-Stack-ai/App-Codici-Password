@@ -75,18 +75,25 @@ exports.checkDeadlines = onSchedule(
                     const daysBefore = s.notif_days_before || 14;
                     const freqDays = s.notif_frequency || 7;
 
-                    // Condizione di invio: siamo nella finestra e non abbiamo già notificato di recente
-                    if (diffDays > daysBefore || diffDays < 0) continue;
+                    // Scadenze già passate: nessuna email
+                    if (diffDays < 0) continue;
 
-                    const lastNotified = s.lastNotifiedAt
-                        ? new Date(s.lastNotifiedAt)
-                        : null;
+                    // Fuori dalla finestra di preavviso: troppo presto
+                    if (diffDays > daysBefore) continue;
 
-                    if (lastNotified) {
-                        const daysSinceLast = Math.floor(
-                            (today - lastNotified) / (1000 * 60 * 60 * 24)
-                        );
-                        if (daysSinceLast < freqDays) continue;
+                    // Giorno della scadenza (diffDays == 0): invia SEMPRE l'email finale
+                    // Negli altri giorni: rispetta la frequenza
+                    if (diffDays > 0) {
+                        const lastNotified = s.lastNotifiedAt
+                            ? new Date(s.lastNotifiedAt)
+                            : null;
+
+                        if (lastNotified) {
+                            const daysSinceLast = Math.floor(
+                                (today - lastNotified) / (1000 * 60 * 60 * 24)
+                            );
+                            if (daysSinceLast < freqDays) continue;
+                        }
                     }
 
                     // Componi il testo dell'email
