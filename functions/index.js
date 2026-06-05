@@ -152,7 +152,8 @@ exports.checkDeadlines = onSchedule(
     <p style="color:#555;font-size:14px;">Provvedi al rinnovo per tempo.</p>
 
     <div class="footer">
-      — Codex Security System &nbsp;|&nbsp; Notifica automatica
+      — Codex Security System &nbsp;|&nbsp; Notifica automatica<br>
+      <strong>Inviato da Codex</strong>
     </div>
   </div>
 </body>
