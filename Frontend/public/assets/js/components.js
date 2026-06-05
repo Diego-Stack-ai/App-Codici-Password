@@ -106,7 +106,9 @@ export async function initComponents() {
             if (!isAuth) {
                 if (isHome) {
                     const user = auth.currentUser;
-                    const initialName = user?.displayName?.split(' ')[0] || 'Utente';
+                    // [FIX V8.1] Fallback neutro: email-prefix se disponibile, altrimenti '...'
+                    // Evita la parola 'Utente' che l'utente interpreta come un errore.
+                    const initialName = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || '...';
 
                     const greetingCont = createElement('div', {
                         className: 'flex flex-col items-center cursor-pointer',

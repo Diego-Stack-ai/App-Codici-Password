@@ -33,31 +33,33 @@ export async function initHomePage(user) {
     console.log("[HOME] Init V5.0 Dashboard (Notifications Disabled)...", user.email);
     currentUser = user;
 
-    try {
-        // Fetch Aziende for the shortcut logic
-        const aziSnap = await getDocs(collection(db, "users", user.uid, "aziende"));
-        const aziendes = aziSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Inizializza Listeners immediatamente (non dipende da dati remoti)
+    initHomeListeners();
 
-        // Renderizza Info Utente (Header)
-        await renderHeaderUser(user);
+    // Sblocco visibilità subito
+    document.documentElement.setAttribute("data-i18n", "ready");
 
-        // Renderizza Scadenze e Urgenze
-        await renderDashboardDeadlines(user);
+    // [FIX V8.1] Caricamenti paralleli e indipendenti:
+    // Se il fetch delle aziende fallisce per un calo di rete,
+    // il nome utente e le scadenze si caricano comunque.
+    const [aziResult] = await Promise.allSettled([
+        getDocs(collection(db, "users", user.uid, "aziende")),
+        renderHeaderUser(user),
+        renderDashboardDeadlines(user)
+    ]);
 
-        // Inizializza Listeners (Logout, Tema, Avatar Fallback)
-        initHomeListeners();
+    // FAB Group dipende solo dal risultato delle aziende
+    const aziendes = aziResult.status === 'fulfilled'
+        ? aziResult.value.docs.map(d => ({ id: d.id, ...d.data() }))
+        : [];
 
-        // 4. SBLOCCO VISIBILITÀ (Anti-Flicker Ready)
-        document.documentElement.setAttribute("data-i18n", "ready");
-
-        // 5. FAB Group (Footer)
-        setupFABGroup(aziendes);
-
-        console.log("[HOME] Dashboard Ready.");
-
-    } catch (err) {
-        console.error("[HOME] Init Error:", err);
+    if (aziResult.status === 'rejected') {
+        console.warn("[HOME] Fetch aziende fallito (rete?), FAB in modalità default.", aziResult.reason);
     }
+
+    setupFABGroup(aziendes);
+
+    console.log("[HOME] Dashboard Ready.");
 }
 
 /**
@@ -105,8 +107,10 @@ async function renderHeaderUser(user) {
     };
 
     // 3. Fallback immediato Nome (Auth)
+    // [FIX V8.1] Rimosso controllo !uName.textContent: sovrascrive sempre
+    // la scritta '...' iniziale con il nome da Firebase Auth appena disponibile.
     let displayName = toFriendlyName(user.displayName || user.email.split('@')[0]);
-    if (uName && !uName.textContent) uName.textContent = displayName;
+    if (uName) uName.textContent = displayName;
 
     // 4. Foto Utente (Auth)
     if (user.photoURL && uAvatar) setAvatarImage(uAvatar, user.photoURL);
