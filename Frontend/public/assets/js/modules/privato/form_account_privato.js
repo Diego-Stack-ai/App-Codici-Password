@@ -1,16 +1,15 @@
-/**
- * FORM ACCOUNT PRIVATO (V5.9.5)
+﻿/**
+ * FORM ACCOUNT PRIVATO (V6.0 — Unified Banking Renderer)
  * Creazione e modifica account con gestione IBAN dinamica.
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { observeAuth } from '../../auth.js';
 import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
-import { initComponents } from '../../components.js';
+import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
@@ -21,6 +20,9 @@ let bankAccounts = []; // Inizialmente vuoto per nuovi account
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
+
+// Re-render callback per banking-renderer.js
+const rerender = () => renderBankAccounts(bankAccounts, rerender);
 
 // Utility per recupero rapido valori (evita ReferenceError)
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -174,7 +176,7 @@ async function loadData() {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
-            renderBankAccounts();
+            renderBankAccounts(bankAccounts, rerender);
         } else {
             // Se non ci sono dati reali, il flag rimane spento e la sezione chiusa
             document.getElementById('flag-banking').checked = false;
@@ -231,7 +233,6 @@ function setupUI() {
     const flags = ['flag-shared', 'flag-memo', 'flag-memo-shared'].map(id => document.getElementById(id)).filter(Boolean);
     flags.forEach(f => {
         f.onchange = () => {
-            const get = (id) => document.getElementById(id)?.value.trim() || '';
             const namePopulated = !!get('account-name');
             const fieldsPopulated = !!(get('account-username') || get('account-code') || get('account-password'));
 
@@ -303,8 +304,28 @@ function setupUI() {
     if (bToggle) {
         bToggle.onchange = () => {
             document.getElementById('banking-section').classList.toggle('hidden', !bToggle.checked);
-            if (bToggle.checked && bankAccounts.length === 0) bankAccounts = [{ iban: '', cards: [] }];
-            renderBankAccounts();
+            if (bToggle.checked && bankAccounts.length === 0) {
+                bankAccounts = [{ iban: '', passwordDispositiva: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
+            }
+            renderBankAccounts(bankAccounts, rerender);
+        };
+    }
+
+    // Aggiungi conto bancario (una volta sola — pattern architetturale corretto)
+    const btnAddIban = document.getElementById('btn-add-iban');
+    if (btnAddIban) {
+        btnAddIban.onclick = () => {
+            bankAccounts.forEach(a => a._isOpen = false);
+            bankAccounts.push({
+                iban: '',
+                passwordDispositiva: '',
+                referenteNome: '',
+                referenteTelefono: '',
+                referenteCellulare: '',
+                cards: [],
+                _isOpen: true
+            });
+            renderBankAccounts(bankAccounts, rerender);
         };
     }
 
@@ -461,148 +482,9 @@ function renderSuggestions(list) {
     });
 }
 
-function renderBankAccounts() {
-    const container = document.getElementById('iban-list-container');
-    if (!container) return;
-    clearElement(container);
 
-    bankAccounts.forEach((acc, idx) => {
-        const isOpen = acc._isOpen !== false;
-
-        const div = createElement('div', { className: 'bank-account-card border-glow' }, [
-            // Header: titolo + cestino inline
-            createElement('div', { className: 'bank-header' }, [
-                createElement('div', {
-                    className: 'bank-header-left',
-                    onclick: () => { acc._isOpen = !isOpen; renderBankAccounts(); },
-                    style: 'cursor:pointer; flex:1;'
-                }, [
-                    createElement('span', {
-                        className: 'material-symbols-outlined bank-expand-icon',
-                        style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
-                        textContent: 'expand_more'
-                    }),
-                    createElement('span', { className: 'bank-title', textContent: acc.iban ? `Conto: ${acc.iban.substring(0, 10)}...` : `Nuovo Conto #${idx + 1}` })
-                ]),
-                createElement('button', {
-                    className: 'btn-delete-bank',
-                    onclick: async (e) => {
-                        e.stopPropagation();
-                        const ok = await showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
-                        if (ok) {
-                            bankAccounts.splice(idx, 1);
-                            renderBankAccounts();
-                        }
-                    }
-                }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
-            ]),
-
-            // Content (Solo se aperto)
-            isOpen ? createElement('div', { className: 'bank-details' }, [
-                createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
-                createInputField('Pass. Disp.', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock'),
-                createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
-                createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone'),
-
-                // Carte Section
-                createElement('div', { className: 'bank-cards-section' }, [
-                    createElement('div', { className: 'bank-cards-header' }, [
-                        createElement('span', { className: 'bank-cards-label', textContent: 'Carte Associate' }),
-                        createElement('button', {
-                            className: 'btn-add-card',
-                            onclick: () => {
-                                if (!acc.cards) acc.cards = [];
-                                acc.cards.forEach(c => c._isOpen = false);
-                                acc.cards.push({ cardType: '', cardNumber: '', expiry: '', titolare: '', ccv: '', pin: '', type: 'Credit', _isOpen: true });
-                                renderBankAccounts();
-                            }
-                        }, [
-                            createElement('span', { className: 'material-symbols-outlined', textContent: 'add_card' })
-                        ])
-                    ]),
-                    createElement('div', { className: 'flex-col-gap' }, (acc.cards || []).map((card, cIdx) => renderCardEntry(idx, cIdx, card)))
-                ])
-            ]) : null
-        ]);
-        container.appendChild(div);
-    });
-
-    // Hook up the header button if it exists
-    const headAddBtn = document.getElementById('btn-add-iban');
-    if (headAddBtn) headAddBtn.onclick = () => {
-        // Chiudi altri IBAN
-        bankAccounts.forEach(a => a._isOpen = false);
-        bankAccounts.push({
-            iban: '',
-            passwordDispositiva: '',
-            referenteNome: '',
-            referenteTelefono: '',
-            referenteCellulare: '',
-            cards: [],
-            _isOpen: true
-        });
-        renderBankAccounts();
-    };
-}
-
-function renderCardEntry(bankIdx, cardIdx, card) {
-    const isOpen = card._isOpen !== false;
-
-    return createElement('div', { className: 'card-entry border-glow' }, [
-        // Card Header: titolo + cestino inline
-        createElement('div', { className: 'card-entry-header' }, [
-            createElement('div', {
-                className: 'card-entry-title-row',
-                onclick: () => { card._isOpen = !isOpen; renderBankAccounts(); },
-                style: 'cursor:pointer; flex:1;'
-            }, [
-                createElement('span', {
-                    className: 'material-symbols-outlined card-entry-icon',
-                    style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
-                    textContent: 'credit_card'
-                }),
-                createElement('span', { className: 'card-entry-label', textContent: card.cardType || `Carta #${cardIdx + 1}` })
-            ]),
-            createElement('button', {
-                className: 'btn-delete-bank',
-                onclick: async (e) => {
-                    e.stopPropagation();
-                    const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
-                    const ok = await showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
-                    if (ok) {
-                        bankAccounts[bankIdx].cards.splice(cardIdx, 1);
-                        renderBankAccounts();
-                    }
-                }
-            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
-        ]),
-
-        isOpen ? createElement('div', { className: 'flex-col-gap' }, [
-            createInputField('Nome Carta (es. Visa, Blu...)', card.cardType, (val) => bankAccounts[bankIdx].cards[cardIdx].cardType = val, 'credit_card'),
-            createInputField('Titolare', card.titolare, (val) => bankAccounts[bankIdx].cards[cardIdx].titolare = val, 'person'),
-            createInputField('Numero Carta', card.cardNumber, (val) => bankAccounts[bankIdx].cards[cardIdx].cardNumber = val, 'numbers'),
-            createInputField('Scadenza', card.expiry, (val) => bankAccounts[bankIdx].cards[cardIdx].expiry = val, 'event'),
-            createInputField('PIN', card.pin, (val) => bankAccounts[bankIdx].cards[cardIdx].pin = val, 'pin'),
-            createInputField('CCV', card.ccv, (val) => bankAccounts[bankIdx].cards[cardIdx].ccv = val, 'verified_user')
-        ]) : null
-    ]);
-}
-
-function createInputField(label, value, onInput, icon, type = 'text') {
-    return createElement('div', { className: 'glass-field-container w-full' }, [
-        createElement('label', { className: 'view-label', textContent: label }),
-        createElement('div', { className: 'glass-field border-glow' }, [
-            createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
-            createElement('input', {
-                className: 'field-input',
-                type: type,
-                value: value || '',
-                oninput: (e) => onInput(e.target.value),
-                autocomplete: 'new-password'
-            })
-        ])
-    ]);
-}
+// ─── BANKING RENDERER ───────────────────────────────────────────────────────
+// renderBankAccounts, renderCardEntry, createInputField sono in ../shared/banking-renderer.js
 
 /**
  * ACTIONS
