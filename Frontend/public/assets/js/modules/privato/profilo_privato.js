@@ -27,6 +27,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { showProfileModal } from './profilo-modal.js';
+import { editSection, editAddress, editUserDocument, addUtility, editUtility } from './profilo-actions.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
@@ -93,15 +94,31 @@ export async function initProfiloPrivato(user) {
 
     await loadUserData(user);
 
+    const ctx = buildCtx();
+
     // Setup UI Handlers
     setupAvatarEdit();
-    setupDelegation();
+    setupDelegation(ctx);
     setupPersonalDataCopy();
     initProxyDropdowns();
-    setupCollapsibleSections();
     setupQRToggles();
+    setupCollapsibleSections();
+    // saveProfileLabels() non va chiamata all'init — viene chiamata al cambio dropdown
+}
 
-    
+/** Context object per profilo-actions.js — raccoglie lo stato condiviso */
+function buildCtx() {
+    return {
+        currentUserUid,
+        currentUserData,
+        userAddresses,
+        userDocuments,
+        profileLabels,
+        syncData,
+        renderAddressesView,
+        renderDocumentiView,
+        loadUserData
+    };
 }
 
 /**
@@ -1047,7 +1064,7 @@ function renderDocumentiView() {
  */
 // ─── SECTION 8: DELEGATION & SYNC ────────────────────────────────────────────
 
-function setupDelegation() {
+function setupDelegation(ctx) {
     document.addEventListener('click', async (e) => {
         const target = e.target.closest('[data-action]');
         if (!target) return;
@@ -1056,17 +1073,19 @@ function setupDelegation() {
         const uIdx = parseInt(target.dataset.uidx);
 
         switch (action) {
-            case 'edit-section': editSection(target.dataset.target); break;
-            case 'edit-address': editAddress(idx); break;
+            // Azioni estratte in profilo-actions.js
+            case 'edit-section': editSection(target.dataset.target, ctx); break;
+            case 'edit-address': editAddress(idx, ctx); break;
+            case 'add-utility': addUtility(idx, ctx); break;
+            case 'edit-utility': editUtility(idx, uIdx, ctx); break;
+            case 'edit-doc': editUserDocument(idx, ctx); break;
+            // Azioni delete rimaste qui (usano syncData e array direttamente)
             case 'delete-address': deleteAddress(idx); break;
-            case 'add-utility': addUtility(idx); break;
-            case 'edit-utility': editUtility(idx, uIdx); break;
             case 'delete-utility': deleteUtility(idx, uIdx); break;
             case 'edit-phone': editPhone(idx); break;
             case 'delete-phone': deletePhone(idx); break;
             case 'edit-email': editEmail(idx); break;
             case 'delete-email': deleteEmail(idx); break;
-            case 'edit-doc': editUserDocument(idx); break;
             case 'delete-doc': deleteDocumento(idx); break;
         }
     });
@@ -1228,213 +1247,6 @@ async function deleteDocumento(idx) {
     }
 }
 
-
-// ─── AZIONI PROFILO ──────────────────────────────────────────────────────────
-// showProfileModal e' importato da ./profilo-modal.js
-
-
-// Implementazione Azioni
-async function editSection(sectionId) {
-    if (sectionId === 'dati-personali') {
-        const fields = [
-            { key: 'nome', label: 'Nome', icon: 'person' },
-            { key: 'cognome', label: 'Cognome', icon: 'person' },
-            { key: 'birth_date', label: 'Data di Nascita', type: 'date', icon: 'calendar_today' },
-            { key: 'birth_place', label: 'Luogo di Nascita', icon: 'location_city' },
-            { key: 'birth_province', label: 'Provincia Nascita (es. PD)', icon: 'map' }
-        ];
-        showProfileModal('Dati Personali', fields, currentUserData, async (newData) => {
-            try {
-                const masterKey = await ensureMasterKey();
-                const clearData = {
-                    nome: newData.nome || '',
-                    cognome: newData.cognome || '',
-                    birth_date: newData.birth_date || '',
-                    birth_place: newData.birth_place || '',
-                    birth_province: newData.birth_province || ''
-                };
-                await updateDoc(doc(db, "users", currentUserUid), clearData);
-                Object.assign(currentUserData, newData); // mantieni valori in chiaro in memoria
-                await loadUserData(auth.currentUser);
-                showToast(t('success_save'), "success");
-            } catch (e) { logError("EditSection", e); showToast(t('error_generic'), "error"); }
-        });
-    } else if (sectionId === 'note') {
-        const fields = [{ key: 'note', label: 'Note', type: 'textarea', icon: 'description' }];
-        showProfileModal('Note Anagrafica', fields, currentUserData, async (newData) => {
-            try {
-                // [FIX] Cifra la nota prima di scrivere su Firestore
-                const masterKey = await ensureMasterKey();
-                const encryptedNote = await encrypt(newData.note || '', masterKey);
-                await updateDoc(doc(db, "users", currentUserUid), { note: encryptedNote });
-                currentUserData.note = newData.note; // mantieni in memoria il valore in chiaro
-                // Ricarica il profilo (loadUserData decripta automaticamente)
-                await loadUserData(auth.currentUser);
-                showToast(t('success_save'), "success");
-            } catch (e) { logError("EditSectionNote", e); showToast(t('error_generic'), "error"); }
-        });
-    }
-}
-
-async function editAddress(idx) {
-    const isNew = idx === -1;
-    const addr = isNew ? { type: profileLabels.addressTypes[0], address: '', civic: '', cap: '', city: '', province: '', utilities: [] } : userAddresses[idx];
-    const fields = [
-        { key: 'type', label: 'Tipo', icon: 'label', type: 'select', options: profileLabels.addressTypes, configKey: 'addressTypes' },
-        { key: 'address', label: 'Indirizzo', icon: 'home' },
-        { key: 'civic', label: 'Civico', icon: 'numbers' },
-        { key: 'cap', label: 'CAP', icon: 'mail_outline' },
-        { key: 'city', label: 'Città', icon: 'location_city' },
-        { key: 'province', label: 'Provincia', icon: 'map' }
-    ];
-    showProfileModal(isNew ? 'Nuovo Indirizzo' : 'Modifica Indirizzo', fields, addr, async (newData) => {
-        if (isNew) {
-            newData.utilities = [];
-            userAddresses.push(newData);
-        } else {
-            Object.assign(userAddresses[idx], newData);
-        }
-        await syncData();
-        renderAddressesView();
-    });
-};
-
-
-
-async function editUserDocument(idx) {
-    const isNew = idx === -1;
-    let tempDoc = isNew ? { type: profileLabels.documentTypes[0], num_serie: '', expiry_date: '' } : { ...userDocuments[idx] };
-
-    const getDocumentFields = (type) => {
-        const base = [
-            { key: 'type', label: 'Tipo Documento', icon: 'badge', type: 'select', options: profileLabels.documentTypes, configKey: 'documentTypes' }
-        ];
-
-        const typeLower = (type || '').toLowerCase();
-
-        if (typeLower.includes('identità')) {
-            return [
-                ...base,
-                { key: 'num_serie', label: 'Numero Carta', icon: 'numbers' },
-                { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
-                { key: 'luogo_rilascio', label: t('label_release_place'), icon: 'location_on' },
-                { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
-                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
-                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
-                { key: 'username', label: 'Username / CF', icon: 'person' },
-                { key: 'password', label: 'Password', icon: 'lock' },
-                { key: 'pin', label: t('label_pin'), icon: 'password' },
-                { key: 'puk', label: t('label_puk'), icon: 'security' },
-                { key: 'codice_app', label: t('label_app_code'), icon: 'apps' },
-                { key: 'note', label: 'Note', icon: 'description' }
-            ];
-        } else if (typeLower.includes('patente')) {
-            return [
-                ...base,
-                { key: 'num_serie', label: 'Patente', icon: 'numbers' },
-                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
-                { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
-                { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
-                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
-                { key: 'note', label: 'Note', icon: 'description' }
-            ];
-        } else if (typeLower.includes('fiscale')) {
-            return [
-                ...base,
-                { key: 'num_serie', label: 'Codice Fiscale', icon: 'badge' },
-                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
-                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
-                { key: 'id_number', label: t('label_id_number'), icon: 'numbers' },
-                { key: 'note', label: 'Note', icon: 'description' }
-            ];
-        } else if (typeLower.includes('passaporto')) {
-            return [
-                ...base,
-                { key: 'num_serie', label: 'Numero Passaporto', icon: 'numbers' },
-                { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
-                { key: 'rilasciato_da', label: t('label_issued_by'), icon: 'account_balance' },
-                { key: 'data_rilascio', label: t('label_issue_date'), type: 'date', icon: 'history' },
-                { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
-                { key: 'note', label: 'Note', icon: 'description' }
-            ];
-        }
-
-        return [
-            ...base,
-            { key: 'num_serie', label: 'Numero / Codice', icon: 'numbers' },
-            { key: 'home_page', label: 'Home Page / Sito', icon: 'language' },
-            { key: 'expiry_date', label: t('label_expiry_date'), type: 'date', icon: 'calendar_today' },
-            { key: 'note', label: 'Note', icon: 'description' }
-        ];
-    };
-
-    const openModal = (currentVals) => {
-        const fields = getDocumentFields(currentVals.type);
-        showProfileModal(isNew ? 'Nuovo Documento' : 'Modifica Documento', fields, currentVals, async (newData) => {
-            // Merge remaining temp fields if any (to avoid losing data when switching types)
-            const finalData = { ...currentVals, ...newData };
-
-            // Normalize for legacy compatibility if needed
-            if (finalData.type.toLowerCase().includes('patente')) finalData.license_number = finalData.num_serie;
-            if (finalData.type.toLowerCase().includes('fiscale')) finalData.cf_value = finalData.num_serie;
-
-            if (isNew) {
-                userDocuments.push(finalData);
-            } else {
-                userDocuments[idx] = finalData;
-            }
-            await syncData();
-            renderDocumentiView();
-        });
-
-        // Add change listener to the type select
-        const modal = document.getElementById('profile-edit-modal');
-        const typeSelect = modal?.querySelector('select');
-        if (typeSelect) {
-            typeSelect.onchange = (e) => {
-                const newType = e.target.value;
-                // Capture current values from inputs before refreshing
-                const currentInputs = modal.querySelectorAll('input');
-                const capturedData = { ...currentVals, type: newType };
-                currentInputs.forEach(inp => {
-                    const key = inp.closest('.glass-field-container')?.querySelector('.view-label')?.textContent;
-                    // We need a better way to map label back to key, or just find by key if we had IDs
-                    // But in showProfileModal we stored inputs in a local 'inputs' object.
-                    // Instead of brittle DOM traversal, let's just use the current values and the new type for now.
-                    // Or better: modify showProfileModal to support updating fields.
-                });
-
-                // For now, just re-open with new type
-                openModal({ ...currentVals, type: newType });
-            };
-        }
-    };
-
-    openModal(tempDoc);
-};
-
-async function addUtility(addrIdx) {
-    const fields = [
-        { key: 'type', label: 'Tipo', icon: 'bolt', type: 'select', options: profileLabels.utilityTypes, configKey: 'utilityTypes' },
-        { key: 'value', label: 'Codice / Identificativo', icon: 'vpn_key' }
-    ];
-    showProfileModal('Aggiungi Utenza', fields, {}, async (newData) => {
-        if (!userAddresses[addrIdx].utilities) userAddresses[addrIdx].utilities = [];
-        userAddresses[addrIdx].utilities.push(newData);
-        await syncData();
-        renderAddressesView();
-    });
-};
-
-async function editUtility(addrIdx, uIdx) {
-    const util = userAddresses[addrIdx].utilities[uIdx];
-    const fields = [
-        { key: 'type', label: 'Tipo', icon: 'bolt', type: 'select', options: profileLabels.utilityTypes, configKey: 'utilityTypes' },
-        { key: 'value', label: 'Codice / Identificativo', icon: 'vpn_key' }
-    ];
-    showProfileModal('Modifica Utenza', fields, util, async (newData) => {
-        Object.assign(userAddresses[addrIdx].utilities[uIdx], newData);
-        await syncData();
-        renderAddressesView();
-    });
-};
+// ─── SECTION 9: AZIONI \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// editSection, editAddress, editUserDocument, addUtility, editUtility
+// sono in ./profilo-actions.js (context-based pattern)
