@@ -330,7 +330,8 @@ window.editPhone = async (idx) => {
 };
 
 window.deletePhone = async (idx) => {
-    if (!confirm(t('confirm_delete') || 'Eliminare questo telefono?')) return;
+    const ok = await showConfirmModal(t('confirm_delete') || 'Eliminare questo telefono?');
+    if (!ok) return;
     const backup = [...contactPhones];
     try {
         contactPhones.splice(idx, 1);
@@ -615,7 +616,7 @@ function syncCustomDropdowns(container, configKey = null) {
                     style: 'width: 20px; height: 20px; border-radius: 4px; background: rgba(0,0,0,0.05); color: #000;',
                     onclick: async (ev) => {
                         ev.stopPropagation();
-                        const newName = prompt("Rinomina voce:", opt.value);
+                        const newName = await showInputModal('Rinomina voce', opt.value, 'Nuovo nome etichetta...');
                         if (newName && newName.trim() && newName !== opt.value) {
                             const idx = profileLabels[configKey].indexOf(opt.value);
                             if (idx > -1) {
@@ -634,7 +635,8 @@ function syncCustomDropdowns(container, configKey = null) {
                     style: 'width: 20px; height: 20px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); color: #ef4444;',
                     onclick: async (ev) => {
                         ev.stopPropagation();
-                        if (confirm(`Eliminare "${opt.value}"?`)) {
+                        const okDel = await showConfirmModal(`Eliminare "${opt.value}"?`);
+                        if (okDel) {
                             profileLabels[configKey] = profileLabels[configKey].filter(v => v !== opt.value);
                             await saveProfileLabels();
                             showToast("Voce eliminata!");
@@ -664,7 +666,7 @@ function syncCustomDropdowns(container, configKey = null) {
             style: 'border-top: 1px dashed rgba(0,0,0,0.1); margin-top: 4px; color: var(--accent); font-weight: 800; display: flex; align-items: center; gap: 8px;',
             onclick: async (e) => {
                 e.stopPropagation();
-                const newLabel = prompt("Aggiungi nuova voce:");
+                const newLabel = await showInputModal('Aggiungi voce', '', 'Nome nuova etichetta...');
                 if (newLabel && newLabel.trim()) {
                     if (!profileLabels[configKey].includes(newLabel.trim())) {
                         profileLabels[configKey].push(newLabel.trim());
@@ -917,7 +919,8 @@ window.editEmail = async (idx) => {
 };
 
 window.deleteEmail = async (idx) => {
-    if (!confirm(t('confirm_delete') || 'Eliminare questa email?')) return;
+    const ok = await showConfirmModal(t('confirm_delete') || 'Eliminare questa email?');
+    if (!ok) return;
     const backup = [...contactEmails];
     try {
         contactEmails.splice(idx, 1);

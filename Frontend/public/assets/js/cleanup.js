@@ -31,7 +31,12 @@ function initGlobalDelegation() {
         switch (action) {
             case 'navigate':
                 if (target.dataset.href) {
-                    window.location.href = target.dataset.href;
+                    const href = target.dataset.href.trim();
+                    // Sanitizzazione: blocca javascript:, vbscript:, data: e schemi non-HTTP
+                    const safePattern = /^(https?:\/\/|\/(?!\/)|[a-zA-Z0-9_\-./]+\.html)/;
+                    if (safePattern.test(href) && !/^javascript:/i.test(href)) {
+                        window.location.href = href;
+                    }
                 }
                 break;
 
