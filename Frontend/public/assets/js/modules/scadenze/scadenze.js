@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SCADENZE MODULE (V4.1)
  * Gestione della pagina scadenze (lista completa) e utility per la home.
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
@@ -19,7 +19,7 @@ let searchQuery = '';
 let sortType = 'date-asc';
 let scadenzeContainer = null; // Module-scoped
 
-const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : console.log(msg);
+const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : window.LOG(msg);
 
 /**
  * SCADENZE MODULE (V5.0 ADAPTER)
@@ -29,7 +29,7 @@ const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) 
  */
 
 export async function initScadenze(user) {
-    console.log("[SCADENZE] Init V5.0...");
+    
     if (!user) return;
     currentUser = user;
 
@@ -113,7 +113,7 @@ export async function initScadenze(user) {
     // FAB Button Setup
     setupFAB();
 
-    console.log("[SCADENZE] Ready.");
+    
 }
 
 // --- INTERNAL HELPER FUNCTIONS ---

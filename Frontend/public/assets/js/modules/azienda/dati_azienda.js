@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DATI AZIENDA MODULE (V5.0 ADAPTER)
  * Visualizzazione dettagliata anagrafica aziendale, QR vCard, sedi e allegati.
  * - Entry Point: initDatiAzienda(user)
@@ -22,7 +22,7 @@ let isQRZoomRendered = false;  // Evita re-render ad ogni apertura del modal
 
 // --- INITIALIZATION ---
 export async function initDatiAzienda(user) {
-    console.log("[DATI-AZIENDA] Init V5.0...");
+    
     if (!user) return;
 
     // Assicura caricamento libreria QR in modo passivo
@@ -38,11 +38,11 @@ export async function initDatiAzienda(user) {
     setupEventListeners();
     await loadData(user.uid);
 
-    console.log("[DATI-AZIENDA] Ready.");
+    
 }
 
 async function initProtocolUI() {
-    console.log('[dati_azienda] UI Base gestita da main.js');
+    
 
     // Footer Right
     // Footer Center Actions

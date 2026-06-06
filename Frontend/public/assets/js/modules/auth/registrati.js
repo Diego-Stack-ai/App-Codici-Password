@@ -1,4 +1,4 @@
-/**
+﻿/**
  * REGISTRATION MODULE (V4.1)
  * Gestisce la creazione di utenze e i relativi feedback di sistema.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
@@ -10,7 +10,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 
 export async function initRegistrati() {
-    console.log("[REGISTER] Init V5.0...");
+    
 
     try {
         // 1. AppState init
@@ -27,7 +27,7 @@ export async function initRegistrati() {
         setupLanguageSelector();
         setupPasswordToggle();
 
-        console.log("[REGISTER] System Ready.");
+        
     } catch (err) {
         console.error("[REGISTER] Critical Init Error:", err);
     }
@@ -84,7 +84,7 @@ function setupRegisterForm() {
 
 
         try {
-            console.log("[REGISTER] Creating account...");
+            window.LOG("[REGISTER] Creating account...");
             const success = await register(nome, cognome, email, password);
 
             if (success) {

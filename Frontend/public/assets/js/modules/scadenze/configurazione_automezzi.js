@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CONFIGURAZIONE AUTOMEZZI MODULE (V4.1)
  * Gestisce la configurazione delle scadenze per automezzi.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
@@ -52,7 +52,7 @@ let editingState = { list: null, index: null };
  */
 
 export async function initConfigurazioneAutomezzi(user) {
-    console.log("[CONF-AUTO] Init V5.0...");
+    
     if (!user) return;
     currentUser = user;
 
@@ -91,7 +91,7 @@ export async function initConfigurazioneAutomezzi(user) {
     });
 
     await loadConfig();
-    console.log("[CONF-AUTO] Ready.");
+    
 }
 
 async function loadConfig() {
@@ -105,7 +105,7 @@ async function loadConfig() {
         } else {
             // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
             currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-            console.log("[CONF-AUTO] Prima visita: salvataggio config default su Firebase...");
+            window.LOG("[CONF-AUTO] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"), currentConfig);
         }
         renderAll();

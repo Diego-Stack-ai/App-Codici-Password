@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LISTA AZIENDE MODULE (V5.0 ADAPTER)
  * Visualizzazione e gestione della lista delle aziende dell'utente.
  * - Entry Point: initListaAziende(user)
@@ -31,7 +31,7 @@ const companyPalettes = [
 
 // --- INITIALIZATION ---
 export async function initListaAziende(user) {
-    console.log("[LISTA-AZIENDE] Init V5.0...");
+    
     if (!user) return;
     currentUser = user;
 
@@ -70,11 +70,11 @@ export async function initListaAziende(user) {
             }));
         }
     }
-    console.log("[LISTA-AZIENDE] Ready.");
+    
 }
 
 async function initProtocolUI() {
-    console.log('[lista_aziende] UI inizializzata tramite main.js');
+    window.LOG('[lista_aziende] UI inizializzata tramite main.js');
 
     // Aggiungi pulsante "+" nel footer center
     const fCenter = document.getElementById('footer-center-actions');

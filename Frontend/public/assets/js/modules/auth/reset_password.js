@@ -1,4 +1,4 @@
-/**
+﻿/**
  * RESET PASSWORD MODULE (V4.1)
  * Gestisce l'invio delle istruzioni di recupero credenziali.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
@@ -10,7 +10,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 
 export async function initResetPassword() {
-    console.log("[RESET] Init V5.0...");
+    
 
     try {
         // 1. AppState base
@@ -26,7 +26,7 @@ export async function initResetPassword() {
         setupResetForm();
         setupLanguageSelector();
 
-        console.log("[RESET] System Ready.");
+        
     } catch (err) {
         console.error("[RESET] Critical Init Error:", err);
     }
@@ -66,7 +66,7 @@ function setupResetForm() {
         document.body.classList.add('is-auth-progress');
 
         try {
-            console.log("[RESET] Sending recovery email to:", email);
+            window.LOG("[RESET] Sending recovery email to:", email);
             await resetPassword(email);
 
             showToast(t('success_reset_sent'), "success");

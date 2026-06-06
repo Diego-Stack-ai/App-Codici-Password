@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LOGIN MODULE (V4.1)
  * Gestisce l'autenticazione e l'interfaccia della pagina di accesso.
  * Refactor: Rimozione innerHTML, uso dom-utils.js, modularizzazione.
@@ -17,7 +17,7 @@ import { showToast, showInputModal } from '../../ui-core.js';
  */
 
 export async function initLogin() {
-    console.log("[LOGIN] Init V5.0...");
+    
 
     try {
         // 1. AppState di base (Local Scope o Global se necessario per compatibilità)
@@ -44,7 +44,7 @@ export async function initLogin() {
         setupLanguageSelector();
         setupPasswordToggle(); // Funzione locale definita sotto
 
-        console.log("[LOGIN] System Ready.");
+        
     } catch (err) {
         console.error("[LOGIN] Init Error:", err);
     }

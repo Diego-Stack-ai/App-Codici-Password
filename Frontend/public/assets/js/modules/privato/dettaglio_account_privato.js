@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
@@ -36,7 +36,7 @@ let accountData = null;
  */
 
 export async function initDettaglioAccountPrivato(user) {
-    console.log("[DETTAGLIO] Init V5.0...");
+    
     if (!user) return;
     currentUid = user.uid;
 
@@ -74,7 +74,7 @@ export async function initDettaglioAccountPrivato(user) {
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
                 onclick: () => {
-                    console.log('[dettaglio] Navigating to form with ID:', currentId);
+                    window.LOG('[dettaglio] Navigating to form with ID:', currentId);
                     window.location.href = `form_account_privato.html?id=${currentId}`;
                 }
             }, [
@@ -91,7 +91,7 @@ export async function initDettaglioAccountPrivato(user) {
 
     await loadAccount();
 
-    console.log("[DETTAGLIO] Ready.");
+    
 }
 
 /**
@@ -243,7 +243,7 @@ function renderAccount(acc) {
             btnAdd.classList.remove('hidden');
             btnAdd.onclick = (e) => {
                 e.preventDefault();
-                console.log("[DETTAGLIO] Add Attachment Clicked (onclick)");
+                window.LOG("[DETTAGLIO] Add Attachment Clicked (onclick)");
                 openSourceSelector();
             };
         }
@@ -523,7 +523,7 @@ async function revokeRecipientV3(email) {
                     timestamp: new Date().toISOString(),
                     read: false
                 });
-                console.log(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+                window.LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
             }
         });
 
@@ -672,7 +672,7 @@ window.openSourceSelector = openSourceSelector;
 window.closeSourceSelector = closeSourceSelector;
 
 function openSourceSelector() {
-    console.log("Opening Source Selector Privato");
+    
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -735,7 +735,7 @@ function setupSourceSelector() {
         if (input) input.addEventListener('change', () => handleFileUpload(input));
     });
 
-    console.log('[DETTAGLIO] setupSourceSelector: listener agganciati');
+    window.LOG('[DETTAGLIO] setupSourceSelector: listener agganciati');
 }
 
 async function handleFileUpload(input) {

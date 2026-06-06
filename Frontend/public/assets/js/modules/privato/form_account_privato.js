@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FORM ACCOUNT PRIVATO (V5.9.5)
  * Creazione e modifica account con gestione IBAN dinamica.
  */
@@ -33,7 +33,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
  */
 
 export async function initFormAccountPrivato(user) {
-    console.log("[FORM-ACC] Init V5.0...");
+    
     if (!user) return;
     currentUid = user.uid;
 
@@ -87,7 +87,7 @@ export async function initFormAccountPrivato(user) {
     await loadRubrica();
     if (isEditing) await loadData();
 
-    console.log("[FORM-ACC] Ready.");
+    
 }
 
 /**
@@ -672,7 +672,7 @@ window.saveAccount = async () => {
     if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); if (btnSave) btnSave.disabled = false; return; }
 
     const isSharingActive = data.visibility === 'shared';
-    console.log(`[V3.1-DEBUG] saveAccount payload constructed. visibility=${data.visibility}, type=${data.type}`);
+    
 
     // Gestione Array UI / Contatti Selezionati
     let emailsToInvite = [];
@@ -825,7 +825,7 @@ window.saveAccount = async () => {
                 finalData.recipientEmail = deleteField();
             }
 
-            console.log("[V3.1-DEBUG] Final Transaction Payload:", finalData);
+            window.LOG("[V3.1-DEBUG] Final Transaction Payload:", finalData);
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);

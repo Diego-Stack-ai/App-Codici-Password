@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FORM ACCOUNT AZIENDA MODULE (V5.9.5 ADAPTER)
  * Creazione e modifica account aziendali con gestione dinamica IBAN.
  * - Entry Point: initFormAccountAzienda(user)
@@ -31,7 +31,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
 
 // --- INITIALIZATION ---
 export async function initFormAccountAzienda(user) {
-    console.log("[FORM-ACCOUNT-AZIENDA] Init V5.0...");
+    
     if (!user) return;
     currentUid = user.uid;
 
@@ -56,11 +56,11 @@ export async function initFormAccountAzienda(user) {
     await loadRubrica();
     if (isEditing) await loadData();
 
-    console.log("[FORM-ACCOUNT-AZIENDA] Ready.");
+    
 }
 
 function initBaseUI() {
-    console.log('[FORM-ACCOUNT-AZIENDA] initBaseUI...');
+    
 
     // Footer actions setup
     const fCenter = document.getElementById('footer-center-actions');
@@ -827,7 +827,7 @@ window.saveAccount = async () => {
                 finalData.recipientEmail = deleteField();
             }
 
-            console.log("[V3.1-DEBUG] Final Transaction Payload Azienda:", finalData);
+            window.LOG("[V3.1-DEBUG] Final Transaction Payload Azienda:", finalData);
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);

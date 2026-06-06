@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CONFIGURAZIONE GENERALI MODULE (V4.1)
  * Gestisce la configurazione delle scadenze generali.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
@@ -39,7 +39,7 @@ let editingState = { list: null, index: null };
  */
 
 export async function initConfigurazioneGenerali(user) {
-    console.log("[CONF-GEN] Init V5.0...");
+    
     if (!user) return;
     currentUser = user;
 
@@ -75,7 +75,7 @@ export async function initConfigurazioneGenerali(user) {
     });
 
     await loadConfig();
-    console.log("[CONF-GEN] Ready.");
+    
 }
 
 async function loadConfig() {
@@ -88,12 +88,12 @@ async function loadConfig() {
         } else {
             // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
             currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-            console.log("[CONF-GEN] Prima visita: salvataggio config default su Firebase...");
+            window.LOG("[CONF-GEN] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig);
         }
         // Documento esistente ma deadlineTypes vuoto → re-seed
         if (currentConfig.deadlineTypes.length === 0) {
-            console.log("[CONF-GEN] deadlineTypes vuoto: ripristino valori default...");
+            window.LOG("[CONF-GEN] deadlineTypes vuoto: ripristino valori default...");
             currentConfig.deadlineTypes = JSON.parse(JSON.stringify(DEFAULT_CONFIG.deadlineTypes));
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig, { merge: true });
         }

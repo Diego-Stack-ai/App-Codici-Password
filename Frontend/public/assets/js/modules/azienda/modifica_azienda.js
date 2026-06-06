@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MODIFICA AZIENDA MODULE (V5.0 ADAPTER)
  * Gestione anagrafica, allegati, sedi e contatti di un'azienda esistente.
  * - Entry Point: initModificaAzienda(user)
@@ -22,7 +22,7 @@ let eventsInitialized = false; // Prevent multiple listeners on body
 
 // --- INITIALIZATION ---
 export async function initModificaAzienda(user) {
-    console.log("[EDIT-AZIENDA] Init V5.0...");
+    
     if (!user) return;
     currentUid = user.uid;
 
@@ -37,11 +37,11 @@ export async function initModificaAzienda(user) {
     }
     initFormEvents();
 
-    console.log("[EDIT-AZIENDA] Ready.");
+    
 }
 
 async function initProtocolUI() {
-    console.log('[modifica_azienda] Configurazione azioni footer...');
+    
 
     // Footer Center - Pulsante Delete (Solo in Modifica)
     const fCenter = document.getElementById('footer-center-actions');
@@ -190,7 +190,7 @@ window.openSourceSelector = openSourceSelector;
 window.closeSourceSelector = closeSourceSelector;
 
 function openSourceSelector() {
-    console.log("Opening Source Selector Modifica Azienda");
+    
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.add('active');

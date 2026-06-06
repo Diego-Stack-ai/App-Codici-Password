@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROFILO PRIVATO MODULE (V4.3 - Consolidated)
  * Gestione profilo con form dinamici e protocollo DOM sicuro.
  */
@@ -69,7 +69,7 @@ const nameDisplay = document.getElementById('user-display-name');
  */
 
 export async function initProfiloPrivato(user) {
-    console.log("[PROFILO] Init V5.0...");
+    
     if (!user) return;
 
     currentUserUid = user.uid;
@@ -84,7 +84,7 @@ export async function initProfiloPrivato(user) {
     setupCollapsibleSections();
     setupQRToggles();
 
-    console.log("[PROFILO] Ready.");
+    
 }
 
 /**
@@ -154,7 +154,7 @@ async function loadUserData(user) {
                     note: await decryptIfPossible(e.note, masterKey)
                 })));
             }
-            console.log("[VaultCheck] Decrittazione granulare V6.1.5 completata.");
+            window.LOG("[VaultCheck] Decrittazione granulare V6.1.5 completata.");
         }
 
         // Hero Header
@@ -917,7 +917,7 @@ window.deleteEmail = async (idx) => {
         await syncData(); // [FIX] usa syncData — filtra + cifra + scrive
         contactEmails = (contactEmails || []).filter(e => e != null); // assicura array locale pulito
         renderEmailsView();
-        console.log(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
+        window.LOG(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
         showToast(t('success_delete') || 'Email eliminata con successo', "success");
     } catch (e) {
         contactEmails = backup; // rollback locale
@@ -1086,7 +1086,7 @@ function setupDelegation() {
 }
 
 async function syncData() {
-    console.log("[VaultCheck] Avvio sincronizzazione protetta...");
+    window.LOG("[VaultCheck] Avvio sincronizzazione protetta...");
     try {
         const user = auth.currentUser;
         if (!user) {
@@ -1107,7 +1107,7 @@ async function syncData() {
             return;
         }
 
-        console.log("[VaultCheck] Cifratura in corso...");
+        window.LOG("[VaultCheck] Cifratura in corso...");
 
         // Cifratura Documenti (Selective Encryption V7.5)
         const encryptedDocuments = await Promise.all(userDocuments.map(async d => {
@@ -1163,7 +1163,7 @@ async function syncData() {
 
         await updateDoc(doc(db, "users", user.uid), finalUpdate);
 
-        console.log("[VaultCheck] Sincronizzazione V6.1 completata con successo.");
+        window.LOG("[VaultCheck] Sincronizzazione V6.1 completata con successo.");
         showToast(t('success_save'), "success");
     } catch (e) {
         logError("SyncData", e);
@@ -1178,7 +1178,7 @@ async function deleteAddress(idx) {
         userAddresses = userAddresses.filter(a => a !== undefined && a !== null);
         await syncData();
         renderAddressesView();
-        console.log(`[Address] Eliminato indirizzo #${idx}. Rimanenti: ${userAddresses.length}`);
+        window.LOG(`[Address] Eliminato indirizzo #${idx}. Rimanenti: ${userAddresses.length}`);
     } catch (e) {
         console.error('[Address] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione dell\'indirizzo.', 'error');
@@ -1192,7 +1192,7 @@ async function deleteUtility(aIdx, uIdx) {
         userAddresses[aIdx].utilities = (userAddresses[aIdx].utilities || []).filter(u => u !== undefined && u !== null);
         await syncData();
         renderAddressesView();
-        console.log(`[Utility] Eliminata utenza #${uIdx} dall'indirizzo #${aIdx}`);
+        window.LOG(`[Utility] Eliminata utenza #${uIdx} dall'indirizzo #${aIdx}`);
     } catch (e) {
         console.error('[Utility] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione dell\'utenza.', 'error');
@@ -1206,7 +1206,7 @@ async function deletePhone(idx) {
         contactPhones = contactPhones.filter(p => p !== undefined && p !== null);
         await syncData();
         renderPhonesView();
-        console.log(`[Phone] Eliminato numero #${idx}. Rimanenti: ${contactPhones.length}`);
+        window.LOG(`[Phone] Eliminato numero #${idx}. Rimanenti: ${contactPhones.length}`);
     } catch (e) {
         console.error('[Phone] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione del numero.', 'error');
@@ -1220,7 +1220,7 @@ async function deleteEmail(idx) {
         contactEmails = contactEmails.filter(e => e !== undefined && e !== null);
         await syncData();
         renderEmailsView();
-        console.log(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
+        window.LOG(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
     } catch (e) {
         console.error('[Email] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione dell\'email.', 'error');
@@ -1234,7 +1234,7 @@ async function deleteDocumento(idx) {
         userDocuments = userDocuments.filter(d => d !== undefined && d !== null);
         await syncData();
         renderDocumentiView();
-        console.log(`[Doc] Eliminato documento #${idx}. Rimanenti: ${userDocuments.length}`);
+        window.LOG(`[Doc] Eliminato documento #${idx}. Rimanenti: ${userDocuments.length}`);
     } catch (e) {
         console.error('[Doc] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione del documento.', 'error');
@@ -1675,7 +1675,7 @@ window.profiloPrivato = {
         if (!masterKey || !currentUserData) return;
 
         if (!currentUserData._encrypted) {
-            console.log("[VaultCheck] Avvio cifratura profilo...");
+            window.LOG("[VaultCheck] Avvio cifratura profilo...");
             // Esempio: cifra la nota se presente
             if (currentUserData.note && currentUserData.note.length < 60) {
                 currentUserData.note = await encrypt(currentUserData.note, masterKey);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DETTAGLIO ACCOUNT AZIENDA MODULE (V5.9.5 ADAPTER)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
  * - Entry Point: initDettaglioAccountAzienda(user)
@@ -30,7 +30,7 @@ let ownerId = null;
 
 // --- INITIALIZATION ---
 export async function initDettaglioAccountAzienda(user) {
-    console.log("[DETTAGLIO-ACCOUNT-AZIENDA] Init V5.0...");
+    
     if (!user) return;
     currentUid = user.uid;
 
@@ -51,7 +51,7 @@ export async function initDettaglioAccountAzienda(user) {
     setupActions();
     await loadAccount();
 
-    console.log("[DETTAGLIO-ACCOUNT-AZIENDA] Ready.");
+    
 }
 
 function initProtocolUI() {
@@ -72,7 +72,7 @@ function initProtocolUI() {
     }
 }
 function initBaseUI() {
-    console.log('[dettaglio_account_azienda] UI Base gestita da main.js');
+    
 }
 
 async function loadAccount() {
@@ -443,7 +443,7 @@ function setupActions() {
 
 
 function openSourceSelector() {
-    console.log("Opening Source Selector Azienda");
+    
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -866,7 +866,7 @@ async function revokeRecipientV3(email) {
                     timestamp: new Date().toISOString(),
                     read: false
                 });
-                console.log(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+                window.LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
             }
         });
 

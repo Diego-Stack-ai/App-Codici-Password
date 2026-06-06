@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ARCHIVIO ACCOUNT MODULE (V4.3)
  * Gestisce la visualizzazione e il ripristino di account archiviati (Cestino).
  * Refactor: Eliminazione innerHTML a favore di dom-utils.
@@ -25,7 +25,7 @@ let currentContext = 'all';
  */
 
 export async function initArchivioAccount(user) {
-    console.log("[ARCHIVIO] Init V5.0...");
+    
     if (!user) return;
     currentUser = user;
 
@@ -101,7 +101,7 @@ export async function initArchivioAccount(user) {
     await loadCompanies();
     await loadArchived();
 
-    console.log("[ARCHIVIO] Ready.");
+    
 }
 
 async function loadCompanies() {
@@ -142,14 +142,14 @@ async function loadArchived() {
 
     try {
         let results = [];
-        console.log(`[ARCHIVIO] Loading context: ${currentContext}`);
+        window.LOG(`[ARCHIVIO] Loading context: ${currentContext}`);
 
         // 1. PRIVATO
         if (currentContext === 'all' || currentContext === 'privato') {
             try {
                 const snap = await getDocs(query(collection(db, "users", currentUser.uid, "accounts"), where("isArchived", "==", true)));
                 snap.forEach(d => results.push({ ...d.data(), id: d.id, context: 'privato' }));
-                console.log(`[ARCHIVIO] Found ${snap.size} private archived items`);
+                window.LOG(`[ARCHIVIO] Found ${snap.size} private archived items`);
             } catch (err) {
                 console.error("[ARCHIVIO] Private query error:", err);
                 if (currentContext === 'privato') throw err; // Re-throw if it's the only one
@@ -160,7 +160,7 @@ async function loadArchived() {
         if (currentContext === 'all') {
             try {
                 const bizSnap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
-                console.log(`[ARCHIVIO] Searching archived items in ${bizSnap.size} companies...`);
+                window.LOG(`[ARCHIVIO] Searching archived items in ${bizSnap.size} companies...`);
 
                 for (const b of bizSnap.docs) {
                     try {
@@ -196,7 +196,7 @@ async function loadArchived() {
                 archived.forEach(acc => {
                     results.push({ ...acc, context: currentContext, businessName: bData.ragioneSociale });
                 });
-                console.log(`[ARCHIVIO] Found ${archived.length} archived items for biz ${currentContext}`);
+                window.LOG(`[ARCHIVIO] Found ${archived.length} archived items for biz ${currentContext}`);
             } catch (err) {
                 console.error(`[ARCHIVIO] Error querying accounts for biz ${currentContext}:`, err);
                 throw err;

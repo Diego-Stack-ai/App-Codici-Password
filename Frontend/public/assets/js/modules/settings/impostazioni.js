@@ -1,4 +1,4 @@
-/**
+﻿/**
  * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
@@ -34,7 +34,7 @@ let qrCodeInclusions = {
  * Gestione preferenze globali.
  */
 export async function initImpostazioni(user) {
-    console.log("[IMPOSTAZIONI] Init V5.0 (Notifications Sanitized)...");
+    
     if (!user) return;
 
     await loadUserData(user);
@@ -44,7 +44,7 @@ export async function initImpostazioni(user) {
     setupPrivacyShort();
     setupTermsShort();
 
-    console.log("[IMPOSTAZIONI] Ready.");
+    
 }
 
 function setupSecurityToggles(data) {

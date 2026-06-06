@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AGGIUNGI SCADENZA MODULE (V4.1)
  * Gestisce l'aggiunta o la modifica di scadenze.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
@@ -45,7 +45,7 @@ let unifiedConfigs = {
  */
 
 export async function initAggiungiScadenza(user) {
-    console.log("[ADD-SCADENZA] Init V5.0...");
+    
     if (!user) return;
     currentUser = user;
 
@@ -179,7 +179,7 @@ export async function initAggiungiScadenza(user) {
         setMode(currentMode);
     }
 
-    console.log("[ADD-SCADENZA] Ready.");
+    
 }
 
 function setMode(mode) {
@@ -682,7 +682,7 @@ function setupSaveLogic() {
 
     btnSave.addEventListener('click', async () => {
         if (!auth.currentUser || isSubmitting) {
-            console.log("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
+            window.LOG("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
             return;
         }
 
@@ -708,7 +708,7 @@ function setupSaveLogic() {
 
         try {
             isSubmitting = true;
-            console.log("[FRONTEND-TRACE] Lock UI attivato. Singolo salvataggio in corso...");
+            window.LOG("[FRONTEND-TRACE] Lock UI attivato. Singolo salvataggio in corso...");
 
             // --- UI LOCK ---
             btnSave.disabled = true;
@@ -722,7 +722,7 @@ function setupSaveLogic() {
             // --- 1. UPLOAD ALLEGATI (PRIMA della scrittura DB) ---
             const uploadedAttachments = [];
             if (selectedFiles.length > 0) {
-                console.log(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
+                window.LOG(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
                     if (btnText) btnText.textContent = `Upload ${i + 1}/${selectedFiles.length}...`;
@@ -741,7 +741,7 @@ function setupSaveLogic() {
                         size: file.size,
                         createdAt: new Date().toISOString()
                     });
-                    console.log(`[FRONTEND-TRACE] File ${i + 1} caricato con successo.`);
+                    window.LOG(`[FRONTEND-TRACE] File ${i + 1} caricato con successo.`);
                 }
             }
 
@@ -782,7 +782,7 @@ function setupSaveLogic() {
 
             // --- 3. SCRITTURA UNICA (SINGLE WRITE) ---
             let finalDocId = editingScadenzaId;
-            console.log("[FRONTEND-TRACE] Scrittura documento Firestore...");
+            window.LOG("[FRONTEND-TRACE] Scrittura documento Firestore...");
 
             if (editingScadenzaId) {
                 await updateDoc(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
@@ -791,7 +791,7 @@ function setupSaveLogic() {
                 finalDocId = docRef.id;
             }
 
-            console.log(`[FRONTEND-TRACE] Documento ${finalDocId} salvato. Trigger backend atteso.`);
+            window.LOG(`[FRONTEND-TRACE] Documento ${finalDocId} salvato. Trigger backend atteso.`);
 
             // Aggiorna il campo 'names' nel documento config corretto per l'autocomplete
             if (!editingScadenzaId && name) {

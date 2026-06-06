@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CONFIGURAZIONE DOCUMENTI MODULE (V4.1)
  * Gestisce la configurazione delle scadenze per documenti.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
@@ -41,7 +41,7 @@ let editingState = { list: null, index: null };
  */
 
 export async function initConfigurazioneDocumenti(user) {
-    console.log("[CONF-DOC] Init V5.0...");
+    
     if (!user) return;
     currentUser = user;
 
@@ -80,7 +80,7 @@ export async function initConfigurazioneDocumenti(user) {
     });
 
     await loadConfig();
-    console.log("[CONF-DOC] Ready.");
+    
 }
 
 async function loadConfig() {
@@ -94,7 +94,7 @@ async function loadConfig() {
         } else {
             // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
             currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-            console.log("[CONF-DOC] Prima visita: salvataggio config default su Firebase...");
+            window.LOG("[CONF-DOC] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), currentConfig);
         }
         renderAll();

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SET NEW PASSWORD MODULE (V4.1)
  * Gestione finale del reset password o cambio password interno.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
@@ -11,7 +11,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 
 export async function initImpostaNuovaPassword() {
-    console.log("[NEW-PASS] Init V5.0...");
+    
 
     try {
         // 1. AppState base
@@ -29,7 +29,7 @@ export async function initImpostaNuovaPassword() {
         setupPasswordToggle();
         setupCancelLogic();
 
-        console.log("[NEW-PASS] System Ready.");
+        
     } catch (err) {
         console.error("[NEW-PASS] Critical Init Error:", err);
     }

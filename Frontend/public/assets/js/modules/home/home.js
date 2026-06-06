@@ -1,4 +1,4 @@
-/**
+﻿/**
  * HOME PAGE MODULE (V4.1)
  * Gestisce l'interfaccia della nuova Home Page statica.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
@@ -30,7 +30,7 @@ export async function initHomePage(user) {
         return;
     }
 
-    console.log("[HOME] Init V5.0 Dashboard (Notifications Disabled)...", user.email);
+    
     currentUser = user;
 
     // Inizializza Listeners immediatamente (non dipende da dati remoti)
@@ -59,7 +59,7 @@ export async function initHomePage(user) {
 
     setupFABGroup(aziendes);
 
-    console.log("[HOME] Dashboard Ready.");
+    
 }
 
 /**
