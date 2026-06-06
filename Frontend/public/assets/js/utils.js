@@ -60,7 +60,3 @@ export function sanitizeEmail(email) {
   return clean || 'unknown_guest';
 }
 
-// Global exposure for non-module scripts
-window.makeCall = makeCall;
-window.formatDateToIT = formatDateToIT;
-window.sanitizeEmail = sanitizeEmail;

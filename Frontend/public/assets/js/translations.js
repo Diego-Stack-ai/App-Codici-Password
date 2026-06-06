@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TRANSLATIONS SLIM — Auto-generato il 2026-06-06
  * Contiene SOLO le 341 chiavi usate nella codebase (su 573 totali per lingua).
  * Riduzione: ~40% del dizionario. Lingue: it, en, es, fr, de, zh, hi, pt
@@ -1422,4 +1422,3 @@ export function applyGlobalTranslations() {
 }
 
 // Compatibilita con vecchi moduli
-window.applyLocalTranslations = applyGlobalTranslations;

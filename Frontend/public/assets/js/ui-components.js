@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROTOCOLLO BASE UI COMPONENTS
  * Gestisce la logica dei componenti riutilizzabili (Pulsanti, Toggles, Icone)
  */
@@ -125,6 +125,3 @@ export function setupCallButtons() {
 }
 
 // Esposizione globale per retrocompatibilità
-window.getAccountIcon = getAccountIcon;
-window.setupPasswordToggles = setupPasswordToggles;
-window.setupCopyButtons = setupCopyButtons;
