@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PROTOCOLLO MASTER MAIN ENTRY POINT (V7.0)
  * Coordina l'inizializzazione dei moduli UI dell'applicazione secondo il PROTOCOLLO V7.0.
  * Refactor: Rimozione innerHTML, uso dom-utils.js, centralizzazione in components.js.
@@ -57,7 +57,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from './ui-core.js';
 import { createElement } from './dom-utils.js';
-import { t, applyGlobalTranslations } from './translations.js';
+import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
@@ -118,6 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     window.__V7_BOOTSTRAPPED__ = true;
+
+    // 🌍 I18N — Carica la lingua PRIMA di qualsiasi render
+    await loadLanguage(getCurrentLanguage());
 
     // 🚀 PWA MODE & SERVICE WORKER (V7.0 STABLE)
     if ('serviceWorker' in navigator) {
