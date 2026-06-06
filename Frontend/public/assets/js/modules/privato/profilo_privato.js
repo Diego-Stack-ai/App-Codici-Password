@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PROFILO PRIVATO MODULE (V4.3 - Consolidated)
  * Gestione profilo con form dinamici e protocollo DOM sicuro.
  */
@@ -228,7 +228,7 @@ function renderPhonesView() {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'add_call' }),
         createElement('span', { textContent: t('add_phone') || 'Aggiungi Telefono' })
     ]);
-    btnAdd.onclick = () => window.addPhone();
+    btnAdd.onclick = () => addPhone();
     container.appendChild(btnAdd);
 
     const cards = contactPhones.map((phone, idx) => createPhoneCard(phone, idx));
@@ -248,10 +248,10 @@ function createPhoneCard(phone, idx) {
                 createElement('span', { className: 'card-title-accent', textContent: phone.label || 'Telefono' })
             ]),
             createElement('div', { className: 'card-actions-row' }, [
-                createElement('button', { className: 'btn-edit-section', onclick: () => window.editPhone(idx) }, [
+                createElement('button', { className: 'btn-edit-section', onclick: () => editPhone(idx) }, [
                     createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'edit' })
                 ]),
-                createElement('button', { className: 'btn-edit-section btn-delete', onclick: () => window.deletePhone(idx) }, [
+                createElement('button', { className: 'btn-edit-section btn-delete', onclick: () => deletePhone(idx) }, [
                     createElement('span', { className: 'material-symbols-outlined icon-edit', textContent: 'delete' })
                 ])
             ])
@@ -278,7 +278,7 @@ function createPhoneCard(phone, idx) {
     return card;
 }
 
-window.addPhone = async () => {
+async function addPhone() {
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
         { key: 'number', label: 'Numero', icon: 'call' }
@@ -297,7 +297,7 @@ window.addPhone = async () => {
     });
 };
 
-window.editPhone = async (idx) => {
+async function editPhone(idx) {
     const phone = contactPhones[idx];
     if (!phone.label) phone.label = profileLabels.phoneLabels[0];
     const fields = [
@@ -319,7 +319,7 @@ window.editPhone = async (idx) => {
     });
 };
 
-window.deletePhone = async (idx) => {
+async function deletePhone(idx) {
     const ok = await showConfirmModal(t('confirm_delete') || 'Eliminare questo telefono?');
     if (!ok) return;
     const backup = [...contactPhones];
@@ -691,7 +691,7 @@ function renderAddressesView() {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'add_location_alt' }),
         createElement('span', { textContent: t('add_address') })
     ]);
-    btnAdd.onclick = () => window.editAddress(-1);
+    btnAdd.onclick = () => editAddress(-1);
     container.appendChild(btnAdd);
 
     const cards = userAddresses.map((addr, idx) => createAddressCard(addr, idx));
@@ -801,7 +801,7 @@ function renderEmailsView() {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'alternate_email' }),
         createElement('span', { textContent: t('add_email') })
     ]);
-    btnAdd.onclick = () => window.editEmail(-1);
+    btnAdd.onclick = () => editEmail(-1);
 
     const items = contactEmails.map((e, idx) => {
         return createElement('div', {
@@ -862,7 +862,7 @@ function renderEmailsView() {
     setChildren(container, [btnAdd, ...items]);
 }
 
-window.addEmail = async () => {
+async function addEmail() {
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
         { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
@@ -883,8 +883,8 @@ window.addEmail = async () => {
     });
 };
 
-window.editEmail = async (idx) => {
-    if (idx === -1) { window.addEmail(); return; }
+async function editEmail(idx) {
+    if (idx === -1) { addEmail(); return; }
     const email = contactEmails[idx];
     if (!email.label) email.label = profileLabels.emailLabels[0];
     const fields = [
@@ -908,7 +908,7 @@ window.editEmail = async (idx) => {
     });
 };
 
-window.deleteEmail = async (idx) => {
+async function deleteEmail(idx) {
     const ok = await showConfirmModal(t('confirm_delete') || 'Eliminare questa email?');
     if (!ok) return;
     const backup = [...contactEmails];
@@ -938,7 +938,7 @@ function renderDocumentiView() {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'add_card' }),
         createElement('span', { textContent: t('add_doc') })
     ]);
-    btnAdd.onclick = () => window.editUserDocument(-1);
+    btnAdd.onclick = () => editUserDocument(-1);
 
     const items = userDocuments.map((docItem, idx) => {
         const num = docItem.num_serie || docItem.cf_value || docItem.id_number || docItem.license_number || docItem.cf || '-';
@@ -1070,16 +1070,16 @@ function setupDelegation() {
 
         switch (action) {
             case 'edit-section': editSection(target.dataset.target); break;
-            case 'edit-address': window.editAddress(idx); break;
+            case 'edit-address': editAddress(idx); break;
             case 'delete-address': deleteAddress(idx); break;
-            case 'add-utility': window.addUtility(idx); break;
-            case 'edit-utility': window.editUtility(idx, uIdx); break;
+            case 'add-utility': addUtility(idx); break;
+            case 'edit-utility': editUtility(idx, uIdx); break;
             case 'delete-utility': deleteUtility(idx, uIdx); break;
-            case 'edit-phone': window.editPhone(idx); break;
+            case 'edit-phone': editPhone(idx); break;
             case 'delete-phone': deletePhone(idx); break;
-            case 'edit-email': window.editEmail(idx); break;
+            case 'edit-email': editEmail(idx); break;
             case 'delete-email': deleteEmail(idx); break;
-            case 'edit-doc': window.editUserDocument(idx); break;
+            case 'edit-doc': editUserDocument(idx); break;
             case 'delete-doc': deleteDocumento(idx); break;
         }
     });
@@ -1499,7 +1499,7 @@ async function editSection(sectionId) {
     }
 }
 
-window.editAddress = async (idx) => {
+async function editAddress(idx) {
     const isNew = idx === -1;
     const addr = isNew ? { type: profileLabels.addressTypes[0], address: '', civic: '', cap: '', city: '', province: '', utilities: [] } : userAddresses[idx];
     const fields = [
@@ -1524,7 +1524,7 @@ window.editAddress = async (idx) => {
 
 
 
-window.editUserDocument = async (idx) => {
+async function editUserDocument(idx) {
     const isNew = idx === -1;
     let tempDoc = isNew ? { type: profileLabels.documentTypes[0], num_serie: '', expiry_date: '' } : { ...userDocuments[idx] };
 
@@ -1636,7 +1636,7 @@ window.editUserDocument = async (idx) => {
     openModal(tempDoc);
 };
 
-window.addUtility = async (addrIdx) => {
+async function addUtility(addrIdx) {
     const fields = [
         { key: 'type', label: 'Tipo', icon: 'bolt', type: 'select', options: profileLabels.utilityTypes, configKey: 'utilityTypes' },
         { key: 'value', label: 'Codice / Identificativo', icon: 'vpn_key' }
@@ -1649,7 +1649,7 @@ window.addUtility = async (addrIdx) => {
     });
 };
 
-window.editUtility = async (addrIdx, uIdx) => {
+async function editUtility(addrIdx, uIdx) {
     const util = userAddresses[addrIdx].utilities[uIdx];
     const fields = [
         { key: 'type', label: 'Tipo', icon: 'bolt', type: 'select', options: profileLabels.utilityTypes, configKey: 'utilityTypes' },
@@ -1660,29 +1660,5 @@ window.editUtility = async (addrIdx, uIdx) => {
         await syncData();
         renderAddressesView();
     });
-};
-
-// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
-window.profiloPrivato = {
-    async decryptAll() {
-        if (typeof auth.currentUser === 'object') {
-            return await loadUserData(auth.currentUser);
-        }
-    },
-    async encryptAllIfNeeded() {
-        // Logica di self-healing: se dati sono in chiaro e masterKey è pronta, cifra e salva.
-        const masterKey = await ensureMasterKey().catch(() => null);
-        if (!masterKey || !currentUserData) return;
-
-        if (!currentUserData._encrypted) {
-            window.LOG("[VaultCheck] Avvio cifratura profilo...");
-            // Esempio: cifra la nota se presente
-            if (currentUserData.note && currentUserData.note.length < 60) {
-                currentUserData.note = await encrypt(currentUserData.note, masterKey);
-                currentUserData._encrypted = true;
-                await syncData();
-            }
-        }
-    }
 };
 

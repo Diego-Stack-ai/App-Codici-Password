@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DETTAGLIO ACCOUNT AZIENDA MODULE (V5.9.5 ADAPTER)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
  * - Entry Point: initDettaglioAccountAzienda(user)
@@ -886,12 +886,3 @@ function setupReadOnlyUI() {
     if (btnEdit) btnEdit.remove();
 }
 
-// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
-window.dettaglioAccountAzienda = {
-    async decryptAll() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const accountId = urlParams.get('id');
-        const bizId = urlParams.get('aziendaId');
-        if (accountId && bizId) return await loadAccount(bizId, accountId);
-    }
-};

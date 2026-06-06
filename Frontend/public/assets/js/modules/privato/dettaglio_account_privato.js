@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
@@ -905,11 +905,3 @@ function checkRealBankingData(acc) {
     });
 }
 
-// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
-window.dettaglioAccountPrivato = {
-    async decryptAll() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const accountId = urlParams.get('id');
-        if (accountId) return await loadAccount(accountId);
-    }
-};

@@ -25,13 +25,6 @@ export async function initLogin() {
         try { savedLang = localStorage.getItem('app_language') || 'it'; } catch (e) { }
 
         // window.AppState legacy support (se altri moduli lo usano)
-        window.AppState = window.AppState || {
-            user: null,
-            theme: 'dark',
-            language: savedLang,
-            isAuthPage: true
-        };
-
         // 2. INIZIALIZZAZIONE COMPONENTI UI
         // initComponents() è già stato chiamato da main.js, ma per sicurezza su auth pages:
         // (Nota: main.js salta setupPasswordToggles su auth pages, quindi qui dobbiamo attivarli specificamente per il login)
@@ -166,14 +159,7 @@ function setupLoginForm() {
             const user = await login(email, password);
 
             // Login riuscito: azzera contatore tentativi
-            failedAttempts = 0;
-
-            if (window.AppState) {
-                window.AppState.user = user;
-                window.AppState.lastSync = new Date().toISOString();
-            }
-
-            showToast(t('success_auth') || "Accesso autorizzato!", "success");
+            failedAttempts = 0;showToast(t('success_auth') || "Accesso autorizzato!", "success");
 
         } catch (err) {
             failedAttempts++;

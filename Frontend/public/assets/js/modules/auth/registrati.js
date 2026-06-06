@@ -14,12 +14,6 @@ export async function initRegistrati() {
 
     try {
         // 1. AppState init
-        window.AppState = window.AppState || {
-            user: null,
-            theme: 'dark',
-            language: localStorage.getItem('app_language') || 'it'
-        };
-
         // 2. SETUP FUNZIONALITÀ
 
         // 3. SETUP FUNZIONALITÀ

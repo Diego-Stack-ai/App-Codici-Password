@@ -61,7 +61,7 @@ export async function initFormAccountPrivato(user) {
             id: 'btn-save-footer',
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('save') || 'Salva',
-            onclick: () => window.saveAccount()
+            onclick: () => saveAccount()
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
         ]);
@@ -397,7 +397,7 @@ function setupUI() {
     });
 }
 
-window.renderGuestsList = function () {
+function renderGuestsList() {
     const list = document.getElementById('guests-list');
     if (!list) return;
     clearElement(list);
@@ -607,7 +607,7 @@ function createInputField(label, value, onInput, icon, type = 'text') {
 /**
  * ACTIONS
  */
-window.saveAccount = async () => {
+async function saveAccount() {
     const btnSave = document.querySelector('button[onclick="saveAccount()"]') || document.getElementById('save-btn-footer');
     if (btnSave) btnSave.disabled = true;
 

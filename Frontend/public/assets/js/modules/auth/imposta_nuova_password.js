@@ -15,12 +15,6 @@ export async function initImpostaNuovaPassword() {
 
     try {
         // 1. AppState base
-        window.AppState = window.AppState || {
-            user: auth.currentUser,
-            theme: 'dark',
-            language: localStorage.getItem('app_language') || 'it'
-        };
-
         // 2. SETUP 
 
         // 3. SETUP 

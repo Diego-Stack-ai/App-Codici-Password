@@ -82,7 +82,7 @@ function initBaseUI() {
             id: 'save-btn-footer',
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('save') || 'Salva',
-            onclick: () => window.saveAccount()
+            onclick: () => saveAccount()
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
         ]);
@@ -369,7 +369,7 @@ function setupUI() {
     }
 }
 
-window.renderGuestsList = function () {
+function renderGuestsList() {
     const list = document.getElementById('guests-list');
     if (!list) return;
     clearElement(list);
@@ -601,8 +601,8 @@ async function removeIban(idx) {
     renderBankAccounts();
 }
 
-window.saveAccount = async () => {
-    const btnSave = document.querySelector('button[onclick="window.saveAccount()"]') || document.getElementById('save-btn-footer');
+async function saveAccount() {
+    const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
 
     const hasBankingData = bankAccounts.some(acc => acc.iban?.trim() || (acc.cards && acc.cards.length > 0));

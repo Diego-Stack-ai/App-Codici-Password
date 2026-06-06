@@ -1,4 +1,4 @@
-﻿/**
+/**
  * HOME PAGE MODULE (V4.1)
  * Gestisce l'interfaccia della nuova Home Page statica.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
@@ -437,10 +437,3 @@ function setupFABGroup(aziendes = []) {
         document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
     }
 }
-// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
-window.areaPrivata = {
-    async decryptAll() {
-        const user = auth.currentUser;
-        if (user) return await initHomePage(user);
-    }
-};

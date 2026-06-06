@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ACCOUNT PRIVATI MODULE (V4.2)
  * Gestione liste account: personali, condivisi, memorandum.
  */
@@ -415,11 +415,4 @@ async function handleDelete(item) {
         filterAndRender();
     } catch (e) { logError("Delete", e); }
 }
-
-// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
-window.accountPrivati = {
-    async decryptAll() {
-        if (currentUser) return await loadAccounts(currentUser);
-    }
-};
 

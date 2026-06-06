@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AGGIUNGI SCADENZA MODULE (V4.1)
  * Gestisce l'aggiunta o la modifica di scadenze.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
@@ -64,6 +64,12 @@ export async function initAggiungiScadenza(user) {
 
     initProxyDropdowns();
     initAttachmentSystem();
+
+    // Collega i pulsanti "Aggiungi Email" ora che il DOM è pronto
+    document.getElementById('btn-add-email-primaria')
+        ?.addEventListener('click', () => _addNotificationEmailBtn('email_primaria_select'));
+    document.getElementById('btn-add-email-secondaria')
+        ?.addEventListener('click', () => _addNotificationEmailBtn('email_secondaria_select'));
 
     // --- FOOTER ACTIONS SYSTEM (Event Contract V6.1) ---
     function initFooterFromDetail(detail) {
@@ -352,10 +358,10 @@ async function loadDynamicConfig() {
     }
 }
 
-window._addNotificationEmailBtn = async (selectId = 'email_primaria_select') => {
-    const v = await showInputModal("Nuova Email", "", "Inserisci un nuovo indirizzo email...");
+async function _addNotificationEmailBtn(selectId = 'email_primaria_select') {
+    const v = await showInputModal('Nuova Email', '', 'Inserisci un nuovo indirizzo email...');
     if (v && v.trim()) await addConfigItem(selectId, v.trim());
-};
+}
 
 function updateCurrentDynamicConfig() {
     if (currentMode === 'automezzi') dynamicConfig = unifiedConfigs.automezzi;

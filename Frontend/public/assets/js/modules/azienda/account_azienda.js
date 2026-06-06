@@ -324,9 +324,3 @@ async function handleDelete(item) {
     } catch (e) { logError("Delete", e); }
 }
 
-// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
-window.accountAzienda = {
-    async decryptAll() {
-        if (currentAziendaId) return await loadAccounts(currentAziendaId);
-    }
-};
