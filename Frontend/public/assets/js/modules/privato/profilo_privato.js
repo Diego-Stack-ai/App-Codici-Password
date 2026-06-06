@@ -32,6 +32,7 @@ import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_uti
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
+import { syncData as _syncData } from './profilo-sync.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -1064,6 +1065,20 @@ function renderDocumentiView() {
  */
 // ─── SECTION 8: DELEGATION & SYNC ────────────────────────────────────────────
 
+/**
+ * Wrapper locale per syncData: inietta automaticamente le variabili di stato correnti.
+ * La logica di cifratura e il commit Firestore sono in profilo-sync.js.
+ */
+async function syncData() {
+    // Sanificazione array prima del commit
+    userAddresses = (userAddresses || []).filter(a => a != null);
+    contactPhones = (contactPhones || []).filter(p => p != null);
+    contactEmails = (contactEmails || []).filter(e => e != null);
+    userDocuments = (userDocuments || []).filter(d => d != null);
+
+    return _syncData({ currentUserUid, currentUserData, userAddresses, contactPhones, contactEmails, userDocuments });
+}
+
 function setupDelegation(ctx) {
     document.addEventListener('click', async (e) => {
         const target = e.target.closest('[data-action]');
@@ -1089,92 +1104,6 @@ function setupDelegation(ctx) {
             case 'delete-doc': deleteDocumento(idx); break;
         }
     });
-}
-
-async function syncData() {
-    window.LOG("[VaultCheck] Avvio sincronizzazione protetta...");
-    try {
-        const user = auth.currentUser;
-        if (!user) {
-            showToast("Sessione scaduta: ricarica la pagina.", "error");
-            return;
-        }
-
-        // Sanificazione array
-        userAddresses = (userAddresses || []).filter(a => a != null);
-        contactPhones = (contactPhones || []).filter(p => p != null);
-        contactEmails = (contactEmails || []).filter(e => e != null);
-        userDocuments = (userDocuments || []).filter(d => d != null);
-
-        // Verifica MasterKey
-        const masterKey = await ensureMasterKey();
-        if (!masterKey) {
-            showToast("Chiave Master mancante: impossibile cifrare.", "error");
-            return;
-        }
-
-        window.LOG("[VaultCheck] Cifratura in corso...");
-
-        // Cifratura Documenti (Selective Encryption V7.5)
-        const encryptedDocuments = await Promise.all(userDocuments.map(async d => {
-            const enc = { ...d };
-            const fields = [
-                'num_serie', 'cf_value', 'id_number', 'license_number', 'cf',
-                'rilasciato_da', 'luogo_rilascio', 'username', 'password',
-                'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
-            ];
-            for (const f of fields) {
-                if (enc[f]) enc[f] = await encrypt(enc[f] || '', masterKey);
-            }
-            return enc;
-        }));
-
-        // Cifratura Email (Selective: solo password e note)
-        const encryptedEmails = await Promise.all(contactEmails.map(async e => ({
-            ...e,
-            password: await encrypt(e.password || '', masterKey),
-            note: await encrypt(e.note || '', masterKey)
-        })));
-
-        // Cifratura Indirizzi (V7.5: Indirizzo in chiaro, solo Utenze cifrate)
-        const encryptedAddresses = await Promise.all(userAddresses.map(async a => ({
-            ...a,
-            // address, civic, city, cap, province rimangono in chiaro
-            utilities: await Promise.all((a.utilities || []).map(async u => ({
-                ...u,
-                value: await encrypt(u.value || '', masterKey)
-            })))
-        })));
-
-        // Cifratura Telefoni (V7.5: Numero in chiaro)
-        const encryptedPhones = [...contactPhones];
-
-        // Commit finale su Firestore
-        const finalUpdate = {
-            nome: currentUserData.nome || '', // V7.5 In Chiaro
-            cognome: currentUserData.cognome || '', // V7.5 In Chiaro
-            birth_date: currentUserData.birth_date || '', // plaintext
-            birth_place: currentUserData.birth_place || '', // V7.5 In Chiaro
-            birth_province: currentUserData.birth_province || '', // plaintext
-            note: await encrypt(currentUserData.note || '', masterKey),
-            userAddresses: encryptedAddresses,
-            contactPhones: encryptedPhones,
-            contactEmails: encryptedEmails,
-            documenti: encryptedDocuments,
-            _encrypted: true
-        };
-
-        // Rimuovi eventuali undefined residui per sicurezza Firebase
-        Object.keys(finalUpdate).forEach(key => finalUpdate[key] === undefined && delete finalUpdate[key]);
-
-        await updateDoc(doc(db, "users", user.uid), finalUpdate);
-
-        window.LOG("[VaultCheck] Sincronizzazione V6.1 completata con successo.");
-        showToast(t('success_save'), "success");
-    } catch (e) {
-        logError("SyncData", e);
-        showToast("Errore di sicurezza durante il salvataggio.", "error");
-    }
 }
 
 async function deleteAddress(idx) {
