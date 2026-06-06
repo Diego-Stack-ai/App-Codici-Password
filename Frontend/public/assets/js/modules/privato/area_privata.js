@@ -151,11 +151,6 @@ async function loadTopAccounts(uid) {
             // Decrittazione preventiva prima della creazione card
             if (data._encrypted && masterKey) {
                 try {
-                    console.log(`[DEBUG_CRYPTO] Decrypting account ${d.id}:`, {
-                        username: data.username,
-                        account: data.account,
-                        password: data.password ? (typeof data.password === 'string' ? `${data.password.substring(0, 10)}...` : typeof data.password) : 'N/A'
-                    });
                     data.username = data.username ? await decrypt(data.username, masterKey) : data.username;
                     data.account = data.account ? await decrypt(data.account, masterKey) : data.account;
                     data.password = data.password ? await decrypt(data.password, masterKey) : data.password;

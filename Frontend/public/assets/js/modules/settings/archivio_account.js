@@ -211,11 +211,6 @@ async function loadArchived() {
             allArchived = await Promise.all(allArchived.map(async acc => {
                 if (acc._encrypted) {
                     try {
-                        console.log(`[DEBUG_CRYPTO] Decrypting archive item ${acc.id}:`, {
-                            name: acc.nomeAccount,
-                            username: acc.username,
-                            account: acc.account
-                        });
                         acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
                         acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
                         acc.password = acc.password ? await decrypt(acc.password, masterKey) : acc.password;
