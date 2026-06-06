@@ -13,6 +13,7 @@ let softLockTimeout;
 let logoutTimerMs = 3 * 60 * 1000; // Default Hard Logout 3 minuti
 let softLockTimerMs = 1 * 60 * 1000; // Default Soft Lock 1 minuto
 let isInitialized = false;
+let _lastActivityTimestamp = null; // in-memory: non manipolabile da localStorage
 
 /**
  * Inizializza il timer di inattività.
@@ -66,25 +67,20 @@ export async function syncTimeoutWithFirestore(uid) {
  * Controlla se l'ultima attività registrata è oltre il limite consentito.
  */
 function checkLastActivity() {
-    const lastActive = localStorage.getItem('titan_last_activity');
-    if (lastActive) {
-        const elapsed = Date.now() - parseInt(lastActive);
+    if (!_lastActivityTimestamp) return;
+    const elapsed = Date.now() - _lastActivityTimestamp;
 
-        // Livello 2: Hard Logout
-        if (elapsed > logoutTimerMs) {
-            console.warn(`[Titan-Lock] Hard Logout: ${Math.round(elapsed / 1000)}s passati.`);
-            performAutoLogout();
-            return;
-        }
+    // Livello 2: Hard Logout
+    if (elapsed > logoutTimerMs) {
+        performAutoLogout();
+        return;
+    }
 
-        // Livello 1: Soft Lock
-        if (elapsed > softLockTimerMs) {
-            console.warn(`[Titan-Lock] Soft Lock: ${Math.round(elapsed / 1000)}s passati.`);
-            try {
-                const { softLock } = import.meta.glob ? {} : window; // Fallback se non exportato correttamente
-                if (typeof window.softLock === 'function') window.softLock();
-            } catch (e) { }
-        }
+    // Livello 1: Soft Lock
+    if (elapsed > softLockTimerMs) {
+        try {
+            if (typeof window.softLock === 'function') window.softLock();
+        } catch (e) { }
     }
 }
 
@@ -92,7 +88,7 @@ function checkLastActivity() {
  * Registra un'attività utente e resetta il timer.
  */
 function recordActivity() {
-    localStorage.setItem('titan_last_activity', Date.now().toString());
+    _lastActivityTimestamp = Date.now(); // in-memory, non manipolabile da DevTools
 
     if (inactivityTimeout) clearTimeout(inactivityTimeout);
     if (softLockTimeout) clearTimeout(softLockTimeout);

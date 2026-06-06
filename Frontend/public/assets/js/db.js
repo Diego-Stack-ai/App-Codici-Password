@@ -95,8 +95,15 @@ async function deleteAccount(userId, accountId) {
 // --- SISTEMA DI CONDIVISIONE & INVITI ---
 
 async function sendInvitation(data) {
+    // Whitelist esplicita dei campi accettati — previene l'iniezione di campi arbitrari
     const inviteData = {
-        ...data,
+        recipientEmail: data.recipientEmail,
+        accountId: data.accountId,
+        accountName: data.accountName || '',
+        ownerId: data.ownerId,
+        senderId: data.senderId || data.ownerId,
+        aziendaId: data.aziendaId || null,
+        type: data.type || 'privato',
         status: 'pending',
         createdAt: new Date().toISOString()
     };
