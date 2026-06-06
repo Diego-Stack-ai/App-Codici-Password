@@ -186,6 +186,7 @@ export function isEncryptedValue(val) {
  */
 export async function decryptIfPossible(val, masterKey, fallback = '') {
     if (val === undefined || val === null) return fallback;
+    if (!masterKey) return val;                // ← guard: senza chiave non tentiamo
     if (!isEncryptedValue(val)) return val;
     try {
         return await decrypt(val, masterKey);

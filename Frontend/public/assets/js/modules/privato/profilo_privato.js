@@ -140,7 +140,7 @@ async function loadUserData(user) {
                         'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
                     ];
                     for (const f of fields) {
-                        if (dec[f]) dec[f] = await decryptIfPossible(dec[f]);
+                        if (dec[f]) dec[f] = await decryptIfPossible(dec[f], masterKey);
                     }
                     return dec;
                 }));
@@ -150,8 +150,8 @@ async function loadUserData(user) {
             if (Array.isArray(currentUserData.contactEmails)) {
                 currentUserData.contactEmails = await Promise.all(currentUserData.contactEmails.map(async e => ({
                     ...e,
-                    password: await decryptIfPossible(e.password),
-                    note: await decryptIfPossible(e.note)
+                    password: await decryptIfPossible(e.password, masterKey),
+                    note: await decryptIfPossible(e.note, masterKey)
                 })));
             }
             console.log("[VaultCheck] Decrittazione granulare V6.1.5 completata.");
