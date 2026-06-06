@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROTOCOLLO MASTER MAIN ENTRY POINT (V7.0)
  * Coordina l'inizializzazione dei moduli UI dell'applicazione secondo il PROTOCOLLO V7.0.
  * Refactor: Rimozione innerHTML, uso dom-utils.js, centralizzazione in components.js.
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('load', async () => {
             try {
                 const registration = await navigator.serviceWorker.register('./sw.js');
-                console.log('[PWA] Service Worker registrato con successo:', registration.scope);
+                window.LOG?.('[PWA] Service Worker registrato con successo:', registration.scope);
 
                 // Gestione Aggiornamenti
                 registration.addEventListener('updatefound', () => {
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                             // C'è un nuovo worker e uno vecchio è già attivo
-                            console.log('[PWA] Nuovo aggiornamento disponibile.');
+                            window.LOG?.('[PWA] Nuovo aggiornamento disponibile.');
                             if (window.showToast) {
                                 showToast("Nuovo aggiornamento disponibile! Ricarica per applicare.", "info");
                                 // Opzionale: forzare il ricaricamento dopo un po' o tramite pulsante
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Router Logic - Step 1: Identifica Pagina
     const currentPage = getCurrentPage();
-    console.log(`[Router] Current Page: ${currentPage}`);
+    window.LOG?.(`[Router] Current Page: ${currentPage}`);
 
     // Gestione Pagine Pubbliche (No Auth Required)
     if (currentPage === 'index') Pages.initIndex();
@@ -189,12 +189,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            console.log(`[AUTH-DEBUG] User logged in: ${user.email} (UID: ${user.uid})`);
+            window.LOG?.(`[AUTH-DEBUG] User logged in: ${user.email} (UID: ${user.uid})`);
             try {
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
-                    console.log("[AUTH-DEBUG] User document found.");
+                    window.LOG?.("[AUTH-DEBUG] User document found.");
                 } else {
                     console.warn("[AUTH-DEBUG] User document NOT found in Firestore.");
                 }
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isMemoLike = (data.type === 'memo' || data.type === 'memorandum');
 
                 if (newVisibility === 'private' && isMemoLike && data.isExplicitMemo !== true) {
-                    console.log(`[V5.4-CONFIRM] Reverting shared-memo to account type after owner OK.`);
+                    window.LOG?.(`[V5.4-CONFIRM] Reverting shared-memo to account type after owner OK.`);
                     newType = 'account';
                 }
 
@@ -455,18 +455,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (!currentUserEmail) throw new Error("Utente non autenticato.");
 
-            console.log(`[V3.1-DEBUG] --- handleInviteResponse ---`);
-            console.log(`[V3.1-DEBUG] User: ${currentUserEmail} (UID: ${currentUid}), Action: ${status}`);
+            window.LOG?.(`[V3.1-DEBUG] --- handleInviteResponse ---`);
+            window.LOG?.(`[V3.1-DEBUG] User: ${currentUserEmail} (UID: ${currentUid}), Action: ${status}`);
 
             // --- RETRY LOGIC (Harden V7.0) ---
             let invSnap = null;
             let inviteRef = doc(db, "invites", inviteId);
 
-            console.log(`[V3.1-DEBUG] Fetching Invite Doc: ${inviteId}`);
+            window.LOG?.(`[V3.1-DEBUG] Fetching Invite Doc: ${inviteId}`);
             for (let i = 0; i < 5; i++) {
                 invSnap = await getDoc(inviteRef);
                 if (invSnap.exists()) {
-                    console.log(`[V3.1-DEBUG] Invite found on attempt ${i + 1}/5`);
+                    window.LOG?.(`[V3.1-DEBUG] Invite found on attempt ${i + 1}/5`);
                     break;
                 }
                 const delay = 800 * (i + 1);
@@ -487,16 +487,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // --- ATOMIC TRANSACTION V7.0 ---
-            console.log("[V3.1-DEBUG] Executing runTransaction...");
+            window.LOG?.("[V3.1-DEBUG] Executing runTransaction...");
             await runTransaction(db, async (transaction) => {
-                console.log(`[V3.1-DEBUG] Transaction started for invite: ${inviteId}`);
+                window.LOG?.(`[V3.1-DEBUG] Transaction started for invite: ${inviteId}`);
 
                 // 1. Get Inverse
                 let storedInviteSnap;
                 try {
                     storedInviteSnap = await transaction.get(inviteRef);
                     if (!storedInviteSnap.exists()) throw new Error("Invito non trovato nel database.");
-                    console.log("[V3.1-DEBUG] Invite fetched successfully.");
+                    window.LOG?.("[V3.1-DEBUG] Invite fetched successfully.");
                 } catch (e) {
                     console.error("[V3.1-DEBUG] Invite GET failed:", e.message);
                     throw e;
@@ -512,14 +512,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ? `users/${ownerId}/aziende/${storedInvite.aziendaId}/accounts/${accId}`
                     : `users/${ownerId}/accounts/${accId}`;
 
-                console.log(`[V3.1-DEBUG] Syncing account at path: ${accountPath}`);
+                window.LOG?.(`[V3.1-DEBUG] Syncing account at path: ${accountPath}`);
                 const accountRef = doc(db, accountPath);
 
                 let accSnap;
                 try {
                     accSnap = await transaction.get(accountRef);
                     if (!accSnap.exists()) throw new Error("Account non trovato o accesso negato.");
-                    console.log("[V3.1-DEBUG] Account fetched successfully.");
+                    window.LOG?.("[V3.1-DEBUG] Account fetched successfully.");
                 } catch (e) {
                     console.error("[V3.1-DEBUG] Account GET failed:", e.message);
                     throw e;
@@ -527,8 +527,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 let data = accSnap.data();
                 let sharedWith = data.sharedWith || {};
-                console.log(`[V3.1-DEBUG] Current sharedWith State:`, sharedWith);
-                console.log(`[V3.1-DEBUG] Processing Guest: ${sKey}, Status: ${status}`);
+                window.LOG?.(`[V3.1-DEBUG] Current sharedWith State:`, sharedWith);
+                window.LOG?.(`[V3.1-DEBUG] Processing Guest: ${sKey}, Status: ${status}`);
 
                 if (sharedWith[sKey]) {
                     sharedWith[sKey].status = status;
@@ -546,7 +546,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // V7.0 AUTO-HEALING DI STATO: Se torna privato e non era un Memo esplicito, torna ad essere Account
                 let newType = data.type;
                 if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
-                    console.log("[V3.1-DEBUG] Auto-Healing: Reverting shared-memo to account type.");
+                    window.LOG?.("[V3.1-DEBUG] Auto-Healing: Reverting shared-memo to account type.");
                     newType = 'account';
                 }
 
@@ -558,18 +558,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     updatedAt: new Date().toISOString()
                 };
 
-                console.log("[V3.1-DEBUG] Final Account Update Payload:", updatePayload);
-                console.log("[V3.1-DEBUG] Performing updates...");
+                window.LOG?.("[V3.1-DEBUG] Final Account Update Payload:", updatePayload);
+                window.LOG?.("[V3.1-DEBUG] Performing updates...");
                 transaction.update(accountRef, updatePayload);
                 transaction.update(inviteRef, {
                     status: status,
                     respondedAt: new Date().toISOString()
                 });
 
-                console.log("[V3.1-DEBUG] Updates queued in transaction.");
+                window.LOG?.("[V3.1-DEBUG] Updates queued in transaction.");
             });
 
-            console.log("[V3.1-DEBUG] Transaction committed successfully.");
+            window.LOG?.("[V3.1-DEBUG] Transaction committed successfully.");
 
             // Cleanup modal
             const modal = document.getElementById('invite-modal');
@@ -604,4 +604,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => document.body.classList.add('revealed'), 100);
 });
 
-console.log("PROTOCOLLO V7.0 MASTER Initialized");
+window.LOG?.("PROTOCOLLO V7.0 MASTER Initialized");

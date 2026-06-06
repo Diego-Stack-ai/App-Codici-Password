@@ -1,4 +1,4 @@
-import { auth, db } from './firebase-config.js';
+﻿import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { disableVaultAutoUnlock } from './modules/core/security-manager.js';
@@ -114,19 +114,19 @@ async function performAutoLogout() {
         // Questo protegge i dati immediatamente senza attendere il logout di Firebase.
         try {
             disableVaultAutoUnlock();
-            console.log("[Titan-Lock] Vault bloccata per inattività.");
+            window.LOG?.("[Titan-Lock] Vault bloccata per inattività.");
         } catch (e) { }
 
         // [V3.0] Decidi se fare logout completo o solo blocco Vault
         // Se il timeout è molto breve (es. < 1 min), facciamo solo blocco Vault + reload
         // Se è lungo, facciamo logout completo.
         if (logoutTimerMs <= 60000) {
-            console.log("[Titan-Lock] Timeout breve: Ricarico per forzare blocco UI.");
+            window.LOG?.("[Titan-Lock] Timeout breve: Ricarico per forzare blocco UI.");
             window.location.reload();
             return;
         }
 
-        console.log("[Titan-Lock] Eseguo logout automatico...");
+        window.LOG?.("[Titan-Lock] Eseguo logout automatico...");
         if (auth.currentUser) {
             await signOut(auth);
         }

@@ -1,4 +1,4 @@
-import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
+﻿import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { auth } from './firebase-config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
@@ -249,7 +249,7 @@ export async function initComponents() {
             }));
         }
 
-        console.log("PROTOCOLLO V7.0 MASTER Components Initialized (DOM Safe)");
+        window.LOG?.("PROTOCOLLO V7.0 MASTER Components Initialized (DOM Safe)");
 
     } catch (e) {
         console.error("Errore inizializzazione componenti:", e);

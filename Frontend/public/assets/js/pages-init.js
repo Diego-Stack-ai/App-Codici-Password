@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PAGES INIT ROUTER (V5.0 ADAPTER)
  * Mappa le funzioni di inizializzazione per tutte le pagine.
  * 
@@ -38,7 +38,7 @@ export async function initImpostaNuovaPassword() {
 }
 
 export async function initHomePage(user) {
-    console.log("[Router] Loading Home V5.0...");
+    window.LOG?.("[Router] Loading Home V5.0...");
     const module = await import('./modules/home/home.js');
     await module.initHomePage(user);
 }
@@ -60,7 +60,7 @@ export async function initImpostazioni(user) {
 
 // --- CONFIG SCADENZE ---
 export async function initRegoleScadenze(user) {
-    console.log("[Router] Init Regole Scadenze (Static)");
+    window.LOG?.("[Router] Init Regole Scadenze (Static)");
 }
 
 export async function initConfigurazioneAutomezzi(user) {
@@ -78,8 +78,8 @@ export async function initConfigurazioneRegoleGenerali(user) {
     await module.initConfigurazioneGenerali(user);
 }
 
-export async function initPrivacy() { console.log("[Router] Privacy Page Loaded"); }
-export async function initTermini() { console.log("[Router] Termini Page Loaded"); }
+export async function initPrivacy() { window.LOG?.("[Router] Privacy Page Loaded"); }
+export async function initTermini() { window.LOG?.("[Router] Termini Page Loaded"); }
 
 // --- 3. MODULI ACCOUNT PRIVATI ---
 export async function initAccountPrivati(user) {
