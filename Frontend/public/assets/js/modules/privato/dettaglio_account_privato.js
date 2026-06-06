@@ -19,6 +19,7 @@ import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
 import { initComponents } from '../../components.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decryptIfPossible } from '../core/crypto-utils.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -116,24 +117,19 @@ async function loadAccount() {
         if (accountData._encrypted) {
             try {
                 const masterKey = await ensureMasterKey();
-                const decryptIfPossible = async (val) => {
-                    if (!val) return val;
-                    try { return await decrypt(val, masterKey); } catch (e) { return "---"; }
-                };
-
-                accountData.username = await decryptIfPossible(accountData.username);
-                accountData.account = await decryptIfPossible(accountData.account);
-                accountData.password = await decryptIfPossible(accountData.password);
-                accountData.note = await decryptIfPossible(accountData.note);
+                accountData.username = await decryptIfPossible(accountData.username, masterKey);
+                accountData.account = await decryptIfPossible(accountData.account, masterKey);
+                accountData.password = await decryptIfPossible(accountData.password, masterKey);
+                accountData.note = await decryptIfPossible(accountData.note, masterKey);
                 if (Array.isArray(accountData.banking)) {
                     accountData.banking = await Promise.all(accountData.banking.map(async b => ({
                         ...b,
-                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva),
+                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, masterKey),
                         cards: await Promise.all((b.cards || []).map(async c => ({
                             ...c,
-                            cardNumber: await decryptIfPossible(c.cardNumber),
-                            pin: await decryptIfPossible(c.pin),
-                            ccv: await decryptIfPossible(c.ccv)
+                            cardNumber: await decryptIfPossible(c.cardNumber, masterKey),
+                            pin: await decryptIfPossible(c.pin, masterKey),
+                            ccv: await decryptIfPossible(c.ccv, masterKey)
                         })))
                     })));
                 }

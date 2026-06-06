@@ -13,6 +13,7 @@ import { t } from '../../translations.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
+import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -99,28 +100,17 @@ async function loadUserData(user) {
         // 🔐 PROTOCOLLO BLINDA (V6.1.5): Decrittazione Granulare Universale
         const masterKey = await ensureMasterKey();
         if (masterKey) {
-            const isEncryptedValue = (val) => {
-                if (!val || typeof val !== 'string' || val.length < 30) return false;
-                return /^[A-Za-z0-9+/]+={0,2}$/.test(val);
-            };
-
-            const decryptIfPossible = async (val) => {
-                if (val === undefined || val === null) return '';
-                if (!isEncryptedValue(val)) return val;
-                try { return await decrypt(val, masterKey); } catch (e) { return val; }
-            };
-
             // Dati personali
-            currentUserData.nome = await decryptIfPossible(currentUserData.nome);
-            currentUserData.cognome = await decryptIfPossible(currentUserData.cognome);
-            currentUserData.birth_place = await decryptIfPossible(currentUserData.birth_place);
-            currentUserData.note = await decryptIfPossible(currentUserData.note);
+            currentUserData.nome = await decryptIfPossible(currentUserData.nome, masterKey);
+            currentUserData.cognome = await decryptIfPossible(currentUserData.cognome, masterKey);
+            currentUserData.birth_place = await decryptIfPossible(currentUserData.birth_place, masterKey);
+            currentUserData.note = await decryptIfPossible(currentUserData.note, masterKey);
 
             // Telefoni
             if (Array.isArray(currentUserData.contactPhones)) {
                 currentUserData.contactPhones = await Promise.all(currentUserData.contactPhones.map(async p => ({
                     ...p,
-                    number: await decryptIfPossible(p.number)
+                    number: await decryptIfPossible(p.number, masterKey)
                 })));
             }
 
@@ -128,14 +118,14 @@ async function loadUserData(user) {
             if (Array.isArray(currentUserData.userAddresses)) {
                 currentUserData.userAddresses = await Promise.all(currentUserData.userAddresses.map(async a => ({
                     ...a,
-                    address: await decryptIfPossible(a.address),
-                    civic: await decryptIfPossible(a.civic),
-                    city: await decryptIfPossible(a.city),
-                    cap: await decryptIfPossible(a.cap),
-                    province: await decryptIfPossible(a.province),
+                    address: await decryptIfPossible(a.address, masterKey),
+                    civic: await decryptIfPossible(a.civic, masterKey),
+                    city: await decryptIfPossible(a.city, masterKey),
+                    cap: await decryptIfPossible(a.cap, masterKey),
+                    province: await decryptIfPossible(a.province, masterKey),
                     utilities: await Promise.all((a.utilities || []).map(async u => ({
                         ...u,
-                        value: await decryptIfPossible(u.value)
+                        value: await decryptIfPossible(u.value, masterKey)
                     })))
                 })));
             }

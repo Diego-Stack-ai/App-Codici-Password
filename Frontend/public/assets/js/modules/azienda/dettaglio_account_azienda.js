@@ -18,6 +18,7 @@ import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decryptIfPossible } from '../core/crypto-utils.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -91,27 +92,22 @@ async function loadAccount() {
         if (originalData._encrypted) {
             try {
                 const masterKey = await ensureMasterKey();
-                const decryptIfPossible = async (val) => {
-                    if (!val) return val;
-                    try { return await decrypt(val, masterKey); } catch (e) { return "---"; }
-                };
-
-                originalData.username = await decryptIfPossible(originalData.username);
-                originalData.account = await decryptIfPossible(originalData.account);
-                originalData.password = await decryptIfPossible(originalData.password);
-                originalData.numeroIscrizione = await decryptIfPossible(originalData.numeroIscrizione);
-                originalData.codiceSocieta = await decryptIfPossible(originalData.codiceSocieta);
-                originalData.note = await decryptIfPossible(originalData.note);
+                originalData.username = await decryptIfPossible(originalData.username, masterKey);
+                originalData.account = await decryptIfPossible(originalData.account, masterKey);
+                originalData.password = await decryptIfPossible(originalData.password, masterKey);
+                originalData.numeroIscrizione = await decryptIfPossible(originalData.numeroIscrizione, masterKey);
+                originalData.codiceSocieta = await decryptIfPossible(originalData.codiceSocieta, masterKey);
+                originalData.note = await decryptIfPossible(originalData.note, masterKey);
 
                 if (Array.isArray(originalData.banking)) {
                     originalData.banking = await Promise.all(originalData.banking.map(async b => ({
                         ...b,
-                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva),
+                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, masterKey),
                         cards: await Promise.all((b.cards || []).map(async c => ({
                             ...c,
-                            cardNumber: await decryptIfPossible(c.cardNumber),
-                            pin: await decryptIfPossible(c.pin),
-                            ccv: await decryptIfPossible(c.ccv)
+                            cardNumber: await decryptIfPossible(c.cardNumber, masterKey),
+                            pin: await decryptIfPossible(c.pin, masterKey),
+                            ccv: await decryptIfPossible(c.ccv, masterKey)
                         })))
                     })));
                 }
