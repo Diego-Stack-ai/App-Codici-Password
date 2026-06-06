@@ -9,6 +9,10 @@ import { t } from './translations.js';
  * Rileva automaticamente se siamo su una pagina Auth o App.
  */
 export async function initComponents() {
+    // Guard idempotente: evita doppia inizializzazione e fetch multipli
+    if (window.__componentsInitialized) return;
+    window.__componentsInitialized = true;
+
     try {
         const path = window.location.pathname;
         const pageTitle = document.title.split(' - ')[0] || 'App Codici Password';
