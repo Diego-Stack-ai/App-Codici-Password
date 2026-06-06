@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app-check.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app-check.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
@@ -23,12 +23,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // 🛡️ APP CHECK — Protegge Firestore e Storage da accessi non autorizzati
-// Richiede chiave reCAPTCHA Enterprise nella Firebase Console
-// https://console.firebase.google.com/project/appcodici-password/appcheck
+// Provider: reCAPTCHA v3 — registrare su https://www.google.com/recaptcha/admin
+// Aggiungere dominio: appcodici-password.web.app
+// Poi attivare enforcement: Firebase Console > App Check > Firestore
 const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaEnterpriseProvider(
-    // Chiave reCAPTCHA Enterprise (inserire dalla Firebase Console > App Check)
-    "RECAPTCHA_ENTERPRISE_KEY_DA_CONFIGURARE"
+  provider: new ReCaptchaV3Provider(
+    // Site Key reCAPTCHA v3 (da Google reCAPTCHA Admin Console)
+    "RECAPTCHA_V3_SITE_KEY_DA_INSERIRE"
   ),
   isTokenAutoRefreshEnabled: true  // Refresh automatico del token
 });
