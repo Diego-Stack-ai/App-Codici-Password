@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (inviteUnsubscribe) inviteUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
-                // window.location.href = 'index.html'; // Scommentare in prod
+                window.location.href = 'index.html';
             }
         }
     });
