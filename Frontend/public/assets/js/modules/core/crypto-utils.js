@@ -167,3 +167,43 @@ export async function decrypt(base64Data, password) {
         return "--ERRORE--";
     }
 }
+
+// ─────────────────────────────────────────────────────────────
+// UTILITY CONDIVISE (V1.0) — eliminano duplicazione in 6 moduli
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Determina se un valore sembra cifrato (base64 valido, lunghezza minima).
+ */
+export function isEncryptedValue(val) {
+    if (!val || typeof val !== 'string' || val.length < 30) return false;
+    return /^[A-Za-z0-9+/]+={0,2}$/.test(val);
+}
+
+/**
+ * Tenta la decrittazione di un valore. Se non sembra cifrato o fallisce,
+ * restituisce il valore originale senza errori.
+ */
+export async function decryptIfPossible(val, masterKey, fallback = '') {
+    if (val === undefined || val === null) return fallback;
+    if (!isEncryptedValue(val)) return val;
+    try {
+        return await decrypt(val, masterKey);
+    } catch (e) {
+        return val;
+    }
+}
+
+/**
+ * Decritta un sottoinsieme di campi di un oggetto piatto.
+ */
+export async function decryptFields(obj, masterKey, fields) {
+    if (!obj || !masterKey) return obj;
+    const result = { ...obj };
+    for (const field of fields) {
+        if (result[field]) {
+            result[field] = await decryptIfPossible(result[field], masterKey);
+        }
+    }
+    return result;
+}

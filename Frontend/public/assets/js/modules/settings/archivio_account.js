@@ -397,9 +397,3 @@ function getCollectionRef(id, context) {
     return doc(db, "users", currentUser.uid, "aziende", context, "accounts", id);
 }
 
-// 🛡️ ESPOSIZIONE DIAGNOSTICA (V3.2 — Audit Ready)
-window.archivioAccount = {
-    async decryptAll() {
-        return await loadArchived();
-    }
-};
