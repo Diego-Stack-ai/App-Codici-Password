@@ -270,14 +270,8 @@ async function loadDynamicConfig() {
                 { name: 'Tagliando', freq: 7, period: 28 },
                 { name: 'Olio motore', freq: 7, period: 14 }
             ],
-            models: [
-                "Moto Guzzi Nevada 750 - CJ14146",
-                "Moto Guzzi California - CC60256",
-                "Land Rover - GK910HB",
-                "Hyundai I10 - FL790AX",
-                "Rimorchio Ellebì - AA36924",
-                "Peugeot e-208 - GM277DC"
-            ],
+            models: [],
+            // I veicoli vengono aggiunti dall'utente nelle impostazioni
             emailTemplates: [
                 "l'assicurazione del motociclo targato",
                 "l'assicurazione dell'auto targata",
@@ -305,11 +299,8 @@ async function loadDynamicConfig() {
                 { name: 'Passaporto', freq: 14, period: 28 },
                 { name: 'Codice fiscale', freq: 7, period: 56 }
             ],
-            models: [
-                "Patente - U136W4689N",
-                "Carta identità - CA55677EP",
-                "Codice fiscale - 80380000500313823013"
-            ],
+            models: [],
+            // I documenti vengono aggiunti dall'utente nelle impostazioni
             emailTemplates: [
                 "la tua patente",
                 "Il tuo documento di Identità",
