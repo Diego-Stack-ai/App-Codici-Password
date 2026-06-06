@@ -94,9 +94,41 @@ function setupLoginForm() {
     const submitBtn = document.getElementById('login-submit-btn');
     if (!submitBtn) return;
 
-    // 🛡️ V7.0: Listener su click (dato che abbiamo rimosso il tag <form>)
+    // 🛡️ Throttle progressivo: conta i tentativi falliti e applica backoff esponenziale
+    let failedAttempts = 0;
+    let throttleTimer = null;
+
+    function applyThrottle() {
+        const delays = [1, 2, 4, 8, 16, 30]; // secondi
+        const waitSec = delays[Math.min(failedAttempts - 1, delays.length - 1)];
+        let remaining = waitSec;
+
+        submitBtn.disabled = true;
+
+        throttleTimer = setInterval(() => {
+            const icon = createElement('span', { className: 'material-symbols-outlined', textContent: 'lock_clock' });
+            clearElement(submitBtn);
+            setChildren(submitBtn, [icon, document.createTextNode(` Attendi ${remaining}s`)]);
+            remaining--;
+
+            if (remaining < 0) {
+                clearInterval(throttleTimer);
+                submitBtn.disabled = false;
+                clearElement(submitBtn);
+                setChildren(submitBtn, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'login' }),
+                    document.createTextNode(t('auth_button') || ' Accedi')
+                ]);
+            }
+        }, 1000);
+    }
+
+    // 🛡️ Listener click con throttle integrato
     submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
+
+        // Blocca click se throttle attivo
+        if (submitBtn.disabled) return;
 
         const emailEl = document.getElementById('email');
         const passwordEl = document.getElementById('password');
@@ -116,7 +148,7 @@ function setupLoginForm() {
             return;
         }
 
-        // 3. Feedback UI
+        // 3. Feedback UI caricamento
         const originalIcon = submitBtn.querySelector('.material-symbols-outlined')?.textContent || 'login';
         const originalText = Array.from(submitBtn.childNodes)
             .filter(n => n.nodeType === Node.TEXT_NODE)
@@ -128,14 +160,14 @@ function setupLoginForm() {
         setChildren(submitBtn, [
             createElement('span', { className: 'animate-spin material-symbols-outlined', textContent: 'sync' })
         ]);
-
         document.body.classList.add('is-auth-progress');
 
         try {
-            console.log("[LOGIN] Authenticating...");
             const user = await login(email, password);
 
-            // 4. Aggiornamento AppState Centrale
+            // Login riuscito: azzera contatore tentativi
+            failedAttempts = 0;
+
             if (window.AppState) {
                 window.AppState.user = user;
                 window.AppState.lastSync = new Date().toISOString();
@@ -143,27 +175,28 @@ function setupLoginForm() {
 
             showToast(t('success_auth') || "Accesso autorizzato!", "success");
 
-            // Il redirect viene gestito centralmente da checkAuthState() in auth.js
-            // per garantire coerenza tra tutti i dispositivi.
         } catch (err) {
-            console.error("[LOGIN] Auth Failure:", err);
-            submitBtn.disabled = false;
+            failedAttempts++;
+
             clearElement(submitBtn);
             setChildren(submitBtn, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: originalIcon }),
                 document.createTextNode(originalText)
             ]);
-
             document.body.classList.remove('is-auth-progress');
 
             let errorMsg = t('error_auth_failed') || "Credenziali non valide.";
-            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
                 errorMsg = "Email o Password errati.";
             } else if (err.code === 'auth/too-many-requests') {
                 errorMsg = "Troppi tentativi falliti. Riprova più tardi.";
+                failedAttempts = 5; // Forza attesa massima se Firebase blocca
             }
 
             showToast(errorMsg, "error");
+
+            // Applica throttle progressivo
+            applyThrottle();
         }
     });
 }
