@@ -28,8 +28,7 @@ const app = initializeApp(firebaseConfig);
 // Poi attivare enforcement: Firebase Console > App Check > Firestore
 const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider(
-    // Site Key reCAPTCHA v3 (da Google reCAPTCHA Admin Console)
-    "RECAPTCHA_V3_SITE_KEY_DA_INSERIRE"
+    "6LdWBhAtAAAAAPPWsqxdOu46YaNHgQzEjlUbQzeW"
   ),
   isTokenAutoRefreshEnabled: true  // Refresh automatico del token
 });
