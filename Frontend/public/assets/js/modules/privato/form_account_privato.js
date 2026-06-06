@@ -608,7 +608,7 @@ function createInputField(label, value, onInput, icon, type = 'text') {
  * ACTIONS
  */
 async function saveAccount() {
-    const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
+    const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
 
     // Check if banking actually has data
