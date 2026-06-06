@@ -13,6 +13,7 @@ import {
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
+import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
 
@@ -25,6 +26,9 @@ let bankAccounts = [];
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
+
+// Funzione di re-render locale per banking-renderer
+const rerender = () => renderBankAccounts(bankAccounts, rerender);
 
 // Utility per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -177,7 +181,7 @@ async function loadData() {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
-            renderBankAccounts();
+            renderBankAccounts(bankAccounts, rerender);
         }
 
         isExplicitMemo = data.isExplicitMemo || false;
@@ -302,7 +306,7 @@ function setupUI() {
             document.getElementById('banking-section')?.classList.toggle('hidden', !flagBanking.checked);
             if (flagBanking.checked && bankAccounts.length === 0) {
                 bankAccounts = [{ iban: '', cards: [], _isOpen: true }];
-                renderBankAccounts();
+                renderBankAccounts(bankAccounts, rerender);
             }
         };
     }
@@ -312,7 +316,7 @@ function setupUI() {
         btnAddIban.onclick = () => {
             bankAccounts.forEach(b => b._isOpen = false);
             bankAccounts.push({ iban: '', cards: [], _isOpen: true });
-            renderBankAccounts();
+            renderBankAccounts(bankAccounts, rerender);
         };
     }
 
@@ -484,121 +488,12 @@ function setupImageUploader() {
     }
 }
 
-function renderBankAccounts() {
-    const container = document.getElementById('iban-list-container');
-    if (!container) return;
-    clearElement(container);
 
-    bankAccounts.forEach((acc, idx) => {
-        const isOpen = acc._isOpen !== false;
-
-        const div = createElement('div', { className: 'bank-account-card border-glow' }, [
-            createElement('div', {
-                className: 'bank-header',
-                onclick: () => { acc._isOpen = !isOpen; renderBankAccounts(); }
-            }, [
-                createElement('div', { className: 'bank-header-left' }, [
-                    createElement('span', {
-                        className: 'material-symbols-outlined bank-expand-icon',
-                        style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
-                        textContent: 'expand_more'
-                    }),
-                    createElement('span', { className: 'bank-title', textContent: acc.iban ? `Conto: ${acc.iban.substring(0, 10)}...` : `Nuovo Conto #${idx + 1}` })
-                ]),
-                createElement('button', {
-                    className: 'btn-delete-bank',
-                    onclick: async (e) => {
-                        e.stopPropagation();
-                        const ok = await showConfirmModal('Elimina Conto', 'Vuoi eliminare interamente questo conto?', 'Elimina', 'Annulla');
-                        if (ok) {
-                            bankAccounts.splice(idx, 1);
-                            renderBankAccounts();
-                        }
-                    }
-                }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })])
-            ]),
-
-            isOpen ? createElement('div', { className: 'bank-details' }, [
-                createInputField('IBAN', acc.iban, (val) => bankAccounts[idx].iban = val, 'account_balance'),
-                createInputField('Pass. Disp.', acc.passwordDispositiva, (val) => bankAccounts[idx].passwordDispositiva = val, 'lock'),
-                createInputField('Tel. Banca', acc.referenteTelefono, (val) => bankAccounts[idx].referenteTelefono = val, 'call'),
-                createInputField('Cell. Banca', acc.referenteCellulare, (val) => bankAccounts[idx].referenteCellulare = val, 'smartphone'),
-
-                // Carte Section
-                createElement('div', { className: 'bank-cards-section' }, [
-                    createElement('div', { className: 'bank-cards-header' }, [
-                        createElement('span', { className: 'bank-cards-title', textContent: 'Carte Associate' }),
-                        createElement('button', {
-                            className: 'btn-add-card',
-                            onclick: () => { if (!acc.cards) acc.cards = []; acc.cards.push({ cardType: '', cardNumber: '', expiry: '', titolare: '', ccv: '', pin: '', _isOpen: true }); renderBankAccounts(); }
-                        }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'add_card' })])
-                    ]),
-                    createElement('div', { className: 'flex-col-gap' }, (acc.cards || []).map((card, cIdx) => renderCardEntry(idx, cIdx, card)))
-                ])
-            ]) : null
-        ]);
-        container.appendChild(div);
-    });
-}
-
-function renderCardEntry(bankIdx, cardIdx, card) {
-    const isOpen = card._isOpen !== false;
-    return createElement('div', { className: 'card-entry border-glow' }, [
-        createElement('div', {
-            className: 'card-entry-header',
-            onclick: () => { card._isOpen = !isOpen; renderBankAccounts(); }
-        }, [
-            createElement('div', { className: 'card-entry-title-row' }, [
-                createElement('span', { className: 'material-symbols-outlined card-entry-icon', textContent: 'credit_card' }),
-                createElement('span', { className: 'card-entry-label', textContent: card.cardType || `Carta #${cardIdx + 1}` })
-            ])
-        ]),
-        createElement('button', {
-            className: 'btn-delete-card',
-            onclick: async (e) => {
-                e.stopPropagation();
-                const msg = t('confirm_delete_card') || 'Eliminare questa carta?';
-                const ok = await showConfirmModal('Elimina Carta', msg, 'Elimina', 'Annulla');
-                if (ok) {
-                    bankAccounts[bankIdx].cards.splice(cardIdx, 1);
-                    renderBankAccounts();
-                }
-            }
-        }, [createElement('span', { className: 'material-symbols-outlined !text-[18px]', textContent: 'delete' })]),
-
-        isOpen ? createElement('div', { className: 'flex-col-gap animate-fade-in' }, [
-            createInputField('Nome Carta', card.cardType, (val) => bankAccounts[bankIdx].cards[cardIdx].cardType = val, 'credit_card'),
-            createInputField('Titolare', card.titolare, (val) => bankAccounts[bankIdx].cards[cardIdx].titolare = val, 'person'),
-            createInputField('Numero Carta', card.cardNumber, (val) => bankAccounts[bankIdx].cards[cardIdx].cardNumber = val, 'numbers'),
-            createElement('div', { className: 'form-grid-2' }, [
-                createInputField('Scadenza', card.expiry, (val) => bankAccounts[bankIdx].cards[cardIdx].expiry = val, 'calendar_month'),
-                createInputField('PIN', card.pin, (val) => bankAccounts[bankIdx].cards[cardIdx].pin = val, 'pin'),
-                createInputField('CCV', card.ccv, (val) => bankAccounts[bankIdx].cards[cardIdx].ccv = val, 'shield')
-            ])
-        ]) : null
-    ]);
-}
-
-function createInputField(label, value, onInput, icon) {
-    return createElement('div', { className: 'glass-field-container' }, [
-        createElement('label', { className: 'view-label', textContent: label }),
-        createElement('div', { className: 'glass-field border-glow' }, [
-            createElement('span', { className: 'material-symbols-outlined ml-4 opacity-40', textContent: icon }),
-            createElement('input', {
-                className: 'field-input',
-                value: value || '',
-                placeholder: label,
-                oninput: (e) => onInput(e.target.value),
-                autocomplete: 'off'
-            })
-        ])
-    ]);
-}
 
 async function removeIban(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_remove_account') || "Rimuovere conto?")) return;
     bankAccounts.splice(idx, 1);
-    renderBankAccounts();
+    renderBankAccounts(bankAccounts, rerender);
 }
 
 async function saveAccount() {

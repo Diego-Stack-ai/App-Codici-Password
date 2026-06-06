@@ -1,4 +1,4 @@
-﻿/**
+/**
  * FORM ACCOUNT PRIVATO (V5.9.5)
  * Creazione e modifica account con gestione IBAN dinamica.
  */
@@ -608,7 +608,7 @@ function createInputField(label, value, onInput, icon, type = 'text') {
  * ACTIONS
  */
 async function saveAccount() {
-    const btnSave = document.querySelector('button[onclick="saveAccount()"]') || document.getElementById('save-btn-footer');
+    const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
 
     // Check if banking actually has data
