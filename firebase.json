@@ -1,4 +1,4 @@
-{
+﻿{
   "firestore": {
     "database": "(default)",
     "location": "eur3",
@@ -23,8 +23,9 @@
     "public": "Frontend/public",
     "ignore": [
       "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
+      "**.*",
+      "**/node_modules/**",
+      "_dev_tools/**"
     ],
     "rewrites": [
       {

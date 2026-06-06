@@ -5,6 +5,9 @@ service cloud.firestore {
     
     function isAuth() { return request.auth != null; }
     function myEmail() { return (request.auth.token.email || "").lower(); }
+    // App Check: verifica che la richiesta provenga da un client verificato
+    // Attivare enforcement nella Firebase Console > App Check dopo aver configurato reCAPTCHA
+    function isAppCheckValid() { return request.app != null; }
 
     // --- 1. UTENTI & PROPRIETARIO (ACCESSO TOTALE) ---
     match /users/{userId}/{allPaths=**} {
