@@ -14,13 +14,7 @@ import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_uti
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 
-// 🛡️ ESPOSIZIONE GLOBALE (V3.2 — Audit Ready)
-window.ensureMasterKey = ensureMasterKey;
-window.clearSession = clearSession;
-window.isAutoUnlockActive = isAutoUnlockActive;
-window.encrypt = encrypt;
-window.decrypt = decrypt;
-
+// Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
 
 function createCopyBtn(text) {

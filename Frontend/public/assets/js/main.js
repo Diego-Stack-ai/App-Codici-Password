@@ -9,11 +9,17 @@
     try {
         const env = (typeof process !== 'undefined' && process.env && process.env.NODE_ENV) || window.NODE_ENV || document.documentElement.dataset.env || 'production';
         const originalConsoleLog = console.log && console.log.bind(console) || function () { };
+        const originalConsoleError = console.error && console.error.bind(console) || function () { };
+        const originalConsoleWarn = console.warn && console.warn.bind(console) || function () { };
 
         if (env === 'production') {
             window.LOG = function () { };
+            window.LOG_ERROR = function () { };
+            window.LOG_WARN = function () { };
         } else {
             window.LOG = (...args) => originalConsoleLog(...args);
+            window.LOG_ERROR = (...args) => originalConsoleError(...args);
+            window.LOG_WARN = (...args) => originalConsoleWarn(...args);
         }
 
         console.log = (...args) => { try { window.LOG(...args); } catch (e) { } };
@@ -22,10 +28,14 @@
         console.trace = (...args) => { try { window.LOG(...args); } catch (e) { } };
         console.group = (...args) => { try { window.LOG(...args); } catch (e) { } };
         console.groupEnd = (...args) => { try { window.LOG(...args); } catch (e) { } };
+        console.error = (...args) => { try { window.LOG_ERROR(...args); } catch (e) { } };
+        console.warn = (...args) => { try { window.LOG_WARN(...args); } catch (e) { } };
 
         window.__APP_ENV = env;
     } catch (e) {
         window.LOG = function () { };
+        window.LOG_ERROR = function () { };
+        window.LOG_WARN = function () { };
     }
 })();
 

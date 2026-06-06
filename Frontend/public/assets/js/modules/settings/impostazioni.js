@@ -13,8 +13,8 @@ import { safeSetText, setChildren, createElement, clearElement } from '../../dom
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { encrypt, decrypt, ensureMasterKey, setMasterKey, enableVaultAutoUnlock, disableVaultAutoUnlock, isAutoUnlockActive, clearSession } from '../core/security-manager.js';
 
-// [V8.0] FLAG AMBIENTE
-const DEV_MODE = true; // In fase di test 12 ore visibili
+// [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
+const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 let currentUserData = null;
 let userAddresses = [];
