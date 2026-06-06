@@ -233,14 +233,14 @@ export function clearSession() {
 // Inizializzazione stato all'importazione
 updateGlobalState();
 
-// 🛡️ ESPOSIZIONE GLOBALE (V7.0 — Audit Ready)
+// 🛡️ ESPOSIZIONE GLOBALE — solo le funzioni richiamate via window.* da moduli senza import diretto
+// (inactivity-timer.js → window.softLock; home.js → window.isAutoUnlockActive, window.resetVault)
 window.ensureMasterKey = ensureMasterKey;
 window.clearSession = clearSession;
 window.softLock = softLock;
 window.isSoftLocked = isSoftLocked;
 window.isAutoUnlockActive = isAutoUnlockActive;
 window.resetVault = resetVault;
-window.encrypt = encrypt;
-window.decrypt = decrypt;
+// window.encrypt e window.decrypt rimossi: disponibili solo via import ES6
 
 export { encrypt, decrypt };
