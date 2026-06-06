@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v8.2-master';
+const CACHE_NAME = 'codex-v8.3-master';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -54,6 +54,11 @@ self.addEventListener('fetch', (event) => {
 
     // Skip non-GET requests
     if (event.request.method !== 'GET') return;
+
+    // ⚡ Skip richieste verso domini esterni (CDN, Firebase SDK, Google APIs)
+    // Il SW gestisce solo asset locali — i CDN hanno propria cache HTTP
+    const url = new URL(event.request.url);
+    if (url.origin !== self.location.origin) return;
 
     // Strategia specifica per le pagine HTML (Network First)
     if (event.request.mode === 'navigate') {
