@@ -1,3 +1,5 @@
+﻿import { LOG } from './logger.js';
+
 /**
  * Centralized error logger for the application.
  * @param {string} context - Where the error happened (e.g., "Firestore User")

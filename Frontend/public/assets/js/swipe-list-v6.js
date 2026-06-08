@@ -1,4 +1,6 @@
-﻿/**
+﻿import { LOG } from './logger.js';
+
+/**
  * SwipeList Utility
  * Handles swipe gestures for list items (Left: Archive, Right: Delete)
  * Supports Touch and Mouse (Desktop) interactions.

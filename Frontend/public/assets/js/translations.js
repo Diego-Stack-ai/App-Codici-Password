@@ -1,4 +1,6 @@
-﻿/**
+﻿import { LOG } from './logger.js';
+
+/**
  * TRANSLATIONS LAZY LOADER (V2.0 — Auto-generato il 2026-06-06)
  * Italiano caricato inline (fallback universale, ~9.5 KB).
  * Altre 7 lingue caricate on-demand via import() dinamico da ./translations/{lang}.js
