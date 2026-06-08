@@ -1,4 +1,6 @@
 ﻿import { auth, db } from './firebase-config.js';
+import { LOG } from './logger.js';
+import { softLock } from './modules/core/security-manager.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { disableVaultAutoUnlock } from './modules/core/security-manager.js';
@@ -79,7 +81,7 @@ function checkLastActivity() {
     // Livello 1: Soft Lock
     if (elapsed > softLockTimerMs) {
         try {
-            if (typeof window.softLock === 'function') window.softLock();
+            if (true) softLock();
         } catch (e) { }
     }
 }
@@ -95,7 +97,7 @@ function recordActivity() {
 
     // Imposta Timer Soft Lock
     softLockTimeout = setTimeout(() => {
-        if (typeof window.softLock === 'function') window.softLock();
+        if (true) softLock();
     }, softLockTimerMs);
 
     // Imposta Timer Hard Logout
@@ -114,19 +116,19 @@ async function performAutoLogout() {
         // Questo protegge i dati immediatamente senza attendere il logout di Firebase.
         try {
             disableVaultAutoUnlock();
-            window.LOG?.("[Titan-Lock] Vault bloccata per inattività.");
+            LOG("[Titan-Lock] Vault bloccata per inattività.");
         } catch (e) { }
 
         // [V3.0] Decidi se fare logout completo o solo blocco Vault
         // Se il timeout è molto breve (es. < 1 min), facciamo solo blocco Vault + reload
         // Se è lungo, facciamo logout completo.
         if (logoutTimerMs <= 60000) {
-            window.LOG?.("[Titan-Lock] Timeout breve: Ricarico per forzare blocco UI.");
+            LOG("[Titan-Lock] Timeout breve: Ricarico per forzare blocco UI.");
             window.location.reload();
             return;
         }
 
-        window.LOG?.("[Titan-Lock] Eseguo logout automatico...");
+        LOG("[Titan-Lock] Eseguo logout automatico...");
         if (auth.currentUser) {
             await signOut(auth);
         }

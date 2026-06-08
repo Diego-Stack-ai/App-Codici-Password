@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DETTAGLIO ACCOUNT AZIENDA — SHARING MODULE (V1.0)
  * Gestione condivisione, visualizzazione ospiti e revoca accessi per account aziendali.
  * Estratto da dettaglio_account_azienda.js per ridurre la complessità del modulo principale.
@@ -6,6 +6,7 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import {
     doc, getDoc, collection, runTransaction
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
@@ -263,7 +264,7 @@ async function revokeRecipientV3(email) {
                     timestamp: new Date().toISOString(),
                     read: false
                 });
-                window.LOG?.(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
             }
         });
 

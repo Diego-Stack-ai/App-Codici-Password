@@ -1,4 +1,4 @@
-﻿/**
+/**
  * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
@@ -261,14 +261,12 @@ function setupTimeoutSelector(data) {
     const selector = document.getElementById('lock-timer-selector');
     if (!selector) return;
 
-    // [V8.0] Filtro opzioni in base a DEV_MODE
+    // Tutte le opzioni visibili tranne 'Subito' (0) rimosso definitivamente
     const btns = selector.querySelectorAll('.timer-btn');
     btns.forEach(btn => {
         const val = parseInt(btn.dataset.val);
-        // [V8.0] 'Subito' (0) rimosso. 12h (720) visibile solo in DEV_MODE.
+        // 'Subito' (0) rimosso: troppo aggressivo, deprecato da V8.0
         if (val === 0) {
-            btn.style.display = 'none';
-        } else if (!DEV_MODE && val === 720) {
             btn.style.display = 'none';
         }
 

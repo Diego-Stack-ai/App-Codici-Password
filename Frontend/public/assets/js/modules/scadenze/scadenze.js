@@ -5,6 +5,8 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { showToast } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { t } from '../../translations.js';
@@ -19,7 +21,6 @@ let searchQuery = '';
 let sortType = 'date-asc';
 let scadenzeContainer = null; // Module-scoped
 
-const showToast = (msg, type) => window.showToast ? window.showToast(msg, type) : window.LOG(msg);
 
 /**
  * SCADENZE MODULE (V5.0 ADAPTER)

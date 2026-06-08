@@ -1,9 +1,10 @@
-/**
+﻿/**
  * ACCOUNT PRIVATI MODULE (V4.2)
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -123,14 +124,14 @@ async function loadAccounts() {
         const lowerEmail = rawEmail.toLowerCase().trim();
         const emailsToSearch = [...new Set([rawEmail.trim(), lowerEmail])].filter(Boolean);
 
-        window.LOG(`[ACCOUNTS] Searching invites for:`, emailsToSearch);
+        LOG(`[ACCOUNTS] Searching invites for:`, emailsToSearch);
 
         const invitesQ = query(collection(db, "invites"),
             where("recipientEmail", "in", emailsToSearch),
             where("status", "==", "accepted")
         );
         const invitesSnap = await getDocs(invitesQ);
-        window.LOG(`[ACCOUNTS] Found ${invitesSnap.size} accepted invites.`);
+        LOG(`[ACCOUNTS] Found ${invitesSnap.size} accepted invites.`);
 
         const invitePromises = invitesSnap.docs.map(async invDoc => {
             const inv = invDoc.data();
@@ -148,13 +149,13 @@ async function loadAccounts() {
                     accPath = `users/${senderId}/aziende/${inv.aziendaId}/accounts/${inv.accountId}`;
                 }
 
-                window.LOG(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
+                LOG(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
                 const accSnap = await getDoc(doc(db, accPath));
 
                 if (accSnap.exists()) {
                     const d = accSnap.data();
                     sharedAccountIds.add(accSnap.id);
-                    window.LOG(`[ACCOUNTS] SUCCESS: Loaded "${d.nomeAccount}" from ${senderId}`);
+                    LOG(`[ACCOUNTS] SUCCESS: Loaded "${d.nomeAccount}" from ${senderId}`);
                     return { ...d, id: accSnap.id, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
                 } else {
                     console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
@@ -165,12 +166,12 @@ async function loadAccounts() {
             return null;
         });
         sharedWithMe = (await Promise.all(invitePromises)).filter(Boolean);
-        window.LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
+        LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
 
         // 2. Own Accounts
-        window.LOG(`[ACCOUNTS] Loading own accounts for: ${currentUser.uid}`);
+        LOG(`[ACCOUNTS] Loading own accounts for: ${currentUser.uid}`);
         const ownSnap = await getDocs(collection(db, "users", currentUser.uid, "accounts"));
-        window.LOG(`[ACCOUNTS] Found ${ownSnap.size} own accounts.`);
+        LOG(`[ACCOUNTS] Found ${ownSnap.size} own accounts.`);
         const ownAccounts = ownSnap.docs.map(d => {
             const data = d.data();
             const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;

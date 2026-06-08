@@ -1,7 +1,9 @@
 ﻿import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
+import { LOG } from './logger.js';
 import { auth } from './firebase-config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
+import { showLogoutModal } from './ui-core.js';
 
 
 /**
@@ -143,8 +145,8 @@ export async function initComponents() {
                             id: 'header-logout-btn',
                             className: 'btn-icon-header',
                             onclick: async () => {
-                                if (typeof window.showLogoutModal === 'function') {
-                                    const confirmed = await window.showLogoutModal();
+                                if (true) {
+                                    const confirmed = await showLogoutModal();
                                     if (confirmed) {
 
                                         await signOut(auth);
@@ -249,7 +251,7 @@ export async function initComponents() {
             }));
         }
 
-        window.LOG?.("PROTOCOLLO V7.0 MASTER Components Initialized (DOM Safe)");
+        LOG("PROTOCOLLO V7.0 MASTER Components Initialized (DOM Safe)");
 
     } catch (e) {
         console.error("Errore inizializzazione componenti:", e);

@@ -1,3 +1,5 @@
+﻿import { LOG } from './logger.js';
+
 import { auth, db } from './firebase-config.js';
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { encrypt, ensureMasterKey } from './modules/core/security-manager.js';

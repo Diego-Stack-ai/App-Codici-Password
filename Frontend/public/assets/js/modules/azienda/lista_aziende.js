@@ -5,6 +5,7 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
@@ -74,7 +75,7 @@ export async function initListaAziende(user) {
 }
 
 async function initProtocolUI() {
-    window.LOG('[lista_aziende] UI inizializzata tramite main.js');
+    LOG('[lista_aziende] UI inizializzata tramite main.js');
 
     // Aggiungi pulsante "+" nel footer center
     const fCenter = document.getElementById('footer-center-actions');

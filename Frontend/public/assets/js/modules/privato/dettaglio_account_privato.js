@@ -1,9 +1,10 @@
-/**
+﻿/**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc,
@@ -74,7 +75,7 @@ export async function initDettaglioAccountPrivato(user) {
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
                 onclick: () => {
-                    window.LOG('[dettaglio] Navigating to form with ID:', currentId);
+                    LOG('[dettaglio] Navigating to form with ID:', currentId);
                     window.location.href = `form_account_privato.html?id=${currentId}`;
                 }
             }, [
@@ -243,7 +244,7 @@ function renderAccount(acc) {
             btnAdd.classList.remove('hidden');
             btnAdd.onclick = (e) => {
                 e.preventDefault();
-                window.LOG("[DETTAGLIO] Add Attachment Clicked (onclick)");
+                LOG("[DETTAGLIO] Add Attachment Clicked (onclick)");
                 openSourceSelector();
             };
         }
@@ -523,7 +524,7 @@ async function revokeRecipientV3(email) {
                     timestamp: new Date().toISOString(),
                     read: false
                 });
-                window.LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
             }
         });
 
@@ -668,8 +669,6 @@ function setupActions() {
 
 // --- ATTACHMENTS LOGIC ---
 
-window.openSourceSelector = openSourceSelector;
-window.closeSourceSelector = closeSourceSelector;
 
 function openSourceSelector() {
     
@@ -735,7 +734,7 @@ function setupSourceSelector() {
         if (input) input.addEventListener('change', () => handleFileUpload(input));
     });
 
-    window.LOG('[DETTAGLIO] setupSourceSelector: listener agganciati');
+    LOG('[DETTAGLIO] setupSourceSelector: listener agganciati');
 }
 
 async function handleFileUpload(input) {

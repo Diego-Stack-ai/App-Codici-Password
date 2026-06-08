@@ -1,7 +1,9 @@
-﻿/**
+/**
  * PROTOCOLLO BASE UI COMPONENTS
  * Gestisce la logica dei componenti riutilizzabili (Pulsanti, Toggles, Icone)
  */
+
+import { showToast } from './ui-core.js';
 
 /**
  * [FACTORY] GENERAZIONE INCONA ACCOUNT
@@ -92,7 +94,7 @@ export function setupCopyButtons() {
                                 icon.textContent = 'done';
                                 setTimeout(() => icon.textContent = oldIcon, 1500);
                             }
-                            if (window.showToast) window.showToast('Copiato!');
+                            showToast('Copiato!');
                         } catch (err) {
                             console.error('Copy failed', err);
                         }

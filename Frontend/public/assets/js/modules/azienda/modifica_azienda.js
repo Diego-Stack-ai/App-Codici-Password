@@ -1,4 +1,4 @@
-﻿/**
+/**
  * MODIFICA AZIENDA MODULE (V5.0 ADAPTER)
  * Gestione anagrafica, allegati, sedi e contatti di un'azienda esistente.
  * - Entry Point: initModificaAzienda(user)
@@ -8,7 +8,7 @@ import { auth, db, storage } from '../../firebase-config.js';
 import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
@@ -186,8 +186,6 @@ function initFormEvents() {
     document.getElementById('btn-add-sede')?.addEventListener('click', () => addExtraSede());
 }
 
-window.openSourceSelector = openSourceSelector;
-window.closeSourceSelector = closeSourceSelector;
 
 function openSourceSelector() {
     

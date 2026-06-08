@@ -1,3 +1,5 @@
+﻿import { LOG } from './logger.js';
+
 /**
  * TRANSLATIONS LAZY LOADER (V2.0 — Auto-generato il 2026-06-06)
  * Italiano caricato inline (fallback universale, ~9.5 KB).
@@ -384,7 +386,7 @@ export async function loadLanguage(lang = 'it') {
     lang = lang || 'it';
     if (lang === 'it') {
         _dict = _it;
-        window.LOG?.('[i18n] Lingua attiva: it (inline)');
+        LOG('[i18n] Lingua attiva: it (inline)');
         return;
     }
     try {
@@ -392,7 +394,7 @@ export async function loadLanguage(lang = 'it') {
         const baseUrl = import.meta.url.replace(/[^/]+$/, '');
         const module = await import(`${baseUrl}translations/${lang}.js`);
         _dict = module.default;
-        window.LOG?.(`[i18n] Lingua attiva: ${lang} (${Object.keys(_dict).length} chiavi)`);
+        LOG(`[i18n] Lingua attiva: ${lang} (${Object.keys(_dict).length} chiavi)`);
     } catch (e) {
         console.warn(`[i18n] Lingua '${lang}' non disponibile — fallback a 'it'`);
         _dict = _it;

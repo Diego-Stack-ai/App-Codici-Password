@@ -1,4 +1,6 @@
-﻿/**
+﻿import { LOG } from './logger.js';
+
+/**
  * SwipeList Utility
  * Handles swipe gestures for list items (Left: Archive, Right: Delete)
  * Supports Touch and Mouse (Desktop) interactions.
@@ -45,7 +47,7 @@ export class SwipeList {
             e.preventDefault();
             e.stopPropagation();
             this.blockNextClick = false;
-            window.LOG?.("[SwipeList] Click blocked due to drag");
+            LOG("[SwipeList] Click blocked due to drag");
         }
     }
 

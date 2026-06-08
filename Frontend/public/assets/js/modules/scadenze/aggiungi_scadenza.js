@@ -1,10 +1,11 @@
-/**
+﻿/**
  * AGGIUNGI SCADENZA MODULE (V4.1)
  * Gestisce l'aggiunta o la modifica di scadenze.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
 import { db, auth, storage } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
@@ -18,6 +19,7 @@ import { initDatePickerV5 } from '../../datepicker_v5.js';
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
 
+let _preventEmailSeed = false;
 let currentUser = null;
 let currentRule = null;
 let currentMode = 'automezzi';
@@ -150,11 +152,11 @@ export async function initAggiungiScadenza(user) {
 
             if (configId === 'tipo_scadenza') {
                 // Chiediamo nome, periodo e frequenza per le Categorie
-                const name = await window.showInputModal(`Aggiungi Nuova Categoria`, '', `Nome categoria...`);
+                const name = await showInputModal(`Aggiungi Nuova Categoria`, '', `Nome categoria...`);
                 if (!name || !name.trim()) return;
-                const period = await window.showInputModal(`Giorni di preavviso`, "14", `Inserisci giorni (es. 14)`);
+                const period = await showInputModal(`Giorni di preavviso`, "14", `Inserisci giorni (es. 14)`);
                 if (period === null) return;
-                const freq = await window.showInputModal(`Frequenza notifica`, "7", `Inserisci giorni (es. 7)`);
+                const freq = await showInputModal(`Frequenza notifica`, "7", `Inserisci giorni (es. 7)`);
                 if (freq === null) return;
 
                 await addConfigItem(configId, {
@@ -163,7 +165,7 @@ export async function initAggiungiScadenza(user) {
                     freq: parseInt(freq) || 7
                 });
             } else {
-                const newVal = await window.showInputModal(`Aggiungi Nuovo`, '', `Inserisci nuovo valore...`);
+                const newVal = await showInputModal(`Aggiungi Nuovo`, '', `Inserisci nuovo valore...`);
                 if (newVal && newVal.trim()) {
                     await addConfigItem(configId, newVal.trim());
                 }
@@ -256,9 +258,9 @@ async function loadDynamicConfig() {
             if (contactEmails.length > 0) {
                 notificationEmails = contactEmails;
                 rawGenData.notificationEmails = notificationEmails;
-                if (!window._preventEmailSeed) {
+                if (!_preventEmailSeed) {
                     setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), { notificationEmails }, { merge: true });
-                    window._preventEmailSeed = true;
+                    _preventEmailSeed = true;
                 }
             }
         }
@@ -463,7 +465,7 @@ async function addConfigItem(selectId, valueStringOrObject) {
 async function editConfigItem(selectId, oldValue) {
     if (!currentUser) return;
     try {
-        const newValue = await window.showInputModal(`Modifica Voce`, oldValue, `Inserisci nuovo valore...`);
+        const newValue = await showInputModal(`Modifica Voce`, oldValue, `Inserisci nuovo valore...`);
         if (!newValue || !newValue.trim() || newValue === oldValue) return;
 
         let field = '';
@@ -688,7 +690,7 @@ function setupSaveLogic() {
 
     btnSave.addEventListener('click', async () => {
         if (!auth.currentUser || isSubmitting) {
-            window.LOG("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
+            LOG("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
             return;
         }
 
@@ -714,7 +716,7 @@ function setupSaveLogic() {
 
         try {
             isSubmitting = true;
-            window.LOG("[FRONTEND-TRACE] Lock UI attivato. Singolo salvataggio in corso...");
+            LOG("[FRONTEND-TRACE] Lock UI attivato. Singolo salvataggio in corso...");
 
             // --- UI LOCK ---
             btnSave.disabled = true;
@@ -728,7 +730,7 @@ function setupSaveLogic() {
             // --- 1. UPLOAD ALLEGATI (PRIMA della scrittura DB) ---
             const uploadedAttachments = [];
             if (selectedFiles.length > 0) {
-                window.LOG(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
+                LOG(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
                     if (btnText) btnText.textContent = `Upload ${i + 1}/${selectedFiles.length}...`;
@@ -747,7 +749,7 @@ function setupSaveLogic() {
                         size: file.size,
                         createdAt: new Date().toISOString()
                     });
-                    window.LOG(`[FRONTEND-TRACE] File ${i + 1} caricato con successo.`);
+                    LOG(`[FRONTEND-TRACE] File ${i + 1} caricato con successo.`);
                 }
             }
 
@@ -788,7 +790,7 @@ function setupSaveLogic() {
 
             // --- 3. SCRITTURA UNICA (SINGLE WRITE) ---
             let finalDocId = editingScadenzaId;
-            window.LOG("[FRONTEND-TRACE] Scrittura documento Firestore...");
+            LOG("[FRONTEND-TRACE] Scrittura documento Firestore...");
 
             if (editingScadenzaId) {
                 await updateDoc(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
@@ -797,7 +799,7 @@ function setupSaveLogic() {
                 finalDocId = docRef.id;
             }
 
-            window.LOG(`[FRONTEND-TRACE] Documento ${finalDocId} salvato. Trigger backend atteso.`);
+            LOG(`[FRONTEND-TRACE] Documento ${finalDocId} salvato. Trigger backend atteso.`);
 
             // Aggiorna il campo 'names' nel documento config corretto per l'autocomplete
             if (!editingScadenzaId && name) {

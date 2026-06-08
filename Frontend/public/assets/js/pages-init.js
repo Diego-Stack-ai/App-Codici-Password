@@ -9,6 +9,7 @@
 
 import { initComponents } from './components.js';
 
+import { LOG } from './logger.js';
 // --- 1. MODULI V5.0 (Puri/Passivi) ---
 import { initAreaPrivata as initAreaPrivataModule } from './modules/privato/area_privata.js';
 
@@ -38,7 +39,7 @@ export async function initImpostaNuovaPassword() {
 }
 
 export async function initHomePage(user) {
-    window.LOG?.("[Router] Loading Home V5.0...");
+    LOG("[Router] Loading Home V5.0...");
     const module = await import('./modules/home/home.js');
     await module.initHomePage(user);
 }
@@ -60,7 +61,7 @@ export async function initImpostazioni(user) {
 
 // --- CONFIG SCADENZE ---
 export async function initRegoleScadenze(user) {
-    window.LOG?.("[Router] Init Regole Scadenze (Static)");
+    LOG("[Router] Init Regole Scadenze (Static)");
 }
 
 export async function initConfigurazioneAutomezzi(user) {
@@ -78,8 +79,8 @@ export async function initConfigurazioneRegoleGenerali(user) {
     await module.initConfigurazioneGenerali(user);
 }
 
-export async function initPrivacy() { window.LOG?.("[Router] Privacy Page Loaded"); }
-export async function initTermini() { window.LOG?.("[Router] Termini Page Loaded"); }
+export async function initPrivacy() { LOG("[Router] Privacy Page Loaded"); }
+export async function initTermini() { LOG("[Router] Termini Page Loaded"); }
 
 // --- 3. MODULI ACCOUNT PRIVATI ---
 export async function initAccountPrivati(user) {

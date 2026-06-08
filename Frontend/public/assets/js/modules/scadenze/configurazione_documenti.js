@@ -5,6 +5,7 @@
  */
 
 import { db, auth } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
@@ -94,7 +95,7 @@ async function loadConfig() {
         } else {
             // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
             currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-            window.LOG("[CONF-DOC] Prima visita: salvataggio config default su Firebase...");
+            LOG("[CONF-DOC] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), currentConfig);
         }
         renderAll();
