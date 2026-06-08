@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROFILO PRIVATO — SYNC MODULE (V1.0)
  * Salvataggio cifrato dei dati del profilo utente su Firestore.
  * Estratto da profilo_privato.js per isolare la logica di crittografia.
@@ -8,16 +8,23 @@
  * automaticamente le variabili di stato correnti.
  *
  * Import graph (no circular deps):
+import { LOG } from '../../logger.js';
  *   profilo_privato.js → profilo-sync.js → firebase, security-manager, utils
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from '../../logger.js';
 import { showToast } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { logError } from '../../utils.js';
+import { LOG } from '../../logger.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';
 
+import { LOG } from '../../logger.js';
 /**
  * Salvataggio cifrato di tutti i dati del profilo su Firestore (Vault V6.1).
  * Cifra selettivamente i campi sensibili usando la MasterKey.
@@ -32,7 +39,7 @@ import { encrypt, ensureMasterKey } from '../core/security-manager.js';
  * @param {Array}  params.userDocuments
  */
 export async function syncData({ currentUserUid, currentUserData, userAddresses, contactPhones, contactEmails, userDocuments }) {
-    window.LOG("[VaultCheck] Avvio sincronizzazione protetta...");
+    LOG("[VaultCheck] Avvio sincronizzazione protetta...");
     try {
         const user = auth.currentUser;
         if (!user) {
@@ -46,7 +53,7 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
             return;
         }
 
-        window.LOG("[VaultCheck] Cifratura in corso...");
+        LOG("[VaultCheck] Cifratura in corso...");
 
         // Cifratura Documenti (Selective Encryption V7.5)
         const encryptedDocuments = await Promise.all((userDocuments || []).map(async d => {
@@ -102,7 +109,7 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
 
         await updateDoc(doc(db, "users", user.uid), finalUpdate);
 
-        window.LOG("[VaultCheck] Sincronizzazione V6.1 completata con successo.");
+        LOG("[VaultCheck] Sincronizzazione V6.1 completata con successo.");
         showToast(t('success_save'), "success");
     } catch (e) {
         logError("SyncData", e);

@@ -5,11 +5,16 @@
  */
 
 import { db, auth } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
 
+import { LOG } from '../../logger.js';
 const DEFAULT_CONFIG = {
     deadlineTypes: [
         { name: 'Sale Addolcitore', freq: 7, period: 14 },
@@ -88,12 +93,12 @@ async function loadConfig() {
         } else {
             // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
             currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-            window.LOG("[CONF-GEN] Prima visita: salvataggio config default su Firebase...");
+            LOG("[CONF-GEN] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig);
         }
         // Documento esistente ma deadlineTypes vuoto → re-seed
         if (currentConfig.deadlineTypes.length === 0) {
-            window.LOG("[CONF-GEN] deadlineTypes vuoto: ripristino valori default...");
+            LOG("[CONF-GEN] deadlineTypes vuoto: ripristino valori default...");
             currentConfig.deadlineTypes = JSON.parse(JSON.stringify(DEFAULT_CONFIG.deadlineTypes));
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig, { merge: true });
         }

@@ -5,12 +5,18 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { logError } from '../../utils.js';
 
+import { LOG } from '../../logger.js';
 // --- STATE ---
 let allAziende = [];
 let sortOrder = 'asc';
@@ -74,7 +80,7 @@ export async function initListaAziende(user) {
 }
 
 async function initProtocolUI() {
-    window.LOG('[lista_aziende] UI inizializzata tramite main.js');
+    LOG('[lista_aziende] UI inizializzata tramite main.js');
 
     // Aggiungi pulsante "+" nel footer center
     const fCenter = document.getElementById('footer-center-actions');

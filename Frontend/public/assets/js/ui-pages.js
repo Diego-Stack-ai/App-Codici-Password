@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROTOCOLLO BASE UI PAGES
  * Gestisce la logica specifica per singole sezioni o pagine dell'app
  */
@@ -86,7 +86,7 @@ export function setupCopyQrCode() {
                 const item = new ClipboardItem({ 'image/png': blob });
                 navigator.clipboard.write([item])
                     .then(() => {
-                        if (window.showToast) window.showToast('Immagine QR Copiata!');
+                        showToast('Immagine QR Copiata!');
                     })
                     .catch(err => console.error('QR Copy failed', err));
             });

@@ -5,10 +5,14 @@
  */
 
 import { register, resendVerificationEmail } from '../../auth.js';
+import { LOG } from '../../logger.js';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast } from '../../ui-core.js';
 
+import { LOG } from '../../logger.js';
 export async function initRegistrati() {
     
 
@@ -78,7 +82,7 @@ function setupRegisterForm() {
 
 
         try {
-            window.LOG("[REGISTER] Creating account...");
+            LOG("[REGISTER] Creating account...");
             const success = await register(nome, cognome, email, password);
 
             if (success) {

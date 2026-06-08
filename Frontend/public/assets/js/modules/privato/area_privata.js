@@ -10,13 +10,20 @@
  */
 
 import { db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, addDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { logError } from '../../utils.js';
+import { LOG } from '../../logger.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
+import { LOG } from '../../logger.js';
 // State locale per evitare reload inutili
 let _isInitialized = false;
 let _currentUserStart = null;
@@ -32,14 +39,14 @@ export async function initAreaPrivata(user) {
     // Evita re-inizializzazione se l'utente è lo stesso
     // (Nota: se serve refresh forzato, passare force=true o gestire a parte)
     if (_isInitialized && _currentUserStart === user.uid) {
-        window.LOG("[AreaPrivata] Già inizializzato per questo utente.");
+        LOG("[AreaPrivata] Già inizializzato per questo utente.");
         return;
     }
 
     _currentUserStart = user.uid;
     _isInitialized = true;
 
-    window.LOG("[AreaPrivata] Inizializzazione Modulo...");
+    LOG("[AreaPrivata] Inizializzazione Modulo...");
 
     // 1. Caricamento Dati Parallelo (Performance V5.0)
     await Promise.all([
@@ -52,7 +59,7 @@ export async function initAreaPrivata(user) {
     setupEventListeners(user.uid);
     setupFABs();
 
-    window.LOG("[AreaPrivata] Modulo Pronto.");
+    LOG("[AreaPrivata] Modulo Pronto.");
 }
 
 /**
@@ -63,9 +70,9 @@ export async function initAreaPrivata(user) {
  */
 async function loadCounters(uid, email) {
     try {
-        window.LOG(`[Counters] Fetching own accounts for UID: ${uid}`);
+        LOG(`[Counters] Fetching own accounts for UID: ${uid}`);
         const allSnap = await getDocs(collection(db, "users", uid, "accounts"));
-        window.LOG(`[Counters] Own accounts fetched: ${allSnap.size}`);
+        LOG(`[Counters] Own accounts fetched: ${allSnap.size}`);
         let counts = { standard: 0, memo: 0, shared: 0, sharedMemo: 0 };
 
         allSnap.forEach(doc => {
@@ -89,13 +96,13 @@ async function loadCounters(uid, email) {
         const lowerEmail = rawEmail.toLowerCase().trim();
         const emailsToSearch = [...new Set([rawEmail.trim(), lowerEmail])].filter(Boolean);
 
-        window.LOG(`[Counters] Fetching invites for:`, emailsToSearch);
+        LOG(`[Counters] Fetching invites for:`, emailsToSearch);
         const invitesQ = query(collection(db, "invites"),
             where("recipientEmail", "in", emailsToSearch),
             where("status", "==", "accepted")
         );
         const invitesSnap = await getDocs(invitesQ);
-        window.LOG(`[Counters] Invites fetched: ${invitesSnap.size}`);
+        LOG(`[Counters] Invites fetched: ${invitesSnap.size}`);
         invitesSnap.forEach(invDoc => {
             const inv = invDoc.data();
             const invType = inv.type || 'privato';

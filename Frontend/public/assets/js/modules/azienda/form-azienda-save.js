@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FORM ACCOUNT AZIENDA — SAVE MODULE (V1.0)
  * Salvataggio e cancellazione degli account aziendali.
  * Estratto da form_account_azienda.js per ridurre la complessità del modulo principale.
@@ -6,14 +6,20 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import {
+import { LOG } from '../../logger.js';
     doc, collection, runTransaction, deleteDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { logError, sanitizeEmail } from '../../utils.js';
+import { LOG } from '../../logger.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';
 
+import { LOG } from '../../logger.js';
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
 
@@ -243,7 +249,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 finalData.recipientEmail = deleteField();
             }
 
-            window.LOG?.("[V3.1-DEBUG] Final Transaction Payload Azienda:", finalData);
+            LOG("[V3.1-DEBUG] Final Transaction Payload Azienda:", finalData);
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);

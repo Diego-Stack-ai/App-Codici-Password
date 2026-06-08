@@ -1,6 +1,7 @@
-
+﻿
 import { t } from './translations.js';
 
+import { showToast } from './ui-core.js';
 /**
  * PROTOCOLLO PULIZIA & SICUREZZA
  * Centralizza la gestione di eventi e traduzioni per rimuovere script inline e unsafe-inline.
@@ -70,7 +71,7 @@ function initGlobalDelegation() {
                     if (typeof window.copyText === 'function') window.copyText(text);
                     else {
                         navigator.clipboard.writeText(text).then(() => {
-                            if (window.showToast) window.showToast("Copiato!", "success");
+                            showToast("Copiato!", "success");
                         });
                     }
                 }

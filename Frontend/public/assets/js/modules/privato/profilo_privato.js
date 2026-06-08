@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROFILO PRIVATO MODULE (V6.0 — Modular)
  * Entry point e orchestratore del profilo privato utente.
  *
@@ -21,25 +21,42 @@
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { LOG } from '../../logger.js';
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from '../../logger.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { editSection, editAddress, editUserDocument, addUtility, editUtility } from './profilo-actions.js';
+import { LOG } from '../../logger.js';
 import { logError, formatDateToIT } from '../../utils.js';
+import { LOG } from '../../logger.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
+import { LOG } from '../../logger.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
+import { LOG } from '../../logger.js';
 import { syncData as _syncData } from './profilo-sync.js';
 
+import { LOG } from '../../logger.js';
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, generateProfileQRCode } from './profilo-qr.js';
+import { LOG } from '../../logger.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
+import { LOG } from '../../logger.js';
 import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js';
+import { LOG } from '../../logger.js';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
 
+import { LOG } from '../../logger.js';
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
+import { LOG } from '../../logger.js';
 export { encrypt, decrypt };
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -189,7 +206,7 @@ async function loadUserData(user) {
                     note: await decryptIfPossible(e.note, masterKey)
                 })));
             }
-            window.LOG('[VaultCheck] Decrittazione granulare V6.1.5 completata.');
+            LOG('[VaultCheck] Decrittazione granulare V6.1.5 completata.');
         }
 
         // Hero Header
@@ -297,7 +314,7 @@ async function deleteAddress(idx) {
         userAddresses = userAddresses.filter(a => a !== undefined && a !== null);
         await syncData();
         renderAddressesView();
-        window.LOG(`[Address] Eliminato indirizzo #${idx}. Rimanenti: ${userAddresses.length}`);
+        LOG(`[Address] Eliminato indirizzo #${idx}. Rimanenti: ${userAddresses.length}`);
     } catch (e) {
         console.error('[Address] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione dell\'indirizzo.', 'error');
@@ -311,7 +328,7 @@ async function deleteUtility(aIdx, uIdx) {
         userAddresses[aIdx].utilities = (userAddresses[aIdx].utilities || []).filter(u => u !== undefined && u !== null);
         await syncData();
         renderAddressesView();
-        window.LOG(`[Utility] Eliminata utenza #${uIdx} dall'indirizzo #${aIdx}`);
+        LOG(`[Utility] Eliminata utenza #${uIdx} dall'indirizzo #${aIdx}`);
     } catch (e) {
         console.error('[Utility] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione dell\'utenza.', 'error');
@@ -325,7 +342,7 @@ async function deletePhone(idx) {
         contactPhones = contactPhones.filter(p => p !== undefined && p !== null);
         await syncData();
         renderPhonesView();
-        window.LOG(`[Phone] Eliminato numero #${idx}. Rimanenti: ${contactPhones.length}`);
+        LOG(`[Phone] Eliminato numero #${idx}. Rimanenti: ${contactPhones.length}`);
     } catch (e) {
         console.error('[Phone] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione del numero.', 'error');
@@ -339,7 +356,7 @@ async function deleteEmail(idx) {
         contactEmails = contactEmails.filter(e => e !== undefined && e !== null);
         await syncData();
         renderEmailsView();
-        window.LOG(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
+        LOG(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
     } catch (e) {
         console.error('[Email] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione dell\'email.', 'error');
@@ -353,7 +370,7 @@ async function deleteDocumento(idx) {
         userDocuments = userDocuments.filter(d => d !== undefined && d !== null);
         await syncData();
         renderDocumentiView();
-        window.LOG(`[Doc] Eliminato documento #${idx}. Rimanenti: ${userDocuments.length}`);
+        LOG(`[Doc] Eliminato documento #${idx}. Rimanenti: ${userDocuments.length}`);
     } catch (e) {
         console.error('[Doc] Errore eliminazione:', e);
         showToast('Errore durante l\'eliminazione del documento.', 'error');

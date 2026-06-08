@@ -1,26 +1,37 @@
-/**
+﻿/**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
 import { auth, db, storage } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
+import { LOG } from '../../logger.js';
 import {
+import { LOG } from '../../logger.js';
     doc, getDoc, collection, query, where, getDocs, updateDoc,
     deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy,
     addDoc
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
+import { LOG } from '../../logger.js';
     ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
+import { LOG } from '../../logger.js';
 import { initComponents } from '../../components.js';
+import { LOG } from '../../logger.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { LOG } from '../../logger.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 
+import { LOG } from '../../logger.js';
 // --- STATE ---
 let currentUid = null;
 let currentId = null;
@@ -74,7 +85,7 @@ export async function initDettaglioAccountPrivato(user) {
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
                 onclick: () => {
-                    window.LOG('[dettaglio] Navigating to form with ID:', currentId);
+                    LOG('[dettaglio] Navigating to form with ID:', currentId);
                     window.location.href = `form_account_privato.html?id=${currentId}`;
                 }
             }, [
@@ -243,7 +254,7 @@ function renderAccount(acc) {
             btnAdd.classList.remove('hidden');
             btnAdd.onclick = (e) => {
                 e.preventDefault();
-                window.LOG("[DETTAGLIO] Add Attachment Clicked (onclick)");
+                LOG("[DETTAGLIO] Add Attachment Clicked (onclick)");
                 openSourceSelector();
             };
         }
@@ -523,7 +534,7 @@ async function revokeRecipientV3(email) {
                     timestamp: new Date().toISOString(),
                     read: false
                 });
-                window.LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
+                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
             }
         });
 
@@ -735,7 +746,7 @@ function setupSourceSelector() {
         if (input) input.addEventListener('change', () => handleFileUpload(input));
     });
 
-    window.LOG('[DETTAGLIO] setupSourceSelector: listener agganciati');
+    LOG('[DETTAGLIO] setupSourceSelector: listener agganciati');
 }
 
 async function handleFileUpload(input) {

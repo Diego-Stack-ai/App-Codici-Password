@@ -5,10 +5,14 @@
  */
 
 import { resetPassword } from '../../auth.js';
+import { LOG } from '../../logger.js';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast } from '../../ui-core.js';
 
+import { LOG } from '../../logger.js';
 export async function initResetPassword() {
     
 
@@ -60,7 +64,7 @@ function setupResetForm() {
         document.body.classList.add('is-auth-progress');
 
         try {
-            window.LOG("[RESET] Sending recovery email to:", email);
+            LOG("[RESET] Sending recovery email to:", email);
             await resetPassword(email);
 
             showToast(t('success_reset_sent'), "success");

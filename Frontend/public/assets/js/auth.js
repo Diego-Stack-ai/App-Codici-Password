@@ -1,5 +1,7 @@
-import { auth, db } from './firebase-config.js';
+﻿import { auth, db } from './firebase-config.js';
+import { LOG } from './logger.js';
 import {
+import { LOG } from './logger.js';
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
@@ -11,9 +13,12 @@ import {
     browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from './logger.js';
 import { showToast } from './ui-core.js';
+import { LOG } from './logger.js';
 import { logError } from './utils.js';
 
+import { LOG } from './logger.js';
 // Imposta la persistenza esplicita per evitare logout inattesi su mobile
 setPersistence(auth, browserLocalPersistence).catch(e => console.error("Persistence error:", e));
 
@@ -80,7 +85,7 @@ async function register(nome, cognome, email, password) {
 
         // Send email verification (optional but recommended)
         await sendEmailVerification(user);
-        window.LOG('Verification email sent to', user.email);
+        LOG('Verification email sent to', user.email);
         showToast("Email di verifica inviata! Controlla la tua casella.", "success");
 
         showToast("Registrazione avvenuta con successo!", "success");
@@ -111,10 +116,10 @@ async function register(nome, cognome, email, password) {
  */
 async function login(email, password) {
     try {
-        window.LOG("LOGIN START: ", email);
+        LOG("LOGIN START: ", email);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        window.LOG("AUTH SUCCESS: ", user.uid);
+        LOG("AUTH SUCCESS: ", user.uid);
 
         // FORZA REFRESH: Controlla lo stato reale su Firebase (evita cache vecchia)
         await user.reload();
@@ -122,9 +127,9 @@ async function login(email, password) {
 
         // CHECK IF USER EXISTS IN FIRESTORE
         const userDocRef = doc(db, "users", updatedUser.uid);
-        window.LOG("FETCHING DOC...");
+        LOG("FETCHING DOC...");
         const userDoc = await getDoc(userDocRef);
-        window.LOG("DOC FETCHED: ", userDoc.exists());
+        LOG("DOC FETCHED: ", userDoc.exists());
 
         if (!updatedUser.emailVerified) {
             console.warn("Email non ancora verificata, ma procedo come da richiesta utente.");
@@ -213,14 +218,14 @@ function checkAuthState() {
         const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
-        window.LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
+        LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (user) {
             // Utente loggato: se siamo su una pagina di login, spostiamoci sulla home
             // Usiamo percorsi relativi per compatibilità con Live Server
             if (isAuthPage) {
                 if (!path.includes('home_page.html')) {
-                    window.LOG("[AUTH] Already logged in, redirecting to home_page.html");
+                    LOG("[AUTH] Already logged in, redirecting to home_page.html");
                     window.location.href = 'home_page.html';
                 }
             }
@@ -229,7 +234,7 @@ function checkAuthState() {
             if (!isAuthPage) {
                 // Evitiamo di ricaricare se siamo già sulla root o su index.html
                 if (!path.includes('index.html') && path !== '/' && path !== '') {
-                    window.LOG("[AUTH] No session, redirecting to /index.html");
+                    LOG("[AUTH] No session, redirecting to /index.html");
                     window.location.href = '/index.html';
                 }
             }

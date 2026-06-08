@@ -1,4 +1,4 @@
-// QR Code Utility Module (shared)
+﻿// QR Code Utility Module (shared)
 // Centralizes QR code generation and vCard construction for user profile/settings
 
 /**
@@ -115,7 +115,7 @@ export function renderQRCode(container, text, options = {}) {
         } catch (retryError) {
             console.error("QR Code Retry Failed:", retryError);
             container.innerHTML = '<div style="color:red; font-size:0.75rem; text-align:center; padding:10px;">Dati eccessivi<br>per il QR Code</div>';
-            if (window.showToast) window.showToast("Dati eccessivi. Riduci i campi.", "warning");
+            showToast("Dati eccessivi. Riduci i campi.", "warning");
         }
     }
 }

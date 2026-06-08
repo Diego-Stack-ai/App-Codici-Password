@@ -5,14 +5,22 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
+import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { LOG } from '../../logger.js';
 import { doc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from '../../logger.js';
 import { showToast, showInputModal } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
+import { LOG } from '../../logger.js';
 let allArchived = [];
 let currentUser = null;
 let currentSwipeList = null;
@@ -142,14 +150,14 @@ async function loadArchived() {
 
     try {
         let results = [];
-        window.LOG(`[ARCHIVIO] Loading context: ${currentContext}`);
+        LOG(`[ARCHIVIO] Loading context: ${currentContext}`);
 
         // 1. PRIVATO
         if (currentContext === 'all' || currentContext === 'privato') {
             try {
                 const snap = await getDocs(query(collection(db, "users", currentUser.uid, "accounts"), where("isArchived", "==", true)));
                 snap.forEach(d => results.push({ ...d.data(), id: d.id, context: 'privato' }));
-                window.LOG(`[ARCHIVIO] Found ${snap.size} private archived items`);
+                LOG(`[ARCHIVIO] Found ${snap.size} private archived items`);
             } catch (err) {
                 console.error("[ARCHIVIO] Private query error:", err);
                 if (currentContext === 'privato') throw err; // Re-throw if it's the only one
@@ -160,7 +168,7 @@ async function loadArchived() {
         if (currentContext === 'all') {
             try {
                 const bizSnap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
-                window.LOG(`[ARCHIVIO] Searching archived items in ${bizSnap.size} companies...`);
+                LOG(`[ARCHIVIO] Searching archived items in ${bizSnap.size} companies...`);
 
                 for (const b of bizSnap.docs) {
                     try {
@@ -196,7 +204,7 @@ async function loadArchived() {
                 archived.forEach(acc => {
                     results.push({ ...acc, context: currentContext, businessName: bData.ragioneSociale });
                 });
-                window.LOG(`[ARCHIVIO] Found ${archived.length} archived items for biz ${currentContext}`);
+                LOG(`[ARCHIVIO] Found ${archived.length} archived items for biz ${currentContext}`);
             } catch (err) {
                 console.error(`[ARCHIVIO] Error querying accounts for biz ${currentContext}:`, err);
                 throw err;
@@ -340,8 +348,10 @@ async function handleRestore(id) {
 
 async function handleDeleteForever(id) {
     // Assuming showInputModal is globally available or we should import it if it's in ui-core?
+import { LOG } from '../../logger.js';
     // Usually it's attached to window in main.js or similar? 
     // Best practice: import confirm modal. But this was asking for explicit typing "SI".
+import { LOG } from '../../logger.js';
     // I'll assume window.showInputModal exists for now as it was in legacy code, 
     // but ideally we should move it to ui-core export.
 

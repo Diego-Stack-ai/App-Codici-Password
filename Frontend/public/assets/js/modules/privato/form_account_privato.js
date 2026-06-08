@@ -4,14 +4,22 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { LOG } from '../../logger.js';
 import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { LOG } from '../../logger.js';
 import { showToast } from '../../ui-core.js';
+import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
+import { LOG } from '../../logger.js';
 import { logError, sanitizeEmail } from '../../utils.js';
+import { LOG } from '../../logger.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
+import { LOG } from '../../logger.js';
 import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
 
+import { LOG } from '../../logger.js';
 // --- STATE ---
 let currentUid = null;
 let currentDocId = null;
@@ -707,7 +715,7 @@ async function saveAccount() {
                 finalData.recipientEmail = deleteField();
             }
 
-            window.LOG("[V3.1-DEBUG] Final Transaction Payload:", finalData);
+            LOG("[V3.1-DEBUG] Final Transaction Payload:", finalData);
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);

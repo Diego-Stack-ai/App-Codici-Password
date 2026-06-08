@@ -45,7 +45,7 @@ export class SwipeList {
             e.preventDefault();
             e.stopPropagation();
             this.blockNextClick = false;
-            window.LOG?.("[SwipeList] Click blocked due to drag");
+            LOG("[SwipeList] Click blocked due to drag");
         }
     }
 

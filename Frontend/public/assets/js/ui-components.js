@@ -92,7 +92,7 @@ export function setupCopyButtons() {
                                 icon.textContent = 'done';
                                 setTimeout(() => icon.textContent = oldIcon, 1500);
                             }
-                            if (window.showToast) window.showToast('Copiato!');
+                            showToast('Copiato!');
                         } catch (err) {
                             console.error('Copy failed', err);
                         }
