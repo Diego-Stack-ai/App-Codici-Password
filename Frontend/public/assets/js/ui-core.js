@@ -1,4 +1,4 @@
-import { initComponents } from './components.js';
+﻿import { initComponents } from './components.js';
 import { createElement, setChildren, safeSetText } from './dom-utils.js';
 import { t } from './translations.js';
 
@@ -127,8 +127,6 @@ export function showWarningModal(title, message, callback = null) {
     });
 }
 
-window.showToast = showToast;
-window.showWarningModal = showWarningModal;
 
 /**
  * [CORE UI] LOGOUT MODAL
@@ -172,7 +170,6 @@ export async function showLogoutModal() {
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
 }
-window.showLogoutModal = showLogoutModal;
 
 /**
  * [CORE UI] CONFIRM MODAL
@@ -213,7 +210,6 @@ export async function showConfirmModal(title, message, confirmText = t('confirm'
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(false); });
     });
 }
-window.showConfirmModal = showConfirmModal;
 
 /**
  * [CORE UI] INPUT MODAL
@@ -276,7 +272,6 @@ export function showInputModal(title, initialValue = '', placeholder = '') {
         }, 10);
     });
 }
-window.showInputModal = showInputModal;
 
 /**
  * [CORE UI] TOGGLE TRIPLE VISIBILITY
@@ -379,7 +374,6 @@ export function toggleTripleVisibility(id) {
     }
 }
 
-window.toggleTripleVisibility = toggleTripleVisibility;
 
 /**
  * [CORE UI] COLLAPSIBLE SYSTEM (Accordion)
@@ -442,5 +436,4 @@ export function showGuideModal(title, steps) {
     requestAnimationFrame(() => modal.classList.add('active'));
     modal.onclick = (e) => { if (e.target === modal) modal.querySelector('button').click(); };
 }
-window.showGuideModal = showGuideModal;
 

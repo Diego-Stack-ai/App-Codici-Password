@@ -679,8 +679,6 @@ function setupActions() {
 
 // --- ATTACHMENTS LOGIC ---
 
-window.openSourceSelector = openSourceSelector;
-window.closeSourceSelector = closeSourceSelector;
 
 function openSourceSelector() {
     

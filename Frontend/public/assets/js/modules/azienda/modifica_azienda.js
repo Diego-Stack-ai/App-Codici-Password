@@ -186,8 +186,6 @@ function initFormEvents() {
     document.getElementById('btn-add-sede')?.addEventListener('click', () => addExtraSede());
 }
 
-window.openSourceSelector = openSourceSelector;
-window.closeSourceSelector = closeSourceSelector;
 
 function openSourceSelector() {
     

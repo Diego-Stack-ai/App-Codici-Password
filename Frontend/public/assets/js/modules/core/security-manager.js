@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SECURITY MANAGER (V7.0 — Vault Auto-Unlock con Persistenza di Sessione)
  * - La masterKey viene salvata in sessionStorage (base64, isolata per tab).
  * - Espone window.__vaultUnlocked in modo sincrono per i moduli UI.
@@ -233,14 +233,6 @@ export function clearSession() {
 // Inizializzazione stato all'importazione
 updateGlobalState();
 
-// 🛡️ ESPOSIZIONE GLOBALE — solo le funzioni richiamate via window.* da moduli senza import diretto
-// (inactivity-timer.js → window.softLock; home.js → window.isAutoUnlockActive, window.resetVault)
-window.ensureMasterKey = ensureMasterKey;
-window.clearSession = clearSession;
-window.softLock = softLock;
-window.isSoftLocked = isSoftLocked;
-window.isAutoUnlockActive = isAutoUnlockActive;
-window.resetVault = resetVault;
 // window.encrypt e window.decrypt rimossi: disponibili solo via import ES6
 
 export { encrypt, decrypt };

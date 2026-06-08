@@ -1,7 +1,7 @@
 ﻿
 import { t } from './translations.js';
 
-import { showToast } from './ui-core.js';
+import { showToast, toggleTripleVisibility } from './ui-core.js';
 /**
  * PROTOCOLLO PULIZIA & SICUREZZA
  * Centralizza la gestione di eventi e traduzioni per rimuovere script inline e unsafe-inline.
@@ -110,8 +110,8 @@ function initGlobalDelegation() {
                     // Se non c'è un input precedente, cerchiamo di usare la logica toggleTripleVisibility
                     const card = target.closest('.micro-account-card');
                     if (card && card.dataset.id) {
-                        if (typeof window.toggleTripleVisibility === 'function') {
-                            window.toggleTripleVisibility(card.dataset.id);
+                        if (true) {
+                            toggleTripleVisibility(card.dataset.id);
                         }
                     }
                 }
