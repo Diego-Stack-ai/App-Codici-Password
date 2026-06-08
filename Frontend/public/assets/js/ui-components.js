@@ -1,7 +1,9 @@
-﻿/**
+/**
  * PROTOCOLLO BASE UI COMPONENTS
  * Gestisce la logica dei componenti riutilizzabili (Pulsanti, Toggles, Icone)
  */
+
+import { showToast } from './ui-core.js';
 
 /**
  * [FACTORY] GENERAZIONE INCONA ACCOUNT
