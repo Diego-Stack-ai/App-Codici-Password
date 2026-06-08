@@ -1,7 +1,6 @@
 ﻿import { auth, db } from './firebase-config.js';
 import { LOG } from './logger.js';
 import {
-import { LOG } from './logger.js';
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
@@ -13,12 +12,9 @@ import { LOG } from './logger.js';
     browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { LOG } from './logger.js';
 import { showToast } from './ui-core.js';
-import { LOG } from './logger.js';
 import { logError } from './utils.js';
 
-import { LOG } from './logger.js';
 // Imposta la persistenza esplicita per evitare logout inattesi su mobile
 setPersistence(auth, browserLocalPersistence).catch(e => console.error("Persistence error:", e));
 

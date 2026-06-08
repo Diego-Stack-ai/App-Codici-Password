@@ -7,14 +7,10 @@
 import { db, auth } from '../../firebase-config.js';
 import { LOG } from '../../logger.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
-import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
 
-import { LOG } from '../../logger.js';
 const DEFAULT_CONFIG = {
     deadlineTypes: [
         { name: 'Sale Addolcitore', freq: 7, period: 14 },

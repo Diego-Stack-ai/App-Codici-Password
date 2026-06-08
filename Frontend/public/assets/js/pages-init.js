@@ -13,13 +13,11 @@ import { LOG } from './logger.js';
 // --- 1. MODULI V5.0 (Puri/Passivi) ---
 import { initAreaPrivata as initAreaPrivataModule } from './modules/privato/area_privata.js';
 
-import { LOG } from './logger.js';
 export async function initAreaPrivata(user) {
     await initAreaPrivataModule(user);
 }
 
 // --- 2. MODULI LEGACY & AUTH (Import Dinamico) ---
-import { LOG } from './logger.js';
 export async function initRegistrati() {
     const module = await import('./modules/auth/registrati.js');
     await module.initRegistrati();

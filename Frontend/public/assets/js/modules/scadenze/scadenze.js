@@ -8,18 +8,12 @@ import { auth, db } from '../../firebase-config.js';
 import { showToast } from '../../ui-core.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { LOG } from '../../logger.js';
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
-import { LOG } from '../../logger.js';
 import { initComponents } from '../../components.js';
-import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { LOG } from '../../logger.js';
 import { logError, formatDateToIT } from '../../utils.js';
 
-import { LOG } from '../../logger.js';
 let currentUser = null;
 let allScadenze = [];
 let activeFilter = 'all';

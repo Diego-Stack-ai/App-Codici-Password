@@ -13,18 +13,12 @@ import { LOG } from '../../logger.js';
  */
 
 import { auth, db } from '../../firebase-config.js';
-import { LOG } from '../../logger.js';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { LOG } from '../../logger.js';
 import { showToast } from '../../ui-core.js';
-import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
-import { LOG } from '../../logger.js';
 import { logError } from '../../utils.js';
-import { LOG } from '../../logger.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';
 
-import { LOG } from '../../logger.js';
 /**
  * Salvataggio cifrato di tutti i dati del profilo su Firestore (Vault V6.1).
  * Cifra selettivamente i campi sensibili usando la MasterKey.

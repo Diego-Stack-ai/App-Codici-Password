@@ -4,6 +4,10 @@
  * Ottimizzato per compatibilità cross-platform (Chrome/Safari iOS).
  */
 
+// Ultimo errore cripto (letto via getLastCryptoError())
+let _lastCryptoError = null;
+export const getLastCryptoError = () => _lastCryptoError;
+
 const ITERATIONS = 100000;
 const SALT_SIZE = 16;
 const IV_SIZE = 12;

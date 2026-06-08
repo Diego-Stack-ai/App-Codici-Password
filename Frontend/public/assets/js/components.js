@@ -1,14 +1,11 @@
 ﻿import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
 import { auth } from './firebase-config.js';
-import { LOG } from './logger.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { LOG } from './logger.js';
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core.js';
 
 
-import { LOG } from './logger.js';
 /**
  * Inizializza i componenti condivisi (Header/Footer)
  * Rileva automaticamente se siamo su una pagina Auth o App.

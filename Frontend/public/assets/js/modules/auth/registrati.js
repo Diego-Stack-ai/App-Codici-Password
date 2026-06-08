@@ -7,12 +7,9 @@
 import { register, resendVerificationEmail } from '../../auth.js';
 import { LOG } from '../../logger.js';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
-import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { LOG } from '../../logger.js';
 import { showToast } from '../../ui-core.js';
 
-import { LOG } from '../../logger.js';
 export async function initRegistrati() {
     
 

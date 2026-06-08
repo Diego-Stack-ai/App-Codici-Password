@@ -6,24 +6,15 @@
 import { auth, db } from '../../firebase-config.js';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
-import { LOG } from '../../logger.js';
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { LOG } from '../../logger.js';
 import { showToast } from '../../ui-core.js';
-import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
-import { LOG } from '../../logger.js';
 import { logError } from '../../utils.js';
-import { LOG } from '../../logger.js';
 import { initComponents } from '../../components.js';
-import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { LOG } from '../../logger.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
-import { LOG } from '../../logger.js';
 // --- STATE ---
 let allAccounts = [];
 let currentUser = null;

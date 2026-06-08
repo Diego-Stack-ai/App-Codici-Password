@@ -6,32 +6,22 @@
 import { auth, db, storage } from '../../firebase-config.js';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
-import { LOG } from '../../logger.js';
 import {
-import { LOG } from '../../logger.js';
     doc, getDoc, collection, query, where, getDocs, updateDoc,
     deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy,
     addDoc
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
-import { LOG } from '../../logger.js';
     ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
-import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
-import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
-import { LOG } from '../../logger.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
-import { LOG } from '../../logger.js';
 import { initComponents } from '../../components.js';
-import { LOG } from '../../logger.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
-import { LOG } from '../../logger.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 
-import { LOG } from '../../logger.js';
 // --- STATE ---
 let currentUid = null;
 let currentId = null;

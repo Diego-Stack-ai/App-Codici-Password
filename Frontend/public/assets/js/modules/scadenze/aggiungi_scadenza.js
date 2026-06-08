@@ -7,30 +7,21 @@
 import { db, auth, storage } from '../../firebase-config.js';
 import { LOG } from '../../logger.js';
 import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { LOG } from '../../logger.js';
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
-import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-import { LOG } from '../../logger.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { LOG } from '../../logger.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 
-import { LOG } from '../../logger.js';
 import { t } from '../../translations.js';
-import { LOG } from '../../logger.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 
-import { LOG } from '../../logger.js';
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
 
 let _preventEmailSeed = false;
 let currentUser = null;
-let _preventEmailSeed = false;
 let currentRule = null;
-let _preventEmailSeed = false;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
 let selectedFiles = [];
