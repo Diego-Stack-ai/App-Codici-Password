@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROFILO PRIVATO — UI MODULE (V1.0)
  * Avatar, label management, collapsible sections, custom dropdowns engine.
  * Estratto da profilo_privato.js.
@@ -17,6 +17,11 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 
 let _getState = null;
+
+// Callback per aggiornare il modal aperto dopo modifica dropdown label
+let _modalRefreshCallback = null;
+/** Registra una funzione da chiamare dopo ogni modifica alle label nel modal aperto. */
+export function setModalRefreshCallback(fn) { _modalRefreshCallback = fn; }
 
 /**
  * Inizializza il modulo UI del profilo.
@@ -164,7 +169,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                                 profileLabels[configKey][idx] = newName.trim();
                                 await saveProfileLabels();
                                 showToast('Voce aggiornata!');
-                                if (window._currentModalRefresh) window._currentModalRefresh();
+                                _modalRefreshCallback?.();
                             }
                         }
                     }
@@ -179,7 +184,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                             profileLabels[configKey] = profileLabels[configKey].filter(v => v !== opt.value);
                             await saveProfileLabels();
                             showToast('Voce eliminata!');
-                            if (window._currentModalRefresh) window._currentModalRefresh();
+                            _modalRefreshCallback?.();
                         }
                     }
                 }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 12px;', textContent: 'delete' })])
@@ -211,7 +216,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                         profileLabels[configKey].push(newLabel.trim());
                         await saveProfileLabels();
                         showToast('Voce aggiunta!');
-                        if (window._currentModalRefresh) window._currentModalRefresh();
+                        _modalRefreshCallback?.();
                     } else {
                         showToast('Voce già esistente', 'info');
                     }

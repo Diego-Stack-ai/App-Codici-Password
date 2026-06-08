@@ -1,4 +1,4 @@
-/**
+﻿/**
  * HOME PAGE MODULE (V4.1)
  * Gestisce l'interfaccia della nuova Home Page statica.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
@@ -9,7 +9,8 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { t } from '../../translations.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureMasterKey, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
+import { getLastCryptoError } from '../core/crypto-utils.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -136,7 +137,7 @@ async function renderHeaderUser(user) {
 
             try {
                 // Tentativo di sblocco silenzioso
-                if (window.isAutoUnlockActive && window.isAutoUnlockActive()) {
+                if (isAutoUnlockActive()) {
                     const mk = await ensureMasterKey();
                     // [FIX V7.15] Regex più tollerante per Safari (include URL-safe e padding flessibile)
                     const isEnc = (v) => v && typeof v === 'string' && v.trim().length > 20 && /^[A-Za-z0-9+/=_-]+$/.test(v.trim());
@@ -191,7 +192,7 @@ async function renderHeaderUser(user) {
                         uName.title = "Clicca per resettare il Vault se vedi errori";
                         uName.onclick = () => {
                             if (confirm("Vuoi resettare la cache del Vault? Dovrai reinserire la Password Master.")) {
-                                if (window.resetVault) window.resetVault();
+                                resetVault();
                             }
                         };
                     }
@@ -237,7 +238,7 @@ function showSelfHealingBanner() {
             style: 'color: #ef4444; margin-bottom: 5px; font-weight: bold;'
         }),
         createElement('p', {
-            textContent: window.lastCryptoError || "Errore sconosciuto (probabile offset buffer Safari)",
+            textContent: getLastCryptoError() || "Errore sconosciuto (probabile offset buffer Safari)",
             style: 'color: #ef4444; font-size: 10px; opacity: 0.7; margin-bottom: 10px; font-family: monospace;'
         }),
         createElement('button', {
@@ -245,7 +246,7 @@ function showSelfHealingBanner() {
             style: 'background: #ef4444; color: white; width: 100%; border-radius: 8px; border: none; padding: 10px;',
             textContent: 'RIPRISTINA VAULT (RE-INSERISCI PASSWORD)',
             onclick: () => {
-                if (window.resetVault) window.resetVault();
+                resetVault();
             }
         })
     ]);

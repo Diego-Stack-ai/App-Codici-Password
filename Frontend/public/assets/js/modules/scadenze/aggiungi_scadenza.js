@@ -26,8 +26,11 @@ import { LOG } from '../../logger.js';
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
 
+let _preventEmailSeed = false;
 let currentUser = null;
+let _preventEmailSeed = false;
 let currentRule = null;
+let _preventEmailSeed = false;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
 let selectedFiles = [];
@@ -264,9 +267,9 @@ async function loadDynamicConfig() {
             if (contactEmails.length > 0) {
                 notificationEmails = contactEmails;
                 rawGenData.notificationEmails = notificationEmails;
-                if (!window._preventEmailSeed) {
+                if (!_preventEmailSeed) {
                     setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), { notificationEmails }, { merge: true });
-                    window._preventEmailSeed = true;
+                    _preventEmailSeed = true;
                 }
             }
         }

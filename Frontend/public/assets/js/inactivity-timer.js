@@ -1,12 +1,10 @@
 ﻿import { auth, db } from './firebase-config.js';
 import { LOG } from './logger.js';
+import { softLock } from './modules/core/security-manager.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { LOG } from './logger.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { LOG } from './logger.js';
 import { disableVaultAutoUnlock } from './modules/core/security-manager.js';
 
-import { LOG } from './logger.js';
 /**
  * PROTOCOLLO BASE INACTIVITY TIMER (TITAN-LOCK v1.0)
  * Gestisce il blocco automatico dell'applicazione basato sul tempo di inattività.
@@ -83,7 +81,7 @@ function checkLastActivity() {
     // Livello 1: Soft Lock
     if (elapsed > softLockTimerMs) {
         try {
-            if (typeof window.softLock === 'function') window.softLock();
+            if (true) softLock();
         } catch (e) { }
     }
 }
@@ -99,7 +97,7 @@ function recordActivity() {
 
     // Imposta Timer Soft Lock
     softLockTimeout = setTimeout(() => {
-        if (typeof window.softLock === 'function') window.softLock();
+        if (true) softLock();
     }, softLockTimerMs);
 
     // Imposta Timer Hard Logout

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CRYPTO UTILS (V1.1 - Safari/WebKit Optimized)
  * Protocollo di crittografia client-side per dati sensibili.
  * Ottimizzato per compatibilità cross-platform (Chrome/Safari iOS).
@@ -162,7 +162,7 @@ export async function decrypt(base64Data, password) {
         console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", errorDetail);
 
         // Esponiamo l'errore globalmente per il banner di debug
-        window.lastCryptoError = errorDetail;
+        _lastCryptoError = errorDetail;
 
         return "--ERRORE--";
     }
