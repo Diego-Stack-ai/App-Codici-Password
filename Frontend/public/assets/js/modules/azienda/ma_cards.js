@@ -36,25 +36,29 @@ export async function populateForm(data) {
     set('cap', data.capSede);
     set('cciaa', data.numeroCCIAA);
     set('data-iscrizione', data.dataIscrizione);
-    set('note-azienda', data.note);
+    // note-azienda è cifrata: impostata dopo la decrittazione
+
+    // 🔐 PROTOCOLLO BLINDA: logica decrypt hoistata fuori da if(data.emails)
+    // così copre anche il campo note (cifrato in saveAzienda)
+    let masterKey = null;
+    const needsDecryption = data._encrypted === true;
+    if (needsDecryption) {
+        try { masterKey = await ensureMasterKey(); } catch (e) {
+            showToast('Dati cifrati: chiave obbligatoria per modificare.', 'error');
+            history.back();
+            return;
+        }
+    }
+
+    const decryptIfPossible = async (val) => {
+        if (!needsDecryption || !val) return val;
+        try { return await decrypt(val, masterKey); } catch (e) { return '---ERRORE DECRYPT---'; }
+    };
+
+    // Campo note (cifrato su save) → decifrato qui
+    set('note-azienda', await decryptIfPossible(data.note));
 
     if (data.emails) {
-        // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica (V6.0)
-        let masterKey = null;
-        const needsDecryption = data._encrypted === true;
-        if (needsDecryption) {
-            try { masterKey = await ensureMasterKey(); } catch (e) {
-                showToast("Dati cifrati: chiave obbligatoria per modificare.", "error");
-                history.back();
-                return;
-            }
-        }
-
-        const decryptIfPossible = async (val) => {
-            if (!needsDecryption || !val) return val;
-            try { return await decrypt(val, masterKey); } catch (e) { return "---ERRORE DECRYPT---"; }
-        };
-
         set('type-pec', data.emails.pec?.tipo || 'PEC Aziendale');
         set('email-pec', data.emails.pec?.email);
         set('email-pec-password', await decryptIfPossible(data.emails.pec?.password));
