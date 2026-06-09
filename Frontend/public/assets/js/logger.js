@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LOGGER MODULE (V1.0)
  * Rimpiazza window.LOG, window.LOG_ERROR, window.LOG_WARN con export ES6.
  * Silenzioso in produzione, attivo in sviluppo.
@@ -6,10 +6,7 @@
  * Uso: import { LOG, LOG_ERROR, LOG_WARN } from '../logger.js';
  */
 
-const _env = document.documentElement.dataset.env ||
-    (typeof window !== 'undefined' && window.__APP_ENV) ||
-    'production';
-
+const _env = document.documentElement.dataset.env || 'production';
 const _isProd = _env === 'production';
 
 const _noop = () => {};

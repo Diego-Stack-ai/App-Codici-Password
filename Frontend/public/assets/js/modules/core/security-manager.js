@@ -15,11 +15,10 @@ let _masterKey = null;
 let _vaultAutoUnlock = false;
 let _isSoftLocked = false; // V7.0: Stato di blocco temporaneo UI
 
-// Sincronizzazione stato globale per moduli esterni (Sincrono)
-const updateGlobalState = () => {
-    // Il vault è sbloccato solo se c'è una chiave E non siamo in Soft Lock
-    window.__vaultUnlocked = !_isSoftLocked && (!!_masterKey || !!_loadKeyFromSession());
-};
+// Nessun modulo legge window.__vaultUnlocked (analisi statica confermata).
+// Lo stato vault è gestito internamente tramite _isSoftLocked e _masterKey.
+// Se un futuro modulo necessita dello stato, importare getVaultState() da questo file.
+const updateGlobalState = () => { /* reserved for future EventBus integration */ };
 
 // Chiavi sessionStorage
 const SS_KEY = 'vault_s_key';

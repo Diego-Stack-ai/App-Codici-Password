@@ -1,4 +1,4 @@
-﻿
+
 import { t } from './translations.js';
 
 import { showToast, toggleTripleVisibility } from './ui-core.js';
@@ -60,20 +60,15 @@ function initGlobalDelegation() {
                 break;
 
             case 'edit-section':
-                if (typeof window.editSection === 'function') {
-                    window.editSection(target.dataset.target);
-                }
+                // Gestita dal modulo pagina specifico (es. profilo_privato.js)
                 break;
 
             case 'copy-text':
                 const text = target.dataset.text;
                 if (text) {
-                    if (typeof window.copyText === 'function') window.copyText(text);
-                    else {
-                        navigator.clipboard.writeText(text).then(() => {
-                            showToast("Copiato!", "success");
-                        });
-                    }
+                    navigator.clipboard.writeText(text).then(() => {
+                        showToast("Copiato!", "success");
+                    }).catch(() => showToast("Errore copia", "error"));
                 }
                 break;
 

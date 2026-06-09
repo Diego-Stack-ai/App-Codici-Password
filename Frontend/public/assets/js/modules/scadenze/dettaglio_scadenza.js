@@ -1,9 +1,10 @@
-/**
+﻿/**
  * DETTAGLIO SCADENZA MODULE (V4.1)
  * Gestisce la visualizzazione del dettaglio di una scadenza.
  */
 
 import { getScadenza, updateScadenza, deleteScadenza } from '../../db.js';
+import { getFooterReady } from '../../footer-state.js';
 import { auth } from '../../firebase-config.js';
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -72,8 +73,9 @@ function setupFooterActions() {
     }
 
     // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
-    if (window.__footerReady) {
-        initFooterFromDetail(window.__footerReady);
+    const _footerState = getFooterReady();
+    if (_footerState) {
+        initFooterFromDetail(_footerState);
     } else {
         document.addEventListener('footer:ready', (e) => initFooterFromDetail(e.detail), { once: true });
     }
