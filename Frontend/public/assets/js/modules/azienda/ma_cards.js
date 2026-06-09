@@ -240,7 +240,7 @@ export function addExtraSede(data = null) {
                 placeholder: t('office_type_placeholder') || 'Altra Sede',
                 value: data ? (data.tipo || '') : '',
                 'data-stop-propagation': true,
-                autocomplete: 'new-password'
+                autocomplete: 'off'
             })
         ]),
         createElement('div', { className: 'email-actions-group' }, [
@@ -266,7 +266,6 @@ export function addExtraSede(data = null) {
             createElement('span', {
                 id: arrowId,
                 className: 'material-symbols-outlined icon-chevron transition-transform',
-                style: 'transform: rotate(180deg)',
                 textContent: 'expand_more'
             })
         ])
@@ -274,8 +273,7 @@ export function addExtraSede(data = null) {
 
     const body = createElement('div', {
         id: bodyId,
-        className: 'email-card-body collapsible-section',
-        style: 'max-height: none'
+        className: 'email-card-body collapsible-section'
     }, [
         createElement('div', {
             style: 'display: grid; grid-template-columns: 1fr 80px; gap: 0.75rem;'
@@ -311,7 +309,7 @@ export function createFieldBox(labelText, labelT, type, val, cls, place, placeT,
                 placeholder: place,
                 'data-t-placeholder': placeT,
                 maxLength: uppercase ? 2 : (cls.includes('cap') ? 5 : undefined),
-                autocomplete: 'new-password', autocorrect: 'off', spellcheck: 'false'
+                autocomplete: 'off', autocorrect: 'off', spellcheck: 'false'
             })
         ])
     ]);
