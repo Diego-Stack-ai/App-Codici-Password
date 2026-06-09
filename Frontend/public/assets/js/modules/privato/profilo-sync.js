@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PROFILO PRIVATO — SYNC MODULE (V1.0)
  * Salvataggio cifrato dei dati del profilo utente su Firestore.
  * Estratto da profilo_privato.js per isolare la logica di crittografia.
@@ -8,7 +8,6 @@
  * automaticamente le variabili di stato correnti.
  *
  * Import graph (no circular deps):
-import { LOG } from '../../logger.js';
  *   profilo_privato.js → profilo-sync.js → firebase, security-manager, utils
  */
 
@@ -18,6 +17,7 @@ import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';
+import { LOG } from '../../logger.js';
 
 /**
  * Salvataggio cifrato di tutti i dati del profilo su Firestore (Vault V6.1).

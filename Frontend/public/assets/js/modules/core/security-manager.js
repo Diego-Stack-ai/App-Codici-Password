@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SECURITY MANAGER (V7.0 — Vault Auto-Unlock con Persistenza di Sessione)
  * - La masterKey viene salvata in sessionStorage (base64, isolata per tab).
  * - Espone window.__vaultUnlocked in modo sincrono per i moduli UI.
@@ -187,7 +187,9 @@ export function resetVault() {
 
 export async function setMasterKey(pass, saveForBiometrics = false) {
     _masterKey = pass;
-    if (saveForBiometrics) await enableBiometricUnlock(pass);
+    // Se biometria già abilitata (chiave in localStorage), aggiorna automaticamente
+    const biometricAlreadyEnabled = !!localStorage.getItem(STORAGE_KEY);
+    if (saveForBiometrics || biometricAlreadyEnabled) await enableBiometricUnlock(pass);
     updateGlobalState();
 }
 

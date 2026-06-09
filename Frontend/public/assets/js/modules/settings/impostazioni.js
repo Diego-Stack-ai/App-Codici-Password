@@ -11,7 +11,7 @@ import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
-import { encrypt, decrypt, ensureMasterKey, setMasterKey, enableVaultAutoUnlock, disableVaultAutoUnlock, isAutoUnlockActive, clearSession } from '../core/security-manager.js';
+import { encrypt, decrypt, ensureMasterKey, setMasterKey, enableVaultAutoUnlock, disableVaultAutoUnlock, isAutoUnlockActive, clearSession, resetVault } from '../core/security-manager.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -241,6 +241,15 @@ function initSettingsEvents() {
             await signOut(auth);
             window.location.href = 'index.html';
         }
+    });
+
+    document.getElementById('btn-reset-vault')?.addEventListener('click', async () => {
+        const ok = await showConfirmModal(
+            'Reset Vault',
+            'Questa operazione cancella la chiave biometrica salvata. Dovrai inserire la master password manualmente al prossimo accesso. Continuare?',
+            'Reset', 'Annulla'
+        );
+        if (ok) resetVault(); // Pulisce sessionStorage + localStorage e ricarica la pagina
     });
 }
 
