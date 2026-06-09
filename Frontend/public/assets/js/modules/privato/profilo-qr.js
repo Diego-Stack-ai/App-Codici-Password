@@ -76,6 +76,7 @@ export async function toggleQRInclusion(type, idx) {
 }
 
 export async function generateProfileQRCode() {
+    if (!_getState) return;  // modulo non ancora inizializzato
     const { currentUserData, qrCodeInclusions, contactPhones, contactEmails, userAddresses } = _getState();
     await ensureQRCodeLib();
     const container = document.getElementById('qrcode-header');
