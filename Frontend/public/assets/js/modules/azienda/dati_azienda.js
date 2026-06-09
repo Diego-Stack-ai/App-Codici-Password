@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DATI AZIENDA MODULE (V5.0 ADAPTER)
  * Visualizzazione dettagliata anagrafica aziendale, QR vCard, sedi e allegati.
  * - Entry Point: initDatiAzienda(user)
@@ -12,6 +12,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
+import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
 let currentAziendaId = null;
