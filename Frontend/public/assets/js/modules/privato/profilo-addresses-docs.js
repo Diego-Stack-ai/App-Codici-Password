@@ -46,6 +46,7 @@ function createCopyBtn(text) {
 // ─── ADDRESSES ───────────────────────────────────────────────────────────────
 
 export function renderAddressesView() {
+    if (!_getState) return;  // moduli non ancora inizializzati
     const { userAddresses } = _getState();
     const container = document.getElementById('indirizzi-view-container');
     if (!container) return;
@@ -154,6 +155,7 @@ function _renderUtilitiesInCard(utils, list, addrIdx) {
 // ─── DOCUMENTS ───────────────────────────────────────────────────────────────
 
 export function renderDocumentiView() {
+    if (!_getState) return;  // moduli non ancora inizializzati
     const { userDocuments } = _getState();
     const container = document.getElementById('documenti-view-container');
     if (!container) return;

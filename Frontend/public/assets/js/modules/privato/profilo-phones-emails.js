@@ -46,6 +46,7 @@ function createCopyBtn(text) {
 // ─── PHONES ──────────────────────────────────────────────────────────────────
 
 export function renderPhonesView() {
+    if (!_getState) return;  // moduli non ancora inizializzati
     const { contactPhones } = _getState();
     const container = document.getElementById('telefoni-view-container');
     if (!container) return;
@@ -150,6 +151,7 @@ export async function editPhone(idx) {
 // ─── EMAILS ──────────────────────────────────────────────────────────────────
 
 export function renderEmailsView() {
+    if (!_getState) return;  // moduli non ancora inizializzati
     const { contactEmails, qrCodeInclusions } = _getState();
     const container = document.getElementById('email-view-container');
     if (!container) return;

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PROFILO PRIVATO MODULE (V6.0 — Modular)
  * Entry point e orchestratore del profilo privato utente.
  *
@@ -112,6 +112,11 @@ export async function initProfiloPrivato(user) {
     initProxyDropdowns();
     setupQRToggles();
     setupCollapsibleSections();
+
+    // Render sezioni ora che tutti i moduli sono inizializzati
+    // (la chiamata dentro loadUserData fallisce silenziosamente perché i moduli non sono ancora pronti)
+    renderAllSections();
+    generateProfileQRCode();
 }
 
 /** Context object per profilo-actions.js */
