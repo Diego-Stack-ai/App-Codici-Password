@@ -24,6 +24,8 @@ export const createElement = (tag, props = {}, children = []) => {
     const el = document.createElement(tag);
 
     for (const key in props) {
+        // Salta undefined/null: evita coercioni WebIDL pericolose (es. maxLength=undefined → 0)
+        if (props[key] === undefined || props[key] === null) continue;
         if (key === 'className') {
             el.className = props[key];
         } else if (key === 'dataset') {

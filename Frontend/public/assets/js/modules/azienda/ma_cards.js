@@ -301,18 +301,26 @@ export function addExtraSede(data = null) {
 export function createFieldBox(labelText, labelT, type, val, cls, place, placeT, center = false, uppercase = false) {
     const uniqueId = `field_${Math.random().toString(36).substr(2, 5)}`;
     const fieldId = `id_${cls}_${uniqueId}`;
+
+    // t() restituisce la chiave come fallback → confronto esplicito per usare labelText
+    const resolvedLabel = (() => { const tr = t(labelT); return (tr && tr !== labelT) ? tr : labelText; })();
+    const resolvedPlaceholder = (() => { const tr = t(placeT); return (tr && tr !== placeT) ? tr : place; })();
+
+    // maxLength: NON passare undefined → el.maxLength=undefined → ToInt32(NaN)=0 → nessun input!
+    const maxLengthProp = uppercase ? { maxLength: 2 } : cls.includes('cap') ? { maxLength: 5 } : {};
+
     return createElement('div', { className: 'glass-field-container' }, [
-        createElement('label', { className: 'view-label', for: fieldId, 'data-t': labelT, textContent: t(labelT) || labelText }),
+        createElement('label', { className: 'view-label', for: fieldId, 'data-t': labelT, textContent: resolvedLabel }),
         createElement('div', { className: 'detail-field-box border-glow' }, [
             createElement('input', {
                 id: fieldId,
                 type: type,
                 name: `${cls}_${uniqueId}`,
-                className: `detail-field-input ${cls} ${center ? 'text-center' : ''} ${uppercase ? 'uppercase' : ''}`,
+                className: `detail-field-input ${cls}${center ? ' text-center' : ''}${uppercase ? ' uppercase' : ''}`,
                 value: val || '',
-                placeholder: place,
+                placeholder: resolvedPlaceholder,
                 'data-t-placeholder': placeT,
-                maxLength: uppercase ? 2 : (cls.includes('cap') ? 5 : undefined),
+                ...maxLengthProp,
                 autocomplete: 'off', autocorrect: 'off', spellcheck: 'false'
             })
         ])
