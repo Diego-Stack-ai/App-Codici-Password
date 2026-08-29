@@ -1,4 +1,4 @@
-ï»¿/**
+/**
  * HOME PAGE MODULE (V4.1)
  * Gestisce l'interfaccia della nuova Home Page statica.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
@@ -8,11 +8,12 @@ import { auth, db } from '../../firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
+import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
 import { getLastCryptoError } from '../core/crypto-utils.js';
 
-// [V8.0] FLAG DI SICUREZZA - In produzione Ã¨ FALSE per nascondere i meccanismi di auto-cura
+// [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
 
 /**
@@ -37,7 +38,7 @@ export async function initHomePage(user) {
     // Inizializza Listeners immediatamente (non dipende da dati remoti)
     initHomeListeners();
 
-    // Sblocco visibilitÃ  subito
+    // Sblocco visibilità subito
     document.documentElement.setAttribute("data-i18n", "ready");
 
     // [FIX V8.1] Caricamenti paralleli e indipendenti:
@@ -55,7 +56,7 @@ export async function initHomePage(user) {
         : [];
 
     if (aziResult.status === 'rejected') {
-        console.warn("[HOME] Fetch aziende fallito (rete?), FAB in modalitÃ  default.", aziResult.reason);
+        console.warn("[HOME] Fetch aziende fallito (rete?), FAB in modalità default.", aziResult.reason);
     }
 
     setupFABGroup(aziendes);
@@ -124,7 +125,7 @@ async function renderHeaderUser(user) {
         if (docSnap.exists()) {
             const data = docSnap.data();
 
-            // ðŸ” PROTOCOLLO BLINDA (V7.0): Decifrazione Profilo Utente
+            // ?? PROTOCOLLO BLINDA (V7.0): Decifrazione Profilo Utente
             let nomeRaw = data.nome;
             let cognomeRaw = data.cognome;
 
@@ -139,7 +140,7 @@ async function renderHeaderUser(user) {
                 // Tentativo di sblocco silenzioso
                 if (isAutoUnlockActive()) {
                     const mk = await ensureMasterKey();
-                    // [FIX V7.15] Regex piÃ¹ tollerante per Safari (include URL-safe e padding flessibile)
+                    // [FIX V7.15] Regex più tollerante per Safari (include URL-safe e padding flessibile)
                     const isEnc = (v) => v && typeof v === 'string' && v.trim().length > 20 && /^[A-Za-z0-9+/=_-]+$/.test(v.trim());
 
                     let nameDecrypted = false;
@@ -158,7 +159,7 @@ async function renderHeaderUser(user) {
                         }
                     }
 
-                    // Se abbiamo decifrato con successo almeno un campo, la chiave Ã¨ valida!
+                    // Se abbiamo decifrato con successo almeno un campo, la chiave è valida!
                     if (nameDecrypted && !sessionStorage.getItem('vault_verified')) {
                         import('../../ui-core.js').then(ui => ui.showToast("Password Master Corretta!", "success"));
                         sessionStorage.setItem('vault_verified', 'true');
@@ -213,7 +214,7 @@ async function renderHeaderUser(user) {
 function setAvatarImage(element, url) {
     if (!url) return;
 
-    // Se element Ã¨ l'ID header-user-avatar o simile
+    // Se element è l'ID header-user-avatar o simile
     const img = element.querySelector('img') || document.getElementById('user-avatar-img');
 
     if (img) {
@@ -234,7 +235,7 @@ function showSelfHealingBanner() {
         style: 'background: rgba(239, 68, 68, 0.1); border-color: #ef4444; margin: 15px; padding: 15px; text-align: center;'
     }, [
         createElement('p', {
-            textContent: "âš ï¸ Rilevato errore nei dati. La tua chiave potrebbe essere obsoleta.",
+            textContent: "?? Rilevato errore nei dati. La tua chiave potrebbe essere obsoleta.",
             style: 'color: #ef4444; margin-bottom: 5px; font-weight: bold;'
         }),
         createElement('p', {
@@ -431,9 +432,10 @@ function setupFABGroup(aziendes = []) {
         });
     }
 
-    // V6.1: Late-subscriber safe â€” se il footer Ã¨ giÃ  pronto, inizializza subito
-    if (window.__footerReady) {
-        initFABFromFooter(window.__footerReady);
+    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
+    const _footerState = getFooterReady();
+    if (_footerState) {
+        initFABFromFooter(_footerState);
     } else {
         document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
     }

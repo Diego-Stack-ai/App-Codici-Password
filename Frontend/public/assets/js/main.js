@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PROTOCOLLO MASTER MAIN ENTRY POINT (V7.0)
  * Coordina l'inizializzazione dei moduli UI dell'applicazione secondo il PROTOCOLLO V7.0.
  * Refactor: Rimozione innerHTML, uso dom-utils.js, centralizzazione in components.js.
@@ -6,8 +6,8 @@
 
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
 
-// Console override — in produzione silenzioso, in dev attivo (gli import sono hoisted)
-window.__APP_ENV = document.documentElement.dataset.env || 'production';
+// APP_ENV ora in env.js — window.__APP_ENV rimosso
+
 console.log      = (...args) => { try { LOG(...args);       } catch (e) {} };
 console.info     = (...args) => { try { LOG(...args);       } catch (e) {} };
 console.debug    = (...args) => { try { LOG(...args);       } catch (e) {} };
@@ -40,6 +40,9 @@ import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js';
 import { ensureMasterKey } from './modules/core/security-manager.js';
+
+// Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
+let _v7Bootstrapped = false;
 
 // Inizializza il controllo inattività globalmente
 initInactivityTimer();
@@ -90,11 +93,11 @@ function getCurrentPage() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 🔐 BLOCCO SENTINELLA V7.0 - Previene il doppio bootstrap
-    if (window.__V7_BOOTSTRAPPED__) {
+    if (_v7Bootstrapped) {
         console.warn("⚠️ Rilevato tentativo di doppio bootstrap. Blocco sentinella attivo.");
         return;
     }
-    window.__V7_BOOTSTRAPPED__ = true;
+    _v7Bootstrapped = true;
 
     // 🌍 I18N — Carica la lingua PRIMA di qualsiasi render
     await loadLanguage(getCurrentLanguage());

@@ -1,6 +1,9 @@
-﻿import { initComponents } from './components.js';
+import { initComponents } from './components.js';
 import { createElement, setChildren, safeSetText } from './dom-utils.js';
 import { t } from './translations.js';
+
+// Timer privato toast — sostituisce window._toastTimeout
+let _toastTimeout = null;
 
 /**
  * [CORE UI] INITIALIZATION
@@ -84,8 +87,8 @@ export function showToast(message, type = 'success') {
     }, 10);
 
     // Auto-hide
-    if (window._toastTimeout) clearTimeout(window._toastTimeout);
-    window._toastTimeout = setTimeout(() => {
+    if (_toastTimeout) clearTimeout(_toastTimeout);
+    _toastTimeout = setTimeout(() => {
         toast.classList.remove('active');
     }, 3000);
 }

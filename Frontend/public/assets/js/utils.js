@@ -1,4 +1,5 @@
-﻿import { LOG } from './logger.js';
+import { LOG } from './logger.js';
+import { APP_ENV } from './env.js';
 
 /**
  * Centralized error logger for the application.
@@ -10,7 +11,7 @@ export function logError(context, error) {
 }
 
 export function logDebug(context, message) {
-  if (window.__APP_ENV !== 'production' || window.location.hostname === 'localhost') {
+  if (APP_ENV !== 'production' || window.location.hostname === 'localhost') {
     console.log(`DEBUG [${context}]:`, message);
   }
 }

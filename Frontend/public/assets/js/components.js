@@ -1,9 +1,13 @@
-﻿import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
+import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
 import { auth } from './firebase-config.js';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core.js';
+import { setFooterReady } from './footer-state.js';
+
+// Guard idempotenza — sostituisce window.__componentsInitialized
+let _componentsInitialized = false;
 
 
 /**
@@ -12,8 +16,8 @@ import { showLogoutModal } from './ui-core.js';
  */
 export async function initComponents() {
     // Guard idempotente: evita doppia inizializzazione e fetch multipli
-    if (window.__componentsInitialized) return;
-    window.__componentsInitialized = true;
+    if (_componentsInitialized) return;
+    _componentsInitialized = true;
 
     try {
         const path = window.location.pathname;
@@ -245,7 +249,7 @@ export async function initComponents() {
                 center: footerCenter,
                 right: footerRight
             };
-            window.__footerReady = footerReadyDetail;
+            setFooterReady(footerReadyDetail);
             document.dispatchEvent(new CustomEvent('footer:ready', {
                 detail: footerReadyDetail
             }));

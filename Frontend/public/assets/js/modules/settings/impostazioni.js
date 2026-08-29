@@ -67,21 +67,43 @@ function setupSecurityToggles(data) {
 
     if (tFace) {
         tFace.checked = data.settings_biometric || false;
+        
+        // Verifica supporto WebAuthn PRF asincrono
+        const prfStatusEl = document.getElementById('prf-support-status');
+        import('../core/webauthn-manager.js').then(manager => {
+            manager.isWebAuthnSupported().then(supported => {
+                if (prfStatusEl) {
+                    if (supported) {
+                        prfStatusEl.textContent = "Dispositivo compatibile (WebAuthn PRF)";
+                        prfStatusEl.style.color = "var(--success-color, green)";
+                    } else {
+                        prfStatusEl.textContent = "Non compatibile (WebAuthn non supportato)";
+                        prfStatusEl.style.color = "var(--error-color, red)";
+                        tFace.disabled = true;
+                    }
+                }
+            });
+        });
+        
         tFace.addEventListener('change', async () => {
             const val = tFace.checked;
             try {
                 if (val) {
-                    // Se attiva biometria, deve fornire la chiave master per salvarla
                     const key = await ensureMasterKey();
-                    await setMasterKey(key, true); // Salva in localStorage
+                    // WebAuthn richiede interazione diretta dell'utente. enableBiometricUnlock lancia la registrazione.
+                    const { enableBiometricUnlock } = await import('../core/security-manager.js');
+                    const success = await enableBiometricUnlock(key);
+                    if (!success) {
+                        tFace.checked = false; // rollback UI se non supportato o fallito
+                    }
                 } else {
-                    localStorage.removeItem('codex_vault_secret');
+                    const { disableVaultAutoUnlock } = await import('../core/security-manager.js');
+                    disableVaultAutoUnlock(); // Rimuove local storage e pulisce stato
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_biometric: false });
                 }
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_biometric: val });
-                showToast(val ? "Biometrico Attivato" : "Biometrico Disattivato");
             } catch (e) {
                 tFace.checked = !val;
-                showToast("Errore: chiave richiesta per biometria", "error");
+                showToast("Errore durante l'operazione biometrica", "error");
             }
         });
     }

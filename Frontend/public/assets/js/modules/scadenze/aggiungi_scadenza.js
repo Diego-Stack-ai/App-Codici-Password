@@ -1,10 +1,11 @@
-ï»¿/**
+/**
  * AGGIUNGI SCADENZA MODULE (V4.1)
  * Gestisce l'aggiunta o la modifica di scadenze.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
 import { db, auth, storage } from '../../firebase-config.js';
+import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
@@ -67,7 +68,7 @@ export async function initAggiungiScadenza(user) {
     initProxyDropdowns();
     initAttachmentSystem();
 
-    // Collega i pulsanti "Aggiungi Email" ora che il DOM Ã¨ pronto
+    // Collega i pulsanti "Aggiungi Email" ora che il DOM è pronto
     document.getElementById('btn-add-email-primaria')
         ?.addEventListener('click', () => _addNotificationEmailBtn('email_primaria_select'));
     document.getElementById('btn-add-email-secondaria')
@@ -137,9 +138,10 @@ export async function initAggiungiScadenza(user) {
         });
     }
 
-    // V6.1: Late-subscriber safe â€” se il footer Ã¨ giÃ  pronto, inizializza subito
-    if (window.__footerReady) {
-        initFooterFromDetail(window.__footerReady);
+    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
+    const _footerState = getFooterReady();
+    if (_footerState) {
+        initFooterFromDetail(_footerState);
     } else {
         document.addEventListener('footer:ready', (e) => initFooterFromDetail(e.detail), { once: true });
     }
@@ -183,7 +185,7 @@ export async function initAggiungiScadenza(user) {
         if (pageTitle) pageTitle.textContent = "Modifica Scadenza";
         await loadScadenzaForEdit(editingScadenzaId);
     } else {
-        // Forza l'aggiornamento UI per la modalitÃ  di default ('automezzi') in "Aggiungi"
+        // Forza l'aggiornamento UI per la modalità di default ('automezzi') in "Aggiungi"
         setMode(currentMode);
     }
 
@@ -303,7 +305,7 @@ async function loadDynamicConfig() {
         const defaultDoc = {
             deadlineTypes: [
                 { name: 'Patente', freq: 7, period: 56 },
-                { name: 'Carta IdentitÃ ', freq: 14, period: 56 },
+                { name: 'Carta Identità', freq: 14, period: 56 },
                 { name: 'Passaporto', freq: 14, period: 28 },
                 { name: 'Codice fiscale', freq: 7, period: 56 }
             ],
@@ -311,7 +313,7 @@ async function loadDynamicConfig() {
             // I documenti vengono aggiunti dall'utente nelle impostazioni
             emailTemplates: [
                 "la tua patente",
-                "Il tuo documento di IdentitÃ ",
+                "Il tuo documento di Identità",
                 "Il tuo passaporto",
                 "Il tuo codice fiscale"
             ]
@@ -341,7 +343,7 @@ async function loadDynamicConfig() {
             ]
         };
         const dGen = genSnap.exists() ? rawGenData : defaultGen;
-        // Seed se documento assente O se deadlineTypes Ã¨ vuoto (documento incompleto)
+        // Seed se documento assente O se deadlineTypes è vuoto (documento incompleto)
         const needsSeedGen = !genSnap.exists() || !rawGenData.deadlineTypes || rawGenData.deadlineTypes.length === 0;
         if (needsSeedGen) {
             const mergedGen = { ...defaultGen, notificationEmails: rawGenData.notificationEmails || [] };
@@ -370,10 +372,10 @@ function updateCurrentDynamicConfig() {
     else if (currentMode === 'documenti') dynamicConfig = unifiedConfigs.documenti;
     else if (currentMode === 'generali') dynamicConfig = unifiedConfigs.generali;
 
-    // names: solo quelli della modalitÃ  corrente (contestuali)
+    // names: solo quelli della modalità corrente (contestuali)
     dynamicConfig.names = (dynamicConfig.names || []).sort();
 
-    // notificationEmails: quelli della modalitÃ  corrente
+    // notificationEmails: quelli della modalità corrente
     populateEmailSelects(dynamicConfig.notificationEmails || []);
 }
 
@@ -399,7 +401,7 @@ async function addConfigItem(selectId, valueStringOrObject) {
             else docName = 'generalConfig';
         } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
             field = 'notificationEmails';
-            // Opzione B: email per modalitÃ  corrente
+            // Opzione B: email per modalità corrente
             if (currentMode === 'automezzi') docName = 'deadlineConfig';
             else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
             else docName = 'generalConfig';
@@ -407,7 +409,7 @@ async function addConfigItem(selectId, valueStringOrObject) {
 
         if (!docName || !field) return;
 
-        // Update local state â€” per notificationEmails usa il config della modalitÃ  corrente
+        // Update local state — per notificationEmails usa il config della modalità corrente
         const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
             (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
 
@@ -422,9 +424,9 @@ async function addConfigItem(selectId, valueStringOrObject) {
                 const newName = typeof valueStringOrObject === 'object' ? valueStringOrObject.name : valueStringOrObject;
                 return checkedName === newName;
             });
-            if (exists) return showToast("Valore giÃ  esistente", "info");
+            if (exists) return showToast("Valore già esistente", "info");
         } else {
-            if (configToUpdate[field].includes(valueStringOrObject)) return showToast("Valore giÃ  esistente", "info");
+            if (configToUpdate[field].includes(valueStringOrObject)) return showToast("Valore già esistente", "info");
         }
 
         configToUpdate[field].push(valueToPush);
@@ -516,7 +518,7 @@ async function editConfigItem(selectId, oldValue) {
 }
 
 async function deleteConfigItem(selectId, value) {
-    const confirm = await showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirÃ  sulle scadenze esistenti, ma la voce non sarÃ  piÃ¹ disponibile per le nuove.`);
+    const confirm = await showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirà sulle scadenze esistenti, ma la voce non sarà più disponibile per le nuove.`);
     if (!confirm) return;
 
     try {
@@ -690,7 +692,7 @@ function setupSaveLogic() {
 
     btnSave.addEventListener('click', async () => {
         if (!auth.currentUser || isSubmitting) {
-            LOG("[FRONTEND] Click ignorato: processo giÃ  in corso o utente non loggato.");
+            LOG("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
             return;
         }
 
@@ -812,7 +814,7 @@ function setupSaveLogic() {
                     { merge: true }
                 ).catch(e => console.warn('[TRACE] names update failed:', e));
 
-                // Salva anche le email nel config della modalitÃ  corrente (Opzione B)
+                // Salva anche le email nel config della modalità corrente (Opzione B)
                 const emailsToSave = [email1, email2].filter(e => e && e.trim() && e !== 'manual');
                 if (emailsToSave.length > 0) {
                     setDoc(

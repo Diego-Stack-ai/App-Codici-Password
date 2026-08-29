@@ -5,6 +5,7 @@
  */
 
 import { auth, db } from '../../firebase-config.js';
+import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
@@ -166,7 +167,7 @@ function renderFilteredScadenze() {
         if (activeFilter === 'urgent') return expired;
         if (activeFilter === 'expiring') return isUpcoming;
 
-        // Se siamo qui e activeFilter == 'all', passa (perché non completata)
+        // Se siamo qui e activeFilter == 'all', passa (perch� non completata)
         return true;
     });
 
@@ -328,7 +329,7 @@ async function archiveScadenza(id) {
 async function deleteScadenza(id) {
     if (!currentUser) return;
     try {
-        // Qui potresti mettere un confirm, ma lo swipe è un'azione veloce.
+        // Qui potresti mettere un confirm, ma lo swipe � un'azione veloce.
         // Se preferisci conferma, scommenta:
         // if(!confirm("Eliminare definitivamente?")) { loadScadenze(); return; }
 
@@ -376,9 +377,10 @@ function setupFAB() {
         });
     }
 
-    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
-    if (window.__footerReady) {
-        initFABFromFooter(window.__footerReady);
+    // V6.1: Late-subscriber safe � se il footer � gi� pronto, inizializza subito
+    const _footerState = getFooterReady();
+    if (_footerState) {
+        initFABFromFooter(_footerState);
     } else {
         document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
     }
