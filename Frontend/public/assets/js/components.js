@@ -5,6 +5,7 @@ import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core.js';
 import { setFooterReady } from './footer-state.js';
+import { APP_VERSION } from './env.js';
 
 // Guard idempotenza — sostituisce window.__componentsInitialized
 let _componentsInitialized = false;
@@ -42,12 +43,17 @@ export async function initComponents() {
                 // EXCEPTION 2.1: Home Page Left -> Avatar Utente (V7.0 Standard)
                 const avatarLink = createElement('div', {
                     id: 'header-user-avatar',
-                    className: 'header-avatar-box cursor-pointer',
+                    className: 'header-avatar-box cursor-pointer flex items-center gap-2',
                     onclick: () => window.location.href = 'profilo_privato.html'
                 }, [
                     createElement('img', {
                         id: 'user-avatar-img',
                         src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00czLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYy04LTIuNjYtOC00LTh6Ii8+PC9zdmc+'
+                    }),
+                    createElement('span', {
+                        className: 'app-version-badge',
+                        style: 'font-size: 0.65rem; opacity: 0.7; font-weight: bold; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 6px;',
+                        textContent: APP_VERSION
                     })
                 ]);
                 headerLeft.appendChild(avatarLink);
