@@ -304,21 +304,42 @@ export async function setMasterKey(pass, saveForBiometrics = false) {
     const cleanPass = String(pass).normalize('NFC').trim();
     const uid = auth.currentUser?.uid;
     
+    // FIX 4: UID SAFETY
+    if (!uid) {
+        _masterKey = null;
+        _vaultAutoUnlock = false;
+        return; // STOP
+    }
+    
     // Assicura che un verifier esista sempre quando viene impostata una password root
     try {
         const verificationResult = await verifyMasterPassword(cleanPass, uid);
         if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
-            await createVerifier(cleanPass, uid);
+            // FIX 2: NO VERIFIER CREATION CIECA
+            const migrated = await migrateLegacyVault(cleanPass, uid);
+            if (!migrated) {
+                // FIX 1: setMasterKey FAIL-CLOSED
+                _masterKey = null;
+                _vaultAutoUnlock = false;
+                throw new Error("Vault verification/migration failed in setMasterKey");
+            }
         } else if (verificationResult === false) {
+            // FIX 1: setMasterKey FAIL-CLOSED
             console.warn('setMasterKey called with wrong password. Rejecting.');
-            return;
+            _masterKey = null;
+            _vaultAutoUnlock = false;
+            throw new Error("Wrong Vault Password");
         }
     } catch(e) {
+        // FIX 3: ERROR PROPAGATION (uscita fail-closed)
         console.error('setMasterKey verifier check failed:', e);
+        _masterKey = null;
+        _vaultAutoUnlock = false;
+        throw e;
     }
     
     _masterKey = cleanPass;
-    const biometricAlreadyEnabled = !!(uid && localStorage.getItem(getStorageKey(uid))) || !!localStorage.getItem(LEGACY_STORAGE_KEY);
+    const biometricAlreadyEnabled = !!localStorage.getItem(getStorageKey(uid)) || !!localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saveForBiometrics || biometricAlreadyEnabled) {
         await enableBiometricUnlock(cleanPass);
     }
