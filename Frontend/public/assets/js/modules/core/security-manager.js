@@ -1,13 +1,13 @@
 /**
- * SECURITY MANAGER (V8.0 - Vault Auto-Unlock con WebAuthn PRF)
- * - La masterKey viene salvata in sessionStorage (base64, isolata per tab).
+ * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
+ * - La masterKey è tenuta solo in RAM (_masterKey). Non persistita.
  * - Sblocco biometrico usa WebAuthn PRF.
  */
 
-import { encrypt, decrypt } from './crypto-utils.js';
+import { encrypt, decrypt, isEncryptedValue } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core.js';
 import { db, auth } from '../../firebase-config.js';
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
 
@@ -18,6 +18,122 @@ const updateGlobalState = () => {};
 
 const STORAGE_PREFIX = 'codex_vault_secret_';
 const LEGACY_STORAGE_KEY = 'codex_vault_secret';
+
+
+// --- VAULT VERIFIER ---
+const VERIFIER_STORAGE_PREFIX = 'codex_vault_verifier_';
+const VERIFIER_MARKER = 'APP_CODICI_PASSWORD_VAULT_VERIFIER_V1';
+
+function getVerifierStorageKey(uid) {
+    return uid ? `${VERIFIER_STORAGE_PREFIX}${uid}` : null;
+}
+
+async function createVerifier(masterPassword, uid) {
+    const ciphertext = await encrypt(VERIFIER_MARKER, masterPassword);
+    const verifier = {
+        version: 1,
+        type: 'vault-verifier',
+        ciphertext: ciphertext,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+    };
+    
+    try {
+        await setDoc(doc(db, 'users', uid, 'settings', 'security'), { verifier: verifier }, { merge: true });
+    } catch (e) {
+        console.error('Firestore verifier write failed:', e);
+        throw e;
+    }
+    
+    localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
+    return verifier;
+}
+
+async function verifyMasterPassword(masterPassword, uid) {
+    let verifierStr = localStorage.getItem(getVerifierStorageKey(uid));
+    let verifier = null;
+    
+    if (verifierStr) {
+        try { verifier = JSON.parse(verifierStr); } catch (e) {}
+    }
+    
+    if (!verifier || verifier.type !== 'vault-verifier' || !verifier.ciphertext) {
+        try {
+            const snap = await getDoc(doc(db, 'users', uid, 'settings', 'security'));
+            if (snap.exists() && snap.data().verifier) {
+                verifier = snap.data().verifier;
+                localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
+            }
+        } catch (e) {
+            console.error('Failed to fetch verifier from Firestore', e);
+            throw new Error('NETWORK_REQUIRED_FOR_SECURITY_SYNC');
+        }
+    }
+    
+    if (!verifier || verifier.type !== 'vault-verifier' || !verifier.ciphertext) {
+        return 'LEGACY_MIGRATION_NEEDED';
+    }
+    
+    try {
+        const decrypted = await decrypt(verifier.ciphertext, masterPassword);
+        return (decrypted === VERIFIER_MARKER);
+    } catch (e) {
+        return false;
+    }
+}
+
+async function migrateLegacyVault(candidatePassword, uid) {
+    try {
+        const snap = await getDoc(doc(db, 'users', uid));
+        const data = snap.exists() ? snap.data() : null;
+        if (data) {
+            const testFields = ['nome', 'cognome', 'cf', 'birth_place', 'note'];
+            for (const field of testFields) {
+                if (data[field] && isEncryptedValue(data[field])) {
+                    const decrypted = await decrypt(data[field], candidatePassword);
+                    if (decrypted && decrypted !== '--ERRORE--') {
+                        await createVerifier(candidatePassword, uid);
+                        return true;
+                    } else if (decrypted === '--ERRORE--') {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        const accountsSnap = await getDocs(query(collection(db, 'users', uid, 'accounts'), limit(1)));
+        if (!accountsSnap.empty) {
+            const accountData = accountsSnap.docs[0].data();
+            const testFields = ['username', 'account', 'password', 'note'];
+            for (const field of testFields) {
+                if (accountData[field] && isEncryptedValue(accountData[field])) {
+                    const decrypted = await decrypt(accountData[field], candidatePassword);
+                    if (decrypted && decrypted !== '--ERRORE--') {
+                        await createVerifier(candidatePassword, uid);
+                        return true;
+                    } else if (decrypted === '--ERRORE--') {
+                        return false;
+                    }
+                }
+            }
+            console.warn('Found account but no verifiable encrypted fields.');
+            return false;
+        }
+        
+        const aziendeSnap = await getDocs(query(collection(db, 'users', uid, 'aziende'), limit(1)));
+        if (aziendeSnap.empty) {
+            await createVerifier(candidatePassword, uid);
+            return true;
+        } else {
+            console.warn('Found aziende but did not find accounts to verify. Failing closed.');
+            return false;
+        }
+    } catch (e) {
+        console.error('Migration check failed:', e);
+        throw new Error('NETWORK_REQUIRED_FOR_SECURITY_SYNC');
+    }
+}
+// ----------------------
 
 function getStorageKey(uid) {
     return uid ? `${STORAGE_PREFIX}${uid}` : null;
@@ -120,14 +236,36 @@ export async function ensureMasterKey(options = {}) {
     const pass = await showInputModal("SBLOCCO VAULT", '', msg);
 
     if (pass) {
-        const cleanPass = pass.trim();
+        const cleanPass = pass.normalize('NFC').trim();
+        
+        try {
+            const verificationResult = await verifyMasterPassword(cleanPass, uid);
+            
+            if (verificationResult === true) {
+                // Success
+            } else if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
+                const migrated = await migrateLegacyVault(cleanPass, uid);
+                if (!migrated) {
+                    showToast("Password errata o migrazione fallita.", "error");
+                    throw new Error("Vault verification failed");
+                }
+            } else {
+                showToast("Password Vault Errata", "error");
+                throw new Error("Vault verification failed");
+            }
+        } catch (e) {
+            if (e.message === 'NETWORK_REQUIRED_FOR_SECURITY_SYNC') {
+                showToast("Per completare l'aggiornamento di sicurezza è necessaria una connessione.", "error");
+            }
+            throw e;
+        }
+
         _masterKey = cleanPass;
         _isSoftLocked = false;
         _vaultAutoUnlock = true;
         updateGlobalState();
 
         if (isOldFormat || isLegacy) {
-            // Verify and migrate
             let isValid = true;
             if (isOldFormat) {
                 const oldDecoded = decodeURIComponent(escape(atob(storedSecret))).normalize('NFC').trim();
@@ -163,11 +301,26 @@ export function resetVault() {
 }
 
 export async function setMasterKey(pass, saveForBiometrics = false) {
-    _masterKey = pass;
+    const cleanPass = String(pass).normalize('NFC').trim();
     const uid = auth.currentUser?.uid;
+    
+    // Assicura che un verifier esista sempre quando viene impostata una password root
+    try {
+        const verificationResult = await verifyMasterPassword(cleanPass, uid);
+        if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
+            await createVerifier(cleanPass, uid);
+        } else if (verificationResult === false) {
+            console.warn('setMasterKey called with wrong password. Rejecting.');
+            return;
+        }
+    } catch(e) {
+        console.error('setMasterKey verifier check failed:', e);
+    }
+    
+    _masterKey = cleanPass;
     const biometricAlreadyEnabled = !!(uid && localStorage.getItem(getStorageKey(uid))) || !!localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saveForBiometrics || biometricAlreadyEnabled) {
-        await enableBiometricUnlock(pass);
+        await enableBiometricUnlock(cleanPass);
     }
     updateGlobalState();
 }
@@ -181,7 +334,6 @@ async function tryBiometricUnlock() {
     if (!encryptedSecret) return null;
 
     if (!encryptedSecret.startsWith('{')) {
-        // Old format detected. Do not auto-unlock. Let fallback to manual input to trigger migration.
         return null;
     }
 
@@ -193,11 +345,29 @@ async function tryBiometricUnlock() {
         const aesKey = await deriveHkdfKey(prfOutput, data.hkdfSalt);
         const secret = await decryptVaultSecret(data.encryptedMasterKey, data.iv, aesKey);
         
-        showToast("Accesso Biometrico Confermato", "success");
-        return secret;
+        // VERIFY WITH VAULT VERIFIER
+        const verificationResult = await verifyMasterPassword(secret, uid);
+        
+        if (verificationResult === true) {
+            showToast('Accesso Biometrico Confermato', 'success');
+            return secret;
+        } else if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
+            const migrated = await migrateLegacyVault(secret, uid);
+            if (migrated) {
+                showToast('Accesso Biometrico Confermato (Migrato)', 'success');
+                return secret;
+            }
+        }
+        
+        console.warn('Biometric PRF decrypted secret but Vault Verifier rejected it.');
+        return null;
+        
     } catch (e) {
-        console.error("[SECURITY-AUDIT] Biometric recovery failed:", e);
-        // Do not delete local storage on auth cancellation or failure. Fallback to manual.
+        if (e.message === 'NETWORK_REQUIRED_FOR_SECURITY_SYNC') {
+            showToast('Connessione necessaria per verifica sicurezza offline.', 'warning');
+        } else {
+            console.error('[SECURITY-AUDIT] Biometric recovery failed:', e);
+        }
         return null;
     }
 }
