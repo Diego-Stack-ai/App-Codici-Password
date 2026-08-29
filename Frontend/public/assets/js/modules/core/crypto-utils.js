@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CRYPTO UTILS (V1.1 - Safari/WebKit Optimized)
  * Protocollo di crittografia client-side per dati sensibili.
  * Ottimizzato per compatibilità cross-platform (Chrome/Safari iOS).
@@ -66,7 +66,7 @@ async function deriveKey(password, salt) {
         },
         passwordKey,
         { name: "AES-GCM", length: 256 },
-        true, // Rendiamo esportabile per il log diagnostico
+        false, // extractable: false (was true)
         ["encrypt", "decrypt"]
     );
 
@@ -79,7 +79,13 @@ async function deriveKey(password, salt) {
  * Cifra una stringa usando una password.
  */
 export async function encrypt(text, password) {
-    if (!text || !password) return text;
+    // Se non c'è testo da cifrare (null, undefined, ''), restituiamo il valore vuoto.
+    if (!text) return text;
+
+    // Se c'è testo ma manca la password, falliamo (fail-closed).
+    if (!password || !String(password).normalize('NFC').trim()) {
+        throw new Error("Encryption key missing or invalid");
+    }
 
     try {
         const encoder = new TextEncoder();
@@ -102,8 +108,8 @@ export async function encrypt(text, password) {
 
         return bufferToBase64(combined);
     } catch (e) {
-        console.error("[CRYPTO-AUDIT] Encryption failed:", e);
-        return text;
+        console.error(`[CRYPTO-AUDIT] Encryption failed: ${e.name || 'Error'}`);
+        throw new Error("Encryption failed");
     }
 }
 
