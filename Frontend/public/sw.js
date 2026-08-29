@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v8.4-webauthn';
+const CACHE_NAME = 'codex-v8.5-prf-hardening';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -10,7 +10,11 @@ const ASSETS_TO_CACHE = [
     'assets/css/core_fascie.css',
     'assets/js/main.js',
     'assets/js/theme-init.js',
+    'assets/js/modules/core/security-manager.js',
     'assets/js/modules/core/webauthn-manager.js',
+    'assets/js/modules/core/crypto-utils.js',
+    'assets/js/firebase-config.js',
+    'assets/js/ui-core.js',
     'assets/js/dom-utils.js',
     'assets/images/app-icon.jpg'
 ];

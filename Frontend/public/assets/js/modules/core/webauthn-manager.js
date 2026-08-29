@@ -82,9 +82,12 @@ export async function setupWebAuthnPrf(userId, userEmail) {
             throw new Error("PRF_NOT_SUPPORTED");
         }
 
+        const createPrfOutput = extResults.prf?.results?.first || null;
+
         return {
             credentialId: bufferToBase64(credential.rawId),
-            prfSalt: bufferToBase64(prfSalt)
+            prfSalt: bufferToBase64(prfSalt),
+            prfOutput: createPrfOutput
         };
     } catch (e) {
         console.error("WebAuthn Registration Error", e);
