@@ -176,10 +176,8 @@ async function tryBiometricUnlock() {
     const uid = auth.currentUser?.uid;
     if (!uid) return null;
     
-    let encryptedSecret = localStorage.getItem(getStorageKey(uid));
-    if (!encryptedSecret) {
-        encryptedSecret = localStorage.getItem(LEGACY_STORAGE_KEY);
-    }
+    const encryptedSecret = localStorage.getItem(getStorageKey(uid));
+    
     if (!encryptedSecret) return null;
 
     if (!encryptedSecret.startsWith('{')) {
