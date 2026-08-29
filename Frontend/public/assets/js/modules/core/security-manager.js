@@ -1,36 +1,27 @@
 /**
- * SECURITY MANAGER (V7.0 — Vault Auto-Unlock con Persistenza di Sessione)
+ * SECURITY MANAGER (V8.0 - Vault Auto-Unlock con WebAuthn PRF)
  * - La masterKey viene salvata in sessionStorage (base64, isolata per tab).
- * - Espone window.__vaultUnlocked in modo sincrono per i moduli UI.
- * - Rimozione definitiva di ogni banner o notifica persistente.
+ * - Sblocco biometrico usa WebAuthn PRF.
  */
 
 import { encrypt, decrypt } from './crypto-utils.js';
-import { showInputModal, showToast } from '../../ui-core.js';
+import { showInputModal, showToast, showConfirmModal } from '../../ui-core.js';
 import { db, auth } from '../../firebase-config.js';
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported, isPrfSupported } from './webauthn-manager.js';
 
-// ─── STATO INTERNO ────────────────────────────────────────────────────
 let _masterKey = null;
 let _vaultAutoUnlock = false;
-let _isSoftLocked = false; // V7.0: Stato di blocco temporaneo UI
+let _isSoftLocked = false;
+const updateGlobalState = () => {};
 
-// Nessun modulo legge window.__vaultUnlocked (analisi statica confermata).
-// Lo stato vault è gestito internamente tramite _isSoftLocked e _masterKey.
-// Se un futuro modulo necessita dello stato, importare getVaultState() da questo file.
-const updateGlobalState = () => { /* reserved for future EventBus integration */ };
-
-// Chiavi sessionStorage
 const SS_KEY = 'vault_s_key';
 const SS_EXPIRY = 'vault_s_expiry';
 const STORAGE_KEY = 'codex_vault_secret';
 
-// ─── PERSISTENZA SESSIONSSTORAGE ─────────────────────────────────────
-
 function _saveKeyToSession(key, durationMs) {
     try {
         if (!key) return;
-        // [SAFARI COMPAT] Normalizzazione prima del salvataggio
         const cleanKey = String(key).normalize('NFC').trim();
         const encoded = btoa(unescape(encodeURIComponent(cleanKey)));
 
@@ -41,9 +32,7 @@ function _saveKeyToSession(key, durationMs) {
             sessionStorage.removeItem(SS_EXPIRY);
         }
         updateGlobalState();
-    } catch (e) {
-        console.warn('[SECURITY-AUDIT] sessionStorage save failed:', e);
-    }
+    } catch (e) {}
 }
 
 function _loadKeyFromSession() {
@@ -55,11 +44,8 @@ function _loadKeyFromSession() {
         }
         const stored = sessionStorage.getItem(SS_KEY);
         if (!stored) return null;
-        const decoded = decodeURIComponent(escape(atob(stored)));
-
-        return decoded;
+        return decodeURIComponent(escape(atob(stored)));
     } catch (e) {
-        console.error("[SECURITY-AUDIT] Session load error:", e);
         _clearSessionStorage();
         return null;
     }
@@ -71,11 +57,9 @@ function _clearSessionStorage() {
     updateGlobalState();
 }
 
-// ─── API PUBBLICA AUTO-UNLOCK ─────────────────────────────────────────
-
 export function enableVaultAutoUnlock(durationMs = null) {
     if (!_masterKey) {
-        showToast('Sblocca prima la Vault per attivare la modalità auto-unlock.', 'warning');
+        showToast('Sblocca prima la Vault.', 'warning');
         return false;
     }
     _vaultAutoUnlock = true;
@@ -89,22 +73,17 @@ export function disableVaultAutoUnlock() {
     _masterKey = null;
     _isSoftLocked = false;
     _clearSessionStorage();
-    showToast('La Vault è stata nuovamente protetta.', 'info');
+    localStorage.removeItem(STORAGE_KEY);
+    showToast('La Vault è stata protetta. Biometria disabilitata.', 'info');
 }
 
-/**
- * [V7.0] SOFT LOCK
- * Oscura i dati (window.__vaultUnlocked = false) ma mantiene la chiave in sessionStorage.
- */
 export function softLock() {
     _isSoftLocked = true;
-    _masterKey = null; // Rimuoviamo dalla memoria volatile
+    _masterKey = null;
     updateGlobalState();
 }
 
-export function isSoftLocked() {
-    return _isSoftLocked;
-}
+export function isSoftLocked() { return _isSoftLocked; }
 
 export function isAutoUnlockActive() {
     const fromSession = _loadKeyFromSession();
@@ -113,19 +92,16 @@ export function isAutoUnlockActive() {
         updateGlobalState();
         return true;
     }
-    updateGlobalState();
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return true;
     return false;
 }
-
-// ─── CHIAVE MASTER ───────────────────────────────────────────────────
 
 export async function ensureMasterKey(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
 
-    // 1. Cache-hit in memoria (se non forzato)
     if (_masterKey && !forceReload) return _masterKey;
 
-    // 2. Ripristino da sessionStorage (silenzioso ma segnalato se nuovo)
     const sessionKey = _loadKeyFromSession();
     if (sessionKey && !forceReload) {
         _masterKey = sessionKey;
@@ -135,33 +111,45 @@ export async function ensureMasterKey(options = {}) {
         return _masterKey;
     }
 
-    // 3. Tentativo biometrico (solo se non forzato)
     if (!forceReload) {
         const recovered = await tryBiometricUnlock();
         if (recovered) {
             _masterKey = recovered;
             _saveKeyToSession(_masterKey, 24 * 60 * 60 * 1000);
             updateGlobalState();
-            showToast("Vault sbloccato automaticamente (Biometria)", "success");
             return _masterKey;
         }
     }
 
-    // 4. Richiesta manuale (Sempre se forceReload è true o altri falliscono)
-    const pass = await showInputModal(
-        "SBLOCCO VAULT",
-        '',
-        "Inserisci la password principale..."
-    );
+    const storedSecret = localStorage.getItem(STORAGE_KEY);
+    let isOldFormat = storedSecret && !storedSecret.startsWith('{');
+    
+    let msg = "Inserisci la password principale...";
+    if (isOldFormat) {
+        msg = "Migrazione sicurezza in corso: inserisci la Master Password per aggiornare l'accesso biometrico.";
+    }
+
+    const pass = await showInputModal("SBLOCCO VAULT", '', msg);
 
     if (pass) {
-        // [HEALING V7.5] Trim automatico della password per evitare errori comuni su Mobile (spazi extra)
         const cleanPass = pass.trim();
         _masterKey = cleanPass;
         _isSoftLocked = false;
         _saveKeyToSession(_masterKey, null);
         _vaultAutoUnlock = true;
         updateGlobalState();
+
+        if (isOldFormat) {
+            // Verify and migrate
+            const oldDecoded = decodeURIComponent(escape(atob(storedSecret))).normalize('NFC').trim();
+            if (oldDecoded === cleanPass) {
+                const migrated = await enableBiometricUnlock(cleanPass);
+                if (migrated) {
+                    showToast("Migrazione WebAuthn completata con successo!", "success");
+                }
+            }
+        }
+
         showToast("Vault sbloccata correttamente!", "success");
         return _masterKey;
     }
@@ -169,10 +157,6 @@ export async function ensureMasterKey(options = {}) {
     throw new Error("Chiave di crittografia non fornita.");
 }
 
-/**
- * [V7.6] RESET TOTALE VAULT
- * Pulisce ogni traccia della chiave (Sessione + Locale) per permettere un ripristino manuale campo per campo.
- */
 export function resetVault() {
     _masterKey = null;
     _vaultAutoUnlock = false;
@@ -180,15 +164,16 @@ export function resetVault() {
     _clearSessionStorage();
     localStorage.removeItem(STORAGE_KEY);
     updateGlobalState();
-    showToast("Cache Vault pulita. Ricarica la pagina per sbloccare manualmente.", "info");
+    showToast("Cache Vault pulita.", "info");
     setTimeout(() => window.location.reload(), 1500);
 }
 
 export async function setMasterKey(pass, saveForBiometrics = false) {
     _masterKey = pass;
-    // Se biometria già abilitata (chiave in localStorage), aggiorna automaticamente
     const biometricAlreadyEnabled = !!localStorage.getItem(STORAGE_KEY);
-    if (saveForBiometrics || biometricAlreadyEnabled) await enableBiometricUnlock(pass);
+    if (saveForBiometrics || biometricAlreadyEnabled) {
+        await enableBiometricUnlock(pass);
+    }
     updateGlobalState();
 }
 
@@ -196,31 +181,79 @@ async function tryBiometricUnlock() {
     const encryptedSecret = localStorage.getItem(STORAGE_KEY);
     if (!encryptedSecret) return null;
 
-    const user = auth.currentUser;
-    if (!user) return null;
+    if (!encryptedSecret.startsWith('{')) {
+        // Old format detected. Do not auto-unlock. Let fallback to manual input to trigger migration.
+        return null;
+    }
 
     try {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        if (!snap.exists() || !snap.data().settings_biometric) return null;
+        const data = JSON.parse(encryptedSecret);
+        if (data.version !== 1 || !data.credentialId || !data.encryptedMasterKey) return null;
 
-        // [SAFARI COMPAT] Decodifica e Normalizzazione
-        const secret = decodeURIComponent(escape(atob(encryptedSecret))).normalize('NFC').trim();
-
+        const prfOutput = await getPrfOutput(data.credentialId, data.prfSalt);
+        const aesKey = await deriveHkdfKey(prfOutput, data.hkdfSalt);
+        const secret = await decryptVaultSecret(data.encryptedMasterKey, data.iv, aesKey);
+        
         showToast("Accesso Biometrico Confermato", "success");
         return secret;
     } catch (e) {
         console.error("[SECURITY-AUDIT] Biometric recovery failed:", e);
+        // Do not delete local storage on auth cancellation or failure. Fallback to manual.
         return null;
     }
 }
 
-async function enableBiometricUnlock(pass) {
-    if (!pass) return;
-    const cleanPass = String(pass).normalize('NFC').trim();
-    const encoded = btoa(unescape(encodeURIComponent(cleanPass)));
-    localStorage.setItem(STORAGE_KEY, encoded);
+export async function enableBiometricUnlock(pass) {
+    if (!pass) return false;
+    
+    if (!await isWebAuthnSupported()) {
+        showToast("WebAuthn non è supportato su questo dispositivo.", "error");
+        return false;
+    }
 
-    showToast("Biometria configurata localmente", "success");
+    const cleanPass = String(pass).normalize('NFC').trim();
+    
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Utente non loggato");
+
+        const setup = await setupWebAuthnPrf(user.uid, user.email);
+        const prfOutput = await getPrfOutput(setup.credentialId, setup.prfSalt);
+        
+        const hkdfSalt = generateHkdfSalt();
+        const aesKey = await deriveHkdfKey(prfOutput, hkdfSalt);
+        
+        const encrypted = await encryptVaultSecret(cleanPass, aesKey);
+
+        const container = {
+            version: 1,
+            credentialId: setup.credentialId,
+            encryptedMasterKey: encrypted.ciphertext,
+            iv: encrypted.iv,
+            hkdfSalt: hkdfSalt,
+            prfSalt: setup.prfSalt,
+            algorithm: "AES-GCM-256",
+            createdAt: Date.now()
+        };
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(container));
+
+        // Aggiorna impostazione su Firebase
+        await updateDoc(doc(db, "users", user.uid), { settings_biometric: true });
+
+        showToast("Biometria PRF configurata localmente in modo sicuro", "success");
+        return true;
+    } catch (e) {
+        console.error("Biometric setup failed", e);
+        if (e.message === 'PRF_NOT_SUPPORTED') {
+            showToast("Il dispositivo non supporta l'estensione PRF. Impossibile usare la biometria offline.", "error");
+            // Se fallisce, eliminiamo anche la falsa biometria se c'era
+            localStorage.removeItem(STORAGE_KEY);
+        } else {
+            showToast("Errore durante la configurazione della biometria.", "error");
+        }
+        return false;
+    }
 }
 
 export function clearSession() {
@@ -231,9 +264,5 @@ export function clearSession() {
     updateGlobalState();
 }
 
-// Inizializzazione stato all'importazione
 updateGlobalState();
-
-// window.encrypt e window.decrypt rimossi: disponibili solo via import ES6
-
 export { encrypt, decrypt };

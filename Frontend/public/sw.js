@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v8.3-master';
+const CACHE_NAME = 'codex-v8.4-webauthn';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -10,6 +10,7 @@ const ASSETS_TO_CACHE = [
     'assets/css/core_fascie.css',
     'assets/js/main.js',
     'assets/js/theme-init.js',
+    'assets/js/modules/core/webauthn-manager.js',
     'assets/js/dom-utils.js',
     'assets/images/app-icon.jpg'
 ];
