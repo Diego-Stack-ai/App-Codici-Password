@@ -73,7 +73,7 @@ Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato
 
 Questa sezione sostituisce i vecchi report di audit e i documenti di migrazione V3 separati.
 
-- [ ] **P0 — Firestore Rules condivisioni**: eliminare l'accesso generico basato sul solo `visibility="shared"`. Lettura e aggiornamento devono essere consentiti esclusivamente al proprietario o a un ospite presente nella Map `sharedWith` con stato `accepted`; limitare inoltre i campi aggiornabili dall'ospite.
+- 🟡 **P0 — Firestore Rules condivisioni (implementazione locale completata)**: dalla versione 1.2.6 la lettura condivisa richiede che l'UID dell'ospite sia presente in `sharedWithUids`; il solo `visibility="shared"` non concede più accesso. Gli ospiti non hanno permessi di scrittura sugli account condivisi. Restano obbligatori il collaudo con emulatori/progetto di test e la verifica del deploy effettivo di Rules e Functions prima del go-live.
 - [ ] **P0 — Test regole**: eseguire i casi `permission-denied` della sezione 5.8 della `GUIDA.md` contro emulatori o progetto di test prima del go-live.
 - [ ] **App Check**: il client reCAPTCHA è configurato; verificare nella Firebase Console che l'enforcement sia attivo per Firestore e Storage.
 - [ ] **Compatibilità legacy**: verificare nel database l'assenza di record che dipendono da `shared`, `isMemoShared`, `hasMemo` o `sharedWithEmails`; solo dopo rimuovere i fallback di lettura dal frontend e dalle Rules.
@@ -83,6 +83,14 @@ Questa sezione sostituisce i vecchi report di audit e i documenti di migrazione 
 I vecchi script di importazione e backfill sono stati rimossi: non devono essere ricreati senza una nuova procedura approvata, un backup Firestore e un piano di rollback.
 
 ## 8. SICUREZZA, ACCESSO E VAULT
+
+### Stato verificato — 1 settembre 2026 (versione 1.2.6)
+
+- Repository su `master`, working tree pulita e sincronizzata con `origin/master` al momento della verifica.
+- Audit automatico `npm test`: 60 controlli di sicurezza e offline superati.
+- ✅ Policy password separate: minimo 12 caratteri per l'account e 16 per una nuova Master Password, con minuscola, maiuscola, numero, simbolo e controllo degli spazi esterni.
+- ✅ Registrazione e cambio password account applicano la policy account; la creazione di un nuovo Vault applica la policy Master Password. Le Master Password esistenti non vengono cambiate automaticamente.
+- ⚠️ Questi controlli validano nuove credenziali ma non costituiscono una rotazione della Master Password e non ricifrano dati esistenti.
 
 ### Fase 1 — Coerenza e fail-safe (completata)
 
@@ -94,9 +102,32 @@ I vecchi script di importazione e backfill sono stati rimossi: non devono essere
 
 ### Fasi successive
 
-- 🟡 **Fase 2 — MFA TOTP reale (client completato)**: enrollment con QR/chiave manuale, verifica nel login e revoca usano Firebase MFA e lo stato reale `enrolledFactors`; resta da abilitare TOTP nel progetto Firebase Authentication with Identity Platform e collaudare enrollment/recovery sull'ambiente remoto.
-- [ ] **Fase 3 — Cambio Master Password**: re-cifratura atomica dei dati, aggiornamento del verifier e rigenerazione delle credenziali biometriche con backup e rollback verificati.
-- [ ] **Fase 4 — Test end-to-end**: coprire i cinque flussi con Firebase Emulator e browser/dispositivi WebAuthn compatibili.
+- [ ] **Fase 2A — Sblocco biometrico esplicito e password manager**: aggiungere il comando “Sblocca con Face ID” quando esiste una credenziale WebAuthn locale, lasciando l'inserimento manuale come fallback/configurazione iniziale. Il percorso normale non deve mostrare il campo Master Password. Il modal Vault usa ancora `autocomplete="current-password"`: va sostituito con semantica e attributi che non lo presentino a Safari come password di login, verificando il comportamento reale su Safari/iOS e sugli altri browser supportati.
+- 🟡 **Fase 2B — MFA TOTP reale (client completato)**: enrollment con QR/chiave manuale, verifica nel login e revoca usano Firebase MFA e lo stato reale `enrolledFactors`; resta da abilitare TOTP nel progetto Firebase Authentication with Identity Platform e collaudare enrollment/recovery sull'ambiente remoto.
+- [ ] **Fase 3 — Cambio Master Password**: migrazione versionata e controllata dei dati cifrati, aggiornamento del verifier e rigenerazione delle credenziali biometriche con backup e rollback verificati. Non avviare questa fase senza approvazione esplicita del disegno e dei test descritti sotto.
+- [ ] **Fase 4 — Reset completo Vault**: progettare un'operazione distruttiva distinta da “Blocca Vault” e “Rimuovi accesso biometrico”, con inventario esatto dei dati eliminati, riautenticazione recente e conferma forte. Attualmente non è implementata e `resetVault()` rimuove soltanto l'accesso biometrico/sessione locale.
+- [ ] **Fase 5 — Test end-to-end**: coprire i cinque flussi con Firebase Emulator e browser/dispositivi WebAuthn compatibili, includendo Safari/iOS e scenari offline/multi-tab.
+
+### Gate di sicurezza prima di modificare la crittografia
+
+**Modifiche previste per la futura rotazione della Master Password**:
+
+1. Inventariare tutte le collezioni e tutti i campi cifrati, compresi record legacy e dati condivisi, senza modificarli.
+2. Verificare la vecchia Master Password e creare un backup/esportazione recuperabile prima di ogni scrittura.
+3. Decifrare e validare ogni record con la vecchia chiave, quindi preparare la nuova versione cifrata con un formato/versione espliciti.
+4. Usare una migrazione a fasi con checkpoint e marker di completamento: il verifier e la biometria passano alla nuova chiave soltanto dopo la verifica integrale dei dati migrati.
+5. Collaudare interruzione di rete, chiusura scheda, multi-tab, record corrotti, rollback e ripresa idempotente su emulatori e su una copia non produttiva.
+
+**Rischi da approvare prima dell'implementazione**:
+
+- perdita definitiva di accesso ai dati se verifier, ciphertext e contenitore biometrico vengono aggiornati in ordine errato;
+- Vault parzialmente migrata in caso di errore, rete assente, quota Firestore o chiusura dell'app;
+- sovrascritture concorrenti da un'altra scheda o dispositivo durante la migrazione;
+- incompatibilità con record legacy, dati condivisi o cache offline non ancora sincronizzata;
+- impossibilità di rollback se il backup non è stato verificato con una prova reale di ripristino;
+- esposizione temporanea di dati in chiaro in memoria e nei log se l'implementazione non mantiene il perimetro esclusivamente client-side.
+
+Fino all'approvazione di questo gate non modificare algoritmi, derivazione chiavi, formato dei ciphertext, verifier o contenitori WebAuthn.
 
 ### Contratto sessione e offline
 
