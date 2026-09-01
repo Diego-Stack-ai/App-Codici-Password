@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -135,5 +135,16 @@ assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-512.png') && i
 assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-maskable-512.png') && icon.purpose === 'maskable'), 'Manifest privo della variante maskable');
 assert.match(homeHtml, /apple-touch-icon-180\.png/, 'La home non usa l\'icona Apple dedicata');
 assert.match(serviceWorker, /app-icon-maskable-512\.png/, 'La variante maskable non è disponibile nella shell offline');
+
+const publicHtmlNames = (await readdir(new URL('../Frontend/public/', import.meta.url))).filter(name => name.endsWith('.html'));
+const publicHtmlFiles = await Promise.all(publicHtmlNames.map(name => read(`Frontend/public/${name}`)));
+assert.ok(publicHtmlFiles.every(html => /name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/.test(html)), 'Le pagine non condividono la viewport responsive canonica');
+assert.ok(publicHtmlFiles.every(html => !/user-scalable=no|maximum-scale=1/.test(html)), 'Una pagina impedisce ancora lo zoom');
+assert.ok(publicHtmlFiles.every(html => /name="mobile-web-app-capable"/.test(html) && /name="apple-mobile-web-app-capable"/.test(html)), 'Metadati PWA non uniformi tra le pagine');
+assert.equal(manifest.orientation, 'any', 'La PWA forza ancora un orientamento specifico');
+const cssNames = (await readdir(new URL('../Frontend/public/assets/css/', import.meta.url))).filter(name => name.endsWith('.css'));
+const cssFiles = await Promise.all(cssNames.map(name => read(`Frontend/public/assets/css/${name}`)));
+assert.ok(cssFiles.every(css => !/@media \((?:max-width:\s*(?:480|640)|min-width:\s*(?:481|640))px\)/.test(css)), 'Breakpoint responsive legacy ancora presente');
+assert.match(await read('Frontend/public/assets/css/core_fascie.css'), /\.btn-icon-header\s*\{[\s\S]*?width:\s*44px;[\s\S]*?height:\s*44px;/, 'Controlli header sotto la dimensione tattile minima');
 
 console.log('Audit sicurezza e offline: 60 controlli superati.');

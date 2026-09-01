@@ -68,7 +68,7 @@
     height: 8px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .matrix-grid {
         grid-template-areas:
             "std shared"

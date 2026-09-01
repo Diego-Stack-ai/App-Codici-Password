@@ -598,7 +598,7 @@
     color: var(--text-primary);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .fab-group {
         gap: 0.85rem;
     }

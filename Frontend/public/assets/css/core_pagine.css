@@ -17,7 +17,7 @@
     margin: 0 auto;
 }
 
-@media (max-width:480px) {
+@media (max-width: 600px) {
     .matrix-grid {
         padding: 0;
         gap: 1.25rem;
@@ -30,7 +30,7 @@
     width: 100%;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .grid-span-2 {
         grid-column: span 1;
         /* Mobile reset */

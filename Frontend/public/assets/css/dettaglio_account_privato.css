@@ -250,8 +250,8 @@
 }
 
 .attachment-icon-box {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     display: flex;
@@ -723,7 +723,7 @@
     gap: 0.75rem;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 601px) {
     .banking-grid {
         grid-template-columns: repeat(2, 1fr);
     }

@@ -188,7 +188,7 @@ html[data-i18n="loading"] body {
     flex: 1;
 }
 
-@media (max-width:480px) {
+@media (max-width: 600px) {
     .form-row {
         flex-direction: column;
         gap: 0;

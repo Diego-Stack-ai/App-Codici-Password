@@ -385,8 +385,8 @@ html:not(.dark) .glass-card {
 }
 
 .referent-call-btn {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border-radius: 14px;
     background: rgba(16, 185, 129, 0.1);
     color: var(--status-success);
