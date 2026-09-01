@@ -9,6 +9,7 @@ import { LOG } from '../../logger.js';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
+import { bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError } from '../core/password-policy.js';
 
 export async function initRegistrati() {
     
@@ -21,6 +22,11 @@ export async function initRegistrati() {
         setupRegisterForm();
         setupLanguageSelector();
         setupPasswordToggle();
+        bindPasswordChecklist(
+            document.getElementById('password'),
+            document.getElementById('account-password-requirements'),
+            'account'
+        );
 
         
     } catch (err) {
@@ -36,11 +42,11 @@ export async function initRegistrati() {
  * Gestione Form Registrazione
  */
 function setupRegisterForm() {
+    const form = document.getElementById('register-form');
     const submitBtn = document.getElementById('register-submit-btn');
-    if (!submitBtn) return;
+    if (!form || !submitBtn) return;
 
-    // 🛡️ V7.0: Listener su click (dato che abbiamo rimosso il tag <form>)
-    submitBtn.addEventListener('click', async (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const nome = document.getElementById('nome').value.trim();
@@ -61,9 +67,9 @@ function setupRegisterForm() {
             return;
         }
 
-        // 3. Password Strength (Min 12 caratteri come da standard sicurezza)
-        if (password.length < 12) {
-            showToast(t('error_password_too_short'), "warning");
+        // 3. Policy account centralizzata
+        if (!evaluatePassword(password, 'account').valid) {
+            showToast(firstPasswordPolicyError(password, 'account'), "warning");
             return;
         }
 

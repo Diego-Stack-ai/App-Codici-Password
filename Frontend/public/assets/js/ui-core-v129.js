@@ -216,7 +216,7 @@ export async function showConfirmModal(title, message, confirmText = t('confirm'
 /**
  * [CORE UI] INPUT MODAL
  */
-export function showInputModal(title, initialValue = '', placeholder = '') {
+export function showInputModal(title, initialValue = '', placeholder = '', description = '') {
     return new Promise((resolve) => {
         const modalId = 'protocol-input-modal';
         let modal = document.getElementById(modalId);
@@ -255,9 +255,10 @@ export function showInputModal(title, initialValue = '', placeholder = '') {
         const content = createElement('div', { className: 'modal-box' }, [
             createElement('h3', { className: 'modal-title', textContent: title }),
             createElement('div', { className: 'modal-accent-bar' }),
+            description ? createElement('p', { className: 'modal-text', textContent: description }) : null,
             input,
             createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
-        ]);
+        ].filter(Boolean));
 
         modal.appendChild(content);
         document.body.appendChild(modal);

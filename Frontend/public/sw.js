@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.3';
+const CACHE_NAME = 'codex-shell-v1.2.4';
 const APP_CACHE_PREFIX = 'codex-';
 
 // Shell minima coerente con la release corrente. Le pagine visitate e i
@@ -30,6 +30,7 @@ const APP_SHELL = [
     'assets/js/modules/core/vault-session.js',
     'assets/js/modules/core/webauthn-manager.js',
     'assets/js/modules/core/crypto-utils.js',
+    'assets/js/modules/core/password-policy.js',
     'assets/js/inactivity-timer.js',
     'assets/js/pages-init.js?v=1.2.5',
     'assets/js/modules/home/home.js?v=1.2.5',

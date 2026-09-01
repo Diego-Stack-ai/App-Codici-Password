@@ -26,10 +26,13 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
 ]);
 
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
+const passwordPolicy = await read('Frontend/public/assets/js/modules/core/password-policy.js');
+const registration = await read('Frontend/public/assets/js/modules/auth/registrati.js');
+const registrationHtml = await read('Frontend/public/registrati.html');
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
-assert.match(homeHtml, new RegExp(`data-app-version>${configuredVersion.replace(/\\./g, '\\\\.') }<`), 'La home non mostra una versione di fallback coerente');
+assert.match(homeHtml, new RegExp(`data-app-version>${configuredVersion.replace(/\./g, '\\.') }<`), 'La home non mostra una versione di fallback coerente');
 assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
 assert.match(homeHtml, /main-v129\.js/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
@@ -70,6 +73,16 @@ assert.doesNotMatch(main, /controllerchange[\s\S]{0,300}window\.location\.reload
 assert.match(serviceWorker, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
 assert.match(auth, /login-v115\.html/, 'I redirect Auth non usano il nuovo percorso di login');
 assert.match(loginHtml, /data-i18n="ready"/, 'Il login può restare invisibile se il bootstrap JavaScript fallisce');
+
+assert.match(passwordPolicy, /account:[\s\S]*minLength:\s*12/, 'La policy account non richiede almeno 12 caratteri');
+assert.match(passwordPolicy, /master:[\s\S]*minLength:\s*16/, 'La policy Master Password non richiede almeno 16 caratteri');
+assert.match(passwordPolicy, /lowercase:[\s\S]*uppercase:[\s\S]*number:[\s\S]*symbol:/, 'La policy non verifica minuscole, maiuscole, numeri e simboli');
+assert.match(registration, /evaluatePassword\(password, 'account'\)/, 'La registrazione non applica la policy account centralizzata');
+assert.match(password, /evaluatePassword\(newPassword, 'account'\)/, 'Cambio e reset password non applicano la policy account centralizzata');
+assert.match(security, /evaluatePassword\(cleanPass, 'master'\)/, 'La prima Master Password non applica la policy dedicata');
+assert.match(security, /CONFERMA MASTER PASSWORD/, 'La prima Master Password non richiede conferma');
+assert.match(security, /if \(await isNewVault\(uid\)\)/, 'La policy Master Password può bloccare utenti Vault esistenti');
+assert.match(registrationHtml, /id="account-password-requirements"/, 'La registrazione non mostra i requisiti password');
 
 assert.doesNotMatch(settings, /settings_2fa\s*:/, 'Il client non deve simulare enrollment 2FA');
 assert.match(settings, /enrollTotp\(\)/, 'Il toggle 2FA non avvia un enrollment TOTP reale');

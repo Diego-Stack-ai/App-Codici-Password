@@ -11,6 +11,7 @@ import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query } fro
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
 import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';
+import { evaluatePassword, firstPasswordPolicyError, passwordPolicyMessage } from './password-policy.js';
 
 let _masterKey = null;
 let _vaultAutoUnlock = false;
@@ -204,6 +205,18 @@ export function isAutoUnlockActive() {
     return false;
 }
 
+async function isNewVault(uid) {
+    const [userSnap, accountsSnap, aziendeSnap] = await Promise.all([
+        getDoc(doc(db, 'users', uid)),
+        getDocs(query(collection(db, 'users', uid, 'accounts'), limit(1))),
+        getDocs(query(collection(db, 'users', uid, 'aziende'), limit(1)))
+    ]);
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    const encryptedProfileFields = ['nome', 'cognome', 'cf', 'birth_place', 'note']
+        .some(field => isEncryptedValue(userData[field]));
+    return !encryptedProfileFields && accountsSnap.empty && aziendeSnap.empty;
+}
+
 export function isBiometricUnlockConfigured() {
     const uid = auth.currentUser?.uid;
     const scopedKey = getStorageKey(uid);
@@ -262,12 +275,14 @@ async function ensureMasterKeyInternal(options = {}) {
     
     let isOldFormat = storedSecret && !storedSecret.startsWith('{');
     
-    let msg = "Inserisci la password principale...";
+    let msg = "Master Password";
+    let description = `${passwordPolicyMessage('master')} Deve essere diversa dalla password dell’account. Non è recuperabile.`;
     if (isOldFormat || isLegacy) {
         msg = "Migrazione sicurezza in corso: inserisci la Master Password per aggiornare l'accesso biometrico.";
+        description = "Inserisci la Master Password già utilizzata: le nuove regole non modificano le password esistenti.";
     }
 
-    const pass = await showInputModal("SBLOCCO VAULT", '', msg);
+    const pass = await showInputModal("SBLOCCO VAULT", '', msg, description);
 
     if (pass) {
         const cleanPass = pass.normalize('NFC').trim();
@@ -278,10 +293,28 @@ async function ensureMasterKeyInternal(options = {}) {
             if (verificationResult === true) {
                 // Success
             } else if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
-                const migrated = await migrateLegacyVault(cleanPass, uid);
-                if (!migrated) {
-                    showToast("Password errata o migrazione fallita.", "error");
-                    throw new Error("Vault verification failed");
+                if (await isNewVault(uid)) {
+                    if (!evaluatePassword(cleanPass, 'master').valid) {
+                        showToast(firstPasswordPolicyError(cleanPass, 'master'), "warning");
+                        throw new Error("Master password policy failed");
+                    }
+                    const confirmation = await showInputModal(
+                        "CONFERMA MASTER PASSWORD",
+                        '',
+                        "Reinserisci la Master Password",
+                        "Conservala in un luogo sicuro: non può essere recuperata."
+                    );
+                    if (!confirmation || confirmation.normalize('NFC').trim() !== cleanPass) {
+                        showToast("Le Master Password non coincidono.", "error");
+                        throw new Error("Master password confirmation failed");
+                    }
+                    await createVerifier(cleanPass, uid);
+                } else {
+                    const migrated = await migrateLegacyVault(cleanPass, uid);
+                    if (!migrated) {
+                        showToast("Password errata o migrazione fallita.", "error");
+                        throw new Error("Vault verification failed");
+                    }
                 }
             } else {
                 showToast("Password Vault Errata", "error");

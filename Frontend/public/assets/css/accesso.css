@@ -420,3 +420,26 @@ html[data-i18n="loading"] body {
         padding: 0 2rem;
     }
 }
+.password-requirements {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0.25rem 0 1rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.78rem;
+    color: var(--text-secondary, #94a3b8);
+}
+
+.password-requirements li::before {
+    content: '○';
+    display: inline-block;
+    width: 1.25rem;
+}
+
+.password-requirements li.is-valid {
+    color: #4ade80;
+}
+
+.password-requirements li.is-valid::before {
+    content: '✓';
+}

@@ -9,6 +9,7 @@ import { updatePassword, confirmPasswordReset } from "https://www.gstatic.com/fi
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
+import { bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError } from '../core/password-policy.js';
 
 export async function initImpostaNuovaPassword() {
     
@@ -21,6 +22,11 @@ export async function initImpostaNuovaPassword() {
         setupNewPasswordForm();
         setupLanguageSelector();
         setupPasswordToggle();
+        bindPasswordChecklist(
+            document.getElementById('new-password'),
+            document.getElementById('account-password-requirements'),
+            'account'
+        );
         setupCancelLogic();
 
         
@@ -49,17 +55,9 @@ function setupNewPasswordForm() {
         const newPassword = passInput.value;
         const confirmPassword = confirmInput.value;
 
-        // 1. Validazione Protocollo 12-3-3 (Regola Sicurezza)
-        if (newPassword.length < 12) {
-            showToast(t('error_password_too_short') || "Minimo 12 caratteri richiesti!", "error");
-            return;
-        }
-
-        const upperCount = (newPassword.match(/[A-Z]/g) || []).length;
-        const symbolCount = (newPassword.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length;
-
-        if (upperCount < 3 || symbolCount < 3) {
-            showToast(t('error_weak_pass_complex') || "Servono almeno 3 MAIUSCOLE e 3 Simboli!", "warning");
+        // 1. Policy account centralizzata
+        if (!evaluatePassword(newPassword, 'account').valid) {
+            showToast(firstPasswordPolicyError(newPassword, 'account'), "warning");
             return;
         }
 

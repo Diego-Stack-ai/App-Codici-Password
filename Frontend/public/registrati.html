@@ -63,7 +63,7 @@
                 <p class="subtitle" data-t="register_subtitle">Crea il tuo account sicuro</p>
 
                 <!-- Form Registrazione (V7.0 Blindato) -->
-                <div id="register-form">
+                <form id="register-form">
                     <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
                     <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
                         <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
@@ -95,7 +95,7 @@
                     <div class="form-group">
                         <label class="label" for="password" data-t="password_label_reg">Password</label>
                         <div class="password-wrapper">
-                            <input id="password" type="text" autocomplete="off" required class="input base-shield"
+                            <input id="password" type="password" autocomplete="new-password" required class="input base-shield"
                                 data-t-placeholder="password_placeholder_reg" placeholder="********">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
                                 aria-label="Mostra Password" data-t-aria="show_hide_data">
@@ -104,22 +104,31 @@
                         </div>
                     </div>
 
+                    <ul id="account-password-requirements" class="password-requirements" aria-label="Requisiti password">
+                        <li data-password-rule="minLength">Almeno 12 caratteri</li>
+                        <li data-password-rule="lowercase">Una lettera minuscola</li>
+                        <li data-password-rule="uppercase">Una lettera maiuscola</li>
+                        <li data-password-rule="number">Un numero</li>
+                        <li data-password-rule="symbol">Un simbolo</li>
+                        <li data-password-rule="noOuterWhitespace">Nessuno spazio iniziale o finale</li>
+                    </ul>
+
                     <!-- Conferma Password -->
                     <div class="form-group">
                         <label class="label" for="confirm-password" data-t="confirm_password_label">Conferma
                             Password</label>
-                        <input id="confirm-password" type="text" autocomplete="off" required class="input base-shield"
+                        <input id="confirm-password" type="password" autocomplete="new-password" required class="input base-shield"
                             data-t-placeholder="password_placeholder_reg" placeholder="********">
                     </div>
 
 
                     <!-- Submit Button -->
-                    <button type="button" id="register-submit-btn" class="btn-primary" data-t="create_account_btn">
+                    <button type="submit" id="register-submit-btn" class="btn-primary" data-t="create_account_btn">
                         <span class="material-symbols-outlined">person_add_alt</span>
                         Nuova registrazione
                     </button>
 
-                </div>
+                </form>
 
                 <!-- Login Link -->
                 <div class="auth-footer-links">
