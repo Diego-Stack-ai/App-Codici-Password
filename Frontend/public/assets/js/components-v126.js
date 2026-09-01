@@ -32,7 +32,7 @@ export async function initComponents() {
             element.textContent = APP_VERSION;
         });
 
-        const isHome = path.endsWith('home_page.html') || path.endsWith('home-v126.html') || path.endsWith('home-v127.html');
+        const isHome = path.endsWith('home_page.html') || /^\/home-v\d+\.html$/.test(path);
         // Pagine che non devono avere header/footer standard (Login, Registrazione, etc)
         const isAuth = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
 
@@ -71,9 +71,9 @@ export async function initComponents() {
                 // IMPORTANTE: usiamo location.replace() invece di location.href
                 // per non inquinare la history del browser (evita il loop "avanti/indietro")
                 if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
-                    backFn = () => window.location.replace('home-v127.html');
+                    backFn = () => window.location.replace('home-v128.html');
                 } else if (path.endsWith('area_privata.html')) {
-                    backFn = () => window.location.replace('home-v127.html');
+                    backFn = () => window.location.replace('home-v128.html');
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
                     backFn = () => window.location.replace('scadenze.html');
                 } else if (path.endsWith('aggiungi_scadenza.html')) {
@@ -81,7 +81,7 @@ export async function initComponents() {
                     if (id) backFn = () => window.location.replace(`dettaglio_scadenza.html?id=${id}`);
                     else backFn = () => window.location.replace('scadenze.html');
                 } else if (path.endsWith('impostazioni.html')) {
-                    backFn = () => window.location.replace('home-v127.html');
+                    backFn = () => window.location.replace('home-v128.html');
                 } else if (path.endsWith('regole_scadenze.html')) {
                     backFn = () => window.location.replace('impostazioni.html');
                 } else if (path.endsWith('privacy.html') || path.endsWith('termini.html')) {
@@ -105,7 +105,7 @@ export async function initComponents() {
                     if (id) backFn = () => window.location.replace(`dati_azienda.html?id=${id}`);
                     else backFn = () => window.location.replace('lista_aziende.html');
                 } else if (path.endsWith('profilo_privato.html')) {
-                    backFn = () => window.location.replace('home-v127.html');
+                    backFn = () => window.location.replace('home-v128.html');
                 } else if (path.endsWith('account_privati.html')) {
                     backFn = () => window.location.replace('area_privata.html');
                 } else if (path.endsWith('dettaglio_account_privato.html')) {
@@ -180,7 +180,7 @@ export async function initComponents() {
                     );
                 } else {
                     headerRight.appendChild(
-                        createElement('a', { href: 'home-v127.html', className: 'btn-icon-header' }, [
+                        createElement('a', { href: 'home-v128.html', className: 'btn-icon-header' }, [
                             createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
                         ])
                     );

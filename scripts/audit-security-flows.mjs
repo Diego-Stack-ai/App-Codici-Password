@@ -20,7 +20,7 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
     ,read('Frontend/public/assets/js/modules/core/vault-session.js')
     ,read('Frontend/public/assets/js/env-v126.js')
     ,read('Frontend/public/assets/js/components-v126.js')
-    ,read('Frontend/public/home-v127.html')
+    ,read('Frontend/public/home-v128.html')
     ,read('package.json')
     ,read('Frontend/public/assets/js/main-v126.js')
 ]);
@@ -32,6 +32,7 @@ assert.match(homeHtml, /data-app-version>v1\.2\.2</, 'La home non mostra una ver
 assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
 assert.match(homeHtml, /main-v126\.js/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
+assert.match(homeHtml, /Object\.defineProperty\(root, 'textContent'/, 'La home non è protetta dai componenti rimasti nella vecchia cache');
 assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
 assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');
@@ -51,7 +52,7 @@ assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.e
 assert.match(serviceWorker, /caches\.match\(event\.request, \{ ignoreSearch: true \}\)/, 'Il fallback PWA non recupera asset con query-versione differenti');
 assert.match(serviceWorker, /assets\/css\/home_page\.css\?v=5\.0/, 'Lo stile della home non è precaricato per l’avvio PWA');
 assert.match(serviceWorker, /assets\/css\/accesso\.css\?v=5\.0/, 'Lo stile del login non è precaricato per l’avvio PWA');
-assert.match(loginHtml, /login-entry\.js\?v=1\.2\.7/, 'Il login non usa il bootstrap Auth dedicato');
+assert.match(loginHtml, /login-entry\.js\?v=1\.2\.8/, 'Il login non usa il bootstrap Auth dedicato');
 assert.doesNotMatch(loginHtml, /assets\/js\/main\.js/, 'Il login carica ancora il router completo dell’app privata');
 assert.doesNotMatch(firebaseConfig, /const appCheck = initializeAppCheck/, 'App Check viene ancora avviato durante il login');
 assert.match(firebaseConfig, /export function enableAppCheck/, 'App Check non è disponibile in modalità lazy');

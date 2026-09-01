@@ -95,7 +95,7 @@ function setupNewPasswordForm() {
 
             // Redirect differenziato
             setTimeout(() => {
-                window.location.href = auth.currentUser ? 'home-v127.html' : 'login-v115.html';
+                window.location.href = auth.currentUser ? 'home-v128.html' : 'login-v115.html';
             }, 2500);
 
         } catch (err) {
