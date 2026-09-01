@@ -27,13 +27,13 @@ let pendingMfaResolver = null;
 export function observeAuth(callback) {
     onAuthStateChanged(auth, (user) => {
         const path = window.location.pathname.toLowerCase();
-        const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
+        const authPages = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
         if (!user) {
             // Se non siamo in una pagina di auth, reindirizza al login
             if (!isAuthPage) {
-                window.location.href = 'index.html';
+                window.location.href = 'login-v115.html';
                 return;
             }
         }
@@ -194,7 +194,7 @@ async function logout() {
         // Cleanup proattivo sessione
 
         await signOut(auth);
-        window.location.href = "index.html";
+        window.location.href = "login-v115.html";
     } catch (error) {
         logError("Auth Logout", error);
         showToast("Errore durante il logout.", "error");
@@ -210,7 +210,7 @@ async function resetPassword(email) {
         await sendPasswordResetEmail(auth, email);
         showToast("Email di reset inviata! Controlla la tua casella di posta.", "success");
         setTimeout(() => {
-            window.location.href = "index.html";
+            window.location.href = "login-v115.html";
         }, 3000);
     } catch (error) {
         logError("Auth ResetPassword", error);
@@ -225,7 +225,7 @@ function checkAuthState() {
     let initialCheckDone = false;
     onAuthStateChanged(auth, async (user) => {
         const path = window.location.pathname.toLowerCase();
-        const authPages = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
+        const authPages = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
         LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
@@ -242,10 +242,10 @@ function checkAuthState() {
         } else {
             // Utente non loggato: se siamo su una pagina protetta, andiamo al login
             if (!isAuthPage) {
-                // Evitiamo di ricaricare se siamo già sulla root o su index.html
-                if (!path.includes('index.html') && path !== '/' && path !== '') {
-                    LOG("[AUTH] No session, redirecting to /index.html");
-                    window.location.href = '/index.html';
+                // Evitiamo di ricaricare se siamo già sulla root o sul login versionato.
+                if (!path.includes('login-v115.html') && path !== '/' && path !== '') {
+                    LOG("[AUTH] No session, redirecting to /login-v115.html");
+                    window.location.href = '/login-v115.html';
                 }
             }
         }

@@ -270,7 +270,7 @@ function initSettingsEvents() {
             clearSession(); // 🔐 Pulisce masterKey e sessionStorage
             localStorage.removeItem('codex_vault_secret'); // 🔐 Rimuove chiave biometrica salvata
             await signOut(auth);
-            window.location.href = 'index.html';
+            window.location.href = 'login-v115.html';
         }
     });
 

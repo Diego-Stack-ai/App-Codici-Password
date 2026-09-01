@@ -29,7 +29,7 @@ const THEMES = {
 
 // --- INITIALIZATION ---
 export async function initAccountAziendaList(user) {
-    if (!user) { window.location.href = 'index.html'; return; }
+    if (!user) { window.location.href = 'login-v115.html'; return; }
 
     currentUser = user;
     const urlParams = new URLSearchParams(window.location.search);

@@ -104,14 +104,14 @@ function recordActivity() {
 function lockVaultForInactivity() {
     try {
         const currentPage = window.location.pathname.split('/').pop();
-        if (currentPage === 'index.html' || currentPage === '') return;
+        if (currentPage === 'login-v115.html' || currentPage === '') return;
 
         softLock();
         LOG("[Titan-Lock] Vault bloccata per inattività.");
         window.location.reload();
     } catch (e) {
         console.error("[Titan-Lock] Errore durante il blocco Vault:", e);
-        window.location.href = 'index.html';
+        window.location.href = 'login-v115.html';
     }
 }
 

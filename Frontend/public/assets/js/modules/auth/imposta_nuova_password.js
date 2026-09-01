@@ -95,7 +95,7 @@ function setupNewPasswordForm() {
 
             // Redirect differenziato
             setTimeout(() => {
-                window.location.href = auth.currentUser ? 'home_page.html' : 'index.html';
+                window.location.href = auth.currentUser ? 'home_page.html' : 'login-v115.html';
             }, 2500);
 
         } catch (err) {
@@ -146,7 +146,7 @@ function setupCancelLogic() {
         const urlParams = new URLSearchParams(window.location.search);
         const isReset = urlParams.has('oobCode');
 
-        window.location.href = (auth.currentUser && !isReset) ? 'impostazioni.html' : 'index.html';
+        window.location.href = (auth.currentUser && !isReset) ? 'impostazioni.html' : 'login-v115.html';
     };
 }
 

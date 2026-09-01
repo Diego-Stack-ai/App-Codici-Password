@@ -32,7 +32,7 @@ export async function initComponents() {
 
         const isHome = path.endsWith('home_page.html');
         // Pagine che non devono avere header/footer standard (Login, Registrazione, etc)
-        const isAuth = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
+        const isAuth = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
 
         const h = new Date().getHours();
         const timeGreeting = (h >= 6 && h < 13) ? t('greeting_morning') : (h >= 13 && h < 18) ? t('greeting_afternoon') : t('greeting_evening');
@@ -163,12 +163,12 @@ export async function initComponents() {
                                     if (confirmed) {
 
                                         await signOut(auth);
-                                        window.location.href = 'index.html';
+                                        window.location.href = 'login-v115.html';
                                     }
                                 } else {
                                     if (confirm(t('logout_confirm') || "Vuoi uscire?")) {
                                         await signOut(auth);
-                                        window.location.href = 'index.html';
+                                        window.location.href = 'login-v115.html';
                                     }
                                 }
                             }

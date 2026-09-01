@@ -70,7 +70,7 @@ function setupResetForm() {
 
             // Redirect al login dopo successo per migliorare la UX
             setTimeout(() => {
-                window.location.href = "index.html";
+                window.location.href = "login-v115.html";
             }, 3000);
 
         } catch (err) {

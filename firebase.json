@@ -30,7 +30,7 @@
     "rewrites": [
       {
         "source": "**",
-        "destination": "/index.html"
+        "destination": "/login-v115.html"
       }
     ],
     "headers": [

@@ -1,7 +1,7 @@
-const CACHE_NAME = 'codex-v1.2.8-safe-recovery';
+const CACHE_NAME = 'codex-v1.2.9-versioned-login-route';
 const ASSETS_TO_CACHE = [
     './',
-    'index.html',
+    'login-v115.html',
     'manifest.json',
     'assets/css/core.css?v=5.1',
     'assets/css/core_ui.css?v=5.1',
@@ -85,7 +85,7 @@ self.addEventListener('fetch', (event) => {
                 }
                 return networkResponse;
             }).catch(async () => {
-                return await caches.match(event.request) || await caches.match('index.html');
+                return await caches.match(event.request) || await caches.match('login-v115.html');
             })
         );
         return;

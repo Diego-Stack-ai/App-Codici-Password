@@ -13,7 +13,7 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
     read('Frontend/public/assets/js/auth.js'),
     read('Frontend/public/assets/js/modules/auth/login.js'),
     read('Frontend/public/impostazioni.html'),
-    read('Frontend/public/index.html'),
+    read('Frontend/public/login-v115.html'),
     read('Frontend/public/assets/js/modules/auth/imposta_nuova_password.js')
     ,read('Frontend/public/sw.js')
     ,read('Frontend/public/assets/js/firebase-config.js')
@@ -55,6 +55,8 @@ assert.match(loginHtml, /codex_shell_recovery_v115/, 'Il login non recupera auto
 assert.match(loginHtml, /name\.startsWith\('codex-'\)/, 'Il recupero cache non è limitato alle cache statiche dell’app');
 assert.doesNotMatch(loginHtml, /location\.replace/, 'Il recupero cache non deve interrompere il parsing della pagina con un redirect');
 assert.match(loginHtml, /window\.addEventListener\('load'/, 'La pulizia cache deve partire soltanto dopo il caricamento della pagina');
+assert.match(serviceWorker, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
+assert.match(auth, /login-v115\.html/, 'I redirect Auth non usano il nuovo percorso di login');
 assert.match(loginHtml, /data-i18n="ready"/, 'Il login può restare invisibile se il bootstrap JavaScript fallisce');
 
 assert.doesNotMatch(settings, /settings_2fa\s*:/, 'Il client non deve simulare enrollment 2FA');
@@ -79,4 +81,4 @@ assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma 
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
 assert.match(serviceWorker, /cache\.put\(event\.request, copy\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
-console.log('Audit sicurezza e offline: 52 controlli superati.');
+console.log('Audit sicurezza e offline: 54 controlli superati.');

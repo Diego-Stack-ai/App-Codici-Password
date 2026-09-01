@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (inviteUnsubscribe) inviteUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
-                window.location.href = 'index.html';
+                window.location.href = 'login-v115.html';
             }
         }
     });

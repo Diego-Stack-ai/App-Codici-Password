@@ -87,7 +87,7 @@ function setupRegisterForm() {
 
                 // Redirect al login dopo successo
                 setTimeout(() => {
-                    window.location.href = "index.html";
+                    window.location.href = "login-v115.html";
                 }, 3000);
             } else {
                 // Rimetto lo stato originale se fallisce internamente
