@@ -29,6 +29,10 @@
     ],
     "rewrites": [
       {
+        "source": "/home",
+        "destination": "/home-v129.html"
+      },
+      {
         "source": "**",
         "destination": "/login-v115.html"
       }

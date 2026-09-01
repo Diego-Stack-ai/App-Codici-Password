@@ -54,7 +54,7 @@ function getCurrentPage() {
     if (path.includes('registrati')) return 'registrati';
     if (path.includes('reset_password')) return 'reset';
     if (path.includes('imposta_nuova_password')) return 'imposta';
-    if (path.includes('home_page') || path.includes('home-v126')) return 'home';
+    if (path === '/home' || path.includes('home_page') || path.includes('home-v')) return 'home';
     if (path.includes('area_privata')) return 'area';
 
     // Account Privati
