@@ -1,6 +1,7 @@
 ﻿import { auth, db } from './firebase-config.js';
 import { LOG } from './logger.js';
 import { softLock } from './modules/core/security-manager.js';
+import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
@@ -12,6 +13,7 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-
 let inactivityTimeout;
 let lockTimerMs = 3 * 60 * 1000;
 let isInitialized = false;
+let _lastPersistedActivity = 0;
 let _lastActivityTimestamp = null; // in-memory: non manipolabile da localStorage
 
 /**
@@ -25,8 +27,8 @@ export function initInactivityTimer() {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             await syncTimeoutWithFirestore(user.uid);
-            startMonitoring();
-            checkLastActivity();
+            const expired = checkLastActivity();
+            if (!expired) startMonitoring();
         } else {
             stopMonitoring();
         }
@@ -39,6 +41,7 @@ export function initInactivityTimer() {
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') checkLastActivity();
     });
+    window.addEventListener('vault-session-unlocked', recordActivity);
 }
 
 /**
@@ -66,18 +69,29 @@ export async function syncTimeoutWithFirestore(uid) {
  * Controlla se l'ultima attività registrata è oltre il limite consentito.
  */
 function checkLastActivity() {
-    if (!_lastActivityTimestamp) return;
+    const sessionExpiry = getVaultSessionExpiry();
+    if (sessionExpiry && Date.now() >= sessionExpiry) {
+        lockVaultForInactivity();
+        return true;
+    }
+    if (!_lastActivityTimestamp) return false;
     const elapsed = Date.now() - _lastActivityTimestamp;
 
     if (elapsed > lockTimerMs) {
         lockVaultForInactivity();
+        return true;
     }
+    return false;
 }
 
 /**
  * Registra un'attività utente e resetta il timer.
  */
 function recordActivity() {
+    if (Date.now() - _lastPersistedActivity >= 1000) {
+        touchVaultSession(lockTimerMs);
+        _lastPersistedActivity = Date.now();
+    }
     _lastActivityTimestamp = Date.now(); // in-memory, non manipolabile da DevTools
 
     if (inactivityTimeout) clearTimeout(inactivityTimeout);

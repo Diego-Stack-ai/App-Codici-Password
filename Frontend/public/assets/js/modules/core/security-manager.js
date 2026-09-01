@@ -1,6 +1,6 @@
 /**
  * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
- * - La masterKey è tenuta solo in RAM (_masterKey). Non persistita.
+ * - La masterKey è tenuta in RAM e cifrata per la durata della scheda attiva.
  * - Sblocco biometrico usa WebAuthn PRF.
  */
 
@@ -10,6 +10,7 @@ import { db, auth } from '../../firebase-config.js';
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
+import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';
 
 let _masterKey = null;
 let _vaultAutoUnlock = false;
@@ -140,8 +141,7 @@ function getStorageKey(uid) {
 }
 
 function _clearSessionStorage() {
-    sessionStorage.removeItem('vault_s_key');
-    sessionStorage.removeItem('vault_s_expiry');
+    clearVaultSession();
     updateGlobalState();
 }
 
@@ -185,6 +185,7 @@ export function disableVaultAutoUnlock() {
 export function softLock() {
     _isSoftLocked = true;
     _masterKey = null;
+    _clearSessionStorage();
     updateGlobalState();
 }
 
@@ -213,16 +214,28 @@ export async function ensureMasterKey(options = {}) {
 
     if (_masterKey && !forceReload) return _masterKey;
 
-    if (!forceReload) {
-        const recovered = await tryBiometricUnlock();
-        if (recovered) {
-            _masterKey = recovered;
+    const uid = auth.currentUser?.uid;
+    if (!forceReload && uid) {
+        const sessionKey = await restoreVaultSession(uid);
+        if (sessionKey) {
+            _masterKey = sessionKey;
+            _isSoftLocked = false;
+            _vaultAutoUnlock = true;
             updateGlobalState();
             return _masterKey;
         }
     }
 
-    const uid = auth.currentUser?.uid;
+    if (!forceReload) {
+        const recovered = await tryBiometricUnlock();
+        if (recovered) {
+            _masterKey = recovered;
+            await saveVaultSession(_masterKey, uid);
+            updateGlobalState();
+            return _masterKey;
+        }
+    }
+
     const scopedKey = getStorageKey(uid);
     let storedSecret = scopedKey ? localStorage.getItem(scopedKey) : null;
     let isLegacy = false;
@@ -269,6 +282,7 @@ export async function ensureMasterKey(options = {}) {
         _masterKey = cleanPass;
         _isSoftLocked = false;
         _vaultAutoUnlock = true;
+        await saveVaultSession(_masterKey, uid);
         updateGlobalState();
 
         if (isOldFormat || isLegacy) {
@@ -356,6 +370,9 @@ export async function setMasterKey(pass, saveForBiometrics = false) {
     }
     
     _masterKey = cleanPass;
+    _isSoftLocked = false;
+    _vaultAutoUnlock = true;
+    await saveVaultSession(_masterKey, uid);
     const biometricAlreadyEnabled = !!localStorage.getItem(getStorageKey(uid)) || !!localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saveForBiometrics || biometricAlreadyEnabled) {
         await enableBiometricUnlock(cleanPass);

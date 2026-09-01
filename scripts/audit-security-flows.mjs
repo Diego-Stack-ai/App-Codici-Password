@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settingsHtml, loginHtml, password, serviceWorker, firebaseConfig] = await Promise.all([
+const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settingsHtml, loginHtml, password, serviceWorker, firebaseConfig, vaultSession] = await Promise.all([
     read('Frontend/public/assets/js/modules/settings/impostazioni.js'),
     read('Frontend/public/assets/js/modules/core/security-setup.js'),
     read('Frontend/public/assets/js/inactivity-timer.js'),
@@ -17,7 +17,15 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
     read('Frontend/public/assets/js/modules/auth/imposta_nuova_password.js')
     ,read('Frontend/public/sw.js')
     ,read('Frontend/public/assets/js/firebase-config.js')
+    ,read('Frontend/public/assets/js/modules/core/vault-session.js')
 ]);
+
+assert.match(security, /restoreVaultSession\(uid\)/, 'La chiave Vault non viene ripristinata tra le pagine');
+assert.match(security, /saveVaultSession\(_masterKey, uid\)/, 'Lo sblocco Vault non viene conservato nella sessione');
+assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica la scadenza condivisa tra pagine');
+assert.match(inactivity, /if \(!expired\) startMonitoring\(\)/, 'La nuova pagina resetta il timer prima di verificarne la scadenza');
+assert.match(vaultSession, /AES-GCM/, 'Il segreto della sessione Vault non è cifrato');
+assert.match(serviceWorker, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
 
 assert.doesNotMatch(settings, /settings_2fa\s*:/, 'Il client non deve simulare enrollment 2FA');
 assert.match(settings, /enrollTotp\(\)/, 'Il toggle 2FA non avvia un enrollment TOTP reale');
@@ -41,4 +49,4 @@ assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma 
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
 assert.match(serviceWorker, /cache\.put\(event\.request, copy\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
-console.log('Audit sicurezza e offline: 22 controlli superati.');
+console.log('Audit sicurezza e offline: 28 controlli superati.');

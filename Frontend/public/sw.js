@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v1.2.0-auth-offline';
+const CACHE_NAME = 'codex-v1.2.1-vault-session';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -13,6 +13,8 @@ const ASSETS_TO_CACHE = [
     'assets/js/modules/core/mfa-manager.js',
     'assets/js/theme-init.js',
     'assets/js/modules/core/security-manager.js',
+    'assets/js/modules/core/vault-session.js',
+    'assets/js/inactivity-timer.js',
     'assets/js/modules/core/webauthn-manager.js',
     'assets/js/modules/core/crypto-utils.js',
     'assets/js/firebase-config.js',
