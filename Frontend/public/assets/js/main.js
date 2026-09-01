@@ -26,7 +26,8 @@ import { initComponents } from './components.js'; // Imports components system
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import { auth, db, enableAppCheck } from './firebase-config.js';
+import * as firebaseRuntime from './firebase-config.js';
+const { auth, db } = firebaseRuntime;
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc,
@@ -175,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             LOG(`[AUTH-DEBUG] User logged in: ${user.email} (UID: ${user.uid})`);
             try {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
-                if (!publicPages.includes(currentPage)) enableAppCheck();
+                if (!publicPages.includes(currentPage)) firebaseRuntime.enableAppCheck?.();
 
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
