@@ -11,7 +11,8 @@ import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
-import { encrypt, decrypt, ensureMasterKey, setMasterKey, enableVaultAutoUnlock, disableVaultAutoUnlock, isAutoUnlockActive, clearSession, resetVault } from '../core/security-manager.js';
+import { encrypt, decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured } from '../core/security-manager.js';
+import { enrollTotp, unenrollTotp, getTotpEnrollment } from '../core/mfa-manager.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -52,21 +53,31 @@ function setupSecurityToggles(data) {
     const tFace = document.getElementById('face-id-toggle');
 
     if (t2fa) {
-        t2fa.checked = data.settings_2fa || false;
+        t2fa.checked = !!getTotpEnrollment();
         t2fa.addEventListener('change', async () => {
-            const val = t2fa.checked;
+            const enable = t2fa.checked;
+            t2fa.disabled = true;
             try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_2fa: val });
-                showToast(val ? "2FA Attivata" : "2FA Disattivata");
-            } catch (e) {
-                t2fa.checked = !val;
-                showToast("Errore salvataggio", "error");
+                const completed = enable ? await enrollTotp() : await unenrollTotp();
+                t2fa.checked = completed ? enable : !enable;
+                if (completed) showToast(enable ? "2FA Authenticator attivata" : "2FA disattivata", "success");
+            } catch (error) {
+                console.error("TOTP configuration failed", error);
+                t2fa.checked = !enable;
+                const message = error.code === 'auth/requires-recent-login'
+                    ? "Per modificare la 2FA esci ed effettua nuovamente il login."
+                    : (error.message || "Configurazione 2FA non riuscita.");
+                showToast(message, "error");
+            } finally {
+                t2fa.disabled = false;
             }
         });
     }
 
     if (tFace) {
-        tFace.checked = data.settings_biometric || false;
+        // La biometria è legata a questo dispositivo: la fonte di verità è la
+        // credenziale locale, non una preferenza Firestore potenzialmente obsoleta.
+        tFace.checked = isBiometricUnlockConfigured();
         
         // Verifica supporto WebAuthn PRF asincrono
         const prfStatusEl = document.getElementById('prf-support-status');
@@ -97,9 +108,7 @@ function setupSecurityToggles(data) {
                         tFace.checked = false; // rollback UI se non supportato o fallito
                     }
                 } else {
-                    const { disableVaultAutoUnlock } = await import('../core/security-manager.js');
-                    disableVaultAutoUnlock(); // Rimuove local storage e pulisce stato
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { settings_biometric: false });
+                    await resetVault();
                 }
             } catch (e) {
                 tFace.checked = !val;
@@ -267,11 +276,11 @@ function initSettingsEvents() {
 
     document.getElementById('btn-reset-vault')?.addEventListener('click', async () => {
         const ok = await showConfirmModal(
-            'Reset Vault',
-            'Questa operazione cancella la chiave biometrica salvata. Dovrai inserire la master password manualmente al prossimo accesso. Continuare?',
-            'Reset', 'Annulla'
+            'Rimuovi accesso biometrico',
+            'Questa operazione non cancella i dati. Dovrai inserire la Master Password al prossimo accesso. Continuare?',
+            'Rimuovi', 'Annulla'
         );
-        if (ok) resetVault(); // Pulisce sessionStorage + localStorage e ricarica la pagina
+        if (ok) await resetVault();
     });
 }
 

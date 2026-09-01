@@ -57,7 +57,7 @@ const _it = {
         card_vehicles_title: "Automezzi",
         cciaa_number: "N. CCIAA",
         change_password: "Cambio Password",
-        change_password_desc: "Aggiorna la tua chiave d'accesso",
+        change_password_desc: "Modifica la password di login, non la Master Password della Vault",
         city: "Città",
         codice_societa: "Codice Società",
         company_logo: "Logo Azienda",

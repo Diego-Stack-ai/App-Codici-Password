@@ -202,6 +202,12 @@ export function isAutoUnlockActive() {
     return false;
 }
 
+export function isBiometricUnlockConfigured() {
+    const uid = auth.currentUser?.uid;
+    const scopedKey = getStorageKey(uid);
+    return !!(scopedKey && localStorage.getItem(scopedKey));
+}
+
 export async function ensureMasterKey(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
 
@@ -287,17 +293,28 @@ export async function ensureMasterKey(options = {}) {
     throw new Error("Chiave di crittografia non fornita.");
 }
 
-export function resetVault() {
+export async function resetVault() {
     _masterKey = null;
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
     _clearSessionStorage();
     const uid = auth.currentUser?.uid;
-    if (uid) localStorage.removeItem(getStorageKey(uid));
+    let syncFailed = false;
+    if (uid) {
+        localStorage.removeItem(getStorageKey(uid));
+        try {
+            await updateDoc(doc(db, "users", uid), { settings_biometric: false });
+        } catch (error) {
+            console.error("Biometric preference cleanup failed", error);
+            showToast("Accesso biometrico rimosso dal dispositivo; sincronizzazione non riuscita.", "warning");
+            syncFailed = true;
+        }
+    }
     localStorage.removeItem(LEGACY_STORAGE_KEY);
     updateGlobalState();
-    showToast("Cache Vault pulita.", "info");
+    showToast("Accesso biometrico rimosso. La Vault richiederà la Master Password.", "info");
     setTimeout(() => window.location.reload(), 1500);
+    return !syncFailed;
 }
 
 export async function setMasterKey(pass, saveForBiometrics = false) {

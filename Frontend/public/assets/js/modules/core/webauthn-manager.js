@@ -8,9 +8,23 @@ const PRF_SALT_SIZE = 32;
 const HKDF_SALT_SIZE = 32;
 const AES_IV_SIZE = 12;
 
-/** Verifica se il browser supporta WebAuthn. */
+/** Verifica WebAuthn e, in modo fail-closed, l'estensione PRF richiesta dalla Vault. */
 export async function isWebAuthnSupported() {
-    return window.PublicKeyCredential !== undefined && typeof window.PublicKeyCredential === 'function';
+    if (window.PublicKeyCredential === undefined || typeof window.PublicKeyCredential !== 'function') {
+        return false;
+    }
+
+    if (typeof PublicKeyCredential.getClientCapabilities !== 'function') {
+        return false;
+    }
+
+    try {
+        const capabilities = await PublicKeyCredential.getClientCapabilities();
+        return capabilities?.['extension:prf'] === true;
+    } catch (error) {
+        console.warn('Impossibile verificare le capacità WebAuthn PRF', error);
+        return false;
+    }
 }
 
 // Convert ArrayBuffer to Base64 (transport only)

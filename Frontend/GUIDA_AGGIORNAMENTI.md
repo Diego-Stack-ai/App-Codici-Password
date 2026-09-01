@@ -82,6 +82,30 @@ Questa sezione sostituisce i vecchi report di audit e i documenti di migrazione 
 
 I vecchi script di importazione e backfill sono stati rimossi: non devono essere ricreati senza una nuova procedura approvata, un backup Firestore e un piano di rollback.
 
+## 8. SICUREZZA, ACCESSO E VAULT
+
+### Fase 1 — Coerenza e fail-safe (completata)
+
+- ✅ **Password**: il flusso esistente è dichiarato esplicitamente come cambio della password Firebase Auth; non viene più presentato come aggiornamento delle chiavi o della Master Password Vault.
+- ✅ **2FA**: il toggle privo di una reale enrollment MFA è disabilitato e indicato come non disponibile; non può più salvare un falso stato `settings_2fa`.
+- ✅ **Biometria**: onboarding e Impostazioni usano entrambi `settings_biometric`; l'onboarding registra realmente WebAuthn PRF e la UI legge la credenziale locale del dispositivo come fonte di verità.
+- ✅ **Inattività**: una sola soglia selezionata blocca la Vault; il timer non esegue più comportamenti diversi a 1/3/5 minuti e non cancella più la credenziale biometrica.
+- ✅ **Reset Vault**: rinominato in rimozione dell'accesso biometrico; cancella la credenziale locale e sincronizza `settings_biometric=false` senza dichiarare la cancellazione dei dati Vault.
+
+### Fasi successive
+
+- 🟡 **Fase 2 — MFA TOTP reale (client completato)**: enrollment con QR/chiave manuale, verifica nel login e revoca usano Firebase MFA e lo stato reale `enrolledFactors`; resta da abilitare TOTP nel progetto Firebase Authentication with Identity Platform e collaudare enrollment/recovery sull'ambiente remoto.
+- [ ] **Fase 3 — Cambio Master Password**: re-cifratura atomica dei dati, aggiornamento del verifier e rigenerazione delle credenziali biometriche con backup e rollback verificati.
+- [ ] **Fase 4 — Test end-to-end**: coprire i cinque flussi con Firebase Emulator e browser/dispositivi WebAuthn compatibili.
+
+### Contratto sessione e offline
+
+- ✅ “Ricordami su questo dispositivo” usa la persistenza Firebase locale; se disattivato usa la persistenza della sola sessione browser.
+- ✅ Il secondo fattore compare nella stessa pagina di login solo quando Firebase restituisce `auth/multi-factor-auth-required`.
+- ✅ Il timer di inattività blocca esclusivamente la Vault e non revoca la sessione Firebase.
+- ✅ Firestore mantiene la cache persistente multi-tab; il service worker conserva anche le pagine HTML visitate, oltre agli asset dell'app, così i dati già sincronizzati possono essere mostrati offline.
+- ℹ️ Un nuovo login email/password/2FA richiede rete. Offline sono disponibili soltanto una sessione locale già valida, lo sblocco Vault locale e i dati precedentemente sincronizzati.
+
 ---
 
 ### 📝 Note per l'Agente AI:

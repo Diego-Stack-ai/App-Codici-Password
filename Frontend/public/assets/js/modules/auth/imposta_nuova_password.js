@@ -88,7 +88,7 @@ function setupNewPasswordForm() {
             } else if (auth.currentUser) {
                 // CASO CAMBIO INTERNO
                 await updatePassword(auth.currentUser, newPassword);
-                showToast(t('password_success') || "Password aggiornata con successo.", "success");
+                showToast(t('password_success') || "Password di accesso aggiornata. La Master Password della Vault non è cambiata.", "success");
             } else {
                 throw new Error("Sessione non valida o link scaduto.");
             }

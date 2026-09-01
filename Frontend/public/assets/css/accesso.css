@@ -153,6 +153,30 @@ html[data-i18n="loading"] body {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
+.auth-help {
+    margin: 0.5rem 0 0;
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+    line-height: 1.45;
+}
+
+.remember-device {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: -0.25rem 0 1rem;
+    color: var(--text-secondary);
+    font-size: var(--fs-xs);
+    text-align: left;
+    cursor: pointer;
+}
+
+.remember-device input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--accent);
+}
+
 .form-row {
     display: flex;
     flex-direction: row;

@@ -7,6 +7,7 @@
 import { db } from '../../firebase-config.js';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren } from '../../dom-utils.js';
+import { ensureMasterKey, enableBiometricUnlock } from './security-manager.js';
 
 export async function showSecuritySetupModal(user, userData) {
     if (userData.security_setup_done) return;
@@ -19,7 +20,6 @@ export async function showSecuritySetupModal(user, userData) {
 
     const timerBtnsContainer = createElement('div', { className: 'timer-selector', id: 'setup-timer-selector' });
     const timerOptions = [
-        { label: 'Subito', val: 0 },
         { label: '1 Min', val: 1 },
         { label: '3 Min', val: 3, active: true },
         { label: '5 Min', val: 5 }
@@ -48,7 +48,7 @@ export async function showSecuritySetupModal(user, userData) {
         type: 'checkbox',
         id: 'setup-face-id',
         className: 'base-toggle',
-        checked: true
+        checked: false
     });
 
     const confirmBtn = createElement('button', {
@@ -95,8 +95,14 @@ export async function showSecuritySetupModal(user, userData) {
             const isFaceId = faceIdCheckbox.checked;
             const userDocRef = doc(db, "users", user.uid);
 
+            if (isFaceId) {
+                const masterKey = await ensureMasterKey();
+                const configured = await enableBiometricUnlock(masterKey);
+                if (!configured) throw new Error("Configurazione biometrica non completata");
+            }
+
             await updateDoc(userDocRef, {
-                biometric_lock: isFaceId,
+                settings_biometric: isFaceId,
                 lock_timeout: selectedTimeout,
                 security_setup_done: true
             });

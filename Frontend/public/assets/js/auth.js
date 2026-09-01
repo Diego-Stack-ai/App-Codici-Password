@@ -9,14 +9,16 @@ import {
     sendPasswordResetEmail,
     sendEmailVerification,
     setPersistence,
-    browserLocalPersistence
+    browserLocalPersistence,
+    browserSessionPersistence,
+    getMultiFactorResolver,
+    TotpMultiFactorGenerator
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from './ui-core.js';
 import { logError } from './utils.js';
 
-// Imposta la persistenza esplicita per evitare logout inattesi su mobile
-setPersistence(auth, browserLocalPersistence).catch(e => console.error("Persistence error:", e));
+let pendingMfaResolver = null;
 
 /**
  * Centrialized Auth Observer
@@ -110,49 +112,51 @@ async function register(nome, cognome, email, password) {
  * @param {string} email - User's email.
  * @param {string} password - User's password.
  */
-async function login(email, password) {
+async function finalizeLogin(user, email) {
+    LOG("AUTH SUCCESS: ", user.uid);
+
+    await user.reload();
+    const updatedUser = auth.currentUser;
+    const userDocRef = doc(db, "users", updatedUser.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!updatedUser.emailVerified) {
+        showToast("Verifica l'email prima di configurare la 2FA.", "warning");
+    }
+
+    if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+            email,
+            nome: "Utente",
+            cognome: "Ripristinato",
+            createdAt: new Date(),
+            photoURL: user.photoURL || "",
+            recreatedAfterDeletion: true
+        });
+        showToast("Profilo ripristinato! Benvenuto.", "success");
+    } else {
+        showToast("Login effettuato con successo!", "success");
+    }
+
+    pendingMfaResolver = null;
+    return { user: updatedUser, mfaRequired: false };
+}
+
+async function login(email, password, rememberDevice = true) {
     try {
         LOG("LOGIN START: ", email);
+        await setPersistence(auth, rememberDevice ? browserLocalPersistence : browserSessionPersistence);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        LOG("AUTH SUCCESS: ", user.uid);
-
-        // FORZA REFRESH: Controlla lo stato reale su Firebase (evita cache vecchia)
-        await user.reload();
-        const updatedUser = auth.currentUser;
-
-        // CHECK IF USER EXISTS IN FIRESTORE
-        const userDocRef = doc(db, "users", updatedUser.uid);
-        LOG("FETCHING DOC...");
-        const userDoc = await getDoc(userDocRef);
-        LOG("DOC FETCHED: ", userDoc.exists());
-
-        if (!updatedUser.emailVerified) {
-            console.warn("Email non ancora verificata, ma procedo come da richiesta utente.");
-            showToast("Nota: Email non verificata, ma accesso consentito.", "warning");
-        }
-
-        if (!userDoc.exists()) {
-            console.warn("User authenticated but no Firestore profile. Auto-recovering profile...");
-
-            // Create a basic skeleton profile to allow access
-            await setDoc(userDocRef, {
-                email: email,
-                nome: "Utente",
-                cognome: "Ripristinato",
-                createdAt: new Date(),
-                photoURL: user.photoURL || "",
-                recreatedAfterDeletion: true
-            });
-
-            showToast("Profilo ripristinato! Benvenuto.", "success");
-        } else {
-            showToast("Login effettuato con successo!", "success");
-        }
-
-        // NOTA: Il redirect viene ora gestito dall'osservatore centrale onAuthStateChanged
-        // per evitare doppie navigazioni o conflitti.
+        return await finalizeLogin(userCredential.user, email);
     } catch (error) {
+        if (error.code === 'auth/multi-factor-auth-required') {
+            pendingMfaResolver = getMultiFactorResolver(auth, error);
+            const hasTotp = pendingMfaResolver.hints.some(
+                hint => hint.factorId === TotpMultiFactorGenerator.FACTOR_ID
+            );
+            if (!hasTotp) throw new Error("Secondo fattore configurato ma non supportato da questa app.");
+            return { mfaRequired: true };
+        }
         logError("Auth Login", error);
         let message = "Credenziali non valide.";
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -170,6 +174,16 @@ async function login(email, password) {
         // Rilanciamo l'errore per permettere al chiamante (login.js) di fermare lo spinner
         throw error;
     }
+}
+
+async function completeTotpLogin(code, email) {
+    if (!pendingMfaResolver) throw new Error("Sessione 2FA scaduta. Ripeti il login.");
+    const hint = pendingMfaResolver.hints.find(
+        item => item.factorId === TotpMultiFactorGenerator.FACTOR_ID
+    );
+    const assertion = TotpMultiFactorGenerator.assertionForSignIn(hint.uid, code);
+    const credential = await pendingMfaResolver.resolveSignIn(assertion);
+    return finalizeLogin(credential.user, email || credential.user.email);
 }
 
 /**
@@ -258,6 +272,7 @@ export {
     resendVerificationEmail,
     register,
     login,
+    completeTotpLogin,
     logout,
     resetPassword,
     checkAuthState

@@ -87,6 +87,20 @@
                             data-t="forgot_password">Password dimenticata?</a>
                     </div>
 
+                    <!-- Secondo fattore: mostrato solo quando Firebase lo richiede -->
+                    <div class="form-group hidden" id="totp-form-group">
+                        <label class="label" for="totp-code">Codice Authenticator</label>
+                        <input id="totp-code" type="text" inputmode="numeric" autocomplete="one-time-code"
+                            maxlength="6" pattern="[0-9]{6}" class="input" placeholder="000000"
+                            aria-describedby="totp-help">
+                        <p id="totp-help" class="auth-help">Apri la tua app Authenticator e inserisci il codice di 6 cifre.</p>
+                    </div>
+
+                    <label class="remember-device" id="remember-device-row">
+                        <input id="remember-device" type="checkbox" checked>
+                        <span>Ricordami su questo dispositivo</span>
+                    </label>
+
                     <!-- Submit Button -->
                     <button type="button" id="login-submit-btn" class="btn-primary" data-t="auth_button">
                         <span class="material-symbols-outlined">login</span>

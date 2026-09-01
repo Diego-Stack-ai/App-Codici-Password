@@ -634,3 +634,26 @@
         transform: rotate(360deg);
     }
 }
+.mfa-qr {
+    display: flex;
+    justify-content: center;
+    margin: 1rem auto;
+    padding: 0.75rem;
+    width: fit-content;
+    background: #fff;
+    border-radius: 16px;
+}
+
+.mfa-secret-label {
+    margin: 0.75rem 0 0.35rem;
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+}
+
+.mfa-secret {
+    display: block;
+    margin-bottom: 1rem;
+    overflow-wrap: anywhere;
+    color: var(--text-primary);
+    font-size: var(--fs-xs);
+}

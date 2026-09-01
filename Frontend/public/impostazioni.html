@@ -175,7 +175,7 @@
 
                 <!-- Sicurezza e Accesso -->
                 <div class="settings-container mt-section">
-                    <h3 class="settings-desc" data-t="section_security">Sicurezza e Accesso (Face ID, 2FA)</h3>
+                    <h3 class="settings-desc" data-t="section_security">Sicurezza e Accesso</h3>
 
                     <!-- Password -->
                     <button class="settings-item group" id="btn-change-password">
@@ -184,8 +184,8 @@
                                 <span class="material-symbols-outlined">lock_reset</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label" data-t="change_password">Cambio Password</span>
-                                <span class="settings-desc" data-t="change_password_desc">Aggiorna le chiavi</span>
+                                <span class="settings-label" data-t="change_password">Password di accesso</span>
+                                <span class="settings-desc" data-t="change_password_desc">Modifica la password di login, non la Master Password della Vault</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
@@ -197,7 +197,10 @@
                             <div class="settings-icon-box icon-emerald">
                                 <span class="material-symbols-outlined">verified_user</span>
                             </div>
-                            <span class="settings-label" data-t="two_factor_auth">2FA</span>
+                            <div class="settings-item-info">
+                                <span class="settings-label" data-t="two_factor_auth">2FA</span>
+                                <span class="settings-desc">Codice tramite app Authenticator (TOTP)</span>
+                            </div>
                         </div>
                         <input type="checkbox" id="2fa-toggle" class="settings-toggle">
                     </div>
@@ -221,7 +224,7 @@
                             </div>
                             <div class="settings-item-info">
                                 <span class="settings-label" data-t="lock_inactivity">Sicurezza e Inattività</span>
-                                <span class="settings-desc">Timeout per blocco auto o chiusura Vault</span>
+                                <span class="settings-desc">Blocca la Vault dopo il periodo scelto</span>
                             </div>
                         </div>
                         <div class="settings-controls-row" id="lock-timer-selector">
@@ -239,8 +242,8 @@
                                 <span class="material-symbols-outlined">lock_reset</span>
                             </div>
                             <div class="settings-item-info">
-                                <span class="settings-label" data-t="reset_vault_title">Reset Vault</span>
-                                <span class="settings-desc" data-t="reset_vault_desc">Cancella chiave salvata e sblocca manualmente</span>
+                                <span class="settings-label" data-t="reset_vault_title">Rimuovi accesso biometrico</span>
+                                <span class="settings-desc" data-t="reset_vault_desc">Non cancella i dati: al prossimo accesso servirà la Master Password</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>

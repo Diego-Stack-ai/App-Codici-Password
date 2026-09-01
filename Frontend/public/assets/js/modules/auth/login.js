@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js, modularizzazione.
  */
 
-import { login, checkAuthState } from '../../auth.js';
+import { login, completeTotpLogin, checkAuthState } from '../../auth.js';
 import { initComponents } from '../../components.js';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -90,6 +90,8 @@ function setupLoginForm() {
     // 🛡️ Throttle progressivo: conta i tentativi falliti e applica backoff esponenziale
     let failedAttempts = 0;
     let throttleTimer = null;
+    let awaitingTotp = false;
+    let pendingEmail = '';
 
     function applyThrottle() {
         const delays = [1, 2, 4, 8, 16, 30]; // secondi
@@ -127,9 +129,11 @@ function setupLoginForm() {
         const passwordEl = document.getElementById('password');
         const email = emailEl.value.trim();
         const password = passwordEl.value;
+        const rememberDevice = document.getElementById('remember-device')?.checked !== false;
+        const totpCode = document.getElementById('totp-code')?.value.trim() || '';
 
         // 1. Validazione Campi
-        if (!email || !password) {
+        if ((!email || !password) && !awaitingTotp) {
             showToast(t('error_missing_fields') || "Campi obbligatori mancanti", "error");
             return;
         }
@@ -156,10 +160,37 @@ function setupLoginForm() {
         document.body.classList.add('is-auth-progress');
 
         try {
-            const user = await login(email, password);
+            if (awaitingTotp) {
+                if (!/^\d{6}$/.test(totpCode)) {
+                    throw new Error("Inserisci il codice Authenticator di 6 cifre.");
+                }
+                await completeTotpLogin(totpCode, pendingEmail);
+            } else {
+                const result = await login(email, password, rememberDevice);
+                if (result?.mfaRequired) {
+                    awaitingTotp = true;
+                    pendingEmail = email;
+                    document.getElementById('totp-form-group')?.classList.remove('hidden');
+                    document.getElementById('remember-device-row')?.classList.add('hidden');
+                    emailEl.disabled = true;
+                    passwordEl.disabled = true;
+                    const codeInput = document.getElementById('totp-code');
+                    if (codeInput) codeInput.focus();
+                    clearElement(submitBtn);
+                    setChildren(submitBtn, [
+                        createElement('span', { className: 'material-symbols-outlined', textContent: 'verified_user' }),
+                        document.createTextNode(' Verifica codice')
+                    ]);
+                    submitBtn.disabled = false;
+                    document.body.classList.remove('is-auth-progress');
+                    showToast("Inserisci il codice generato dalla tua app Authenticator.", "info");
+                    return;
+                }
+            }
 
             // Login riuscito: azzera contatore tentativi
-            failedAttempts = 0;showToast(t('success_auth') || "Accesso autorizzato!", "success");
+            failedAttempts = 0;
+            showToast(t('success_auth') || "Accesso autorizzato!", "success");
 
         } catch (err) {
             failedAttempts++;
@@ -177,6 +208,10 @@ function setupLoginForm() {
             } else if (err.code === 'auth/too-many-requests') {
                 errorMsg = "Troppi tentativi falliti. Riprova più tardi.";
                 failedAttempts = 5; // Forza attesa massima se Firebase blocca
+            } else if (err.code === 'auth/invalid-verification-code') {
+                errorMsg = "Codice Authenticator errato o scaduto.";
+            } else if (err.message) {
+                errorMsg = err.message;
             }
 
             showToast(errorMsg, "error");

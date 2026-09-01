@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v1.1.1';
+const CACHE_NAME = 'codex-v1.2.0-auth-offline';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -8,6 +8,9 @@ const ASSETS_TO_CACHE = [
     'assets/css/core_fonts.css',
     'assets/css/core_fascie.css',
     'assets/js/main.js',
+    'assets/js/auth.js',
+    'assets/js/modules/auth/login.js',
+    'assets/js/modules/core/mfa-manager.js',
     'assets/js/theme-init.js',
     'assets/js/modules/core/security-manager.js',
     'assets/js/modules/core/webauthn-manager.js',
@@ -67,8 +70,15 @@ self.addEventListener('fetch', (event) => {
     // Strategia specifica per le pagine HTML (Network First)
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request)
-                .catch(() => caches.match(event.request))
+            fetch(event.request).then((networkResponse) => {
+                if (networkResponse.status === 200) {
+                    const copy = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+                }
+                return networkResponse;
+            }).catch(async () => {
+                return await caches.match(event.request) || await caches.match('index.html');
+            })
         );
         return;
     }
