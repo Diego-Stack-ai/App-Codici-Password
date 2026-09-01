@@ -20,7 +20,7 @@ console.warn     = (...args) => { try { LOG_WARN(...args);  } catch (e) {} };
 import { setupPasswordToggles, setupCopyButtons, setupCallButtons } from './ui-components.js';
 import { setupAccountCards, setupEditMode, setupAccountDetailView, setupCopyQrCode } from './ui-pages.js';
 import { initCleanup } from './cleanup.js';
-import { initComponents } from './components.js'; // Imports components system
+import { initComponents } from './components.js?v=1.2.3'; // Imports components system
 
 /**
  * INITIALIZATION

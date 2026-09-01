@@ -11,7 +11,7 @@ import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { t } from '../../translations.js';
-import { initComponents } from '../../components.js';
+import { initComponents } from '../../components.js?v=1.2.3';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 

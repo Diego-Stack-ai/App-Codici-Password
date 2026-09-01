@@ -18,7 +18,7 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
-import { initComponents } from '../../components.js';
+import { initComponents } from '../../components.js?v=1.2.3';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 

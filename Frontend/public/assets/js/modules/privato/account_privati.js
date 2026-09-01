@@ -11,7 +11,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js';
+import { initComponents } from '../../components.js?v=1.2.3';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 

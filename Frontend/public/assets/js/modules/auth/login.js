@@ -5,7 +5,7 @@
  */
 
 import { login, completeTotpLogin, checkAuthState } from '../../auth.js';
-import { initComponents } from '../../components.js';
+import { initComponents } from '../../components.js?v=1.2.3';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showInputModal } from '../../ui-core.js';

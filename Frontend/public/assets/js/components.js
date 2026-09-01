@@ -26,7 +26,9 @@ export async function initComponents() {
 
         // Versione unica disponibile su tutte le pagine e mostrata dove previsto.
         document.documentElement.dataset.appVersion = APP_VERSION;
-        document.querySelectorAll('[data-app-version]').forEach(element => {
+        // L'attributo sull'elemento <html> serve solo come metadato. Non deve
+        // ricevere textContent, altrimenti verrebbe cancellata l'intera pagina.
+        document.querySelectorAll('[data-app-version]:not(html)').forEach(element => {
             element.textContent = APP_VERSION;
         });
 

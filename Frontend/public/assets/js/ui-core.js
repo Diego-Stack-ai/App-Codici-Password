@@ -1,4 +1,4 @@
-import { initComponents } from './components.js';
+import { initComponents } from './components.js?v=1.2.3';
 import { createElement, setChildren, safeSetText } from './dom-utils.js';
 import { t } from './translations.js';
 
