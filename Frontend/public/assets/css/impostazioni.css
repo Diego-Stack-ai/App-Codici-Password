@@ -24,7 +24,7 @@
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
-    max-width: 600px;
+    max-width: 760px;
     margin: 0 auto;
     position: relative;
     z-index: 2;
@@ -647,4 +647,29 @@ h3.settings-desc {
 .btn-maintenance-danger:active,
 .btn-maintenance-accent:active {
     transform: scale(0.98);
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+    .settings-container {
+        max-width: 680px;
+    }
+}
+
+@media (max-width: 600px) {
+    .settings-item {
+        padding: 0.8rem;
+    }
+
+    .settings-item-header-row,
+    .row-layout {
+        min-width: 0;
+    }
+
+    .settings-desc {
+        overflow-wrap: anywhere;
+    }
+
+    .settings-controls-row {
+        flex-wrap: wrap;
+    }
 }

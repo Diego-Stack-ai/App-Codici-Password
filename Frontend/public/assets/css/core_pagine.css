@@ -13,7 +13,7 @@
     gap: 2rem;
     width: 100%;
     padding: 0 0 1.5rem 0;
-    max-width: 1100px;
+    max-width: 1120px;
     margin: 0 auto;
 }
 
@@ -21,6 +21,24 @@
     .matrix-grid {
         padding: 0;
         gap: 1.25rem;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+    .matrix-grid {
+        gap: 1.5rem;
+    }
+}
+
+@media (min-width: 1025px) {
+    .home-page .matrix-grid {
+        grid-template-areas:
+            "privato azienda"
+            "scadenze urgenze";
+    }
+
+    .home-page .matrix-card {
+        min-height: 220px;
     }
 }
 

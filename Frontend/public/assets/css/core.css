@@ -144,7 +144,7 @@ body,
     justify-content: flex-start;
     min-height: 100dvh;
     width: 100%;
-    max-width: 60rem;
+    max-width: 75rem;
     margin: 0 auto;
     background: transparent;
 }
@@ -162,7 +162,7 @@ body,
 
 .page-container {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1160px;
     margin: 0 auto;
     padding: 0 1.25rem;
     box-sizing: border-box;
@@ -174,7 +174,13 @@ body,
    ----------------------- */
 @media (min-width: 601px) {
     .base-container {
-        padding: max(2.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) max(2.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+        padding: max(1.5rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+    }
+}
+
+@media (min-width: 1025px) {
+    .page-container {
+        padding-inline: 1.5rem;
     }
 }
 

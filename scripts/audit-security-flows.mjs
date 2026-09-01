@@ -146,5 +146,12 @@ const cssNames = (await readdir(new URL('../Frontend/public/assets/css/', import
 const cssFiles = await Promise.all(cssNames.map(name => read(`Frontend/public/assets/css/${name}`)));
 assert.ok(cssFiles.every(css => !/@media \((?:max-width:\s*(?:480|640)|min-width:\s*(?:481|640))px\)/.test(css)), 'Breakpoint responsive legacy ancora presente');
 assert.match(await read('Frontend/public/assets/css/core_fascie.css'), /\.btn-icon-header\s*\{[\s\S]*?width:\s*44px;[\s\S]*?height:\s*44px;/, 'Controlli header sotto la dimensione tattile minima');
+const coreCss = await read('Frontend/public/assets/css/core.css');
+const pagesCss = await read('Frontend/public/assets/css/core_pagine.css');
+const settingsCss = await read('Frontend/public/assets/css/impostazioni.css');
+assert.match(coreCss, /\.base-container\s*\{[\s\S]*?max-width:\s*75rem;/, 'Il desktop resta limitato alla vecchia larghezza mobile-first');
+assert.match(pagesCss, /@media \(min-width:\s*1025px\)[\s\S]*?\.home-page \.matrix-grid[\s\S]*?"scadenze urgenze"/, 'La Home desktop non usa una matrice bilanciata');
+assert.match(settingsCss, /\.settings-container\s*\{[\s\S]*?max-width:\s*760px;/, 'Le impostazioni restano eccessivamente strette su desktop');
+assert.match(await read('Frontend/public/assets/css/account_privati.css'), /@media \(min-width:\s*1025px\)[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/, 'La lista account privati non sfrutta il desktop');
 
 console.log('Audit sicurezza e offline: 60 controlli superati.');
