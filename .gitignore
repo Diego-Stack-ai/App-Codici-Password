@@ -76,3 +76,6 @@ scripts_import_dati/serviceAccountKey.json
 # Backup translations completo (non serve in produzione)
 translations.full.js
 
+# Documento locale riservato con credenziali (non versionare)
+Torna alla Login e accedi con.docx
+
