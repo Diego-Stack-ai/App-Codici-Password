@@ -26,7 +26,7 @@ import { initComponents } from './components.js'; // Imports components system
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js';
+import * as firebaseRuntime from './firebase-config.js?v=1.1.8';
 const { auth, db } = firebaseRuntime;
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {

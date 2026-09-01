@@ -1,8 +1,8 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app-check.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
 // Your web app's Firebase configuration
@@ -20,7 +20,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 // 🛡️ APP CHECK — Protegge Firestore e Storage da accessi non autorizzati
 // Provider: reCAPTCHA v3 — registrare su https://www.google.com/recaptcha/admin
@@ -42,9 +42,15 @@ const auth = getAuth(app);
 
 // 🛡️ PROTOCOLLO V7.0 — PERSISTENZA OFFLINE (Modern API)
 // Configurazione cache persistente multischeda
-const db = initializeFirestore(app, {
-  cache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
+let db;
+try {
+  db = initializeFirestore(app, {
+    cache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+} catch (error) {
+  // Una configurazione precedente in cache può avere già inizializzato Firestore.
+  db = getFirestore(app);
+}
 
 const storage = getStorage(app);
 
