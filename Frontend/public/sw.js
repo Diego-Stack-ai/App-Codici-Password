@@ -1,9 +1,8 @@
-const CACHE_NAME = 'codex-v8.5-prf-hardening';
+const CACHE_NAME = 'codex-v1.1.1';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
     'manifest.json',
-    'favicon.ico',
     'assets/css/core.css?v=5.0',
     'assets/css/core_ui.css?v=5.1',
     'assets/css/core_fonts.css',

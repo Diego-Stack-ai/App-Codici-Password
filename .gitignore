@@ -71,7 +71,6 @@ node_modules/
 # IDX config
 .idx/
 serviceAccountKey.json
-scripts_import_dati/serviceAccountKey.json
 
 # Backup translations completo (non serve in produzione)
 translations.full.js

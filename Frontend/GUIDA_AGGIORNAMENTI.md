@@ -69,5 +69,20 @@ Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato
 
 ---
 
+## 7. CONTROLLI APERTI CONSOLIDATI
+
+Questa sezione sostituisce i vecchi report di audit e i documenti di migrazione V3 separati.
+
+- [ ] **P0 — Firestore Rules condivisioni**: eliminare l'accesso generico basato sul solo `visibility="shared"`. Lettura e aggiornamento devono essere consentiti esclusivamente al proprietario o a un ospite presente nella Map `sharedWith` con stato `accepted`; limitare inoltre i campi aggiornabili dall'ospite.
+- [ ] **P0 — Test regole**: eseguire i casi `permission-denied` della sezione 5.8 della `GUIDA.md` contro emulatori o progetto di test prima del go-live.
+- [ ] **App Check**: il client reCAPTCHA è configurato; verificare nella Firebase Console che l'enforcement sia attivo per Firestore e Storage.
+- [ ] **Compatibilità legacy**: verificare nel database l'assenza di record che dipendono da `shared`, `isMemoShared`, `hasMemo` o `sharedWithEmails`; solo dopo rimuovere i fallback di lettura dal frontend e dalle Rules.
+- [ ] **Globali residue**: sostituire `window.deleteAccount`; mantenere soltanto le globali tecniche giustificate per Tailwind e il tema finché l'architettura attuale le richiede.
+- [ ] **Deploy GitHub**: sostituire il token legacy `FIREBASE_TOKEN` con credenziali di servizio/ADC generate dalla procedura ufficiale `firebase init hosting:github`. Il workflow attuale pubblica soltanto Hosting; Functions, Rules e indici richiedono un rilascio separato e controllato.
+
+I vecchi script di importazione e backfill sono stati rimossi: non devono essere ricreati senza una nuova procedura approvata, un backup Firestore e un piano di rollback.
+
+---
+
 ### 📝 Note per l'Agente AI:
 Quando lavori su queste sezioni, documenta qui ogni progresso. Se l'utente approva un nuovo stile o una nuova logica, prepara lo snippet per il trasferimento nel **Protocollo Master**.

@@ -187,6 +187,18 @@ La tipografia non è solo "scelta del font", è l'intelaiatura della leggibilit�
 > 3. Suggerisce la sostituzione con il token semantico corrispondente (es. `var(--fs-base)`).
 > 4. Verifica che le icone usino la classe standard e che non ci siano font-icons rimasugli di vecchie versioni (font-awesome, ecc.).
 
+### 3.5 Protocollo traduzioni e audit i18n
+Ogni testo visibile deve essere risolto tramite una chiave di traduzione, inclusi placeholder, titoli, etichette ARIA, opzioni, modali, toast, stati vuoti, messaggi dinamici e template email.
+
+Checklist unica:
+
+1. Scansionare HTML e JavaScript per testi visibili hardcoded.
+2. Verificare l'uso di `data-t`, degli attributi correlati o di `t("chiave")`.
+3. Verificare che ogni chiave esista in tutte le lingue supportate e non contenga valori vuoti, `TODO` o fallback involontari in italiano.
+4. Includere nell'audit contenuti inizialmente nascosti o generati a runtime: dropdown, modali, menu, tooltip, notifiche e messaggi delle scadenze.
+5. Rigenerare i file lingua esclusivamente con `node scripts/split-translations.mjs` quando cambia il dizionario principale.
+6. L'audit deve produrre conteggi di testi analizzati, hardcoded, chiavi mancanti e copertura per lingua; non deve modificare automaticamente le traduzioni.
+
 ---
 
 ## 4. JS BOOTSTRAP E ORCHESTRAZIONE UNICA
@@ -356,6 +368,19 @@ Quando un accesso fiduciario si spegne (revoca da parte dell'Owner), la transazi
 1. Spazza via la chiave incriminata dalla mappa `sharedWith`.
 2. Azzera ed elimina gli eventuali inviti fantasma in `invites`.
 3. Notifica lo storico dell'Owner e l'Ospite dell'operazione compiuta.
+
+### 5.8 Test di accettazione della condivisione
+Questa è la checklist unica da applicare dopo ogni modifica al sistema di condivisione:
+
+1. **Account privato**: `type="account"`, `visibility="private"` e `sharedWith` Map vuota.
+2. **Memorandum condiviso**: `type="memo"`, `visibility="shared"`, invitati nella Map `sharedWith` con stato `pending` e documento coerente in `invites`.
+3. **Accettazione e rifiuto**: risposta elaborata in transazione atomica, aggiornamento di `acceptedCount` e ritorno automatico a `private` quando non restano invitati attivi.
+4. **Revoca**: rimozione dell'ospite da `sharedWith`, eliminazione dell'invito tecnico e aggiornamento immediato delle viste di proprietario e ospite.
+5. **Vista ospite**: account in sola lettura; nessun comando di modifica o eliminazione dei dati principali.
+6. **Filtri**: Account, Condivisi e Memorandum devono essere determinati esclusivamente da `type` e `visibility` per i nuovi record.
+7. **Regole Firestore**: un utente non presente nella Map `sharedWith` con stato `accepted` deve ricevere `permission-denied`; un ospite non può modificare password, username, note, `type` o `visibility`.
+
+I vecchi campi `shared`, `isMemoShared`, `hasMemo` e `sharedWithEmails` sono ammessi soltanto come fallback temporaneo di lettura per record legacy. Ogni nuova scrittura deve usare lo schema a Map e rimuovere i campi precedenti.
 
 ---
 
@@ -671,7 +696,6 @@ users/{uid}/settings/
 1. **Contestualità**: I menu `names` e `notificationEmails` cambiano automaticamente al cambio di tab (Automezzi / Documenti / Generali) nel form "Aggiungi Scadenza".
 2. **Seed Automatico**: Se un documento config non esiste o ha `deadlineTypes: []` vuoto, il sistema inizializza i valori di default su Firebase automaticamente al primo accesso — sia dalle pagine di configurazione che dal form di inserimento scadenza.
 3. **Accumulo Progressivo**: Ad ogni nuova scadenza salvata, il nome dell'intestatario e le email usate vengono aggiunti automaticamente via `arrayUnion` nel config della modalità corrente (nessun duplicato).
-4. **Backfill Retroattivo**: Lo script `scripts_import_dati/backfill_names.js` popola retroattivamente `names` e `notificationEmails` leggendo tutte le scadenze esistenti, divise per modalità.
 
 **Il Parsing Automatico dell'Oggetto (Syntax Builder)**:
 Tramite la funzione `buildEmailSubject(objectName, detail)` in `scadenza_templates.js`, il front-end genera a tempo di record l'oggetto email. Se l'utente unisce la tipologia "L'Assicurazione" e la targa "AB123CD", l'app pre-assemblerà matematicamente la stringa:
