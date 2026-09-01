@@ -4,7 +4,7 @@
  * Refactor: Eliminazione innerHTML a favore di dom-utils.
  */
 
-import { auth, db } from '../../firebase-config.js';
+import { auth, db } from '../../firebase-config.js?v=1.1.8';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";

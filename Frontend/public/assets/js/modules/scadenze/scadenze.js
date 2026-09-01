@@ -4,7 +4,7 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db } from '../../firebase-config.js';
+import { auth, db } from '../../firebase-config.js?v=1.1.8';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core.js';
 import { LOG } from '../../logger.js';

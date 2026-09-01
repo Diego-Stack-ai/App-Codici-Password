@@ -1,4 +1,4 @@
-import { auth } from '../../firebase-config.js';
+import { auth } from '../../firebase-config.js?v=1.1.8';
 import {
     multiFactor,
     TotpMultiFactorGenerator

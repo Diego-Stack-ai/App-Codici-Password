@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth, db } from '../../firebase-config.js';
+import { auth, db } from '../../firebase-config.js?v=1.1.8';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

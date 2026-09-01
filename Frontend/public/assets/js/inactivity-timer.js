@@ -1,4 +1,4 @@
-﻿import { auth, db } from './firebase-config.js';
+﻿import { auth, db } from './firebase-config.js?v=1.1.8';
 import { LOG } from './logger.js';
 import { softLock } from './modules/core/security-manager.js';
 import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';

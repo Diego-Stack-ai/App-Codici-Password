@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js';
+import { db } from '../../firebase-config.js?v=1.1.8';
 import {
     doc, getDoc, updateDoc, increment
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";

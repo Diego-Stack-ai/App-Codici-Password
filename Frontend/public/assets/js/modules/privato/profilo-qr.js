@@ -8,7 +8,7 @@
  *   profilo_privato.js → profilo-qr.js → qr_code_utils.js, firebase
  */
 
-import { db } from '../../firebase-config.js';
+import { db } from '../../firebase-config.js?v=1.1.8';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';

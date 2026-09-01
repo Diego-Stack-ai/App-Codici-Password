@@ -3,7 +3,7 @@
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { auth, db } from '../../firebase-config.js';
+import { auth, db } from '../../firebase-config.js?v=1.1.8';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

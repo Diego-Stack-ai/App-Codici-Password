@@ -1,4 +1,4 @@
-import { db } from './firebase-config.js';
+import { db } from './firebase-config.js?v=1.1.8';
 import {
     collection,
     addDoc,

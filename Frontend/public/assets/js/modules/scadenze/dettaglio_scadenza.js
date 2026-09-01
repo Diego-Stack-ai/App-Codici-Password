@@ -5,7 +5,7 @@
 
 import { getScadenza, updateScadenza, deleteScadenza } from '../../db.js';
 import { getFooterReady } from '../../footer-state.js';
-import { auth } from '../../firebase-config.js';
+import { auth } from '../../firebase-config.js?v=1.1.8';
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
