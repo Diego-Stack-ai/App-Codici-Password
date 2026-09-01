@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v1.2.2-app-version';
+const CACHE_NAME = 'codex-v1.2.3-cache-consistency';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -83,6 +83,19 @@ self.addEventListener('fetch', (event) => {
             }).catch(async () => {
                 return await caches.match(event.request) || await caches.match('index.html');
             })
+        );
+        return;
+    }
+
+    // Gli asset eseguibili e gli stili devono essere coerenti con l'HTML appena pubblicato.
+    if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+        event.respondWith(
+            fetch(event.request).then((networkResponse) => {
+                if (networkResponse.status === 200) {
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
+                }
+                return networkResponse;
+            }).catch(() => caches.match(event.request))
         );
         return;
     }

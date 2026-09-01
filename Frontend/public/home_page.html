@@ -23,6 +23,10 @@
   <link rel="stylesheet" href="assets/css/core_pagine.css?v=5.0">
   <link rel="stylesheet" href="assets/css/home_page.css?v=5.0">
   <link rel="stylesheet" href="assets/css/core_ui.css?v=5.1">
+  <style>
+    /* Nasconde anche il badge creato da eventuali componenti rimasti nella vecchia cache. */
+    .app-version-badge { display: none !important; }
+  </style>
 </head>
 
 <body class="base-bg home-page">
@@ -85,7 +89,7 @@
         <!-- Versione applicazione: valorizzata dalla configurazione centrale -->
         <div class="version-display"
           style="text-align: center; margin-top: 30px; opacity: 0.4; font-size: 0.8rem; letter-spacing: 1px;">
-          APP VERSION: <span id="app-version-label" data-app-version></span>
+          APP VERSION: <span id="app-version-label" data-app-version>v1.1.2</span>
         </div>
       </div>
 
@@ -96,7 +100,7 @@
   </div>
 
   <!-- Scripts -->
-  <script type="module" src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/main.js?v=1.1.2"></script>
 
 </body>
 

@@ -27,6 +27,9 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
+assert.match(homeHtml, /data-app-version>v1\.1\.2</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
+assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
+assert.match(homeHtml, /main\.js\?v=1\.1\.2/, 'La home non forza il caricamento della release corrente');
 assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
 assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');
@@ -37,6 +40,7 @@ assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica l
 assert.match(inactivity, /if \(!expired\) startMonitoring\(\)/, 'La nuova pagina resetta il timer prima di verificarne la scadenza');
 assert.match(vaultSession, /AES-GCM/, 'Il segreto della sessione Vault non è cifrato');
 assert.match(serviceWorker, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
+assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.endsWith\('\.css'\)/s, 'Gli asset applicativi non usano una strategia network-first coerente');
 
 assert.doesNotMatch(settings, /settings_2fa\s*:/, 'Il client non deve simulare enrollment 2FA');
 assert.match(settings, /enrollTotp\(\)/, 'Il toggle 2FA non avvia un enrollment TOTP reale');
@@ -60,4 +64,4 @@ assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma 
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
 assert.match(serviceWorker, /cache\.put\(event\.request, copy\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
-console.log('Audit sicurezza e offline: 33 controlli superati.');
+console.log('Audit sicurezza e offline: 37 controlli superati.');
