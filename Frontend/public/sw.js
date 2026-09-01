@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v1.2.1-vault-session';
+const CACHE_NAME = 'codex-v1.2.2-app-version';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -8,6 +8,8 @@ const ASSETS_TO_CACHE = [
     'assets/css/core_fonts.css',
     'assets/css/core_fascie.css',
     'assets/js/main.js',
+    'assets/js/env.js',
+    'assets/js/components.js',
     'assets/js/auth.js',
     'assets/js/modules/auth/login.js',
     'assets/js/modules/core/mfa-manager.js',

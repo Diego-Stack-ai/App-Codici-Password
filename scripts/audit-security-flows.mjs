@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settingsHtml, loginHtml, password, serviceWorker, firebaseConfig, vaultSession] = await Promise.all([
+const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settingsHtml, loginHtml, password, serviceWorker, firebaseConfig, vaultSession, env, components, homeHtml, packageJson] = await Promise.all([
     read('Frontend/public/assets/js/modules/settings/impostazioni.js'),
     read('Frontend/public/assets/js/modules/core/security-setup.js'),
     read('Frontend/public/assets/js/inactivity-timer.js'),
@@ -18,7 +18,18 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
     ,read('Frontend/public/sw.js')
     ,read('Frontend/public/assets/js/firebase-config.js')
     ,read('Frontend/public/assets/js/modules/core/vault-session.js')
+    ,read('Frontend/public/assets/js/env.js')
+    ,read('Frontend/public/assets/js/components.js')
+    ,read('Frontend/public/home_page.html')
+    ,read('package.json')
 ]);
+
+const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
+assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
+assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
+assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
+assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
+assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');
 
 assert.match(security, /restoreVaultSession\(uid\)/, 'La chiave Vault non viene ripristinata tra le pagine');
 assert.match(security, /saveVaultSession\(_masterKey, uid\)/, 'Lo sblocco Vault non viene conservato nella sessione');
@@ -49,4 +60,4 @@ assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma 
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
 assert.match(serviceWorker, /cache\.put\(event\.request, copy\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
-console.log('Audit sicurezza e offline: 28 controlli superati.');
+console.log('Audit sicurezza e offline: 33 controlli superati.');

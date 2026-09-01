@@ -24,6 +24,12 @@ export async function initComponents() {
         const path = window.location.pathname;
         const pageTitle = document.title.split(' - ')[0] || 'App Codici Password';
 
+        // Versione unica disponibile su tutte le pagine e mostrata dove previsto.
+        document.documentElement.dataset.appVersion = APP_VERSION;
+        document.querySelectorAll('[data-app-version]').forEach(element => {
+            element.textContent = APP_VERSION;
+        });
+
         const isHome = path.endsWith('home_page.html');
         // Pagine che non devono avere header/footer standard (Login, Registrazione, etc)
         const isAuth = ['index.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'].some(p => path.endsWith(p)) || path.endsWith('/');
@@ -51,15 +57,9 @@ export async function initComponents() {
                         src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2ZmZiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00czLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYy04LTIuNjYtOC00LTh6Ii8+PC9zdmc+'
                     })
                 ]);
-                const versionBadge = createElement('span', {
-                    className: 'app-version-badge',
-                    style: 'font-size: 0.65rem; opacity: 0.7; font-weight: bold; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 6px; margin-left: 8px;',
-                    textContent: APP_VERSION
-                });
                 headerLeft.style.display = 'flex';
                 headerLeft.style.alignItems = 'center';
                 headerLeft.appendChild(avatarLink);
-                headerLeft.appendChild(versionBadge);
             } else if (!isAuth) {
                 // Back Button (Solo se non siamo su Auth o Home)
                 let backFn = () => window.history.back();
