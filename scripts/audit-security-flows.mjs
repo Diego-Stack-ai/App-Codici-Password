@@ -31,6 +31,7 @@ const registration = await read('Frontend/public/assets/js/modules/auth/registra
 const registrationHtml = await read('Frontend/public/registrati.html');
 const firestoreRules = await read('firestore.rules');
 const cloudFunctions = await read('functions/index.js');
+const manifest = JSON.parse(await read('Frontend/public/manifest.json'));
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
@@ -129,5 +130,10 @@ assert.match(firestoreRules, /allow update, delete: if isInviteOwner\(\)/, 'Il d
 assert.match(cloudFunctions, /exports\.respondToInvitation = onCall/, 'La risposta sicura agli inviti non è gestita dal server');
 assert.match(cloudFunctions, /invite\.recipientEmail[\s\S]*!== email/, 'La funzione non verifica l’identità del destinatario');
 assert.match(cloudFunctions, /sharedWithUids/, 'La funzione non registra gli UID autorizzati alla lettura');
+assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-192.png') && icon.sizes === '192x192' && icon.type === 'image/png'), 'Manifest privo dell\'icona PNG 192x192');
+assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-512.png') && icon.sizes === '512x512' && icon.type === 'image/png'), 'Manifest privo dell\'icona PNG 512x512');
+assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-maskable-512.png') && icon.purpose === 'maskable'), 'Manifest privo della variante maskable');
+assert.match(homeHtml, /apple-touch-icon-180\.png/, 'La home non usa l\'icona Apple dedicata');
+assert.match(serviceWorker, /app-icon-maskable-512\.png/, 'La variante maskable non è disponibile nella shell offline');
 
 console.log('Audit sicurezza e offline: 60 controlli superati.');

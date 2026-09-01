@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.8';
+const CACHE_NAME = 'codex-shell-v1.2.9';
 const APP_CACHE_PREFIX = 'codex-';
 
 // Shell minima coerente con la release corrente. Le pagine visitate e i
@@ -8,6 +8,10 @@ const APP_SHELL = [
     'home_page.html',
     'manifest.json?v=5.0',
     'assets/images/app-icon.jpg',
+    'assets/images/app-icon-192.png',
+    'assets/images/app-icon-512.png',
+    'assets/images/app-icon-maskable-512.png',
+    'assets/images/apple-touch-icon-180.png',
     'assets/css/core.css?v=5.1',
     'assets/css/core_ui.css?v=5.1',
     'assets/css/core_fonts.css',
