@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v1.2.7-device-recovery';
+const CACHE_NAME = 'codex-v1.2.8-safe-recovery';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -11,7 +11,7 @@ const ASSETS_TO_CACHE = [
     'assets/css/home_page.css?v=5.0',
     'assets/css/accesso.css?v=5.0',
     'assets/js/main.js',
-    'assets/js/main.js?v=1.1.4',
+    'assets/js/main.js?v=1.1.5',
     'assets/js/env.js',
     'assets/js/components.js',
     'assets/js/auth.js',

@@ -27,9 +27,9 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
-assert.match(homeHtml, /data-app-version>v1\.1\.4</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
+assert.match(homeHtml, /data-app-version>v1\.1\.5</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
 assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
-assert.match(homeHtml, /main\.js\?v=1\.1\.4/, 'La home non forza il caricamento della release corrente');
+assert.match(homeHtml, /main\.js\?v=1\.1\.5/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
 assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
@@ -50,9 +50,11 @@ assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.e
 assert.match(serviceWorker, /caches\.match\(event\.request, \{ ignoreSearch: true \}\)/, 'Il fallback PWA non recupera asset con query-versione differenti');
 assert.match(serviceWorker, /assets\/css\/home_page\.css\?v=5\.0/, 'Lo stile della home non è precaricato per l’avvio PWA');
 assert.match(serviceWorker, /assets\/css\/accesso\.css\?v=5\.0/, 'Lo stile del login non è precaricato per l’avvio PWA');
-assert.match(loginHtml, /main\.js\?v=1\.1\.4/, 'Il login non forza la release JavaScript corrente');
-assert.match(loginHtml, /codex_shell_recovery_v114/, 'Il login non recupera automaticamente le cache PWA incoerenti');
+assert.match(loginHtml, /main\.js\?v=1\.1\.5/, 'Il login non forza la release JavaScript corrente');
+assert.match(loginHtml, /codex_shell_recovery_v115/, 'Il login non recupera automaticamente le cache PWA incoerenti');
 assert.match(loginHtml, /name\.startsWith\('codex-'\)/, 'Il recupero cache non è limitato alle cache statiche dell’app');
+assert.doesNotMatch(loginHtml, /location\.replace/, 'Il recupero cache non deve interrompere il parsing della pagina con un redirect');
+assert.match(loginHtml, /window\.addEventListener\('load'/, 'La pulizia cache deve partire soltanto dopo il caricamento della pagina');
 assert.match(loginHtml, /data-i18n="ready"/, 'Il login può restare invisibile se il bootstrap JavaScript fallisce');
 
 assert.doesNotMatch(settings, /settings_2fa\s*:/, 'Il client non deve simulare enrollment 2FA');
@@ -77,4 +79,4 @@ assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma 
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
 assert.match(serviceWorker, /cache\.put\(event\.request, copy\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
-console.log('Audit sicurezza e offline: 50 controlli superati.');
+console.log('Audit sicurezza e offline: 52 controlli superati.');
