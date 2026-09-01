@@ -84,8 +84,9 @@ function setupLanguageSelector() {
  * Validazione e Invio Form Login
  */
 function setupLoginForm() {
+    const form = document.getElementById('login-form');
     const submitBtn = document.getElementById('login-submit-btn');
-    if (!submitBtn) return;
+    if (!form || !submitBtn) return;
 
     // 🛡️ Throttle progressivo: conta i tentativi falliti e applica backoff esponenziale
     let failedAttempts = 0;
@@ -118,8 +119,8 @@ function setupLoginForm() {
         }, 1000);
     }
 
-    // 🛡️ Listener click con throttle integrato
-    submitBtn.addEventListener('click', async (e) => {
+    // 🛡️ Submit nativo: supporta click, tasto Invio e password manager.
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         // Blocca click se throttle attivo
