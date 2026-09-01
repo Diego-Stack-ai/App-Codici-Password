@@ -584,7 +584,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     initComponents();
     applyGlobalTranslations();
-    setTimeout(() => document.body.classList.add('revealed'), 100);
+    setTimeout(() => document.body?.classList.add('revealed'), 100);
 });
 
 LOG("PROTOCOLLO V7.0 MASTER Initialized");

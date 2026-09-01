@@ -1,12 +1,15 @@
-const CACHE_NAME = 'codex-v1.2.4-vault-session-compat';
+const CACHE_NAME = 'codex-v1.2.5-shell-recovery';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
     'manifest.json',
-    'assets/css/core.css?v=5.0',
+    'assets/css/core.css?v=5.1',
     'assets/css/core_ui.css?v=5.1',
     'assets/css/core_fonts.css',
     'assets/css/core_fascie.css',
+    'assets/css/core_pagine.css?v=5.0',
+    'assets/css/home_page.css?v=5.0',
+    'assets/css/accesso.css?v=5.0',
     'assets/js/main.js',
     'assets/js/env.js',
     'assets/js/components.js',
@@ -95,7 +98,9 @@ self.addEventListener('fetch', (event) => {
                     caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
                 }
                 return networkResponse;
-            }).catch(() => caches.match(event.request))
+            }).catch(async () => {
+                return await caches.match(event.request) || await caches.match(event.request, { ignoreSearch: true });
+            })
         );
         return;
     }
