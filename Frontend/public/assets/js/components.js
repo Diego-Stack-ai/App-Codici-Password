@@ -3,7 +3,7 @@ import { LOG } from './logger.js';
 import { auth } from './firebase-config.js?v=1.1.8';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
-import { showLogoutModal } from './ui-core.js';
+import { showLogoutModal } from './ui-core.js?v=1.2.4';
 import { setFooterReady } from './footer-state.js';
 import { APP_VERSION } from './env.js';
 

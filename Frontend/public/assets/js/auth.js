@@ -15,7 +15,7 @@ import {
     TotpMultiFactorGenerator
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showToast } from './ui-core.js';
+import { showToast } from './ui-core.js?v=1.2.4';
 import { logError } from './utils.js';
 
 let pendingMfaResolver = null;
