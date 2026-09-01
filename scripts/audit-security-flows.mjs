@@ -28,9 +28,9 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
-assert.match(homeHtml, /data-app-version>v1\.2\.1</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
+assert.match(homeHtml, /data-app-version>v1\.2\.2</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
 assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
-assert.match(homeHtml, /main\.js\?v=1\.2\.1/, 'La home non forza il caricamento della release corrente');
+assert.match(homeHtml, /main\.js\?v=1\.2\.2/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
 assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
@@ -51,7 +51,7 @@ assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.e
 assert.match(serviceWorker, /caches\.match\(event\.request, \{ ignoreSearch: true \}\)/, 'Il fallback PWA non recupera asset con query-versione differenti');
 assert.match(serviceWorker, /assets\/css\/home_page\.css\?v=5\.0/, 'Lo stile della home non è precaricato per l’avvio PWA');
 assert.match(serviceWorker, /assets\/css\/accesso\.css\?v=5\.0/, 'Lo stile del login non è precaricato per l’avvio PWA');
-assert.match(loginHtml, /login-entry\.js\?v=1\.2\.1/, 'Il login non usa il bootstrap Auth dedicato');
+assert.match(loginHtml, /login-entry\.js\?v=1\.2\.2/, 'Il login non usa il bootstrap Auth dedicato');
 assert.doesNotMatch(loginHtml, /assets\/js\/main\.js/, 'Il login carica ancora il router completo dell’app privata');
 assert.doesNotMatch(firebaseConfig, /const appCheck = initializeAppCheck/, 'App Check viene ancora avviato durante il login');
 assert.match(firebaseConfig, /export function enableAppCheck/, 'App Check non è disponibile in modalità lazy');
@@ -60,7 +60,7 @@ assert.match(main, /firebase-config\.js\?v=1\.1\.8/, 'Il bootstrap non bypassa l
 assert.match(firebaseConfig, /getApps\(\)\.length \? getApp\(\)/, 'Firebase App non viene riutilizzata tra moduli versionati');
 assert.match(firebaseConfig, /db = getFirestore\(app\)/, 'Firestore già inizializzato non viene riutilizzato');
 assert.doesNotMatch(loginHtml, /caches\.keys|registration\?\.update/, 'Il login modifica ancora cache o Service Worker durante il caricamento');
-assert.match(loginHtml, /registration\.unregister\(\)/, 'Il login non disattiva il Service Worker difettoso');
+assert.doesNotMatch(loginHtml, /serviceWorker|getRegistrations|unregister\(/, 'Il login esegue ancora operazioni PWA durante il caricamento');
 assert.match(main, /const serviceWorkerEnabled = false/, 'Il bootstrap continua a registrare il Service Worker durante il recovery');
 assert.match(serviceWorker, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
 assert.match(auth, /login-v115\.html/, 'I redirect Auth non usano il nuovo percorso di login');
