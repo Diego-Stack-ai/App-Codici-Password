@@ -39,6 +39,11 @@ assert.match(security, /saveVaultSession\(_masterKey, uid\)/, 'Lo sblocco Vault 
 assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica la scadenza condivisa tra pagine');
 assert.match(inactivity, /if \(!expired\) startMonitoring\(\)/, 'La nuova pagina resetta il timer prima di verificarne la scadenza');
 assert.match(vaultSession, /AES-GCM/, 'Il segreto della sessione Vault non è cifrato');
+assert.doesNotMatch(vaultSession, /indexedDB/, 'La sessione Vault dipende ancora da CryptoKey in IndexedDB');
+assert.match(vaultSession, /crypto\.subtle\.importKey\('raw'/, 'La chiave di sessione compatibile non viene importata con Web Crypto');
+assert.doesNotMatch(vaultSession, /localStorage\.getItem\(WRAPPING_KEY\)|localStorage\.setItem\(WRAPPING_KEY/, 'La chiave di sessione non deve persistere dopo la chiusura della scheda');
+assert.match(vaultSession, /sessionStorage\.removeItem\(WRAPPING_KEY\)/, 'Blocco e logout non eliminano la chiave di sessione');
+assert.match(security, /if \(_unlockPromise && !forceReload\) return _unlockPromise/, 'Le richieste concorrenti possono ancora aprire più sblocchi');
 assert.match(serviceWorker, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
 assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.endsWith\('\.css'\)/s, 'Gli asset applicativi non usano una strategia network-first coerente');
 
@@ -64,4 +69,4 @@ assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma 
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
 assert.match(serviceWorker, /cache\.put\(event\.request, copy\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
-console.log('Audit sicurezza e offline: 37 controlli superati.');
+console.log('Audit sicurezza e offline: 42 controlli superati.');

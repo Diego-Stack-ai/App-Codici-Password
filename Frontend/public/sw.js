@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-v1.2.3-cache-consistency';
+const CACHE_NAME = 'codex-v1.2.4-vault-session-compat';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',

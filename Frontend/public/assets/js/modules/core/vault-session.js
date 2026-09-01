@@ -1,8 +1,6 @@
 /** Sessione Vault cifrata tra i caricamenti completi della stessa scheda. */
 const SESSION_KEY = 'vault_session_v1';
-const DB_NAME = 'codex-vault-session';
-const STORE_NAME = 'keys';
-const KEY_ID = 'session-key';
+const WRAPPING_KEY = 'codex_vault_session_wrapping_key_v1';
 
 const toBase64 = bytes => {
     let binary = '';
@@ -11,32 +9,14 @@ const toBase64 = bytes => {
 };
 const fromBase64 = value => Uint8Array.from(atob(value), char => char.charCodeAt(0));
 
-function openDb() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
-        request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
-
 async function getSessionKey(create = false) {
-    const db = await openDb();
-    try {
-        const existing = await new Promise((resolve, reject) => {
-            const request = db.transaction(STORE_NAME).objectStore(STORE_NAME).get(KEY_ID);
-            request.onsuccess = () => resolve(request.result || null);
-            request.onerror = () => reject(request.error);
-        });
-        if (existing || !create) return existing;
-        const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
-        await new Promise((resolve, reject) => {
-            const request = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(key, KEY_ID);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-        return key;
-    } finally { db.close(); }
+    let encodedKey = sessionStorage.getItem(WRAPPING_KEY);
+    if (!encodedKey && create) {
+        encodedKey = toBase64(crypto.getRandomValues(new Uint8Array(32)));
+        sessionStorage.setItem(WRAPPING_KEY, encodedKey);
+    }
+    if (!encodedKey) return null;
+    return crypto.subtle.importKey('raw', fromBase64(encodedKey), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
 export async function saveVaultSession(masterKey, uid, expiresAt = null) {
@@ -97,6 +77,7 @@ export function getVaultSessionExpiry() {
 
 export function clearVaultSession() {
     sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(WRAPPING_KEY);
     sessionStorage.removeItem('vault_s_key');
     sessionStorage.removeItem('vault_s_expiry');
 }

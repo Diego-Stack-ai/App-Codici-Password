@@ -15,6 +15,7 @@ import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vaul
 let _masterKey = null;
 let _vaultAutoUnlock = false;
 let _isSoftLocked = false;
+let _unlockPromise = null;
 const updateGlobalState = () => {};
 
 const STORAGE_PREFIX = 'codex_vault_secret_';
@@ -210,6 +211,20 @@ export function isBiometricUnlockConfigured() {
 }
 
 export async function ensureMasterKey(options = {}) {
+    const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
+    if (_masterKey && !forceReload) return _masterKey;
+    if (_unlockPromise && !forceReload) return _unlockPromise;
+
+    const operation = ensureMasterKeyInternal(options);
+    _unlockPromise = operation;
+    try {
+        return await operation;
+    } finally {
+        if (_unlockPromise === operation) _unlockPromise = null;
+    }
+}
+
+async function ensureMasterKeyInternal(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
 
     if (_masterKey && !forceReload) return _masterKey;
