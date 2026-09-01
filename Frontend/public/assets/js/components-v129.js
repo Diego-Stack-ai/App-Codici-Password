@@ -71,9 +71,9 @@ export async function initComponents() {
                 // IMPORTANTE: usiamo location.replace() invece di location.href
                 // per non inquinare la history del browser (evita il loop "avanti/indietro")
                 if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
-                    backFn = () => window.location.replace('/home');
+                    backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('area_privata.html')) {
-                    backFn = () => window.location.replace('/home');
+                    backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
                     backFn = () => window.location.replace('scadenze.html');
                 } else if (path.endsWith('aggiungi_scadenza.html')) {
@@ -81,7 +81,7 @@ export async function initComponents() {
                     if (id) backFn = () => window.location.replace(`dettaglio_scadenza.html?id=${id}`);
                     else backFn = () => window.location.replace('scadenze.html');
                 } else if (path.endsWith('impostazioni.html')) {
-                    backFn = () => window.location.replace('/home');
+                    backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('regole_scadenze.html')) {
                     backFn = () => window.location.replace('impostazioni.html');
                 } else if (path.endsWith('privacy.html') || path.endsWith('termini.html')) {
@@ -105,7 +105,7 @@ export async function initComponents() {
                     if (id) backFn = () => window.location.replace(`dati_azienda.html?id=${id}`);
                     else backFn = () => window.location.replace('lista_aziende.html');
                 } else if (path.endsWith('profilo_privato.html')) {
-                    backFn = () => window.location.replace('/home');
+                    backFn = () => window.location.replace('home_page.html');
                 } else if (path.endsWith('account_privati.html')) {
                     backFn = () => window.location.replace('area_privata.html');
                 } else if (path.endsWith('dettaglio_account_privato.html')) {
@@ -180,7 +180,7 @@ export async function initComponents() {
                     );
                 } else {
                     headerRight.appendChild(
-                        createElement('a', { href: '/home', className: 'btn-icon-header' }, [
+                        createElement('a', { href: 'home_page.html', className: 'btn-icon-header' }, [
                             createElement('span', { className: 'material-symbols-outlined', textContent: 'home' })
                         ])
                     );

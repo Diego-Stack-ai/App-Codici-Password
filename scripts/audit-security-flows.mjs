@@ -20,7 +20,7 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
     ,read('Frontend/public/assets/js/modules/core/vault-session.js')
     ,read('Frontend/public/assets/js/env-v126.js')
     ,read('Frontend/public/assets/js/components-v129.js')
-    ,read('Frontend/public/home-v129.html')
+    ,read('Frontend/public/home_page.html')
     ,read('package.json')
     ,read('Frontend/public/assets/js/main-v129.js')
 ]);
@@ -52,7 +52,7 @@ assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.e
 assert.match(serviceWorker, /caches\.match\(event\.request, \{ ignoreSearch: true \}\)/, 'Il fallback PWA non recupera asset con query-versione differenti');
 assert.match(serviceWorker, /assets\/css\/home_page\.css\?v=5\.0/, 'Lo stile della home non è precaricato per l’avvio PWA');
 assert.match(serviceWorker, /assets\/css\/accesso\.css\?v=5\.0/, 'Lo stile del login non è precaricato per l’avvio PWA');
-assert.match(loginHtml, /login-entry\.js\?v=1\.3\.1/, 'Il login non usa il bootstrap Auth dedicato');
+assert.match(loginHtml, /login-entry\.js\?v=1\.3\.2/, 'Il login non usa il bootstrap Auth dedicato');
 assert.match(loginHtml, /<form id="login-form">/, 'Il campo password non è contenuto in un form semantico');
 assert.match(loginHtml, /type="submit" id="login-submit-btn"/, 'Il pulsante Accedi non invia il form in modo nativo');
 assert.doesNotMatch(loginHtml, /assets\/js\/main\.js/, 'Il login carica ancora il router completo dell’app privata');

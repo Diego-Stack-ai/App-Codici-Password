@@ -30,7 +30,7 @@
     "rewrites": [
       {
         "source": "/home",
-        "destination": "/home-v129.html"
+        "destination": "/home_page.html"
       },
       {
         "source": "**",

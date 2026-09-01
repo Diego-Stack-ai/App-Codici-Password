@@ -234,9 +234,9 @@ function checkAuthState() {
             // Utente loggato: se siamo su una pagina di login, spostiamoci sulla home
             // Usiamo percorsi relativi per compatibilità con Live Server
             if (isAuthPage) {
-                if (path !== '/home') {
-                    LOG("[AUTH] Already logged in, redirecting to /home");
-                    window.location.href = '/home';
+                if (!path.endsWith('/home_page.html')) {
+                    LOG("[AUTH] Already logged in, redirecting to home_page.html");
+                    window.location.href = 'home_page.html';
                 }
             }
         } else {
