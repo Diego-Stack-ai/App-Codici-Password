@@ -103,8 +103,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 🌍 I18N — Carica la lingua PRIMA di qualsiasi render
     await loadLanguage(getCurrentLanguage());
 
-    // 🚀 PWA MODE & SERVICE WORKER (V7.0 STABLE)
-    if ('serviceWorker' in navigator) {
+    // Recovery v1.2.0: il worker resta disattivato finché la cache PWA non viene ricostruita.
+    const serviceWorkerEnabled = false;
+    if (serviceWorkerEnabled && 'serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
                 const registration = await navigator.serviceWorker.register('./sw.js');
