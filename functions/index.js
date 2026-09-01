@@ -9,6 +9,7 @@
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
@@ -20,6 +21,71 @@ setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 // Segreti cifrati (salvati su Google Secret Manager)
 const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
+
+function sanitizeEmail(email) {
+    return String(email || "").toLowerCase().replace(/[^a-zA-Z0-9]/g, "_") || "unknown_guest";
+}
+
+exports.respondToInvitation = onCall(
+    { region: "europe-west1", enforceAppCheck: true },
+    async (request) => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        const inviteId = String(request.data?.inviteId || "");
+        const status = String(request.data?.status || "");
+        if (!inviteId || !["accepted", "rejected"].includes(status)) {
+            throw new HttpsError("invalid-argument", "Risposta invito non valida.");
+        }
+
+        const uid = request.auth.uid;
+        const email = String(request.auth.token.email || "").toLowerCase().trim();
+        if (!email) throw new HttpsError("permission-denied", "Email verificabile mancante.");
+
+        const firestore = admin.firestore();
+        const inviteRef = firestore.collection("invites").doc(inviteId);
+        await firestore.runTransaction(async (transaction) => {
+            const inviteSnap = await transaction.get(inviteRef);
+            if (!inviteSnap.exists) throw new HttpsError("not-found", "Invito non trovato.");
+            const invite = inviteSnap.data();
+            if (invite.status !== "pending") throw new HttpsError("failed-precondition", "Invito già elaborato.");
+            if (String(invite.recipientEmail || "").toLowerCase().trim() !== email) {
+                throw new HttpsError("permission-denied", "Non sei il destinatario dell'invito.");
+            }
+
+            const accountPath = invite.aziendaId
+                ? `users/${invite.ownerId}/aziende/${invite.aziendaId}/accounts/${invite.accountId}`
+                : `users/${invite.ownerId}/accounts/${invite.accountId}`;
+            const accountRef = firestore.doc(accountPath);
+            const accountSnap = await transaction.get(accountRef);
+            if (!accountSnap.exists) throw new HttpsError("not-found", "Account condiviso non trovato.");
+
+            const account = accountSnap.data();
+            const sharedWith = { ...(account.sharedWith || {}) };
+            const guestKey = sanitizeEmail(email);
+            const guest = sharedWith[guestKey];
+            if (!guest || String(guest.email || "").toLowerCase().trim() !== email) {
+                throw new HttpsError("permission-denied", "Destinatario non presente nella condivisione.");
+            }
+            sharedWith[guestKey] = { ...guest, status, uid: status === "accepted" ? uid : null };
+            const acceptedGuests = Object.values(sharedWith).filter((item) => item?.status === "accepted" && item?.uid);
+            const sharedWithUids = [...new Set(acceptedGuests.map((item) => item.uid))];
+            const hasActive = Object.values(sharedWith).some((item) => ["pending", "accepted"].includes(item?.status));
+
+            transaction.update(accountRef, {
+                sharedWith,
+                sharedWithUids,
+                acceptedCount: acceptedGuests.length,
+                visibility: hasActive ? "shared" : "private",
+                updatedAt: new Date().toISOString()
+            });
+            transaction.update(inviteRef, {
+                status,
+                guestUid: status === "accepted" ? uid : null,
+                respondedAt: new Date().toISOString()
+            });
+        });
+        return { ok: true, status };
+    }
+);
 
 // ─────────────────────────────────────────────────────────────
 // UTILITY — Crea il trasportatore Nodemailer

@@ -29,6 +29,8 @@ const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
 const passwordPolicy = await read('Frontend/public/assets/js/modules/core/password-policy.js');
 const registration = await read('Frontend/public/assets/js/modules/auth/registrati.js');
 const registrationHtml = await read('Frontend/public/registrati.html');
+const firestoreRules = await read('firestore.rules');
+const cloudFunctions = await read('functions/index.js');
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
@@ -112,5 +114,14 @@ assert.match(settingsHtml, /app Authenticator \(TOTP\)/, 'Lo stato reale della 2
 assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma cambio password ambigua');
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
 assert.match(serviceWorker, /cache\.put\(request, response\.clone\(\)\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
+
+assert.doesNotMatch(firestoreRules, /visibility[^\n]+==\s*['"]shared['"]/, 'La visibilità shared concede ancora accesso generico');
+assert.doesNotMatch(firestoreRules, /allow\s+read,\s*update/, 'Un ospite può ancora modificare account altrui');
+assert.match(firestoreRules, /request\.auth\.uid in resource\.data\.get\('sharedWithUids', \[\]\)/, 'La lettura condivisa non richiede un UID accettato');
+assert.doesNotMatch(firestoreRules, /request\.query\.filters\.size/, 'Gli inviti accettano ancora una query con filtro arbitrario');
+assert.match(firestoreRules, /allow update, delete: if isInviteOwner\(\)/, 'Il destinatario può modificare direttamente un invito');
+assert.match(cloudFunctions, /exports\.respondToInvitation = onCall/, 'La risposta sicura agli inviti non è gestita dal server');
+assert.match(cloudFunctions, /invite\.recipientEmail[\s\S]*!== email/, 'La funzione non verifica l’identità del destinatario');
+assert.match(cloudFunctions, /sharedWithUids/, 'La funzione non registra gli UID autorizzati alla lettura');
 
 console.log('Audit sicurezza e offline: 60 controlli superati.');

@@ -2,66 +2,55 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
     function isAuth() { return request.auth != null; }
-    function myEmail() { return (request.auth.token.email || "").lower(); }
-    // App Check: verifica che la richiesta provenga da un client verificato
-    // Attivare enforcement nella Firebase Console > App Check dopo aver configurato reCAPTCHA
-    function isAppCheckValid() { return request.app != null; }
-
-    // --- 1. UTENTI & PROPRIETARIO (ACCESSO TOTALE) ---
-    match /users/{userId}/{allPaths=**} {
-      allow read, write: if isAuth() && request.auth.uid == userId;
+    function isOwner(userId) { return isAuth() && request.auth.uid == userId; }
+    function myEmail() {
+      return request.auth.token.email is string ? request.auth.token.email.lower() : "";
+    }
+    function isAcceptedGuest() {
+      return isAuth() && request.auth.uid in resource.data.get('sharedWithUids', []);
     }
 
-    // --- 2. ACCESSO OSPITI (SHARED DATA) ---
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isOwner(userId);
+    }
+
     match /users/{userId}/accounts/{accountId} {
-      allow read, update: if isAuth() && (
-        resource.data.get('visibility', 'private') == 'shared' || 
-        resource.data.get('shared', false) == true ||
-        resource.data.get('isMemoShared', false) == true
-      );
+      allow get, list: if isAcceptedGuest();
     }
     match /users/{userId}/aziende/{aziendaId}/accounts/{accountId} {
-      allow read, update: if isAuth() && (
-        resource.data.get('visibility', 'private') == 'shared' || 
-        resource.data.get('shared', false) == true ||
-        resource.data.get('isMemoShared', false) == true
-      );
+      allow get, list: if isAcceptedGuest();
     }
-
-    // --- 2b. COLLECTIONGROUP ACCOUNTS (ACCESSO OSPITI VIA CONDIVISIONE) ---
-    // Protegge da IDOR: un utente può leggere un account altrui solo se è in sharedWith
     match /{path=**}/accounts/{accountId} {
-      allow read: if isAuth() && (
-        request.auth.uid in resource.data.get('sharedWith', {}) ||
-        resource.data.get('visibility', 'private') == 'shared'
-      );
+      allow get, list: if isAcceptedGuest();
     }
 
-    // Notifiche (Permetti invio da terzi per risposte condivisione)
-    match /users/{userId}/notifications/{notifId} {
-      allow create: if isAuth(); 
-    }
-
-    // --- 3. INVITI (INVITES) ---
     match /invites/{inviteId} {
-      // Lettura singolo invito: solo owner, sender o destinatario
-      allow read, update, delete: if isAuth() && (
-        resource == null ||
-        resource.data.get('ownerId', '') == request.auth.uid || 
-        resource.data.get('senderId', '') == request.auth.uid ||
-        resource.data.get('recipientEmail', '').lower() == myEmail()
-      );
-      // Creazione: utente autenticato, solo campi consentiti dalla whitelist
+      function isInviteOwner() {
+        return isAuth() && (
+          resource.data.get('ownerId', '') == request.auth.uid ||
+          resource.data.get('senderId', '') == request.auth.uid
+        );
+      }
+      function isRecipient() {
+        return isAuth() && resource.data.get('recipientEmail', '').lower() == myEmail();
+      }
+
+      allow get, list: if isInviteOwner() || isRecipient();
       allow create: if isAuth() &&
-        request.resource.data.keys().hasOnly(['recipientEmail','accountId','accountName','ownerId','senderId','aziendaId','type','status','createdAt']) &&
+        request.resource.data.keys().hasOnly([
+          'inviteId', 'recipientEmail', 'accountId', 'accountName',
+          'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',
+          'status', 'createdAt'
+        ]) &&
         request.resource.data.get('ownerId', '') == request.auth.uid &&
+        request.resource.data.get('senderId', '') == request.auth.uid &&
+        request.resource.data.get('senderEmail', '').lower() == myEmail() &&
+        request.resource.data.get('recipientEmail', '') is string &&
+        request.resource.data.get('recipientEmail', '').size() > 3 &&
         request.resource.data.get('status', '') == 'pending';
-      // List/query: solo i propri inviti (come mittente o destinatario)
-      allow list: if isAuth() && (
-        request.query.filters.size() > 0
-      );
+
+      allow update, delete: if isInviteOwner();
     }
   }
 }

@@ -229,6 +229,7 @@ async function revokeRecipientV3(email) {
 
             transaction.update(accRef, {
                 sharedWith: sharedWith,
+                sharedWithUids: Object.values(sharedWith).filter(g => g.status === 'accepted' && g.uid).map(g => g.uid),
                 acceptedCount: newCount,
                 visibility: newVisibility,
                 type: newType,

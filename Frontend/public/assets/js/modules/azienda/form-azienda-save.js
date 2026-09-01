@@ -152,6 +152,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                     }
                 }
                 finalData.sharedWith = {};
+                finalData.sharedWithUids = [];
                 finalData.acceptedCount = 0;
             } else {
                 // E' SHARED. Merge new invites into the sharedWith Map
@@ -227,6 +228,9 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
                 // Calcola Accepted Count V3.1
                 finalData.acceptedCount = Object.values(finalData.sharedWith).filter(g => g.status === 'accepted').length;
+                finalData.sharedWithUids = Object.values(finalData.sharedWith)
+                    .filter(g => g.status === 'accepted' && g.uid)
+                    .map(g => g.uid);
 
                 // AUTO-HEALING V5.1: Forza visibilità private se non ci sono inviti attivi
                 const hasActive = Object.values(finalData.sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');

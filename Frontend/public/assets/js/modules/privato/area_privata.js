@@ -86,13 +86,10 @@ async function loadCounters(uid, email) {
         });
 
         // Controlla inviti accettati (per conteggio condivisi) - Normalizzazione V5.0
-        const rawEmail = email || "";
-        const lowerEmail = rawEmail.toLowerCase().trim();
-        const emailsToSearch = [...new Set([rawEmail.trim(), lowerEmail])].filter(Boolean);
-
-        LOG(`[Counters] Fetching invites for:`, emailsToSearch);
+        const lowerEmail = (email || "").toLowerCase().trim();
+        LOG(`[Counters] Fetching invites for authenticated email:`, lowerEmail);
         const invitesQ = query(collection(db, "invites"),
-            where("recipientEmail", "in", emailsToSearch),
+            where("recipientEmail", "==", lowerEmail),
             where("status", "==", "accepted")
         );
         const invitesSnap = await getDocs(invitesQ);

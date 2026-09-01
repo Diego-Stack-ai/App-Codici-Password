@@ -4,6 +4,7 @@ import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { getFunctions } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
 
 // Your web app's Firebase configuration
 const _f1 = "AIza";
@@ -53,5 +54,6 @@ try {
 }
 
 const storage = getStorage(app);
+const functions = getFunctions(app, 'europe-west1');
 
-export { auth, db, storage };
+export { auth, db, storage, functions };

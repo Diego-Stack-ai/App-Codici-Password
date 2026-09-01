@@ -120,14 +120,11 @@ async function loadAccounts() {
         sharedAccountIds.clear();
 
         // 1. Invitations Accepted
-        const rawEmail = currentUser.email || "";
-        const lowerEmail = rawEmail.toLowerCase().trim();
-        const emailsToSearch = [...new Set([rawEmail.trim(), lowerEmail])].filter(Boolean);
-
-        LOG(`[ACCOUNTS] Searching invites for:`, emailsToSearch);
+        const lowerEmail = (currentUser.email || "").toLowerCase().trim();
+        LOG(`[ACCOUNTS] Searching invites for authenticated email:`, lowerEmail);
 
         const invitesQ = query(collection(db, "invites"),
-            where("recipientEmail", "in", emailsToSearch),
+            where("recipientEmail", "==", lowerEmail),
             where("status", "==", "accepted")
         );
         const invitesSnap = await getDocs(invitesQ);

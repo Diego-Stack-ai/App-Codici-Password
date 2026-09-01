@@ -27,7 +27,7 @@ import { initComponents } from './components-v129.js'; // Imports components sys
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
 import * as firebaseRuntime from './firebase-config.js?v=1.1.8';
-const { auth, db } = firebaseRuntime;
+const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc,
@@ -42,6 +42,7 @@ import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js?v=1.2.5';
 import { ensureMasterKey } from './modules/core/security-manager.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION } from './modules/core/password-policy.js';
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
 
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
@@ -433,8 +434,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const currentUid = auth.currentUser?.uid;
             const currentUserEmail = auth.currentUser?.email;
-            const sKey = sanitizeEmail(currentUserEmail);
-
             if (!currentUserEmail) throw new Error("Utente non autenticato.");
 
             LOG(`[V3.1-DEBUG] --- handleInviteResponse ---`);
@@ -468,90 +467,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error("Non sei autorizzato a rispondere a questo invito.");
             }
 
-            // --- ATOMIC TRANSACTION V7.0 ---
-            LOG("[V3.1-DEBUG] Executing runTransaction...");
-            await runTransaction(db, async (transaction) => {
-                LOG(`[V3.1-DEBUG] Transaction started for invite: ${inviteId}`);
-
-                // 1. Get Inverse
-                let storedInviteSnap;
-                try {
-                    storedInviteSnap = await transaction.get(inviteRef);
-                    if (!storedInviteSnap.exists()) throw new Error("Invito non trovato nel database.");
-                    LOG("[V3.1-DEBUG] Invite fetched successfully.");
-                } catch (e) {
-                    console.error("[V3.1-DEBUG] Invite GET failed:", e.message);
-                    throw e;
-                }
-
-                const storedInvite = storedInviteSnap.data();
-                if (storedInvite.status !== 'pending') throw "L'invito è stato aggiornato da un'altra sessione.";
-
-                const ownerId = storedInvite.ownerId || storedInvite.senderId;
-                const accId = storedInvite.accountId;
-
-                let accountPath = storedInvite.aziendaId
-                    ? `users/${ownerId}/aziende/${storedInvite.aziendaId}/accounts/${accId}`
-                    : `users/${ownerId}/accounts/${accId}`;
-
-                LOG(`[V3.1-DEBUG] Syncing account at path: ${accountPath}`);
-                const accountRef = doc(db, accountPath);
-
-                let accSnap;
-                try {
-                    accSnap = await transaction.get(accountRef);
-                    if (!accSnap.exists()) throw new Error("Account non trovato o accesso negato.");
-                    LOG("[V3.1-DEBUG] Account fetched successfully.");
-                } catch (e) {
-                    console.error("[V3.1-DEBUG] Account GET failed:", e.message);
-                    throw e;
-                }
-
-                let data = accSnap.data();
-                let sharedWith = data.sharedWith || {};
-                LOG(`[V3.1-DEBUG] Current sharedWith State:`, sharedWith);
-                LOG(`[V3.1-DEBUG] Processing Guest: ${sKey}, Status: ${status}`);
-
-                if (sharedWith[sKey]) {
-                    sharedWith[sKey].status = status;
-                    if (status === 'accepted') {
-                        sharedWith[sKey].uid = auth.currentUser.uid;
-                    }
-                } else {
-                    console.warn(`[V3.1-DEBUG] Missing key ${sKey} in sharedWith map. Possible sanitization mismatch.`);
-                }
-
-                const newCount = Object.values(sharedWith).filter(g => g.status === 'accepted').length;
-                const hasActive = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
-                const newVisibility = hasActive ? "shared" : "private";
-
-                // V7.0 AUTO-HEALING DI STATO: Se torna privato e non era un Memo esplicito, torna ad essere Account
-                let newType = data.type;
-                if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
-                    LOG("[V3.1-DEBUG] Auto-Healing: Reverting shared-memo to account type.");
-                    newType = 'account';
-                }
-
-                const updatePayload = {
-                    sharedWith: sharedWith,
-                    acceptedCount: newCount,
-                    visibility: newVisibility,
-                    type: newType,
-                    updatedAt: new Date().toISOString()
-                };
-
-                LOG("[V3.1-DEBUG] Final Account Update Payload:", updatePayload);
-                LOG("[V3.1-DEBUG] Performing updates...");
-                transaction.update(accountRef, updatePayload);
-                transaction.update(inviteRef, {
-                    status: status,
-                    respondedAt: new Date().toISOString()
-                });
-
-                LOG("[V3.1-DEBUG] Updates queued in transaction.");
-            });
-
-            LOG("[V3.1-DEBUG] Transaction committed successfully.");
+            const respondToInvitation = httpsCallable(functions, 'respondToInvitation');
+            await respondToInvitation({ inviteId, status });
+            LOG("[SHARING] Risposta invito convalidata e applicata dal server.");
 
             // Cleanup modal
             const modal = document.getElementById('invite-modal');

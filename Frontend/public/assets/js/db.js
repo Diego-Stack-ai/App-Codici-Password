@@ -163,6 +163,7 @@ async function respondToInvitation(inviteId, accept, guestUid, guestEmail) {
 
             transaction.update(accountRef, {
                 sharedWith: sharedWith,
+                sharedWithUids: Object.values(sharedWith).filter(g => g.status === 'accepted' && g.uid).map(g => g.uid),
                 acceptedCount: newCount,
                 visibility: newVisibility,
                 type: newType,
@@ -208,6 +209,7 @@ async function revokeAccess(ownerId, accountId, guestEmail, aziendaId = null) {
 
         transaction.update(accountRef, {
             sharedWith: sharedWith,
+            sharedWithUids: Object.values(sharedWith).filter(g => g.status === 'accepted' && g.uid).map(g => g.uid),
             acceptedCount: newCount,
             visibility: newVisibility,
             updatedAt: new Date().toISOString()
