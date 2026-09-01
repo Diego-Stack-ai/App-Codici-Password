@@ -103,8 +103,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 🌍 I18N — Carica la lingua PRIMA di qualsiasi render
     await loadLanguage(getCurrentLanguage());
 
-    // Recovery v1.2.0: il worker resta disattivato finché la cache PWA non viene ricostruita.
-    const serviceWorkerEnabled = false;
+    // Shell offline ricostruita: registrata solo dopo l'accesso all'app privata.
+    const serviceWorkerEnabled = true;
     if (serviceWorkerEnabled && 'serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
@@ -118,13 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                             // C'è un nuovo worker e uno vecchio è già attivo
                             LOG('[PWA] Nuovo aggiornamento disponibile.');
-                            {
-                                showToast("Nuovo aggiornamento disponibile! Ricarica per applicare.", "info");
-                                // Opzionale: forzare il ricaricamento dopo un po' o tramite pulsante
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 3000);
-                            }
+                            showToast("Nuovo aggiornamento disponibile. Verrà applicato alla prossima apertura.", "info");
                         }
                     });
                 });
@@ -133,14 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Forza il reload quando il nuovo SW prende il controllo
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (!refreshing) {
-                refreshing = true;
-                window.location.reload();
-            }
-        });
+        // Nessun reload automatico su controllerchange: evita cicli di ricaricamento.
     }
 
     // 1. Policy UX (Lockdown menu/selezione)

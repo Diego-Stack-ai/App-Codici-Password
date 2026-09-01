@@ -49,7 +49,7 @@ assert.match(vaultSession, /sessionStorage\.removeItem\(WRAPPING_KEY\)/, 'Blocco
 assert.match(security, /if \(_unlockPromise && !forceReload\) return _unlockPromise/, 'Le richieste concorrenti possono ancora aprire più sblocchi');
 assert.match(serviceWorker, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
 assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.endsWith\('\.css'\)/s, 'Gli asset applicativi non usano una strategia network-first coerente');
-assert.match(serviceWorker, /caches\.match\(event\.request, \{ ignoreSearch: true \}\)/, 'Il fallback PWA non recupera asset con query-versione differenti');
+assert.doesNotMatch(serviceWorker, /ignoreSearch:\s*true/, 'Il fallback PWA può mescolare release con query-versione differenti');
 assert.match(serviceWorker, /assets\/css\/home_page\.css\?v=5\.0/, 'Lo stile della home non è precaricato per l’avvio PWA');
 assert.match(serviceWorker, /assets\/css\/accesso\.css\?v=5\.0/, 'Lo stile del login non è precaricato per l’avvio PWA');
 assert.match(loginHtml, /login-entry\.js\?v=1\.3\.2/, 'Il login non usa il bootstrap Auth dedicato');
@@ -64,7 +64,8 @@ assert.match(firebaseConfig, /getApps\(\)\.length \? getApp\(\)/, 'Firebase App 
 assert.match(firebaseConfig, /db = getFirestore\(app\)/, 'Firestore già inizializzato non viene riutilizzato');
 assert.doesNotMatch(loginHtml, /caches\.keys|registration\?\.update/, 'Il login modifica ancora cache o Service Worker durante il caricamento');
 assert.doesNotMatch(loginHtml, /serviceWorker|getRegistrations|unregister\(/, 'Il login esegue ancora operazioni PWA durante il caricamento');
-assert.match(main, /const serviceWorkerEnabled = false/, 'Il bootstrap continua a registrare il Service Worker durante il recovery');
+assert.match(main, /const serviceWorkerEnabled = true/, 'Il Service Worker ricostruito non è stato riattivato');
+assert.doesNotMatch(main, /controllerchange[\s\S]{0,300}window\.location\.reload/, 'Il Service Worker può ancora innescare un ciclo di ricaricamento');
 assert.match(serviceWorker, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
 assert.match(auth, /login-v115\.html/, 'I redirect Auth non usano il nuovo percorso di login');
 assert.match(loginHtml, /data-i18n="ready"/, 'Il login può restare invisibile se il bootstrap JavaScript fallisce');
@@ -89,6 +90,6 @@ assert.match(settingsHtml, /non la Master Password della Vault/, 'Il cambio pass
 assert.match(settingsHtml, /app Authenticator \(TOTP\)/, 'Lo stato reale della 2FA non è visibile');
 assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma cambio password ambigua');
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
-assert.match(serviceWorker, /cache\.put\(event\.request, copy\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
+assert.match(serviceWorker, /cache\.put\(request, response\.clone\(\)\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
 console.log('Audit sicurezza e offline: 60 controlli superati.');
