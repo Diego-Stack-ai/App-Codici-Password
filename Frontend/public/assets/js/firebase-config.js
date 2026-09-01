@@ -26,12 +26,17 @@ const app = initializeApp(firebaseConfig);
 // Provider: reCAPTCHA v3 — registrare su https://www.google.com/recaptcha/admin
 // Aggiungere dominio: appcodici-password.web.app
 // Poi attivare enforcement: Firebase Console > App Check > Firestore
-const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider(
-    "6LdWBhAtAAAAAPPWsqxdOu46YaNHgQzEjlUbQzeW"
-  ),
-  isTokenAutoRefreshEnabled: true  // Refresh automatico del token
-});
+let appCheck = null;
+export function enableAppCheck() {
+  if (appCheck) return appCheck;
+  appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(
+      "6LdWBhAtAAAAAPPWsqxdOu46YaNHgQzEjlUbQzeW"
+    ),
+    isTokenAutoRefreshEnabled: true
+  });
+  return appCheck;
+}
 
 const auth = getAuth(app);
 

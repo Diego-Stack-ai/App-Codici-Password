@@ -26,7 +26,7 @@ import { initComponents } from './components.js'; // Imports components system
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import { auth, db } from './firebase-config.js';
+import { auth, db, enableAppCheck } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc,
@@ -174,6 +174,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user) {
             LOG(`[AUTH-DEBUG] User logged in: ${user.email} (UID: ${user.uid})`);
             try {
+                const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
+                if (!publicPages.includes(currentPage)) enableAppCheck();
+
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
@@ -184,7 +187,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // 🔐 PROTOCOLLO BLINDA (V7.0 MASTER)
                 // Se la pagina è privata, assicuriamoci che il Vault sia sbloccato
-                const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
                 if (!publicPages.includes(currentPage)) {
                     try {
                         await ensureMasterKey();
