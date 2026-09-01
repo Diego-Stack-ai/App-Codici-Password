@@ -3,6 +3,12 @@
 
 <head>
   <script>
+    // Mantiene il file versionato come dettaglio interno e mostra l'URL pubblico.
+    if (window.location.pathname !== '/home') {
+      window.history.replaceState(null, '', `/home${window.location.search}${window.location.hash}`);
+    }
+  </script>
+  <script>
     // Protezione transitoria contro i componenti rimasti nella vecchia cache:
     // impedisce che assegnare la versione a <html> cancelli l'intera pagina.
     (() => {
