@@ -27,8 +27,9 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
 
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
+assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
-assert.match(homeHtml, /data-app-version>v1\.2\.2</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
+assert.match(homeHtml, new RegExp(`data-app-version>${configuredVersion.replace(/\\./g, '\\\\.') }<`), 'La home non mostra una versione di fallback coerente');
 assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
 assert.match(homeHtml, /main-v129\.js/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
