@@ -282,7 +282,10 @@ async function ensureMasterKeyInternal(options = {}) {
         description = "Inserisci la Master Password già utilizzata: le nuove regole non modificano le password esistenti.";
     }
 
-    const pass = await showInputModal("SBLOCCO VAULT", '', msg, description);
+    const offerMasterSuggestion = !storedSecret && await isNewVault(uid);
+    const pass = await showInputModal(
+        "SBLOCCO VAULT", '', msg, description, offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}
+    );
 
     if (pass) {
         const cleanPass = pass.normalize('NFC').trim();

@@ -9,7 +9,7 @@ import { LOG } from '../../logger.js';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
-import { bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError } from '../core/password-policy.js';
+import { bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
 
 export async function initRegistrati() {
     
@@ -22,6 +22,7 @@ export async function initRegistrati() {
         setupRegisterForm();
         setupLanguageSelector();
         setupPasswordToggle();
+        setupPasswordSuggestion();
         bindPasswordChecklist(
             document.getElementById('password'),
             document.getElementById('account-password-requirements'),
@@ -32,6 +33,22 @@ export async function initRegistrati() {
     } catch (err) {
         console.error("[REGISTER] Critical Init Error:", err);
     }
+}
+
+function setupPasswordSuggestion() {
+    const button = document.getElementById('suggest-password-btn');
+    const password = document.getElementById('password');
+    const confirmation = document.getElementById('confirm-password');
+    if (!button || !password || !confirmation) return;
+    button.addEventListener('click', () => {
+        const generated = generateSecurePassword();
+        password.value = generated;
+        confirmation.value = generated;
+        password.dispatchEvent(new Event('input', { bubbles: true }));
+        password.type = 'text';
+        password.focus();
+        showToast('Password sicura generata sul dispositivo. Salvala nel gestore password.', 'success');
+    });
 }
 
 /**

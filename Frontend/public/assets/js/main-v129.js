@@ -41,6 +41,7 @@ import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js?v=1.2.5';
 import { ensureMasterKey } from './modules/core/security-manager.js';
+import { ACCOUNT_PASSWORD_POLICY_VERSION } from './modules/core/password-policy.js';
 
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
@@ -172,6 +173,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     LOG("[AUTH-DEBUG] User document found.");
                 } else {
                     console.warn("[AUTH-DEBUG] User document NOT found in Firestore.");
+                }
+
+                if (!publicPages.includes(currentPage) &&
+                    (userDoc.data()?.passwordPolicyVersion || 0) < ACCOUNT_PASSWORD_POLICY_VERSION) {
+                    showToast('Prima di continuare, aggiorna una volta la password di accesso.', 'warning');
+                    window.location.replace('imposta_nuova_password.html?policyUpdate=1');
+                    return;
                 }
 
                 // 🔐 PROTOCOLLO BLINDA (V7.0 MASTER)

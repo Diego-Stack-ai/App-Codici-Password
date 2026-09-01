@@ -9,7 +9,9 @@ import { updatePassword, confirmPasswordReset } from "https://www.gstatic.com/fi
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
-import { bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError } from '../core/password-policy.js';
+import { db } from '../../firebase-config.js?v=1.1.8';
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
 
 export async function initImpostaNuovaPassword() {
     
@@ -22,6 +24,7 @@ export async function initImpostaNuovaPassword() {
         setupNewPasswordForm();
         setupLanguageSelector();
         setupPasswordToggle();
+        setupPasswordSuggestion();
         bindPasswordChecklist(
             document.getElementById('new-password'),
             document.getElementById('account-password-requirements'),
@@ -86,6 +89,9 @@ function setupNewPasswordForm() {
             } else if (auth.currentUser) {
                 // CASO CAMBIO INTERNO
                 await updatePassword(auth.currentUser, newPassword);
+                await setDoc(doc(db, 'users', auth.currentUser.uid), {
+                    passwordPolicyVersion: ACCOUNT_PASSWORD_POLICY_VERSION
+                }, { merge: true });
                 showToast(t('password_success') || "Password di accesso aggiornata. La Master Password della Vault non è cambiata.", "success");
             } else {
                 throw new Error("Sessione non valida o link scaduto.");
@@ -112,6 +118,22 @@ function setupNewPasswordForm() {
 
             showToast(msg, "error");
         }
+    });
+}
+
+function setupPasswordSuggestion() {
+    const button = document.getElementById('suggest-password-btn');
+    const password = document.getElementById('new-password');
+    const confirmation = document.getElementById('confirm-password');
+    if (!button || !password || !confirmation) return;
+    button.addEventListener('click', () => {
+        const generated = generateSecurePassword();
+        password.value = generated;
+        confirmation.value = generated;
+        password.dispatchEvent(new Event('input', { bubbles: true }));
+        password.type = 'text';
+        password.focus();
+        showToast('Password sicura generata sul dispositivo. Salvala nel gestore password.', 'success');
     });
 }
 

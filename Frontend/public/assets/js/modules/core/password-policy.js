@@ -3,6 +3,26 @@ export const PASSWORD_POLICIES = Object.freeze({
     master: Object.freeze({ minLength: 16, label: 'Master Password' })
 });
 
+export const ACCOUNT_PASSWORD_POLICY_VERSION = 1;
+
+export function generateSecurePassword(length = 20) {
+    const groups = ['abcdefghijkmnopqrstuvwxyz', 'ABCDEFGHJKLMNPQRSTUVWXYZ', '23456789', '!@#$%&*+-=?'];
+    const randomIndex = (max) => {
+        const limit = Math.floor(0x100000000 / max) * max;
+        const buffer = new Uint32Array(1);
+        do crypto.getRandomValues(buffer); while (buffer[0] >= limit);
+        return buffer[0] % max;
+    };
+    const chars = groups.map(group => group[randomIndex(group.length)]);
+    const alphabet = groups.join('');
+    while (chars.length < Math.max(length, 12)) chars.push(alphabet[randomIndex(alphabet.length)]);
+    for (let i = chars.length - 1; i > 0; i -= 1) {
+        const j = randomIndex(i + 1);
+        [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+    return chars.join('');
+}
+
 const RULE_LABELS = Object.freeze({
     minLength: (policy) => `Almeno ${policy.minLength} caratteri`,
     lowercase: () => 'Almeno una lettera minuscola',

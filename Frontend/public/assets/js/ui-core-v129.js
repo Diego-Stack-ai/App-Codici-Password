@@ -1,5 +1,6 @@
 import { createElement, setChildren, safeSetText } from './dom-utils.js';
 import { t } from './translations.js';
+import { generateSecurePassword } from './modules/core/password-policy.js';
 
 // Timer privato toast — sostituisce window._toastTimeout
 let _toastTimeout = null;
@@ -216,7 +217,7 @@ export async function showConfirmModal(title, message, confirmText = t('confirm'
 /**
  * [CORE UI] INPUT MODAL
  */
-export function showInputModal(title, initialValue = '', placeholder = '', description = '') {
+export function showInputModal(title, initialValue = '', placeholder = '', description = '', options = {}) {
     return new Promise((resolve) => {
         const modalId = 'protocol-input-modal';
         let modal = document.getElementById(modalId);
@@ -234,6 +235,17 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
 
         const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: t('cancel') || 'Annulla' }, []);
         const btnConfirm = createElement('button', { id: 'modal-confirm-btn', className: 'btn-modal btn-primary', textContent: t('confirm') || 'Conferma' }, []);
+        const btnSuggest = options.suggestPassword ? createElement('button', {
+            type: 'button',
+            className: 'btn-modal btn-secondary',
+            textContent: 'Suggerisci password sicura'
+        }) : null;
+        btnSuggest?.addEventListener('click', () => {
+            input.value = generateSecurePassword(options.length || 20);
+            input.type = 'text';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+        });
 
         // Listener per chiusura
         const closeModal = (val) => {
@@ -257,6 +269,7 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
             createElement('div', { className: 'modal-accent-bar' }),
             description ? createElement('p', { className: 'modal-text', textContent: description }) : null,
             input,
+            btnSuggest,
             createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
         ].filter(Boolean));
 

@@ -83,6 +83,13 @@ assert.match(security, /evaluatePassword\(cleanPass, 'master'\)/, 'La prima Mast
 assert.match(security, /CONFERMA MASTER PASSWORD/, 'La prima Master Password non richiede conferma');
 assert.match(security, /if \(await isNewVault\(uid\)\)/, 'La policy Master Password può bloccare utenti Vault esistenti');
 assert.match(registrationHtml, /id="account-password-requirements"/, 'La registrazione non mostra i requisiti password');
+assert.doesNotMatch(registrationHtml, /user_login_trap|password_trap/, 'La registrazione ostacola i suggerimenti password del dispositivo');
+assert.match(registrationHtml, /name="new-password"[^>]+autocomplete="new-password"/, 'Il password manager non riconosce la nuova password');
+assert.match(passwordPolicy, /crypto\.getRandomValues/, 'Il generatore password non usa casualità crittografica locale');
+assert.match(registration, /generateSecurePassword\(\)/, 'La registrazione non offre una password sicura');
+assert.match(password, /passwordPolicyVersion:\s*ACCOUNT_PASSWORD_POLICY_VERSION/, 'Il cambio password non registra la policy applicata');
+assert.match(main, /passwordPolicyVersion[\s\S]*imposta_nuova_password\.html\?policyUpdate=1/, 'Gli account precedenti non vengono guidati nell\'aggiornamento una tantum');
+assert.match(security, /suggestPassword:\s*true/, 'La prima Master Password non offre un suggerimento sicuro locale');
 
 assert.doesNotMatch(settings, /settings_2fa\s*:/, 'Il client non deve simulare enrollment 2FA');
 assert.match(settings, /enrollTotp\(\)/, 'Il toggle 2FA non avvia un enrollment TOTP reale');

@@ -64,12 +64,6 @@
 
                 <!-- Form Registrazione (V7.0 Blindato) -->
                 <form id="register-form">
-                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
-                    <div class="anti-autofill-trap" aria-hidden="true" style="position: absolute; left: -9999px;">
-                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
-                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
-                    </div>
-
                     <!-- Nome & Cognome -->
                     <div class="form-row">
                         <div class="form-group">
@@ -87,7 +81,7 @@
                     <!-- Email -->
                     <div class="form-group">
                         <label class="label" for="email" data-t="email_label">Email</label>
-                        <input id="email" type="email" autocomplete="off" required class="input"
+                        <input id="email" name="email" type="email" autocomplete="email" required class="input"
                             data-t-placeholder="email_placeholder" placeholder="mario.rossi@email.com">
                     </div>
 
@@ -95,13 +89,17 @@
                     <div class="form-group">
                         <label class="label" for="password" data-t="password_label_reg">Password</label>
                         <div class="password-wrapper">
-                            <input id="password" type="password" autocomplete="new-password" required class="input base-shield"
+                            <input id="password" name="new-password" type="password" autocomplete="new-password" required class="input base-shield"
                                 data-t-placeholder="password_placeholder_reg" placeholder="********">
                             <button type="button" class="toggle-password" id="btn-toggle-password"
                                 aria-label="Mostra Password" data-t-aria="show_hide_data">
                                 <span class="material-symbols-outlined">visibility</span>
                             </button>
                         </div>
+                        <button type="button" id="suggest-password-btn" class="password-suggestion-btn">
+                            <span class="material-symbols-outlined">password</span>
+                            Suggerisci password sicura
+                        </button>
                     </div>
 
                     <ul id="account-password-requirements" class="password-requirements" aria-label="Requisiti password">
@@ -117,7 +115,7 @@
                     <div class="form-group">
                         <label class="label" for="confirm-password" data-t="confirm_password_label">Conferma
                             Password</label>
-                        <input id="confirm-password" type="password" autocomplete="new-password" required class="input base-shield"
+                        <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required class="input base-shield"
                             data-t-placeholder="password_placeholder_reg" placeholder="********">
                     </div>
 

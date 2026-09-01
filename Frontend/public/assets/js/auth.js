@@ -17,6 +17,7 @@ import {
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { showToast } from './ui-core.js?v=1.2.4';
 import { logError } from './utils.js';
+import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 
 let pendingMfaResolver = null;
 
@@ -50,17 +51,8 @@ export function observeAuth(callback) {
  */
 async function register(nome, cognome, email, password) {
     try {
-        // Client-side Password Validation (Protocollo 12-3-3)
-        if (password.length < 12) {
-            throw { code: 'auth/weak-password', message: 'La password deve avere almeno 12 caratteri.' };
-        }
-        const upperCount = (password.match(/[A-Z]/g) || []).length;
-        if (upperCount < 3) {
-            throw { code: 'auth/weak-password-upper', message: 'Servono almeno 3 lettere MAIUSCOLE.' };
-        }
-        const symbolCount = (password.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length;
-        if (symbolCount < 3) {
-            throw { code: 'auth/weak-password-symbols', message: 'Servono almeno 3 caratteri speciali (!@#...).' };
+        if (!evaluatePassword(password, 'account').valid) {
+            throw { code: 'auth/weak-password', message: firstPasswordPolicyError(password, 'account') };
         }
 
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -78,7 +70,8 @@ async function register(nome, cognome, email, password) {
             email: email,
             createdAt: new Date(),
             photoURL: "",
-            settings: { theme: 'system' }
+            settings: { theme: 'system' },
+            passwordPolicyVersion: ACCOUNT_PASSWORD_POLICY_VERSION
         });
 
         // Send email verification (optional but recommended)
@@ -96,9 +89,7 @@ async function register(nome, cognome, email, password) {
         if (error.code === 'auth/email-already-in-use') {
             message = "Questa email è già registrata.";
         } else if (error.code === 'auth/weak-password') {
-            message = "La password è troppo debole (min. 12 caratteri).";
-        } else if (error.code === 'auth/weak-password-upper' || error.code === 'auth/weak-password-symbols') {
-            message = error.message;
+            message = error.message || "La password non rispetta i requisiti di sicurezza.";
         } else if (error.code === 'auth/network-request-failed') {
             message = "Problema di connessione. Riprova.";
         }
