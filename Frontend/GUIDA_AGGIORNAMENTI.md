@@ -91,6 +91,7 @@ I vecchi script di importazione e backfill sono stati rimossi: non devono essere
 - ✅ Policy password separate: minimo 12 caratteri per l'account e 16 per una nuova Master Password, con minuscola, maiuscola, numero, simbolo e controllo degli spazi esterni.
 - ✅ Registrazione e cambio password account applicano la policy account; la creazione di un nuovo Vault applica la policy Master Password. Le Master Password esistenti non vengono cambiate automaticamente.
 - ⚠️ Questi controlli validano nuove credenziali ma non costituiscono una rotazione della Master Password e non ricifrano dati esistenti.
+- ✅ **Formato locale legacy rimosso**: il vecchio `codex_vault_secret` e gli eventuali contenitori UID non strutturati non vengono più letti o decodificati; sono eliminati in modo fail-closed. Lo sblocco richiede la Master Password nota oppure un contenitore WebAuthn PRF corrente.
 
 ### Fase 1 — Coerenza e fail-safe (completata)
 

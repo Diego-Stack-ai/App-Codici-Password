@@ -20,7 +20,17 @@ let _unlockPromise = null;
 const updateGlobalState = () => {};
 
 const STORAGE_PREFIX = 'codex_vault_secret_';
-const LEGACY_STORAGE_KEY = 'codex_vault_secret';
+
+// Il vecchio contenitore non era protetto da WebAuthn PRF. Viene soltanto
+// eliminato: non deve più essere letto, decodificato o usato per lo sblocco.
+function purgeDeprecatedVaultSecrets(uid = null) {
+    localStorage.removeItem('codex_vault_secret');
+    const scopedKey = getStorageKey(uid);
+    const scopedValue = scopedKey ? localStorage.getItem(scopedKey) : null;
+    if (scopedValue && !scopedValue.startsWith('{')) localStorage.removeItem(scopedKey);
+}
+
+purgeDeprecatedVaultSecrets();
 
 
 // --- VAULT VERIFIER ---
@@ -154,6 +164,7 @@ onAuthStateChanged(auth, (user) => {
         clearSession();
         _currentUid = null;
     } else {
+        purgeDeprecatedVaultSecrets(user.uid);
         if (_currentUid && _currentUid !== user.uid) {
             clearSession();
         }
@@ -180,7 +191,6 @@ export function disableVaultAutoUnlock() {
     if (uid) {
         localStorage.removeItem(getStorageKey(uid));
     }
-    localStorage.removeItem(LEGACY_STORAGE_KEY);
     showToast('La Vault è stata protetta. Biometria disabilitata.', 'info');
 }
 
@@ -201,7 +211,6 @@ export function isAutoUnlockActive() {
     const uid = auth.currentUser?.uid;
     const scopedKey = getStorageKey(uid);
     if (scopedKey && localStorage.getItem(scopedKey)) return true;
-    if (localStorage.getItem(LEGACY_STORAGE_KEY)) return true;
     return false;
 }
 
@@ -219,6 +228,7 @@ async function isNewVault(uid) {
 
 export function isBiometricUnlockConfigured() {
     const uid = auth.currentUser?.uid;
+    purgeDeprecatedVaultSecrets(uid);
     const scopedKey = getStorageKey(uid);
     return !!(scopedKey && localStorage.getItem(scopedKey));
 }
@@ -264,25 +274,10 @@ async function ensureMasterKeyInternal(options = {}) {
         }
     }
 
-    const scopedKey = getStorageKey(uid);
-    let storedSecret = scopedKey ? localStorage.getItem(scopedKey) : null;
-    let isLegacy = false;
-
-    if (!storedSecret) {
-        storedSecret = localStorage.getItem(LEGACY_STORAGE_KEY);
-        isLegacy = !!storedSecret;
-    }
-    
-    let isOldFormat = storedSecret && !storedSecret.startsWith('{');
-    
     let msg = "Master Password";
     let description = `${passwordPolicyMessage('master')} Deve essere diversa dalla password dell’account. Non è recuperabile.`;
-    if (isOldFormat || isLegacy) {
-        msg = "Migrazione sicurezza in corso: inserisci la Master Password per aggiornare l'accesso biometrico.";
-        description = "Inserisci la Master Password già utilizzata: le nuove regole non modificano le password esistenti.";
-    }
 
-    const offerMasterSuggestion = !storedSecret && await isNewVault(uid);
+    const offerMasterSuggestion = !isBiometricUnlockConfigured() && await isNewVault(uid);
     const pass = await showInputModal(
         "SBLOCCO VAULT", '', msg, description, offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}
     );
@@ -336,21 +331,6 @@ async function ensureMasterKeyInternal(options = {}) {
         await saveVaultSession(_masterKey, uid);
         updateGlobalState();
 
-        if (isOldFormat || isLegacy) {
-            let isValid = true;
-            if (isOldFormat) {
-                const oldDecoded = decodeURIComponent(escape(atob(storedSecret))).normalize('NFC').trim();
-                isValid = (oldDecoded === cleanPass);
-            }
-            if (isValid) {
-                const migrated = await enableBiometricUnlock(cleanPass);
-                if (migrated) {
-                    localStorage.removeItem(LEGACY_STORAGE_KEY);
-                    showToast("Migrazione WebAuthn completata con successo!", "success");
-                }
-            }
-        }
-
         showToast("Vault sbloccata correttamente!", "success");
         return _masterKey;
     }
@@ -375,7 +355,6 @@ export async function resetVault() {
             syncFailed = true;
         }
     }
-    localStorage.removeItem(LEGACY_STORAGE_KEY);
     updateGlobalState();
     showToast("Accesso biometrico rimosso. La Vault richiederà la Master Password.", "info");
     setTimeout(() => window.location.reload(), 1500);
@@ -424,7 +403,7 @@ export async function setMasterKey(pass, saveForBiometrics = false) {
     _isSoftLocked = false;
     _vaultAutoUnlock = true;
     await saveVaultSession(_masterKey, uid);
-    const biometricAlreadyEnabled = !!localStorage.getItem(getStorageKey(uid)) || !!localStorage.getItem(LEGACY_STORAGE_KEY);
+    const biometricAlreadyEnabled = !!localStorage.getItem(getStorageKey(uid));
     if (saveForBiometrics || biometricAlreadyEnabled) {
         await enableBiometricUnlock(cleanPass);
     }
@@ -516,9 +495,6 @@ export async function enableBiometricUnlock(pass) {
         const scopedKey = getStorageKey(user.uid);
         localStorage.setItem(scopedKey, JSON.stringify(container));
         
-        // Clean legacy if it existed
-        localStorage.removeItem(LEGACY_STORAGE_KEY);
-
         // Aggiorna impostazione su Firebase
         await updateDoc(doc(db, "users", user.uid), { settings_biometric: true });
 
@@ -531,7 +507,6 @@ export async function enableBiometricUnlock(pass) {
             // Se fallisce, eliminiamo anche la falsa biometria se c'era
             const uid = auth.currentUser?.uid;
             if (uid) localStorage.removeItem(getStorageKey(uid));
-            localStorage.removeItem(LEGACY_STORAGE_KEY);
         } else {
             showToast("Errore durante la configurazione della biometria.", "error");
         }

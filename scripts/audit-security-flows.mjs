@@ -111,6 +111,9 @@ assert.match(setup, /settings_biometric\s*:/, 'Preferenza biometrica canonica ma
 assert.doesNotMatch(inactivity, /disableVaultAutoUnlock|signOut/, 'L\'inattività non deve revocare la biometria o cambiare la sessione Auth');
 assert.match(inactivity, /setTimeout\(lockVaultForInactivity, lockTimerMs\)/, 'Il timeout selezionato non governa il blocco Vault');
 assert.match(security, /settings_biometric: false/, 'La rimozione biometrica non viene sincronizzata');
+assert.doesNotMatch(security, /LEGACY_STORAGE_KEY|atob\(storedSecret\)|getItem\(['"]codex_vault_secret['"]\)/, 'Il vecchio segreto locale può ancora essere letto o decodificato');
+assert.match(security, /removeItem\(['"]codex_vault_secret['"]\)/, 'Il vecchio segreto locale non viene eliminato in modo fail-closed');
+assert.match(security, /scopedValue[\s\S]+!scopedValue\.startsWith\(['"]\{['"]\)[\s\S]+removeItem\(scopedKey\)/, 'Un contenitore UID nel vecchio formato non viene eliminato');
 assert.match(webauthn, /capabilities\?\.\['extension:prf'\] === true/, 'La compatibilità biometrica deve verificare PRF in modo fail-closed');
 assert.match(settingsHtml, /non la Master Password della Vault/, 'Il cambio password non distingue login e Vault');
 assert.match(settingsHtml, /app Authenticator \(TOTP\)/, 'Lo stato reale della 2FA non è visibile');

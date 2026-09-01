@@ -268,7 +268,6 @@ function initSettingsEvents() {
         const ok = await showConfirmModal(t('section_security') || 'Sicurezza', "Vuoi davvero uscire dall'account?", "Esci", "Annulla");
         if (ok) {
             clearSession(); // 🔐 Pulisce masterKey e sessionStorage
-            localStorage.removeItem('codex_vault_secret'); // 🔐 Rimuove chiave biometrica salvata
             await signOut(auth);
             window.location.href = 'login-v115.html';
         }
