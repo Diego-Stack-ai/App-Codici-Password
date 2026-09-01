@@ -18,11 +18,11 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
     ,read('Frontend/public/sw.js')
     ,read('Frontend/public/assets/js/firebase-config.js')
     ,read('Frontend/public/assets/js/modules/core/vault-session.js')
-    ,read('Frontend/public/assets/js/env.js')
-    ,read('Frontend/public/assets/js/components.js')
+    ,read('Frontend/public/assets/js/env-v126.js')
+    ,read('Frontend/public/assets/js/components-v126.js')
     ,read('Frontend/public/home-v126.html')
     ,read('package.json')
-    ,read('Frontend/public/assets/js/main.js')
+    ,read('Frontend/public/assets/js/main-v126.js')
 ]);
 
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
@@ -30,7 +30,7 @@ assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versi
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
 assert.match(homeHtml, /data-app-version>v1\.2\.2</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
 assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
-assert.match(homeHtml, /main\.js\?v=1\.2\.6/, 'La home non forza il caricamento della release corrente');
+assert.match(homeHtml, /main-v126\.js/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
 assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
