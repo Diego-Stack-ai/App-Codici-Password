@@ -5,7 +5,7 @@ import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core.js?v=1.2.4';
 import { setFooterReady } from './footer-state.js';
-import { APP_VERSION } from './env.js';
+import { APP_VERSION } from './env.js?v=1.2.5';
 
 // Guard idempotenza — sostituisce window.__componentsInitialized
 let _componentsInitialized = false;

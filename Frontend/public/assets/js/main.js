@@ -20,7 +20,7 @@ console.warn     = (...args) => { try { LOG_WARN(...args);  } catch (e) {} };
 import { setupPasswordToggles, setupCopyButtons, setupCallButtons } from './ui-components.js';
 import { setupAccountCards, setupEditMode, setupAccountDetailView, setupCopyQrCode } from './ui-pages.js';
 import { initCleanup } from './cleanup.js';
-import { initComponents } from './components.js?v=1.2.3'; // Imports components system
+import { initComponents } from './components.js?v=1.2.5'; // Imports components system
 
 /**
  * INITIALIZATION
@@ -33,13 +33,13 @@ import {
     doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc,
     onSnapshot, runTransaction, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showToast, initLockedUX } from './ui-core.js';
+import { showToast, initLockedUX } from './ui-core.js?v=1.2.5';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js';
+import * as Pages from './pages-init.js?v=1.2.5';
 import { ensureMasterKey } from './modules/core/security-manager.js';
 
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__

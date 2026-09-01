@@ -7,7 +7,7 @@
  * - Moduli Legacy -> V5.0: Importa dinamicamente il file e chiama la funzione init esportata.
  */
 
-import { initComponents } from './components.js?v=1.2.3';
+import { initComponents } from './components.js?v=1.2.5';
 
 import { LOG } from './logger.js';
 // --- 1. MODULI V5.0 (Puri/Passivi) ---
@@ -40,7 +40,7 @@ export async function initImpostaNuovaPassword() {
 
 export async function initHomePage(user) {
     LOG("[Router] Loading Home V5.0...");
-    const module = await import('./modules/home/home.js');
+    const module = await import('./modules/home/home.js?v=1.2.5');
     await module.initHomePage(user);
 }
 

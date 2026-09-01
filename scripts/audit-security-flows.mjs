@@ -30,7 +30,7 @@ assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versi
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
 assert.match(homeHtml, /data-app-version>v1\.2\.2</, 'La home non mostra una versione di fallback durante l’aggiornamento cache');
 assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
-assert.match(homeHtml, /main\.js\?v=1\.2\.2/, 'La home non forza il caricamento della release corrente');
+assert.match(homeHtml, /main\.js\?v=1\.2\.5/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
 assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
