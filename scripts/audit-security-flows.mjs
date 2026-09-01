@@ -87,6 +87,9 @@ assert.match(security, /if \(await isNewVault\(uid\)\)/, 'La policy Master Passw
 assert.match(registrationHtml, /id="account-password-requirements"/, 'La registrazione non mostra i requisiti password');
 assert.doesNotMatch(registrationHtml, /user_login_trap|password_trap/, 'La registrazione ostacola i suggerimenti password del dispositivo');
 assert.match(registrationHtml, /name="new-password"[^>]+autocomplete="new-password"/, 'Il password manager non riconosce la nuova password');
+assert.match(password, /auth\/requires-recent-login[\s\S]+signOut\(auth\)[\s\S]+login-v115\.html\?reauth=password-change/, 'Il cambio password non avvia una riautenticazione reale');
+assert.match(auth, /reauthFlow\s*===\s*['"]password-change['"][\s\S]+imposta_nuova_password\.html\?reauthenticated=1/, 'Il login non ritorna al cambio password dopo la riautenticazione');
+assert.match(password, /isRequiredPolicyUpdate[\s\S]+cancelBtn\.textContent\s*=\s*['"]Esci['"][\s\S]+signOut\(auth\)/, 'L\'annullamento dell\'aggiornamento obbligatorio crea ancora un ciclo con la home');
 assert.match(passwordPolicy, /crypto\.getRandomValues/, 'Il generatore password non usa casualità crittografica locale');
 assert.match(registration, /generateSecurePassword\(\)/, 'La registrazione non offre una password sicura');
 assert.match(password, /passwordPolicyVersion:\s*ACCOUNT_PASSWORD_POLICY_VERSION/, 'Il cambio password non registra la policy applicata');

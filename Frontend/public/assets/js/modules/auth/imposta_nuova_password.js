@@ -5,7 +5,7 @@
  */
 
 import { auth } from '../../firebase-config.js?v=1.1.8';
-import { updatePassword, confirmPasswordReset } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { updatePassword, confirmPasswordReset, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
@@ -111,7 +111,13 @@ function setupNewPasswordForm() {
 
             let msg = t('error_generic') || "Impossibile aggiornare la password.";
             if (err.code === 'auth/requires-recent-login') {
-                msg = t('error_reauth_required') || "Rieffettua il login per motivi di sicurezza.";
+                showToast("Per sicurezza devi accedere di nuovo. Dopo il login tornerai qui.", "warning");
+                try {
+                    await signOut(auth);
+                } finally {
+                    window.location.replace('login-v115.html?reauth=password-change');
+                }
+                return;
             } else if (err.code === 'auth/expired-action-code') {
                 msg = t('error_link_expired') || "Il link di recupero è scaduto.";
             }
@@ -161,10 +167,19 @@ function setupCancelLogic() {
     const cancelBtn = document.getElementById('cancel-password-update');
     if (!cancelBtn) return;
 
-    cancelBtn.onclick = (e) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRequiredPolicyUpdate = urlParams.has('policyUpdate') || urlParams.has('reauthenticated');
+    if (isRequiredPolicyUpdate) cancelBtn.textContent = 'Esci';
+
+    cancelBtn.onclick = async (e) => {
         e.preventDefault();
-        const urlParams = new URLSearchParams(window.location.search);
         const isReset = urlParams.has('oobCode');
+
+        if (isRequiredPolicyUpdate) {
+            await signOut(auth);
+            window.location.replace('login-v115.html');
+            return;
+        }
 
         window.location.href = (auth.currentUser && !isReset) ? 'impostazioni.html' : 'login-v115.html';
     };

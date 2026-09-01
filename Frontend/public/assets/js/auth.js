@@ -216,12 +216,18 @@ function checkAuthState() {
     let initialCheckDone = false;
     onAuthStateChanged(auth, async (user) => {
         const path = window.location.pathname.toLowerCase();
+        const reauthFlow = new URLSearchParams(window.location.search).get('reauth');
         const authPages = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
         LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (user) {
+            if (path.includes('login-v115.html') && reauthFlow === 'password-change') {
+                LOG("[AUTH] Reauthentication completed, returning to password change");
+                window.location.replace('imposta_nuova_password.html?reauthenticated=1');
+                return;
+            }
             // Utente loggato: se siamo su una pagina di login, spostiamoci sulla home
             // Usiamo percorsi relativi per compatibilità con Live Server
             if (isAuthPage) {
