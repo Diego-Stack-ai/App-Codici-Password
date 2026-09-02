@@ -634,6 +634,12 @@
         transform: rotate(360deg);
     }
 }
+
+/* La Master Password è un segreto locale della Vault, non una credenziale di login.
+   Il mascheramento CSS evita che i password manager la associno all'account. */
+.vault-secret-input {
+    -webkit-text-security: disc;
+}
 .mfa-qr {
     display: flex;
     justify-content: center;

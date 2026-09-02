@@ -153,5 +153,9 @@ assert.match(coreCss, /\.base-container\s*\{[\s\S]*?max-width:\s*75rem;/, 'Il de
 assert.match(pagesCss, /@media \(min-width:\s*1025px\)[\s\S]*?\.home-page \.matrix-grid[\s\S]*?"scadenze urgenze"/, 'La Home desktop non usa una matrice bilanciata');
 assert.match(settingsCss, /\.settings-container\s*\{[\s\S]*?max-width:\s*760px;/, 'Le impostazioni restano eccessivamente strette su desktop');
 assert.match(await read('Frontend/public/assets/css/account_privati.css'), /@media \(min-width:\s*1025px\)[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/, 'La lista account privati non sfrutta il desktop');
+assert.doesNotMatch(await read('Frontend/public/assets/js/ui-core-v129.js'), /autocomplete:\s*['"]current-password['"]/, 'Il popup Vault viene ancora associato alla password di login');
+assert.match(await read('Frontend/public/assets/js/ui-core-v129.js'), /options\.vaultSecret[\s\S]*?data-form-type[\s\S]*?data-1p-ignore/, 'La Master Password non è esclusa dai password manager');
+assert.match(security, /vaultSecret:\s*true/, 'Lo sblocco Vault non identifica il campo come segreto locale');
+assert.match(await read('Frontend/public/assets/css/core_fascie.css'), /@media \(max-width:\s*600px\)[\s\S]*?\.base-header,[\s\S]*?backdrop-filter:\s*none;[\s\S]*?mask-image:\s*none;/, 'Le fasce mobili usano ancora la composizione che causa sfarfallio');
 
 console.log('Audit sicurezza e offline: 60 controlli superati.');

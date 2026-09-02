@@ -279,7 +279,8 @@ async function ensureMasterKeyInternal(options = {}) {
 
     const offerMasterSuggestion = !isBiometricUnlockConfigured() && await isNewVault(uid);
     const pass = await showInputModal(
-        "SBLOCCO VAULT", '', msg, description, offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}
+        "SBLOCCO VAULT", '', msg, description,
+        { vaultSecret: true, ...(offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}) }
     );
 
     if (pass) {
@@ -300,7 +301,8 @@ async function ensureMasterKeyInternal(options = {}) {
                         "CONFERMA MASTER PASSWORD",
                         '',
                         "Reinserisci la Master Password",
-                        "Conservala in un luogo sicuro: non può essere recuperata."
+                        "Conservala in un luogo sicuro: non può essere recuperata.",
+                        { vaultSecret: true }
                     );
                     if (!confirmation || confirmation.normalize('NFC').trim() !== cleanPass) {
                         showToast("Le Master Password non coincidono.", "error");

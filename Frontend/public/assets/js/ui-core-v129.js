@@ -225,12 +225,19 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
 
         modal = createElement('div', { id: modalId, className: 'modal-overlay' });
 
+        const isVaultSecret = options.vaultSecret === true;
         const input = createElement('input', {
-            type: 'password',
+            type: 'text',
             value: initialValue,
             placeholder: placeholder,
-            autocomplete: 'current-password',
-            className: 'glass-field modal-input-glass'
+            name: isVaultSecret ? 'vault-local-secret' : 'modal-value',
+            autocomplete: 'off',
+            autocapitalize: 'off',
+            spellcheck: 'false',
+            'data-form-type': 'other',
+            'data-1p-ignore': 'true',
+            'data-lpignore': 'true',
+            className: `glass-field modal-input-glass${isVaultSecret ? ' vault-secret-input' : ''}`
         });
 
         const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: t('cancel') || 'Annulla' }, []);
@@ -242,7 +249,7 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
         }) : null;
         btnSuggest?.addEventListener('click', () => {
             input.value = generateSecurePassword(options.length || 20);
-            input.type = 'text';
+            input.classList.remove('vault-secret-input');
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.focus();
         });

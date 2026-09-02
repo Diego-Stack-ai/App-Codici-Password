@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.11';
+const CACHE_NAME = 'codex-shell-v1.2.12';
 const APP_CACHE_PREFIX = 'codex-';
 
 // Shell minima coerente con la release corrente. Le pagine visitate e i

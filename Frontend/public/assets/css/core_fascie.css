@@ -22,7 +22,31 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-sizing: border-box;
+    transform: translate3d(-50%, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
     /* Essenziale per calcolo height + padding safe-area */
+}
+
+@media (max-width: 600px) {
+    .base-header,
+    .base-footer {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+
+    .base-header {
+        background: linear-gradient(to bottom, var(--card-bg) 0%, var(--card-bg) 68%, transparent 100%);
+        border-bottom-color: transparent;
+    }
+
+    .base-footer {
+        background: linear-gradient(to top, var(--card-bg) 0%, var(--card-bg) 58%, transparent 100%);
+        border-top-color: transparent;
+    }
 }
 
 .base-header {
