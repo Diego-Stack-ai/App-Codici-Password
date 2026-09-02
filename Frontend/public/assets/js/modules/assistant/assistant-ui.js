@@ -69,23 +69,68 @@ export function createAssistantUI({ onSearch, onClose }) {
         runSearch(query);
     });
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const supportsLocalRecognition = SpeechRecognition && 'processLocally' in SpeechRecognition.prototype;
+    const supportsLocalRecognition = SpeechRecognition
+        && 'processLocally' in SpeechRecognition.prototype
+        && typeof SpeechRecognition.available === 'function';
     if (supportsLocalRecognition) {
         const recognition = new SpeechRecognition();
         recognition.lang = 'it-IT'; recognition.interimResults = false; recognition.maxAlternatives = 1;
         recognition.processLocally = true;
-        microphone.addEventListener('click', () => {
-            status.textContent = 'Ti ascolto…'; microphone.classList.add('listening');
-            try { recognition.start(); } catch { /* una sessione è già attiva */ }
+        let installConfirmed = false;
+        microphone.addEventListener('click', async () => {
+            microphone.disabled = true;
+            try {
+                const availability = await SpeechRecognition.available({ langs: ['it-IT'], processLocally: true });
+                if (availability === 'available') {
+                    status.textContent = 'Ti ascolto…';
+                    microphone.classList.add('listening');
+                    recognition.start();
+                    return;
+                }
+                if (availability === 'downloadable' && !installConfirmed) {
+                    installConfirmed = true;
+                    microphone.querySelector('.material-symbols-outlined').textContent = 'download';
+                    status.textContent = 'Manca la lingua italiana locale. Premi ancora il pulsante per scaricarla.';
+                    return;
+                }
+                if ((availability === 'downloadable' || availability === 'downloading')
+                    && typeof SpeechRecognition.install === 'function') {
+                    status.textContent = 'Installazione della lingua italiana sul dispositivo…';
+                    const installed = await SpeechRecognition.install({ langs: ['it-IT'], processLocally: true });
+                    installConfirmed = false;
+                    microphone.querySelector('.material-symbols-outlined').textContent = 'mic';
+                    status.textContent = installed
+                        ? 'Lingua italiana installata. Premi il microfono e parla.'
+                        : 'Installazione non riuscita. Puoi continuare usando la tastiera.';
+                    return;
+                }
+                status.textContent = 'La lingua italiana locale non è disponibile in questo browser.';
+            } catch (error) {
+                const permissionError = ['not-allowed', 'service-not-allowed'].includes(error?.error) || error?.name === 'NotAllowedError';
+                status.textContent = permissionError
+                    ? 'Il browser non ha autorizzato il microfono o il riconoscimento locale.'
+                    : 'Riconoscimento vocale locale non disponibile. Puoi continuare usando la tastiera.';
+            } finally {
+                microphone.disabled = false;
+            }
         });
         recognition.addEventListener('result', event => {
             const query = event.results[0][0].transcript.trim();
             input.value = query; runSearch(query, true);
         });
-        recognition.addEventListener('error', () => { status.textContent = 'Non sono riuscito ad ascoltare. Puoi riprovare o scrivere.'; });
+        recognition.addEventListener('error', event => {
+            const messages = {
+                'no-speech': 'Non ho sentito parole. Premi il microfono e riprova.',
+                'audio-capture': 'Il microfono non è disponibile o è già utilizzato da un’altra app.',
+                'not-allowed': 'Permesso microfono non concesso.',
+                'service-not-allowed': 'Riconoscimento vocale locale non autorizzato dal browser.',
+                'language-not-supported': 'La lingua italiana locale non è ancora installata.'
+            };
+            status.textContent = messages[event.error] || `Riconoscimento non riuscito (${event.error || 'errore sconosciuto'}).`;
+        });
         recognition.addEventListener('end', () => microphone.classList.remove('listening'));
     } else {
-        microphone.disabled = true;
+        microphone.setAttribute('aria-disabled', 'true');
         microphone.title = 'Riconoscimento vocale locale non disponibile in questo browser';
         microphone.addEventListener('click', () => {
             status.textContent = 'Questo browser non offre ancora il riconoscimento vocale completamente locale.';
@@ -95,10 +140,4 @@ export function createAssistantUI({ onSearch, onClose }) {
     panel.append(header, searchRow, status, results); backdrop.append(panel); document.body.append(backdrop);
     queueMicrotask(() => input.focus());
     return { destroy: () => backdrop.remove() };
-}
-
-export function createAssistantButton(onClick) {
-    const button = element('button', 'vault-assistant-fab', 'Cerca nella Vault');
-    button.type = 'button'; button.addEventListener('click', onClick); document.body.append(button);
-    return { destroy: () => button.remove() };
 }

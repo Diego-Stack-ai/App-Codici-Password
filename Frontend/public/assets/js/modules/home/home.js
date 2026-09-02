@@ -84,7 +84,7 @@ export async function initHomePage(user) {
     if (assistantEnabled) {
         try {
             document.getElementById('ai-assistant-status')?.classList.remove('hidden');
-            const { initVaultAssistant } = await import('../assistant/assistant-controller.js');
+            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.24-ai6');
             await initVaultAssistant(user);
         } catch (error) {
             console.warn('[ASSISTANT] Avvio non riuscito.', error);

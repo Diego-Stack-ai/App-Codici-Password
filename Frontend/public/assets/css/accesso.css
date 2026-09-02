@@ -344,6 +344,38 @@ html[data-i18n="loading"] body {
     vertical-align: middle;
 }
 
+.auth-secondary-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.85rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(96, 165, 250, 0.28);
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--link-color);
+    font: inherit;
+    font-size: var(--fs-xs);
+    line-height: 1.25;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.auth-secondary-action .material-symbols-outlined {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+}
+
+.auth-secondary-action:hover,
+.auth-secondary-action:focus-visible {
+    border-color: rgba(96, 165, 250, 0.58);
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+    outline: none;
+}
+
 /* --- 4. AUTH FOOTER --- */
 .auth-footer-links {
     margin-top: 1rem;

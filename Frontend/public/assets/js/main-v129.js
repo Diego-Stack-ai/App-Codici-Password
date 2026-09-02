@@ -39,7 +39,7 @@ import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './
 import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.24-ai4';
+import * as Pages from './pages-init.js?v=1.2.24-ai6';
 import { ensureMasterKey } from './modules/core/security-manager.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION } from './modules/core/password-policy.js';
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";

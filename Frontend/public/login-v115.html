@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
 
-    <link rel="stylesheet" href="assets/css/accesso.css?v=5.0">
+    <link rel="stylesheet" href="assets/css/accesso.css?v=5.0-ai5">
 
 </head>
 
@@ -96,7 +96,10 @@
                             maxlength="6" pattern="[0-9]{6}" class="input" placeholder="000000"
                             aria-describedby="totp-help">
                         <p id="totp-help" class="auth-help">Apri la tua app Authenticator e inserisci il codice di 6 cifre.</p>
-                        <button type="button" id="btn-use-recovery-code" class="link-forgot">Non hai accesso all'Authenticator?</button>
+                        <button type="button" id="btn-use-recovery-code" class="auth-secondary-action">
+                            <span class="material-symbols-outlined">key</span>
+                            <span>Non hai accesso all'Authenticator?</span>
+                        </button>
                     </div>
 
                     <div class="form-group hidden" id="recovery-form-group">
@@ -136,7 +139,7 @@
     </div>
 
     <!-- Scripts (In fondo per performance) -->
-    <script type="module" src="assets/js/login-entry.js?v=1.3.2"></script>
+    <script type="module" src="assets/js/login-entry.js?v=1.3.3-ai5"></script>
 
 
 </body>
