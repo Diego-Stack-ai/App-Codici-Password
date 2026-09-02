@@ -69,6 +69,17 @@ export async function initHomePage(user) {
 
     setupFABGroup(aziendes);
 
+    // Prototipo locale: si attiva solo aprendo la Home con ?assistant=1.
+    // Nessun dato o segreto dell'indice viene scritto su storage persistente.
+    if (new URLSearchParams(window.location.search).get('assistant') === '1') {
+        try {
+            const { initVaultAssistant } = await import('../assistant/assistant-controller.js');
+            await initVaultAssistant(user);
+        } catch (error) {
+            console.warn('[ASSISTANT] Avvio non riuscito.', error);
+        }
+    }
+
     
 }
 
