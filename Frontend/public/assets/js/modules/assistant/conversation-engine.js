@@ -17,6 +17,7 @@ const SYNONYMS = new Map([
     ['identita', ['identita', 'documento']], ['societa', ['societa', 'azienda', 'impresa']],
     ['azienda', ['azienda', 'societa', 'impresa']], ['scadenze', ['scadenza']], ['account', ['account']]
 ]);
+const CATEGORY_WORDS = new Set(['account', 'azienda', 'banca', 'conto', 'documento', 'identita', 'scadenza', 'scadenze', 'societa']);
 
 const safeText = record => normalizeSearchText([
     record.kind, record.title, record.subtitle, record.scope, record.companyName, ...(record.keywords || [])
@@ -30,14 +31,38 @@ function matchesToken(recordText, token) {
     return (SYNONYMS.get(token) || [token]).some(candidate => recordText.includes(candidate));
 }
 
+function editDistance(left, right) {
+    const previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+    for (let row = 1; row <= left.length; row += 1) {
+        const current = [row];
+        for (let column = 1; column <= right.length; column += 1) {
+            current[column] = Math.min(
+                current[column - 1] + 1,
+                previous[column] + 1,
+                previous[column - 1] + (left[row - 1] === right[column - 1] ? 0 : 1)
+            );
+        }
+        previous.splice(0, previous.length, ...current);
+    }
+    return previous[right.length];
+}
+
+function resemblesCompany(record, queryTokens) {
+    const company = normalizeSearchText(record.companyName).replaceAll(' ', '');
+    const spoken = queryTokens.filter(token => !CATEGORY_WORDS.has(token)).join('');
+    if (!company || company.length < 5 || spoken.length < 5) return false;
+    return editDistance(company, spoken) <= Math.max(2, Math.floor(company.length * 0.25));
+}
+
 function searchRecords(records, query) {
     const tokens = meaningfulTokens(query);
     if (!tokens.length) return [];
     return records.map(record => {
         const text = safeText(record);
-        if (!tokens.every(token => matchesToken(text, token))) return null;
+        const unmatched = tokens.filter(token => !matchesToken(text, token));
+        if (unmatched.length && !resemblesCompany(record, tokens)) return null;
         const title = normalizeSearchText(record.title);
-        const score = tokens.reduce((total, token) => total + (title.includes(token) ? 20 : 5), 0);
+        const score = tokens.reduce((total, token) => total + (title.includes(token) ? 20 : 5), 0) + (unmatched.length ? 8 : 0);
         return { record, score };
     }).filter(Boolean).sort((a, b) => b.score - a.score || a.record.title.localeCompare(b.record.title, 'it'))
         .slice(0, 12).map(match => match.record);

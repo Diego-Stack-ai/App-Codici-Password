@@ -28,6 +28,9 @@ const bankAnswer = conversation.ask("Sto cercando una banca dell'azienda PaxTibi
 assert.equal(bankAnswer.items.length, 1);
 assert.equal(bankAnswer.items[0].href, '/company-bank');
 assert.match(bankAnswer.message, /PaxTibi/);
+const spokenBankAnswer = conversation.ask('Sto cercando una banca di Pack Tibi');
+assert.equal(spokenBankAnswer.items.length, 1);
+assert.equal(spokenBankAnswer.items[0].href, '/company-bank');
 const openAnswer = conversation.ask('aprimi il primo');
 assert.equal(openAnswer.navigateTo, '/company-bank');
 conversation.clear();
