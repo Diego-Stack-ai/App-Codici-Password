@@ -12,6 +12,7 @@ const ITERATIONS = 100000;
 const SALT_SIZE = 16;
 const IV_SIZE = 12;
 const KEK_ITERATIONS = 600000;
+export const VERIFIER_ITERATIONS = 600000;
 
 // Helper: Uint8Array -> Hex
 const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -64,6 +65,58 @@ async function deriveKek(masterPassword, salt) {
         { name: 'PBKDF2', salt, iterations: KEK_ITERATIONS, hash: 'SHA-256' },
         material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
     );
+}
+
+async function deriveVerifierKey(masterPassword, salt, iterations = VERIFIER_ITERATIONS) {
+    if (!Number.isInteger(iterations) || iterations < VERIFIER_ITERATIONS) {
+        throw new Error('VAULT_VERIFIER_KDF_INVALID');
+    }
+    const material = await crypto.subtle.importKey(
+        'raw', new TextEncoder().encode(String(masterPassword).normalize('NFC').trim()),
+        'PBKDF2', false, ['deriveKey']
+    );
+    return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+        material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+}
+
+export async function createVaultVerifier(marker, masterPassword, createdAt = Date.now()) {
+    const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
+    const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
+    const key = await deriveVerifierKey(masterPassword, salt);
+    const ciphertext = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv }, key, new TextEncoder().encode(marker)
+    );
+    return {
+        version: 2,
+        type: 'vault-verifier',
+        kdf: 'PBKDF2-SHA256',
+        iterations: VERIFIER_ITERATIONS,
+        cipher: 'AES-GCM-256',
+        salt: bufferToBase64(salt),
+        iv: bufferToBase64(iv),
+        ciphertext: bufferToBase64(ciphertext),
+        createdAt,
+        updatedAt: Date.now()
+    };
+}
+
+export async function verifyVaultVerifier(verifier, marker, masterPassword) {
+    if (verifier?.version !== 2 || verifier?.type !== 'vault-verifier' ||
+        verifier?.kdf !== 'PBKDF2-SHA256' || verifier?.cipher !== 'AES-GCM-256') {
+        return false;
+    }
+    try {
+        const salt = base64ToBuffer(verifier.salt);
+        const iv = base64ToBuffer(verifier.iv);
+        const ciphertext = base64ToBuffer(verifier.ciphertext);
+        const key = await deriveVerifierKey(masterPassword, salt, verifier.iterations);
+        const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+        return new TextDecoder().decode(plaintext) === marker;
+    } catch (error) {
+        return false;
+    }
 }
 
 export async function wrapVaultKey(vaultKey, masterPassword, keyOrigin = 'random') {

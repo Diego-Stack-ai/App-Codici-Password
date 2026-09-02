@@ -4,10 +4,10 @@
  * - Sblocco biometrico usa WebAuthn PRF.
  */
 
-import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey } from './crypto-utils.js';
+import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core.js';
 import { db, auth } from '../../firebase-config.js?v=1.1.8';
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query, runTransaction } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
 import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';
@@ -43,14 +43,7 @@ function getVerifierStorageKey(uid) {
 }
 
 async function createVerifier(masterPassword, uid) {
-    const ciphertext = await encrypt(VERIFIER_MARKER, masterPassword);
-    const verifier = {
-        version: 1,
-        type: 'vault-verifier',
-        ciphertext: ciphertext,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-    };
+    const verifier = await createVaultVerifier(VERIFIER_MARKER, masterPassword);
     
     try {
         await setDoc(doc(db, 'users', uid, 'settings', 'security'), { verifier: verifier }, { merge: true });
@@ -61,6 +54,28 @@ async function createVerifier(masterPassword, uid) {
     
     localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
     return verifier;
+}
+
+async function migrateVerifierV1(masterPassword, uid, legacyVerifier) {
+    const securityRef = doc(db, 'users', uid, 'settings', 'security');
+    const replacement = await createVaultVerifier(
+        VERIFIER_MARKER,
+        masterPassword,
+        legacyVerifier.createdAt || Date.now()
+    );
+    let verifierToCache = replacement;
+    await runTransaction(db, async transaction => {
+        const snap = await transaction.get(securityRef);
+        const remote = snap.exists() ? snap.data().verifier : null;
+        if (remote?.version === 1 && remote.ciphertext === legacyVerifier.ciphertext) {
+            transaction.set(securityRef, { verifier: replacement }, { merge: true });
+        } else if (remote?.version === 2) {
+            verifierToCache = remote;
+        } else {
+            throw new Error('VAULT_VERIFIER_CHANGED');
+        }
+    });
+    localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifierToCache));
 }
 
 async function verifyMasterPassword(masterPassword, uid) {
@@ -89,8 +104,19 @@ async function verifyMasterPassword(masterPassword, uid) {
     }
     
     try {
+        if (verifier.version === 2) {
+            return await verifyVaultVerifier(verifier, VERIFIER_MARKER, masterPassword);
+        }
         const decrypted = await decrypt(verifier.ciphertext, masterPassword);
-        return (decrypted === VERIFIER_MARKER);
+        const verified = decrypted === VERIFIER_MARKER;
+        if (verified && verifier.version === 1) {
+            // Upgrade opportunistico: un errore di rete non deve impedire lo
+            // sblocco offline già verificato con il formato precedente.
+            migrateVerifierV1(masterPassword, uid, verifier).catch(error => {
+                console.warn('Vault verifier v2 migration deferred:', error);
+            });
+        }
+        return verified;
     } catch (e) {
         return false;
     }
@@ -583,11 +609,7 @@ export async function changeMasterPassword() {
         ? await unwrapVaultKey(envelope, cleanOld)
         : createVaultKeyring(generateVaultKey(), cleanOld);
     const newEnvelope = await wrapVaultKey(vaultKey, cleanNew, envelope?.keyOrigin || 'random-with-legacy-fallback');
-    const verifier = {
-        version: 1, type: 'vault-verifier',
-        ciphertext: await encrypt(VERIFIER_MARKER, cleanNew),
-        createdAt: Date.now(), updatedAt: Date.now()
-    };
+    const verifier = await createVaultVerifier(VERIFIER_MARKER, cleanNew);
     await setDoc(doc(db, 'users', uid, 'settings', 'security'), { verifier, vaultKeyEnvelope: newEnvelope }, { merge: true });
     localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
     localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(newEnvelope));

@@ -13,7 +13,7 @@
     "stylelint-config-standard": "^40.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.16",
+  "version": "1.2.17",
   "description": "",
   "main": "css-audit-tool.js",
   "scripts": {
@@ -22,8 +22,9 @@
     "version:minor": "node scripts/bump-version.mjs minor",
     "version:major": "node scripts/bump-version.mjs major",
     "release:patch": "npm run version:patch && npm test",
-    "test": "npm run test:security && npm run test:storage-rules",
+    "test": "npm run test:security && npm run test:crypto && npm run test:storage-rules",
     "test:security": "node scripts/audit-security-flows.mjs",
+    "test:crypto": "node --test tests/crypto-utils.test.mjs",
     "test:storage-rules": "node scripts/run-storage-rules-tests.mjs"
   },
   "repository": {

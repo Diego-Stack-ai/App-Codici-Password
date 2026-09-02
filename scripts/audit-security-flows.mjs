@@ -192,6 +192,11 @@ assert.match(login, /recoverTotpAccess\(pendingEmail, password, recoveryCode\)/,
 assert.match(settingsHtml, /id="btn-revoke-all-sessions"/, 'Comando disconnessione postazioni assente');
 assert.match(settings, /await revokeAllSessions\(\)[\s\S]*?await signOut\(auth\)/, 'La revoca postazioni non termina la sessione corrente');
 assert.match(cryptoUtils, /const KEK_ITERATIONS = 600000/, 'Derivazione KEK insufficiente o non centralizzata');
+assert.match(cryptoUtils, /VERIFIER_ITERATIONS = 600000/, 'Il verifier v2 non usa il costo KDF rinforzato');
+assert.match(cryptoUtils, /export async function createVaultVerifier/, 'Creazione verifier v2 mancante');
+assert.match(cryptoUtils, /iterations < VERIFIER_ITERATIONS/, 'Il verifier accetta ancora un downgrade del costo KDF');
+assert.match(security, /verifier\.version === 1[\s\S]*?migrateVerifierV1\(masterPassword, uid, verifier\)/, 'Il verifier legacy non viene migrato automaticamente');
+assert.match(security, /runTransaction[\s\S]*?remote\?\.version === 1[\s\S]*?remote\.ciphertext === legacyVerifier\.ciphertext/, 'La migrazione verifier può sovrascrivere uno stato remoto più recente');
 assert.match(cryptoUtils, /export async function wrapVaultKey/, 'Envelope della Vault Key mancante');
 assert.match(cryptoUtils, /export async function unwrapVaultKey/, 'Apertura envelope della Vault Key mancante');
 assert.match(cryptoUtils, /createVaultKeyring[\s\S]*?legacyKey[\s\S]*?encryptionKeyCandidates/, 'La migrazione Vault non conserva un fallback leggibile per i record legacy');
