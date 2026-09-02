@@ -114,17 +114,33 @@ exports.sendDeadlinePushTest = onCall(
             return { ok: false, cooldownSeconds: Math.ceil((60000 - (now - lastTest)) / 1000) };
         }
         await deviceRef.set({ lastTestAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const deadlines = await db.collection("users").doc(request.auth.uid).collection("scadenze")
+            .where("completed", "==", false).get();
+        const upcoming = deadlines.docs.map((item) => {
+            const data = item.data();
+            const dueDate = new Date(data.dueDate);
+            dueDate.setHours(0, 0, 0, 0);
+            return { id: item.id, data, dueDate };
+        }).filter((item) => !Number.isNaN(item.dueDate.getTime()) && item.dueDate >= today)
+            .sort((left, right) => left.dueDate - right.dueDate)[0];
+
+        const deadlineId = upcoming?.id || "";
+        const diffDays = upcoming ? Math.ceil((upcoming.dueDate - today) / (1000 * 60 * 60 * 24)) : 0;
+        const text = upcoming
+            ? pushText(upcoming.data, diffDays)
+            : { title: "Codici & Password", body: "Notifica scadenza di prova" };
         try {
             await admin.messaging().send({
                 token: device.data().token,
                 data: {
-                    eventType: "deadline", deadlineId: "", title: "Codici & Password",
-                    body: "Assicurazione · Moto Guzzi California\nNotifica scadenza di prova",
+                    eventType: "deadline", deadlineId, title: text.title, body: text.body,
                     deliveryTag: `deadline-test-${deviceId}-${now}`
                 },
                 webpush: { headers: { TTL: "300", Urgency: "high" } }
             });
-            return { ok: true };
+            return { ok: true, opensDeadline: Boolean(deadlineId) };
         } catch (error) {
             console.error("[PUSH TEST FAILED]", error.code || error.message);
             throw new HttpsError("internal", "Invio della notifica di prova non riuscito.");
