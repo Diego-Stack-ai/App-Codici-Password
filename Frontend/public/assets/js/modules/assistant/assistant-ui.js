@@ -77,6 +77,11 @@ export function createAssistantUI({ onSearch, onClose }) {
         recognition.lang = 'it-IT'; recognition.interimResults = false; recognition.maxAlternatives = 1;
         recognition.processLocally = true;
         let installConfirmed = false;
+        let recognitionTimeout = null;
+        const clearRecognitionTimeout = () => {
+            if (recognitionTimeout) clearTimeout(recognitionTimeout);
+            recognitionTimeout = null;
+        };
         microphone.addEventListener('click', async () => {
             microphone.disabled = true;
             try {
@@ -85,6 +90,12 @@ export function createAssistantUI({ onSearch, onClose }) {
                     status.textContent = 'Ti ascolto…';
                     microphone.classList.add('listening');
                     recognition.start();
+                    clearRecognitionTimeout();
+                    recognitionTimeout = setTimeout(() => {
+                        recognition.abort();
+                        microphone.classList.remove('listening');
+                        status.textContent = 'Nessuna trascrizione ricevuta. Prova da Chrome o dal telefono.';
+                    }, 8000);
                     return;
                 }
                 if (availability === 'downloadable' && !installConfirmed) {
@@ -115,10 +126,12 @@ export function createAssistantUI({ onSearch, onClose }) {
             }
         });
         recognition.addEventListener('result', event => {
+            clearRecognitionTimeout();
             const query = event.results[0][0].transcript.trim();
             input.value = query; runSearch(query, true);
         });
         recognition.addEventListener('error', event => {
+            clearRecognitionTimeout();
             const messages = {
                 'no-speech': 'Non ho sentito parole. Premi il microfono e riprova.',
                 'audio-capture': 'Il microfono non è disponibile o è già utilizzato da un’altra app.',
@@ -128,7 +141,10 @@ export function createAssistantUI({ onSearch, onClose }) {
             };
             status.textContent = messages[event.error] || `Riconoscimento non riuscito (${event.error || 'errore sconosciuto'}).`;
         });
-        recognition.addEventListener('end', () => microphone.classList.remove('listening'));
+        recognition.addEventListener('end', () => {
+            clearRecognitionTimeout();
+            microphone.classList.remove('listening');
+        });
     } else {
         microphone.setAttribute('aria-disabled', 'true');
         microphone.title = 'Riconoscimento vocale locale non disponibile in questo browser';
