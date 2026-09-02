@@ -11,7 +11,10 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
-const admin = require("firebase-admin");
+const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
+const { FieldValue, getFirestore } = require("firebase-admin/firestore");
+const { getMessaging } = require("firebase-admin/messaging");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const { setGlobalOptions } = require("firebase-functions");
@@ -23,7 +26,13 @@ const {
     recoveryCodeHash
 } = require("./recovery-security");
 
-admin.initializeApp();
+initializeApp();
+
+// Facciata minima per mantenere leggibile la logica esistente usando la API
+// modulare richiesta da Firebase Admin 14.
+const firestore = () => getFirestore();
+firestore.FieldValue = FieldValue;
+const admin = { auth: getAuth, firestore, messaging: getMessaging };
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 
 // Segreti cifrati (salvati su Google Secret Manager)
