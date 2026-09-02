@@ -153,30 +153,43 @@ h3.settings-desc {
 
 /* --- 6. INTERACTIVE ELEMENTS --- */
 .settings-toggle {
+    --switch-width: 48px;
+    --switch-height: 26px;
+    --switch-thumb-size: 20px;
+    --switch-inset: 3px;
     appearance: none;
-    width: 48px;
-    height: 26px;
+    display: inline-block;
+    flex: 0 0 var(--switch-width);
+    width: var(--switch-width);
+    min-width: var(--switch-width);
+    max-width: var(--switch-width);
+    height: var(--switch-height);
+    min-height: var(--switch-height);
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
     border-radius: 99px;
     background: rgba(255, 255, 255, 0.05);
     position: relative;
     cursor: pointer;
     transition: all 0.3s;
-    border: 1px solid var(--card-border);
+    border: 0;
+    box-shadow: inset 0 0 0 1px var(--card-border);
 }
 
 .settings-toggle:checked {
     background: var(--accent);
-    border-color: transparent;
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
 .settings-toggle::after {
     content: '';
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
+    top: var(--switch-inset);
+    left: var(--switch-inset);
+    width: var(--switch-thumb-size);
+    height: var(--switch-thumb-size);
     border-radius: 50%;
     background: white;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -184,7 +197,7 @@ h3.settings-desc {
 }
 
 .settings-toggle:checked::after {
-    transform: translateX(22px);
+    transform: translateX(calc(var(--switch-width) - var(--switch-thumb-size) - (2 * var(--switch-inset))));
 }
 
 .timer-btn,

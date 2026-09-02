@@ -248,7 +248,9 @@ function createScadenzaCard(scadenza) {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
     ]);
 
-    const cardTitle = scadenza.type || scadenza.title || 'Scadenza Generale';
+    const cardOwner = scadenza.name || 'Intestatario non specificato';
+    const cardCategory = scadenza.type || scadenza.category || scadenza.title || 'Scadenza Generale';
+    const cardVehicle = scadenza.veicolo_modello || 'Veicolo non specificato';
 
     // 2. CONTENUTO VISIBILE (Sopra)
     const swipeContent = createElement('div', { className: 'swipe-content' }, [
@@ -258,9 +260,9 @@ function createScadenzaCard(scadenza) {
                     createElement('span', { className: 'material-symbols-outlined filled', textContent: scadenza.icon || 'event_note' })
                 ]),
                 createElement('div', { className: 'deadline-card-info-group' }, [
-                    createElement('span', { className: 'deadline-card-category', textContent: (scadenza.category || scadenza.type || 'SCADENZA').toUpperCase() }),
-                    createElement('h4', { className: 'deadline-card-title', textContent: cardTitle }),
-                    createElement('p', { className: 'deadline-card-subtitle', textContent: `Ref: ${scadenza.name || 'Generale'}` })
+                    createElement('span', { className: 'deadline-card-category', textContent: cardOwner.toUpperCase() }),
+                    createElement('h4', { className: 'deadline-card-title', textContent: cardCategory }),
+                    createElement('p', { className: 'deadline-card-subtitle', textContent: cardVehicle })
                 ])
             ]),
             createElement('span', {
