@@ -10,13 +10,14 @@ import {
     doc, collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import {
-    ref, uploadBytes, getDownloadURL, deleteObject
+    ref, uploadBytes, getDownloadURL, deleteObject, getBytes
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { createStorageObjectName, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
+import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
+import { ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _currentUid = null;
@@ -81,8 +82,11 @@ export async function handleFileUpload(input) {
     try {
         const storagePath = `users/${_currentUid}/aziende/${_currentAziendaId}/accounts/${_currentId}/attachments/${createStorageObjectName(file)}`;
         const sRef = ref(storage, storagePath);
-
-        const snap = await uploadBytes(sRef, file);
+        const vaultKey = await ensureMasterKey();
+        const encryptedFile = await encryptAttachmentFile(file, vaultKey);
+        const snap = await uploadBytes(sRef, encryptedFile.blob, {
+            contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
+        });
         const url = await getDownloadURL(snap.ref);
 
         const colRef = collection(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments");
@@ -92,6 +96,7 @@ export async function handleFileUpload(input) {
             storagePath: storagePath,
             type: file.type || 'application/octet-stream',
             size: file.size,
+            encryption: encryptedFile.metadata,
             createdAt: serverTimestamp()
         });
 
@@ -154,7 +159,7 @@ function renderAttachments(list) {
         }, [
             createElement('div', {
                 className: 'attachment-info cursor-pointer',
-                onclick: () => openExternalUrl(a.url)
+                onclick: () => openAttachment(a)
             }, [
                 createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                 createElement('div', { className: 'attachment-meta' }, [
@@ -173,6 +178,23 @@ function renderAttachments(list) {
     });
 
     setChildren(container, items);
+}
+
+async function openAttachment(attachment) {
+    try {
+        if (!attachment.encryption) {
+            if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
+            return;
+        }
+        if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
+        const vaultKey = await ensureMasterKey();
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        openDecryptedAttachment(clear, attachment);
+    } catch (error) {
+        logError('OpenEncryptedAttachment', error);
+        showToast('Impossibile aprire l’allegato cifrato.', 'error');
+    }
 }
 
 async function deleteAttachment(att) {

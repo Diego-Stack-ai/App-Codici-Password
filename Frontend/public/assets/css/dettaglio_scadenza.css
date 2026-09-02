@@ -152,6 +152,10 @@
 }
 
 .detail-list-item {
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    text-align: left;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     padding: 1rem;

@@ -65,3 +65,14 @@ test('upload fuori dallo spazio UID, MIME non consentito e file oltre 25 MB sono
     {contentType: 'application/pdf'},
   ));
 });
+
+test('il formato binario è ammesso soltanto se marcato come allegato cifrato v1', async () => {
+  const storage = testEnv.authenticatedContext(OWNER_UID).storage();
+  const plainBinary = ref(storage, `users/${OWNER_UID}/accounts/a1/attachments/plain.bin`);
+  const encryptedBinary = ref(storage, `users/${OWNER_UID}/accounts/a1/attachments/encrypted.bin`);
+  await assertFails(uploadBytes(plainBinary, new Uint8Array([1]), {contentType: 'application/octet-stream'}));
+  await assertSucceeds(uploadBytes(encryptedBinary, new Uint8Array([1]), {
+    contentType: 'application/octet-stream',
+    customMetadata: {encrypted: 'v1'},
+  }));
+});

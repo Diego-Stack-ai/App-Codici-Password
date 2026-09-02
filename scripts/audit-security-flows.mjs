@@ -194,6 +194,11 @@ assert.match(storageRules, /request\.resource\.contentType\.matches/, 'Storage n
 assert.match(attachmentSecurity, /MAX_ATTACHMENT_BYTES = 25 \* 1024 \* 1024/, 'Il client non applica lo stesso limite Storage');
 assert.match(attachmentSecurity, /\['https:', 'http:'\]/, 'Gli URL esterni non usano una allowlist di protocolli');
 assert.match(attachmentSecurity, /noopener,noreferrer/, 'Le nuove schede possono controllare la pagina di origine');
+assert.match(attachmentSecurity, /export async function encryptAttachmentFile/, 'Gli allegati nuovi non dispongono di cifratura client');
+assert.match(attachmentSecurity, /additionalData: ATTACHMENT_AAD/, 'La cifratura allegati non autentica il contesto del formato');
+assert.match(attachmentSecurity, /crypto\.getRandomValues\(new Uint8Array\(32\)\)/, 'La chiave casuale per-file degli allegati non è presente');
+assert.match(attachmentSecurity, /HKDF[\s\S]*?SHA-256/, 'La chiave per-file non è protetta con derivazione HKDF');
+assert.match(storageRules, /application\/octet-stream/, 'Storage non accetta il formato cifrato degli allegati');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
 assert.match(deployWorkflow, /npm ci[\s\S]*?npm test[\s\S]*?firebase\.js deploy/, 'Il deploy non è preceduto dai test del repository');
 assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.28.2', 'La Firebase CLI non è fissata a una versione');

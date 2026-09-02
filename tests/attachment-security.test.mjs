@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 globalThis.File = class File {
-  constructor(name, type, size) {
+  constructor(name, type, size, bytes = null) {
     this.name = name;
     this.type = type;
     this.size = size;
+    this.bytes = bytes || new Uint8Array(size);
   }
+  arrayBuffer() { return Promise.resolve(this.bytes.buffer.slice(0)); }
 };
 
 const source = await readFile(
@@ -34,4 +36,19 @@ test('normalizza soltanto URL web e respinge protocolli attivi', () => {
   assert.equal(security.normalizeExternalUrl('https://example.com/path'), 'https://example.com/path');
   assert.equal(security.normalizeExternalUrl('javascript:alert(1)'), null);
   assert.equal(security.normalizeExternalUrl('data:text/html,test'), null);
+});
+
+test('cifra e decifra un allegato soltanto con la chiave Vault corretta', async () => {
+  const clear = new TextEncoder().encode('contenuto riservato');
+  const file = new File('documento.txt', 'text/plain', clear.length, clear);
+  const encrypted = await security.encryptAttachmentFile(file, 'vault-key-corretta');
+  const ciphertext = await encrypted.blob.arrayBuffer();
+  assert.notDeepEqual(new Uint8Array(ciphertext), clear);
+  const decrypted = await security.decryptAttachmentBytes(
+    ciphertext, encrypted.metadata, 'vault-key-corretta',
+  );
+  assert.deepEqual(new Uint8Array(decrypted), clear);
+  await assert.rejects(() => security.decryptAttachmentBytes(
+    ciphertext, encrypted.metadata, 'vault-key-errata',
+  ));
 });

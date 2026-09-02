@@ -16,6 +16,8 @@ import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
+import { ensureMasterKey } from '../core/security-manager.js';
+import { createStorageObjectName, encryptAttachmentFile, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -68,7 +70,7 @@ export async function initAggiungiScadenza(user) {
     initProxyDropdowns();
     initAttachmentSystem();
 
-    // Collega i pulsanti "Aggiungi Email" ora che il DOM è pronto
+    // Collega i pulsanti "Aggiungi Email" ora che il DOM Ã¨ pronto
     document.getElementById('btn-add-email-primaria')
         ?.addEventListener('click', () => _addNotificationEmailBtn('email_primaria_select'));
     document.getElementById('btn-add-email-secondaria')
@@ -138,7 +140,7 @@ export async function initAggiungiScadenza(user) {
         });
     }
 
-    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
+    // V6.1: Late-subscriber safe â€” se il footer Ã¨ giÃ  pronto, inizializza subito
     const _footerState = getFooterReady();
     if (_footerState) {
         initFooterFromDetail(_footerState);
@@ -185,7 +187,7 @@ export async function initAggiungiScadenza(user) {
         if (pageTitle) pageTitle.textContent = "Modifica Scadenza";
         await loadScadenzaForEdit(editingScadenzaId);
     } else {
-        // Forza l'aggiornamento UI per la modalità di default ('automezzi') in "Aggiungi"
+        // Forza l'aggiornamento UI per la modalitÃ  di default ('automezzi') in "Aggiungi"
         setMode(currentMode);
     }
 
@@ -305,7 +307,7 @@ async function loadDynamicConfig() {
         const defaultDoc = {
             deadlineTypes: [
                 { name: 'Patente', freq: 7, period: 56 },
-                { name: 'Carta Identità', freq: 14, period: 56 },
+                { name: 'Carta IdentitÃ ', freq: 14, period: 56 },
                 { name: 'Passaporto', freq: 14, period: 28 },
                 { name: 'Codice fiscale', freq: 7, period: 56 }
             ],
@@ -313,7 +315,7 @@ async function loadDynamicConfig() {
             // I documenti vengono aggiunti dall'utente nelle impostazioni
             emailTemplates: [
                 "la tua patente",
-                "Il tuo documento di Identità",
+                "Il tuo documento di IdentitÃ ",
                 "Il tuo passaporto",
                 "Il tuo codice fiscale"
             ]
@@ -343,7 +345,7 @@ async function loadDynamicConfig() {
             ]
         };
         const dGen = genSnap.exists() ? rawGenData : defaultGen;
-        // Seed se documento assente O se deadlineTypes è vuoto (documento incompleto)
+        // Seed se documento assente O se deadlineTypes Ã¨ vuoto (documento incompleto)
         const needsSeedGen = !genSnap.exists() || !rawGenData.deadlineTypes || rawGenData.deadlineTypes.length === 0;
         if (needsSeedGen) {
             const mergedGen = { ...defaultGen, notificationEmails: rawGenData.notificationEmails || [] };
@@ -372,10 +374,10 @@ function updateCurrentDynamicConfig() {
     else if (currentMode === 'documenti') dynamicConfig = unifiedConfigs.documenti;
     else if (currentMode === 'generali') dynamicConfig = unifiedConfigs.generali;
 
-    // names: solo quelli della modalità corrente (contestuali)
+    // names: solo quelli della modalitÃ  corrente (contestuali)
     dynamicConfig.names = (dynamicConfig.names || []).sort();
 
-    // notificationEmails: quelli della modalità corrente
+    // notificationEmails: quelli della modalitÃ  corrente
     populateEmailSelects(dynamicConfig.notificationEmails || []);
 }
 
@@ -401,7 +403,7 @@ async function addConfigItem(selectId, valueStringOrObject) {
             else docName = 'generalConfig';
         } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
             field = 'notificationEmails';
-            // Opzione B: email per modalità corrente
+            // Opzione B: email per modalitÃ  corrente
             if (currentMode === 'automezzi') docName = 'deadlineConfig';
             else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
             else docName = 'generalConfig';
@@ -409,7 +411,7 @@ async function addConfigItem(selectId, valueStringOrObject) {
 
         if (!docName || !field) return;
 
-        // Update local state — per notificationEmails usa il config della modalità corrente
+        // Update local state â€” per notificationEmails usa il config della modalitÃ  corrente
         const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
             (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
 
@@ -424,9 +426,9 @@ async function addConfigItem(selectId, valueStringOrObject) {
                 const newName = typeof valueStringOrObject === 'object' ? valueStringOrObject.name : valueStringOrObject;
                 return checkedName === newName;
             });
-            if (exists) return showToast("Valore già esistente", "info");
+            if (exists) return showToast("Valore giÃ  esistente", "info");
         } else {
-            if (configToUpdate[field].includes(valueStringOrObject)) return showToast("Valore già esistente", "info");
+            if (configToUpdate[field].includes(valueStringOrObject)) return showToast("Valore giÃ  esistente", "info");
         }
 
         configToUpdate[field].push(valueToPush);
@@ -518,7 +520,7 @@ async function editConfigItem(selectId, oldValue) {
 }
 
 async function deleteConfigItem(selectId, value) {
-    const confirm = await showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirà sulle scadenze esistenti, ma la voce non sarà più disponibile per le nuove.`);
+    const confirm = await showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirÃ  sulle scadenze esistenti, ma la voce non sarÃ  piÃ¹ disponibile per le nuove.`);
     if (!confirm) return;
 
     try {
@@ -692,7 +694,7 @@ function setupSaveLogic() {
 
     btnSave.addEventListener('click', async () => {
         if (!auth.currentUser || isSubmitting) {
-            LOG("[FRONTEND] Click ignorato: processo già in corso o utente non loggato.");
+            LOG("[FRONTEND] Click ignorato: processo giÃ  in corso o utente non loggato.");
             return;
         }
 
@@ -732,23 +734,31 @@ function setupSaveLogic() {
             // --- 1. UPLOAD ALLEGATI (PRIMA della scrittura DB) ---
             const uploadedAttachments = [];
             if (selectedFiles.length > 0) {
+                const vaultKey = await ensureMasterKey();
                 LOG(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];
+                    validateAttachmentFile(file);
                     if (btnText) btnText.textContent = `Upload ${i + 1}/${selectedFiles.length}...`;
 
                     const folderId = editingScadenzaId || `new_${Date.now()}`;
-                    const storagePath = `users/${currentUser.uid}/scadenze/${folderId}/${Date.now()}_${file.name}`;
+                    const storagePath = `users/${currentUser.uid}/scadenze/${folderId}/${createStorageObjectName(file)}`;
                     const sRef = ref(storage, storagePath);
 
-                    const snap = await uploadBytes(sRef, file);
+                    const encryptedFile = await encryptAttachmentFile(file, vaultKey);
+                    const snap = await uploadBytes(sRef, encryptedFile.blob, {
+                        contentType: 'application/octet-stream',
+                        customMetadata: { encrypted: 'v1' }
+                    });
                     const url = await getDownloadURL(snap.ref);
 
                     uploadedAttachments.push({
                         name: file.name,
                         url: url,
+                        storagePath,
                         type: file.type,
                         size: file.size,
+                        encryption: encryptedFile.metadata,
                         createdAt: new Date().toISOString()
                     });
                     LOG(`[FRONTEND-TRACE] File ${i + 1} caricato con successo.`);
@@ -814,7 +824,7 @@ function setupSaveLogic() {
                     { merge: true }
                 ).catch(e => console.warn('[TRACE] names update failed:', e));
 
-                // Salva anche le email nel config della modalità corrente (Opzione B)
+                // Salva anche le email nel config della modalitÃ  corrente (Opzione B)
                 const emailsToSave = [email1, email2].filter(e => e && e.trim() && e !== 'manual');
                 if (emailsToSave.length > 0) {
                     setDoc(

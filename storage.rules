@@ -9,11 +9,15 @@ service firebase.storage {
     function isAllowedUpload() {
       return request.resource != null &&
         request.resource.size > 0 &&
-        request.resource.size <= 25 * 1024 * 1024 &&
+        request.resource.size <= 25 * 1024 * 1024 +
+          (request.resource.contentType == 'application/octet-stream' ? 1024 : 0) &&
         request.resource.contentType is string &&
         request.resource.contentType.matches(
-          '^(image/(jpeg|png|gif|webp|heic|heif)|video/(mp4|quicktime|webm)|application/(pdf|msword|vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document|vnd\\.ms-excel|vnd\\.openxmlformats-officedocument\\.spreadsheetml\\.sheet)|text/plain)$'
-        );
+          '^(image/(jpeg|png|gif|webp|heic|heif)|video/(mp4|quicktime|webm)|application/(pdf|msword|vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document|vnd\\.ms-excel|vnd\\.openxmlformats-officedocument\\.spreadsheetml\\.sheet)|text/plain|application/octet-stream)$'
+        ) &&
+        (request.resource.contentType != 'application/octet-stream' ||
+          ('encrypted' in request.resource.metadata &&
+            request.resource.metadata.encrypted == 'v1'));
     }
 
     // Tutti gli oggetti applicativi sono confinati nello spazio dell'UID.

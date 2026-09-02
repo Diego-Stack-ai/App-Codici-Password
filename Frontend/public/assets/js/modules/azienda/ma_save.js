@@ -15,7 +15,7 @@ import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';
-import { createStorageObjectName, validateAttachmentFile } from '../shared/attachment-security.js';
+import { createStorageObjectName, encryptAttachmentFile, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // ─── SAVE ─────────────────────────────────────────────────────────────────────
 
@@ -125,10 +125,17 @@ export async function saveAzienda() {
         const newAtt = [];
         for (const file of state.selectedFiles) {
             validateAttachmentFile(file);
-            const sRef = ref(storage, `users/${state.currentUid}/aziende_allegati/${createStorageObjectName(file)}`);
-            const snap = await uploadBytes(sRef, file);
+            const storagePath = `users/${state.currentUid}/aziende_allegati/${createStorageObjectName(file)}`;
+            const sRef = ref(storage, storagePath);
+            const encryptedFile = await encryptAttachmentFile(file, masterKey);
+            const snap = await uploadBytes(sRef, encryptedFile.blob, {
+                contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
+            });
             const url = await getDownloadURL(snap.ref);
-            newAtt.push({ name: file.name, url, type: file.type, size: file.size, date: new Date().toISOString() });
+            newAtt.push({
+                name: file.name, url, storagePath, type: file.type, size: file.size,
+                encryption: encryptedFile.metadata, date: new Date().toISOString()
+            });
         }
         data.allegati = [...state.existingAttachments, ...newAtt];
 

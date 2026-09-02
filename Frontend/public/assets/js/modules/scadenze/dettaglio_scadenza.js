@@ -5,13 +5,15 @@
 
 import { getScadenza, updateScadenza, deleteScadenza } from '../../db.js';
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db } from '../../firebase-config.js?v=1.1.8';
+import { auth, db, storage } from '../../firebase-config.js?v=1.1.8';
 import { doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
-import { normalizeExternalUrl } from '../shared/attachment-security.js';
+import { ensureMasterKey } from '../core/security-manager.js';
+import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
@@ -135,7 +137,7 @@ function renderScadenza(scadenza) {
         clearElement(attCont);
         const items = scadenza.attachments.map(a => {
             const ext = a.name.split('.').pop().toLowerCase();
-            return createElement('a', { href: normalizeExternalUrl(a.url) || '#', target: '_blank', rel: 'noopener noreferrer', className: 'detail-list-item clickable' }, [
+            return createElement('button', { type: 'button', onclick: () => openDeadlineAttachment(a), className: 'detail-list-item clickable' }, [
                 createElement('div', { className: 'detail-list-item-left' }, [
                     createElement('div', { className: 'detail-list-icon-box' }, [
                         createElement('span', { className: `material-symbols-outlined`, textContent: 'description' })
@@ -195,5 +197,22 @@ function renderScadenza(scadenza) {
         }
 
         document.getElementById('detail-template').textContent = compiledText;
+    }
+}
+
+async function openDeadlineAttachment(attachment) {
+    try {
+        if (!attachment.encryption) {
+            if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
+            return;
+        }
+        if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
+        const vaultKey = await ensureMasterKey();
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        openDecryptedAttachment(clear, attachment);
+    } catch (error) {
+        console.error('[DeadlineAttachment]', error);
+        showToast('Impossibile aprire l’allegato cifrato.', 'error');
     }
 }

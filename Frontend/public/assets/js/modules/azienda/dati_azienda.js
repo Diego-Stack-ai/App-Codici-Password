@@ -4,7 +4,7 @@
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.1.8';
+import { auth, db, storage } from '../../firebase-config.js?v=1.1.8';
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
@@ -13,7 +13,8 @@ import { logError } from '../../utils.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
-import { normalizeExternalUrl } from '../shared/attachment-security.js';
+import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
+import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
 // --- STATE ---
 let currentAziendaId = null;
@@ -583,10 +584,9 @@ function renderAllegati(allegati) {
     const container = document.getElementById('allegati-list');
     if (!container || !allegati || allegati.length === 0) return;
 
-    const items = allegati.map(a => createElement('a', {
-        href: normalizeExternalUrl(a.url) || '#',
-        target: '_blank',
-        rel: 'noopener noreferrer',
+    const items = allegati.map(a => createElement('button', {
+        type: 'button',
+        onclick: () => openCompanyAttachment(a),
         className: 'attachment-item group'
     }, [
         createElement('div', { className: 'attachment-info' }, [
@@ -597,5 +597,21 @@ function renderAllegati(allegati) {
     ]));
 
     setChildren(container, items);
+}
+
+async function openCompanyAttachment(attachment) {
+    try {
+        if (!attachment.encryption) {
+            if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
+            return;
+        }
+        const vaultKey = await ensureMasterKey();
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
+        openDecryptedAttachment(clear, attachment);
+    } catch (error) {
+        logError('OpenCompanyAttachment', error);
+        showToast('Impossibile aprire l’allegato cifrato.', 'error');
+    }
 }
 
