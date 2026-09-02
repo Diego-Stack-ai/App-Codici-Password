@@ -10,6 +10,7 @@ firebase-debug.*.log*
 # Firebase cache
 .firebase/
 .codex-tmp/
+.codex-worktrees/
 
 # Firebase config
 
