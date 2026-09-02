@@ -3,9 +3,9 @@ import { collection, doc, getDoc, getDocs } from 'https://www.gstatic.com/fireba
 
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];
-const make = ({ id, kind, title, subtitle = '', keywords = [], href }) => ({
+const make = ({ id, kind, title, subtitle = '', keywords = [], href, scope = 'privato', companyName = '' }) => ({
     id: `${kind}:${id}`, kind, title: text(title) || 'Senza nome', subtitle: text(subtitle),
-    keywords: keywords.map(text).filter(Boolean), href
+    keywords: keywords.map(text).filter(Boolean), href, scope, companyName: text(companyName)
 });
 
 function profileRecords(uid, data) {
@@ -23,11 +23,13 @@ function accountRecord(id, data, companyId = '', companyName = '') {
     return make({ id, kind: companyId ? 'account aziendale' : 'account', title: data.nomeAccount || data.nome || 'Account',
         subtitle: companyId ? `Azienda: ${companyName || 'non specificata'}` : 'Account privato',
         keywords: [companyName, data.type, data.tipo, data.categoria, data.url, data.sitoWeb, data.referenteNome],
+        scope: companyId ? 'azienda' : 'privato', companyName,
         href: companyId ? `/dettaglio_account_azienda.html?aziendaId=${encodeURIComponent(companyId)}&id=${encodeURIComponent(id)}` : `/dettaglio_account_privato.html?id=${encodeURIComponent(id)}` });
 }
 
 function companyRecord(id, data) {
-    return make({ id, kind: 'azienda', title: data.ragioneSociale || data.nome || data.denominazione || 'Azienda', subtitle: 'Azienda',
+    const companyName = data.ragioneSociale || data.nome || data.denominazione || 'Azienda';
+    return make({ id, kind: 'azienda', title: companyName, subtitle: 'Azienda', scope: 'azienda', companyName,
         keywords: [data.nomeBreve, data.partitaIva, data.codiceFiscale, data.citta, data.settore], href: `/dettaglio_azienda.html?id=${encodeURIComponent(id)}` });
 }
 
