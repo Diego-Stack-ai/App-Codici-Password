@@ -16,6 +16,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { ensureMasterKey } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
+import { openExternalUrl } from '../shared/attachment-security.js';
 import {
     initAttachmentModule, loadAttachments,
     openSourceSelector, closeSourceSelector, handleFileUpload
@@ -387,7 +388,7 @@ function setupActions() {
     if (openWebBtn) {
         openWebBtn.onclick = () => {
             const url = document.getElementById('detail-website')?.value;
-            if (url) window.open(url.startsWith('http') ? url : `https://${url}`, '_blank');
+            if (url && !openExternalUrl(url)) showToast('Indirizzo non valido.', 'error');
         };
     }
 

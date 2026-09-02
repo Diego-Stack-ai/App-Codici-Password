@@ -21,6 +21,7 @@ import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
 import { initComponents } from '../../components.js?v=1.2.3';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
+import { createStorageObjectName, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -625,7 +626,7 @@ function setupActions() {
     if (openWebBtn) {
         openWebBtn.onclick = () => {
             const url = document.getElementById('detail-website')?.value;
-            if (url) window.open(url.startsWith('http') ? url : `https://${url}`, '_blank');
+            if (url && !openExternalUrl(url)) showToast('Indirizzo non valido.', 'error');
         };
     }
 
@@ -744,6 +745,11 @@ async function handleFileUpload(input) {
 
     const file = input.files[0];
     if (!file) return;
+    try { validateAttachmentFile(file); } catch (error) {
+        showToast(error.message, 'error');
+        input.value = '';
+        return;
+    }
 
     // Feedback immediato per mobile
     showToast(`File selezionato: ${file.name}`, 'info');
@@ -760,8 +766,7 @@ async function handleFileUpload(input) {
     showToast("Caricamento in corso...", "info");
 
     try {
-        const timestamp = Date.now();
-        const storagePath = `users/${ownerId}/accounts/${currentId}/attachments/${timestamp}_${file.name}`;
+        const storagePath = `users/${ownerId}/accounts/${currentId}/attachments/${createStorageObjectName(file)}`;
         const sRef = ref(storage, storagePath);
 
         const snap = await uploadBytes(sRef, file);
@@ -834,7 +839,7 @@ function renderAttachments(list) {
         }, [
             createElement('div', {
                 className: 'attachment-info cursor-pointer',
-                onclick: () => window.open(a.url, '_blank')
+                onclick: () => openExternalUrl(a.url)
             }, [
                 createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                 createElement('div', { className: 'attachment-meta' }, [
@@ -860,15 +865,12 @@ async function deleteAttachment(att) {
     if (!ok) return;
 
     try {
-        // Delete from Firestore
-        const docRef = doc(db, "users", ownerId, "accounts", currentId, "attachments", att.id);
-        await deleteDoc(docRef);
-
-        // Delete from Storage
         if (att.storagePath) {
             const sRef = ref(storage, att.storagePath);
             await deleteObject(sRef);
         }
+        const docRef = doc(db, "users", ownerId, "accounts", currentId, "attachments", att.id);
+        await deleteDoc(docRef);
 
         showToast("Allegato eliminato", "success");
         await loadAttachments();

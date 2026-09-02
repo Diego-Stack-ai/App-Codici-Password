@@ -13,6 +13,7 @@ import { logError } from '../../utils.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { normalizeExternalUrl } from '../shared/attachment-security.js';
 
 // --- STATE ---
 let currentAziendaId = null;
@@ -583,8 +584,9 @@ function renderAllegati(allegati) {
     if (!container || !allegati || allegati.length === 0) return;
 
     const items = allegati.map(a => createElement('a', {
-        href: a.url,
+        href: normalizeExternalUrl(a.url) || '#',
         target: '_blank',
+        rel: 'noopener noreferrer',
         className: 'attachment-item group'
     }, [
         createElement('div', { className: 'attachment-info' }, [

@@ -11,6 +11,7 @@ import { doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
+import { normalizeExternalUrl } from '../shared/attachment-security.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
@@ -134,7 +135,7 @@ function renderScadenza(scadenza) {
         clearElement(attCont);
         const items = scadenza.attachments.map(a => {
             const ext = a.name.split('.').pop().toLowerCase();
-            return createElement('a', { href: a.url, target: '_blank', className: 'detail-list-item clickable' }, [
+            return createElement('a', { href: normalizeExternalUrl(a.url) || '#', target: '_blank', rel: 'noopener noreferrer', className: 'detail-list-item clickable' }, [
                 createElement('div', { className: 'detail-list-item-left' }, [
                     createElement('div', { className: 'detail-list-icon-box' }, [
                         createElement('span', { className: `material-symbols-outlined`, textContent: 'description' })

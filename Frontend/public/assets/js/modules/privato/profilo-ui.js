@@ -15,6 +15,7 @@ import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { createStorageObjectName, MAX_AVATAR_BYTES, validateAttachmentFile } from '../shared/attachment-security.js';
 
 let _getState = null;
 
@@ -42,10 +43,12 @@ export function setupAvatarEdit() {
         const file = e.target.files[0];
         const { currentUserUid } = _getState();
         if (!file || !currentUserUid) return;
+        try { validateAttachmentFile(file, { imageOnly: true, maxBytes: MAX_AVATAR_BYTES }); }
+        catch (error) { showToast(error.message, 'error'); input.value = ''; return; }
 
         showToast(t('uploading_avatar') || 'Caricamento avatar...', 'info');
         try {
-            const sRef = ref(storage, `users/${currentUserUid}/avatar_${Date.now()}`);
+            const sRef = ref(storage, `users/${currentUserUid}/avatar_${createStorageObjectName(file)}`);
             await uploadBytes(sRef, file);
             const url = await getDownloadURL(sRef);
             await updateDoc(doc(db, 'users', currentUserUid), { photoURL: url });

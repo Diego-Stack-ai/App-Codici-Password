@@ -16,6 +16,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import { createStorageObjectName, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _currentUid = null;
@@ -57,6 +58,11 @@ export async function handleFileUpload(input) {
 
     const file = input.files[0];
     if (!file) return;
+    try { validateAttachmentFile(file); } catch (error) {
+        showToast(error.message, 'error');
+        input.value = '';
+        return;
+    }
 
     // Feedback immediato per mobile
     showToast(`File selezionato: ${file.name}`, 'info');
@@ -73,7 +79,7 @@ export async function handleFileUpload(input) {
     showToast("Caricamento in corso...", "info");
 
     try {
-        const storagePath = `users/${_currentUid}/aziende/${_currentAziendaId}/accounts/${_currentId}/attachments/${Date.now()}_${file.name}`;
+        const storagePath = `users/${_currentUid}/aziende/${_currentAziendaId}/accounts/${_currentId}/attachments/${createStorageObjectName(file)}`;
         const sRef = ref(storage, storagePath);
 
         const snap = await uploadBytes(sRef, file);
@@ -148,7 +154,7 @@ function renderAttachments(list) {
         }, [
             createElement('div', {
                 className: 'attachment-info cursor-pointer',
-                onclick: () => window.open(a.url, '_blank')
+                onclick: () => openExternalUrl(a.url)
             }, [
                 createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                 createElement('div', { className: 'attachment-meta' }, [
@@ -174,13 +180,12 @@ async function deleteAttachment(att) {
     if (!ok) return;
 
     try {
-        const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments", att.id);
-        await deleteDoc(docRef);
-
         if (att.storagePath) {
             const sRef = ref(storage, att.storagePath);
             await deleteObject(sRef);
         }
+        const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments", att.id);
+        await deleteDoc(docRef);
 
         showToast("Allegato eliminato", "success");
         await loadAttachments();

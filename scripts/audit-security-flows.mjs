@@ -39,6 +39,7 @@ const resetPasswordModule = await read('Frontend/public/assets/js/modules/auth/r
 const pushManager = await read('Frontend/public/assets/js/modules/shared/push-manager.js');
 const cryptoUtils = await read('Frontend/public/assets/js/modules/core/crypto-utils.js');
 const coreUi = await read('Frontend/public/assets/js/ui-core-v129.js');
+const attachmentSecurity = await read('Frontend/public/assets/js/modules/shared/attachment-security.js');
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
@@ -190,6 +191,9 @@ assert.match(storageRules, /match \/users\/\{userId\}\/\{allPaths=\*\*\}/, 'Stor
 assert.match(storageRules, /request\.auth\.uid == userId/, 'Storage non verifica la proprietà tramite UID');
 assert.match(storageRules, /request\.resource\.size <= 25 \* 1024 \* 1024/, 'Storage non impone il limite di 25 MB');
 assert.match(storageRules, /request\.resource\.contentType\.matches/, 'Storage non applica una allowlist dei MIME type');
+assert.match(attachmentSecurity, /MAX_ATTACHMENT_BYTES = 25 \* 1024 \* 1024/, 'Il client non applica lo stesso limite Storage');
+assert.match(attachmentSecurity, /\['https:', 'http:'\]/, 'Gli URL esterni non usano una allowlist di protocolli');
+assert.match(attachmentSecurity, /noopener,noreferrer/, 'Le nuove schede possono controllare la pagina di origine');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
 assert.match(deployWorkflow, /npm ci[\s\S]*?npm test[\s\S]*?firebase\.js deploy/, 'Il deploy non è preceduto dai test del repository');
 assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.28.2', 'La Firebase CLI non è fissata a una versione');

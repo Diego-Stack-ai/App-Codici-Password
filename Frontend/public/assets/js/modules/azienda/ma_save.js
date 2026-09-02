@@ -15,6 +15,7 @@ import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';
+import { createStorageObjectName, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // ─── SAVE ─────────────────────────────────────────────────────────────────────
 
@@ -123,7 +124,8 @@ export async function saveAzienda() {
         // Upload nuovi allegati
         const newAtt = [];
         for (const file of state.selectedFiles) {
-            const sRef = ref(storage, `users/${state.currentUid}/aziende_allegati/${Date.now()}_${file.name}`);
+            validateAttachmentFile(file);
+            const sRef = ref(storage, `users/${state.currentUid}/aziende_allegati/${createStorageObjectName(file)}`);
             const snap = await uploadBytes(sRef, file);
             const url = await getDownloadURL(snap.ref);
             newAtt.push({ name: file.name, url, type: file.type, size: file.size, date: new Date().toISOString() });

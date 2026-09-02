@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.20';
+const CACHE_NAME = 'codex-shell-v1.2.21';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js');
@@ -85,6 +85,7 @@ const APP_SHELL = [
     'assets/js/modules/core/webauthn-manager.js',
     'assets/js/modules/core/crypto-utils.js',
     'assets/js/modules/core/password-policy.js',
+    'assets/js/modules/shared/attachment-security.js',
     'assets/js/inactivity-timer.js',
     'assets/js/pages-init.js?v=1.2.5',
     'assets/js/modules/home/home.js?v=1.2.5',
