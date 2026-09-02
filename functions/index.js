@@ -3,7 +3,7 @@
  * Sistema notifiche scadenze via Gmail (App Password).
  *
  * Due funzioni:
- * 1. checkDeadlines    → schedulata ogni giorno alle 08:00 (repliche + email finale)
+ * 1. checkDeadlines    → schedulata ogni giorno alle 09:00 (repliche + avviso finale)
  * 2. onScadenzaCreated → trigger Firestore, invio immediato se preavviso già nella finestra
  */
 
@@ -33,11 +33,17 @@ function pushText(scadenza, diffDays) {
     return { title: "Codici & Password", body: `${tipo}${veicolo ? ` · ${veicolo}` : ""}\n${when}` };
 }
 
-function isPushReminderDay(scadenza, diffDays) {
+function shouldSendPush(scadenza, diffDays, forceImmediate = false) {
     if (diffDays === 0) return true;
-    const daysBefore = Number(scadenza.notif_days_before || 14);
+    if (forceImmediate) return true;
     const frequency = Math.max(1, Number(scadenza.notif_frequency || 7));
-    return diffDays >= 0 && diffDays <= daysBefore && (daysBefore - diffDays) % frequency === 0;
+    if (!scadenza.lastPushNotifiedAt) return true;
+    const lastPush = new Date(scadenza.lastPushNotifiedAt);
+    lastPush.setHours(0, 0, 0, 0);
+    if (Number.isNaN(lastPush.getTime())) return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.floor((today - lastPush) / (1000 * 60 * 60 * 24)) >= frequency;
 }
 
 async function activePushDevices(db, uid) {
@@ -46,13 +52,16 @@ async function activePushDevices(db, uid) {
     return snap.docs.filter((item) => item.data().notificationScope === "deadlines" && item.data().token);
 }
 
-async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays) {
-    if (!isPushReminderDay(scadenza, diffDays)) return;
+async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options = {}) {
+    if (!shouldSendPush(scadenza, diffDays, options.forceImmediate === true)) return;
     const devices = await activePushDevices(db, uid);
     if (!devices.length) return;
     const dueVersion = String(scadenza.dueDate || "").replace(/[^0-9]/g, "").slice(0, 14);
-    const stage = diffDays === 0 ? "D0" : `D${diffDays}`;
+    const previousPush = String(scadenza.lastPushNotifiedAt || "initial").replace(/[^0-9a-zA-Z]/g, "");
+    const stage = diffDays === 0 ? "D0" : `after_${previousPush}`;
     const text = pushText(scadenza, diffDays);
+    let acceptedCount = 0;
+    let retryableFailure = false;
 
     for (const device of devices) {
         const deliveryId = `${deadlineId}_${dueVersion}_${stage}_${device.id}`.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -83,6 +92,7 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays) {
                 webpush: { headers: { TTL: diffDays === 0 ? "21600" : "86400", Urgency: "high" } }
             });
             await deliveryRef.set({ status: "sent", sentAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            acceptedCount += 1;
         } catch (error) {
             const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"]
                 .includes(error.code);
@@ -91,8 +101,17 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays) {
                 updatedAt: admin.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
             if (invalid) await device.ref.set({ enabled: false, status: "invalid", invalidatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            else retryableFailure = true;
             console.error(`[PUSH FAILED] ${deadlineId}/${device.id}:`, error.code || error.message);
         }
+    }
+
+    if (acceptedCount > 0 && !retryableFailure) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        await db.collection("users").doc(uid).collection("scadenze").doc(deadlineId).update({
+            lastPushNotifiedAt: today.toISOString().split("T")[0]
+        });
     }
 }
 
@@ -305,11 +324,11 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// FUNZIONE 1 — Schedulata ogni giorno alle 08:00
+// FUNZIONE 1 — Schedulata ogni giorno alle 09:00
 // ─────────────────────────────────────────────────────────────
 exports.checkDeadlines = onSchedule(
     {
-        schedule: "0 8 * * *",
+        schedule: "0 9 * * *",
         timeZone: "Europe/Rome",
         secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
         region: "europe-west1",
@@ -425,7 +444,9 @@ exports.onScadenzaCreated = onDocumentCreated(
         if (diffDays < 0 || diffDays > daysBefore) return;
 
         try {
-            await sendDeadlinePush(admin.firestore(), event.params.uid, event.params.scadenzaId, s, diffDays);
+            await sendDeadlinePush(admin.firestore(), event.params.uid, event.params.scadenzaId, s, diffDays, {
+                forceImmediate: true
+            });
         } catch (pushErr) {
             console.error(`[TRIGGER PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
         }
