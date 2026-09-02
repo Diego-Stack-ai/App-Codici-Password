@@ -11,6 +11,7 @@ export const getLastCryptoError = () => _lastCryptoError;
 const ITERATIONS = 100000;
 const SALT_SIZE = 16;
 const IV_SIZE = 12;
+const KEK_ITERATIONS = 600000;
 
 // Helper: Uint8Array -> Hex
 const toHex = (buffer) => Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -34,6 +35,69 @@ const base64ToBuffer = (base64) => {
     }
     return bytes;
 };
+
+export function generateVaultKey() {
+    return bufferToBase64(crypto.getRandomValues(new Uint8Array(32)));
+}
+
+export function createVaultKeyring(primaryKey, legacyKey = null) {
+    return `CPVK2:${bufferToBase64(new TextEncoder().encode(JSON.stringify({ primaryKey, legacyKey })))}`;
+}
+
+function encryptionKeyCandidates(keyMaterial) {
+    const value = String(keyMaterial || '');
+    if (!value.startsWith('CPVK2:')) return [value];
+    try {
+        const keyring = JSON.parse(new TextDecoder().decode(base64ToBuffer(value.slice(6))));
+        return [keyring.primaryKey, keyring.legacyKey].filter(Boolean);
+    } catch (error) {
+        throw new Error('VAULT_KEYRING_INVALID');
+    }
+}
+
+async function deriveKek(masterPassword, salt) {
+    const material = await crypto.subtle.importKey(
+        'raw', new TextEncoder().encode(String(masterPassword).normalize('NFC').trim()),
+        'PBKDF2', false, ['deriveKey']
+    );
+    return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt, iterations: KEK_ITERATIONS, hash: 'SHA-256' },
+        material, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+}
+
+export async function wrapVaultKey(vaultKey, masterPassword, keyOrigin = 'random') {
+    const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
+    const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
+    const kek = await deriveKek(masterPassword, salt);
+    const ciphertext = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv }, kek, new TextEncoder().encode(vaultKey)
+    );
+    return {
+        version: 2,
+        type: 'vault-key-envelope',
+        kdf: 'PBKDF2-SHA256',
+        iterations: KEK_ITERATIONS,
+        cipher: 'AES-GCM-256',
+        salt: bufferToBase64(salt),
+        iv: bufferToBase64(iv),
+        wrappedKey: bufferToBase64(ciphertext),
+        keyOrigin,
+        updatedAt: Date.now()
+    };
+}
+
+export async function unwrapVaultKey(envelope, masterPassword) {
+    if (envelope?.version !== 2 || envelope?.type !== 'vault-key-envelope') {
+        throw new Error('VAULT_ENVELOPE_INVALID');
+    }
+    const salt = base64ToBuffer(envelope.salt);
+    const iv = base64ToBuffer(envelope.iv);
+    const ciphertext = base64ToBuffer(envelope.wrappedKey);
+    const kek = await deriveKek(masterPassword, salt);
+    const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, kek, ciphertext);
+    return new TextDecoder().decode(plaintext);
+}
 
 /**
  * Deriva una chiave CryptoKey da una password testuale.
@@ -93,7 +157,7 @@ export async function encrypt(text, password) {
         const salt = crypto.getRandomValues(new Uint8Array(SALT_SIZE));
         const iv = crypto.getRandomValues(new Uint8Array(IV_SIZE));
 
-        const key = await deriveKey(password, salt);
+        const key = await deriveKey(encryptionKeyCandidates(password)[0], salt);
 
         const ciphertext = await crypto.subtle.encrypt(
             { name: "AES-GCM", iv: iv },
@@ -153,20 +217,19 @@ export async function decrypt(base64Data, password) {
         const ctClean = new Uint8Array(ciphertext.length);
         ctClean.set(ciphertext);
 
-        const key = await deriveKey(password, saltClean);
-
-        // Decriptazione standard WebCrypto con parametri rigidi
-        const decoded = await crypto.subtle.decrypt(
-            {
-                name: "AES-GCM",
-                iv: ivClean,
-                tagLength: 128
-            },
-            key,
-            ctClean // Passiamo l'oggetto Uint8Array direttamente (più stabile su Safari)
-        );
-
-        return new TextDecoder().decode(decoded);
+        let lastError = null;
+        for (const candidate of encryptionKeyCandidates(password)) {
+            try {
+                const key = await deriveKey(candidate, saltClean);
+                const decoded = await crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: ivClean, tagLength: 128 }, key, ctClean
+                );
+                return new TextDecoder().decode(decoded);
+            } catch (error) {
+                lastError = error;
+            }
+        }
+        throw lastError || new Error('Decryption failed');
     } catch (e) {
         const errorDetail = `${e.name}: ${e.message}`;
         console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", errorDetail);

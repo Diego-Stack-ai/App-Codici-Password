@@ -1,6 +1,6 @@
 import { createElement, setChildren, safeSetText } from './dom-utils.js';
 import { t } from './translations.js';
-import { generateSecurePassword } from './modules/core/password-policy.js';
+import { generateSecurePassword, bindPasswordChecklist } from './modules/core/password-policy.js';
 
 // Timer privato toast — sostituisce window._toastTimeout
 let _toastTimeout = null;
@@ -247,6 +247,13 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
             className: 'btn-modal btn-secondary',
             textContent: 'Suggerisci password sicura'
         }) : null;
+        const btnVisibility = isVaultSecret ? createElement('button', {
+            type: 'button', className: 'btn-modal btn-secondary', textContent: 'Mostra'
+        }) : null;
+        btnVisibility?.addEventListener('click', () => {
+            const masked = input.classList.toggle('vault-secret-input');
+            btnVisibility.textContent = masked ? 'Mostra' : 'Nascondi';
+        });
         btnSuggest?.addEventListener('click', () => {
             input.value = generateSecurePassword(options.length || 20);
             input.classList.remove('vault-secret-input');
@@ -276,12 +283,24 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
             createElement('div', { className: 'modal-accent-bar' }),
             description ? createElement('p', { className: 'modal-text', textContent: description }) : null,
             input,
+            options.passwordType ? createElement('ul', {
+                className: 'modal-password-requirements',
+                'aria-label': 'Requisiti password'
+            }, ['minLength', 'lowercase', 'uppercase', 'number', 'symbol', 'noOuterWhitespace'].map(rule =>
+                createElement('li', { dataset: { passwordRule: rule }, textContent: rule })
+            )) : null,
             btnSuggest,
+            btnVisibility,
             createElement('div', { className: 'modal-actions' }, [btnCancel, btnConfirm])
         ].filter(Boolean));
 
         modal.appendChild(content);
         document.body.appendChild(modal);
+        if (options.passwordType) {
+            const labels = ['Lunghezza minima', 'Una minuscola', 'Una maiuscola', 'Un numero', 'Un simbolo', 'Nessuno spazio esterno'];
+            content.querySelectorAll('.modal-password-requirements li').forEach((item, index) => { item.textContent = labels[index]; });
+            bindPasswordChecklist(input, content.querySelector('.modal-password-requirements'), options.passwordType);
+        }
 
         setTimeout(() => {
             modal.classList.add('active');

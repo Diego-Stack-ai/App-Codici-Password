@@ -204,6 +204,32 @@
                         <input type="checkbox" id="2fa-toggle" class="settings-toggle">
                     </div>
 
+                    <button class="settings-item group hidden" id="btn-regenerate-recovery-codes">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-emerald">
+                                <span class="material-symbols-outlined">key</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <span class="settings-label">Codici di recupero 2FA</span>
+                                <span class="settings-desc">Genera 10 nuovi codici monouso; i precedenti saranno annullati</span>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
+                    </button>
+
+                    <button class="settings-item group" id="btn-change-master-password">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-purple">
+                                <span class="material-symbols-outlined">encrypted</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <span class="settings-label">Master Password della Vault</span>
+                                <span class="settings-desc">Cambia la Master Password senza modificare la password di login</span>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
+                    </button>
+
                     <!-- Biometrico -->
                     <div class="settings-item">
                         <div class="row-layout">
@@ -243,6 +269,19 @@
                             <div class="settings-item-info">
                                 <span class="settings-label" data-t="reset_vault_title">Rimuovi accesso biometrico</span>
                                 <span class="settings-desc" data-t="reset_vault_desc">Non cancella i dati: al prossimo accesso servirà la Master Password</span>
+                            </div>
+                        </div>
+                        <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
+                    </button>
+
+                    <button class="settings-item group" id="btn-revoke-all-sessions">
+                        <div class="row-layout">
+                            <div class="settings-icon-box icon-red">
+                                <span class="material-symbols-outlined">devices_off</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <span class="settings-label">Disconnetti tutte le postazioni</span>
+                                <span class="settings-desc">Revoca le sessioni Firebase su PC, tablet e telefono, inclusa questa</span>
                             </div>
                         </div>
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>

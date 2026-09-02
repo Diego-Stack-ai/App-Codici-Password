@@ -11,8 +11,8 @@ import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
-import { encrypt, decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured } from '../core/security-manager.js';
-import { enrollTotp, unenrollTotp, getTotpEnrollment } from '../core/mfa-manager.js';
+import { encrypt, decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
+import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
 import { disableDeadlinePush, enableDeadlinePush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
@@ -123,13 +123,18 @@ function setupSecurityToggles(data) {
 
     if (t2fa) {
         t2fa.checked = !!getTotpEnrollment();
+        document.getElementById('btn-regenerate-recovery-codes')?.classList.toggle('hidden', !t2fa.checked);
         t2fa.addEventListener('change', async () => {
             const enable = t2fa.checked;
             t2fa.disabled = true;
             try {
                 const completed = enable ? await enrollTotp() : await unenrollTotp();
                 t2fa.checked = completed ? enable : !enable;
-                if (completed) showToast(enable ? "2FA Authenticator attivata" : "2FA disattivata", "success");
+                if (completed) {
+                    document.getElementById('btn-regenerate-recovery-codes')?.classList.toggle('hidden', !enable);
+                    if (enable) await generateAndShowRecoveryCodes();
+                    showToast(enable ? "2FA Authenticator attivata" : "2FA disattivata", "success");
+                }
             } catch (error) {
                 console.error("TOTP configuration failed", error);
                 t2fa.checked = !enable;
@@ -198,6 +203,24 @@ function setupSecurityToggles(data) {
             }
         });
     }
+}
+
+async function generateAndShowRecoveryCodes() {
+    const codes = await createRecoveryCodes();
+    const modal = createElement('div', { className: 'modal-overlay active' });
+    const list = createElement('div', { className: 'recovery-code-grid' },
+        codes.map(code => createElement('code', { textContent: code }))
+    );
+    const close = () => modal.remove();
+    setChildren(modal, createElement('div', { className: 'modal-box' }, [
+        createElement('h3', { className: 'modal-title', textContent: 'Codici di recupero 2FA' }),
+        createElement('p', { className: 'modal-text', textContent: 'Salvali ora in un luogo sicuro. Ogni codice funziona una sola volta e non sarà più mostrato.' }),
+        list,
+        createElement('div', { className: 'modal-actions' }, [
+            createElement('button', { className: 'btn-modal btn-primary', textContent: 'Li ho salvati', onclick: close })
+        ])
+    ]));
+    document.body.appendChild(modal);
 }
 
 
@@ -362,6 +385,36 @@ function initSettingsEvents() {
             'Rimuovi', 'Annulla'
         );
         if (ok) await resetVault();
+    });
+
+    document.getElementById('btn-change-master-password')?.addEventListener('click', async () => {
+        try {
+            await changeMasterPassword();
+            const faceToggle = document.getElementById('face-id-toggle');
+            if (faceToggle) faceToggle.checked = false;
+        } catch (error) {
+            showToast(error.message || 'Cambio Master Password non riuscito.', 'error');
+        }
+    });
+
+    document.getElementById('btn-regenerate-recovery-codes')?.addEventListener('click', async () => {
+        const ok = await showConfirmModal('Nuovi codici di recupero', 'I codici precedenti smetteranno subito di funzionare. Continuare?', 'Genera', 'Annulla');
+        if (!ok) return;
+        try { await generateAndShowRecoveryCodes(); }
+        catch (error) { showToast(error.message || 'Generazione codici non riuscita.', 'error'); }
+    });
+
+    document.getElementById('btn-revoke-all-sessions')?.addEventListener('click', async () => {
+        const ok = await showConfirmModal('Disconnetti tutte le postazioni', 'Dovrai eseguire nuovamente login e 2FA su ogni dispositivo. Continuare?', 'Disconnetti', 'Annulla');
+        if (!ok) return;
+        try {
+            await revokeAllSessions();
+            clearSession();
+            await signOut(auth);
+            window.location.replace('login-v115.html?reauth=sessions-revoked');
+        } catch (error) {
+            showToast(error.message || 'Revoca delle sessioni non riuscita.', 'error');
+        }
     });
 }
 

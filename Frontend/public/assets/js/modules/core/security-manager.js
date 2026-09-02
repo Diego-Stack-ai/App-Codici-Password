@@ -4,7 +4,7 @@
  * - Sblocco biometrico usa WebAuthn PRF.
  */
 
-import { encrypt, decrypt, isEncryptedValue } from './crypto-utils.js';
+import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core.js';
 import { db, auth } from '../../firebase-config.js?v=1.1.8';
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
@@ -36,6 +36,7 @@ purgeDeprecatedVaultSecrets();
 // --- VAULT VERIFIER ---
 const VERIFIER_STORAGE_PREFIX = 'codex_vault_verifier_';
 const VERIFIER_MARKER = 'APP_CODICI_PASSWORD_VAULT_VERIFIER_V1';
+const ENVELOPE_STORAGE_PREFIX = 'codex_vault_envelope_';
 
 function getVerifierStorageKey(uid) {
     return uid ? `${VERIFIER_STORAGE_PREFIX}${uid}` : null;
@@ -214,6 +215,44 @@ export function isAutoUnlockActive() {
     return false;
 }
 
+function getEnvelopeStorageKey(uid) {
+    return uid ? `${ENVELOPE_STORAGE_PREFIX}${uid}` : null;
+}
+
+async function loadVaultEnvelope(uid) {
+    const cached = localStorage.getItem(getEnvelopeStorageKey(uid));
+    if (cached) {
+        try {
+            const parsed = JSON.parse(cached);
+            if (parsed?.version === 2) return parsed;
+        } catch (error) { /* recupera dalla copia remota */ }
+    }
+    const snap = await getDoc(doc(db, 'users', uid, 'settings', 'security'));
+    const envelope = snap.exists() ? snap.data().vaultKeyEnvelope : null;
+    if (envelope?.version === 2) localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(envelope));
+    return envelope || null;
+}
+
+async function saveVaultEnvelope(uid, envelope) {
+    await setDoc(doc(db, 'users', uid, 'settings', 'security'), { vaultKeyEnvelope: envelope }, { merge: true });
+    localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(envelope));
+}
+
+async function resolveVaultKey(masterPassword, uid, newVault) {
+    let envelope = await loadVaultEnvelope(uid);
+    if (!envelope) {
+        // I vault esistenti mantengono inizialmente la chiave dati corrente per evitare
+        // una ricifratura non atomica. I vault nuovi ricevono subito 256 bit casuali.
+        const vaultKey = newVault
+            ? generateVaultKey()
+            : createVaultKeyring(generateVaultKey(), masterPassword);
+        envelope = await wrapVaultKey(vaultKey, masterPassword, newVault ? 'random' : 'random-with-legacy-fallback');
+        await saveVaultEnvelope(uid, envelope);
+        return vaultKey;
+    }
+    return unwrapVaultKey(envelope, masterPassword);
+}
+
 async function isNewVault(uid) {
     const [userSnap, accountsSnap, aziendeSnap] = await Promise.all([
         getDoc(doc(db, 'users', uid)),
@@ -327,7 +366,7 @@ async function ensureMasterKeyInternal(options = {}) {
             throw e;
         }
 
-        _masterKey = cleanPass;
+        _masterKey = await resolveVaultKey(cleanPass, uid, await isNewVault(uid));
         _isSoftLocked = false;
         _vaultAutoUnlock = true;
         await saveVaultSession(_masterKey, uid);
@@ -401,13 +440,13 @@ export async function setMasterKey(pass, saveForBiometrics = false) {
         throw e;
     }
     
-    _masterKey = cleanPass;
+    _masterKey = await resolveVaultKey(cleanPass, uid, await isNewVault(uid));
     _isSoftLocked = false;
     _vaultAutoUnlock = true;
     await saveVaultSession(_masterKey, uid);
     const biometricAlreadyEnabled = !!localStorage.getItem(getStorageKey(uid));
     if (saveForBiometrics || biometricAlreadyEnabled) {
-        await enableBiometricUnlock(cleanPass);
+        await enableBiometricUnlock(_masterKey);
     }
     updateGlobalState();
 }
@@ -426,23 +465,30 @@ async function tryBiometricUnlock() {
 
     try {
         const data = JSON.parse(encryptedSecret);
-        if (data.version !== 1 || !data.credentialId || !data.encryptedMasterKey) return null;
+        if (![1, 2].includes(data.version) || !data.credentialId || !(data.encryptedVaultKey || data.encryptedMasterKey)) return null;
 
         const prfOutput = await getPrfOutput(data.credentialId, data.prfSalt);
         const aesKey = await deriveHkdfKey(prfOutput, data.hkdfSalt);
-        const secret = await decryptVaultSecret(data.encryptedMasterKey, data.iv, aesKey);
+        const secret = await decryptVaultSecret(data.encryptedVaultKey || data.encryptedMasterKey, data.iv, aesKey);
         
         // VERIFY WITH VAULT VERIFIER
+        if (data.version === 2) {
+            showToast('Accesso Biometrico Confermato', 'success');
+            return secret;
+        }
+
         const verificationResult = await verifyMasterPassword(secret, uid);
         
         if (verificationResult === true) {
+            const vaultKey = await resolveVaultKey(secret, uid, await isNewVault(uid));
             showToast('Accesso Biometrico Confermato', 'success');
-            return secret;
+            return vaultKey;
         } else if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
             const migrated = await migrateLegacyVault(secret, uid);
             if (migrated) {
                 showToast('Accesso Biometrico Confermato (Migrato)', 'success');
-                return secret;
+                const vaultKey = await resolveVaultKey(secret, uid, await isNewVault(uid));
+                return vaultKey;
             }
         }
         
@@ -484,9 +530,9 @@ export async function enableBiometricUnlock(pass) {
         const encrypted = await encryptVaultSecret(cleanPass, aesKey);
 
         const container = {
-            version: 1,
+            version: 2,
             credentialId: setup.credentialId,
-            encryptedMasterKey: encrypted.ciphertext,
+            encryptedVaultKey: encrypted.ciphertext,
             iv: encrypted.iv,
             hkdfSalt: hkdfSalt,
             prfSalt: setup.prfSalt,
@@ -514,6 +560,42 @@ export async function enableBiometricUnlock(pass) {
         }
         return false;
     }
+}
+
+export async function changeMasterPassword() {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error('Utente non autenticato.');
+    const oldPassword = await showInputModal('CAMBIA MASTER PASSWORD', '', 'Master Password attuale', 'Verifica la chiave attuale della Vault.', { vaultSecret: true });
+    if (!oldPassword) return false;
+    const cleanOld = oldPassword.normalize('NFC').trim();
+    if (await verifyMasterPassword(cleanOld, uid) !== true) throw new Error('Master Password attuale errata.');
+
+    const newPassword = await showInputModal('NUOVA MASTER PASSWORD', '', 'Nuova Master Password', passwordPolicyMessage('master'), { vaultSecret: true, suggestPassword: true, length: 24, passwordType: 'master' });
+    if (!newPassword) return false;
+    const cleanNew = newPassword.normalize('NFC').trim();
+    if (!evaluatePassword(cleanNew, 'master').valid) throw new Error(firstPasswordPolicyError(cleanNew, 'master'));
+    if (cleanNew === cleanOld) throw new Error('La nuova Master Password deve essere diversa dalla precedente.');
+    const confirmation = await showInputModal('CONFERMA MASTER PASSWORD', '', 'Reinserisci la nuova Master Password', 'Il cambio non modifica la password di login.', { vaultSecret: true });
+    if (!confirmation || confirmation.normalize('NFC').trim() !== cleanNew) throw new Error('Le nuove Master Password non coincidono.');
+
+    const envelope = await loadVaultEnvelope(uid);
+    const vaultKey = envelope
+        ? await unwrapVaultKey(envelope, cleanOld)
+        : createVaultKeyring(generateVaultKey(), cleanOld);
+    const newEnvelope = await wrapVaultKey(vaultKey, cleanNew, envelope?.keyOrigin || 'random-with-legacy-fallback');
+    const verifier = {
+        version: 1, type: 'vault-verifier',
+        ciphertext: await encrypt(VERIFIER_MARKER, cleanNew),
+        createdAt: Date.now(), updatedAt: Date.now()
+    };
+    await setDoc(doc(db, 'users', uid, 'settings', 'security'), { verifier, vaultKeyEnvelope: newEnvelope }, { merge: true });
+    localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
+    localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(newEnvelope));
+    localStorage.removeItem(getStorageKey(uid));
+    _masterKey = vaultKey;
+    await saveVaultSession(vaultKey, uid);
+    showToast('Master Password modificata. Riattiva la biometria su questo dispositivo.', 'success');
+    return true;
 }
 
 export function clearSession() {

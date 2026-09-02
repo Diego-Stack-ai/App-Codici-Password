@@ -1,8 +1,9 @@
-import { auth } from '../../firebase-config.js?v=1.1.8';
+import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.1.8';
 import {
     multiFactor,
     TotpMultiFactorGenerator
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 
@@ -75,6 +76,7 @@ export async function enrollTotp(user = auth.currentUser) {
 
     const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, code);
     await multiFactor(user).enroll(assertion, 'App Authenticator');
+    await user.getIdToken(true);
     return true;
 }
 
@@ -83,5 +85,23 @@ export async function unenrollTotp(user = auth.currentUser) {
     const enrollment = getTotpEnrollment(user);
     if (!enrollment) return true;
     await multiFactor(user).unenroll(enrollment);
+    return true;
+}
+
+export async function createRecoveryCodes() {
+    const result = await httpsCallable(functions, 'createMfaRecoveryCodes')();
+    return result.data?.codes || [];
+}
+
+export async function recoverTotpAccess(email, password, recoveryCode) {
+    // Il login mantiene App Check lazy per evitare regressioni all'avvio; viene
+    // attivato solo quando l'utente richiede questa funzione server sensibile.
+    enableAppCheck();
+    await httpsCallable(functions, 'recoverMfaWithCode')({ email, password, recoveryCode });
+    return true;
+}
+
+export async function revokeAllSessions() {
+    await httpsCallable(functions, 'revokeAllSessions')();
     return true;
 }

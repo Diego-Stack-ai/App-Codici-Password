@@ -11,6 +11,11 @@ service cloud.firestore {
       return isAuth() && request.auth.uid in resource.data.get('sharedWithUids', []);
     }
 
+    // Solo Cloud Functions (Admin SDK) può leggere o scrivere i codici di recupero.
+    match /mfaRecovery/{userId} {
+      allow read, write: if false;
+    }
+
     match /users/{userId} {
       allow read, write: if isOwner(userId);
     }

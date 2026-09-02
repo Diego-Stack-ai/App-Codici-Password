@@ -13,6 +13,7 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 const { setGlobalOptions } = require("firebase-functions");
 
 admin.initializeApp();
@@ -21,6 +22,96 @@ setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 // Segreti cifrati (salvati su Google Secret Manager)
 const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
+const FIREBASE_WEB_API_KEY = "AIzaSyDDt-PacoHtUQg6Ow7-1UxvrGVZLXVYx-o";
+
+function normalizeRecoveryCode(value) {
+    return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function recoveryCodeHash(value) {
+    return crypto.createHash("sha256").update(normalizeRecoveryCode(value), "utf8").digest("hex");
+}
+
+function generateRecoveryCode() {
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const bytes = crypto.randomBytes(16);
+    let raw = "";
+    for (let i = 0; i < 16; i += 1) raw += alphabet[bytes[i] % alphabet.length];
+    return raw.match(/.{1,4}/g).join("-");
+}
+
+exports.createMfaRecoveryCodes = onCall(
+    { region: "europe-west1", enforceAppCheck: true },
+    async (request) => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        const authAgeSeconds = Math.floor(Date.now() / 1000) - Number(request.auth.token.auth_time || 0);
+        if (authAgeSeconds > 300) {
+            throw new HttpsError("failed-precondition", "Accedi nuovamente prima di generare i codici.");
+        }
+        const user = await admin.auth().getUser(request.auth.uid);
+        const hasTotp = user.multiFactor?.enrolledFactors?.some((factor) => factor.factorId === "totp");
+        if (!hasTotp) throw new HttpsError("failed-precondition", "Attiva prima la 2FA Authenticator.");
+
+        const codes = Array.from({ length: 10 }, generateRecoveryCode);
+        await admin.firestore().collection("mfaRecovery").doc(user.uid).set({
+            codeHashes: codes.map(recoveryCodeHash),
+            remaining: codes.length,
+            version: 1,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        return { codes };
+    }
+);
+
+exports.recoverMfaWithCode = onCall(
+    { region: "europe-west1", enforceAppCheck: true },
+    async (request) => {
+        const email = String(request.data?.email || "").trim().toLowerCase();
+        const password = String(request.data?.password || "");
+        const codeHash = recoveryCodeHash(request.data?.recoveryCode);
+        if (!email || !password || normalizeRecoveryCode(request.data?.recoveryCode).length !== 16) {
+            throw new HttpsError("invalid-argument", "Dati di recupero non validi.");
+        }
+
+        // Verifica il primo fattore con Firebase Auth senza creare una sessione applicativa.
+        const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email, password, returnSecureToken: true })
+        });
+        const authResult = await response.json();
+        const firstFactorAccepted = response.ok || String(authResult?.error?.message || "").startsWith("MFA_REQUIRED");
+        if (!firstFactorAccepted) throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
+
+        const user = await admin.auth().getUserByEmail(email);
+        const recoveryRef = admin.firestore().collection("mfaRecovery").doc(user.uid);
+        const recovery = await recoveryRef.get();
+        const hashes = recovery.exists ? recovery.data().codeHashes || [] : [];
+        if (!hashes.includes(codeHash)) {
+            throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
+        }
+
+        await admin.auth().updateUser(user.uid, { multiFactor: { enrolledFactors: null } });
+        await admin.auth().revokeRefreshTokens(user.uid);
+        await recoveryRef.set({
+            codeHashes: hashes.filter((hash) => hash !== codeHash),
+            remaining: Math.max(0, hashes.length - 1),
+            recoveredAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        return { ok: true };
+    }
+);
+
+exports.revokeAllSessions = onCall(
+    { region: "europe-west1", enforceAppCheck: true },
+    async (request) => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        await admin.auth().revokeRefreshTokens(request.auth.uid);
+        return { ok: true };
+    }
+);
 
 function sanitizeEmail(email) {
     return String(email || "").toLowerCase().replace(/[^a-zA-Z0-9]/g, "_") || "unknown_guest";

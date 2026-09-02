@@ -9,6 +9,7 @@ import { initComponents } from '../../components.js?v=1.2.4';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showInputModal } from '../../ui-core.js?v=1.2.4';
+import { recoverTotpAccess } from '../core/mfa-manager.js';
 
 /**
  * LOGIN MODULE (V5.0 ADAPTER)
@@ -93,6 +94,14 @@ function setupLoginForm() {
     let throttleTimer = null;
     let awaitingTotp = false;
     let pendingEmail = '';
+    let usingRecoveryCode = false;
+
+    document.getElementById('btn-use-recovery-code')?.addEventListener('click', () => {
+        usingRecoveryCode = true;
+        document.getElementById('totp-form-group')?.classList.add('hidden');
+        document.getElementById('recovery-form-group')?.classList.remove('hidden');
+        document.getElementById('recovery-code')?.focus();
+    });
 
     function applyThrottle() {
         const delays = [1, 2, 4, 8, 16, 30]; // secondi
@@ -162,6 +171,13 @@ function setupLoginForm() {
 
         try {
             if (awaitingTotp) {
+                if (usingRecoveryCode) {
+                    const recoveryCode = document.getElementById('recovery-code')?.value.trim() || '';
+                    await recoverTotpAccess(pendingEmail, password, recoveryCode);
+                    showToast('Accesso recuperato. La 2FA è stata disattivata: accedi di nuovo e riconfigurala.', 'success');
+                    setTimeout(() => window.location.reload(), 1800);
+                    return;
+                }
                 if (!/^\d{6}$/.test(totpCode)) {
                     throw new Error("Inserisci il codice Authenticator di 6 cifre.");
                 }

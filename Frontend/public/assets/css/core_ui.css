@@ -640,6 +640,21 @@
 .vault-secret-input {
     -webkit-text-security: disc;
 }
+
+.modal-password-requirements {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem 0.75rem;
+    margin: 0.75rem 0;
+    padding: 0;
+    list-style: none;
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+}
+
+.modal-password-requirements li::before { content: '○ '; }
+.modal-password-requirements li.is-valid { color: var(--status-success); }
+.modal-password-requirements li.is-valid::before { content: '✓ '; }
 .mfa-qr {
     display: flex;
     justify-content: center;

@@ -34,6 +34,8 @@ const cloudFunctions = await read('functions/index.js');
 const manifest = JSON.parse(await read('Frontend/public/manifest.json'));
 const resetPasswordModule = await read('Frontend/public/assets/js/modules/auth/reset_password.js');
 const pushManager = await read('Frontend/public/assets/js/modules/shared/push-manager.js');
+const cryptoUtils = await read('Frontend/public/assets/js/modules/core/crypto-utils.js');
+const coreUi = await read('Frontend/public/assets/js/ui-core-v129.js');
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
@@ -169,4 +171,22 @@ assert.match(auth, /reauthFlow === 'security-settings'[\s\S]*?impostazioni\.html
 assert.match(pushManager, /getToken\(messaging[\s\S]*?serviceWorkerRegistration/, 'La correzione sicurezza ha rimosso la registrazione push');
 assert.match(serviceWorker, /onBackgroundMessage[\s\S]*?eventType !== 'deadline'/, 'La correzione sicurezza ha alterato le notifiche push di scadenza');
 
-console.log('Audit sicurezza e offline: 60 controlli superati.');
+assert.match(cloudFunctions, /exports\.createMfaRecoveryCodes = onCall/, 'Generazione server dei codici recupero 2FA mancante');
+assert.match(cloudFunctions, /exports\.recoverMfaWithCode = onCall/, 'Recupero 2FA server mancante');
+assert.match(cloudFunctions, /updateUser\(user\.uid, \{ multiFactor: \{ enrolledFactors: null \} \}\)/, 'Il recupero non rimuove realmente il fattore Firebase');
+assert.match(cloudFunctions, /revokeRefreshTokens\(user\.uid\)/, 'Il recupero 2FA non revoca le sessioni esistenti');
+assert.match(firestoreRules, /match \/mfaRecovery\/\{userId\}[\s\S]*?allow read, write: if false;/, 'I codici recupero sono accessibili direttamente dal client');
+assert.match(loginHtml, /id="recovery-code"[^>]+autocomplete="off"/, 'Campo codice recupero assente o esposto ad autofill');
+assert.match(login, /recoverTotpAccess\(pendingEmail, password, recoveryCode\)/, 'Flusso recupero 2FA non collegato al login');
+assert.match(settingsHtml, /id="btn-revoke-all-sessions"/, 'Comando disconnessione postazioni assente');
+assert.match(settings, /await revokeAllSessions\(\)[\s\S]*?await signOut\(auth\)/, 'La revoca postazioni non termina la sessione corrente');
+assert.match(cryptoUtils, /const KEK_ITERATIONS = 600000/, 'Derivazione KEK insufficiente o non centralizzata');
+assert.match(cryptoUtils, /export async function wrapVaultKey/, 'Envelope della Vault Key mancante');
+assert.match(cryptoUtils, /export async function unwrapVaultKey/, 'Apertura envelope della Vault Key mancante');
+assert.match(cryptoUtils, /createVaultKeyring[\s\S]*?legacyKey[\s\S]*?encryptionKeyCandidates/, 'La migrazione Vault non conserva un fallback leggibile per i record legacy');
+assert.match(security, /generateVaultKey\(\)[\s\S]*?wrapVaultKey/, 'I nuovi Vault non ricevono una chiave casuale separata');
+assert.match(security, /export async function changeMasterPassword/, 'Cambio Master Password non implementato');
+assert.match(settingsHtml, /id="btn-change-master-password"/, 'Cambio Master Password non esposto in Impostazioni');
+assert.match(coreUi, /passwordType[\s\S]*?bindPasswordChecklist/, 'Il cambio Master Password non mostra i requisiti dinamici');
+
+console.log('Audit sicurezza e offline: 77 controlli superati.');
