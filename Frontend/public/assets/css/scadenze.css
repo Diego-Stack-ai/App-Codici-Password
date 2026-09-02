@@ -350,3 +350,18 @@ html:not(.dark) .deadline-card-subtitle {
         transform: translateY(0);
     }
 }
+
+@media (max-width: 600px) {
+    .deadline-card .swipe-content {
+        /* Un layer opaco evita il conflitto GPU tra blur delle card e fasce fixed. */
+        background: #142f69;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    html:not(.dark) .deadline-card .swipe-content {
+        background: #dbeafe;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}

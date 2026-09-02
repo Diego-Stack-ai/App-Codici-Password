@@ -36,6 +36,8 @@
         -webkit-backdrop-filter: none;
         mask-image: none;
         -webkit-mask-image: none;
+        transform: translateX(-50%);
+        will-change: auto;
     }
 
     .base-header {
@@ -46,6 +48,11 @@
     .base-footer {
         background: linear-gradient(to top, var(--card-bg) 0%, var(--card-bg) 58%, transparent 100%);
         border-top-color: transparent;
+    }
+
+    .btn-footer-secondary {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 }
 
