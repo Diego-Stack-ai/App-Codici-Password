@@ -248,7 +248,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 finalData.recipientEmail = deleteField();
             }
 
-            LOG("[V3.1-DEBUG] Final Transaction Payload Azienda:", finalData);
+            LOG("[V3.1-DEBUG] Company account transaction ready");
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);

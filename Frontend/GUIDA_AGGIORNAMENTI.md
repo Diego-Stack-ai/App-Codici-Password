@@ -71,6 +71,14 @@ Con il rilascio della **V8.0**, l'app entra in uno stato di produzione "Blindato
 
 ## 7. CONTROLLI APERTI CONSOLIDATI
 
+### Hardening P4 — settembre 2026
+
+- Le dipendenze runtime del pacchetto principale non presentano vulnerabilità note (`npm audit --omit=dev`).
+- Firebase Admin, Firebase Functions e Nodemailer sono aggiornati alle baseline compatibili con Node 22; le sole segnalazioni runtime residue delle Functions sono moderate e transitive nella catena Google Storage, senza aggiornamento compatibile disponibile.
+- Il lint delle Functions è nuovamente operativo con configurazione ESLint flat ed è parte della suite `npm test`.
+- I log di sviluppo non includono più email, UID, nomi account, payload cifrati o frammenti di ciphertext.
+- Il fallback QR non usa più assegnazioni `innerHTML`.
+
 Questa sezione sostituisce i vecchi report di audit e i documenti di migrazione V3 separati.
 
 - 🟡 **P0 — Firestore Rules condivisioni (implementazione locale completata)**: dalla versione 1.2.6 la lettura condivisa richiede che l'UID dell'ospite sia presente in `sharedWithUids`; il solo `visibility="shared"` non concede più accesso. Gli ospiti non hanno permessi di scrittura sugli account condivisi. Restano obbligatori il collaudo con emulatori/progetto di test e la verifica del deploy effettivo di Rules e Functions prima del go-live.

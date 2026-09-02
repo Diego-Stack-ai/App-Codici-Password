@@ -121,7 +121,7 @@ async function loadAccounts() {
 
         // 1. Invitations Accepted
         const lowerEmail = (currentUser.email || "").toLowerCase().trim();
-        LOG(`[ACCOUNTS] Searching invites for authenticated email:`, lowerEmail);
+        LOG('[ACCOUNTS] Searching invites for authenticated user');
 
         const invitesQ = query(collection(db, "invites"),
             where("recipientEmail", "==", lowerEmail),
@@ -152,7 +152,7 @@ async function loadAccounts() {
                 if (accSnap.exists()) {
                     const d = accSnap.data();
                     sharedAccountIds.add(accSnap.id);
-                    LOG(`[ACCOUNTS] SUCCESS: Loaded "${d.nomeAccount}" from ${senderId}`);
+                    LOG('[ACCOUNTS] Shared account loaded');
                     return { ...d, id: accSnap.id, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
                 } else {
                     console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
@@ -166,7 +166,7 @@ async function loadAccounts() {
         LOG(`[ACCOUNTS] Total shared accounts successfully loaded: ${sharedWithMe.length}`);
 
         // 2. Own Accounts
-        LOG(`[ACCOUNTS] Loading own accounts for: ${currentUser.uid}`);
+        LOG('[ACCOUNTS] Loading own accounts');
         const ownSnap = await getDocs(collection(db, "users", currentUser.uid, "accounts"));
         LOG(`[ACCOUNTS] Found ${ownSnap.size} own accounts.`);
         const ownAccounts = ownSnap.docs.map(d => {

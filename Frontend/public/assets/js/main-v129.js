@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            LOG(`[AUTH-DEBUG] User logged in: ${user.email} (UID: ${user.uid})`);
+            LOG('[AUTH-DEBUG] User logged in');
             try {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
                 if (!publicPages.includes(currentPage)) firebaseRuntime.enableAppCheck?.();
@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!currentUserEmail) throw new Error("Utente non autenticato.");
 
             LOG(`[V3.1-DEBUG] --- handleInviteResponse ---`);
-            LOG(`[V3.1-DEBUG] User: ${currentUserEmail} (UID: ${currentUid}), Action: ${status}`);
+            LOG(`[V3.1-DEBUG] Invitation action: ${status}`);
 
             // --- RETRY LOGIC (Harden V7.0) ---
             let invSnap = null;

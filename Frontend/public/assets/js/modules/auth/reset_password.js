@@ -61,7 +61,7 @@ function setupResetForm() {
         document.body.classList.add('is-auth-progress');
 
         try {
-            LOG("[RESET] Sending recovery email to:", email);
+            LOG("[RESET] Sending recovery email");
             await resetPassword(email);
 
             showToast(t('success_reset_sent'), "success");

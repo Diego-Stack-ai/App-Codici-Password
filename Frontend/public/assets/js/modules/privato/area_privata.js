@@ -64,7 +64,7 @@ export async function initAreaPrivata(user) {
  */
 async function loadCounters(uid, email) {
     try {
-        LOG(`[Counters] Fetching own accounts for UID: ${uid}`);
+        LOG('[Counters] Fetching own accounts');
         const allSnap = await getDocs(collection(db, "users", uid, "accounts"));
         LOG(`[Counters] Own accounts fetched: ${allSnap.size}`);
         let counts = { standard: 0, memo: 0, shared: 0, sharedMemo: 0 };
@@ -87,7 +87,7 @@ async function loadCounters(uid, email) {
 
         // Controlla inviti accettati (per conteggio condivisi) - Normalizzazione V5.0
         const lowerEmail = (email || "").toLowerCase().trim();
-        LOG(`[Counters] Fetching invites for authenticated email:`, lowerEmail);
+        LOG('[Counters] Fetching invites for authenticated user');
         const invitesQ = query(collection(db, "invites"),
             where("recipientEmail", "==", lowerEmail),
             where("status", "==", "accepted")

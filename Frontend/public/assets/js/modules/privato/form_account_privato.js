@@ -712,7 +712,7 @@ async function saveAccount() {
                 finalData.recipientEmail = deleteField();
             }
 
-            LOG("[V3.1-DEBUG] Final Transaction Payload:", finalData);
+            LOG("[V3.1-DEBUG] Account transaction ready");
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);

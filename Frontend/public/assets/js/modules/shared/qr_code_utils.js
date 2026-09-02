@@ -114,7 +114,10 @@ export function renderQRCode(container, text, options = {}) {
             });
         } catch (retryError) {
             console.error("QR Code Retry Failed:", retryError);
-            container.innerHTML = '<div style="color:red; font-size:0.75rem; text-align:center; padding:10px;">Dati eccessivi<br>per il QR Code</div>';
+            const message = document.createElement('div');
+            message.style.cssText = 'color:red; font-size:0.75rem; text-align:center; padding:10px;';
+            message.append('Dati eccessivi', document.createElement('br'), 'per il QR Code');
+            container.replaceChildren(message);
             showToast("Dati eccessivi. Riduci i campi.", "warning");
         }
     }

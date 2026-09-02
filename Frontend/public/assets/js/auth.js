@@ -100,7 +100,7 @@ async function register(nome, cognome, email, password) {
 
         // Send email verification (optional but recommended)
         await sendEmailVerification(user);
-        LOG('Verification email sent to', user.email);
+        LOG('Verification email sent');
         showToast("Email di verifica inviata! Controlla la tua casella.", "success");
 
         showToast("Registrazione avvenuta con successo!", "success");
@@ -128,7 +128,7 @@ async function register(nome, cognome, email, password) {
  * @param {string} password - User's password.
  */
 async function finalizeLogin(user, email) {
-    LOG("AUTH SUCCESS: ", user.uid);
+    LOG("AUTH SUCCESS");
 
     await user.reload();
     const updatedUser = auth.currentUser;
@@ -160,7 +160,7 @@ async function finalizeLogin(user, email) {
 
 async function login(email, password, rememberDevice = true) {
     try {
-        LOG("LOGIN START: ", email);
+        LOG("LOGIN START");
         await setPersistence(auth, rememberDevice ? browserLocalPersistence : browserSessionPersistence);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return await finalizeLogin(userCredential.user, email);
@@ -237,7 +237,7 @@ function checkAuthState() {
         const authPages = ['login-v115.html', 'registrati.html', 'reset_password.html', 'imposta_nuova_password.html'];
         const isAuthPage = authPages.some(p => path.includes(p)) || path === '/' || path.endsWith('/');
 
-        LOG(`[AUTH CHECK] User: ${user ? user.uid : 'Guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
+        LOG(`[AUTH CHECK] State: ${user ? 'authenticated' : 'guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (user) {
             if (path.includes('login-v115.html') && reauthFlow === 'password-change') {

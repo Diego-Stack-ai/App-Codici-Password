@@ -40,6 +40,10 @@ const pushManager = await read('Frontend/public/assets/js/modules/shared/push-ma
 const cryptoUtils = await read('Frontend/public/assets/js/modules/core/crypto-utils.js');
 const coreUi = await read('Frontend/public/assets/js/ui-core-v129.js');
 const attachmentSecurity = await read('Frontend/public/assets/js/modules/shared/attachment-security.js');
+const qrCodeUtils = await read('Frontend/public/assets/js/modules/shared/qr_code_utils.js');
+const privateAccountForm = await read('Frontend/public/assets/js/modules/privato/form_account_privato.js');
+const companyAccountSave = await read('Frontend/public/assets/js/modules/azienda/form-azienda-save.js');
+const functionsPackage = JSON.parse(await read('functions/package.json'));
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
@@ -199,6 +203,11 @@ assert.match(attachmentSecurity, /additionalData: ATTACHMENT_AAD/, 'La cifratura
 assert.match(attachmentSecurity, /crypto\.getRandomValues\(new Uint8Array\(32\)\)/, 'La chiave casuale per-file degli allegati non è presente');
 assert.match(attachmentSecurity, /HKDF[\s\S]*?SHA-256/, 'La chiave per-file non è protetta con derivazione HKDF');
 assert.match(storageRules, /application\/octet-stream/, 'Storage non accetta il formato cifrato degli allegati');
+assert.doesNotMatch(qrCodeUtils, /\.innerHTML\s*=/, 'Il fallback QR usa ancora HTML dinamico');
+assert.doesNotMatch(privateAccountForm, /Final Transaction Payload[^\n]*finalData/, 'Il form privato registra il payload del Vault');
+assert.doesNotMatch(companyAccountSave, /Final Transaction Payload[^\n]*finalData/, 'Il form aziendale registra il payload del Vault');
+assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Firebase Admin non è aggiornato alla baseline P4');
+assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
 assert.match(deployWorkflow, /npm ci[\s\S]*?npm test[\s\S]*?firebase\.js deploy/, 'Il deploy non è preceduto dai test del repository');
 assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.28.2', 'La Firebase CLI non è fissata a una versione');

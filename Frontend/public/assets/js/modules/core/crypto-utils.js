@@ -243,7 +243,7 @@ export async function decrypt(base64Data, password) {
         // Check regex base64
         const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
         if (!base64Regex.test(normalized)) {
-            console.warn("[CRYPTO-AUDIT] Not a valid Base64 string:", base64Data.substring(0, 10) + "...");
+            console.warn("[CRYPTO-AUDIT] Not a valid encrypted value");
             return base64Data;
         }
 
@@ -284,8 +284,8 @@ export async function decrypt(base64Data, password) {
         }
         throw lastError || new Error('Decryption failed');
     } catch (e) {
-        const errorDetail = `${e.name}: ${e.message}`;
-        console.error("[CRYPTO-AUDIT] DECRYPTION FATAL ERROR:", errorDetail);
+        const errorDetail = e?.name || 'DecryptionError';
+        console.error("[CRYPTO-AUDIT] Decryption failed");
 
         // Esponiamo l'errore globalmente per il banner di debug
         _lastCryptoError = errorDetail;

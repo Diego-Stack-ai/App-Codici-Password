@@ -1,19 +1,16 @@
 {
-  "dependencies": {
-    "@playwright/test": "^1.57.0",
-    "firebase-admin": "^13.6.1",
-    "playwright": "^1.57.0"
-  },
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.2",
+    "@playwright/test": "^1.62.1",
     "firebase": "12.18.0",
     "firebase-tools": "15.28.2",
     "madge": "^8.0.0",
+    "playwright": "^1.62.1",
     "stylelint": "^17.1.0",
     "stylelint-config-standard": "^40.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.22",
+  "version": "1.2.23",
   "description": "",
   "main": "css-audit-tool.js",
   "scripts": {
@@ -26,7 +23,7 @@
     "test:security": "node scripts/audit-security-flows.mjs",
     "test:crypto": "node --test tests/crypto-utils.test.mjs",
     "test:attachments": "node --test tests/attachment-security.test.mjs",
-    "test:functions-security": "node --check functions/index.js && node --check functions/recovery-security.js && node --test functions/test/recovery-security.test.js",
+    "test:functions-security": "node --check functions/index.js && node --check functions/recovery-security.js && node functions/node_modules/eslint/bin/eslint.js --config functions/eslint.config.js functions && node --test functions/test/recovery-security.test.js",
     "test:storage-rules": "node scripts/run-storage-rules-tests.mjs"
   },
   "repository": {
