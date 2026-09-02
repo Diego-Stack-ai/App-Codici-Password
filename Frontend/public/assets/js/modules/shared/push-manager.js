@@ -5,6 +5,7 @@ import { deleteToken, getToken, onMessage } from "https://www.gstatic.com/fireba
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
 const DEVICE_ID_KEY = 'codex_push_device_id';
+const LAST_TEST_KEY = 'codex_push_last_test_at';
 let foregroundListenerStarted = false;
 
 function getDeviceId() {
@@ -92,8 +93,17 @@ export async function disableDeadlinePush(user = auth.currentUser) {
 }
 
 export async function sendDeadlinePushTest() {
+    const lastTestAt = Number(localStorage.getItem(LAST_TEST_KEY) || 0);
+    const remainingSeconds = Math.ceil((60000 - (Date.now() - lastTestAt)) / 1000);
+    if (remainingSeconds > 0) throw new Error(`Attendi ancora ${remainingSeconds} secondi prima di riprovare.`);
     const call = httpsCallable(functions, 'sendDeadlinePushTest');
-    return (await call({ deviceId: getDeviceId() })).data;
+    const result = (await call({ deviceId: getDeviceId() })).data;
+    if (!result?.ok && result?.cooldownSeconds) {
+        localStorage.setItem(LAST_TEST_KEY, String(Date.now() - (60000 - result.cooldownSeconds * 1000)));
+        throw new Error(`Attendi ancora ${result.cooldownSeconds} secondi prima di riprovare.`);
+    }
+    localStorage.setItem(LAST_TEST_KEY, String(Date.now()));
+    return result;
 }
 
 export async function listenForDeadlinePushInForeground() {
@@ -109,6 +119,8 @@ export async function listenForDeadlinePushInForeground() {
             icon: './assets/images/app-icon-192.png',
             badge: './assets/images/app-icon-192.png',
             tag: payload.data.deliveryTag || `deadline-${payload.data.deadlineId || 'reminder'}`,
+            renotify: true,
+            timestamp: Date.now(),
             data: { eventType: 'deadline', deadlineId: payload.data.deadlineId || '' }
         });
     });

@@ -110,7 +110,9 @@ exports.sendDeadlinePushTest = onCall(
         }
         const now = Date.now();
         const lastTest = device.data().lastTestAt?.toMillis?.() || 0;
-        if (now - lastTest < 60000) throw new HttpsError("resource-exhausted", "Attendi un minuto prima di riprovare.");
+        if (now - lastTest < 60000) {
+            return { ok: false, cooldownSeconds: Math.ceil((60000 - (now - lastTest)) / 1000) };
+        }
         await deviceRef.set({ lastTestAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
         try {
             await admin.messaging().send({
@@ -118,7 +120,7 @@ exports.sendDeadlinePushTest = onCall(
                 data: {
                     eventType: "deadline", deadlineId: "", title: "Codici & Password",
                     body: "Assicurazione · Moto Guzzi California\nNotifica scadenza di prova",
-                    deliveryTag: `deadline-test-${deviceId}`
+                    deliveryTag: `deadline-test-${deviceId}-${now}`
                 },
                 webpush: { headers: { TTL: "300", Urgency: "high" } }
             });

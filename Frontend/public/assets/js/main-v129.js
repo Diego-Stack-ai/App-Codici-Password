@@ -110,6 +110,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (serviceWorkerEnabled && 'serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
+                // Migrazione dalla vecchia implementazione FCM, che usava un
+                // secondo worker ora rimosso. Evita richieste HTML come script.
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(async (item) => {
+                    const scriptURL = item.active?.scriptURL || item.waiting?.scriptURL || item.installing?.scriptURL || '';
+                    if (scriptURL.includes('/firebase-messaging-sw.js')) await item.unregister();
+                }));
                 const registration = await navigator.serviceWorker.register('./sw.js');
                 LOG('[PWA] Service Worker registrato con successo:', registration.scope);
 

@@ -109,7 +109,7 @@ async function setupDeadlinePush(user) {
             await sendDeadlinePushTest();
             showToast('Notifica di prova inviata', 'success');
         } catch (error) {
-            console.error('[PUSH TEST] Invio fallito', error);
+            if (error.code !== 'functions/resource-exhausted') console.error('[PUSH TEST] Invio fallito', error);
             showToast(error.message || 'Invio di prova non riuscito', 'error');
         } finally {
             testButton.disabled = false;

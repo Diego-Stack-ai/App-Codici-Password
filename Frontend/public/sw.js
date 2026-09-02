@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.13';
+const CACHE_NAME = 'codex-shell-v1.2.14';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js');
@@ -20,6 +20,8 @@ firebase.messaging().onBackgroundMessage((payload) => {
         icon: './assets/images/app-icon-192.png',
         badge: './assets/images/app-icon-192.png',
         tag: payload.data.deliveryTag || `deadline-${payload.data.deadlineId || 'reminder'}`,
+        renotify: true,
+        timestamp: Date.now(),
         data: { eventType: 'deadline', deadlineId: payload.data.deadlineId || '' }
     });
 });
@@ -27,13 +29,17 @@ firebase.messaging().onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     if (event.notification.data?.eventType !== 'deadline') return;
-    const deadlineId = encodeURIComponent(event.notification.data.deadlineId || '');
-    const target = new URL(deadlineId ? `dettaglio_scadenza.html?id=${deadlineId}` : 'scadenze.html', self.location.origin).href;
+    const deadlineId = encodeURIComponent(event.notification.data?.deadlineId || '');
+    const target = new URL(deadlineId ? `/dettaglio_scadenza.html?id=${deadlineId}` : '/scadenze.html', self.location.origin).href;
     event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
         const existing = windows.find((client) => client.url.startsWith(self.location.origin));
         if (existing) {
-            await existing.navigate(target);
-            return existing.focus();
+            try {
+                const navigated = await existing.navigate(target);
+                return navigated ? navigated.focus() : existing.focus();
+            } catch (error) {
+                console.warn('[PUSH] Navigazione finestra esistente non riuscita', error);
+            }
         }
         return self.clients.openWindow(target);
     }));
