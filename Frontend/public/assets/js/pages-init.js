@@ -24,7 +24,7 @@ export async function initRegistrati() {
 }
 
 export async function initIndex() {
-    const module = await import('./modules/auth/login.js');
+    const module = await import('./modules/auth/login.js?v=1.2.24-ai4');
     await module.initLogin();
 }
 

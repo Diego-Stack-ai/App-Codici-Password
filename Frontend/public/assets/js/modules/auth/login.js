@@ -211,6 +211,17 @@ function setupLoginForm() {
             failedAttempts = 0;
             showToast(t('success_auth') || "Accesso autorizzato!", "success");
 
+            // Navigazione esplicita: non dipende dall'evento auth globale e resta
+            // affidabile anche se la shell offline ha mostrato il login sotto un URL protetto.
+            const reauthFlow = new URLSearchParams(window.location.search).get('reauth');
+            if (reauthFlow === 'password-change') {
+                window.location.replace('imposta_nuova_password.html?reauthenticated=1');
+            } else if (reauthFlow === 'security-settings') {
+                window.location.replace('impostazioni.html');
+            } else {
+                window.location.replace('home_page.html');
+            }
+
         } catch (err) {
             failedAttempts++;
 
