@@ -200,6 +200,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Se l'utente annulla lo sblocco su una pagina privata, potremmo volerlo reindirizzare
                         // o lasciare i dati cifrati (che verrebbero visti come "---").
                     }
+
+                    // Le Push di scadenza devono essere visualizzate anche quando
+                    // l'app è aperta su una pagina diversa dalle Impostazioni.
+                    const { listenForDeadlinePushInForeground } = await import('./modules/shared/push-manager.js');
+                    await listenForDeadlinePushInForeground();
                 }
 
                 // ROUTER - Step 2: Inizializza Pagina Privata
