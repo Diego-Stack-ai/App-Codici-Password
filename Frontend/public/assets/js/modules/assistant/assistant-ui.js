@@ -72,30 +72,49 @@ export function createAssistantUI({ onSearch, onClose }) {
     const supportsLocalRecognition = SpeechRecognition
         && 'processLocally' in SpeechRecognition.prototype
         && typeof SpeechRecognition.available === 'function';
-    if (supportsLocalRecognition) {
+    if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
         recognition.lang = 'it-IT'; recognition.interimResults = false; recognition.maxAlternatives = 1;
-        recognition.processLocally = true;
         let installConfirmed = false;
+        let remoteConsentPending = false;
+        let usingLocalRecognition = false;
         let recognitionTimeout = null;
         const clearRecognitionTimeout = () => {
             if (recognitionTimeout) clearTimeout(recognitionTimeout);
             recognitionTimeout = null;
         };
+        const beginRecognition = locally => {
+            usingLocalRecognition = locally;
+            if ('processLocally' in recognition) recognition.processLocally = locally;
+            status.textContent = locally ? 'Ti ascolto sul dispositivo…' : 'Ti ascolto tramite il servizio vocale del browser…';
+            microphone.classList.add('listening');
+            recognition.start();
+            clearRecognitionTimeout();
+            recognitionTimeout = setTimeout(() => {
+                recognition.abort();
+                microphone.classList.remove('listening');
+                status.textContent = 'Nessuna trascrizione ricevuta. Premi il microfono e riprova.';
+            }, 8000);
+        };
+        const requestRemoteConsent = () => {
+            remoteConsentPending = true;
+            status.textContent = 'La voce locale non è disponibile. Se premi ancora, soltanto ciò che pronunci sarà elaborato dal servizio vocale del browser per questa sessione.';
+        };
         microphone.addEventListener('click', async () => {
             microphone.disabled = true;
             try {
+                if (remoteConsentPending) {
+                    remoteConsentPending = false;
+                    beginRecognition(false);
+                    return;
+                }
+                if (!supportsLocalRecognition) {
+                    requestRemoteConsent();
+                    return;
+                }
                 const availability = await SpeechRecognition.available({ langs: ['it-IT'], processLocally: true });
                 if (availability === 'available') {
-                    status.textContent = 'Ti ascolto…';
-                    microphone.classList.add('listening');
-                    recognition.start();
-                    clearRecognitionTimeout();
-                    recognitionTimeout = setTimeout(() => {
-                        recognition.abort();
-                        microphone.classList.remove('listening');
-                        status.textContent = 'Nessuna trascrizione ricevuta. Prova da Chrome o dal telefono.';
-                    }, 8000);
+                    beginRecognition(true);
                     return;
                 }
                 if (availability === 'downloadable' && !installConfirmed) {
@@ -115,7 +134,7 @@ export function createAssistantUI({ onSearch, onClose }) {
                         : 'Installazione non riuscita. Puoi continuare usando la tastiera.';
                     return;
                 }
-                status.textContent = 'La lingua italiana locale non è disponibile in questo browser.';
+                requestRemoteConsent();
             } catch (error) {
                 const permissionError = ['not-allowed', 'service-not-allowed'].includes(error?.error) || error?.name === 'NotAllowedError';
                 status.textContent = permissionError
@@ -136,10 +155,11 @@ export function createAssistantUI({ onSearch, onClose }) {
                 'no-speech': 'Non ho sentito parole. Premi il microfono e riprova.',
                 'audio-capture': 'Il microfono non è disponibile o è già utilizzato da un’altra app.',
                 'not-allowed': 'Permesso microfono non concesso.',
-                'service-not-allowed': 'Riconoscimento vocale locale non autorizzato dal browser.',
+                'service-not-allowed': 'Servizio vocale non autorizzato dal browser.',
                 'language-not-supported': 'La lingua italiana locale non è ancora installata.'
             };
-            status.textContent = messages[event.error] || `Riconoscimento non riuscito (${event.error || 'errore sconosciuto'}).`;
+            status.textContent = messages[event.error]
+                || `${usingLocalRecognition ? 'Riconoscimento locale' : 'Riconoscimento vocale'} non riuscito (${event.error || 'errore sconosciuto'}).`;
         });
         recognition.addEventListener('end', () => {
             clearRecognitionTimeout();
@@ -147,9 +167,9 @@ export function createAssistantUI({ onSearch, onClose }) {
         });
     } else {
         microphone.setAttribute('aria-disabled', 'true');
-        microphone.title = 'Riconoscimento vocale locale non disponibile in questo browser';
+        microphone.title = 'Riconoscimento vocale non disponibile in questo browser';
         microphone.addEventListener('click', () => {
-            status.textContent = 'Questo browser non offre ancora il riconoscimento vocale completamente locale.';
+            status.textContent = 'Questo browser non offre il riconoscimento vocale. Puoi usare la dettatura della tastiera del telefono.';
         });
     }
     backdrop.addEventListener('click', event => { if (event.target === backdrop) onClose(); });

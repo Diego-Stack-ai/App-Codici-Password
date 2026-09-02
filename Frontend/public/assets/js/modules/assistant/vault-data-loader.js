@@ -19,10 +19,10 @@ function profileRecords(uid, data) {
     return result;
 }
 
-function accountRecord(id, data, companyId = '') {
+function accountRecord(id, data, companyId = '', companyName = '') {
     return make({ id, kind: companyId ? 'account aziendale' : 'account', title: data.nomeAccount || data.nome || 'Account',
-        subtitle: companyId ? 'Account aziendale' : 'Account privato',
-        keywords: [data.type, data.tipo, data.categoria, data.url, data.sitoWeb, data.referenteNome],
+        subtitle: companyId ? `Azienda: ${companyName || 'non specificata'}` : 'Account privato',
+        keywords: [companyName, data.type, data.tipo, data.categoria, data.url, data.sitoWeb, data.referenteNome],
         href: companyId ? `/dettaglio_account_azienda.html?aziendaId=${encodeURIComponent(companyId)}&id=${encodeURIComponent(id)}` : `/dettaglio_account_privato.html?id=${encodeURIComponent(id)}` });
 }
 
@@ -49,9 +49,11 @@ export async function loadVaultSearchRecords(user) {
     deadlines.forEach(item => records.push(deadlineRecord(item.id, item.data())));
     const nested = [];
     companies.forEach(item => {
-        records.push(companyRecord(item.id, item.data()));
+        const companyData = item.data();
+        const companyName = companyData.ragioneSociale || companyData.nome || companyData.denominazione || 'Azienda';
+        records.push(companyRecord(item.id, companyData));
         nested.push(getDocs(collection(db, 'users', uid, 'aziende', item.id, 'accounts'))
-            .then(snapshot => snapshot.forEach(account => records.push(accountRecord(account.id, account.data(), item.id)))));
+            .then(snapshot => snapshot.forEach(account => records.push(accountRecord(account.id, account.data(), item.id, companyName)))));
     });
     await Promise.all(nested);
     return records;

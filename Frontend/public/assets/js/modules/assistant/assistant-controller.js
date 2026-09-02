@@ -1,7 +1,7 @@
 import { ensureMasterKey } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
 import { VaultSearchIndex } from './vault-search-index.js';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.24-ai8';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.24-ai9';
 
 let activeController = null;
 
