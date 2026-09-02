@@ -14,7 +14,7 @@ function profileRecords(uid, data) {
     list(data.documenti).forEach((item, index) => result.push(make({
         id: item.id || index, kind: 'documento', title: item.tipo || item.type || item.nome || 'Documento', subtitle: owner,
         // I metadati cifrati del documento non entrano nell'indice.
-        keywords: ['documento', owner], href: '/profilo_privato.html'
+        keywords: ['documento', owner], href: `/profilo_privato.html?assistantDoc=${encodeURIComponent(index)}`
     })));
     return result;
 }

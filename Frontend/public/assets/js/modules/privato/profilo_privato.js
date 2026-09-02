@@ -37,7 +37,7 @@ import { syncData as _syncData } from './profilo-sync.js';
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.24-ai3';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
@@ -249,6 +249,20 @@ function renderAllSections() {
     renderPhonesView();
     renderEmailsView();
     renderDocumentiView();
+    focusAssistantDocument();
+}
+
+function focusAssistantDocument() {
+    const rawIndex = new URLSearchParams(window.location.search).get('assistantDoc');
+    if (!/^\d+$/.test(rawIndex || '')) return;
+    const target = document.querySelector(`[data-assistant-doc-index="${rawIndex}"]`);
+    if (!target) return;
+    const header = document.querySelector('[data-section="documenti"]');
+    const container = document.getElementById('documenti-view-container');
+    header?.classList.remove('collapsed');
+    container?.classList.remove('collapsed');
+    target.classList.add('assistant-focus-card');
+    requestAnimationFrame(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 }
 
 // ─── SYNC WRAPPER ─────────────────────────────────────────────────────────────

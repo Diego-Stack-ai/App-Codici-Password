@@ -50,7 +50,7 @@ export async function initArchivioAccount(user) {
 }
 
 export async function initProfiloPrivato(user) {
-    const module = await import('./modules/privato/profilo_privato.js');
+    const module = await import('./modules/privato/profilo_privato.js?v=1.2.24-ai3');
     await module.initProfiloPrivato(user);
 }
 

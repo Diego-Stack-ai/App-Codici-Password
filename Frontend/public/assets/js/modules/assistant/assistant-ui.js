@@ -14,21 +14,26 @@ export function createAssistantUI({ onSearch, onClose }) {
 
     const header = element('header', 'vault-assistant-header');
     const heading = element('div');
-    heading.append(element('h2', '', 'Cerca nella tua Vault'), element('p', '', 'Ricerca locale, in sola lettura'));
+    heading.append(element('h2', '', 'Cerca in Codex'), element('p', '', 'Assistente locale, protetto e in sola lettura'));
     const close = element('button', 'vault-assistant-close', '×');
     close.type = 'button'; close.setAttribute('aria-label', 'Chiudi'); close.addEventListener('click', onClose);
     header.append(heading, close);
 
+    const searchRow = element('div', 'vault-assistant-search-row');
     const input = element('input', 'vault-assistant-input');
     input.type = 'search'; input.autocomplete = 'off'; input.spellcheck = false;
     input.placeholder = 'Es. carta identità Diego, Poste Business…';
     input.setAttribute('aria-label', 'Cosa vuoi cercare?');
+    const microphone = element('button', 'vault-assistant-microphone');
+    microphone.type = 'button'; microphone.setAttribute('aria-label', 'Parla con Codex');
+    microphone.append(element('span', 'material-symbols-outlined', 'mic'));
+    searchRow.append(input, microphone);
     const status = element('p', 'vault-assistant-status', 'Scrivi almeno due caratteri.');
     const results = element('div', 'vault-assistant-results');
 
     const render = items => {
         results.replaceChildren();
-        if (!items.length) { status.textContent = 'Nessun risultato trovato.'; return; }
+        if (!items.length) { status.textContent = 'Non ho trovato risultati. Prova a dirmelo in un altro modo.'; return; }
         status.textContent = `${items.length} risultati. I dati segreti non vengono mostrati qui.`;
         for (const item of items) {
             const link = element('a', 'vault-assistant-result');
@@ -40,13 +45,54 @@ export function createAssistantUI({ onSearch, onClose }) {
         }
     };
 
+    const speak = message => {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'it-IT';
+        window.speechSynthesis.speak(utterance);
+    };
+
+    const runSearch = (query, answerByVoice = false) => {
+        const items = onSearch(query);
+        render(items);
+        if (answerByVoice) {
+            speak(items.length
+                ? `Ho trovato ${items.length} risultati. Il primo è ${items[0].title}.`
+                : 'Non ho trovato risultati. Prova a dirmelo in un altro modo.');
+        }
+    };
+
     input.addEventListener('input', () => {
         const query = input.value.trim();
         if (query.length < 2) { results.replaceChildren(); status.textContent = 'Scrivi almeno due caratteri.'; return; }
-        render(onSearch(query));
+        runSearch(query);
     });
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const supportsLocalRecognition = SpeechRecognition && 'processLocally' in SpeechRecognition.prototype;
+    if (supportsLocalRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'it-IT'; recognition.interimResults = false; recognition.maxAlternatives = 1;
+        recognition.processLocally = true;
+        microphone.addEventListener('click', () => {
+            status.textContent = 'Ti ascolto…'; microphone.classList.add('listening');
+            try { recognition.start(); } catch { /* una sessione è già attiva */ }
+        });
+        recognition.addEventListener('result', event => {
+            const query = event.results[0][0].transcript.trim();
+            input.value = query; runSearch(query, true);
+        });
+        recognition.addEventListener('error', () => { status.textContent = 'Non sono riuscito ad ascoltare. Puoi riprovare o scrivere.'; });
+        recognition.addEventListener('end', () => microphone.classList.remove('listening'));
+    } else {
+        microphone.disabled = true;
+        microphone.title = 'Riconoscimento vocale locale non disponibile in questo browser';
+        microphone.addEventListener('click', () => {
+            status.textContent = 'Questo browser non offre ancora il riconoscimento vocale completamente locale.';
+        });
+    }
     backdrop.addEventListener('click', event => { if (event.target === backdrop) onClose(); });
-    panel.append(header, input, status, results); backdrop.append(panel); document.body.append(backdrop);
+    panel.append(header, searchRow, status, results); backdrop.append(panel); document.body.append(backdrop);
     queueMicrotask(() => input.focus());
     return { destroy: () => backdrop.remove() };
 }

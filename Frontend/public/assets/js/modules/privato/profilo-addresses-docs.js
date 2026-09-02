@@ -175,7 +175,7 @@ export function renderDocumentiView() {
         if (docItem.luogo_rilascio) subDetails.push(docItem.luogo_rilascio);
         if (docItem.id_number) subDetails.push(docItem.id_number);
 
-        return createElement('div', { className: 'form-card' }, [
+        return createElement('div', { className: 'form-card', dataset: { assistantDocIndex: idx } }, [
             createElement('div', { className: 'card-header-row' }, [
                 createElement('div', { className: 'card-icon-stack' }, [
                     createElement('div', { className: 'card-icon-box' }, [
