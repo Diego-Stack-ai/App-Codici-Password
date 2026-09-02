@@ -32,4 +32,6 @@ jobs:
         run: npm test
 
       - name: Deploy Hosting, Functions and security rules
+        env:
+          FUNCTIONS_DISCOVERY_TIMEOUT: 30
         run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting,functions,firestore:rules,storage --token ${{ secrets.FIREBASE_TOKEN }}
