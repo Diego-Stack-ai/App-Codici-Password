@@ -5,7 +5,7 @@
  */
 
 import { auth } from '../../firebase-config.js?v=1.1.8';
-import { updatePassword, confirmPasswordReset, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core.js';
@@ -84,7 +84,13 @@ function setupNewPasswordForm() {
 
             if (oobCode) {
                 // CASO RESET ESTERNO
+                const resetEmail = (await verifyPasswordResetCode(auth, oobCode)).trim().toLowerCase();
                 await confirmPasswordReset(auth, oobCode, newPassword);
+                localStorage.setItem('codex_password_reset_policy_v1', JSON.stringify({
+                    email: resetEmail,
+                    version: ACCOUNT_PASSWORD_POLICY_VERSION,
+                    completedAt: Date.now()
+                }));
                 showToast(t('password_success') || "Password ripristinata! Ora puoi accedere.", "success");
             } else if (auth.currentUser) {
                 // CASO CAMBIO INTERNO

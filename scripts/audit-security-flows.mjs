@@ -32,6 +32,8 @@ const registrationHtml = await read('Frontend/public/registrati.html');
 const firestoreRules = await read('firestore.rules');
 const cloudFunctions = await read('functions/index.js');
 const manifest = JSON.parse(await read('Frontend/public/manifest.json'));
+const resetPasswordModule = await read('Frontend/public/assets/js/modules/auth/reset_password.js');
+const pushManager = await read('Frontend/public/assets/js/modules/shared/push-manager.js');
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
@@ -157,5 +159,14 @@ assert.doesNotMatch(await read('Frontend/public/assets/js/ui-core-v129.js'), /au
 assert.match(await read('Frontend/public/assets/js/ui-core-v129.js'), /options\.vaultSecret[\s\S]*?data-form-type[\s\S]*?data-1p-ignore/, 'La Master Password non è esclusa dai password manager');
 assert.match(security, /vaultSecret:\s*true/, 'Lo sblocco Vault non identifica il campo come segreto locale');
 assert.match(await read('Frontend/public/assets/css/core_fascie.css'), /@media \(max-width:\s*600px\)[\s\S]*?\.base-header,[\s\S]*?backdrop-filter:\s*none;[\s\S]*?mask-image:\s*none;/, 'Le fasce mobili usano ancora la composizione che causa sfarfallio');
+assert.match(auth, /async function resetPassword\(email\)[\s\S]*?await sendPasswordResetEmail\(auth, email\);[\s\S]*?return true;/, 'Il reset password non propaga correttamente gli errori Firebase');
+assert.doesNotMatch(auth, /async function resetPassword\(email\)\s*\{\s*try\s*\{/, 'Il reset password intercetta ancora gli errori prima della UI');
+assert.match(password, /verifyPasswordResetCode[\s\S]*?codex_password_reset_policy_v1/, 'Il reset completato non prepara la sincronizzazione della policy');
+assert.match(auth, /consumePasswordResetPolicyMarker\(updatedUser\)/, 'Il login non completa la policy dopo un reset password');
+assert.match(resetPasswordModule, /auth\/network-request-failed[\s\S]*?Connessione assente/, 'Il recupero password non distingue un errore di rete reale');
+assert.match(settings, /auth\/user-token-expired[\s\S]*?requireSecurityReauthentication/, 'La disattivazione 2FA non gestisce il token scaduto');
+assert.match(auth, /reauthFlow === 'security-settings'[\s\S]*?impostazioni\.html/, 'La riautenticazione 2FA non torna alle Impostazioni');
+assert.match(pushManager, /getToken\(messaging[\s\S]*?serviceWorkerRegistration/, 'La correzione sicurezza ha rimosso la registrazione push');
+assert.match(serviceWorker, /onBackgroundMessage[\s\S]*?eventType !== 'deadline'/, 'La correzione sicurezza ha alterato le notifiche push di scadenza');
 
 console.log('Audit sicurezza e offline: 60 controlli superati.');

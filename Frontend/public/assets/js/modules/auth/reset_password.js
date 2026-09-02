@@ -80,14 +80,16 @@ function setupResetForm() {
             setChildren(submitBtn, originalContent);
             document.body.classList.remove('is-auth-progress');
 
-            let errorKey = 'error_generic';
-            if (err.code === 'auth/user-not-found') {
-                errorKey = 'error_user_not_found';
-            } else if (err.code === 'auth/invalid-email') {
-                errorKey = 'error_invalid_email';
+            let message = t('error_generic') || "Non è stato possibile inviare l'email. Riprova.";
+            if (err.code === 'auth/invalid-email') {
+                message = t('error_invalid_email') || "Indirizzo email non valido.";
+            } else if (err.code === 'auth/too-many-requests') {
+                message = "Troppi tentativi. Attendi qualche minuto e riprova.";
+            } else if (err.code === 'auth/network-request-failed') {
+                message = "Connessione assente. Controlla la rete e riprova.";
             }
 
-            showToast(t(errorKey), "error");
+            showToast(message, "error");
         }
     });
 }

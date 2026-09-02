@@ -46,8 +46,26 @@ export async function initImpostazioni(user) {
     setupPrivacyShort();
     setupTermsShort();
     await setupDeadlinePush(user);
+    showPendingSecurityNotice();
 
     
+}
+
+function showPendingSecurityNotice() {
+    const message = sessionStorage.getItem('codex_security_notice');
+    if (!message) return;
+    sessionStorage.removeItem('codex_security_notice');
+    showToast(message, 'info');
+}
+
+async function requireSecurityReauthentication(message) {
+    sessionStorage.setItem('codex_security_notice', message);
+    clearSession();
+    try {
+        await signOut(auth);
+    } finally {
+        window.location.replace('login-v115.html?reauth=security-settings');
+    }
 }
 
 async function setupDeadlinePush(user) {
@@ -115,8 +133,16 @@ function setupSecurityToggles(data) {
             } catch (error) {
                 console.error("TOTP configuration failed", error);
                 t2fa.checked = !enable;
-                const message = error.code === 'auth/requires-recent-login'
-                    ? "Per modificare la 2FA esci ed effettua nuovamente il login."
+                if (error.code === 'auth/requires-recent-login') {
+                    await requireSecurityReauthentication('Accesso confermato. Ripeti ora la modifica della 2FA.');
+                    return;
+                }
+                if (error.code === 'auth/user-token-expired') {
+                    await requireSecurityReauthentication('La configurazione 2FA è cambiata. Accedi nuovamente per continuare.');
+                    return;
+                }
+                const message = error.code === 'auth/invalid-verification-code'
+                    ? 'Codice Authenticator errato o scaduto.'
                     : (error.message || "Configurazione 2FA non riuscita.");
                 showToast(message, "error");
             } finally {
@@ -163,7 +189,12 @@ function setupSecurityToggles(data) {
                 }
             } catch (e) {
                 tFace.checked = !val;
-                showToast("Errore durante l'operazione biometrica", "error");
+                const message = e.name === 'NotAllowedError'
+                    ? 'Verifica biometrica annullata o non autorizzata.'
+                    : (e.message === 'PRF_NOT_SUPPORTED'
+                        ? 'Questo dispositivo non supporta lo sblocco Vault tramite WebAuthn PRF.'
+                        : "Operazione biometrica non riuscita. Puoi usare la Master Password.");
+                showToast(message, "error");
             }
         });
     }

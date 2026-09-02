@@ -20,6 +20,30 @@ import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 
 let pendingMfaResolver = null;
+const RESET_POLICY_MARKER = 'codex_password_reset_policy_v1';
+
+async function consumePasswordResetPolicyMarker(user) {
+    let marker = null;
+    try {
+        marker = JSON.parse(localStorage.getItem(RESET_POLICY_MARKER) || 'null');
+    } catch {
+        localStorage.removeItem(RESET_POLICY_MARKER);
+        return;
+    }
+    if (!marker) return;
+
+    const sameEmail = marker.email === user.email?.trim().toLowerCase();
+    const recent = Date.now() - Number(marker.completedAt) < 30 * 60 * 1000;
+    if (!sameEmail || !recent || marker.version !== ACCOUNT_PASSWORD_POLICY_VERSION) {
+        localStorage.removeItem(RESET_POLICY_MARKER);
+        return;
+    }
+
+    await setDoc(doc(db, 'users', user.uid), {
+        passwordPolicyVersion: ACCOUNT_PASSWORD_POLICY_VERSION
+    }, { merge: true });
+    localStorage.removeItem(RESET_POLICY_MARKER);
+}
 
 /**
  * Centrialized Auth Observer
@@ -108,6 +132,7 @@ async function finalizeLogin(user, email) {
 
     await user.reload();
     const updatedUser = auth.currentUser;
+    await consumePasswordResetPolicyMarker(updatedUser);
     const userDocRef = doc(db, "users", updatedUser.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -197,16 +222,8 @@ async function logout() {
  * @param {string} email - The user's email.
  */
 async function resetPassword(email) {
-    try {
-        await sendPasswordResetEmail(auth, email);
-        showToast("Email di reset inviata! Controlla la tua casella di posta.", "success");
-        setTimeout(() => {
-            window.location.href = "login-v115.html";
-        }, 3000);
-    } catch (error) {
-        logError("Auth ResetPassword", error);
-        showToast("Errore nell'invio dell'email di reset.", "error");
-    }
+    await sendPasswordResetEmail(auth, email);
+    return true;
 }
 
 /**
@@ -226,6 +243,11 @@ function checkAuthState() {
             if (path.includes('login-v115.html') && reauthFlow === 'password-change') {
                 LOG("[AUTH] Reauthentication completed, returning to password change");
                 window.location.replace('imposta_nuova_password.html?reauthenticated=1');
+                return;
+            }
+            if (path.includes('login-v115.html') && reauthFlow === 'security-settings') {
+                LOG("[AUTH] Security reauthentication completed, returning to settings");
+                window.location.replace('impostazioni.html');
                 return;
             }
             // Utente loggato: se siamo su una pagina di login, spostiamoci sulla home
