@@ -31,7 +31,7 @@ jobs:
       - name: Run security and offline checks
         run: npm test
 
-      - name: Deploy Hosting, Functions and security rules
-        env:
-          FUNCTIONS_DISCOVERY_TIMEOUT: 30
-        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting,functions,firestore:rules,storage --token ${{ secrets.FIREBASE_TOKEN }}
+      # Le Functions richiedono un'identità CI con permessi Cloud Build/Run.
+      # Finché FIREBASE_TOKEN non viene sostituito, il loro deploy resta manuale.
+      - name: Deploy Hosting and security rules
+        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting,firestore:rules,storage --token ${{ secrets.FIREBASE_TOKEN }}
