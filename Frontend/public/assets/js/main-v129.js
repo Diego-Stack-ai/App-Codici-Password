@@ -263,6 +263,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (inviteUnsubscribe) inviteUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
+                if (currentPage === 'dettaglio_scadenza' && new URLSearchParams(window.location.search).has('notification')) {
+                    sessionStorage.setItem('pending_deadline_link', `${window.location.pathname}${window.location.search}`);
+                }
                 window.location.href = 'login-v115.html';
             }
         }

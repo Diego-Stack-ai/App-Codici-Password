@@ -22,7 +22,11 @@ firebase.messaging().onBackgroundMessage((payload) => {
         tag: payload.data.deliveryTag || `deadline-${payload.data.deadlineId || 'reminder'}`,
         renotify: true,
         timestamp: Date.now(),
-        data: { eventType: 'deadline', deadlineId: payload.data.deadlineId || '' }
+        data: {
+            eventType: 'deadline',
+            deadlineId: payload.data.deadlineId || '',
+            notificationId: payload.data.notificationId || ''
+        }
     });
 });
 
@@ -30,7 +34,9 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     if (event.notification.data?.eventType !== 'deadline') return;
     const deadlineId = encodeURIComponent(event.notification.data?.deadlineId || '');
-    const target = new URL(deadlineId ? `/dettaglio_scadenza.html?id=${deadlineId}` : '/scadenze.html', self.location.origin).href;
+    const notificationId = encodeURIComponent(event.notification.data?.notificationId || '');
+    const query = notificationId ? `&notification=${notificationId}` : '';
+    const target = new URL(deadlineId ? `/dettaglio_scadenza.html?id=${deadlineId}${query}` : '/scadenze.html', self.location.origin).href;
     event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
         const existing = windows.find((client) => client.url.startsWith(self.location.origin));
         if (existing) {

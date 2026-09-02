@@ -5,7 +5,8 @@
 
 import { getScadenza, updateScadenza, deleteScadenza } from '../../db.js';
 import { getFooterReady } from '../../footer-state.js';
-import { auth } from '../../firebase-config.js?v=1.1.8';
+import { auth, db } from '../../firebase-config.js?v=1.1.8';
+import { doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core.js';
@@ -36,8 +37,23 @@ async function loadScadenza(uid) {
             return;
         }
         renderScadenza(currentScadenza);
+        await markOpenedDeadlineNotification(uid);
     } catch (e) {
         console.error(e);
+    }
+}
+
+async function markOpenedDeadlineNotification(uid) {
+    const notificationId = new URLSearchParams(window.location.search).get('notification');
+    if (!notificationId) return;
+    try {
+        const notificationRef = doc(db, 'users', uid, 'deadlineNotifications', notificationId);
+        const notification = await getDoc(notificationRef);
+        if (notification.exists() && notification.data().deadlineId === currentScadenzaId && notification.data().status === 'unread') {
+            await updateDoc(notificationRef, { status: 'viewed', readAt: serverTimestamp() });
+        }
+    } catch (error) {
+        console.warn('[SCADENZE] Impossibile aggiornare lo stato della notifica', error);
     }
 }
 

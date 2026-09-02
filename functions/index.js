@@ -8,7 +8,7 @@
  */
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
@@ -54,17 +54,28 @@ async function activePushDevices(db, uid) {
 
 async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options = {}) {
     if (!shouldSendPush(scadenza, diffDays, options.forceImmediate === true)) return;
-    const devices = await activePushDevices(db, uid);
-    if (!devices.length) return;
     const dueVersion = String(scadenza.dueDate || "").replace(/[^0-9]/g, "").slice(0, 14);
     const previousPush = String(scadenza.lastPushNotifiedAt || "initial").replace(/[^0-9a-zA-Z]/g, "");
     const stage = diffDays === 0 ? "D0" : `after_${previousPush}`;
+    const notificationId = `${deadlineId}_${dueVersion}_${stage}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const notificationRef = db.collection("users").doc(uid).collection("deadlineNotifications").doc(notificationId);
+    await db.runTransaction(async (transaction) => {
+        const existing = await transaction.get(notificationRef);
+        if (!existing.exists) {
+            transaction.set(notificationRef, {
+                eventType: "deadline", deadlineId, dueDate: String(scadenza.dueDate), diffDays,
+                status: "unread", createdAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    });
+
+    const devices = await activePushDevices(db, uid);
     const text = pushText(scadenza, diffDays);
     let acceptedCount = 0;
     let retryableFailure = false;
 
     for (const device of devices) {
-        const deliveryId = `${deadlineId}_${dueVersion}_${stage}_${device.id}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+        const deliveryId = `${notificationId}_${device.id}`.replace(/[^a-zA-Z0-9_-]/g, "_");
         const deliveryRef = db.collection("users").doc(uid).collection("notificationDeliveries").doc(deliveryId);
         const reserved = await db.runTransaction(async (transaction) => {
             const existing = await transaction.get(deliveryRef);
@@ -86,7 +97,7 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options
             await admin.messaging().send({
                 token: device.data().token,
                 data: {
-                    eventType: "deadline", deadlineId, title: text.title, body: text.body,
+                    eventType: "deadline", deadlineId, notificationId, title: text.title, body: text.body,
                     deliveryTag: deliveryId
                 },
                 webpush: { headers: { TTL: diffDays === 0 ? "21600" : "86400", Urgency: "high" } }
@@ -106,7 +117,7 @@ async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options
         }
     }
 
-    if (acceptedCount > 0 && !retryableFailure) {
+    if ((acceptedCount > 0 || devices.length === 0) && !retryableFailure) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         await db.collection("users").doc(uid).collection("scadenze").doc(deadlineId).update({
@@ -465,5 +476,38 @@ exports.onScadenzaCreated = onDocumentCreated(
         } catch (err) {
             console.error(`[TRIGGER EMAIL FAILED]:`, err.message);
         }
+    }
+);
+
+exports.onScadenzaUpdated = onDocumentUpdated(
+    {
+        document: "users/{uid}/scadenze/{scadenzaId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+    },
+    async (event) => {
+        const before = event.data.before.data();
+        const after = event.data.after.data();
+        const completedNow = !before.completed && after.completed === true;
+        const dueDateChanged = String(before.dueDate || "") !== String(after.dueDate || "");
+        if (!completedNow && !dueDateChanged) return;
+
+        const db = admin.firestore();
+        const notifications = await db.collection("users").doc(event.params.uid)
+            .collection("deadlineNotifications")
+            .where("deadlineId", "==", event.params.scadenzaId).get();
+        const batch = db.batch();
+        notifications.docs.forEach((item) => batch.set(item.ref, {
+            status: "resolved",
+            resolvedAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }));
+        if (dueDateChanged) {
+            batch.update(event.data.after.ref, {
+                lastPushNotifiedAt: admin.firestore.FieldValue.delete(),
+                lastNotifiedAt: admin.firestore.FieldValue.delete()
+            });
+        }
+        await batch.commit();
     }
 );

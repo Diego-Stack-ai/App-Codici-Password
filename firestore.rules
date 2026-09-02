@@ -55,10 +55,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /users/{userId}/deadlineNotifications/{notificationId} {
+      allow read: if isOwner(userId);
+      allow create, delete: if false;
+      allow update: if isOwner(userId) &&
+        resource.data.status == 'unread' &&
+        request.resource.data.status == 'viewed' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'readAt']);
+    }
+
     match /users/{userId}/{collection}/{document=**} {
       allow read, write: if isOwner(userId) &&
         collection != 'pushDevices' &&
-        collection != 'notificationDeliveries';
+        collection != 'notificationDeliveries' &&
+        collection != 'deadlineNotifications';
     }
 
     match /users/{userId}/accounts/{accountId} {

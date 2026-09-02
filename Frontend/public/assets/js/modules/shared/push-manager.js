@@ -121,7 +121,11 @@ export async function listenForDeadlinePushInForeground() {
             tag: payload.data.deliveryTag || `deadline-${payload.data.deadlineId || 'reminder'}`,
             renotify: true,
             timestamp: Date.now(),
-            data: { eventType: 'deadline', deadlineId: payload.data.deadlineId || '' }
+            data: {
+                eventType: 'deadline',
+                deadlineId: payload.data.deadlineId || '',
+                notificationId: payload.data.notificationId || ''
+            }
         });
     });
 }

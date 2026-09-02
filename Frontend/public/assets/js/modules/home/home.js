@@ -13,7 +13,7 @@ import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
 import { getLastCryptoError } from '../core/crypto-utils.js';
 
-// [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
+// [V8.0] FLAG DI SICUREZZA - In produzione Ã¨ FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
 
 /**
@@ -35,10 +35,17 @@ export async function initHomePage(user) {
     
     currentUser = user;
 
+    const pendingDeadlineLink = sessionStorage.getItem('pending_deadline_link');
+    if (pendingDeadlineLink && /^\/dettaglio_scadenza\.html\?/.test(pendingDeadlineLink)) {
+        sessionStorage.removeItem('pending_deadline_link');
+        window.location.replace(pendingDeadlineLink);
+        return;
+    }
+
     // Inizializza Listeners immediatamente (non dipende da dati remoti)
     initHomeListeners();
 
-    // Sblocco visibilità subito
+    // Sblocco visibilitÃ  subito
     document.documentElement.setAttribute("data-i18n", "ready");
 
     // [FIX V8.1] Caricamenti paralleli e indipendenti:
@@ -47,7 +54,8 @@ export async function initHomePage(user) {
     const [aziResult] = await Promise.allSettled([
         getDocs(collection(db, "users", user.uid, "aziende")),
         renderHeaderUser(user),
-        renderDashboardDeadlines(user)
+        renderDashboardDeadlines(user),
+        renderDeadlineNotificationInbox(user)
     ]);
 
     // FAB Group dipende solo dal risultato delle aziende
@@ -56,12 +64,67 @@ export async function initHomePage(user) {
         : [];
 
     if (aziResult.status === 'rejected') {
-        console.warn("[HOME] Fetch aziende fallito (rete?), FAB in modalità default.", aziResult.reason);
+        console.warn("[HOME] Fetch aziende fallito (rete?), FAB in modalitÃ  default.", aziResult.reason);
     }
 
     setupFABGroup(aziendes);
 
     
+}
+
+async function renderDeadlineNotificationInbox(user) {
+    const notificationSnap = await getDocs(collection(db, 'users', user.uid, 'deadlineNotifications'));
+    const unread = notificationSnap.docs
+        .filter((item) => item.data().status === 'unread')
+        .sort((left, right) => {
+            const leftTime = left.data().createdAt?.toMillis?.() || 0;
+            const rightTime = right.data().createdAt?.toMillis?.() || 0;
+            return rightTime - leftTime;
+        });
+    if (!unread.length || document.getElementById('deadline-inbox-modal')) return;
+
+    const entries = (await Promise.all(unread.slice(0, 10).map(async (notification) => {
+        const data = notification.data();
+        const deadline = await getDoc(doc(db, 'users', user.uid, 'scadenze', data.deadlineId));
+        if (!deadline.exists() || deadline.data().completed) return null;
+        const item = deadline.data();
+        const label = `${item.type || 'Scadenza'}${item.veicolo_modello ? ` Â· ${item.veicolo_modello}` : ''}`;
+        const when = data.diffDays === 0 ? 'Scade oggi' : data.diffDays === 1 ? 'Scade domani' : `Scadenza tra ${data.diffDays} giorni`;
+        return createElement('button', {
+            className: 'deadline-inbox-item',
+            onclick: () => {
+                window.location.href = `dettaglio_scadenza.html?id=${encodeURIComponent(data.deadlineId)}&notification=${encodeURIComponent(notification.id)}`;
+            }
+        }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'notification_important' }),
+            createElement('span', { className: 'deadline-inbox-copy' }, [
+                createElement('strong', { textContent: label }),
+                createElement('small', { textContent: when })
+            ]),
+            createElement('span', { className: 'material-symbols-outlined', textContent: 'chevron_right' })
+        ]);
+    }))).filter(Boolean);
+    if (!entries.length) return;
+
+    const modal = createElement('div', { id: 'deadline-inbox-modal', className: 'modal-overlay deadline-inbox-modal' }, [
+        createElement('div', { className: 'modal-box deadline-inbox-box' }, [
+            createElement('div', { className: 'deadline-inbox-heading' }, [
+                createElement('span', { className: 'material-symbols-outlined', textContent: 'notifications_active' }),
+                createElement('div', {}, [
+                    createElement('h2', { className: 'modal-title', textContent: 'Promemoria scadenze' }),
+                    createElement('p', { textContent: `${entries.length} avvis${entries.length === 1 ? 'o' : 'i'} da controllare` })
+                ])
+            ]),
+            createElement('div', { className: 'deadline-inbox-list' }, entries),
+            createElement('button', {
+                className: 'btn-modal btn-secondary',
+                textContent: 'Ricordamelo dopo',
+                onclick: () => modal.classList.remove('active')
+            })
+        ])
+    ]);
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add('active'));
 }
 
 /**
@@ -140,7 +203,7 @@ async function renderHeaderUser(user) {
                 // Tentativo di sblocco silenzioso
                 if (isAutoUnlockActive()) {
                     const mk = await ensureMasterKey();
-                    // [FIX V7.15] Regex più tollerante per Safari (include URL-safe e padding flessibile)
+                    // [FIX V7.15] Regex piÃ¹ tollerante per Safari (include URL-safe e padding flessibile)
                     const isEnc = (v) => v && typeof v === 'string' && v.trim().length > 20 && /^[A-Za-z0-9+/=_-]+$/.test(v.trim());
 
                     let nameDecrypted = false;
@@ -159,7 +222,7 @@ async function renderHeaderUser(user) {
                         }
                     }
 
-                    // Se abbiamo decifrato con successo almeno un campo, la chiave è valida!
+                    // Se abbiamo decifrato con successo almeno un campo, la chiave Ã¨ valida!
                     if (nameDecrypted && !sessionStorage.getItem('vault_verified')) {
                         import('../../ui-core.js').then(ui => ui.showToast("Password Master Corretta!", "success"));
                         sessionStorage.setItem('vault_verified', 'true');
@@ -214,7 +277,7 @@ async function renderHeaderUser(user) {
 function setAvatarImage(element, url) {
     if (!url) return;
 
-    // Se element è l'ID header-user-avatar o simile
+    // Se element Ã¨ l'ID header-user-avatar o simile
     const img = element.querySelector('img') || document.getElementById('user-avatar-img');
 
     if (img) {
@@ -432,7 +495,7 @@ function setupFABGroup(aziendes = []) {
         });
     }
 
-    // V6.1: Late-subscriber safe — se il footer è già pronto, inizializza subito
+    // V6.1: Late-subscriber safe â€” se il footer Ã¨ giÃ  pronto, inizializza subito
     const _footerState = getFooterReady();
     if (_footerState) {
         initFABFromFooter(_footerState);
