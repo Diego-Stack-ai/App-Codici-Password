@@ -5,12 +5,15 @@
     "playwright": "^1.57.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.2",
+    "firebase": "12.18.0",
+    "firebase-tools": "15.28.2",
     "madge": "^8.0.0",
     "stylelint": "^17.1.0",
     "stylelint-config-standard": "^40.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.15",
+  "version": "1.2.16",
   "description": "",
   "main": "css-audit-tool.js",
   "scripts": {
@@ -19,8 +22,9 @@
     "version:minor": "node scripts/bump-version.mjs minor",
     "version:major": "node scripts/bump-version.mjs major",
     "release:patch": "npm run version:patch && npm test",
-    "test": "npm run test:security",
-    "test:security": "node scripts/audit-security-flows.mjs"
+    "test": "npm run test:security && npm run test:storage-rules",
+    "test:security": "node scripts/audit-security-flows.mjs",
+    "test:storage-rules": "node scripts/run-storage-rules-tests.mjs"
   },
   "repository": {
     "type": "git",

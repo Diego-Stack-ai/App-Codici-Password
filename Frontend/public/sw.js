@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.15';
+const CACHE_NAME = 'codex-shell-v1.2.16';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js');

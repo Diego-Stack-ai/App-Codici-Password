@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAllowedUpload() {
+      return request.resource != null &&
+        request.resource.size > 0 &&
+        request.resource.size <= 25 * 1024 * 1024 &&
+        request.resource.contentType is string &&
+        request.resource.contentType.matches(
+          '^(image/(jpeg|png|gif|webp|heic|heif)|video/(mp4|quicktime|webm)|application/(pdf|msword|vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document|vnd\\.ms-excel|vnd\\.openxmlformats-officedocument\\.spreadsheetml\\.sheet)|text/plain)$'
+        );
+    }
+
+    // Tutti gli oggetti applicativi sono confinati nello spazio dell'UID.
+    // La lettura resta limitata al proprietario: la condivisione degli allegati
+    // richiederà un protocollo crittografico dedicato nella fase P3.
+    match /users/{userId}/{allPaths=**} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isAllowedUpload();
+    }
+
+    // Chiusura esplicita per qualsiasi percorso non riconosciuto.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

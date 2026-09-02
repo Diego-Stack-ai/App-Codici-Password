@@ -30,6 +30,9 @@ const passwordPolicy = await read('Frontend/public/assets/js/modules/core/passwo
 const registration = await read('Frontend/public/assets/js/modules/auth/registrati.js');
 const registrationHtml = await read('Frontend/public/registrati.html');
 const firestoreRules = await read('firestore.rules');
+const storageRules = await read('storage.rules');
+const firebaseJson = JSON.parse(await read('firebase.json'));
+const deployWorkflow = await read('.github/workflows/firebase-deploy.yml');
 const cloudFunctions = await read('functions/index.js');
 const manifest = JSON.parse(await read('Frontend/public/manifest.json'));
 const resetPasswordModule = await read('Frontend/public/assets/js/modules/auth/reset_password.js');
@@ -176,6 +179,14 @@ assert.match(cloudFunctions, /exports\.recoverMfaWithCode = onCall/, 'Recupero 2
 assert.match(cloudFunctions, /updateUser\(user\.uid, \{ multiFactor: \{ enrolledFactors: null \} \}\)/, 'Il recupero non rimuove realmente il fattore Firebase');
 assert.match(cloudFunctions, /revokeRefreshTokens\(user\.uid\)/, 'Il recupero 2FA non revoca le sessioni esistenti');
 assert.match(firestoreRules, /match \/mfaRecovery\/\{userId\}[\s\S]*?allow read, write: if false;/, 'I codici recupero sono accessibili direttamente dal client');
+assert.equal(firebaseJson.storage?.rules, 'storage.rules', 'Le regole Storage non sono collegate a firebase.json');
+assert.match(storageRules, /match \/users\/\{userId\}\/\{allPaths=\*\*\}/, 'Storage non confina gli oggetti nello spazio UID');
+assert.match(storageRules, /request\.auth\.uid == userId/, 'Storage non verifica la proprietà tramite UID');
+assert.match(storageRules, /request\.resource\.size <= 25 \* 1024 \* 1024/, 'Storage non impone il limite di 25 MB');
+assert.match(storageRules, /request\.resource\.contentType\.matches/, 'Storage non applica una allowlist dei MIME type');
+assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
+assert.match(deployWorkflow, /npm ci[\s\S]*?npm test[\s\S]*?firebase\.js deploy/, 'Il deploy non è preceduto dai test del repository');
+assert.equal(JSON.parse(packageJson).devDependencies?.['firebase-tools'], '15.28.2', 'La Firebase CLI non è fissata a una versione');
 assert.match(loginHtml, /id="recovery-code"[^>]+autocomplete="off"/, 'Campo codice recupero assente o esposto ad autofill');
 assert.match(login, /recoverTotpAccess\(pendingEmail, password, recoveryCode\)/, 'Flusso recupero 2FA non collegato al login');
 assert.match(settingsHtml, /id="btn-revoke-all-sessions"/, 'Comando disconnessione postazioni assente');

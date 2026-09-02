@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: Validate and deploy Firebase
 # Configurato il 2026-06-05 — Token CI attivo
 
 on:
@@ -13,8 +13,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-      - name: Deploy to Firebase Hosting
-        run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
+      - name: Setup Java for Firebase Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security and offline checks
+        run: npm test
+
+      - name: Deploy Hosting and Storage rules
+        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting,storage --token ${{ secrets.FIREBASE_TOKEN }}
