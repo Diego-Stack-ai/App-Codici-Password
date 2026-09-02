@@ -69,10 +69,21 @@ export async function initHomePage(user) {
 
     setupFABGroup(aziendes);
 
-    // Prototipo locale: si attiva solo aprendo la Home con ?assistant=1.
-    // Nessun dato o segreto dell'indice viene scritto su storage persistente.
-    if (new URLSearchParams(window.location.search).get('assistant') === '1') {
+    // L'impostazione sincronizzata contiene soltanto il consenso ad attivare la funzione.
+    // Indice e risultati rimangono esclusivamente nella memoria della pagina.
+    const assistantOverride = new URLSearchParams(window.location.search).get('assistant') === '1';
+    let assistantEnabled = assistantOverride;
+    if (!assistantEnabled) {
         try {
+            const settingsSnapshot = await getDoc(doc(db, 'users', user.uid));
+            assistantEnabled = settingsSnapshot.data()?.settings_ai_assistant === true;
+        } catch (error) {
+            console.warn('[ASSISTANT] Preferenza non disponibile.', error);
+        }
+    }
+    if (assistantEnabled) {
+        try {
+            document.getElementById('ai-assistant-status')?.classList.remove('hidden');
             const { initVaultAssistant } = await import('../assistant/assistant-controller.js');
             await initVaultAssistant(user);
         } catch (error) {

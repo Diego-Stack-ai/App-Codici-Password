@@ -40,7 +40,7 @@ export async function initImpostaNuovaPassword() {
 
 export async function initHomePage(user) {
     LOG("[Router] Loading Home V5.0...");
-    const module = await import('./modules/home/home.js?v=1.2.5');
+    const module = await import('./modules/home/home.js?v=1.2.24-ai2');
     await module.initHomePage(user);
 }
 
@@ -55,7 +55,7 @@ export async function initProfiloPrivato(user) {
 }
 
 export async function initImpostazioni(user) {
-    const module = await import('./modules/settings/impostazioni.js');
+    const module = await import('./modules/settings/impostazioni.js?v=1.2.24-ai2');
     await module.initImpostazioni(user);
 }
 

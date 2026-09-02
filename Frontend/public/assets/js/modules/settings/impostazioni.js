@@ -42,6 +42,7 @@ export async function initImpostazioni(user) {
     await loadUserData(user);
     initSettingsEvents();
     setupSecurityToggles(currentUserData);
+    setupAIAssistantToggle(user, currentUserData);
     setupAppInfo();
     setupPrivacyShort();
     setupTermsShort();
@@ -49,6 +50,27 @@ export async function initImpostazioni(user) {
     showPendingSecurityNotice();
 
     
+}
+
+function setupAIAssistantToggle(user, data) {
+    const toggle = document.getElementById('ai-assistant-toggle');
+    if (!toggle) return;
+    toggle.checked = data?.settings_ai_assistant === true;
+    toggle.addEventListener('change', async () => {
+        const enabled = toggle.checked;
+        toggle.disabled = true;
+        try {
+            await updateDoc(doc(db, 'users', user.uid), { settings_ai_assistant: enabled });
+            if (currentUserData) currentUserData.settings_ai_assistant = enabled;
+            showToast(enabled ? 'Agente AI attivato' : 'Agente AI disattivato', 'success');
+        } catch (error) {
+            console.error('[ASSISTANT] Salvataggio preferenza fallito.', error);
+            toggle.checked = !enabled;
+            showToast('Impossibile salvare la preferenza Agente AI', 'error');
+        } finally {
+            toggle.disabled = false;
+        }
+    });
 }
 
 function showPendingSecurityNotice() {
