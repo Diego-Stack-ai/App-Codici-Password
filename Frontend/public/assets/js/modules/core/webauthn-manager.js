@@ -8,6 +8,18 @@ const PRF_SALT_SIZE = 32;
 const HKDF_SALT_SIZE = 32;
 const AES_IV_SIZE = 12;
 
+function currentRpId() {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return undefined;
+    return hostname;
+}
+
+function assertCanonicalProductionOrigin() {
+    if (window.location.hostname === 'appcodici-password.firebaseapp.com') {
+        throw new Error('WEBAUTHN_CANONICAL_ORIGIN_REQUIRED');
+    }
+}
+
 /** Verifica WebAuthn e, in modo fail-closed, l'estensione PRF richiesta dalla Vault. */
 export async function isWebAuthnSupported() {
     if (window.PublicKeyCredential === undefined || typeof window.PublicKeyCredential !== 'function') {
@@ -53,17 +65,15 @@ function base64ToBuffer(base64) {
  */
 export async function setupWebAuthnPrf(userId, userEmail) {
     if (!await isWebAuthnSupported()) throw new Error("WebAuthn non supportato.");
+    assertCanonicalProductionOrigin();
 
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const prfSalt = crypto.getRandomValues(new Uint8Array(PRF_SALT_SIZE));
 
     // Il dominio deve combaciare con l'origin
-    const hostname = window.location.hostname;
-    // Se siamo su localhost non mettiamo l'id, altrimenti firebaseapp.com
+    const rpId = currentRpId();
     const rp = { name: "AppCodiciPassword" };
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-        rp.id = hostname;
-    }
+    if (rpId) rp.id = rpId;
 
     const publicKey = {
         challenge: challenge,
@@ -100,6 +110,7 @@ export async function setupWebAuthnPrf(userId, userEmail) {
 
         return {
             credentialId: bufferToBase64(credential.rawId),
+            rpId: rpId || null,
             prfSalt: bufferToBase64(prfSalt),
             prfOutput: createPrfOutput
         };
@@ -112,13 +123,16 @@ export async function setupWebAuthnPrf(userId, userEmail) {
 /**
  * Ottiene l'output PRF sbloccando la credenziale.
  */
-export async function getPrfOutput(credentialIdBase64, prfSaltBase64) {
+export async function getPrfOutput(credentialIdBase64, prfSaltBase64, credentialRpId = null) {
+    assertCanonicalProductionOrigin();
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const rawId = base64ToBuffer(credentialIdBase64);
     const prfSalt = base64ToBuffer(prfSaltBase64);
 
-    const hostname = window.location.hostname;
-    const rpId = (hostname !== "localhost" && hostname !== "127.0.0.1") ? hostname : undefined;
+    const rpId = currentRpId();
+    if (credentialRpId && credentialRpId !== rpId) {
+        throw new Error('WEBAUTHN_RP_ID_MISMATCH');
+    }
 
     const publicKey = {
         challenge: challenge,

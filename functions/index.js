@@ -15,6 +15,13 @@ const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const { setGlobalOptions } = require("firebase-functions");
+const {
+    generateRecoveryCode,
+    nextRecoveryAttemptState,
+    normalizeRecoveryCode,
+    recoveryAttemptId,
+    recoveryCodeHash
+} = require("./recovery-security");
 
 admin.initializeApp();
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
@@ -23,22 +30,6 @@ setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 const GMAIL_USER = defineSecret("GMAIL_USER");
 const GMAIL_APP_PASSWORD = defineSecret("GMAIL_APP_PASSWORD");
 const FIREBASE_WEB_API_KEY = "AIzaSyDDt-PacoHtUQg6Ow7-1UxvrGVZLXVYx-o";
-
-function normalizeRecoveryCode(value) {
-    return String(value || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-}
-
-function recoveryCodeHash(value) {
-    return crypto.createHash("sha256").update(normalizeRecoveryCode(value), "utf8").digest("hex");
-}
-
-function generateRecoveryCode() {
-    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    const bytes = crypto.randomBytes(16);
-    let raw = "";
-    for (let i = 0; i < 16; i += 1) raw += alphabet[bytes[i] % alphabet.length];
-    return raw.match(/.{1,4}/g).join("-");
-}
 
 exports.createMfaRecoveryCodes = onCall(
     { region: "europe-west1", enforceAppCheck: true },
@@ -74,6 +65,26 @@ exports.recoverMfaWithCode = onCall(
             throw new HttpsError("invalid-argument", "Dati di recupero non validi.");
         }
 
+        const db = admin.firestore();
+        const ipAddress = request.rawRequest?.ip || request.rawRequest?.socket?.remoteAddress || "unknown";
+        const attemptRef = db.collection("mfaRecoveryAttempts").doc(recoveryAttemptId(email, ipAddress));
+        let recoveryAttemptAllowed = false;
+        await db.runTransaction(async (transaction) => {
+            const attemptSnap = await transaction.get(attemptRef);
+            const next = nextRecoveryAttemptState(attemptSnap.exists ? attemptSnap.data() : null);
+            recoveryAttemptAllowed = next.allowed;
+            transaction.set(attemptRef, {
+                emailHash: crypto.createHash("sha256").update(email, "utf8").digest("hex"),
+                attempts: next.attempts || 0,
+                windowStartedAt: next.windowStartedAt || Date.now(),
+                blockedUntil: next.blockedUntil || 0,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+        });
+        if (!recoveryAttemptAllowed) {
+            throw new HttpsError("resource-exhausted", "Troppi tentativi. Riprova più tardi.");
+        }
+
         // Verifica il primo fattore con Firebase Auth senza creare una sessione applicativa.
         const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`, {
             method: "POST",
@@ -85,21 +96,30 @@ exports.recoverMfaWithCode = onCall(
         if (!firstFactorAccepted) throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
 
         const user = await admin.auth().getUserByEmail(email);
-        const recoveryRef = admin.firestore().collection("mfaRecovery").doc(user.uid);
-        const recovery = await recoveryRef.get();
-        const hashes = recovery.exists ? recovery.data().codeHashes || [] : [];
-        if (!hashes.includes(codeHash)) {
-            throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
-        }
+        const recoveryRef = db.collection("mfaRecovery").doc(user.uid);
+        await db.runTransaction(async (transaction) => {
+            const recovery = await transaction.get(recoveryRef);
+            const hashes = recovery.exists ? recovery.data().codeHashes || [] : [];
+            if (!hashes.includes(codeHash)) {
+                throw new HttpsError("permission-denied", "Credenziali o codice di recupero non validi.");
+            }
+            const remainingHashes = hashes.filter((hash) => hash !== codeHash);
+            transaction.set(recoveryRef, {
+                codeHashes: remainingHashes,
+                remaining: remainingHashes.length,
+                recoveryPendingAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        });
 
         await admin.auth().updateUser(user.uid, { multiFactor: { enrolledFactors: null } });
         await admin.auth().revokeRefreshTokens(user.uid);
         await recoveryRef.set({
-            codeHashes: hashes.filter((hash) => hash !== codeHash),
-            remaining: Math.max(0, hashes.length - 1),
             recoveredAt: admin.firestore.FieldValue.serverTimestamp(),
+            recoveryPendingAt: admin.firestore.FieldValue.delete(),
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
+        await attemptRef.delete();
         return { ok: true };
     }
 );

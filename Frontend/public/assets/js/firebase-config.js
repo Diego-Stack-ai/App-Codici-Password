@@ -7,6 +7,13 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-s
 import { getFunctions } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
 import { getMessaging, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
 
+// Mantiene un solo origin per le credenziali WebAuthn/PRF. I due domini
+// Firebase Hosting hanno storage e credenziali browser separati.
+const CANONICAL_HOST = 'appcodici-password.web.app';
+if (window.location.hostname === 'appcodici-password.firebaseapp.com') {
+  window.location.replace(`https://${CANONICAL_HOST}${window.location.pathname}${window.location.search}${window.location.hash}`);
+}
+
 // Your web app's Firebase configuration
 const _f1 = "AIza";
 const _f2 = "SyDDt-Paco";

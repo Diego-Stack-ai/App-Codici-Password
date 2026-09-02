@@ -31,5 +31,5 @@ jobs:
       - name: Run security and offline checks
         run: npm test
 
-      - name: Deploy Hosting and Storage rules
-        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting,storage --token ${{ secrets.FIREBASE_TOKEN }}
+      - name: Deploy Hosting, Functions and security rules
+        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting,functions,firestore:rules,storage --token ${{ secrets.FIREBASE_TOKEN }}

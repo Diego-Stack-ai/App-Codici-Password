@@ -493,7 +493,7 @@ async function tryBiometricUnlock() {
         const data = JSON.parse(encryptedSecret);
         if (![1, 2].includes(data.version) || !data.credentialId || !(data.encryptedVaultKey || data.encryptedMasterKey)) return null;
 
-        const prfOutput = await getPrfOutput(data.credentialId, data.prfSalt);
+        const prfOutput = await getPrfOutput(data.credentialId, data.prfSalt, data.rpId || null);
         const aesKey = await deriveHkdfKey(prfOutput, data.hkdfSalt);
         const secret = await decryptVaultSecret(data.encryptedVaultKey || data.encryptedMasterKey, data.iv, aesKey);
         
@@ -548,7 +548,7 @@ export async function enableBiometricUnlock(pass) {
         const setup = await setupWebAuthnPrf(user.uid, user.email);
         
         // FIX 3: Evitare doppio prompt
-        const prfOutput = setup.prfOutput || await getPrfOutput(setup.credentialId, setup.prfSalt);
+        const prfOutput = setup.prfOutput || await getPrfOutput(setup.credentialId, setup.prfSalt, setup.rpId);
         
         const hkdfSalt = generateHkdfSalt();
         const aesKey = await deriveHkdfKey(prfOutput, hkdfSalt);
@@ -558,6 +558,7 @@ export async function enableBiometricUnlock(pass) {
         const container = {
             version: 2,
             credentialId: setup.credentialId,
+            rpId: setup.rpId,
             encryptedVaultKey: encrypted.ciphertext,
             iv: encrypted.iv,
             hkdfSalt: hkdfSalt,

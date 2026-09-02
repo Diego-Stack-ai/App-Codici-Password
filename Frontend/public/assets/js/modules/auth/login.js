@@ -174,6 +174,8 @@ function setupLoginForm() {
                 if (usingRecoveryCode) {
                     const recoveryCode = document.getElementById('recovery-code')?.value.trim() || '';
                     await recoverTotpAccess(pendingEmail, password, recoveryCode);
+                    passwordEl.value = '';
+                    document.getElementById('recovery-code').value = '';
                     showToast('Accesso recuperato. La 2FA è stata disattivata: accedi di nuovo e riconfigurala.', 'success');
                     setTimeout(() => window.location.reload(), 1800);
                     return;

@@ -123,10 +123,13 @@ assert.doesNotMatch(security, /LEGACY_STORAGE_KEY|atob\(storedSecret\)|getItem\(
 assert.match(security, /removeItem\(['"]codex_vault_secret['"]\)/, 'Il vecchio segreto locale non viene eliminato in modo fail-closed');
 assert.match(security, /scopedValue[\s\S]+!scopedValue\.startsWith\(['"]\{['"]\)[\s\S]+removeItem\(scopedKey\)/, 'Un contenitore UID nel vecchio formato non viene eliminato');
 assert.match(webauthn, /capabilities\?\.\['extension:prf'\] === true/, 'La compatibilità biometrica deve verificare PRF in modo fail-closed');
+assert.match(webauthn, /credentialRpId && credentialRpId !== rpId/, 'Lo sblocco WebAuthn non verifica il RP ID registrato');
+assert.match(security, /rpId: setup\.rpId/, 'Il contenitore biometrico non conserva il RP ID');
 assert.match(settingsHtml, /non la Master Password della Vault/, 'Il cambio password non distingue login e Vault');
 assert.match(settingsHtml, /app Authenticator \(TOTP\)/, 'Lo stato reale della 2FA non è visibile');
 assert.match(password, /Master Password della Vault non è cambiata/, 'Conferma cambio password ambigua');
 assert.match(firebaseConfig, /persistentLocalCache/, 'Cache Firestore persistente mancante');
+assert.match(firebaseConfig, /firebaseapp\.com[\s\S]*?location\.replace[\s\S]*?CANONICAL_HOST/, 'Il dominio Firebase alternativo non viene ricondotto all origin canonico');
 assert.match(serviceWorker, /cache\.put\(request, response\.clone\(\)\)/, 'Le pagine visitate non vengono conservate per navigazione offline');
 
 assert.doesNotMatch(firestoreRules, /visibility[^\n]+==\s*['"]shared['"]/, 'La visibilità shared concede ancora accesso generico');
@@ -176,9 +179,12 @@ assert.match(serviceWorker, /onBackgroundMessage[\s\S]*?eventType !== 'deadline'
 
 assert.match(cloudFunctions, /exports\.createMfaRecoveryCodes = onCall/, 'Generazione server dei codici recupero 2FA mancante');
 assert.match(cloudFunctions, /exports\.recoverMfaWithCode = onCall/, 'Recupero 2FA server mancante');
+assert.match(cloudFunctions, /mfaRecoveryAttempts[\s\S]*?nextRecoveryAttemptState/, 'Il recupero MFA non applica un limite server');
+assert.match(cloudFunctions, /runTransaction[\s\S]*?remainingHashes/, 'Il recovery code non viene consumato atomicamente');
 assert.match(cloudFunctions, /updateUser\(user\.uid, \{ multiFactor: \{ enrolledFactors: null \} \}\)/, 'Il recupero non rimuove realmente il fattore Firebase');
 assert.match(cloudFunctions, /revokeRefreshTokens\(user\.uid\)/, 'Il recupero 2FA non revoca le sessioni esistenti');
 assert.match(firestoreRules, /match \/mfaRecovery\/\{userId\}[\s\S]*?allow read, write: if false;/, 'I codici recupero sono accessibili direttamente dal client');
+assert.match(firestoreRules, /match \/mfaRecoveryAttempts\/\{attemptId\}[\s\S]*?allow read, write: if false;/, 'I contatori recupero sono accessibili direttamente dal client');
 assert.equal(firebaseJson.storage?.rules, 'storage.rules', 'Le regole Storage non sono collegate a firebase.json');
 assert.match(storageRules, /match \/users\/\{userId\}\/\{allPaths=\*\*\}/, 'Storage non confina gli oggetti nello spazio UID');
 assert.match(storageRules, /request\.auth\.uid == userId/, 'Storage non verifica la proprietà tramite UID');
