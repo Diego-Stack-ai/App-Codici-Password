@@ -11,8 +11,54 @@ service cloud.firestore {
       return isAuth() && request.auth.uid in resource.data.get('sharedWithUids', []);
     }
 
-    match /users/{userId}/{allPaths=**} {
+    match /users/{userId} {
       allow read, write: if isOwner(userId);
+    }
+
+    match /users/{userId}/pushDevices/{deviceId} {
+      allow read, delete: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+        deviceId.matches('^[a-fA-F0-9-]{36}$') &&
+        request.resource.data.keys().hasOnly([
+          'token', 'platform', 'browser', 'enabled', 'notificationScope',
+          'privacyMode', 'schemaVersion', 'updatedAt', 'lastSeenAt', 'createdAt'
+        ]) &&
+        request.resource.data.token is string &&
+        request.resource.data.token.size() > 20 &&
+        request.resource.data.token.size() < 4096 &&
+        request.resource.data.platform in ['windows', 'android', 'ios', 'other'] &&
+        request.resource.data.browser is string &&
+        request.resource.data.browser.size() < 200 &&
+        request.resource.data.enabled is bool &&
+        request.resource.data.notificationScope == 'deadlines' &&
+        request.resource.data.privacyMode in ['detailed', 'discreet'] &&
+        request.resource.data.schemaVersion == 1;
+      allow update: if isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'token', 'platform', 'browser', 'enabled', 'notificationScope',
+          'privacyMode', 'schemaVersion', 'updatedAt', 'lastSeenAt', 'createdAt'
+        ]) &&
+        request.resource.data.token is string &&
+        request.resource.data.token.size() > 20 &&
+        request.resource.data.token.size() < 4096 &&
+        request.resource.data.platform in ['windows', 'android', 'ios', 'other'] &&
+        request.resource.data.browser is string &&
+        request.resource.data.browser.size() < 200 &&
+        request.resource.data.enabled is bool &&
+        request.resource.data.notificationScope == 'deadlines' &&
+        request.resource.data.privacyMode in ['detailed', 'discreet'] &&
+        request.resource.data.schemaVersion == 1;
+    }
+
+    match /users/{userId}/notificationDeliveries/{deliveryId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    match /users/{userId}/{collection}/{document=**} {
+      allow read, write: if isOwner(userId) &&
+        collection != 'pushDevices' &&
+        collection != 'notificationDeliveries';
     }
 
     match /users/{userId}/accounts/{accountId} {

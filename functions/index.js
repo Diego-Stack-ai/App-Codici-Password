@@ -26,6 +26,110 @@ function sanitizeEmail(email) {
     return String(email || "").toLowerCase().replace(/[^a-zA-Z0-9]/g, "_") || "unknown_guest";
 }
 
+function pushText(scadenza, diffDays) {
+    const tipo = String(scadenza.type || scadenza.templateText || "Scadenza").trim();
+    const veicolo = String(scadenza.veicolo_modello || "").trim();
+    const when = diffDays === 0 ? "Scade oggi" : diffDays === 1 ? "Scade domani" : `Scadenza tra ${diffDays} giorni`;
+    return { title: "Codici & Password", body: `${tipo}${veicolo ? ` · ${veicolo}` : ""}\n${when}` };
+}
+
+function isPushReminderDay(scadenza, diffDays) {
+    if (diffDays === 0) return true;
+    const daysBefore = Number(scadenza.notif_days_before || 14);
+    const frequency = Math.max(1, Number(scadenza.notif_frequency || 7));
+    return diffDays >= 0 && diffDays <= daysBefore && (daysBefore - diffDays) % frequency === 0;
+}
+
+async function activePushDevices(db, uid) {
+    const snap = await db.collection("users").doc(uid).collection("pushDevices")
+        .where("enabled", "==", true).get();
+    return snap.docs.filter((item) => item.data().notificationScope === "deadlines" && item.data().token);
+}
+
+async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays) {
+    if (!isPushReminderDay(scadenza, diffDays)) return;
+    const devices = await activePushDevices(db, uid);
+    if (!devices.length) return;
+    const dueVersion = String(scadenza.dueDate || "").replace(/[^0-9]/g, "").slice(0, 14);
+    const stage = diffDays === 0 ? "D0" : `D${diffDays}`;
+    const text = pushText(scadenza, diffDays);
+
+    for (const device of devices) {
+        const deliveryId = `${deadlineId}_${dueVersion}_${stage}_${device.id}`.replace(/[^a-zA-Z0-9_-]/g, "_");
+        const deliveryRef = db.collection("users").doc(uid).collection("notificationDeliveries").doc(deliveryId);
+        const reserved = await db.runTransaction(async (transaction) => {
+            const existing = await transaction.get(deliveryRef);
+            if (existing.exists && existing.data().status === "sent") return false;
+            if (existing.exists && existing.data().status === "sending") {
+                const updatedAt = existing.data().updatedAt?.toMillis?.() || 0;
+                if (Date.now() - updatedAt < 10 * 60 * 1000) return false;
+            }
+            transaction.set(deliveryRef, {
+                eventType: "deadline", deadlineId, deviceId: device.id, channel: "push", stage,
+                dueDate: String(scadenza.dueDate), status: "sending", attempts: admin.firestore.FieldValue.increment(1),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            return true;
+        });
+        if (!reserved) continue;
+
+        try {
+            await admin.messaging().send({
+                token: device.data().token,
+                data: {
+                    eventType: "deadline", deadlineId, title: text.title, body: text.body,
+                    deliveryTag: deliveryId
+                },
+                webpush: { headers: { TTL: diffDays === 0 ? "21600" : "86400", Urgency: "high" } }
+            });
+            await deliveryRef.set({ status: "sent", sentAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        } catch (error) {
+            const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"]
+                .includes(error.code);
+            await deliveryRef.set({
+                status: "failed", errorCode: String(error.code || "unknown").slice(0, 120),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            if (invalid) await device.ref.set({ enabled: false, status: "invalid", invalidatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+            console.error(`[PUSH FAILED] ${deadlineId}/${device.id}:`, error.code || error.message);
+        }
+    }
+}
+
+exports.sendDeadlinePushTest = onCall(
+    { region: "europe-west1", enforceAppCheck: true },
+    async (request) => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        const deviceId = String(request.data?.deviceId || "");
+        if (!/^[a-f0-9-]{36}$/i.test(deviceId)) throw new HttpsError("invalid-argument", "Dispositivo non valido.");
+        const db = admin.firestore();
+        const deviceRef = db.collection("users").doc(request.auth.uid).collection("pushDevices").doc(deviceId);
+        const device = await deviceRef.get();
+        if (!device.exists || !device.data().enabled || device.data().notificationScope !== "deadlines") {
+            throw new HttpsError("failed-precondition", "Notifiche non attive su questo dispositivo.");
+        }
+        const now = Date.now();
+        const lastTest = device.data().lastTestAt?.toMillis?.() || 0;
+        if (now - lastTest < 60000) throw new HttpsError("resource-exhausted", "Attendi un minuto prima di riprovare.");
+        await deviceRef.set({ lastTestAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        try {
+            await admin.messaging().send({
+                token: device.data().token,
+                data: {
+                    eventType: "deadline", deadlineId: "", title: "Codici & Password",
+                    body: "Assicurazione · Moto Guzzi California\nNotifica scadenza di prova",
+                    deliveryTag: `deadline-test-${deviceId}`
+                },
+                webpush: { headers: { TTL: "300", Urgency: "high" } }
+            });
+            return { ok: true };
+        } catch (error) {
+            console.error("[PUSH TEST FAILED]", error.code || error.message);
+            throw new HttpsError("internal", "Invio della notifica di prova non riuscito.");
+        }
+    }
+);
+
 exports.respondToInvitation = onCall(
     { region: "europe-west1", enforceAppCheck: true },
     async (request) => {
@@ -218,7 +322,7 @@ exports.checkDeadlines = onSchedule(
 
                 for (const sDoc of scadenzeSnap.docs) {
                     const s = sDoc.data();
-                    if (!s.email1 || !s.dueDate) continue;
+                    if (!s.dueDate) continue;
 
                     const dueDate = new Date(s.dueDate);
                     dueDate.setHours(0, 0, 0, 0);
@@ -232,6 +336,15 @@ exports.checkDeadlines = onSchedule(
                     if (diffDays < 0) continue;
                     // Fuori dalla finestra: troppo presto
                     if (diffDays > daysBefore) continue;
+
+                    // Il canale Push usa un registro separato e non interferisce con le email.
+                    try {
+                        await sendDeadlinePush(db, uid, sDoc.id, s, diffDays);
+                    } catch (pushErr) {
+                        console.error(`[PUSH FAILED] ${sDoc.id}:`, pushErr.message);
+                    }
+
+                    if (!s.email1) continue;
 
                     // Giorno 0: invia SEMPRE
                     // Altri giorni: rispetta la frequenza
@@ -277,7 +390,7 @@ exports.onScadenzaCreated = onDocumentCreated(
         const docRef = event.data.ref;
 
         // Verifica campi minimi
-        if (!s.email1 || !s.dueDate || s.completed) return;
+        if (!s.dueDate || s.completed) return;
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -292,6 +405,14 @@ exports.onScadenzaCreated = onDocumentCreated(
 
         // Scadenza già passata o fuori dalla finestra → niente da fare
         if (diffDays < 0 || diffDays > daysBefore) return;
+
+        try {
+            await sendDeadlinePush(admin.firestore(), event.params.uid, event.params.scadenzaId, s, diffDays);
+        } catch (pushErr) {
+            console.error(`[TRIGGER PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
+        }
+
+        if (!s.email1) return;
 
         console.log(`[TRIGGER] Nuova scadenza creata — diffDays: ${diffDays}, preavviso: ${daysBefore}`);
 

@@ -1,5 +1,43 @@
-const CACHE_NAME = 'codex-shell-v1.2.12';
+const CACHE_NAME = 'codex-shell-v1.2.13';
 const APP_CACHE_PREFIX = 'codex-';
+
+importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+    apiKey: 'AIzaSyDDt-PacoHtUQg6Ow7-1UxvrGVZLXVYx-o',
+    authDomain: 'appcodici-password.firebaseapp.com',
+    projectId: 'appcodici-password',
+    storageBucket: 'appcodici-password.firebasestorage.app',
+    messagingSenderId: '343696844738',
+    appId: '1:343696844738:web:3e62fa1fdd9375535b985b'
+});
+
+firebase.messaging().onBackgroundMessage((payload) => {
+    if (payload.data?.eventType !== 'deadline') return;
+    return self.registration.showNotification(payload.data.title || 'Codici & Password', {
+        body: payload.data.body || 'Hai una scadenza in arrivo.',
+        icon: './assets/images/app-icon-192.png',
+        badge: './assets/images/app-icon-192.png',
+        tag: payload.data.deliveryTag || `deadline-${payload.data.deadlineId || 'reminder'}`,
+        data: { eventType: 'deadline', deadlineId: payload.data.deadlineId || '' }
+    });
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    if (event.notification.data?.eventType !== 'deadline') return;
+    const deadlineId = encodeURIComponent(event.notification.data.deadlineId || '');
+    const target = new URL(deadlineId ? `dettaglio_scadenza.html?id=${deadlineId}` : 'scadenze.html', self.location.origin).href;
+    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
+        const existing = windows.find((client) => client.url.startsWith(self.location.origin));
+        if (existing) {
+            await existing.navigate(target);
+            return existing.focus();
+        }
+        return self.clients.openWindow(target);
+    }));
+});
 
 // Shell minima coerente con la release corrente. Le pagine visitate e i
 // relativi asset vengono aggiunti a runtime, senza toccare IndexedDB/Firestore.

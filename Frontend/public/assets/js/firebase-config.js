@@ -5,6 +5,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth
 import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { getFunctions } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
+import { getMessaging, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
 
 // Your web app's Firebase configuration
 const _f1 = "AIza";
@@ -55,5 +56,13 @@ try {
 
 const storage = getStorage(app);
 const functions = getFunctions(app, 'europe-west1');
+
+let messagingPromise = null;
+export function getMessagingInstance() {
+  if (!messagingPromise) {
+    messagingPromise = isMessagingSupported().then((supported) => supported ? getMessaging(app) : null);
+  }
+  return messagingPromise;
+}
 
 export { auth, db, storage, functions };

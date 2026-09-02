@@ -248,6 +248,24 @@
                         <span class="material-symbols-outlined arrow-icon-muted arrow-icon">chevron_right</span>
                     </button>
 
+                    <!-- Notifiche native: limitate alle Scadenze -->
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-amber">
+                                <span class="material-symbols-outlined">notifications_active</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <span class="settings-label">Notifiche scadenze</span>
+                                <span id="deadline-push-status" class="settings-desc">Verifica disponibilità…</span>
+                            </div>
+                            <input type="checkbox" id="deadline-push-toggle" class="settings-toggle" aria-label="Notifiche Push per le scadenze">
+                        </div>
+                        <button type="button" id="btn-test-deadline-push" class="btn-maintenance-accent hidden">
+                            <span class="material-symbols-outlined">send</span>
+                            Invia notifica di prova su questo dispositivo
+                        </button>
+                    </div>
+
                 </div>
 
                 <!-- Supporto e Info -->

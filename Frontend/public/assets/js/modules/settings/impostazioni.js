@@ -13,6 +13,7 @@ import { safeSetText, setChildren, createElement, clearElement } from '../../dom
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured } from '../core/security-manager.js';
 import { enrollTotp, unenrollTotp, getTotpEnrollment } from '../core/mfa-manager.js';
+import { disableDeadlinePush, enableDeadlinePush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -44,8 +45,58 @@ export async function initImpostazioni(user) {
     setupAppInfo();
     setupPrivacyShort();
     setupTermsShort();
+    await setupDeadlinePush(user);
 
     
+}
+
+async function setupDeadlinePush(user) {
+    const toggle = document.getElementById('deadline-push-toggle');
+    const status = document.getElementById('deadline-push-status');
+    const testButton = document.getElementById('btn-test-deadline-push');
+    if (!toggle || !status || !testButton) return;
+
+    const render = async () => {
+        const state = await getCurrentPushState(user);
+        toggle.checked = state.enabled;
+        toggle.disabled = !state.compatible;
+        testButton.classList.toggle('hidden', !state.enabled);
+        status.textContent = state.compatible
+            ? (state.enabled ? 'Attive su questo dispositivo · Solo scadenze' : 'Disattivate su questo dispositivo')
+            : state.reason;
+    };
+
+    await render();
+    await listenForDeadlinePushInForeground();
+    toggle.addEventListener('change', async () => {
+        const enabling = toggle.checked;
+        toggle.disabled = true;
+        try {
+            if (enabling) await enableDeadlinePush(user);
+            else await disableDeadlinePush(user);
+            showToast(enabling ? 'Notifiche scadenze attivate' : 'Notifiche scadenze disattivate', 'success');
+            if (enabling) await listenForDeadlinePushInForeground();
+        } catch (error) {
+            console.error('[PUSH] Configurazione fallita', error);
+            toggle.checked = !enabling;
+            showToast(error.message || 'Configurazione notifiche non riuscita', 'error');
+        } finally {
+            await render();
+        }
+    });
+
+    testButton.addEventListener('click', async () => {
+        testButton.disabled = true;
+        try {
+            await sendDeadlinePushTest();
+            showToast('Notifica di prova inviata', 'success');
+        } catch (error) {
+            console.error('[PUSH TEST] Invio fallito', error);
+            showToast(error.message || 'Invio di prova non riuscito', 'error');
+        } finally {
+            testButton.disabled = false;
+        }
+    });
 }
 
 function setupSecurityToggles(data) {
