@@ -333,9 +333,9 @@ h3.settings-desc {
     /* Più nell'angolo */
     bottom: -8px;
     /* Più nell'angolo */
-    width: 32px;
+    width: var(--touch-target-min, 44px);
     /* Un po' più grande per facilità di click */
-    height: 32px;
+    height: var(--touch-target-min, 44px);
     background: var(--accent);
     color: white;
     border-radius: 50%;

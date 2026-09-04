@@ -62,6 +62,16 @@ const deadlineCss = [
   'aggiungi_scadenza.css',
   'dettaglio_scadenza.css'
 ].map(name => fs.readFileSync(path.join(publicRoot, 'assets', 'css', name), 'utf8')).join('\n');
+const remainingUiCss = [
+  'profilo_privato.css',
+  'impostazioni.css',
+  'archivio_account.css',
+  'regole_scadenze.css',
+  'configurazione_automezzi.css',
+  'configurazione_documenti.css',
+  'configurazione_generali.css',
+  'vault-assistant.css'
+].map(name => fs.readFileSync(path.join(publicRoot, 'assets', 'css', name), 'utf8')).join('\n');
 const requiredSignals = [
   ['token --text-body', coreFonts.includes('--text-body:')],
   ['token --touch-target-min', core.includes('--touch-target-min:')],
@@ -78,7 +88,9 @@ const requiredSignals = [
   ['azioni account aziendali con target tattile', companyAccountCss.includes('width: var(--touch-target-min, 44px)')],
   ['card aziendali allineate nella griglia', /\.account-card\s*\{[\s\S]*?display:\s*flex;/.test(companyAccountCss) && /\.account-card \.swipe-content\s*\{[\s\S]*?flex:\s*1;/.test(companyAccountCss)],
   ['scadenze senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(deadlineCss)],
-  ['azioni scadenze con target tattile', deadlineCss.includes('width: var(--touch-target-min, 44px)')]
+  ['azioni scadenze con target tattile', deadlineCss.includes('width: var(--touch-target-min, 44px)')],
+  ['controlli rimanenti con target tattile', (remainingUiCss.match(/var\(--touch-target-min, 44px\)/g) || []).length >= 12],
+  ['assistente contenuto nel viewport', remainingUiCss.includes('max-height: calc(100dvh') && remainingUiCss.includes('overscroll-behavior: contain')]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);
