@@ -10,6 +10,41 @@ import { APP_VERSION } from './env-v126.js';
 // Guard idempotenza — sostituisce window.__componentsInitialized
 let _componentsInitialized = false;
 
+const AUTH_PATHS = new Set([
+    '/',
+    '/index.html',
+    '/login-v115.html',
+    '/registrati.html',
+    '/reset_password.html',
+    '/imposta_nuova_password.html'
+]);
+
+/**
+ * Torna alla pagina interna realmente precedente quando il browser la espone.
+ * Dopo refresh, deep-link, login o provenienza esterna usa invece il parent
+ * gerarchico indicato dalla pagina corrente.
+ */
+function navigateBack(fallbackHref) {
+    try {
+        const previous = document.referrer ? new URL(document.referrer) : null;
+        const current = new URL(window.location.href);
+        const previousPath = previous?.pathname.toLowerCase();
+        const isSafeInternalPrevious = previous
+            && previous.origin === current.origin
+            && previous.href !== current.href
+            && !AUTH_PATHS.has(previousPath);
+
+        if (isSafeInternalPrevious && window.history.length > 1) {
+            window.history.back();
+            return;
+        }
+    } catch (error) {
+        LOG('[NAV] Referrer non utilizzabile, applico il fallback gerarchico', error);
+    }
+
+    window.location.replace(fallbackHref);
+}
+
 
 /**
  * Inizializza i componenti condivisi (Header/Footer)
@@ -66,57 +101,56 @@ export async function initComponents() {
                 headerLeft.appendChild(avatarLink);
             } else if (!isAuth) {
                 // Back Button (Solo se non siamo su Auth o Home)
-                let backFn = () => window.history.back();
+                let fallbackHref = 'home_page.html';
                 const urlParams = new URLSearchParams(window.location.search);
 
                 // Mapping Logico Navigazione
-                // IMPORTANTE: usiamo location.replace() invece di location.href
-                // per non inquinare la history del browser (evita il loop "avanti/indietro")
+                // La pagina precedente reale ha priorità; questa mappa interviene
+                // soltanto dopo refresh, deep-link o provenienza non attendibile.
                 if (path.endsWith('lista_aziende.html') || path.endsWith('scadenze.html')) {
-                    backFn = () => window.location.replace('home_page.html');
+                    fallbackHref = 'home_page.html';
                 } else if (path.endsWith('area_privata.html')) {
-                    backFn = () => window.location.replace('home_page.html');
+                    fallbackHref = 'home_page.html';
                 } else if (path.endsWith('dettaglio_scadenza.html')) {
-                    backFn = () => window.location.replace('scadenze.html');
+                    fallbackHref = 'scadenze.html';
                 } else if (path.endsWith('aggiungi_scadenza.html')) {
                     const id = urlParams.get('id');
-                    if (id) backFn = () => window.location.replace(`dettaglio_scadenza.html?id=${id}`);
-                    else backFn = () => window.location.replace('scadenze.html');
+                    fallbackHref = id ? `dettaglio_scadenza.html?id=${id}` : 'scadenze.html';
                 } else if (path.endsWith('impostazioni.html')) {
-                    backFn = () => window.location.replace('home_page.html');
+                    fallbackHref = 'home_page.html';
                 } else if (path.endsWith('regole_scadenze.html')) {
-                    backFn = () => window.location.replace('impostazioni.html');
+                    fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('privacy.html') || path.endsWith('termini.html')) {
-                    backFn = () => window.location.replace('impostazioni.html');
+                    fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('configurazione_automezzi.html') || path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
-                    backFn = () => window.location.replace('regole_scadenze.html');
+                    fallbackHref = 'regole_scadenze.html';
                 } else if (path.endsWith('archivio_account.html') || path.endsWith('notifiche_storia.html')) {
-                    backFn = () => window.location.replace('impostazioni.html');
+                    fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html')) {
-                    backFn = () => window.location.replace('lista_aziende.html');
+                    fallbackHref = 'lista_aziende.html';
                 } else if (path.endsWith('dettaglio_account_azienda.html')) {
                     const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda');
-                    backFn = () => window.location.replace(`account_azienda.html?id=${aziendaId}`);
+                    fallbackHref = aziendaId ? `account_azienda.html?id=${aziendaId}` : 'lista_aziende.html';
                 } else if (path.endsWith('form_account_azienda.html')) {
                     const accountId = urlParams.get('id');
                     const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda');
-                    if (accountId) backFn = () => window.location.replace(`dettaglio_account_azienda.html?id=${accountId}&aziendaId=${aziendaId}`);
-                    else backFn = () => window.location.replace(`account_azienda.html?id=${aziendaId}`);
+                    if (accountId && aziendaId) fallbackHref = `dettaglio_account_azienda.html?id=${accountId}&aziendaId=${aziendaId}`;
+                    else fallbackHref = aziendaId ? `account_azienda.html?id=${aziendaId}` : 'lista_aziende.html';
                 } else if (path.endsWith('modifica_azienda.html')) {
                     const id = urlParams.get('id');
-                    if (id) backFn = () => window.location.replace(`dati_azienda.html?id=${id}`);
-                    else backFn = () => window.location.replace('lista_aziende.html');
+                    fallbackHref = id ? `dati_azienda.html?id=${id}` : 'lista_aziende.html';
                 } else if (path.endsWith('profilo_privato.html')) {
-                    backFn = () => window.location.replace('home_page.html');
+                    fallbackHref = 'home_page.html';
                 } else if (path.endsWith('account_privati.html')) {
-                    backFn = () => window.location.replace('area_privata.html');
+                    fallbackHref = 'area_privata.html';
                 } else if (path.endsWith('dettaglio_account_privato.html')) {
-                    backFn = () => window.location.replace('account_privati.html');
+                    fallbackHref = 'account_privati.html';
                 } else if (path.endsWith('form_account_privato.html')) {
                     const id = urlParams.get('id');
-                    if (id) backFn = () => window.location.replace(`dettaglio_account_privato.html?id=${id}`);
-                    else backFn = () => window.location.replace('account_privati.html');
+                    fallbackHref = id ? `dettaglio_account_privato.html?id=${id}` : 'account_privati.html';
                 }
+
+                const backFn = () => navigateBack(fallbackHref);
 
                 headerLeft.appendChild(
                     createElement('button', { className: 'btn-icon-header', dataset: { action: 'back' }, onclick: backFn }, [

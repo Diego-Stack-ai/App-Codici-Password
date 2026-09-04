@@ -54,18 +54,6 @@ export async function initDettaglioAccountPrivato(user) {
     ownerId = params.get('ownerId') || user.uid;
     isReadOnly = (ownerId !== currentUid);
 
-    // NAVIGAZIONE GERARCHICA: Override pulsante Back
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => window.location.replace('account_privati.html')
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
-    }
-
     // Aggiungi pulsante Edit nel footer (solo se non è read-only)
     if (!isReadOnly) {
         const fCenter = document.getElementById('footer-center-actions');

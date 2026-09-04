@@ -87,7 +87,7 @@ async function initProtocolUI() {
             title: 'Aggiungi Azienda',
             onclick: () => {
                 if (isDeleteMode) toggleDeleteMode();
-                window.location.replace('modifica_azienda.html');
+                window.location.href = 'modifica_azienda.html';
             }
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'add' })
@@ -133,7 +133,7 @@ function renderAziende() {
             }),
             createElement('button', {
                 className: 'btn-empty-add',
-                onclick: () => window.location.replace('modifica_azienda.html')
+                onclick: () => { window.location.href = 'modifica_azienda.html'; }
             }, [createElement('span', { textContent: 'Aggiungi Ora' })])
         ]));
         return;
@@ -165,7 +165,7 @@ function createAziendaCard(a) {
                 deleteAziendaList(a.id, a.ragioneSociale);
                 return;
             }
-            window.location.replace(`account_azienda.html?id=${a.id}`);
+            window.location.href = `account_azienda.html?id=${a.id}`;
         }
     }, [
         // Delete Indicator (Solo in modalità elimina)
@@ -208,11 +208,11 @@ function createAziendaCard(a) {
         createElement('div', { className: 'card-actions' }, [
             createElement('button', {
                 className: 'btn-card-action',
-                onclick: (e) => { e.stopPropagation(); window.location.replace(`dati_azienda.html?id=${a.id}`); }
+                onclick: (e) => { e.stopPropagation(); window.location.href = `dati_azienda.html?id=${a.id}`; }
             }, [createElement('span', { textContent: 'Dati Azienda' })]),
             createElement('button', {
                 className: 'btn-card-action',
-                onclick: (e) => { e.stopPropagation(); window.location.replace(`account_azienda.html?id=${a.id}`); }
+                onclick: (e) => { e.stopPropagation(); window.location.href = `account_azienda.html?id=${a.id}`; }
             }, [createElement('span', { textContent: 'Account' })])
         ])
     ]);
