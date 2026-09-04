@@ -40,13 +40,11 @@ export function renderBankAccounts(bankAccounts, rerender) {
         const div = createElement('div', { className: 'bank-account-card border-glow' }, [
             createElement('div', { className: 'bank-header' }, [
                 createElement('div', {
-                    className: 'bank-header-left',
-                    style: 'cursor:pointer; flex:1;',
+                    className: 'bank-header-left bank-toggle-row',
                     onclick: () => { acc._isOpen = !isOpen; rerender(); }
                 }, [
                     createElement('span', {
-                        className: 'material-symbols-outlined bank-expand-icon',
-                        style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
+                        className: `material-symbols-outlined bank-expand-icon${isOpen ? '' : ' is-collapsed'}`,
                         textContent: 'expand_more'
                     }),
                     createElement('span', {
@@ -117,13 +115,11 @@ function _renderCardEntry(bankAccounts, bankIdx, cardIdx, card, rerender) {
     return createElement('div', { className: 'card-entry border-glow' }, [
         createElement('div', { className: 'card-entry-header' }, [
             createElement('div', {
-                className: 'card-entry-title-row',
-                style: 'cursor:pointer; flex:1;',
+                className: 'card-entry-title-row bank-toggle-row',
                 onclick: () => { card._isOpen = !isOpen; rerender(); }
             }, [
                 createElement('span', {
-                    className: 'material-symbols-outlined card-entry-icon',
-                    style: `transform: rotate(${isOpen ? '0' : '-90'}deg)`,
+                    className: `material-symbols-outlined card-entry-icon${isOpen ? '' : ' is-collapsed'}`,
                     textContent: 'credit_card'
                 }),
                 createElement('span', {

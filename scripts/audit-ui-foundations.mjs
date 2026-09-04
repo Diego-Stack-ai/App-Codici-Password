@@ -14,7 +14,10 @@ function walk(directory) {
   });
 }
 
-const files = walk(publicRoot).filter(file => !file.includes('ui-preview'));
+const files = walk(publicRoot).filter(file =>
+  !file.includes('ui-preview') &&
+  !file.includes(`${path.sep}vendor${path.sep}`)
+);
 const cssFiles = files.filter(file => file.endsWith('.css'));
 const markupFiles = files.filter(file => /\.(?:html|js)$/.test(file));
 const findings = { smallFontDeclarations: 0, hardcodedFontDeclarations: 0, inlineStyleDeclarations: 0, nativeDialogs: 0 };
@@ -22,7 +25,9 @@ const smallByFile = new Map();
 
 for (const file of cssFiles) {
   const source = fs.readFileSync(file, 'utf8');
-  findings.hardcodedFontDeclarations += (source.match(/font-size\s*:\s*(?!var\()/g) || []).length;
+  for (const match of source.matchAll(/font-size\s*:\s*([^;}]+)/g)) {
+    if (!match[1].trim().startsWith('var(')) findings.hardcodedFontDeclarations += 1;
+  }
   for (const match of source.matchAll(/font-size\s*:\s*([\d.]+)(px|rem)/g)) {
     const pixels = match[2] === 'rem' ? Number(match[1]) * 16 : Number(match[1]);
     if (pixels < 12) {

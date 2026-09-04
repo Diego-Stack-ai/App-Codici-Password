@@ -317,20 +317,18 @@ function showSelfHealingBanner() {
 
     const banner = createElement('div', {
         id: 'self-healing-banner',
-        className: 'card border-glow',
-        style: 'background: rgba(239, 68, 68, 0.1); border-color: #ef4444; margin: 15px; padding: 15px; text-align: center;'
+        className: 'card border-glow self-healing-banner'
     }, [
         createElement('p', {
-            textContent: "?? Rilevato errore nei dati. La tua chiave potrebbe essere obsoleta.",
-            style: 'color: #ef4444; margin-bottom: 5px; font-weight: bold;'
+            className: 'self-healing-title',
+            textContent: "?? Rilevato errore nei dati. La tua chiave potrebbe essere obsoleta."
         }),
         createElement('p', {
-            textContent: getLastCryptoError() || "Errore sconosciuto (probabile offset buffer Safari)",
-            style: 'color: #ef4444; font-size: 10px; opacity: 0.7; margin-bottom: 10px; font-family: monospace;'
+            className: 'self-healing-detail',
+            textContent: getLastCryptoError() || "Errore sconosciuto (probabile offset buffer Safari)"
         }),
         createElement('button', {
-            className: 'btn-primary',
-            style: 'background: #ef4444; color: white; width: 100%; border-radius: 8px; border: none; padding: 10px;',
+            className: 'btn-primary self-healing-action',
             textContent: 'RIPRISTINA VAULT (RE-INSERISCI PASSWORD)',
             onclick: () => {
                 resetVault();

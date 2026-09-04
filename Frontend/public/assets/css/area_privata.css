@@ -12,6 +12,9 @@
     grid-template-columns: 1fr 1fr;
 }
 
+.micro-visto-inline { margin-left: 4px; font-size: 0.8em; opacity: 0.6; }
+.account-action-icon { font-size: 16px; }
+
 /* Nuova Estetica Icone Fuse (Watermark Style) */
 .matrix-card .matrix-icon-box {
     position: absolute;

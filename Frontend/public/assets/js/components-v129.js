@@ -330,16 +330,14 @@ function openGuideModal(title, steps) {
 
     // Contenuto passaggi
     const stepsContent = steps.map((step, i) => createElement('div', {
-        className: 'flex-start-row mb-3',
-        style: 'display: flex; align-items: flex-start; margin-bottom: 0.75rem;'
+        className: 'guide-step'
     }, [
-        createElement('strong', { className: 'text-accent mr-2', style: 'margin-right: 0.5rem; color: var(--accent); white-space: nowrap;', textContent: `${i + 1}.` }),
-        createElement('span', { className: 'text-secondary text-sm', style: 'color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;', textContent: step })
+        createElement('strong', { className: 'guide-step-number', textContent: `${i + 1}.` }),
+        createElement('span', { className: 'guide-step-text', textContent: step })
     ]));
 
     const btnClose = createElement('button', {
-        className: 'btn-modal btn-primary',
-        style: 'width: 100%; margin-top: 1rem;',
+        className: 'btn-modal btn-primary guide-close-button',
         textContent: t('close') || 'Chiudi',
         onclick: () => {
             modal.classList.remove('active');

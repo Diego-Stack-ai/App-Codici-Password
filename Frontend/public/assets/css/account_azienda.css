@@ -8,6 +8,9 @@
     margin-bottom: 2rem;
 }
 
+.account-pin-icon { font-size: 18px; }
+.account-action-icon { font-size: 16px; }
+
 .search-container-spacing {
     margin-top: 0.5rem;
 }

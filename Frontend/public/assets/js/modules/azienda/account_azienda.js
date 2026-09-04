@@ -220,7 +220,7 @@ function createAccountCard(acc) {
                         className: `btn-mini-action ${isPinned ? 'active' : ''}`,
                         onclick: (e) => { e.stopPropagation(); togglePin(acc); }
                     }, [
-                        createElement('span', { className: `material-symbols-outlined ${isPinned ? 'filled' : ''}`, style: 'font-size: 18px;', textContent: 'push_pin' })
+                        createElement('span', { className: `material-symbols-outlined account-pin-icon ${isPinned ? 'filled' : ''}`, textContent: 'push_pin' })
                     ])
                 ])
             ]),
@@ -261,7 +261,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     }
                 }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'visibility' })
+                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'visibility' })
             ]) : null,
             createElement('button', {
                 className: 'btn-mini-action',
@@ -271,7 +271,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     showToast(t('copied') || "Copiato!");
                 }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'content_copy' })
+                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'content_copy' })
             ])
         ].filter(Boolean))
     ]);

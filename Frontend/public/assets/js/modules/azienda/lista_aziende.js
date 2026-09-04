@@ -175,13 +175,11 @@ function createAziendaCard(a) {
         // Pin Button
         createElement('button', {
             type: 'button',
-            className: `btn-pin-azienda${isPinned ? ' is-pinned' : ''}`,
-            style: isDeleteMode ? 'display: none' : '',
+            className: `btn-pin-azienda${isPinned ? ' is-pinned' : ''}${isDeleteMode ? ' is-hidden' : ''}`,
             onclick: (e) => { e.stopPropagation(); togglePin(a.id); }
         }, [
             createElement('span', {
-                className: `material-symbols-outlined ${isPinned ? 'pin-active' : 'pin-inactive'}`,
-                style: 'font-size: 24px;',
+                className: `material-symbols-outlined company-pin-icon ${isPinned ? 'pin-active' : 'pin-inactive'}`,
                 textContent: 'push_pin'
             })
         ]),

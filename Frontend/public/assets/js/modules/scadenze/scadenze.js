@@ -333,7 +333,6 @@ async function deleteScadenza(id) {
     try {
         // Qui potresti mettere un confirm, ma lo swipe � un'azione veloce.
         // Se preferisci conferma, scommenta:
-        // if(!confirm("Eliminare definitivamente?")) { loadScadenze(); return; }
 
         const docRef = doc(db, "users", currentUser.uid, "scadenze", id);
         await deleteDoc(docRef);

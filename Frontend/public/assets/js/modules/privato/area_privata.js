@@ -193,7 +193,7 @@ function createMicroAccountCard(id, data) {
                     createElement('div', { className: 'account-card-info-group' }, [
                         createElement('h3', { className: 'account-card-title' }, [
                             document.createTextNode(data.nomeAccount || t('without_name')),
-                            createElement('span', { className: 'micro-visto-inline', style: 'opacity:0.6; font-size: 0.8em; margin-left: 4px;', textContent: `• ${data.views || 0}` })
+                            createElement('span', { className: 'micro-visto-inline', textContent: `• ${data.views || 0}` })
                         ]),
                         createElement('p', { className: 'account-card-subtitle', textContent: data.username || data.email || 'Utente Nascosto' })
                     ])
@@ -234,7 +234,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     }
                 }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'visibility' })
+                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'visibility' })
             ]) : null,
             createElement('button', {
                 className: 'btn-mini-action',
@@ -244,7 +244,7 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     showToast(t('copied') || "Copiato!");
                 }
             }, [
-                createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'content_copy' })
+                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'content_copy' })
             ])
         ].filter(Boolean))
     ]);

@@ -685,6 +685,29 @@
     font-size: var(--fs-xs);
 }
 
+.guide-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.guide-step-number {
+    margin-right: 0.5rem;
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+.guide-step-text {
+    color: var(--text-secondary);
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+}
+
+.guide-close-button {
+    width: 100%;
+    margin-top: 1rem;
+}
+
 @media (max-width: 600px) {
     .modal-actions {
         flex-direction: column-reverse;

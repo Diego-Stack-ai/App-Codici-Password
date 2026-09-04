@@ -10,6 +10,9 @@
     width: 100%;
 }
 
+.btn-pin-azienda.is-hidden { display: none; }
+.company-pin-icon { font-size: 24px; }
+
 /* --- 2. LOADING PLACEHOLDER --- */
 .loading-placeholder {
     grid-column: 1 / -1;
