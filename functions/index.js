@@ -153,12 +153,35 @@ function pushText(scadenza, diffDays) {
     return { title: "Codici & Password", body: `${tipo}${veicolo ? ` · ${veicolo}` : ""}\n${when}` };
 }
 
-function shouldSendPush(scadenza, diffDays, forceImmediate = false) {
+function normalizeEmail(email) {
+    return String(email || "").trim().toLowerCase();
+}
+
+function deadlineRecipients(scadenza) {
+    const source = Array.isArray(scadenza.recipients) && scadenza.recipients.length
+        ? scadenza.recipients
+        : [scadenza.email1, scadenza.email2].filter(Boolean).map((email) => ({ email, sendEmail: true, sendPush: false }));
+    const unique = new Map();
+    for (const item of source) {
+        const email = normalizeEmail(item?.email || item?.address || item);
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) continue;
+        const previous = unique.get(email);
+        unique.set(email, {
+            email,
+            displayName: String(item?.displayName || item?.name || previous?.displayName || "").trim().slice(0, 120),
+            sendEmail: (previous?.sendEmail === true) || item?.sendEmail !== false,
+            sendPush: (previous?.sendPush === true) || item?.sendPush === true
+        });
+    }
+    return [...unique.values()];
+}
+
+function shouldSendPush(scadenza, diffDays, forceImmediate = false, lastField = "lastPushNotifiedAt") {
     if (diffDays === 0) return true;
     if (forceImmediate) return true;
     const frequency = Math.max(1, Number(scadenza.notif_frequency || 7));
-    if (!scadenza.lastPushNotifiedAt) return true;
-    const lastPush = new Date(scadenza.lastPushNotifiedAt);
+    if (!scadenza[lastField]) return true;
+    const lastPush = new Date(scadenza[lastField]);
     lastPush.setHours(0, 0, 0, 0);
     if (Number.isNaN(lastPush.getTime())) return true;
     const today = new Date();
@@ -166,10 +189,49 @@ function shouldSendPush(scadenza, diffDays, forceImmediate = false) {
     return Math.floor((today - lastPush) / (1000 * 60 * 60 * 24)) >= frequency;
 }
 
-async function activePushDevices(db, uid) {
+async function activePushDevices(db, uid, scope = "deadlines") {
     const snap = await db.collection("users").doc(uid).collection("pushDevices")
         .where("enabled", "==", true).get();
-    return snap.docs.filter((item) => item.data().notificationScope === "deadlines" && item.data().token);
+    return snap.docs.filter((item) => {
+        const data = item.data();
+        const scopes = Array.isArray(data.notificationScopes) ? data.notificationScopes : [data.notificationScope];
+        return scopes.includes(scope) && data.token;
+    });
+}
+
+async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, diffDays, options = {}) {
+    if (!shouldSendPush(scadenza, diffDays, options.forceImmediate === true, "lastRecipientPushNotifiedAt")) return;
+    const recipients = deadlineRecipients(scadenza).filter((recipient) => recipient.sendPush);
+    if (!recipients.length) return;
+    const text = pushText(scadenza, diffDays);
+    let sent = 0;
+    for (const recipient of recipients) {
+        let recipientUser;
+        try { recipientUser = await admin.auth().getUserByEmail(recipient.email); }
+        catch (error) {
+            if (error.code !== "auth/user-not-found") console.error("[RECIPIENT LOOKUP FAILED]", error.code || error.message);
+            continue;
+        }
+        const devices = await activePushDevices(db, recipientUser.uid, "deadlines");
+        for (const device of devices) {
+            try {
+                await admin.messaging().send({
+                    token: device.data().token,
+                    data: { eventType: "external_deadline", title: text.title, body: text.body, deliveryTag: `external-${deadlineId}-${device.id}` },
+                    webpush: { headers: { TTL: diffDays === 0 ? "21600" : "86400", Urgency: "high" } }
+                });
+                sent += 1;
+            } catch (error) {
+                const invalid = ["messaging/registration-token-not-registered", "messaging/invalid-registration-token"].includes(error.code);
+                if (invalid) await device.ref.set({ enabled: false, status: "invalid", invalidatedAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+                console.error(`[RECIPIENT PUSH FAILED] ${deadlineId}/${device.id}:`, error.code || error.message);
+            }
+        }
+    }
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    await db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId)
+        .update({ lastRecipientPushNotifiedAt: today.toISOString().split("T")[0] });
+    console.log(`[RECIPIENT PUSH] ${deadlineId}: ${sent} dispositivi raggiunti`);
 }
 
 async function sendDeadlinePush(db, uid, deadlineId, scadenza, diffDays, options = {}) {
@@ -369,6 +431,56 @@ function createTransporter(gmailUser, gmailPass) {
     });
 }
 
+exports.onInviteCreated = onDocumentCreated(
+    {
+        document: "invites/{inviteId}",
+        secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+    },
+    async (event) => {
+        const invite = event.data.data();
+        if (invite.status !== "pending") return;
+        const recipientEmail = normalizeEmail(invite.recipientEmail);
+        if (!recipientEmail) return;
+        const tasks = [];
+        if (invite.notifyEmail === true) {
+            const transporter = createTransporter(GMAIL_USER.value(), GMAIL_APP_PASSWORD.value());
+            tasks.push(transporter.sendMail({
+                from: `"Codex Notifiche" <${GMAIL_USER.value()}>`,
+                to: recipientEmail,
+                subject: "Invito a un account condiviso — Codici & Password",
+                html: `<p>Hai ricevuto un invito per un account condiviso in Codici & Password.</p><p>Apri l'app per accettarlo o rifiutarlo.</p><p><a href="https://appcodici-password.web.app/">Apri o installa Codici & Password</a></p>`
+            }));
+        }
+        if (invite.notifyPush === true) {
+            tasks.push((async () => {
+                let recipientUser;
+                try { recipientUser = await admin.auth().getUserByEmail(recipientEmail); }
+                catch (error) {
+                    if (error.code !== "auth/user-not-found") throw error;
+                    return;
+                }
+                const devices = await activePushDevices(admin.firestore(), recipientUser.uid, "sharing");
+                await Promise.allSettled(devices.map((device) => admin.messaging().send({
+                    token: device.data().token,
+                    data: {
+                        eventType: "share_invite",
+                        title: "Nuovo invito — Codici & Password",
+                        body: `Hai ricevuto un invito per ${String(invite.accountName || "un account condiviso").slice(0, 100)}.`,
+                        deliveryTag: `share-${event.params.inviteId}`
+                    },
+                    webpush: { headers: { TTL: "86400", Urgency: "high" } }
+                })));
+            })());
+        }
+        const results = await Promise.allSettled(tasks);
+        results.filter((result) => result.status === "rejected")
+            .forEach((result) => console.error(`[INVITE NOTIFICATION FAILED] ${event.params.inviteId}:`, result.reason?.message || result.reason));
+    }
+);
+
 // ─────────────────────────────────────────────────────────────
 // UTILITY — Componi e invia una email per una scadenza
 // ─────────────────────────────────────────────────────────────
@@ -435,14 +547,17 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
 </body>
 </html>`;
 
-    const recipients = [s.email1, s.email2].filter(Boolean).join(", ");
-
-    await transporter.sendMail({
+    const recipients = deadlineRecipients(s).filter((recipient) => recipient.sendEmail);
+    if (!recipients.length) return false;
+    const results = await Promise.allSettled(recipients.map((recipient) => transporter.sendMail({
         from: `"Codex Notifiche" <${gmailUser}>`,
-        to: recipients,
+        to: recipient.email,
         subject: `⚠️ Scadenza in arrivo — ${s.type || templateText}`,
-        html: emailBody,
-    });
+        html: emailBody.replace('</div>\n</body>', `<div class="footer">Usi già Codici & Password? Apri l'app per gestire i tuoi promemoria.<br><a href="https://appcodici-password.web.app/">Apri o installa Codici & Password</a></div></div>\n</body>`),
+    })));
+    const sentCount = results.filter((result) => result.status === "fulfilled").length;
+    results.filter((result) => result.status === "rejected").forEach((result) => console.error("[EMAIL RECIPIENT FAILED]", result.reason?.message || result.reason));
+    if (!sentCount) throw new Error("Nessun destinatario email raggiunto.");
 
     // Aggiorna lastNotifiedAt per evitare duplicati dallo scheduler
     const today = new Date();
@@ -451,7 +566,8 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
         lastNotifiedAt: today.toISOString().split("T")[0],
     });
 
-    console.log(`[OK] Email inviata → ${recipients} (diffDays: ${diffDays})`);
+    console.log(`[OK] Email inviata a ${sentCount}/${recipients.length} destinatari (diffDays: ${diffDays})`);
+    return true;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -512,7 +628,13 @@ exports.checkDeadlines = onSchedule(
                         console.error(`[PUSH FAILED] ${sDoc.id}:`, pushErr.message);
                     }
 
-                    if (!s.email1) continue;
+                    try {
+                        await sendRecipientDeadlinePushes(db, uid, sDoc.id, s, diffDays);
+                    } catch (pushErr) {
+                        console.error(`[RECIPIENT PUSH FAILED] ${sDoc.id}:`, pushErr.message);
+                    }
+
+                    if (!deadlineRecipients(s).some((recipient) => recipient.sendEmail)) continue;
 
                     // Giorno 0: invia SEMPRE
                     // Altri giorni: rispetta la frequenza
@@ -582,7 +704,15 @@ exports.onScadenzaCreated = onDocumentCreated(
             console.error(`[TRIGGER PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
         }
 
-        if (!s.email1) return;
+        try {
+            await sendRecipientDeadlinePushes(admin.firestore(), event.params.uid, event.params.scadenzaId, s, diffDays, {
+                forceImmediate: true
+            });
+        } catch (pushErr) {
+            console.error(`[TRIGGER RECIPIENT PUSH FAILED] ${event.params.scadenzaId}:`, pushErr.message);
+        }
+
+        if (!deadlineRecipients(s).some((recipient) => recipient.sendEmail)) return;
 
         console.log(`[TRIGGER] Nuova scadenza creata — diffDays: ${diffDays}, preavviso: ${daysBefore}`);
 
@@ -625,6 +755,7 @@ exports.onScadenzaUpdated = onDocumentUpdated(
         if (dueDateChanged) {
             batch.update(event.data.after.ref, {
                 lastPushNotifiedAt: admin.firestore.FieldValue.delete(),
+                lastRecipientPushNotifiedAt: admin.firestore.FieldValue.delete(),
                 lastNotifiedAt: admin.firestore.FieldValue.delete()
             });
         }

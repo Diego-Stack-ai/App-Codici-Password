@@ -105,7 +105,7 @@ export async function initScadenze(user) {
 }
 
 export async function initAggiungiScadenza(user) {
-    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=2.3');
+    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=2.4');
     await module.initAggiungiScadenza(user);
 }
 

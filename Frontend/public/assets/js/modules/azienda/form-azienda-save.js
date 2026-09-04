@@ -208,6 +208,8 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                             recipientEmail: email.toLowerCase().trim(),
                             accountName: data.nomeAccount,
                             type: finalData.type,
+                            notifyPush: document.getElementById('invite-notify-push')?.checked === true,
+                            notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
                             status: 'pending',
                             createdAt: new Date().toISOString()
                         });

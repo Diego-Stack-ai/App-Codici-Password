@@ -672,6 +672,8 @@ async function saveAccount() {
                             recipientEmail: email.toLowerCase().trim(),
                             accountName: data.nomeAccount,
                             type: data.type,
+                            notifyPush: document.getElementById('invite-notify-push')?.checked === true,
+                            notifyEmail: document.getElementById('invite-notify-email')?.checked === true,
                             status: 'pending',
                             createdAt: new Date().toISOString()
                         });

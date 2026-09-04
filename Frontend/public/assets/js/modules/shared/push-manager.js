@@ -43,18 +43,20 @@ async function serviceWorkerRegistration() {
     return registration;
 }
 
-export async function getCurrentPushState(user = auth.currentUser) {
+export async function getCurrentPushState(user = auth.currentUser, scope = 'deadlines') {
     const compatibility = getPushCompatibility();
     if (!user || !compatibility.compatible) return { enabled: false, ...compatibility };
     const snap = await getDoc(doc(db, 'users', user.uid, 'pushDevices', getDeviceId()));
+    const scopes = snap.exists() && Array.isArray(snap.data().notificationScopes)
+        ? snap.data().notificationScopes : (snap.exists() ? [snap.data().notificationScope] : []);
     return {
         compatible: true,
-        enabled: Notification.permission === 'granted' && snap.exists() && snap.data().enabled === true,
+        enabled: Notification.permission === 'granted' && snap.exists() && snap.data().enabled === true && scopes.includes(scope),
         permission: Notification.permission
     };
 }
 
-export async function enableDeadlinePush(user = auth.currentUser) {
+async function enablePushScope(scope, user = auth.currentUser) {
     const compatibility = getPushCompatibility();
     if (!user) throw new Error('Accesso richiesto.');
     if (!compatibility.compatible) throw new Error(compatibility.reason);
@@ -69,12 +71,18 @@ export async function enableDeadlinePush(user = auth.currentUser) {
     if (!token) throw new Error('Firebase non ha restituito il token del dispositivo.');
 
     const deviceId = getDeviceId();
-    await setDoc(doc(db, 'users', user.uid, 'pushDevices', deviceId), {
+    const deviceRef = doc(db, 'users', user.uid, 'pushDevices', deviceId);
+    const existing = await getDoc(deviceRef);
+    const previousScopes = existing.exists() && Array.isArray(existing.data().notificationScopes)
+        ? existing.data().notificationScopes : (existing.exists() && existing.data().notificationScope ? [existing.data().notificationScope] : []);
+    const notificationScopes = [...new Set([...previousScopes, scope])];
+    await setDoc(deviceRef, {
         token,
         platform: platformName(),
         browser: navigator.userAgentData?.brands?.map((b) => b.brand).join(', ') || 'browser',
         enabled: true,
         notificationScope: 'deadlines',
+        notificationScopes,
         privacyMode: 'detailed',
         schemaVersion: 1,
         updatedAt: serverTimestamp(),
@@ -83,14 +91,27 @@ export async function enableDeadlinePush(user = auth.currentUser) {
     return true;
 }
 
+export async function enableDeadlinePush(user = auth.currentUser) { return enablePushScope('deadlines', user); }
+export async function enableSharingPush(user = auth.currentUser) { return enablePushScope('sharing', user); }
+
 export async function disableDeadlinePush(user = auth.currentUser) {
-    if (!user) return;
-    const messaging = await getMessagingInstance();
-    if (messaging) {
-        try { await deleteToken(messaging); } catch (error) { console.warn('[PUSH] Revoca token locale non riuscita', error); }
-    }
-    await deleteDoc(doc(db, 'users', user.uid, 'pushDevices', getDeviceId()));
+    return disablePushScope('deadlines', user);
 }
+
+async function disablePushScope(scope, user = auth.currentUser) {
+    if (!user) return;
+    const deviceRef = doc(db, 'users', user.uid, 'pushDevices', getDeviceId());
+    const snap = await getDoc(deviceRef);
+    const scopes = snap.exists() && Array.isArray(snap.data().notificationScopes)
+        ? snap.data().notificationScopes : (snap.exists() && snap.data().notificationScope ? [snap.data().notificationScope] : []);
+    const remaining = scopes.filter(item => item !== scope);
+    if (remaining.length) return setDoc(deviceRef, { notificationScopes: remaining, updatedAt: serverTimestamp() }, { merge: true });
+    const messaging = await getMessagingInstance();
+    if (messaging) try { await deleteToken(messaging); } catch (error) { console.warn('[PUSH] Revoca token locale non riuscita', error); }
+    await deleteDoc(deviceRef);
+}
+
+export async function disableSharingPush(user = auth.currentUser) { return disablePushScope('sharing', user); }
 
 export async function sendDeadlinePushTest() {
     const lastTestAt = Number(localStorage.getItem(LAST_TEST_KEY) || 0);
@@ -112,7 +133,7 @@ export async function listenForDeadlinePushInForeground() {
     if (!messaging) return;
     foregroundListenerStarted = true;
     onMessage(messaging, async (payload) => {
-        if (payload.data?.eventType !== 'deadline') return;
+        if (!['deadline', 'external_deadline', 'share_invite'].includes(payload.data?.eventType)) return;
         const registration = await serviceWorkerRegistration();
         await registration.showNotification(payload.data.title || 'Codici & Password', {
             body: payload.data.body || 'Hai una scadenza in arrivo.',
@@ -122,7 +143,7 @@ export async function listenForDeadlinePushInForeground() {
             renotify: true,
             timestamp: Date.now(),
             data: {
-                eventType: 'deadline',
+                eventType: payload.data.eventType,
                 deadlineId: payload.data.deadlineId || '',
                 notificationId: payload.data.notificationId || ''
             }

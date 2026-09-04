@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="assets/css/core_ui.css?v=5.0">
     <link rel="stylesheet" href="assets/css/moduli.css?v=5.0">
     <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=5.0">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=2.3">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=2.4">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -218,79 +218,27 @@
                     </div>
                 </div>
 
-                <!-- 3. Destinatari (Email Only - Doppio Dropdown) -->
+                <!-- 3. Destinatari multicanale -->
                 <div class="form-section">
                     <div class="form-section-header">
                         <h3 class="form-section-title" data-t="notification_recipients">Destinatari Notifica</h3>
                     </div>
 
                     <div class="flex-col-gap-4">
-                        <!-- Email Primaria -->
-                        <div class="form-group">
-                            <label class="label-sm" for="email_primaria_select">
-                                <span class="material-symbols-outlined icon-blue label-icon">alternate_email</span>
-                                <span data-t="primary_email_label">Email Primaria</span>
-                            </label>
-
-                            <div class="dropdown-with-action">
-                                <div class="base-dropdown base-dropdown-full"
-                                    data-custom-select="email_primaria_select">
-                                    <button type="button" class="base-btn-secondary dropdown-trigger">
-                                        <div class="dropdown-trigger-content">
-                                            <span class="dropdown-label truncate" data-t="select_email">Seleziona
-                                                email...</span>
-                                        </div>
-                                        <span class="material-symbols-outlined arrow-icon">expand_more</span>
-                                    </button>
-                                    <div class="base-dropdown-menu scrollable role-menu" id="email_primaria_menu">
-                                        <!-- Popolato da JS -->
-                                    </div>
-                                    <select id="email_primaria_select" class="hidden">
-                                        <option value="" data-t="select_email">Seleziona email...</option>
-                                    </select>
-                                </div>
-                                <button class="btn-manage-config-inline" type="button"
-                                    id="btn-add-email-primaria"
-                                    title="Aggiungi email in rubrica">
-                                    <span class="material-symbols-outlined">add</span>
-                                </button>
-                            </div>
+                        <div class="deadline-recipient-add-row">
+                            <select id="deadline-contact-select" class="base-btn-secondary deadline-contact-select" aria-label="Seleziona una persona dalla rubrica">
+                                <option value="">Seleziona dalla rubrica…</option>
+                            </select>
+                            <button class="btn-manage-config-inline" type="button" id="btn-add-deadline-contact" title="Aggiungi persona selezionata">
+                                <span class="material-symbols-outlined">person_add</span>
+                            </button>
+                            <button class="btn-manage-config-inline" type="button" id="btn-add-deadline-email" title="Inserisci una nuova email">
+                                <span class="material-symbols-outlined">alternate_email</span>
+                            </button>
                         </div>
-
-                        <!-- Email Secondaria -->
-                        <div class="form-group">
-                            <label class="label-sm" for="email_secondaria_select">
-                                <span class="material-symbols-outlined icon-blue label-icon">forward_to_inbox</span>
-                                <span data-t="secondary_email_label">Email Secondaria (Opz.)</span>
-                            </label>
-
-                            <div class="dropdown-with-action">
-                                <div class="base-dropdown base-dropdown-full"
-                                    data-custom-select="email_secondaria_select">
-                                    <button type="button" class="base-btn-secondary dropdown-trigger">
-                                        <div class="dropdown-trigger-content">
-                                            <span class="dropdown-label truncate" data-t="select_email">Seleziona
-                                                email...</span>
-                                        </div>
-                                        <span class="material-symbols-outlined arrow-icon">expand_more</span>
-                                    </button>
-                                    <div class="base-dropdown-menu scrollable role-menu" id="email_secondaria_menu">
-                                        <!-- Popolato da JS -->
-                                    </div>
-                                    <select id="email_secondaria_select" class="hidden">
-                                        <option value="" data-t="select_email">Seleziona email...</option>
-                                    </select>
-                                </div>
-                                <button class="btn-manage-config-inline" type="button"
-                                    id="btn-add-email-secondaria"
-                                    title="Aggiungi email in rubrica">
-                                    <span class="material-symbols-outlined">add</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Stato Canale Forzato -->
-                        <input id="notif_channel_select" type="hidden" value="email">
+                        <div id="deadline-recipients-list" class="deadline-recipients-list" aria-live="polite"></div>
+                        <p class="deadline-recipient-help">Email e Push sono indipendenti. Con entrambi disattivati il destinatario rimane salvato ma sospeso.</p>
+                        <input id="notif_channel_select" type="hidden" value="multichannel">
                     </div>
                 </div>
                 <p style="font-size:var(--fs-micro);opacity:0.35;font-style:italic;text-align:center;margin-top:6px;">

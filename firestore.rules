@@ -29,7 +29,7 @@ service cloud.firestore {
       allow create: if isOwner(userId) &&
         deviceId.matches('^[a-fA-F0-9-]{36}$') &&
         request.resource.data.keys().hasOnly([
-          'token', 'platform', 'browser', 'enabled', 'notificationScope',
+          'token', 'platform', 'browser', 'enabled', 'notificationScope', 'notificationScopes',
           'privacyMode', 'schemaVersion', 'updatedAt', 'lastSeenAt', 'createdAt'
         ]) &&
         request.resource.data.token is string &&
@@ -40,11 +40,13 @@ service cloud.firestore {
         request.resource.data.browser.size() < 200 &&
         request.resource.data.enabled is bool &&
         request.resource.data.notificationScope == 'deadlines' &&
+        request.resource.data.notificationScopes is list &&
+        request.resource.data.notificationScopes.hasOnly(['deadlines', 'sharing']) &&
         request.resource.data.privacyMode in ['detailed', 'discreet'] &&
         request.resource.data.schemaVersion == 1;
       allow update: if isOwner(userId) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'token', 'platform', 'browser', 'enabled', 'notificationScope',
+          'token', 'platform', 'browser', 'enabled', 'notificationScope', 'notificationScopes',
           'privacyMode', 'schemaVersion', 'updatedAt', 'lastSeenAt', 'createdAt'
         ]) &&
         request.resource.data.token is string &&
@@ -55,6 +57,8 @@ service cloud.firestore {
         request.resource.data.browser.size() < 200 &&
         request.resource.data.enabled is bool &&
         request.resource.data.notificationScope == 'deadlines' &&
+        request.resource.data.notificationScopes is list &&
+        request.resource.data.notificationScopes.hasOnly(['deadlines', 'sharing']) &&
         request.resource.data.privacyMode in ['detailed', 'discreet'] &&
         request.resource.data.schemaVersion == 1;
     }
@@ -106,13 +110,15 @@ service cloud.firestore {
         request.resource.data.keys().hasOnly([
           'inviteId', 'recipientEmail', 'accountId', 'accountName',
           'ownerId', 'senderId', 'senderEmail', 'aziendaId', 'type',
-          'status', 'createdAt'
+          'status', 'createdAt', 'notifyPush', 'notifyEmail'
         ]) &&
         request.resource.data.get('ownerId', '') == request.auth.uid &&
         request.resource.data.get('senderId', '') == request.auth.uid &&
         request.resource.data.get('senderEmail', '').lower() == myEmail() &&
         request.resource.data.get('recipientEmail', '') is string &&
         request.resource.data.get('recipientEmail', '').size() > 3 &&
+        request.resource.data.get('notifyPush', false) is bool &&
+        request.resource.data.get('notifyEmail', false) is bool &&
         request.resource.data.get('status', '') == 'pending';
 
       allow update, delete: if isInviteOwner();

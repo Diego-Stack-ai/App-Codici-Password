@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.25';
+const CACHE_NAME = 'codex-shell-v1.2.26';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js');
@@ -14,7 +14,7 @@ firebase.initializeApp({
 });
 
 firebase.messaging().onBackgroundMessage((payload) => {
-    if (payload.data?.eventType !== 'deadline') return;
+    if (!['deadline', 'external_deadline', 'share_invite'].includes(payload.data?.eventType)) return;
     return self.registration.showNotification(payload.data.title || 'Codici & Password', {
         body: payload.data.body || 'Hai una scadenza in arrivo.',
         icon: './assets/images/app-icon-192.png',
@@ -23,7 +23,7 @@ firebase.messaging().onBackgroundMessage((payload) => {
         renotify: true,
         timestamp: Date.now(),
         data: {
-            eventType: 'deadline',
+            eventType: payload.data.eventType,
             deadlineId: payload.data.deadlineId || '',
             notificationId: payload.data.notificationId || ''
         }
@@ -32,7 +32,19 @@ firebase.messaging().onBackgroundMessage((payload) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    if (event.notification.data?.eventType !== 'deadline') return;
+    if (!['deadline', 'external_deadline', 'share_invite'].includes(event.notification.data?.eventType)) return;
+    if (event.notification.data.eventType !== 'deadline') {
+        const target = new URL(event.notification.data.eventType === 'share_invite' ? '/home_page.html' : '/scadenze.html', self.location.origin).href;
+        event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
+            const existing = windows.find((client) => client.url.startsWith(self.location.origin));
+            if (existing) {
+                try { const navigated = await existing.navigate(target); return navigated ? navigated.focus() : existing.focus(); }
+                catch (error) { console.warn('[PUSH] Navigazione finestra esistente non riuscita', error); }
+            }
+            return self.clients.openWindow(target);
+        }));
+        return;
+    }
     const deadlineId = encodeURIComponent(event.notification.data?.deadlineId || '');
     const notificationId = encodeURIComponent(event.notification.data?.notificationId || '');
     const query = notificationId ? `&notification=${notificationId}` : '';

@@ -29,6 +29,8 @@ let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
 let selectedFiles = [];
 let existingAttachments = [];
+let deadlineRecipients = [];
+let recipientContacts = [];
 
 let dynamicConfig = {
     deadlineTypes: [],
@@ -70,11 +72,7 @@ export async function initAggiungiScadenza(user) {
     initProxyDropdowns();
     initAttachmentSystem();
 
-    // Collega i pulsanti "Aggiungi Email" ora che il DOM è pronto
-    document.getElementById('btn-add-email-primaria')
-        ?.addEventListener('click', () => _addNotificationEmailBtn('email_primaria_select'));
-    document.getElementById('btn-add-email-secondaria')
-        ?.addEventListener('click', () => _addNotificationEmailBtn('email_secondaria_select'));
+    setupDeadlineRecipientsUI();
 
     // --- FOOTER ACTIONS SYSTEM (Event Contract V6.1) ---
     function initFooterFromDetail(detail) {
@@ -246,11 +244,12 @@ function initialStaticLoad() {
 async function loadDynamicConfig() {
     if (!currentUser) return;
     try {
-        const [autoSnap, docSnap, genSnap, userSnap] = await Promise.all([
+        const [autoSnap, docSnap, genSnap, userSnap, contactsSnap] = await Promise.all([
             getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig")),
             getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments")),
             getDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig")),
-            getDoc(doc(db, "users", currentUser.uid))
+            getDoc(doc(db, "users", currentUser.uid)),
+            getDocs(collection(db, "users", currentUser.uid, "contacts"))
         ]);
 
         const rawGenData = genSnap.exists() ? genSnap.data() : {};
@@ -271,6 +270,14 @@ async function loadDynamicConfig() {
 
         unifiedConfigs.generali = { deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: [], ...rawGenData };
         populateEmailSelects(unifiedConfigs.generali.notificationEmails);
+        recipientContacts = contactsSnap.docs.map(contactDoc => ({ id: contactDoc.id, ...contactDoc.data() }));
+        notificationEmails.forEach(email => {
+            const normalized = normalizeRecipientEmail(email);
+            if (normalized && !recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === normalized)) {
+                recipientContacts.push({ id: '', nome: 'Email salvata', cognome: '', email: normalized });
+            }
+        });
+        populateRecipientContacts();
 
         // --- AUTOMEZZI ---
         const defaultAuto = {
@@ -367,6 +374,114 @@ async function loadDynamicConfig() {
 async function _addNotificationEmailBtn(selectId = 'email_primaria_select') {
     const v = await showInputModal('Nuova Email', '', 'Inserisci un nuovo indirizzo email...');
     if (v && v.trim()) await addConfigItem(selectId, v.trim());
+}
+
+function normalizeRecipientEmail(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function isValidRecipientEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeRecipientEmail(value));
+}
+
+function addDeadlineRecipient({ email, displayName = '', contactId = '', sendEmail = true, sendPush = true }) {
+    const normalized = normalizeRecipientEmail(email);
+    if (!isValidRecipientEmail(normalized)) return false;
+    const existing = deadlineRecipients.find(item => item.email === normalized);
+    if (existing) {
+        existing.displayName = existing.displayName || String(displayName || '').trim();
+        existing.contactId = existing.contactId || contactId;
+        existing.sendEmail = existing.sendEmail || sendEmail === true;
+        existing.sendPush = existing.sendPush || sendPush === true;
+    } else {
+        deadlineRecipients.push({ email: normalized, displayName: String(displayName || '').trim(), contactId, sendEmail: sendEmail === true, sendPush: sendPush === true });
+    }
+    renderDeadlineRecipients();
+    return true;
+}
+
+function renderDeadlineRecipients() {
+    const container = document.getElementById('deadline-recipients-list');
+    if (!container) return;
+    clearElement(container);
+    if (!deadlineRecipients.length) {
+        container.appendChild(createElement('p', { className: 'deadline-recipient-help', textContent: 'Nessun destinatario aggiuntivo. Il proprietario continuerà a ricevere le proprie Push.' }));
+        return;
+    }
+    deadlineRecipients.forEach((recipient, index) => {
+        const emailToggle = createElement('input', { type: 'checkbox', checked: recipient.sendEmail, dataset: { recipientIndex: String(index), channel: 'email' } });
+        const pushToggle = createElement('input', { type: 'checkbox', checked: recipient.sendPush, dataset: { recipientIndex: String(index), channel: 'push' } });
+        const card = createElement('div', { className: `deadline-recipient-card${recipient.sendEmail || recipient.sendPush ? '' : ' is-paused'}` }, [
+            createElement('div', {}, [
+                createElement('span', { className: 'deadline-recipient-name', textContent: recipient.displayName || 'Destinatario' }),
+                createElement('span', { className: 'deadline-recipient-email', textContent: recipient.email })
+            ]),
+            createElement('div', { className: 'deadline-recipient-controls' }, [
+                createElement('label', { className: 'deadline-channel-label' }, [emailToggle, document.createTextNode('Email')]),
+                createElement('label', { className: 'deadline-channel-label' }, [pushToggle, document.createTextNode('Push')]),
+                createElement('button', { type: 'button', className: 'deadline-recipient-remove', dataset: { recipientRemove: String(index) }, title: 'Rimuovi destinatario' }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
+                ])
+            ])
+        ]);
+        container.appendChild(card);
+    });
+}
+
+function populateRecipientContacts() {
+    const select = document.getElementById('deadline-contact-select');
+    if (!select) return;
+    clearElement(select);
+    select.appendChild(new Option('Seleziona dalla rubrica…', ''));
+    recipientContacts.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'it')).forEach(contact => {
+        const email = normalizeRecipientEmail(contact.email);
+        if (!email) return;
+        const label = [contact.nome, contact.cognome].filter(Boolean).join(' ').trim() || email;
+        select.appendChild(new Option(`${label} — ${email}`, contact.id || `email:${email}`));
+    });
+}
+
+function setupDeadlineRecipientsUI() {
+    document.getElementById('btn-add-deadline-contact')?.addEventListener('click', () => {
+        const select = document.getElementById('deadline-contact-select');
+        const selectedValue = select?.value || '';
+        const contact = recipientContacts.find(item => item.id === selectedValue || `email:${normalizeRecipientEmail(item.email)}` === selectedValue);
+        if (!contact) return showToast('Seleziona prima una persona dalla rubrica.', 'info');
+        addDeadlineRecipient({ contactId: contact.id, displayName: [contact.nome, contact.cognome].filter(Boolean).join(' '), email: contact.email });
+        select.value = '';
+    });
+    document.getElementById('btn-add-deadline-email')?.addEventListener('click', async () => {
+        const email = normalizeRecipientEmail(await showInputModal('Nuovo destinatario', '', 'Inserisci indirizzo email'));
+        if (!email) return;
+        if (!isValidRecipientEmail(email)) return showToast('Inserisci un indirizzo email valido.', 'warning');
+        const displayName = String(await showInputModal('Nome o descrizione', '', 'Es. Maria Rossi o Commercialista') || '').trim();
+        if (!addDeadlineRecipient({ email, displayName })) return;
+        const known = recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === email);
+        if (!known && await showConfirmModal('Salva in rubrica', 'Vuoi riutilizzare questa persona anche in futuro?')) {
+            const parts = displayName.split(/\s+/).filter(Boolean);
+            const contactData = { nome: parts.shift() || displayName || email, cognome: parts.join(' '), email, emailNormalized: email, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+            const ref = await addDoc(collection(db, 'users', currentUser.uid, 'contacts'), contactData);
+            recipientContacts.push({ id: ref.id, ...contactData });
+            const recipient = deadlineRecipients.find(item => item.email === email);
+            if (recipient) recipient.contactId = ref.id;
+            populateRecipientContacts(); renderDeadlineRecipients();
+        }
+    });
+    document.getElementById('deadline-recipients-list')?.addEventListener('change', event => {
+        const input = event.target.closest('input[data-recipient-index]');
+        if (!input) return;
+        const recipient = deadlineRecipients[Number(input.dataset.recipientIndex)];
+        if (!recipient) return;
+        if (input.dataset.channel === 'email') recipient.sendEmail = input.checked;
+        if (input.dataset.channel === 'push') recipient.sendPush = input.checked;
+        renderDeadlineRecipients();
+    });
+    document.getElementById('deadline-recipients-list')?.addEventListener('click', event => {
+        const button = event.target.closest('[data-recipient-remove]');
+        if (!button) return;
+        deadlineRecipients.splice(Number(button.dataset.recipientRemove), 1); renderDeadlineRecipients();
+    });
+    renderDeadlineRecipients();
 }
 
 function updateCurrentDynamicConfig() {
@@ -769,11 +884,14 @@ function setupSaveLogic() {
             if (btnText) btnText.textContent = "Salvataggio DB...";
             const finalAttachments = [...existingAttachments, ...uploadedAttachments];
 
-            const email1Sel = document.getElementById('email_primaria_select');
-            const email1 = email1Sel?.value;
-
-            const email2Sel = document.getElementById('email_secondaria_select');
-            const email2 = email2Sel?.value;
+            const recipients = deadlineRecipients.map(recipient => ({
+                ...(recipient.contactId ? { contactId: recipient.contactId } : {}),
+                displayName: String(recipient.displayName || '').trim(),
+                email: normalizeRecipientEmail(recipient.email),
+                sendEmail: recipient.sendEmail === true,
+                sendPush: recipient.sendPush === true
+            }));
+            const legacyEmailRecipients = recipients.filter(recipient => recipient.sendEmail).map(recipient => recipient.email);
 
             const scadenzaData = {
                 uid: currentUser.uid,
@@ -788,9 +906,10 @@ function setupSaveLogic() {
                 updatedAt: Timestamp.now(),
                 mode: currentMode,
                 templateText: document.getElementById('testo_email_select')?.value || '',
-                email1: email1 || '',
-                email2: email2 || '',
-                notifChannel: document.getElementById('notif_channel_select')?.value || 'email',
+                recipients,
+                email1: legacyEmailRecipients[0] || '',
+                email2: legacyEmailRecipients[1] || '',
+                notifChannel: 'multichannel',
                 notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
                 notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
             };
@@ -825,7 +944,7 @@ function setupSaveLogic() {
                 ).catch(e => console.warn('[TRACE] names update failed:', e));
 
                 // Salva anche le email nel config della modalità corrente (Opzione B)
-                const emailsToSave = [email1, email2].filter(e => e && e.trim() && e !== 'manual');
+                const emailsToSave = recipients.map(recipient => recipient.email);
                 if (emailsToSave.length > 0) {
                     setDoc(
                         doc(db, "users", currentUser.uid, "settings", configDocName),
@@ -1044,44 +1163,20 @@ async function loadScadenzaForEdit(id) {
         if (iFreq) iFreq.value = freq;
 
 
-        const email1Input = document.getElementById('email_primaria_input');
-        const email1Select = document.getElementById('email_primaria_select');
-        const email2Input = document.getElementById('email_secondaria_input');
-        const email2Select = document.getElementById('email_secondaria_select');
-
-        let emailsList = [];
-        if (Array.isArray(data.emails)) {
-            emailsList = data.emails.map(e => typeof e === 'object' && e !== null ? (e.address || '') : e).filter(e => e);
-        } else if (data.email1 || data.email2) {
-            if (data.email1) emailsList.push(data.email1);
-            if (data.email2) emailsList.push(data.email2);
-        }
-
-        let e1 = emailsList.length > 0 ? emailsList[0] : '';
-        let e2 = emailsList.length > 1 ? emailsList[1] : '';
-
-        if (e1 && email1Select) {
-            let opt = Array.from(email1Select.options).find(o => o.value === e1);
-            if (!opt) {
-                const newOpt = new Option(e1, e1);
-                email1Select.insertBefore(newOpt, email1Select.lastElementChild);
-            }
-            email1Select.value = e1;
-            if (email1Input) { email1Input.value = ''; email1Input.classList.add('hidden'); }
-        } else if (email1Select) { email1Select.value = ''; }
-
-        if (e2 && email2Select) {
-            let opt = Array.from(email2Select.options).find(o => o.value === e2);
-            if (!opt) {
-                const newOpt = new Option(e2, e2);
-                email2Select.insertBefore(newOpt, email2Select.lastElementChild);
-            }
-            email2Select.value = e2;
-            if (email2Input) { email2Input.value = ''; email2Input.classList.add('hidden'); }
-        } else if (email2Select) {
-            email2Select.value = '';
-            if (email2Input) { email2Input.value = ''; email2Input.classList.add('hidden'); }
-        }
+        const storedRecipients = Array.isArray(data.recipients) ? data.recipients : [];
+        const legacyEmails = Array.isArray(data.emails)
+            ? data.emails.map(email => typeof email === 'object' && email !== null ? email.address : email)
+            : [data.email1, data.email2];
+        deadlineRecipients = (storedRecipients.length ? storedRecipients : legacyEmails
+            .filter(Boolean).map(email => ({ email, sendEmail: true, sendPush: false })))
+            .map(recipient => ({
+                contactId: String(recipient.contactId || ''),
+                displayName: String(recipient.displayName || recipient.name || '').trim(),
+                email: normalizeRecipientEmail(recipient.email || recipient.address),
+                sendEmail: recipient.sendEmail !== false,
+                sendPush: recipient.sendPush === true
+            })).filter(recipient => isValidRecipientEmail(recipient.email));
+        renderDeadlineRecipients();
 
         const testoEmailSelect = document.getElementById('testo_email_select');
         if (data.templateText && testoEmailSelect) {

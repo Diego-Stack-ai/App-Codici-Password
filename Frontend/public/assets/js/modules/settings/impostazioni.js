@@ -13,7 +13,7 @@ import { safeSetText, setChildren, createElement, clearElement } from '../../dom
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
 import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
-import { disableDeadlinePush, enableDeadlinePush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
+import { disableDeadlinePush, disableSharingPush, enableDeadlinePush, enableSharingPush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -47,9 +47,35 @@ export async function initImpostazioni(user) {
     setupPrivacyShort();
     setupTermsShort();
     await setupDeadlinePush(user);
+    await setupSharingPush(user);
     showPendingSecurityNotice();
 
     
+}
+
+async function setupSharingPush(user) {
+    const toggle = document.getElementById('sharing-push-toggle');
+    const status = document.getElementById('sharing-push-status');
+    if (!toggle || !status) return;
+    const render = async () => {
+        const state = await getCurrentPushState(user, 'sharing');
+        toggle.checked = state.enabled;
+        toggle.disabled = !state.compatible;
+        status.textContent = state.compatible ? (state.enabled ? 'Attive su questo dispositivo' : 'Disattivate su questo dispositivo') : state.reason;
+    };
+    await render();
+    toggle.addEventListener('change', async () => {
+        const enabling = toggle.checked;
+        toggle.disabled = true;
+        try {
+            if (enabling) await enableSharingPush(user); else await disableSharingPush(user);
+            showToast(enabling ? 'Notifiche inviti attivate' : 'Notifiche inviti disattivate', 'success');
+            if (enabling) await listenForDeadlinePushInForeground();
+        } catch (error) {
+            console.error('[SHARING PUSH] Configurazione fallita', error);
+            showToast(error.message || 'Configurazione notifiche non riuscita', 'error');
+        } finally { await render(); }
+    });
 }
 
 function setupAIAssistantToggle(user, data) {

@@ -155,8 +155,15 @@ function renderScadenza(scadenza) {
 
     // Notifiche Email
     const emailSec = document.getElementById('section-emails');
-    const e1 = scadenza.emails ? scadenza.emails[0] : scadenza.email1;
-    const e2 = scadenza.emails ? scadenza.emails[1] : scadenza.email2;
+    const recipientLines = Array.isArray(scadenza.recipients)
+        ? scadenza.recipients.map(recipient => {
+            const channels = [recipient.sendEmail ? 'Email' : '', recipient.sendPush ? 'Push' : ''].filter(Boolean).join(' + ') || 'Sospeso';
+            return `${recipient.displayName ? `${recipient.displayName} — ` : ''}${recipient.email} (${channels})`;
+        })
+        : [];
+    const legacyEmails = scadenza.emails || [scadenza.email1, scadenza.email2].filter(Boolean);
+    const e1 = recipientLines[0] || legacyEmails[0];
+    const e2 = recipientLines.length > 1 ? recipientLines.slice(1).join(' · ') : legacyEmails[1];
     if (e1 || e2) {
         if (emailSec) emailSec.classList.remove('hidden');
         document.getElementById('detail-email1').textContent = e1 || '';
