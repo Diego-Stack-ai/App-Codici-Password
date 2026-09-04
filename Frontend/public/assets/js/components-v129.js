@@ -24,7 +24,7 @@ const AUTH_PATHS = new Set([
  * Dopo refresh, deep-link, login o provenienza esterna usa invece il parent
  * gerarchico indicato dalla pagina corrente.
  */
-function navigateBack(fallbackHref) {
+function navigateBack(fallbackHref, preferHistory = true) {
     try {
         const previous = document.referrer ? new URL(document.referrer) : null;
         const current = new URL(window.location.href);
@@ -34,7 +34,7 @@ function navigateBack(fallbackHref) {
             && previous.href !== current.href
             && !AUTH_PATHS.has(previousPath);
 
-        if (isSafeInternalPrevious && window.history.length > 1) {
+        if (preferHistory && isSafeInternalPrevious && window.history.length > 1) {
             window.history.back();
             return;
         }
@@ -102,6 +102,7 @@ export async function initComponents() {
             } else if (!isAuth) {
                 // Back Button (Solo se non siamo su Auth o Home)
                 let fallbackHref = 'home_page.html';
+                let preferHistory = true;
                 const urlParams = new URLSearchParams(window.location.search);
 
                 // Mapping Logico Navigazione
@@ -128,6 +129,10 @@ export async function initComponents() {
                     fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html')) {
                     fallbackHref = 'lista_aziende.html';
+                    // Sono entrambe viste principali dell'azienda: la freccia
+                    // deve tornare sempre all'elenco, non seguire percorsi
+                    // intermedi rimasti nella history del browser/PWA.
+                    preferHistory = false;
                 } else if (path.endsWith('dettaglio_account_azienda.html')) {
                     const aziendaId = urlParams.get('aziendaId') || urlParams.get('id_azienda');
                     fallbackHref = aziendaId ? `account_azienda.html?id=${aziendaId}` : 'lista_aziende.html';
@@ -150,7 +155,7 @@ export async function initComponents() {
                     fallbackHref = id ? `dettaglio_account_privato.html?id=${id}` : 'account_privati.html';
                 }
 
-                const backFn = () => navigateBack(fallbackHref);
+                const backFn = () => navigateBack(fallbackHref, preferHistory);
 
                 headerLeft.appendChild(
                     createElement('button', { className: 'btn-icon-header', dataset: { action: 'back' }, onclick: backFn }, [

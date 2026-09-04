@@ -54,19 +54,10 @@ export async function initAccountAziendaList(user) {
 }
 
 function setupUI() {
-    // 1. Header Left Back Button Override
-    const hLeft = document.getElementById('header-left');
-    if (hLeft) {
-        clearElement(hLeft);
-        setChildren(hLeft, createElement('button', {
-            className: 'btn-icon-header',
-            onclick: () => window.location.href = `dati_azienda.html?id=${currentAziendaId}`
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
-        ]));
-    }
+    // Header e navigazione Back restano sotto il controllo del componente
+    // condiviso, così Account Azienda torna coerentemente a Lista Aziende.
 
-    // 2. Search & Sort Listeners
+    // Search & Sort Listeners
     const searchInput = document.getElementById('account-search');
     if (searchInput) searchInput.addEventListener('input', filterAndRender);
 
