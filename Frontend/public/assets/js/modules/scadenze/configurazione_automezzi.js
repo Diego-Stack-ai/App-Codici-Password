@@ -213,7 +213,7 @@ function renderTypes() {
                         createElement('span', { className: 'config-badge config-badge-amber', textContent: `${t('text_replica')} ${item.freq}gg` })
                     ])
                 ]),
-                createElement('div', { className: 'config-item-actions flex-align-center gap-1' }, [
+                createElement('div', { className: 'config-item-actions' }, [
                     createElement('button', { className: 'btn-edit-item btn-icon-edit', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })]),
                     createElement('button', { className: 'btn-delete-item btn-icon-delete', dataset: { list: 'deadlineTypes', index: index.toString() } }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })])
                 ])

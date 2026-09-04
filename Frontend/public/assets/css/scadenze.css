@@ -3,6 +3,11 @@
    ========================================================================== */
 
 /* --- 1. SEARCH & FILTERS --- */
+.deadline-error-message {
+    margin-top: 1rem;
+    text-align: center;
+}
+
 .deadline-toolbar {
     display: flex;
     justify-content: space-between;

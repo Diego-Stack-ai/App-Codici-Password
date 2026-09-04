@@ -235,7 +235,7 @@ function renderTypes() {
                     })
                 ])
             ]),
-            createElement('div', { className: 'config-item-actions flex-align-center gap-1' }, [
+            createElement('div', { className: 'config-item-actions' }, [
                 createElement('button', {
                     className: 'btn-edit-item btn-icon-edit',
                     dataset: { list: 'deadlineTypes', index: index.toString() }

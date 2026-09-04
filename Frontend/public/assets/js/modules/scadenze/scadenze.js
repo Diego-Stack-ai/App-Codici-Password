@@ -1,15 +1,15 @@
-﻿/**
+/**
  * SCADENZE MODULE (V4.1)
  * Gestione della pagina scadenze (lista completa) e utility per la home.
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.31';
+import { db } from '../../firebase-config.js?v=1.2.31';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { t } from '../../translations.js';
 import { initComponents } from '../../components.js?v=1.2.31';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -128,7 +128,7 @@ async function loadScadenze() {
     } catch (error) {
         logError("Scadenze Page", error);
         if (scadenzeContainer) {
-            const p = createElement('p', { className: 'hero-page-subtitle text-center mt-4', textContent: `Errore: ${error.message}` });
+            const p = createElement('p', { className: 'hero-page-subtitle deadline-error-message', textContent: `Errore: ${error.message}` });
             setChildren(scadenzeContainer, p);
         }
     }
@@ -387,81 +387,3 @@ function setupFAB() {
         document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
     }
 }
-
-// --- UTILITY PER LA HOME PAGE (ESPORTATA) ---
-
-export async function loadUrgentDeadlinesCount(user) {
-    try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const colRef = collection(db, "users", user.uid, "scadenze");
-        const snap = await getDocs(colRef);
-        const items = [];
-
-        snap.forEach(d => {
-            const data = d.data();
-            if (data.completed) return;
-
-            if (data.dueDate) {
-                const due = new Date(data.dueDate);
-                due.setHours(0, 0, 0, 0);
-                const days = data.notificationDaysBefore || 7;
-                const start = new Date(due);
-                start.setDate(start.getDate() - days);
-
-                if (today >= start && today <= due) {
-                    items.push({ ...data, id: d.id, due: due });
-                }
-            }
-        });
-
-        items.sort((a, b) => a.due - b.due);
-
-        const badge = document.getElementById('urgent-count-badge');
-        const count = document.getElementById('urgent-count');
-        if (count) count.textContent = items.length;
-        if (badge) {
-            badge.classList.remove('loading-pulse');
-            if (items.length > 0) {
-                badge.classList.add('opacity-100');
-                badge.classList.remove('opacity-0');
-            } else {
-                badge.classList.add('opacity-0');
-                badge.classList.remove('opacity-100');
-            }
-        }
-
-        const list = document.getElementById('deadline-list-container');
-        if (list) {
-            clearElement(list);
-            if (items.length > 0) {
-                const listItems = items.map(deadline => {
-                    const daysUntil = Math.ceil((deadline.due - today) / (1000 * 60 * 60 * 24));
-                    const badgeText = daysUntil < 0 ? 'Scaduto' : (daysUntil === 0 ? 'Oggi' : (daysUntil === 1 ? 'Domani' : `${daysUntil}g`));
-
-                    const cardTitle = deadline.type || deadline.title || 'Scadenza Generale';
-
-                    return createElement('div', { className: 'micro-list-item' }, [
-                        createElement('div', { className: 'item-content' }, [
-                            createElement('div', { className: 'item-icon-box' }, [
-                                createElement('span', { className: 'material-symbols-outlined', textContent: deadline.icon || 'event' })
-                            ]),
-                            createElement('span', { className: 'item-title', textContent: cardTitle })
-                        ]),
-                        createElement('span', { className: 'item-badge', textContent: badgeText })
-                    ]);
-                });
-                setChildren(list, listItems);
-            }
-        }
-    } catch (error) {
-        logError("Utility Scadenze", error);
-        if (error.code === 'permission-denied') {
-            console.warn("Permessi insufficienti per leggere le scadenze (REGOLE FIRESTORE?)");
-        } else if (error.code === 'unavailable') {
-            console.warn("Il database non risponde. Controlla la connessione.");
-        }
-    }
-}
-
