@@ -18,7 +18,6 @@ console.error    = (...args) => { try { LOG_ERROR(...args); } catch (e) {} };
 console.warn     = (...args) => { try { LOG_WARN(...args);  } catch (e) {} };
 
 import { setupPasswordToggles, setupCopyButtons, setupCallButtons } from './ui-components.js';
-import { setupAccountCards, setupEditMode, setupAccountDetailView, setupCopyQrCode } from './ui-pages.js';
 import { initCleanup } from './cleanup.js';
 import { initComponents } from './components-v129.js'; // Imports components system
 
@@ -36,13 +35,9 @@ import {
 import { showToast, initLockedUX } from './ui-core-v129.js';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
-import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js?v=1.2.31';
-import { ensureMasterKey } from './modules/core/security-manager.js';
-import { ACCOUNT_PASSWORD_POLICY_VERSION } from './modules/core/password-policy.js';
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
 
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
@@ -173,7 +168,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             LOG('[AUTH-DEBUG] User logged in');
             try {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
-                if (!publicPages.includes(currentPage)) firebaseRuntime.enableAppCheck?.();
+                const isPrivatePage = !publicPages.includes(currentPage);
+                if (isPrivatePage) firebaseRuntime.enableAppCheck?.();
+
+                // Avvia in parallelo il codice Vault, senza appesantire login e pagine pubbliche.
+                const securityModulesPromise = isPrivatePage
+                    ? Promise.all([
+                        import('./modules/core/security-manager.js'),
+                        import('./modules/core/password-policy.js')
+                    ])
+                    : null;
 
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -183,8 +187,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.warn("[AUTH-DEBUG] User document NOT found in Firestore.");
                 }
 
-                if (!publicPages.includes(currentPage) &&
-                    (userDoc.data()?.passwordPolicyVersion || 0) < ACCOUNT_PASSWORD_POLICY_VERSION) {
+                const securityModules = securityModulesPromise ? await securityModulesPromise : null;
+                const passwordPolicyVersion = securityModules?.[1].ACCOUNT_PASSWORD_POLICY_VERSION;
+                if (isPrivatePage &&
+                    (userDoc.data()?.passwordPolicyVersion || 0) < passwordPolicyVersion) {
                     showToast('Prima di continuare, aggiorna una volta la password di accesso.', 'warning');
                     window.location.replace('imposta_nuova_password.html?policyUpdate=1');
                     return;
@@ -192,9 +198,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // 🔐 PROTOCOLLO BLINDA (V7.0 MASTER)
                 // Se la pagina è privata, assicuriamoci che il Vault sia sbloccato
-                if (!publicPages.includes(currentPage)) {
+                if (isPrivatePage) {
                     try {
-                        await ensureMasterKey();
+                        await securityModules[0].ensureMasterKey();
                     } catch (e) {
                         console.error("[BLINDA] Vault lock required.");
                         // Se l'utente annulla lo sblocco su una pagina privata, potremmo volerlo reindirizzare
@@ -482,6 +488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error("Non sei autorizzato a rispondere a questo invito.");
             }
 
+            const { httpsCallable } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js");
             const respondToInvitation = httpsCallable(functions, 'respondToInvitation');
             await respondToInvitation({ inviteId, status });
             LOG("[SHARING] Risposta invito convalidata e applicata dal server.");

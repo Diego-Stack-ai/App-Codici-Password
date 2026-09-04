@@ -94,7 +94,6 @@ const APP_SHELL = [
     'assets/js/modules/auth/login.js?v=1.2.31',
     'assets/js/modules/core/mfa-manager.js',
     'assets/js/modules/core/security-manager.js',
-    'assets/js/modules/core/security-setup.js',
     'assets/js/modules/core/vault-session.js',
     'assets/js/modules/core/webauthn-manager.js',
     'assets/js/modules/core/crypto-utils.js',
@@ -103,13 +102,13 @@ const APP_SHELL = [
     'assets/js/inactivity-timer.js',
     'assets/js/pages-init.js?v=1.2.31',
     'assets/js/modules/home/home.js?v=1.2.31',
+    'assets/js/modules/privato/area_privata.js?v=1.2.31',
     'assets/js/modules/assistant/conversation-engine.js?v=1.2.31',
     'assets/js/translations.js',
     'assets/js/dom-utils.js',
     'assets/js/logger.js',
     'assets/js/footer-state.js',
     'assets/js/ui-components.js',
-    'assets/js/ui-pages.js',
     'assets/js/cleanup.js',
     'assets/js/utils.js'
 ];

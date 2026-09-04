@@ -1,6 +1,5 @@
 ﻿import { auth, db } from './firebase-config.js?v=1.2.31';
 import { LOG } from './logger.js';
-import { softLock } from './modules/core/security-manager.js';
 import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
@@ -101,11 +100,12 @@ function recordActivity() {
 /**
  * Esegue il logout automatico e reindirizza alla login.
  */
-function lockVaultForInactivity() {
+async function lockVaultForInactivity() {
     try {
         const currentPage = window.location.pathname.split('/').pop();
         if (currentPage === 'login-v115.html' || currentPage === '') return;
 
+        const { softLock } = await import('./modules/core/security-manager.js');
         softLock();
         LOG("[Titan-Lock] Vault bloccata per inattività.");
         window.location.reload();

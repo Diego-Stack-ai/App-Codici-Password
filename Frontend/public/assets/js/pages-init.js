@@ -10,11 +10,10 @@
 import { initComponents } from './components.js?v=1.2.31';
 
 import { LOG } from './logger.js';
-// --- 1. MODULI V5.0 (Puri/Passivi) ---
-import { initAreaPrivata as initAreaPrivataModule } from './modules/privato/area_privata.js';
 
 export async function initAreaPrivata(user) {
-    await initAreaPrivataModule(user);
+    const module = await import('./modules/privato/area_privata.js?v=1.2.31');
+    await module.initAreaPrivata(user);
 }
 
 // --- 2. MODULI LEGACY & AUTH (Import Dinamico) ---
