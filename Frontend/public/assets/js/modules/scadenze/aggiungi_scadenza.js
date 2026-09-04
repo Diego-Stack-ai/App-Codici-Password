@@ -958,7 +958,7 @@ function setupSaveLogic() {
             showToast(editingScadenzaId ? "Scadenza aggiornata!" : "Scadenza salvata!", "success");
 
             setTimeout(() => {
-                window.location.href = `dettaglio_scadenza.html?id=${finalDocId}`;
+                window.location.replace(`dettaglio_scadenza.html?id=${finalDocId}`);
             }, 1000);
 
         } catch (e) {

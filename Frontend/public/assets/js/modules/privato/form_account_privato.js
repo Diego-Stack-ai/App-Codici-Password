@@ -721,7 +721,12 @@ async function saveAccount() {
         });
 
         showToast(t('success_save'), "success");
-        setTimeout(() => window.location.href = 'account_privati.html', 1000);
+        setTimeout(() => {
+            const destination = isEditing
+                ? `dettaglio_account_privato.html?id=${currentDocId}`
+                : 'account_privati.html';
+            window.location.replace(destination);
+        }, 1000);
 
     } catch (e) {
         console.error("[V3.1-ERROR] SaveAccount Transaction Failed:", e);

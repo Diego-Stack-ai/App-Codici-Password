@@ -257,7 +257,12 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         });
 
         showToast(t('success_save'), "success");
-        setTimeout(() => window.location.href = 'dati_azienda.html?id=' + currentAziendaId, 1000);
+        setTimeout(() => {
+            const destination = isEditing
+                ? `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}`
+                : `dati_azienda.html?id=${currentAziendaId}`;
+            window.location.replace(destination);
+        }, 1000);
 
     } catch (e) {
         console.error("[V3.1-ERROR] SaveAccount Azienda Failed:", e);

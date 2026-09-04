@@ -142,13 +142,13 @@ export async function saveAzienda() {
         if (state.currentAziendaId) {
             await updateDoc(doc(db, "users", state.currentUid, "aziende", state.currentAziendaId), data);
             showToast(t('success_save') || "Azienda salvata con successo!", "success");
-            setTimeout(() => window.location.href = `dati_azienda.html?id=${state.currentAziendaId}`, 1000);
+            setTimeout(() => window.location.replace(`dati_azienda.html?id=${state.currentAziendaId}`), 1000);
         } else {
             const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
             const colRef = collection(db, "users", state.currentUid, "aziende");
             const newDoc = await addDoc(colRef, data);
             showToast(t('success_save') || "Azienda creata con successo!", "success");
-            setTimeout(() => window.location.href = `dati_azienda.html?id=${newDoc.id}`, 1000);
+            setTimeout(() => window.location.replace(`dati_azienda.html?id=${newDoc.id}`), 1000);
         }
     } catch (e) {
         logError("Save", e);
