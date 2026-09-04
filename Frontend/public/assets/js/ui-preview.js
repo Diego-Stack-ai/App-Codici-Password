@@ -6,6 +6,8 @@
   function showView(name) {
     document.querySelectorAll('.app-view').forEach(panel => panel.classList.toggle('is-active', panel.dataset.panel === name));
     document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('is-active', item.dataset.view === name));
+    document.querySelector('.app-content').scrollTop = 0;
+    window.scrollTo(0, 0);
     if (name === 'vault') openModal();
   }
 
@@ -31,10 +33,25 @@
     frame.dataset.size = button.dataset.size;
   }));
 
-  document.getElementById('theme-toggle').addEventListener('click', event => {
-    const dark = root.dataset.theme === 'dark';
-    root.dataset.theme = dark ? 'light' : 'dark';
-    event.currentTarget.querySelector('.material-symbols-outlined').textContent = dark ? 'dark_mode' : 'light_mode';
+  const themeModes = ['auto', 'light', 'dark'];
+  let themeMode = 'auto';
+  function applyTheme(mode) {
+    const isNight = new Date().getHours() >= 19 || new Date().getHours() < 7;
+    root.dataset.theme = mode === 'auto' ? (isNight ? 'dark' : 'light') : mode;
+    root.dataset.themeMode = mode;
+    const button = document.getElementById('theme-toggle');
+    const content = {
+      auto: ['schedule', 'Automatico'],
+      light: ['light_mode', 'Chiaro'],
+      dark: ['dark_mode', 'Scuro']
+    }[mode];
+    button.querySelector('.material-symbols-outlined').textContent = content[0];
+    document.getElementById('theme-label').textContent = content[1];
+  }
+  applyTheme(themeMode);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    themeMode = themeModes[(themeModes.indexOf(themeMode) + 1) % themeModes.length];
+    applyTheme(themeMode);
   });
 
   document.getElementById('open-vault-modal').addEventListener('click', openModal);
