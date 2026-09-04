@@ -279,9 +279,7 @@ export function addExtraSede(data = null) {
         id: bodyId,
         className: 'email-card-body collapsible-section'
     }, [
-        createElement('div', {
-            style: 'display: grid; grid-template-columns: 1fr 80px; gap: 0.75rem;'
-        }, [
+        createElement('div', { className: 'form-grid-address-number' }, [
             createFieldBox('Indirizzo', 'address', 'text', data?.indirizzo, 'sede-indirizzo', 'Via / Piazza', 'address_placeholder'),
             createFieldBox('N.', 'civic_number', 'text', data?.civico, 'sede-civico', 'N.', 'civic_number', true)
         ]),

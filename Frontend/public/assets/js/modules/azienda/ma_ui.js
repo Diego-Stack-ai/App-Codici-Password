@@ -26,6 +26,10 @@ export function updateTitlesForCreation() {
 // ─── FORM EVENTS ──────────────────────────────────────────────────────────────
 
 export function initFormEvents() {
+    document.querySelector('form.anti-autofill-trap')?.addEventListener('submit', (event) => {
+        event.preventDefault();
+    });
+
     // Gestione eliminazione card email statiche (CSP Compatibile)
     document.querySelectorAll('.inside-card .btn-remove-item').forEach(btn => {
         btn.addEventListener('click', function () {
