@@ -92,6 +92,9 @@
 /* --- 3. ACCOUNT CARDS (DEADLINE STYLE) --- */
 .account-card {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
     margin-bottom: 2px;
     animation: slideInUp 0.3s ease-out backwards;
     /* Hint Colors on Sides */
@@ -150,6 +153,7 @@
     touch-action: pan-y;
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 /* Light Mode Override */

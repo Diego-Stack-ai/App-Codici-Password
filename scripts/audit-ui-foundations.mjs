@@ -73,8 +73,10 @@ const requiredSignals = [
   ['assistente AI collocato nell’header', components.includes("headerRight.appendChild(assistantStatus)") && home.includes('class="ai-assistant-label"')],
   ['account personali senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(privateAccountCss)],
   ['azioni account personali con target tattile', privateAccountCss.includes('width: var(--touch-target-min, 44px)')],
+  ['card personali allineate nella griglia', /\.account-card\s*\{[\s\S]*?display:\s*flex;/.test(privateAccountCss) && /\.account-card \.swipe-content\s*\{[\s\S]*?flex:\s*1;/.test(privateAccountCss)],
   ['account aziendali senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(companyAccountCss)],
   ['azioni account aziendali con target tattile', companyAccountCss.includes('width: var(--touch-target-min, 44px)')],
+  ['card aziendali allineate nella griglia', /\.account-card\s*\{[\s\S]*?display:\s*flex;/.test(companyAccountCss) && /\.account-card \.swipe-content\s*\{[\s\S]*?flex:\s*1;/.test(companyAccountCss)],
   ['scadenze senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(deadlineCss)],
   ['azioni scadenze con target tattile', deadlineCss.includes('width: var(--touch-target-min, 44px)')]
 ];
