@@ -49,9 +49,11 @@ export async function initComponents() {
 
             if (isHome) {
                 // EXCEPTION 2.1: Home Page Left -> Avatar Utente (V7.0 Standard)
-                const avatarLink = createElement('div', {
+                const avatarLink = createElement('button', {
                     id: 'header-user-avatar',
-                    className: 'header-avatar-box cursor-pointer',
+                    type: 'button',
+                    className: 'header-avatar-box header-profile-trigger',
+                    title: t('page_title_profile') || 'Profilo',
                     onclick: () => window.location.href = 'profilo_privato.html'
                 }, [
                     createElement('img', {
@@ -131,11 +133,13 @@ export async function initComponents() {
                     // Evita la parola 'Utente' che l'utente interpreta come un errore.
                     const initialName = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || '...';
 
-                    const greetingCont = createElement('div', {
-                        className: 'flex flex-col items-center cursor-pointer',
+                    const greetingCont = createElement('button', {
+                        type: 'button',
+                        className: 'header-greeting-trigger',
+                        title: t('page_title_profile') || 'Profilo',
                         onclick: () => window.location.href = 'profilo_privato.html'
                     }, [
-                        createElement('span', { id: 'home-greeting-text', className: 'text-[9px] opacity-30 uppercase font-black tracking-widest', textContent: timeGreeting }),
+                        createElement('span', { id: 'home-greeting-text', className: 'header-greeting', textContent: timeGreeting }),
                         createElement('h1', { id: 'home-user-name', className: 'header-title', textContent: initialName })
                     ]);
                     headerCenter.appendChild(greetingCont);
@@ -190,8 +194,9 @@ export async function initComponents() {
             const headerContent = createElement('div', { id: 'header-content', className: 'header-balanced-container' }, [
                 headerLeft, headerCenter, headerRight
             ]);
-            const header = createElement('header', { className: 'base-header' }, [headerContent]);
-            headerPh.appendChild(header);
+            // Il placeholder HTML è già <header class="base-header">: evitiamo
+            // un secondo header fisso annidato, che duplica maschera e compositing.
+            setChildren(headerPh, headerContent);
         }
 
         // 2. SETUP FOOTER

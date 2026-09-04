@@ -236,3 +236,11 @@
 .deadline-inbox-copy small { overflow-wrap: anywhere; }
 
 .deadline-inbox-copy small { color: var(--text-secondary); }
+
+.version-display {
+    margin-top: var(--space-8, 2rem);
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    letter-spacing: 0.08em;
+    text-align: center;
+}

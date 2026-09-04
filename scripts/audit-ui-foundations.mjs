@@ -42,11 +42,16 @@ for (const file of markupFiles) {
 const coreFonts = fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core_fonts.css'), 'utf8');
 const core = fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core.css'), 'utf8');
 const theme = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'theme-init.js'), 'utf8');
+const components = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'components-v129.js'), 'utf8');
+const home = fs.readFileSync(path.join(publicRoot, 'home_page.html'), 'utf8');
 const requiredSignals = [
   ['token --text-body', coreFonts.includes('--text-body:')],
   ['token --touch-target-min', core.includes('--touch-target-min:')],
   ['supporto movimento ridotto', core.includes('prefers-reduced-motion')],
-  ['tema security-dark', theme.includes("themeMode = 'security-dark'")]
+  ['tema security-dark', theme.includes("themeMode = 'security-dark'")],
+  ['header senza elemento fisso annidato', components.includes('setChildren(headerPh, headerContent)') && !components.includes("createElement('header', { className: 'base-header' }")],
+  ['saluto Home con tipografia semantica', components.includes("className: 'header-greeting'") && !components.includes('text-[9px]')],
+  ['versione Home senza stile inline', /<div class="version-display">/.test(home)]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);
