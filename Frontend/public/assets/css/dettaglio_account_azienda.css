@@ -175,8 +175,8 @@
 }
 
 .btn-icon-header {
-    width: 36px;
-    height: 36px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -248,7 +248,7 @@
 }
 
 .attachment-name {
-    font-size: 11px;
+    font: var(--font-label);
     font-weight: var(--font-label-weight);
     color: var(--text-primary);
     text-transform: uppercase;
@@ -258,7 +258,7 @@
 }
 
 .attachment-status {
-    font-size: 8px;
+    font: var(--font-caption);
     font-weight: var(--font-title-weight);
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -266,8 +266,8 @@
 }
 
 .btn-delete-attachment {
-    width: 32px;
-    height: 32px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -338,7 +338,7 @@
 }
 
 .modal-source-title {
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-title-weight);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -382,7 +382,7 @@
 }
 
 .btn-source-label {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-label-weight);
     text-transform: uppercase;
     color: #0c4a6e;
@@ -405,7 +405,8 @@
 
 .btn-modal-cancel {
     padding: 0.5rem 0;
-    font-size: 10px;
+    min-height: var(--touch-target-min, 44px);
+    font: var(--font-label);
     font-weight: var(--font-label-weight);
     text-transform: uppercase;
     color: rgba(3, 105, 161, 0.6);
@@ -509,7 +510,7 @@
 }
 
 .banking-index {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     color: var(--status-success);
     text-transform: uppercase;
@@ -523,7 +524,7 @@
 }
 
 .micro-data-label {
-    font-size: 8px;
+    font: var(--font-caption);
     font-weight: var(--font-title-weight);
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -531,7 +532,7 @@
 }
 
 .micro-data-value {
-    font-size: 11px;
+    font: var(--font-label);
     font-weight: var(--font-weight-medium);
     color: var(--text-primary);
     flex: 1;
@@ -683,7 +684,7 @@
 
 .bank-cards-title,
 .bank-cards-label {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: var(--text-secondary);

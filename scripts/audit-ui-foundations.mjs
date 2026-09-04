@@ -50,6 +50,13 @@ const privateAccountCss = [
   'form_account_privato.css',
   'dettaglio_account_privato.css'
 ].map(name => fs.readFileSync(path.join(publicRoot, 'assets', 'css', name), 'utf8')).join('\n');
+const companyAccountCss = [
+  'lista_aziende.css',
+  'dati_azienda.css',
+  'account_azienda.css',
+  'form_account_azienda.css',
+  'dettaglio_account_azienda.css'
+].map(name => fs.readFileSync(path.join(publicRoot, 'assets', 'css', name), 'utf8')).join('\n');
 const requiredSignals = [
   ['token --text-body', coreFonts.includes('--text-body:')],
   ['token --touch-target-min', core.includes('--touch-target-min:')],
@@ -60,7 +67,9 @@ const requiredSignals = [
   ['versione Home senza stile inline', /<div class="version-display">/.test(home)],
   ['assistente AI collocato nell’header', components.includes("headerRight.appendChild(assistantStatus)") && home.includes('class="ai-assistant-label"')],
   ['account personali senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(privateAccountCss)],
-  ['azioni account personali con target tattile', privateAccountCss.includes('width: var(--touch-target-min, 44px)')]
+  ['azioni account personali con target tattile', privateAccountCss.includes('width: var(--touch-target-min, 44px)')],
+  ['account aziendali senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(companyAccountCss)],
+  ['azioni account aziendali con target tattile', companyAccountCss.includes('width: var(--touch-target-min, 44px)')]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);
