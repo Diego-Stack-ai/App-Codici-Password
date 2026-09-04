@@ -273,8 +273,8 @@ html:not(.dark) .account-card-subtitle {
 }
 
 .btn-mini-action {
-    width: 32px;
-    height: 32px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -313,18 +313,19 @@ html:not(.dark) .account-card-subtitle {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: var(--fs-micro);
+    font: var(--font-caption);
     background: rgba(255, 255, 255, 0.03);
     padding: 0.25rem 0.6rem;
     border-radius: 8px;
-    height: 28px;
+    min-height: var(--touch-target-min, 44px);
+    height: auto;
 }
 
 .account-data-label {
     color: var(--text-secondary);
     font-weight: var(--font-weight-medium);
     text-transform: uppercase;
-    font-size: var(--fs-micro);
+    font: var(--font-caption);
     letter-spacing: 0.05em;
 }
 

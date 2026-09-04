@@ -81,7 +81,7 @@
     margin-top: 0.5rem;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -185,8 +185,8 @@
 }
 
 .btn-icon-header {
-    width: 36px;
-    height: 36px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -205,8 +205,8 @@
 }
 
 .micro-btn-copy-inline {
-    width: 36px;
-    height: 36px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     border-radius: 10px;
     background: transparent;
     border: none;
@@ -460,7 +460,7 @@
 }
 
 .modal-source-title {
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-title-weight);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -523,7 +523,7 @@
 }
 
 .btn-source-label {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-label-weight);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -577,7 +577,8 @@
 
 .btn-modal-cancel {
     padding: 0.5rem 0;
-    font-size: 10px;
+    min-height: var(--touch-target-min, 44px);
+    font: var(--font-label);
     font-weight: var(--font-label-weight);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -698,7 +699,7 @@
 }
 
 .banking-index {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     color: var(--status-success);
     /* emerald-500 */
@@ -747,14 +748,14 @@
 }
 
 .referent-title {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
 
 .referent-name {
-    font-size: 11px;
+    font: var(--font-label);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
 }
@@ -766,7 +767,7 @@
 }
 
 .cards-title {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     color: rgba(255, 255, 255, 0.4);
     text-transform: uppercase;
@@ -822,7 +823,7 @@
 }
 
 .call-number {
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-label-weight);
     color: var(--text-secondary);
 }
@@ -900,7 +901,7 @@
 }
 
 .attachment-name {
-    font-size: 11px;
+    font: var(--font-label);
     font-weight: var(--font-label-weight);
     color: var(--text-primary);
     text-transform: uppercase;
@@ -911,7 +912,7 @@
 }
 
 .attachment-status {
-    font-size: 8px;
+    font: var(--font-caption);
     font-weight: var(--font-title-weight);
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -919,8 +920,8 @@
 }
 
 .btn-delete-attachment {
-    width: 32px;
-    height: 32px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -44,6 +44,12 @@ const core = fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core.css'),
 const theme = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'theme-init.js'), 'utf8');
 const components = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'components-v129.js'), 'utf8');
 const home = fs.readFileSync(path.join(publicRoot, 'home_page.html'), 'utf8');
+const privateAccountCss = [
+  'area_privata.css',
+  'account_privati.css',
+  'form_account_privato.css',
+  'dettaglio_account_privato.css'
+].map(name => fs.readFileSync(path.join(publicRoot, 'assets', 'css', name), 'utf8')).join('\n');
 const requiredSignals = [
   ['token --text-body', coreFonts.includes('--text-body:')],
   ['token --touch-target-min', core.includes('--touch-target-min:')],
@@ -52,7 +58,9 @@ const requiredSignals = [
   ['header senza elemento fisso annidato', components.includes('setChildren(headerPh, headerContent)') && !components.includes("createElement('header', { className: 'base-header' }")],
   ['saluto Home con tipografia semantica', components.includes("className: 'header-greeting'") && !components.includes('text-[9px]')],
   ['versione Home senza stile inline', /<div class="version-display">/.test(home)],
-  ['assistente AI collocato nell’header', components.includes("headerRight.appendChild(assistantStatus)") && home.includes('class="ai-assistant-label"')]
+  ['assistente AI collocato nell’header', components.includes("headerRight.appendChild(assistantStatus)") && home.includes('class="ai-assistant-label"')],
+  ['account personali senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(privateAccountCss)],
+  ['azioni account personali con target tattile', privateAccountCss.includes('width: var(--touch-target-min, 44px)')]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);
