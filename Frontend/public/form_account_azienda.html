@@ -33,7 +33,7 @@
 
         <main class="base-main">
             <div id="loading-overlay" class="loading-overlay hidden">
-                <div class="flex-col-gap items-center">
+                <div class="flex-col-gap">
                     <div class="loading-spinner">
                     </div>
                     <p class="loading-text" data-t="loading_data">Caricamento dati...</p>
@@ -56,7 +56,7 @@
                         </div>
                         <!-- Tasto Rimozione Logo -->
                         <button id="btn-remove-logo" type="button" class="btn-remove-logo hidden">
-                            <span class="material-symbols-outlined text-sm">close</span>
+                            <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
                     <input type="file" id="logo-input" accept="image/*" class="hidden" />
@@ -82,7 +82,7 @@
                                 <label class="view-label" for="account-name" data-t="account_name">Nome
                                     Account</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
+                                    <span class="material-symbols-outlined">badge</span>
                                     <input id="account-name" type="text" data-t-placeholder="account_name_placeholder"
                                         autocomplete="no-autofill" spellcheck="false" class="field-input" />
                                 </div>
@@ -92,7 +92,7 @@
                                 <label class="view-label" for="account-username" data-t="username_email">Username /
                                     Email</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">person</span>
+                                    <span class="material-symbols-outlined">person</span>
                                     <input id="account-username" type="text" data-t-placeholder="username_placeholder"
                                         autocomplete="off" autocorrect="off" spellcheck="false" class="field-input" />
                                 </div>
@@ -103,7 +103,7 @@
                                     <label class="view-label" for="account-code" data-t="account_code">Account /
                                         Codice</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">pin</span>
+                                        <span class="material-symbols-outlined">pin</span>
                                         <input id="account-code" type="text" data-t-placeholder="code_placeholder"
                                             autocomplete="off" spellcheck="false" class="field-input" />
                                     </div>
@@ -112,7 +112,7 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="account-password" data-t="password">Password</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">lock</span>
+                                        <span class="material-symbols-outlined">lock</span>
                                         <input id="account-password" type="text" class="field-input base-shield"
                                             data-t-placeholder="password_placeholder" autocomplete="off"
                                             autocorrect="off" spellcheck="false" />
@@ -126,9 +126,9 @@
                             <div class="glass-field-container">
                                 <label class="view-label" for="account-url" data-t="website">Sito Web</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">language</span>
+                                    <span class="material-symbols-outlined">language</span>
                                     <input id="account-url" type="url" placeholder="https://"
-                                        class="field-input text-blue-400" autocomplete="off" />
+                                        class="field-input" autocomplete="off" />
                                 </div>
                             </div>
 
@@ -150,7 +150,7 @@
 
                     <!-- 2. Coordinate Bancarie -->
                     <section id="banking-section" class="hidden">
-                        <div class="detail-section-header justify-between">
+                        <div class="detail-section-header">
                             <div class="header-left-group">
                                 <span
                                     class="material-symbols-outlined detail-section-icon icon-accent-purple">account_balance</span>
@@ -173,7 +173,7 @@
                             <div class="glass-field-container">
                                 <label class="view-label" for="ref-name" data-t="full_name">Nome e Cognome</label>
                                 <div class="glass-field border-glow">
-                                    <span class="material-symbols-outlined ml-4 opacity-40">badge</span>
+                                    <span class="material-symbols-outlined">badge</span>
                                     <input id="ref-name" type="text" class="field-input" />
                                 </div>
                             </div>
@@ -181,14 +181,14 @@
                                 <div class="glass-field-container">
                                     <label class="view-label" for="ref-phone" data-t="phone">Telefono</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">call</span>
+                                        <span class="material-symbols-outlined">call</span>
                                         <input id="ref-phone" type="tel" class="field-input" />
                                     </div>
                                 </div>
                                 <div class="glass-field-container">
                                     <label class="view-label" for="ref-mobile" data-t="mobile">Cellulare</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">smartphone</span>
+                                        <span class="material-symbols-outlined">smartphone</span>
                                         <input id="ref-mobile" type="tel" class="field-input" />
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@
                                     <label class="view-label" for="account-numero-iscrizione"
                                         data-t="numero_iscrizione">Numero Iscrizione</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">app_registration</span>
+                                        <span class="material-symbols-outlined">app_registration</span>
                                         <input type="text" id="account-numero-iscrizione" class="field-input"
                                             placeholder="Numero Iscrizione">
                                     </div>
@@ -219,7 +219,7 @@
                                     <label class="view-label" for="account-codice-societa"
                                         data-t="codice_societa">Codice Società</label>
                                     <div class="glass-field border-glow">
-                                        <span class="material-symbols-outlined ml-4 opacity-40">id_card</span>
+                                        <span class="material-symbols-outlined">id_card</span>
                                         <input type="text" id="account-codice-societa" class="field-input"
                                             placeholder="Codice Società">
                                     </div>

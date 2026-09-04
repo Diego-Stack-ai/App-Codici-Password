@@ -619,7 +619,7 @@
     background: rgba(245, 158, 11, 0.05);
 }
 
-.text-blue-400 {
+.account-link-value {
     color: var(--accent);
 }
 
@@ -645,7 +645,7 @@
     margin-bottom: 2.5rem;
 }
 
-.justify-between {
+.detail-section-header-spread {
     justify-content: space-between;
 }
 
