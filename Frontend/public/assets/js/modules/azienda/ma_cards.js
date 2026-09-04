@@ -138,7 +138,7 @@ export function addExtraEmail(data = null) {
             autocomplete: 'new-password'
         }),
         createElement('div', { className: 'email-actions-group' }, [
-            createElement('div', { className: 'field-action-qr opacity-40' }, [
+            createElement('div', { className: 'field-action-qr field-action-muted' }, [
                 createElement('input', {
                     id: `qr_${uniqueId}`,
                     type: 'checkbox',
@@ -154,7 +154,7 @@ export function addExtraEmail(data = null) {
                 'data-stop-propagation': true,
                 onclick: () => wrapper.remove()
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined action-icon-compact', textContent: 'delete' })
             ]),
             createElement('span', {
                 id: arrowId,
@@ -235,7 +235,7 @@ export function addExtraSede(data = null) {
         className: 'email-card-header btn-toggle-section',
         'data-target': bodyId
     }, [
-        createElement('div', { className: 'flex items-center gap-3 flex-1' }, [
+        createElement('div', { className: 'location-primary-fields' }, [
             createElement('span', { className: 'material-symbols-outlined icon-accent-blue', textContent: 'location_on' }),
             createElement('input', {
                 id: `tipo_${uniqueId}`,
@@ -248,7 +248,7 @@ export function addExtraSede(data = null) {
             })
         ]),
         createElement('div', { className: 'email-actions-group' }, [
-            createElement('div', { className: 'field-action-qr opacity-40' }, [
+            createElement('div', { className: 'field-action-qr field-action-muted' }, [
                 createElement('input', {
                     id: `qr_${uniqueId}`,
                     type: 'checkbox',
@@ -265,7 +265,7 @@ export function addExtraSede(data = null) {
                 'data-stop-propagation': true,
                 onclick: () => wrapper.remove()
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
+                createElement('span', { className: 'material-symbols-outlined action-icon-compact', textContent: 'delete' })
             ]),
             createElement('span', {
                 id: arrowId,
@@ -314,7 +314,7 @@ export function createFieldBox(labelText, labelT, type, val, cls, place, placeT,
                 id: fieldId,
                 type: type,
                 name: `${cls}_${uniqueId}`,
-                className: `detail-field-input ${cls}${center ? ' text-center' : ''}${uppercase ? ' uppercase' : ''}`,
+                className: `detail-field-input ${cls}${center ? ' field-input-centered' : ''}${uppercase ? ' field-input-uppercase' : ''}`,
                 value: val || '',
                 placeholder: resolvedPlaceholder,
                 'data-t-placeholder': placeT,

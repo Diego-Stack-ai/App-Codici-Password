@@ -26,7 +26,7 @@ export async function saveAzienda() {
     const btn = document.getElementById('btn-save');
     if (btn) {
         btn.disabled = true;
-        setChildren(btn, createElement('span', { className: 'material-symbols-outlined animate-spin text-sm', textContent: 'sync' }));
+        setChildren(btn, createElement('span', { className: 'material-symbols-outlined animate-spin action-icon-compact', textContent: 'sync' }));
     }
 
     // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili

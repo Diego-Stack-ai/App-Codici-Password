@@ -573,6 +573,75 @@
     margin-top: 0.75rem;
 }
 
+.attachment-item-main {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.attachment-icon-muted {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.attachment-text-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.attachment-file-name {
+    max-width: 150px;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.8);
+    font: var(--font-label);
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.attachment-file-status {
+    color: rgba(255, 255, 255, 0.35);
+    font: var(--font-micro);
+    font-weight: var(--font-label-weight);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.form-block-spacing {
+    margin-top: 1rem;
+}
+
+.tax-identifier-input {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.referent-avatar-round {
+    border-radius: 9999px;
+}
+
+.referent-fields,
+.location-primary-fields {
+    flex: 1;
+}
+
+.field-action-muted {
+    opacity: 0.4;
+}
+
+.field-input-centered {
+    text-align: center;
+}
+
+.field-input-uppercase {
+    text-transform: uppercase;
+}
+
+.action-icon-compact {
+    font-size: var(--fs-xs);
+}
+
 .mt-2 {
     margin-top: 0.5rem;
 }

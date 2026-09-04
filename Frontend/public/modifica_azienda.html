@@ -99,7 +99,7 @@
                                 </div>
 
                                 <!-- Forma Giuridica -->
-                                <div class="glass-field-container mt-4">
+                                <div class="glass-field-container form-block-spacing">
                                     <label class="view-label" for="forma-giuridica" data-t="legal_form">Forma
                                         Giuridica</label>
                                     <div class="detail-field-box border-glow">
@@ -110,7 +110,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-grid-2 mt-4">
+                                <div class="form-grid-2 form-block-spacing">
                                     <!-- Telefono -->
                                     <div class="glass-field-container">
                                         <label class="view-label" for="telefono-azienda" data-t="phone">Telefono</label>
@@ -151,7 +151,7 @@
                                 </button>
 
                                 <div id="section-fiscal-main" class="collapsible-section hidden-content">
-                                    <div class="flex-col-gap mt-content p-4">
+                                    <div class="flex-col-gap mt-content">
                                         <div class="form-grid-responsive">
                                             <div class="glass-field-container">
                                                 <label class="view-label" for="piva" data-t="vat_number">Partita
@@ -180,7 +180,7 @@
                                                     <span
                                                         class="material-symbols-outlined icon-field-left">qr_code</span>
                                                     <input id="codice-sdi" name="company_sdi_master" type="text"
-                                                        class="detail-field-input uppercase tracking-widest"
+                                                        class="detail-field-input tax-identifier-input"
                                                         placeholder="Codice SDI" data-t-placeholder="sdi_code"
                                                         autocomplete="off" autocorrect="off" spellcheck="false"
                                                         maxlength="7" />
@@ -261,7 +261,7 @@
                                     <div class="referent-header">
                                         <div id="btn-trigger-ref-photo" class="referent-avatar-box group">
                                             <img loading="lazy" id="referente-photo-preview"
-                                                class="detail-avatar-img hidden rounded-full" src=""
+                                                class="detail-avatar-img hidden referent-avatar-round" src=""
                                                 alt="Referente Preview" />
                                             <span id="referente-photo-placeholder"
                                                 class="material-symbols-outlined icon-large opacity-placeholder">person</span>
@@ -272,7 +272,7 @@
                                         <label for="referente-photo-upload" class="sr-only">Foto Referente</label>
                                         <input type="file" id="referente-photo-upload" name="referente-photo-upload"
                                             accept="image/*" class="hidden" aria-label="Carica Foto Referente" />
-                                        <div class="flex-1">
+                                        <div class="referent-fields">
                                             <div class="glass-field-container">
                                                 <label class="view-label" for="referente-ruolo"
                                                     data-t="referent_role">Ruolo / Titolo</label>
@@ -380,7 +380,7 @@
                                         <div class="glass-card inside-card">
                                             <div class="email-card-header btn-toggle-section"
                                                 data-target="section-legale">
-                                                <div class="flex items-center gap-3 flex-1">
+                                                <div class="location-primary-fields">
                                                     <span
                                                         class="material-symbols-outlined icon-accent-blue">gavel</span>
                                                     <input id="tipo-sede-legale" name="legale_type_master" type="text"
@@ -388,7 +388,7 @@
                                                         value="Sede Legale" data-stop-propagation />
                                                 </div>
                                                 <div class="email-actions-group">
-                                                    <div class="field-action-qr opacity-40">
+                                                    <div class="field-action-qr field-action-muted">
                                                         <input id="qr-sede-legale" name="qr-sede-legale" type="checkbox"
                                                             data-qr-field="qrLegale" class="checkbox-qr" checked
                                                             data-stop-propagation
@@ -417,7 +417,7 @@
                                                             data-t="civic_number">N.</label>
                                                         <div class="detail-field-box border-glow">
                                                             <input id="civico" name="office_civic_master" type="text"
-                                                                class="detail-field-input text-center"
+                                                                class="detail-field-input field-input-centered"
                                                                 placeholder="Civico" data-t-placeholder="civic_number"
                                                                 autocomplete="off" autocorrect="off"
                                                                 spellcheck="false" />
@@ -440,7 +440,7 @@
                                                             data-t="province">Prov</label>
                                                         <div class="detail-field-box border-glow">
                                                             <input id="provincia" name="office_prov_master" type="text"
-                                                                class="detail-field-input text-center uppercase"
+                                                                class="detail-field-input field-input-centered field-input-uppercase"
                                                                 placeholder="PR" maxlength="2"
                                                                 data-t-placeholder="province_short" autocomplete="off"
                                                                 autocorrect="off" spellcheck="false" />
@@ -450,7 +450,7 @@
                                                         <label class="view-label" for="cap" data-t="cap">CAP</label>
                                                         <div class="detail-field-box border-glow">
                                                             <input id="cap" name="office_zip_master" type="tel"
-                                                                class="detail-field-input text-center" placeholder="CAP"
+                                                                class="detail-field-input field-input-centered" placeholder="CAP"
                                                                 maxlength="5" data-t-placeholder="cap"
                                                                 autocomplete="off" autocorrect="off"
                                                                 spellcheck="false" />
@@ -498,7 +498,7 @@
                                                     placeholder="PEC Aziendale" value="PEC Aziendale"
                                                     data-stop-propagation />
                                                 <div class="email-actions-group">
-                                                    <div class="field-action-qr opacity-40">
+                                                    <div class="field-action-qr field-action-muted">
                                                         <input id="qr-pec" name="qr-pec" type="checkbox"
                                                             data-qr-field="aziendaEmail" aria-label="Includi PEC nel QR"
                                                             class="checkbox-qr" checked data-stop-propagation />
@@ -506,7 +506,7 @@
                                                             QR</label>
                                                     </div>
                                                     <button type="button" class="btn-remove-item" data-stop-propagation>
-                                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                                        <span class="material-symbols-outlined action-icon-compact">delete</span>
                                                     </button>
                                                     <span id="arrow-body-pec"
                                                         class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
@@ -566,7 +566,7 @@
                                                         placeholder="Amministrazione" value="Amministrazione"
                                                         data-stop-propagation />
                                                     <div class="email-actions-group">
-                                                        <div class="field-action-qr opacity-40">
+                                                        <div class="field-action-qr field-action-muted">
                                                             <input id="qr-amministrazione" name="qr-amministrazione"
                                                                 type="checkbox" data-qr-field="adminEmail"
                                                                 aria-label="Includi Amministrazione nel QR"
@@ -577,7 +577,7 @@
                                                         <button type="button" class="btn-remove-item"
                                                             data-stop-propagation>
                                                             <span
-                                                                class="material-symbols-outlined text-sm">delete</span>
+                                                                class="material-symbols-outlined action-icon-compact">delete</span>
                                                         </button>
                                                         <span id="arrow-body-amministrazione"
                                                             class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
@@ -638,7 +638,7 @@
                                                         class="email-type-input text-purple-400" placeholder="Personale"
                                                         value="Personale" data-stop-propagation />
                                                     <div class="email-actions-group">
-                                                        <div class="field-action-qr opacity-40">
+                                                        <div class="field-action-qr field-action-muted">
                                                             <input id="qr-personale" name="qr-personale" type="checkbox"
                                                                 data-qr-field="persEmail"
                                                                 aria-label="Includi Personale nel QR"
@@ -651,7 +651,7 @@
                                                         <button type="button" class="btn-remove-item"
                                                             data-stop-propagation>
                                                             <span
-                                                                class="material-symbols-outlined text-sm">delete</span>
+                                                                class="material-symbols-outlined action-icon-compact">delete</span>
                                                         </button>
                                                         <span id="arrow-body-personale"
                                                             class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>

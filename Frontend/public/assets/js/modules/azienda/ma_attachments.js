@@ -23,7 +23,7 @@ export function renderAttachments() {
     const cards = all.map(f => {
         const type = (f.name || "").toLowerCase();
         let icon = 'description';
-        let color = 'text-white/20';
+        let color = 'attachment-icon-muted';
 
         if (type.endsWith('.pdf')) { icon = 'picture_as_pdf'; color = 'text-icon-red'; }
         else if (type.match(/\.(jpg|jpeg|png|gif|webp)$/)) { icon = 'image'; color = 'text-icon-purple'; }
@@ -31,18 +31,18 @@ export function renderAttachments() {
         return createElement('div', {
             className: 'attachment-item-edit'
         }, [
-            createElement('div', { className: 'flex items-center gap-3' }, [
+            createElement('div', { className: 'attachment-item-main' }, [
                 createElement('span', {
                     className: `material-symbols-outlined ${color}`,
                     textContent: icon
                 }),
-                createElement('div', { className: 'flex-col' }, [
+                createElement('div', { className: 'attachment-text-group' }, [
                     createElement('span', {
-                        className: 'text-[10px] font-black text-white/80 uppercase truncate max-w-[150px]',
+                        className: 'attachment-file-name',
                         textContent: f.name
                     }),
                     createElement('span', {
-                        className: 'text-[8px] font-bold text-white/20 uppercase tracking-widest',
+                        className: 'attachment-file-status',
                         textContent: f.existing ? (t('uploaded')) : (t('new'))
                     })
                 ])
@@ -52,7 +52,7 @@ export function renderAttachments() {
                 className: 'btn-remove-item',
                 onclick: () => removeAttachment(f.idx, f.existing)
             }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'close' })
+                createElement('span', { className: 'material-symbols-outlined action-icon-compact', textContent: 'close' })
             ])
         ]);
     });
