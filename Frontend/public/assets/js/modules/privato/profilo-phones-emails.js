@@ -65,8 +65,7 @@ export function renderPhonesView() {
 function _createPhoneCard(phone, idx) {
     const { qrCodeInclusions } = _getState();
     return createElement('div', {
-        className: 'form-card',
-        style: 'margin-bottom: 1.25rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: none;'
+        className: 'form-card profile-data-card'
     }, [
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'card-icon-stack' }, [
@@ -164,8 +163,7 @@ export function renderEmailsView() {
     btnAdd.onclick = () => editEmail(-1);
 
     const items = contactEmails.map((e, idx) => createElement('div', {
-        className: 'form-card',
-        style: 'margin-bottom: 1.25rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: none;'
+        className: 'form-card profile-data-card'
     }, [
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'field-header' }, [
@@ -194,7 +192,7 @@ export function renderEmailsView() {
             ]),
             e.password ? createElement('div', { className: 'field-value-row' }, [
                 createElement('span', { className: 'data-value-sub', textContent: '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022', dataset: { pwd: e.password, visible: 'false' } }),
-                createElement('div', { className: 'flex-center-row', style: 'gap: 0.5rem;' }, [
+                createElement('div', { className: 'flex-center-row profile-password-actions' }, [
                     createElement('button', {
                         className: 'btn-action-mini',
                         onclick: (event) => {
@@ -205,13 +203,12 @@ export function renderEmailsView() {
                             span.dataset.visible = !isVisible;
                             event.currentTarget.querySelector('span').textContent = isVisible ? 'visibility' : 'visibility_off';
                         }
-                    }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'visibility' })]),
+                    }, [createElement('span', { className: 'material-symbols-outlined profile-mini-action-icon', textContent: 'visibility' })]),
                     createCopyBtn(e.password)
                 ])
             ]) : createElement('span', { className: 'data-value-sub', textContent: 'No PWD' }),
             e.note ? createElement('div', {
-                className: 'note-display-lite',
-                style: 'margin-top: 8px; font-size: 11px; opacity: 0.6; color: var(--text-secondary); line-height: 1.4; border-left: 2px solid var(--accent); padding-left: 8px;'
+                className: 'note-display-lite profile-contact-note'
             }, [createElement('span', { textContent: e.note })]) : null
         ])
     ]));

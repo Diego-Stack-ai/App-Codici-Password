@@ -154,15 +154,13 @@ export function syncCustomDropdowns(container, configKey = null) {
     clearElement(menu);
     Array.from(select.options).forEach(opt => {
         const item = createElement('div', {
-            className: `base-dropdown-item ${opt.selected ? 'active' : ''}`,
+            className: `base-dropdown-item profile-dropdown-item ${opt.selected ? 'active' : ''}`,
             dataset: { value: opt.value },
-            style: 'display: flex; justify-content: space-between; align-items: center;'
         }, [
             createElement('span', { textContent: opt.textContent }),
-            (configKey && opt.value !== '') ? createElement('div', { className: 'flex-center-row', style: 'gap: 4px;' }, [
+            (configKey && opt.value !== '') ? createElement('div', { className: 'flex-center-row profile-label-actions' }, [
                 createElement('button', {
-                    className: 'btn-action-mini',
-                    style: 'width: 20px; height: 20px; border-radius: 4px; background: rgba(0,0,0,0.05); color: #000;',
+                    className: 'btn-action-mini profile-label-action profile-label-edit',
                     onclick: async (ev) => {
                         ev.stopPropagation();
                         const newName = await showInputModal('Rinomina voce', opt.value, 'Nuovo nome etichetta...');
@@ -176,10 +174,9 @@ export function syncCustomDropdowns(container, configKey = null) {
                             }
                         }
                     }
-                }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 12px;', textContent: 'edit' })]),
+                }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'edit' })]),
                 createElement('button', {
-                    className: 'btn-action-mini',
-                    style: 'width: 20px; height: 20px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); color: #ef4444;',
+                    className: 'btn-action-mini profile-label-action profile-label-delete',
                     onclick: async (ev) => {
                         ev.stopPropagation();
                         const okDel = await showConfirmModal(`Eliminare "${opt.value}"?`);
@@ -190,7 +187,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                             _modalRefreshCallback?.();
                         }
                     }
-                }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 12px;', textContent: 'delete' })])
+                }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'delete' })])
             ]) : null
         ]);
 
@@ -209,8 +206,7 @@ export function syncCustomDropdowns(container, configKey = null) {
     // Pulsante "Aggiungi voce"
     if (configKey) {
         const btnAdd = createElement('div', {
-            className: 'base-dropdown-item',
-            style: 'border-top: 1px dashed rgba(0,0,0,0.1); margin-top: 4px; color: var(--accent); font-weight: 800; display: flex; align-items: center; gap: 8px;',
+            className: 'base-dropdown-item profile-label-add',
             onclick: async (e) => {
                 e.stopPropagation();
                 const newLabel = await showInputModal('Aggiungi voce', '', 'Nome nuova etichetta...');
@@ -226,7 +222,7 @@ export function syncCustomDropdowns(container, configKey = null) {
                 }
             }
         }, [
-            createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 18px;', textContent: 'add_circle' }),
+            createElement('span', { className: 'material-symbols-outlined profile-label-add-icon', textContent: 'add_circle' }),
             createElement('span', { textContent: 'Aggiungi voce...' })
         ]);
         menu.appendChild(btnAdd);

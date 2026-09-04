@@ -65,8 +65,7 @@ export function renderAddressesView() {
 function _createAddressCard(addr, idx) {
     const { qrCodeInclusions } = _getState();
     const card = createElement('div', {
-        className: 'form-card',
-        style: 'margin-bottom: 1.25rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: none;'
+        className: 'form-card profile-data-card'
     }, [
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'card-icon-stack' }, [
@@ -198,22 +197,21 @@ export function renderDocumentiView() {
                         createElement('span', { className: 'data-value', textContent: num }),
                         createCopyBtn(num)
                     ]),
-                    subDetails.length > 0 ? createElement('span', { className: 'data-value-sub', style: 'display: block; margin-bottom: 4px;', textContent: subDetails.join(' - ') }) : null,
+                    subDetails.length > 0 ? createElement('span', { className: 'data-value-sub document-subdetails', textContent: subDetails.join(' - ') }) : null,
 
                     // Blocco Dati Accesso / Sicurezza (PIN, PUK, Username, Password)
                     (docItem.username || docItem.password || docItem.pin || docItem.puk || docItem.codice_app) ? createElement('div', {
-                        className: 'flex-col-gap-xs',
-                        style: 'margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;'
+                        className: 'flex-col-gap-xs document-security-block'
                     }, [
-                        docItem.username ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
-                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'USERNAME:' }),
-                            createElement('span', { className: 'data-value truncate', style: 'flex: 1;', textContent: docItem.username }),
+                        docItem.username ? createElement('div', { className: 'field-value-row document-security-row' }, [
+                            createElement('span', { className: 'data-label document-security-label', textContent: 'USERNAME:' }),
+                            createElement('span', { className: 'data-value truncate document-security-value', textContent: docItem.username }),
                             createCopyBtn(docItem.username)
                         ]) : null,
-                        docItem.password ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
-                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'PASSWORD:' }),
-                            createElement('span', { className: 'data-value base-shield', style: 'flex: 1;', textContent: docItem.password, dataset: { pwd: docItem.password, visible: 'false' } }),
-                            createElement('div', { className: 'flex-center-row', style: 'gap: 4px;' }, [
+                        docItem.password ? createElement('div', { className: 'field-value-row document-security-row' }, [
+                            createElement('span', { className: 'data-label document-security-label', textContent: 'PASSWORD:' }),
+                            createElement('span', { className: 'data-value base-shield document-security-value', textContent: docItem.password, dataset: { pwd: docItem.password, visible: 'false' } }),
+                            createElement('div', { className: 'flex-center-row document-mini-actions' }, [
                                 createElement('button', {
                                     className: 'btn-action-mini',
                                     onclick: (e) => {
@@ -223,52 +221,50 @@ export function renderDocumentiView() {
                                         span.dataset.visible = !isVisible;
                                         e.currentTarget.querySelector('span').textContent = isVisible ? 'visibility' : 'visibility_off';
                                     }
-                                }, [createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 16px;', textContent: 'visibility' })]),
+                                }, [createElement('span', { className: 'material-symbols-outlined document-action-icon', textContent: 'visibility' })]),
                                 createCopyBtn(docItem.password)
                             ])
                         ]) : null,
-                        docItem.pin ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
-                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'PIN:' }),
-                            createElement('span', { className: 'data-value', style: 'flex: 1;', textContent: docItem.pin }),
+                        docItem.pin ? createElement('div', { className: 'field-value-row document-security-row' }, [
+                            createElement('span', { className: 'data-label document-security-label', textContent: 'PIN:' }),
+                            createElement('span', { className: 'data-value document-security-value', textContent: docItem.pin }),
                             createCopyBtn(docItem.pin)
                         ]) : null,
-                        docItem.puk ? createElement('div', { className: 'field-value-row', style: 'margin-bottom: 4px;' }, [
-                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'PUK:' }),
-                            createElement('span', { className: 'data-value', style: 'flex: 1;', textContent: docItem.puk }),
+                        docItem.puk ? createElement('div', { className: 'field-value-row document-security-row' }, [
+                            createElement('span', { className: 'data-label document-security-label', textContent: 'PUK:' }),
+                            createElement('span', { className: 'data-value document-security-value', textContent: docItem.puk }),
                             createCopyBtn(docItem.puk)
                         ]) : null,
                         docItem.codice_app ? createElement('div', { className: 'field-value-row' }, [
-                            createElement('span', { className: 'data-label', style: 'width: 100px;', textContent: 'APP CODE:' }),
-                            createElement('span', { className: 'data-value', style: 'flex: 1;', textContent: docItem.codice_app }),
+                            createElement('span', { className: 'data-label document-security-label', textContent: 'APP CODE:' }),
+                            createElement('span', { className: 'data-value document-security-value', textContent: docItem.codice_app }),
                             createCopyBtn(docItem.codice_app)
                         ]) : null
                     ].filter(Boolean)) : null,
 
-                    createElement('div', { className: 'flex-col-gap-xs', style: 'margin-top: 10px; opacity: 0.8;' }, [
-                        docItem.data_rilascio ? createElement('div', { className: 'flex-center-row', style: 'gap: 6px;' }, [
-                            createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'history' }),
+                    createElement('div', { className: 'flex-col-gap-xs document-date-list' }, [
+                        docItem.data_rilascio ? createElement('div', { className: 'flex-center-row document-meta-row' }, [
+                            createElement('span', { className: 'material-symbols-outlined document-meta-icon', textContent: 'history' }),
                             createElement('span', { className: 'data-value-sub', textContent: `Emesso: ${formatDateToIT(docItem.data_rilascio)}` })
                         ]) : null,
-                        docItem.expiry_date ? createElement('div', { className: 'flex-center-row', style: 'gap: 6px;' }, [
-                            createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 14px;', textContent: 'event' }),
+                        docItem.expiry_date ? createElement('div', { className: 'flex-center-row document-meta-row' }, [
+                            createElement('span', { className: 'material-symbols-outlined document-meta-icon', textContent: 'event' }),
                             createElement('span', { className: 'data-value-sub', textContent: `Scadenza: ${formatDateToIT(docItem.expiry_date)}` })
                         ]) : null
                     ].filter(Boolean)),
 
-                    docItem.home_page ? createElement('div', { className: 'flex-center-row', style: 'gap: 6px; margin-top: 10px;' }, [
-                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 18px; color: var(--accent);', textContent: 'language' }),
+                    docItem.home_page ? createElement('div', { className: 'flex-center-row document-link-row' }, [
+                        createElement('span', { className: 'material-symbols-outlined document-link-icon', textContent: 'language' }),
                         createElement('a', {
                             href: docItem.home_page.startsWith('http') ? docItem.home_page : `https://${docItem.home_page}`,
                             target: '_blank',
-                            className: 'data-value-sub truncate underline',
-                            style: 'color: var(--accent);',
+                            className: 'data-value-sub truncate underline document-link',
                             textContent: docItem.home_page
                         })
                     ]) : null,
 
                     docItem.note ? createElement('p', {
-                        className: 'note-text',
-                        style: 'margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; font-style: italic;',
+                        className: 'note-text document-note',
                         textContent: docItem.note
                     }) : null
                 ])

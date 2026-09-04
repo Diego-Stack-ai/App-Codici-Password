@@ -212,18 +212,10 @@ export async function initComponents() {
                             id: 'header-logout-btn',
                             className: 'btn-icon-header',
                             onclick: async () => {
-                                if (true) {
-                                    const confirmed = await showLogoutModal();
-                                    if (confirmed) {
-
-                                        await signOut(auth);
-                                        window.location.href = 'login-v115.html';
-                                    }
-                                } else {
-                                    if (confirm(t('logout_confirm') || "Vuoi uscire?")) {
-                                        await signOut(auth);
-                                        window.location.href = 'login-v115.html';
-                                    }
+                                const confirmed = await showLogoutModal();
+                                if (confirmed) {
+                                    await signOut(auth);
+                                    window.location.href = 'login-v115.html';
                                 }
                             }
                         }, [

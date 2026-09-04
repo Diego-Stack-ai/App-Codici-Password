@@ -12,6 +12,7 @@ import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
 import { getLastCryptoError } from '../core/crypto-utils.js';
+import { showConfirmModal } from '../../ui-core.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -276,8 +277,8 @@ async function renderHeaderUser(user) {
                     if (SAFE_MODE) {
                         uName.style.cursor = 'pointer';
                         uName.title = "Clicca per resettare il Vault se vedi errori";
-                        uName.onclick = () => {
-                            if (confirm("Vuoi resettare la cache del Vault? Dovrai reinserire la Password Master.")) {
+                        uName.onclick = async () => {
+                            if (await showConfirmModal('Reset Vault', 'Vuoi resettare la cache del Vault? Dovrai reinserire la Master Password.')) {
                                 resetVault();
                             }
                         };
