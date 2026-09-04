@@ -50,12 +50,12 @@
                     <div class="base-dropdown base-dropdown-full archive-spacer-m">
                         <button id="archive-filter-btn" class="base-btn-secondary" aria-label="Filtra archivio"
                             data-t-aria="archive_all">
-                            <span id="active-context-label" class="font-black text-sm uppercase tracking-widest"
+                            <span id="active-context-label" class="archive-context-label"
                                 data-t="archive_all">Tutti
                                 gli archiviati</span>
                             <span class="material-symbols-outlined">expand_more</span>
                         </button>
-                        <div id="archive-context-menu" class="base-dropdown-menu w-full">
+                        <div id="archive-context-menu" class="base-dropdown-menu archive-context-menu">
                             <div class="base-dropdown-item active" data-value="all" data-t="archive_all">Tutti
                                 gli archiviati</div>
                             <div class="base-dropdown-item" data-value="privato" data-t="archive_private_only">
@@ -66,7 +66,7 @@
 
                     <!-- Search Input (Standardized V5.0) -->
                     <div class="search-field-box">
-                        <span class="material-symbols-outlined text-secondary">search</span>
+                        <span class="material-symbols-outlined archive-search-icon">search</span>
                         <input type="search" id="archive-search" class="search-input-field"
                             placeholder="Cerca nell'archivio..." data-t-placeholder="archive_search_placeholder">
                     </div>

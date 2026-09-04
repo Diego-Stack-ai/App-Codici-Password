@@ -69,6 +69,20 @@
 }
 
 /* --- 2. SEARCH & FILTERS --- */
+.archive-context-label {
+    font: var(--font-label);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.archive-context-menu {
+    width: 100%;
+}
+
+.archive-search-icon {
+    color: var(--text-secondary);
+}
+
 .search-field-box {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
