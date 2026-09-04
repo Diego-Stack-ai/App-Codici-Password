@@ -30,16 +30,15 @@ export function showProfileModal(title, fields, currentValues, onSave) {
         ]);
 
         // 🛡️ Trappola Anti-autofill V7.0
-        const trap = createElement('div', { className: 'anti-autofill-trap', ariaHidden: 'true', style: 'position: absolute; left: -9999px;' }, [
+        const trap = createElement('div', { className: 'anti-autofill-trap', ariaHidden: 'true' }, [
             createElement('input', { type: 'text', name: 'user_login_trap', autocomplete: 'username', tabindex: '-1' }),
             createElement('input', { type: 'password', name: 'password_trap', autocomplete: 'current-password', tabindex: '-1' })
         ]);
 
-        const form = createElement('div', { className: 'flex-col-gap', style: 'padding-bottom: 2rem;' });
+        const form = createElement('div', { className: 'flex-col-gap profile-modal-form' });
         form.appendChild(trap);
         const formScroll = createElement('div', {
-            className: 'modal-form-scroll vertical-scroll',
-            style: 'max-height: 65vh; overflow-y: auto; padding-right: 5px;'
+            className: 'modal-form-scroll vertical-scroll profile-modal-scroll'
         }, [form]);
         const inputs = {};
 
@@ -49,16 +48,15 @@ export function showProfileModal(title, fields, currentValues, onSave) {
             let valueInput;
 
             if (f.type === 'select') {
-                const hiddenSelect = createElement('select', { className: 'hidden-select', style: 'display:none;' },
+                const hiddenSelect = createElement('select', { className: 'hidden-select' },
                     (f.options || []).map(opt => createElement('option', { value: opt, textContent: opt, selected: opt === val }))
                 );
                 valueInput = hiddenSelect;
 
-                finalInputEl = createElement('div', { className: 'custom-select-wrapper', style: 'position: relative; width: 100%;' }, [
+                finalInputEl = createElement('div', { className: 'custom-select-wrapper' }, [
                     hiddenSelect,
                     createElement('div', {
                         className: 'glass-field-input custom-select-trigger',
-                        style: 'cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding-right: 0.5rem;',
                         onclick: (e) => {
                             e.stopPropagation();
                             const currentMenu = e.currentTarget.nextElementSibling;
@@ -91,10 +89,9 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                 ]);
             } else if (f.type === 'textarea' || f.key === 'note') {
                 valueInput = createElement('textarea', {
-                    className: 'glass-field-input vertical-scroll',
+                    className: 'glass-field-input vertical-scroll profile-modal-textarea',
                     value: val,
                     placeholder: f.label,
-                    style: 'width: 100%; border: none; background: transparent; color: inherit; padding: 12px 14px; resize: none; min-height: 150px; font-family: inherit; line-height: 1.6;',
                     oninput: (e) => {
                         e.target.style.height = 'auto';
                         e.target.style.height = (e.target.scrollHeight) + 'px';
@@ -113,10 +110,9 @@ export function showProfileModal(title, fields, currentValues, onSave) {
 
                 const inputEl = createElement('input', {
                     type: 'text',
-                    className: `glass-field-input ${isSensitive ? 'base-shield' : ''}`,
+                    className: `glass-field-input profile-modal-input ${isSensitive ? 'base-shield' : ''}`,
                     value: val,
                     placeholder: f.label,
-                    style: 'flex: 1; border: none; background: transparent; color: inherit; padding: 0; min-width: 0;',
                     autocomplete: 'off',
                     autocorrect: 'off',
                     spellcheck: 'false'
@@ -125,8 +121,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
 
                 if (isSensitive) {
                     const toggleBtn = createElement('button', {
-                        className: 'btn-view-toggle',
-                        style: 'background: transparent; border: none; color: var(--accent-primary, #6366f1); cursor: pointer; padding: 0 8px; display: flex; align-items: center; justify-content: center; min-width: 40px; opacity: 0.8;',
+                        className: 'btn-view-toggle profile-modal-visibility',
                         onclick: (e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -142,11 +137,10 @@ export function showProfileModal(title, fields, currentValues, onSave) {
                             }
                         }
                     }, [
-                        createElement('span', { className: 'material-symbols-outlined', style: 'font-size: 22px; color: inherit;', textContent: 'visibility_off' })
+                        createElement('span', { className: 'material-symbols-outlined profile-modal-visibility-icon', textContent: 'visibility_off' })
                     ]);
                     finalInputEl = createElement('div', {
-                        className: 'flex-center-row',
-                        style: 'width: 100%; display: flex; align-items: center;'
+                        className: 'flex-center-row profile-modal-sensitive-row'
                     }, [inputEl, toggleBtn]);
                 } else {
                     finalInputEl = inputEl;
@@ -157,8 +151,7 @@ export function showProfileModal(title, fields, currentValues, onSave) {
             const fieldContainer = createElement('div', { className: 'glass-field-container' }, [
                 createElement('label', { className: 'view-label', textContent: f.label }),
                 createElement('div', {
-                    className: 'glass-field-box',
-                    style: isLong ? 'display: block; padding: 0;' : 'padding-left: 1rem;'
+                    className: `glass-field-box ${isLong ? 'profile-modal-long-field' : 'profile-modal-short-field'}`
                 }, [finalInputEl])
             ]);
 

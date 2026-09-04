@@ -620,6 +620,92 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 /* Modal Actions Buttons Consistency (Forced Grid Alignment) */
+.anti-autofill-trap {
+    position: absolute;
+    left: -9999px;
+}
+
+.profile-modal-form {
+    padding-bottom: 2rem;
+}
+
+.profile-modal-scroll {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.hidden-select {
+    display: none;
+}
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 0.5rem;
+    cursor: pointer;
+}
+
+.profile-modal-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    line-height: 1.6;
+    resize: none;
+}
+
+.profile-modal-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+}
+
+.profile-modal-visibility {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    padding: 0 8px;
+    border: none;
+    background: transparent;
+    color: var(--accent-primary, #6366f1);
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.profile-modal-visibility-icon {
+    color: inherit;
+    font-size: var(--icon-md);
+}
+
+.profile-modal-sensitive-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.profile-modal-long-field {
+    display: block;
+    padding: 0;
+}
+
+.profile-modal-short-field {
+    padding-left: 1rem;
+}
+
 .modal-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
