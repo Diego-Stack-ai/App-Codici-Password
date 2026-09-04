@@ -166,6 +166,57 @@
     justify-content: center;
 }
 
+.header-profile-trigger,
+.header-greeting-trigger {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+}
+
+.header-profile-trigger {
+    padding: 0;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
+    background: transparent;
+    border: 0;
+}
+
+.header-profile-trigger img {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--card-border);
+    border-radius: 50%;
+}
+
+.header-greeting-trigger {
+    min-width: var(--touch-target-min, 44px);
+    min-height: var(--touch-target-min, 44px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-2, 0.5rem);
+    background: transparent;
+}
+
+.header-greeting {
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.btn-icon-header:focus-visible,
+.btn-footer-secondary:focus-visible,
+.header-profile-trigger:focus-visible,
+.header-greeting-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* --- UTILITY GESTIONE SPAZI --- */
 /* (Header e Footer Spacer HTML sono stati deprecati e rimossi nello standard V3.9) */
 
@@ -207,7 +258,6 @@
     appearance: none;
     -webkit-appearance: none;
     outline: none;
-    border: none;
     padding: 0;
     margin: 0;
 }

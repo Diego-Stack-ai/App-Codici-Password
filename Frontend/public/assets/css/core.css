@@ -57,6 +57,33 @@ body,
    ----------------------- */
 :root {
     color-scheme: light;
+    /* Fondazioni condivise per spazi, forme, controlli, livelli e movimento. */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --control-height-sm: 2.5rem;
+    --control-height-md: 2.75rem;
+    --control-height-lg: 3.25rem;
+    --touch-target-min: 2.75rem;
+    --content-max: 72.5rem;
+    --modal-max: 26.25rem;
+    --z-content: 10;
+    --z-bars: 50;
+    --z-dropdown: 1000;
+    --z-modal: 1100;
+    --z-toast: 1200;
+    --motion-fast: 160ms;
+    --motion-normal: 240ms;
+    --motion-slow: 360ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
     --premium-border-width: 1.5px;
     --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
 
@@ -94,6 +121,17 @@ body,
     /* BRAND PALETTE EXTENSIONS */
     --color-purple: #a855f7;
     /* violet-500 — badge condivisione, account azienda */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 /* -----------------------

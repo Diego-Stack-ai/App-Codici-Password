@@ -91,8 +91,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     right: -8px;
     background: rgba(0, 0, 0, 0.82);
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -498,8 +498,8 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .btn-edit-section {
-    width: 32px;
-    height: 32px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     border-radius: 10px;
     display: flex;
     align-items: center;

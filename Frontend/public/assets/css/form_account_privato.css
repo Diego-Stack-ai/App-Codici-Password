@@ -173,8 +173,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     margin-right: 0.5rem;
     background: transparent;
     border: none;
@@ -427,14 +427,14 @@ input:checked+.base-switch::after {
 }
 
 .logo-placeholder-text {
-    font-size: 8px;
+    font: var(--font-caption);
     text-transform: uppercase;
     font-weight: var(--font-label-weight);
 }
 
 .btn-remove-logo {
-    width: 36px;
-    height: 36px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     border-radius: 10px;
     background: transparent;
     border: none;
@@ -553,7 +553,7 @@ input:checked+.base-switch::after {
     /* verde erba soft */
     color: #22c55e;
     /* verde erba */
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     cursor: pointer;
 }
@@ -593,7 +593,7 @@ input:checked+.base-switch::after {
 }
 
 .bank-title {
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: #22c55e;
@@ -639,7 +639,7 @@ input:checked+.base-switch::after {
 
 .bank-cards-title,
 .bank-cards-label {
-    font-size: 9px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: var(--text-secondary);
@@ -693,7 +693,7 @@ input:checked+.base-switch::after {
 }
 
 .card-entry-label {
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: #34d399;
@@ -722,7 +722,7 @@ input:checked+.base-switch::after {
 }
 
 .card-title {
-    font-size: 10px;
+    font: var(--font-caption);
     font-weight: var(--font-strong-weight);
     text-transform: uppercase;
     color: #34d399;
@@ -826,7 +826,7 @@ input:checked+.base-switch::after {
 }
 
 .suggestion-email {
-    font-size: 10px;
+    font: var(--font-caption);
     color: var(--text-secondary);
     margin: 0;
 }

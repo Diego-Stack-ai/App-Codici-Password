@@ -6,10 +6,15 @@
         // Se la pagina richiede il Dark Forzato (es. Login/Registrazione), non toccare nulla
         if (document.documentElement.classList.contains('protocol-forced-dark')) {
             document.documentElement.classList.add('dark');
+            document.documentElement.dataset.themeMode = 'security-dark';
+            document.documentElement.dataset.themeResolved = 'dark';
             return;
         }
 
-        const localTheme = localStorage.getItem('theme') || 'auto';
+        const savedTheme = localStorage.getItem('theme');
+        const localTheme = ['light', 'dark', 'auto'].includes(savedTheme) ? savedTheme : 'auto';
+        const AUTO_LIGHT_START = 8;
+        const AUTO_DARK_START = 21;
         let isDark = false;
 
         if (localTheme === 'dark') {
@@ -28,7 +33,7 @@
 
                 const hour = parseInt(italyTime);
                 // Giorno: 08:00 - 20:59. Sera/Notte: 21:00 - 07:59
-                isDark = (hour < 8 || hour >= 21);
+                isDark = (hour < AUTO_LIGHT_START || hour >= AUTO_DARK_START);
             } catch (e) {
                 // Fallback se Intl fallisce
                 isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -40,6 +45,8 @@
         } else {
             document.documentElement.classList.remove('dark');
         }
+        document.documentElement.dataset.themeMode = localTheme;
+        document.documentElement.dataset.themeResolved = isDark ? 'dark' : 'light';
     } catch (e) {
         console.warn('Theme init failed', e);
     }

@@ -3,38 +3,48 @@
    ========================================================================== */
 
 :root {
-    /* SCALA TIPOGRAFICA PREMIUM (Design Tokens) */
-    --fs-micro: 0.75rem;
+    /* Fondazioni tipografiche: ruoli semantici, non dimensioni di pagina. */
+    --font-family-base: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --text-caption: 0.75rem;
+    --text-label: 0.875rem;
+    --text-body: 1rem;
+    --text-card-title: 1.125rem;
+    --text-section-title: 1.25rem;
+    --text-page-title: 1.5rem;
+
+    /* Alias compatibili: le pagine esistenti continuano a funzionare. */
+    --fs-micro: var(--text-caption);
     /* 12px - Menu compatti, Badge, FAB labels */
     --fs-xs: 0.85rem;
     /* 13.6px - Label campi, Placeholder, Testi secondari */
-    --fs-sm: 0.875rem;
+    --fs-sm: var(--text-label);
     /* 14px - Testi descrittivi, info-text, note compatte */
-    --fs-base: 1rem;
+    --fs-base: var(--text-body);
     /* 16px - Testo standard, Input */
-    --fs-md: 1.1rem;
+    --fs-md: var(--text-card-title);
     /* 17.6px - Titoli Card, Pulsanti principali */
-    --fs-lg: 1.25rem;
+    --fs-lg: var(--text-section-title);
     /* 20px - Titoli di sezione, Titoli Modali */
-    --fs-xl: 1.5rem;
+    --fs-xl: var(--text-page-title);
     /* 24px - Hero titles (Pagina) */
 
     /* SEMANTIC TOKENS (V5.0) - Font + Weight + Size */
-    --font-h1: var(--font-strong-weight) var(--fs-xl)/var(--lh-tight) 'Manrope', sans-serif;
-    --font-h2: var(--font-title-weight) var(--fs-lg)/var(--lh-tight) 'Manrope', sans-serif;
-    --font-card-title: var(--font-title-weight) var(--fs-md)/var(--lh-tight) 'Manrope', sans-serif;
-    --font-label: var(--font-label-weight) var(--fs-xs)/var(--lh-tight) 'Manrope', sans-serif;
-    --font-input: var(--font-weight-normal) var(--fs-base)/var(--lh-normal) 'Manrope', sans-serif;
-    --font-button: var(--font-title-weight) var(--fs-xs)/var(--lh-tight) 'Manrope', sans-serif;
-    --font-badge: var(--font-strong-weight) var(--fs-micro)/1 'Manrope', sans-serif;
-    --font-micro: var(--font-weight-medium) var(--fs-micro)/var(--lh-tight) 'Manrope', sans-serif;
+    --font-h1: var(--font-strong-weight) var(--fs-xl)/var(--lh-tight) var(--font-family-base);
+    --font-h2: var(--font-title-weight) var(--fs-lg)/var(--lh-tight) var(--font-family-base);
+    --font-card-title: var(--font-title-weight) var(--fs-md)/var(--lh-tight) var(--font-family-base);
+    --font-label: var(--font-label-weight) var(--fs-sm)/var(--lh-tight) var(--font-family-base);
+    --font-input: var(--font-weight-normal) var(--fs-base)/var(--lh-normal) var(--font-family-base);
+    --font-button: var(--font-title-weight) var(--fs-sm)/var(--lh-tight) var(--font-family-base);
+    --font-badge: var(--font-strong-weight) var(--fs-micro)/1 var(--font-family-base);
+    --font-micro: var(--font-weight-normal) var(--fs-micro)/var(--lh-tight) var(--font-family-base);
 
     /* FONT WEIGHTS (Phase 2) */
     --font-weight-normal: 400;
-    --font-weight-medium: 600;
+    /* Il file locale fornisce 400 e 700: evitiamo pesi sintetizzati 600/800/900. */
+    --font-weight-medium: 400;
     --font-label-weight: 700;
-    --font-title-weight: 800;
-    --font-strong-weight: 900;
+    --font-title-weight: 700;
+    --font-strong-weight: 700;
 
     /* ICON SYSTEM (Phase 3) */
     --icon-xs: 16px;
@@ -84,7 +94,10 @@
 */
 html,
 body {
-    font-family: 'Manrope', sans-serif !important;
+    font-family: var(--font-family-base) !important;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    font-synthesis: none;
 }
 
 /* Estendiamo ai contenitori principali e ai controlli di input */
@@ -97,7 +110,7 @@ button,
 label,
 select,
 textarea {
-    font-family: 'Manrope', sans-serif !important;
+    font-family: var(--font-family-base) !important;
 }
 
 /* 

@@ -75,7 +75,7 @@ html[data-i18n="loading"] body {
     background: var(--card-bg);
     backdrop-filter: blur(20px);
     border: 1px solid var(--card-border);
-    border-radius: 24px;
+    border-radius: var(--radius-xl, 24px);
     padding: 2rem 1.5rem;
     width: 100%;
     box-shadow: 0 25px 50px -12px var(--card-shadow);
@@ -138,7 +138,8 @@ html[data-i18n="loading"] body {
     width: 100%;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
-    border-radius: 16px;
+    border-radius: var(--radius-lg, 16px);
+    min-height: var(--control-height-lg, 52px);
     padding: 1rem 1.25rem;
     color: var(--input-text);
     font: var(--font-input);
@@ -147,7 +148,8 @@ html[data-i18n="loading"] body {
     box-sizing: border-box;
 }
 
-.input:focus {
+.input:focus,
+.input:focus-visible {
     background: var(--input-bg-focus);
     border-color: var(--accent);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
@@ -169,6 +171,7 @@ html[data-i18n="loading"] body {
     font-size: var(--fs-xs);
     text-align: left;
     cursor: pointer;
+    min-height: var(--touch-target-min, 44px);
 }
 
 .remember-device input {
@@ -202,9 +205,9 @@ html[data-i18n="loading"] body {
     background: var(--accent);
     color: white;
     border: none;
-    border-radius: 16px;
+    border-radius: var(--radius-lg, 16px);
+    min-height: var(--control-height-lg, 52px);
     font: var(--font-button);
-    font-size: var(--fs-xs);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -249,8 +252,8 @@ html[data-i18n="loading"] body {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--card-border);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -299,6 +302,7 @@ html[data-i18n="loading"] body {
     cursor: pointer;
     font: var(--font-label);
     font-size: var(--fs-xs);
+    min-height: var(--touch-target-min, 44px);
 }
 
 .lang-option:hover {
@@ -320,6 +324,13 @@ html[data-i18n="loading"] body {
     color: var(--link-color);
     text-decoration: none;
     transition: color 0.2s;
+    min-height: var(--touch-target-min, 44px);
+    align-items: center;
+    justify-content: center;
+}
+
+.link-forgot {
+    display: flex;
 }
 
 .link-forgot:hover,
@@ -360,6 +371,7 @@ html[data-i18n="loading"] body {
     font-size: var(--fs-xs);
     line-height: 1.25;
     cursor: pointer;
+    min-height: var(--touch-target-min, 44px);
     transition: border-color 0.2s, background-color 0.2s, color 0.2s;
 }
 
@@ -414,18 +426,20 @@ html[data-i18n="loading"] body {
 }
 
 .password-wrapper .input[type="password"] {
-    padding-right: 3rem;
+    padding-right: 3.75rem;
     /* spazio per il toggle */
 }
 
 .toggle-password {
     position: absolute;
-    right: 0.75rem;
+    right: 0.25rem;
     top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
-    padding: 0.25rem;
+    padding: 0;
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
     cursor: pointer;
     color: var(--text-secondary);
     z-index: 2;
@@ -458,8 +472,10 @@ html[data-i18n="loading"] body {
     margin: 0.25rem 0 1rem;
     padding: 0;
     list-style: none;
-    font-size: 0.78rem;
+    font: var(--font-caption);
+    line-height: 1.45;
     color: var(--text-secondary, #94a3b8);
+    text-align: left;
 }
 
 .password-suggestion-btn {
@@ -468,11 +484,11 @@ html[data-i18n="loading"] body {
     gap: 0.4rem;
     margin-top: 0.55rem;
     padding: 0.45rem 0;
+    min-height: var(--touch-target-min, 44px);
     border: 0;
     background: transparent;
     color: #60a5fa;
-    font: inherit;
-    font-size: 0.82rem;
+    font: var(--font-label);
     cursor: pointer;
 }
 
@@ -491,4 +507,19 @@ html[data-i18n="loading"] body {
 
 .password-requirements li.is-valid::before {
     content: '✓';
+}
+
+@media (max-width: 600px) {
+    .vault {
+        padding-inline: var(--space-3, 0.75rem);
+    }
+
+    .card {
+        padding: var(--space-6, 1.5rem) var(--space-5, 1.25rem);
+    }
+
+    .lang-selector-container {
+        top: max(var(--space-3, 0.75rem), env(safe-area-inset-top));
+        right: max(var(--space-3, 0.75rem), env(safe-area-inset-right));
+    }
 }
