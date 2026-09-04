@@ -144,6 +144,9 @@ export async function initComponents() {
                 } else if (path.endsWith('modifica_azienda.html')) {
                     const id = urlParams.get('id');
                     fallbackHref = id ? `dati_azienda.html?id=${id}` : 'lista_aziende.html';
+                    // Modifica con id e nuova azienda senza id hanno due parent
+                    // distinti e deterministici: non dipendono dalla history.
+                    preferHistory = false;
                 } else if (path.endsWith('profilo_privato.html')) {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('account_privati.html')) {
