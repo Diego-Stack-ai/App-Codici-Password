@@ -203,6 +203,20 @@
     color: var(--text-primary);
 }
 
+.detail-email-secondary {
+    opacity: 0.6;
+}
+
+.detail-planning-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3, 0.75rem);
+}
+
+.detail-template-text {
+    margin: 0;
+}
+
 .detail-list-item-meta {
     font-size: var(--fs-micro);
     font-weight: var(--font-strong-weight);
