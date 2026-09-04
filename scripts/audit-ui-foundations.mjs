@@ -51,7 +51,8 @@ const requiredSignals = [
   ['tema security-dark', theme.includes("themeMode = 'security-dark'")],
   ['header senza elemento fisso annidato', components.includes('setChildren(headerPh, headerContent)') && !components.includes("createElement('header', { className: 'base-header' }")],
   ['saluto Home con tipografia semantica', components.includes("className: 'header-greeting'") && !components.includes('text-[9px]')],
-  ['versione Home senza stile inline', /<div class="version-display">/.test(home)]
+  ['versione Home senza stile inline', /<div class="version-display">/.test(home)],
+  ['assistente AI collocato nell’header', components.includes("headerRight.appendChild(assistantStatus)") && home.includes('class="ai-assistant-label"')]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);

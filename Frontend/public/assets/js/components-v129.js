@@ -159,6 +159,12 @@ export async function initComponents() {
 
                 // Home Button / Logout
                 if (isHome) {
+                    const assistantStatus = document.getElementById('ai-assistant-status');
+                    if (assistantStatus) {
+                        assistantStatus.classList.add('header-ai-status');
+                        headerRight.appendChild(assistantStatus);
+                    }
+
                     headerRight.appendChild(
                         createElement('button', {
                             id: 'header-logout-btn',
