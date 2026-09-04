@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Codici & Password — Proposta UI</title>
+  <link rel="stylesheet" href="assets/css/core_fonts.css">
+  <link rel="stylesheet" href="assets/css/ui-preview.css">
+</head>
+<body>
+  <div class="preview-toolbar" aria-label="Controlli anteprima">
+    <div class="preview-brand"><span class="brand-mark">C</span><span><strong>Proposta UI</strong><small>Branch separato · dati dimostrativi</small></span></div>
+    <div class="preview-controls">
+      <div class="segmented" aria-label="Dimensione anteprima">
+        <button class="preview-size is-active" data-size="desktop" type="button"><span class="material-symbols-outlined">desktop_windows</span><span>PC</span></button>
+        <button class="preview-size" data-size="tablet" type="button"><span class="material-symbols-outlined">tablet</span><span>Tablet</span></button>
+        <button class="preview-size" data-size="phone" type="button"><span class="material-symbols-outlined">smartphone</span><span>Telefono</span></button>
+      </div>
+      <button class="icon-button" id="theme-toggle" type="button" aria-label="Cambia tema"><span class="material-symbols-outlined">light_mode</span></button>
+    </div>
+  </div>
+
+  <main class="preview-stage">
+    <div class="device-frame" data-size="desktop">
+      <div class="app-shell">
+        <header class="app-header">
+          <button class="avatar" type="button" aria-label="Profilo Diego">DS</button>
+          <div class="header-copy"><span>Buonasera</span><strong>Diego</strong></div>
+          <div class="header-status"><span class="status-dot"></span><span>Vault protetta</span></div>
+          <button class="icon-button app-logout" type="button" aria-label="Esci"><span class="material-symbols-outlined">logout</span></button>
+        </header>
+
+        <nav class="app-nav" aria-label="Sezioni demo">
+          <button class="nav-item is-active" data-view="home" type="button"><span class="material-symbols-outlined">home</span><span>Home</span></button>
+          <button class="nav-item" data-view="list" type="button"><span class="material-symbols-outlined">calendar_month</span><span>Scadenze</span><b>3</b></button>
+          <button class="nav-item" data-view="detail" type="button"><span class="material-symbols-outlined">key</span><span>Dettaglio</span></button>
+          <button class="nav-item" data-view="vault" type="button"><span class="material-symbols-outlined">shield_lock</span><span>Sblocco Vault</span></button>
+        </nav>
+
+        <section class="app-content">
+          <div class="app-view is-active" data-panel="home">
+            <div class="page-heading"><div><span class="eyebrow">PANORAMICA</span><h1>Tutto sotto controllo</h1><p>Le informazioni importanti, senza rumore visivo.</p></div><button class="primary-button" type="button"><span class="material-symbols-outlined">add</span>Nuovo elemento</button></div>
+            <div class="summary-grid">
+              <article class="summary-card accent-blue"><div class="card-icon"><span class="material-symbols-outlined">lock</span></div><div><span>Account privati</span><strong>24</strong><small>2 aggiornati questa settimana</small></div></article>
+              <article class="summary-card accent-green"><div class="card-icon"><span class="material-symbols-outlined">apartment</span></div><div><span>Aziende</span><strong>6</strong><small>18 account collegati</small></div></article>
+              <article class="summary-card accent-amber"><div class="card-icon"><span class="material-symbols-outlined">event_upcoming</span></div><div><span>In scadenza</span><strong>3</strong><small>Nei prossimi 30 giorni</small></div></article>
+              <article class="summary-card accent-red"><div class="card-icon"><span class="material-symbols-outlined">warning</span></div><div><span>Da verificare</span><strong>1</strong><small>Richiede attenzione</small></div></article>
+            </div>
+            <div class="dashboard-grid">
+              <article class="panel"><div class="panel-heading"><div><span class="eyebrow">PROSSIME SCADENZE</span><h2>Promemoria</h2></div><button class="text-button" data-view="list" type="button">Vedi tutte</button></div><div class="compact-list"><div class="compact-row"><span class="date-tile"><b>12</b><small>SET</small></span><span><strong>Assicurazione Hyundai i10</strong><small>Veicolo · Diego</small></span><span class="tag amber">8 giorni</span></div><div class="compact-row"><span class="date-tile"><b>19</b><small>SET</small></span><span><strong>Revisione Peugeot 208</strong><small>Veicolo · Azienda</small></span><span class="tag blue">15 giorni</span></div><div class="compact-row"><span class="date-tile"><b>03</b><small>OTT</small></span><span><strong>Rinnovo PEC</strong><small>Servizio · Civilaro</small></span><span class="tag neutral">29 giorni</span></div></div></article>
+              <article class="panel security-panel"><div class="panel-heading"><div><span class="eyebrow">SICUREZZA</span><h2>Protezione attiva</h2></div><span class="material-symbols-outlined security-shield">verified_user</span></div><div class="security-score"><strong>Ottima</strong><span>2FA, Windows Hello e blocco automatico sono attivi.</span></div><div class="progress"><i></i></div><button class="secondary-button" type="button">Controlla impostazioni</button></article>
+            </div>
+          </div>
+
+          <div class="app-view" data-panel="list">
+            <div class="page-heading"><div><span class="eyebrow">SCADENZE</span><h1>Promemoria e rinnovi</h1><p>Un elenco più leggibile, con priorità immediatamente riconoscibili.</p></div><button class="primary-button" type="button"><span class="material-symbols-outlined">add</span>Nuova scadenza</button></div>
+            <div class="filter-bar"><label class="search"><span class="material-symbols-outlined">search</span><input type="search" placeholder="Cerca una scadenza"></label><div class="chips"><button class="chip is-active">Tutte <b>6</b></button><button class="chip">Urgenti <b>1</b></button><button class="chip">Prossime <b>3</b></button></div></div>
+            <div class="deadline-list">
+              <button class="deadline-item urgent" data-view="detail" type="button"><span class="priority-marker"></span><span class="deadline-main"><span class="item-icon"><span class="material-symbols-outlined">directions_car</span></span><span><strong>Assicurazione Hyundai i10</strong><small>Veicolo · Diego</small></span></span><span class="deadline-date"><strong>12 settembre</strong><small>tra 8 giorni</small></span><span class="tag red">Urgente</span><span class="material-symbols-outlined chevron">chevron_right</span></button>
+              <button class="deadline-item" data-view="detail" type="button"><span class="priority-marker"></span><span class="deadline-main"><span class="item-icon"><span class="material-symbols-outlined">car_repair</span></span><span><strong>Revisione auto Peugeot 208</strong><small>Veicolo · Azienda</small></span></span><span class="deadline-date"><strong>19 settembre</strong><small>tra 15 giorni</small></span><span class="tag amber">In arrivo</span><span class="material-symbols-outlined chevron">chevron_right</span></button>
+              <button class="deadline-item" data-view="detail" type="button"><span class="priority-marker"></span><span class="deadline-main"><span class="item-icon"><span class="material-symbols-outlined">mail_lock</span></span><span><strong>Rinnovo PEC Civilaro</strong><small>Servizio digitale</small></span></span><span class="deadline-date"><strong>3 ottobre</strong><small>tra 29 giorni</small></span><span class="tag blue">Pianificata</span><span class="material-symbols-outlined chevron">chevron_right</span></button>
+            </div>
+          </div>
+
+          <div class="app-view" data-panel="detail">
+            <button class="back-link" data-view="list" type="button"><span class="material-symbols-outlined">arrow_back</span>Torna alle scadenze</button>
+            <div class="detail-hero"><div class="detail-symbol"><span class="material-symbols-outlined">directions_car</span></div><div><span class="eyebrow">VEICOLO · URGENTE</span><h1>Assicurazione Hyundai i10</h1><p>Scade il 12 settembre 2026 · tra 8 giorni</p></div><button class="secondary-button" type="button"><span class="material-symbols-outlined">edit</span>Modifica</button></div>
+            <div class="detail-grid"><article class="panel"><span class="eyebrow">INFORMAZIONI</span><dl class="data-list"><div><dt>Intestatario</dt><dd>Diego</dd></div><div><dt>Targa</dt><dd>AB 123 CD</dd></div><div><dt>Compagnia</dt><dd>Compagnia dimostrativa</dd></div><div><dt>Promemoria</dt><dd>7 giorni prima</dd></div></dl></article><article class="panel"><span class="eyebrow">NOTIFICHE</span><div class="recipient"><span class="avatar small">DS</span><span><strong>Diego</strong><small>Email e notifica push</small></span><span class="tag green">Attive</span></div><button class="secondary-button full" type="button"><span class="material-symbols-outlined">person_add</span>Aggiungi destinatario</button></article></div>
+          </div>
+
+          <div class="app-view vault-view" data-panel="vault">
+            <div class="demo-note"><span class="material-symbols-outlined">info</span>Questa è una simulazione grafica: non viene richiesta né salvata alcuna password.</div>
+            <button class="primary-button" id="open-vault-modal" type="button"><span class="material-symbols-outlined">lock_open</span>Apri popup Vault</button>
+          </div>
+        </section>
+
+        <footer class="app-footer"><span>Codici & Password</span><span class="footer-security"><span class="status-dot"></span>Sessione protetta</span><span>Proposta 01</span></footer>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="vault-modal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="vault-title">
+      <button class="modal-close icon-button" type="button" aria-label="Chiudi"><span class="material-symbols-outlined">close</span></button>
+      <div class="modal-icon"><span class="material-symbols-outlined">shield_lock</span></div>
+      <span class="eyebrow">SBLOCCO SICURO</span><h2 id="vault-title">Sblocca la tua Vault</h2><p>Usa Windows Hello oppure inserisci la Master Password. La password rimane sul dispositivo.</p>
+      <button class="hello-button" type="button"><span class="material-symbols-outlined">face</span><span><strong>Usa Windows Hello</strong><small>Riconoscimento facciale consigliato</small></span><span class="material-symbols-outlined">arrow_forward</span></button>
+      <div class="divider"><span>oppure</span></div>
+      <label class="field-label" for="demo-master">Master Password</label><div class="field"><span class="material-symbols-outlined">key</span><input id="demo-master" type="text" inputmode="none" readonly placeholder="Inserisci la Master Password"><button class="field-action" type="button" aria-label="Mostra password"><span class="material-symbols-outlined">visibility</span></button></div>
+      <div class="modal-actions"><button class="secondary-button modal-cancel" type="button">Annulla</button><button class="primary-button" type="button">Sblocca Vault</button></div>
+      <small class="privacy-note"><span class="material-symbols-outlined">encrypted</span>La chiave di cifratura non viene mai salvata in chiaro.</small>
+    </section>
+  </div>
+  <script src="assets/js/ui-preview.js"></script>
+</body>
+</html>
