@@ -83,6 +83,7 @@ const APP_SHELL = [
     'assets/css/accesso.css?v=1.2.31',
     'assets/css/vault-assistant.css?v=1.2.31',
     'assets/js/theme-init.js',
+    'assets/js/home-bootstrap.js?v=1.2.31',
     'assets/js/login-entry.js?v=1.2.31',
     'assets/js/main-v129.js',
     'assets/js/components-v129.js',

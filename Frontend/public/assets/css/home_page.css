@@ -2,6 +2,11 @@
    HOME PAGE (Matrix & Dashboard) - V5.0 Standard
    ========================================================================== */
 
+/* Nasconde anche il badge creato da componenti rimasti in una vecchia cache. */
+.app-version-badge {
+    display: none !important;
+}
+
 /* 
    NOTE: Matrix Grid and Card Core styles moved to core_pagine.css 
    This file contains only home-specific layout and effects.

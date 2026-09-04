@@ -40,6 +40,8 @@ const resetPasswordModule = await read('Frontend/public/assets/js/modules/auth/r
 const pushManager = await read('Frontend/public/assets/js/modules/shared/push-manager.js');
 const cryptoUtils = await read('Frontend/public/assets/js/modules/core/crypto-utils.js');
 const coreUi = await read('Frontend/public/assets/js/ui-core-v129.js');
+const homeBootstrap = await read('Frontend/public/assets/js/home-bootstrap.js');
+const homeCss = await read('Frontend/public/assets/css/home_page.css');
 const attachmentSecurity = await read('Frontend/public/assets/js/modules/shared/attachment-security.js');
 const qrCodeUtils = await read('Frontend/public/assets/js/modules/shared/qr_code_utils.js');
 const privateAccountForm = await read('Frontend/public/assets/js/modules/privato/form_account_privato.js');
@@ -49,10 +51,11 @@ assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versi
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
 assert.match(homeHtml, /data-app-version/, 'La home non usa la versione applicativa centrale');
 assert.match(homeHtml, new RegExp(`data-app-version>${configuredVersion.replace(/\./g, '\\.') }<`), 'La home non mostra una versione di fallback coerente');
-assert.match(homeHtml, /\.app-version-badge \{ display: none !important; \}/, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
+assert.match(homeHtml, new RegExp(`home-bootstrap\\.js\\?v=${assetVersion}`), 'La protezione bootstrap della home non è versionata');
+assert.match(homeCss, /\.app-version-badge\s*\{[^}]*display:\s*none\s*!important/s, 'Il vecchio badge header non è neutralizzato durante l’aggiornamento cache');
 assert.match(homeHtml, /main-v129\.js/, 'La home non forza il caricamento della release corrente');
 assert.match(homeHtml, /data-i18n="ready"/, 'La home può restare invisibile se il bootstrap JavaScript fallisce');
-assert.match(homeHtml, /Object\.defineProperty\(root, 'textContent'/, 'La home non è protetta dai componenti rimasti nella vecchia cache');
+assert.match(homeBootstrap, /Object\.defineProperty\(root, 'textContent'/, 'La home non è protetta dai componenti rimasti nella vecchia cache');
 assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene ancora la vecchia versione hardcoded');
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
 assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');

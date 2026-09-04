@@ -160,6 +160,10 @@
     transform: scale(0.97);
 }
 
+.modal-confirm-icon {
+    font-size: var(--icon-sm);
+}
+
 .hero-title {
     font: var(--font-h1);
     line-height: var(--lh-tight);
