@@ -9,6 +9,8 @@ let inlineEvents = 0;
 let inlineScripts = 0;
 let inlineStyleBlocks = 0;
 let duplicateIds = 0;
+let legacyBootstraps = 0;
+let tailwindRuntimes = 0;
 
 for (const name of htmlFiles) {
     const html = await readFile(new URL(name, publicDir), 'utf8');
@@ -28,11 +30,17 @@ for (const name of htmlFiles) {
     inlineEvents += eventMatches.length;
     inlineScripts += scriptMatches.length;
     inlineStyleBlocks += styleBlockMatches.length;
+    const legacyBootstrapMatches = html.match(/assets\/js\/main\.js(?:[?"'])/gi) ?? [];
+    const tailwindRuntimeMatches = html.match(/(?:cdn\.tailwindcss\.com|tailwind(?:\.min)?\.js)/gi) ?? [];
+    legacyBootstraps += legacyBootstrapMatches.length;
+    tailwindRuntimes += tailwindRuntimeMatches.length;
 
     recordMatches(/\sstyle\s*=/gi, 'stile inline');
     recordMatches(/\son[a-z]+\s*=/gi, 'evento inline');
     recordMatches(/<script(?![^>]*\bsrc\s*=)[^>]*>/gi, 'script incorporato');
     recordMatches(/<style\b[^>]*>/gi, 'blocco style incorporato');
+    recordMatches(/assets\/js\/main\.js(?:[?"'])/gi, 'bootstrap legacy');
+    recordMatches(/(?:cdn\.tailwindcss\.com|tailwind(?:\.min)?\.js)/gi, 'runtime Tailwind');
 
     const ids = [...html.matchAll(/\sid=["']([^"']+)["']/gi)].map((match) => match[1]);
     const seen = new Set();
@@ -51,7 +59,9 @@ console.table({
     inlineEvents,
     inlineScripts,
     inlineStyleBlocks,
-    duplicateIds
+    duplicateIds,
+    legacyBootstraps,
+    tailwindRuntimes
 });
 
 assert.equal(violations.length, 0, `Violazioni purezza HTML:\n${violations.join('\n')}`);
