@@ -6,7 +6,7 @@
 
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core.js';
-import { db, auth } from '../../firebase-config.js?v=1.1.8';
+import { db, auth } from '../../firebase-config.js?v=1.2.31';
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query, runTransaction } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';

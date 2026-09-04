@@ -1,4 +1,4 @@
-import { db } from '../../firebase-config.js?v=1.1.8';
+import { db } from '../../firebase-config.js?v=1.2.31';
 import { collection, doc, getDoc, getDocs } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js';
 
 const text = value => typeof value === 'string' ? value.trim() : '';

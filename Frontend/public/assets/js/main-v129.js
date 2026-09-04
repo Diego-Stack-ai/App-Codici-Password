@@ -26,7 +26,7 @@ import { initComponents } from './components-v129.js'; // Imports components sys
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.1.8';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.31';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
@@ -39,7 +39,7 @@ import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './
 import { showSecuritySetupModal } from './modules/core/security-setup.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.25-ai12';
+import * as Pages from './pages-init.js?v=1.2.31';
 import { ensureMasterKey } from './modules/core/security-manager.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION } from './modules/core/password-policy.js';
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";

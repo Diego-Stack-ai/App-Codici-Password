@@ -8,7 +8,7 @@
  *   profilo_privato.js → profilo-ui.js → firebase, ui-core, dom-utils
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.1.8';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.31';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, clearElement } from '../../dom-utils.js';

@@ -7,7 +7,7 @@
  * - Moduli Legacy -> V5.0: Importa dinamicamente il file e chiama la funzione init esportata.
  */
 
-import { initComponents } from './components.js?v=1.2.5';
+import { initComponents } from './components.js?v=1.2.31';
 
 import { LOG } from './logger.js';
 // --- 1. MODULI V5.0 (Puri/Passivi) ---
@@ -24,7 +24,7 @@ export async function initRegistrati() {
 }
 
 export async function initIndex() {
-    const module = await import('./modules/auth/login.js?v=1.2.24-ai4');
+    const module = await import('./modules/auth/login.js?v=1.2.31');
     await module.initLogin();
 }
 
@@ -40,7 +40,7 @@ export async function initImpostaNuovaPassword() {
 
 export async function initHomePage(user) {
     LOG("[Router] Loading Home V5.0...");
-    const module = await import('./modules/home/home.js?v=1.2.25-ai12');
+    const module = await import('./modules/home/home.js?v=1.2.31');
     await module.initHomePage(user);
 }
 
@@ -50,12 +50,12 @@ export async function initArchivioAccount(user) {
 }
 
 export async function initProfiloPrivato(user) {
-    const module = await import('./modules/privato/profilo_privato.js?v=1.2.24-ai3');
+    const module = await import('./modules/privato/profilo_privato.js?v=1.2.31');
     await module.initProfiloPrivato(user);
 }
 
 export async function initImpostazioni(user) {
-    const module = await import('./modules/settings/impostazioni.js?v=1.2.24-ai2');
+    const module = await import('./modules/settings/impostazioni.js?v=1.2.31');
     await module.initImpostazioni(user);
 }
 
@@ -105,7 +105,7 @@ export async function initScadenze(user) {
 }
 
 export async function initAggiungiScadenza(user) {
-    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=2.4');
+    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=1.2.31');
     await module.initAggiungiScadenza(user);
 }
 

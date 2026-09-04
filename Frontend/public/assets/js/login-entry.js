@@ -1,5 +1,5 @@
 /** Bootstrap minimale della pagina di accesso. */
-import { initLogin } from './modules/auth/login.js?v=1.3.3-ai5';
+import { initLogin } from './modules/auth/login.js?v=1.2.31';
 import { loadLanguage, getCurrentLanguage, applyGlobalTranslations } from './translations.js';
 
 document.addEventListener('DOMContentLoaded', async () => {

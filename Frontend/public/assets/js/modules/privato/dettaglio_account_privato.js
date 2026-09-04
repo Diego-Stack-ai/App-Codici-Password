@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.1.8';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.31';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import {
@@ -18,7 +18,7 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { showToast, showConfirmModal } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
-import { initComponents } from '../../components.js?v=1.2.3';
+import { initComponents } from '../../components.js?v=1.2.31';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';

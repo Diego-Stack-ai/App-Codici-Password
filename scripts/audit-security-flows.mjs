@@ -26,6 +26,7 @@ const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settin
 ]);
 
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
+const assetVersion = configuredVersion?.replace(/^v/, '').replace(/\./g, '\\.');
 const passwordPolicy = await read('Frontend/public/assets/js/modules/core/password-policy.js');
 const registration = await read('Frontend/public/assets/js/modules/auth/registrati.js');
 const registrationHtml = await read('Frontend/public/registrati.html');
@@ -69,16 +70,16 @@ assert.match(security, /if \(_unlockPromise && !forceReload\) return _unlockProm
 assert.match(serviceWorker, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
 assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.endsWith\('\.css'\)/s, 'Gli asset applicativi non usano una strategia network-first coerente');
 assert.doesNotMatch(serviceWorker, /ignoreSearch:\s*true/, 'Il fallback PWA può mescolare release con query-versione differenti');
-assert.match(serviceWorker, /assets\/css\/home_page\.css\?v=5\.0/, 'Lo stile della home non è precaricato per l’avvio PWA');
-assert.match(serviceWorker, /assets\/css\/accesso\.css\?v=5\.0/, 'Lo stile del login non è precaricato per l’avvio PWA');
-assert.match(loginHtml, /login-entry\.js\?v=1\.3\.3-ai5/, 'Il login non usa il bootstrap Auth dedicato aggiornato');
+assert.match(serviceWorker, new RegExp(`assets/css/home_page\\.css\\?v=${assetVersion}`), 'Lo stile della home non è precaricato per l’avvio PWA');
+assert.match(serviceWorker, new RegExp(`assets/css/accesso\\.css\\?v=${assetVersion}`), 'Lo stile del login non è precaricato per l’avvio PWA');
+assert.match(loginHtml, new RegExp(`login-entry\\.js\\?v=${assetVersion}`), 'Il login non usa il bootstrap Auth dedicato aggiornato');
 assert.match(loginHtml, /<form id="login-form">/, 'Il campo password non è contenuto in un form semantico');
 assert.match(loginHtml, /type="submit" id="login-submit-btn"/, 'Il pulsante Accedi non invia il form in modo nativo');
 assert.doesNotMatch(loginHtml, /assets\/js\/main\.js/, 'Il login carica ancora il router completo dell’app privata');
 assert.doesNotMatch(firebaseConfig, /const appCheck = initializeAppCheck/, 'App Check viene ancora avviato durante il login');
 assert.match(firebaseConfig, /export function enableAppCheck/, 'App Check non è disponibile in modalità lazy');
 assert.match(main, /firebaseRuntime\.enableAppCheck\?\.\(\)/, 'App Check lazy non è compatibile con una configurazione precedente in cache');
-assert.match(main, /firebase-config\.js\?v=1\.1\.8/, 'Il bootstrap non bypassa la vecchia configurazione Firebase in cache');
+assert.match(main, new RegExp(`firebase-config\\.js\\?v=${assetVersion}`), 'Il bootstrap non usa la configurazione Firebase della release corrente');
 assert.match(firebaseConfig, /getApps\(\)\.length \? getApp\(\)/, 'Firebase App non viene riutilizzata tra moduli versionati');
 assert.match(firebaseConfig, /db = getFirestore\(app\)/, 'Firestore già inizializzato non viene riutilizzato');
 assert.doesNotMatch(loginHtml, /caches\.keys|registration\?\.update/, 'Il login modifica ancora cache o Service Worker durante il caricamento');
