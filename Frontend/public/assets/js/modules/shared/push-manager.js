@@ -1,4 +1,4 @@
-import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.31';
+import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.32';
 import { doc, getDoc, serverTimestamp, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
 import { deleteToken, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";

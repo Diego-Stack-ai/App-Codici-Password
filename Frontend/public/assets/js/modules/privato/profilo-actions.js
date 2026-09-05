@@ -20,7 +20,7 @@
  */
 
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { auth, db } from '../../firebase-config.js?v=1.2.31';
+import { auth, db } from '../../firebase-config.js?v=1.2.32';
 import { showToast } from '../../ui-core.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';

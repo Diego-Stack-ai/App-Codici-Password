@@ -4,11 +4,11 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js, modularizzazione.
  */
 
-import { login, completeTotpLogin, checkAuthState } from '../../auth.js?v=1.2.31';
-import { initComponents } from '../../components.js?v=1.2.31';
+import { login, completeTotpLogin, checkAuthState } from '../../auth.js?v=1.2.32';
+import { initComponents } from '../../components.js?v=1.2.32';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core.js?v=1.2.31';
+import { showToast, showInputModal } from '../../ui-core.js?v=1.2.32';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
 
 /**

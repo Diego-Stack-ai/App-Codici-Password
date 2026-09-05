@@ -5,7 +5,7 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.31';
+import { db, storage } from '../../firebase-config.js?v=1.2.32';
 import {
     doc, collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";

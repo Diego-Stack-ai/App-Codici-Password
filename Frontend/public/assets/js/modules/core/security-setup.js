@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js con import corretti.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.31';
+import { db } from '../../firebase-config.js?v=1.2.32';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { ensureMasterKey, enableBiometricUnlock } from './security-manager.js';
