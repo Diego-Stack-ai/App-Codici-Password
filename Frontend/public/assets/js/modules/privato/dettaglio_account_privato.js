@@ -4,7 +4,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.41';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.42';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy, addDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -13,10 +13,11 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.41';
+import { initComponents } from '../../components-v129.js?v=1.2.42';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
+import { getOfflineAttachment, hasOfflineAttachment, removeOfflineAttachment, saveOfflineAttachment } from '../shared/offline-attachment-store.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -790,13 +791,13 @@ async function loadAttachments() {
         const snap = await getDocs(q);
 
         const attachments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderAttachments(attachments);
+        await renderAttachments(attachments);
     } catch (e) {
         logError("LoadAttachments", e);
     }
 }
 
-function renderAttachments(list) {
+async function renderAttachments(list) {
     const container = document.getElementById('attachments-list');
     if (!container) return;
 
@@ -810,7 +811,7 @@ function renderAttachments(list) {
         return;
     }
 
-    const items = list.map(a => {
+    const items = await Promise.all(list.map(async a => {
         const type = (a.type || "").toLowerCase();
         let icon = 'description';
         let color = 'text-blue-400/40';
@@ -822,6 +823,7 @@ function renderAttachments(list) {
         const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '---';
         const size = (a.size / (1024 * 1024)).toFixed(2);
 
+        const availableOffline = a.storagePath ? await hasOfflineAttachment(ownerId, a.storagePath) : false;
         return createElement('div', {
             className: 'attachment-item animate-in slide-in-from-left-2'
         }, [
@@ -832,9 +834,15 @@ function renderAttachments(list) {
                 createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                 createElement('div', { className: 'attachment-meta' }, [
                     createElement('span', { className: 'attachment-name', textContent: a.name }),
-                    createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
+                    createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}${availableOffline ? ' • Offline' : ' • Solo online'}` })
                 ])
             ]),
+            a.encryption && a.storagePath ? createElement('button', {
+                type: 'button',
+                className: 'btn-delete-attachment',
+                title: availableOffline ? 'Rimuovi dal dispositivo' : 'Rendi disponibile offline',
+                onclick: async (e) => { e.stopPropagation(); await toggleOfflineAttachment(a, availableOffline); }
+            }, [createElement('span', { className: 'material-symbols-outlined', textContent: availableOffline ? 'offline_pin' : 'download_for_offline' })]) : null,
             !isReadOnly ? createElement('button', {
                 type: 'button',
                 className: 'btn-delete-attachment',
@@ -843,7 +851,7 @@ function renderAttachments(list) {
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
             ]) : null
         ]);
-    });
+    }));
 
     setChildren(container, items);
 }
@@ -856,12 +864,31 @@ async function openAttachment(attachment) {
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureMasterKey();
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const cached = await getOfflineAttachment(ownerId, attachment.storagePath);
+        const bytes = cached || await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         openDecryptedAttachment(clear, attachment);
     } catch (error) {
         logError('OpenEncryptedAttachment', error);
         showToast('Impossibile aprire l’allegato cifrato.', 'error');
+    }
+}
+
+async function toggleOfflineAttachment(attachment, availableOffline) {
+    try {
+        if (availableOffline) {
+            await removeOfflineAttachment(ownerId, attachment.storagePath);
+            showToast('Copia offline rimossa dal dispositivo', 'success');
+        } else {
+            if (!navigator.onLine) throw new Error('OFFLINE_DOWNLOAD_REQUIRES_NETWORK');
+            const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+            await saveOfflineAttachment(ownerId, attachment, bytes);
+            showToast('Allegato disponibile offline', 'success');
+        }
+        await loadAttachments();
+    } catch (error) {
+        logError('ToggleOfflineAttachment', error);
+        showToast(error.message === 'OFFLINE_ATTACHMENT_QUOTA' ? 'Spazio offline esaurito (limite 100 MB)' : 'Impossibile aggiornare la copia offline', 'error');
     }
 }
 
@@ -876,6 +903,7 @@ async function deleteAttachment(att) {
         }
         const docRef = doc(db, "users", ownerId, "accounts", currentId, "attachments", att.id);
         await deleteDoc(docRef);
+        if (att.storagePath) await removeOfflineAttachment(ownerId, att.storagePath);
 
         showToast("Allegato eliminato", "success");
         await loadAttachments();

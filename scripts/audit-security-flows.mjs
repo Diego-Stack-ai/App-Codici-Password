@@ -29,6 +29,7 @@ const assetVersion = configuredVersion?.replace(/^v/, '').replace(/\./g, '\\.');
 const offlineAssets = await read('Frontend/public/offline-assets.js');
 const loginEntry = await read('Frontend/public/assets/js/login-entry.js');
 const offlineSync = await read('Frontend/public/assets/js/offline-sync.js');
+const offlineAttachmentStore = await read('Frontend/public/assets/js/modules/shared/offline-attachment-store.js');
 const passwordPolicy = await read('Frontend/public/assets/js/modules/core/password-policy.js');
 const registration = await read('Frontend/public/assets/js/modules/auth/registrati.js');
 const registrationHtml = await read('Frontend/public/registrati.html');
@@ -87,6 +88,9 @@ assert.match(firebaseConfig, /localCache:\s*persistentLocalCache/, 'La persisten
 assert.doesNotMatch(main, /await\s+prepareOfflineData\(/, 'La sincronizzazione offline blocca ancora il rendering della pagina');
 assert.match(offlineSync, /requestIdleCallback/, 'La sincronizzazione secondaria non attende un periodo di inattività');
 assert.match(offlineSync, /syncWithConcurrency/, 'Gli account aziendali vengono ancora richiesti tutti contemporaneamente');
+assert.match(offlineAttachmentStore, /encrypted-attachments/, 'Archivio cifrato allegati offline assente');
+assert.match(offlineAttachmentStore, /MAX_OFFLINE_TOTAL_BYTES\s*=\s*100\s*\*\s*1024\s*\*\s*1024/, 'Limite complessivo allegati offline assente');
+assert.doesNotMatch(offlineAttachmentStore, /decrypt|originalType|originalName/, 'L’archivio offline conserva metadati o dati decifrati');
 assert.match(loginHtml, new RegExp(`login-entry\\.js\\?v=${assetVersion}`), 'Il login non usa il bootstrap Auth dedicato aggiornato');
 assert.match(loginHtml, /<form id="login-form">/, 'Il campo password non è contenuto in un form semantico');
 assert.match(loginHtml, /type="submit" id="login-submit-btn"/, 'Il pulsante Accedi non invia il form in modo nativo');

@@ -5,14 +5,14 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.41';
+import { db } from '../../firebase-config.js?v=1.2.42';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { collection, updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.41';
+import { initComponents } from '../../components-v129.js?v=1.2.42';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 
