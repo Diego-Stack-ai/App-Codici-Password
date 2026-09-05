@@ -23,3 +23,34 @@
     max-height: calc(100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom)));
     overscroll-behavior: contain;
 }
+
+html.vault-assistant-open,
+body.vault-assistant-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+body.vault-assistant-open {
+    position: fixed;
+    left: 0;
+    width: 100%;
+}
+
+.vault-assistant-backdrop {
+    overscroll-behavior: none;
+    touch-action: none;
+}
+
+.vault-assistant-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.vault-assistant-conversation {
+    min-height: 0;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}

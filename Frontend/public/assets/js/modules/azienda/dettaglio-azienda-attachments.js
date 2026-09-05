@@ -6,7 +6,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.39';
+import { db, storage } from '../../firebase-config.js?v=1.2.40';
 import { doc, collection, addDoc, query, orderBy, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

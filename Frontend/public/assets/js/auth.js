@@ -1,9 +1,9 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db } from './firebase-config.js?v=1.2.39';
+import { auth, db } from './firebase-config.js?v=1.2.40';
 import { LOG } from './logger.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, sendEmailVerification, setPersistence, browserLocalPersistence, browserSessionPersistence, getMultiFactorResolver, TotpMultiFactorGenerator } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showToast } from './ui-core-v129.js?v=1.2.39';
+import { showToast } from './ui-core-v129.js?v=1.2.40';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 

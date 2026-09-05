@@ -6,6 +6,10 @@ function element(tag, className, text = '') {
 }
 
 export function createAssistantUI({ onAsk, onClose }) {
+    const pageScrollY = window.scrollY;
+    document.documentElement.classList.add('vault-assistant-open');
+    document.body.classList.add('vault-assistant-open');
+    document.body.style.top = `-${pageScrollY}px`;
     const backdrop = element('div', 'vault-assistant-backdrop');
     const panel = element('section', 'vault-assistant-panel');
     panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); panel.setAttribute('aria-label', 'Agente Codex');
@@ -118,5 +122,12 @@ export function createAssistantUI({ onAsk, onClose }) {
     backdrop.addEventListener('click', event => { if (event.target === backdrop) onClose(); });
     panel.append(header, conversation, searchRow, status); backdrop.append(panel); document.body.append(backdrop);
     queueMicrotask(() => input.focus());
-    return { destroy: () => { window.speechSynthesis?.cancel(); backdrop.remove(); } };
+    return { destroy: () => {
+        window.speechSynthesis?.cancel();
+        backdrop.remove();
+        document.documentElement.classList.remove('vault-assistant-open');
+        document.body.classList.remove('vault-assistant-open');
+        document.body.style.removeProperty('top');
+        window.scrollTo(0, pageScrollY);
+    } };
 }

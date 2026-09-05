@@ -4,14 +4,14 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.39';
+import { auth, db } from '../../firebase-config.js?v=1.2.40';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { doc, collection, query, where, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.39';
+import { initComponents } from '../../components-v129.js?v=1.2.40';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---

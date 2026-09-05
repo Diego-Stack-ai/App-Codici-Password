@@ -6,7 +6,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Init: initSharingModule(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.39';
+import { auth, db } from '../../firebase-config.js?v=1.2.40';
 import { LOG } from '../../logger.js';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
