@@ -93,13 +93,47 @@ function paintSelection() {
     context.strokeRect(selection.x, selection.y, selection.width, selection.height);
     context.fillStyle = '#fff';
     context.strokeStyle = '#1768d5';
+    const cssScale = preview.width / preview.getBoundingClientRect().width;
     for (const point of selectionCorners()) {
         context.beginPath();
-        context.arc(point.x, point.y, Math.max(10, preview.width / 90), 0, Math.PI * 2);
+        context.arc(point.x, point.y, 18 * cssScale, 0, Math.PI * 2);
         context.fill();
         context.stroke();
     }
     context.restore();
+}
+
+function paintLoupe(point) {
+    const context = preview.getContext('2d');
+    const cssScale = preview.width / preview.getBoundingClientRect().width;
+    const radius = 54 * cssScale;
+    const gap = 22 * cssScale;
+    const center = {
+        x: point.x < preview.width / 2 ? Math.min(preview.width - radius, point.x + radius + gap) : Math.max(radius, point.x - radius - gap),
+        y: point.y < preview.height / 2 ? Math.min(preview.height - radius, point.y + radius + gap) : Math.max(radius, point.y - radius - gap)
+    };
+    const zoom = 2.5;
+    const sourceSize = (radius * 2) / zoom;
+    context.save();
+    context.beginPath();
+    context.arc(center.x, center.y, radius, 0, Math.PI * 2);
+    context.clip();
+    context.drawImage(workingImage, point.x - sourceSize / 2, point.y - sourceSize / 2, sourceSize, sourceSize,
+        center.x - radius, center.y - radius, radius * 2, radius * 2);
+    context.strokeStyle = '#fff';
+    context.lineWidth = 2 * cssScale;
+    context.beginPath();
+    context.moveTo(center.x - 12 * cssScale, center.y);
+    context.lineTo(center.x + 12 * cssScale, center.y);
+    context.moveTo(center.x, center.y - 12 * cssScale);
+    context.lineTo(center.x, center.y + 12 * cssScale);
+    context.stroke();
+    context.restore();
+    context.strokeStyle = '#1768d5';
+    context.lineWidth = 4 * cssScale;
+    context.beginPath();
+    context.arc(center.x, center.y, radius, 0, Math.PI * 2);
+    context.stroke();
 }
 
 function selectionCorners() {
@@ -115,8 +149,10 @@ function selectionCorners() {
 preview.addEventListener('pointerdown', event => {
     event.preventDefault();
     const point = pointerPosition(event);
-    const hitRadius = Math.max(35, preview.width / 35);
+    const cssScale = preview.width / preview.getBoundingClientRect().width;
+    const hitRadius = 38 * cssScale;
     resizeCorner = selectionCorners().find(corner => Math.hypot(corner.x - point.x, corner.y - point.y) <= hitRadius)?.name || null;
+    if (selection && !resizeCorner) return;
     selectionAtStart = selection ? { ...selection } : null;
     dragStart = point;
     preview.setPointerCapture(event.pointerId);
@@ -139,9 +175,11 @@ preview.addEventListener('pointermove', event => {
             width: Math.abs(end.x - dragStart.x), height: Math.abs(end.y - dragStart.y) };
     }
     paintSelection();
+    if (resizeCorner) paintLoupe(end);
     cropButton.disabled = selection.width < 80 || selection.height < 80;
 });
 function finishPointer() {
+    if (selection) paintSelection();
     dragStart = null;
     resizeCorner = null;
     selectionAtStart = null;
