@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Prototipo importatore card</title>
+    <link rel="stylesheet" href="prototype.css">
+</head>
+<body>
+    <main>
+        <h1>Importatore card — laboratorio</h1>
+        <p class="notice">Esperimento locale: nessun dato viene salvato o inviato al vault.</p>
+        <label>Tipo di contenuto
+            <select id="profile">
+                <option value="business">Biglietto da visita</option>
+                <option value="payment">Carta di pagamento</option>
+                <option value="code">QR / codice</option>
+                <option value="generic">Card generica</option>
+            </select>
+        </label>
+        <label>Fotografa o scegli un’immagine
+            <input id="image-input" type="file" accept="image/*" capture="environment">
+        </label>
+        <img id="preview" alt="Anteprima immagine" hidden>
+        <button id="analyze" type="button" disabled>Analizza</button>
+        <p id="status" role="status">In attesa di un’immagine.</p>
+        <section id="result" hidden>
+            <h2>Proposta da verificare</h2>
+            <textarea id="fields" spellcheck="false"></textarea>
+            <p>I campi restano modificabili. Questo prototipo non dispone di alcun pulsante di salvataggio.</p>
+        </section>
+    </main>
+    <script type="module" src="dist/prototype.js"></script>
+</body>
+</html>

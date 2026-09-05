@@ -38,3 +38,18 @@ Eseguire i parser con:
 node --test experiments/card-importer/card-parser.test.mjs
 ```
 
+## Seconda prova isolata
+
+`prototype.html` permette di fotografare o selezionare una card, scegliere il profilo
+e ottenere una proposta modificabile. Non può salvare dati. QR usa prima l'API nativa
+e poi ZXing; OCR usa Tesseract soltanto dopo la pressione di **Analizza**.
+
+Il prototipo non è pubblicato e il bundle generato resta ignorato da Git:
+
+```text
+npm run build:card-importer-prototype
+```
+
+Prima di una possibile integrazione servono ancora prove su immagini reali, soprattutto
+su iPhone, e la scelta di come distribuire localmente worker e modello italiano senza
+dipendenze di rete durante il riconoscimento.
