@@ -4,8 +4,9 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.36';
+import { auth, db, enableAppCheck } from '../../firebase-config.js?v=1.2.36';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app-check.js";
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
@@ -135,6 +136,7 @@ function initAppPresentation() {
         try {
             const idToken = await auth.currentUser?.getIdToken();
             if (!idToken) throw new Error('Sessione non disponibile.');
+            const appCheckToken = await getAppCheckToken(enableAppCheck(), false);
             const controller = new AbortController();
             const timeout = window.setTimeout(() => controller.abort(), 20000);
             const objectPath = encodeURIComponent('app-media/presentazione/codici-password-v2.mp4');
@@ -143,7 +145,10 @@ function initAppPresentation() {
                 response = await fetch(
                     `https://firebasestorage.googleapis.com/v0/b/appcodici-password.firebasestorage.app/o/${objectPath}?alt=media`,
                     {
-                        headers: { Authorization: `Firebase ${idToken}` },
+                        headers: {
+                            Authorization: `Firebase ${idToken}`,
+                            'X-Firebase-AppCheck': appCheckToken.token
+                        },
                         cache: 'no-store',
                         signal: controller.signal
                     }
