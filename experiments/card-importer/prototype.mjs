@@ -41,11 +41,31 @@ async function recognizeText() {
         }
     });
     try {
-        const output = await worker.recognize(preview);
+        const output = await worker.recognize(preprocessImage(preview));
         return { text: output.data.text, elapsedMs: Math.round(performance.now() - started) };
     } finally {
         await worker.terminate();
     }
+}
+
+function preprocessImage(image) {
+    const maxSide = 1800;
+    const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(image.naturalWidth * scale);
+    canvas.height = Math.round(image.naturalHeight * scale);
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let index = 0; index < pixels.data.length; index += 4) {
+        const gray = (pixels.data[index] * .299) + (pixels.data[index + 1] * .587) + (pixels.data[index + 2] * .114);
+        const contrasted = Math.max(0, Math.min(255, ((gray - 128) * 1.35) + 128));
+        pixels.data[index] = contrasted;
+        pixels.data[index + 1] = contrasted;
+        pixels.data[index + 2] = contrasted;
+    }
+    context.putImageData(pixels, 0, 0);
+    return canvas;
 }
 
 analyze.addEventListener('click', async () => {
