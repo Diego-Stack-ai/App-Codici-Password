@@ -3,14 +3,14 @@
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.34';
+import { auth, db } from '../../firebase-config.js?v=1.2.35';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.34';
+import { initComponents } from '../../components-v129.js?v=1.2.35';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
 // --- STATE ---
