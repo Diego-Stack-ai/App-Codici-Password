@@ -71,7 +71,6 @@ export async function editSection(sectionId, ctx) {
         });
     }
 }
-
 /**
  * Apre il modal per aggiungere o modificare un indirizzo.
  * @param {number} idx - Indice indirizzo, -1 per nuovo
@@ -239,5 +238,4 @@ export async function editUtility(addrIdx, uIdx, ctx) {
         renderAddressesView();
     });
 }
-
 

@@ -25,7 +25,6 @@ export function initAddressesDocsModule(getState, callbacks) {
     _getState = getState;
     _callbacks = callbacks;
 }
-
 // ─── Helper locale ────────────────────────────────────────────────────────────
 
 function createCopyBtn(text) {
@@ -278,5 +277,4 @@ export function renderDocumentiView() {
     });
     setChildren(container, [btnAdd, ...items]);
 }
-
 

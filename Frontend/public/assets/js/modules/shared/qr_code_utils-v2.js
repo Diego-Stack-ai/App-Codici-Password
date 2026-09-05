@@ -16,7 +16,6 @@ export async function ensureQRCodeLib() {
         });
     }
 }
-
 /**
  * Builds a vCard string from user data and inclusion config.
  * @param {Object} userData - User data object
@@ -136,5 +135,4 @@ export function renderQRCode(container, text, options = {}) {
         }
     }
 }
-
 

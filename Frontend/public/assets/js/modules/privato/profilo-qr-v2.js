@@ -25,7 +25,6 @@ export function initQRModule(getState, renders) {
     _getState = getState;
     _renders = renders;
 }
-
 export function setupQRToggles() {
     const toggles = [
         { id: 'qr-toggle-nome', field: 'nome' },
@@ -129,4 +128,3 @@ function _showEnlargedQR(vcard) {
     };
     renderQRCode(document.getElementById('qr-enlarged'), vcard, { width: qrSize, height: qrSize, colorDark: '#000000', colorLight: '#E3F2FD', correctLevel: 3 });
 }
-

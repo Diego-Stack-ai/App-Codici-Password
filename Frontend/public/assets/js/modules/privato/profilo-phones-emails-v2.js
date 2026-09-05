@@ -26,7 +26,6 @@ export function initPhonesEmailsModule(getState, callbacks) {
     _getState = getState;
     _callbacks = callbacks;
 }
-
 // ─── Helper locale ────────────────────────────────────────────────────────────
 
 function createCopyBtn(text) {
@@ -273,5 +272,4 @@ export async function editEmail(idx) {
         }
     });
 }
-
 

@@ -10,7 +10,6 @@
     width: 100%;
     gap: 1rem;
 }
-
 .section-title-wrapper {
     display: flex;
     align-items: center;
@@ -1225,5 +1224,4 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     .profile-widget:has(.profile-widget-body) { grid-column: 1 / -1; }
     .profile-widget-header { align-items: flex-start; flex-wrap: wrap; }
 }
-
 
