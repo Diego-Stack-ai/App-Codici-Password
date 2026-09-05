@@ -4,10 +4,9 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
+import { auth, db } from '../../firebase-config.js?v=1.2.36';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
@@ -134,8 +133,26 @@ function initAppPresentation() {
         playButton.disabled = true;
         playButton.querySelector('span:last-child').textContent = 'Caricamento…';
         try {
-            const bytes = await getBytes(ref(storage, 'app-media/presentazione/codici-password-v2.mp4'));
-            const blob = new Blob([bytes], { type: 'video/mp4' });
+            const idToken = await auth.currentUser?.getIdToken();
+            if (!idToken) throw new Error('Sessione non disponibile.');
+            const controller = new AbortController();
+            const timeout = window.setTimeout(() => controller.abort(), 20000);
+            const objectPath = encodeURIComponent('app-media/presentazione/codici-password-v2.mp4');
+            let response;
+            try {
+                response = await fetch(
+                    `https://firebasestorage.googleapis.com/v0/b/appcodici-password.firebasestorage.app/o/${objectPath}?alt=media`,
+                    {
+                        headers: { Authorization: `Firebase ${idToken}` },
+                        cache: 'no-store',
+                        signal: controller.signal
+                    }
+                );
+            } finally {
+                window.clearTimeout(timeout);
+            }
+            if (!response.ok) throw new Error(`Download non disponibile (${response.status}).`);
+            const blob = await response.blob();
             presentationObjectUrl = URL.createObjectURL(blob);
             const video = document.createElement('video');
             video.src = presentationObjectUrl;
