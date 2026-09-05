@@ -38,3 +38,11 @@ ben fotografate. Sulle carte deteriorate deve limitarsi ai dati chiaramente legg
 Il laboratorio dispone ora di rotazione manuale, ritaglio tattile, ridimensionamento,
 controllo qualità e soglia minima di affidabilità. Prima dell'integrazione occorre una
 terza prova dal browser iPhone; l'OCR non è ancora pronto per la produzione.
+
+## Primo collaudo iPhone
+
+Il primo collaudo ha rilevato tre problemi: selezione iniziale non ridimensionabile,
+selettore iOS orientato soltanto alla fotocamera e avvio OCR non riuscito. La seconda
+Preview introduce quattro maniglie sugli angoli, separa “Scatta foto” da “Scegli dalla
+libreria”, pubblica esplicitamente il worker OCR e mostra il dettaglio tecnico degli
+errori nel solo laboratorio. La correzione non costituisce ancora accettazione del motore.

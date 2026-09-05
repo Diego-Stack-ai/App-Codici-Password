@@ -45,7 +45,9 @@ e ottenere una proposta modificabile. Non può salvare dati. QR usa prima l'API 
 e poi ZXing; OCR usa Tesseract soltanto dopo la pressione di **Analizza**.
 
 Prima dell'analisi l'utente può ruotare la fotografia e delimitare con il dito o il
-mouse la sola card. Il laboratorio ridimensiona l'immagine, valuta risoluzione,
+mouse la sola card. Le quattro maniglie permettono di correggere il rettangolo senza
+ridisegnarlo. Fotocamera e libreria immagini hanno comandi separati su iPhone.
+Il laboratorio ridimensiona l'immagine, valuta risoluzione,
 contrasto e riflessi e mostra un indicatore di qualità. Se qualità o affidabilità OCR
 sono inferiori alla soglia minima, non propone campi e restituisce “non rilevato”.
 

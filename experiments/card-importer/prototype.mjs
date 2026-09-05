@@ -4,6 +4,7 @@ import { classifyCode, parseBusinessCard, parseGenericCard, parsePaymentCard } f
 
 const byId = id => document.getElementById(id);
 const input = byId('image-input');
+const cameraInput = byId('camera-input');
 const editor = byId('editor');
 const preview = byId('preview');
 const analyze = byId('analyze');
@@ -16,6 +17,9 @@ const cropButton = byId('crop');
 let workingImage = null;
 let selection = null;
 let dragStart = null;
+let resizeCorner = null;
+let selectionAtStart = null;
+let lastFile = null;
 
 function copyCanvas(source) {
     const copy = document.createElement('canvas');
@@ -38,9 +42,10 @@ function setWorkingImage(source) {
     showQuality();
 }
 
-function loadSelectedFile() {
-    const file = input.files?.[0];
+function loadSelectedFile(event) {
+    const file = event?.currentTarget?.files?.[0] || lastFile;
     if (!file) return;
+    lastFile = file;
     const image = new Image();
     const url = URL.createObjectURL(file);
     image.onload = () => {
@@ -55,7 +60,8 @@ function loadSelectedFile() {
     image.src = url;
 }
 input.addEventListener('change', loadSelectedFile);
-byId('reset').addEventListener('click', loadSelectedFile);
+cameraInput.addEventListener('change', loadSelectedFile);
+byId('reset').addEventListener('click', () => loadSelectedFile());
 
 function pointerPosition(event) {
     const box = preview.getBoundingClientRect();
@@ -78,24 +84,55 @@ function paintSelection() {
     context.strokeStyle = '#4da3ff';
     context.lineWidth = Math.max(3, preview.width / 400);
     context.strokeRect(selection.x, selection.y, selection.width, selection.height);
+    context.fillStyle = '#fff';
+    context.strokeStyle = '#1768d5';
+    for (const point of selectionCorners()) {
+        context.beginPath();
+        context.arc(point.x, point.y, Math.max(10, preview.width / 90), 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+    }
     context.restore();
 }
 
+function selectionCorners() {
+    if (!selection) return [];
+    return [
+        { name: 'nw', x: selection.x, y: selection.y },
+        { name: 'ne', x: selection.x + selection.width, y: selection.y },
+        { name: 'sw', x: selection.x, y: selection.y + selection.height },
+        { name: 'se', x: selection.x + selection.width, y: selection.y + selection.height }
+    ];
+}
+
 preview.addEventListener('pointerdown', event => {
-    dragStart = pointerPosition(event);
+    const point = pointerPosition(event);
+    const hitRadius = Math.max(35, preview.width / 35);
+    resizeCorner = selectionCorners().find(corner => Math.hypot(corner.x - point.x, corner.y - point.y) <= hitRadius)?.name || null;
+    selectionAtStart = selection ? { ...selection } : null;
+    dragStart = point;
     preview.setPointerCapture(event.pointerId);
 });
 preview.addEventListener('pointermove', event => {
     if (!dragStart) return;
     const end = pointerPosition(event);
-    selection = {
-        x: Math.min(dragStart.x, end.x), y: Math.min(dragStart.y, end.y),
-        width: Math.abs(end.x - dragStart.x), height: Math.abs(end.y - dragStart.y)
-    };
+    if (resizeCorner && selectionAtStart) {
+        const opposite = {
+            nw: { x: selectionAtStart.x + selectionAtStart.width, y: selectionAtStart.y + selectionAtStart.height },
+            ne: { x: selectionAtStart.x, y: selectionAtStart.y + selectionAtStart.height },
+            sw: { x: selectionAtStart.x + selectionAtStart.width, y: selectionAtStart.y },
+            se: { x: selectionAtStart.x, y: selectionAtStart.y }
+        }[resizeCorner];
+        selection = { x: Math.min(opposite.x, end.x), y: Math.min(opposite.y, end.y),
+            width: Math.abs(opposite.x - end.x), height: Math.abs(opposite.y - end.y) };
+    } else {
+        selection = { x: Math.min(dragStart.x, end.x), y: Math.min(dragStart.y, end.y),
+            width: Math.abs(end.x - dragStart.x), height: Math.abs(end.y - dragStart.y) };
+    }
     paintSelection();
     cropButton.disabled = selection.width < 80 || selection.height < 80;
 });
-preview.addEventListener('pointerup', () => { dragStart = null; });
+preview.addEventListener('pointerup', () => { dragStart = null; resizeCorner = null; selectionAtStart = null; });
 
 byId('rotate-left').addEventListener('click', () => {
     const rotated = document.createElement('canvas');
@@ -173,9 +210,13 @@ async function decodeCode() {
 
 async function recognizeText() {
     const started = performance.now();
-    const worker = await createWorker('ita', 1, { logger: progress => {
+    const worker = await createWorker('ita', 1, {
+        workerPath: './tesseract/worker.min.js',
+        langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+        logger: progress => {
         if (progress.status === 'recognizing text') status.textContent = `OCR ${Math.round((progress.progress || 0) * 100)}%`;
-    } });
+        }
+    });
     try {
         const output = await worker.recognize(preprocessedCanvas());
         return {
@@ -210,6 +251,7 @@ analyze.addEventListener('click', async () => {
         status.textContent = 'Analisi terminata: controlla e correggi ogni campo.';
     } catch (error) {
         console.error(error);
-        status.textContent = 'Immagine non riconosciuta. Prova a ruotare, ritagliare o usare più luce.';
+        const detail = String(error?.message || error?.name || 'errore sconosciuto').slice(0, 180);
+        status.textContent = `Analisi non riuscita: ${detail}. Prova a ruotare o ritagliare; se persiste, comunica questo messaggio.`;
     } finally { analyze.disabled = false; }
 });
