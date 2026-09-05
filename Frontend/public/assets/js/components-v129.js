@@ -1,6 +1,6 @@
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from './dom-utils.js';
 import { LOG } from './logger.js';
-import { auth } from './firebase-config.js?v=1.2.35';
+import { auth } from './firebase-config.js?v=1.2.36';
 import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t } from './translations.js';
 import { showLogoutModal } from './ui-core-v129.js';
@@ -147,6 +147,8 @@ export async function initComponents() {
                     // Modifica con id e nuova azienda senza id hanno due parent
                     // distinti e deterministici: non dipendono dalla history.
                     preferHistory = false;
+                } else if (path.endsWith('profilo_privato_v2.html')) {
+                    fallbackHref = 'home_page.html';
                 } else if (path.endsWith('profilo_privato.html')) {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('account_privati.html')) {
@@ -189,6 +191,7 @@ export async function initComponents() {
                     let displayTitle = pageTitle;
                     if (path.includes('impostazioni.html')) displayTitle = t('settings_title');
                     else if (path.includes('archivio_account.html')) displayTitle = t('account_archive');
+                    else if (path.includes('profilo_privato_v2.html')) displayTitle = 'Profilo Utente V2';
                     else if (path.includes('profilo_privato.html')) displayTitle = t('page_title_profile');
                     else if (path.includes('regole_scadenze.html')) displayTitle = t('expiry_rules_title_page');
                     else if (path.includes('configurazione_automezzi.html')) displayTitle = t('vehicles_config_title');
@@ -250,7 +253,7 @@ export async function initComponents() {
             const footerCenter = createElement('div', { id: 'footer-center-actions', className: 'header-center' });
 
             // GUIDA RAPIDA (Icona Centrale - Solo Profilo)
-            if (path.includes('profilo_privato.html')) {
+            if (path.includes('profilo_privato')) {
                 const guideBtn = createElement('button', {
                     className: 'btn-icon-header',
                     title: 'Guida Profilo',
@@ -265,6 +268,15 @@ export async function initComponents() {
                     createElement('span', { className: 'material-symbols-outlined', textContent: 'info' })
                 ]);
                 footerCenter.appendChild(guideBtn);
+
+                if (path.endsWith('profilo_privato.html')) {
+                    footerCenter.appendChild(createElement('a', {
+                        className: 'btn-icon-header',
+                        href: 'profilo_privato_v2.html',
+                        title: 'Apri Profilo Utente V2',
+                        ariaLabel: 'Apri Profilo Utente V2'
+                    }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'dashboard_customize' })]));
+                }
             }
 
             const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });

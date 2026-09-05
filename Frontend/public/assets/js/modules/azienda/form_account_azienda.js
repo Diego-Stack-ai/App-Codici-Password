@@ -5,7 +5,7 @@
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.35';
+import { db } from '../../firebase-config.js?v=1.2.36';
 import {
     doc, getDoc, getDocs, collection
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";

@@ -25,7 +25,7 @@ import { initComponents } from './components-v129.js'; // Imports components sys
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.35';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.36';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import {
@@ -37,7 +37,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.35';
+import * as Pages from './pages-init.js?v=1.2.36';
 
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
@@ -61,6 +61,7 @@ function getCurrentPage() {
 
     // Settings & Profile
     if (path.includes('archivio_account')) return 'archivio';
+    if (path.includes('profilo_privato_v2')) return 'profilo_v2';
     if (path.includes('profilo_privato')) return 'profilo';
     if (path.includes('impostazioni')) return 'impostazioni';
 
@@ -224,6 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     case 'archivio': await Pages.initArchivioAccount(user); break;
                     case 'profilo': await Pages.initProfiloPrivato(user); break;
+                    case 'profilo_v2': await Pages.initProfiloPrivatoV2(user); break;
 
                     case 'scadenze': await Pages.initScadenze(user); break;
                     case 'aggiungi_scadenza': await Pages.initAggiungiScadenza(user); break;

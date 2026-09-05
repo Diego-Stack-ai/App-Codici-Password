@@ -3,7 +3,7 @@
  * Creazione e modifica account con gestione IBAN dinamica.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.35';
+import { auth, db } from '../../firebase-config.js?v=1.2.36';
 import { LOG } from '../../logger.js';
 import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -18,6 +18,7 @@ let currentUid = null;
 let currentDocId = null;
 let isEditing = false;
 let bankAccounts = []; // Inizialmente vuoto per nuovi account
+let profileEmailLinkDraft = null;
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
@@ -43,6 +44,13 @@ export async function initFormAccountPrivato(user) {
     const params = new URLSearchParams(window.location.search);
     currentDocId = params.get('id');
     isEditing = !!currentDocId;
+    const profileEmailId = params.get('profileEmailId');
+    if (!isEditing && profileEmailId) {
+        try {
+            const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
+            if (draft?.profileEmailId === profileEmailId) profileEmailLinkDraft = draft;
+        } catch { profileEmailLinkDraft = null; }
+    }
 
     // Footer actions setup
     const fCenter = document.getElementById('footer-center-actions');
@@ -84,6 +92,10 @@ export async function initFormAccountPrivato(user) {
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'arrow_back' })
             ]));
         }
+    }
+    if (profileEmailLinkDraft?.email) {
+        const usernameInput = document.getElementById('account-username');
+        if (usernameInput) usernameInput.value = profileEmailLinkDraft.email;
     }
 
     setupUI();
@@ -560,6 +572,9 @@ async function saveAccount() {
         updatedAt: new Date().toISOString(),
         _encrypted: true // Flag per indicare che i dati sono cifrati (V6.0)
     };
+    if (profileEmailLinkDraft?.profileEmailId) {
+        data.linkedProfileField = { type: 'email', id: profileEmailLinkDraft.profileEmailId };
+    }
 
     if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); if (btnSave) btnSave.disabled = false; return; }
 
@@ -595,6 +610,8 @@ async function saveAccount() {
 
             // 1. ALL READS FIRST
             const accountSnap = isEditing ? await transaction.get(accRef) : null;
+            const profileUserRef = profileEmailLinkDraft?.profileEmailId ? doc(db, 'users', currentUid) : null;
+            const profileUserSnap = profileUserRef ? await transaction.get(profileUserRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
             let currentSharedWith = oldData?.sharedWith || {};
 
@@ -727,7 +744,18 @@ async function saveAccount() {
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);
+
+            if (!isEditing && profileEmailLinkDraft?.profileEmailId) {
+                const emails = profileUserSnap?.data()?.contactEmails || [];
+                transaction.update(profileUserRef, {
+                    contactEmails: emails.map(email => email.id === profileEmailLinkDraft.profileEmailId
+                        ? { ...email, linkedAccountId: targetId, password: '' }
+                        : email)
+                });
+            }
         });
+
+        if (profileEmailLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
 
         showToast(t('success_save'), "success");
         setTimeout(() => {

@@ -9,19 +9,19 @@
     <title data-t="title_settings">Impostazioni - PROTOCOLLO BASE V5.0</title>
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.35" />
+    <link rel="manifest" href="manifest.json?v=1.2.36" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.35">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.36">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.35">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.36">
 
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.35">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.36">
 </head>
 
 <body class="base-bg">
@@ -55,11 +55,12 @@
                                 <div id="user-avatar-settings" class="hero-avatar"></div>
                             </div>
 
-                            <div id="qrcode-preview" class="qr-preview-box">
+                            <a id="digital-card-settings-link" class="qr-preview-box" href="profilo_privato_v2.html?profileTab=digital-card" aria-label="Gestisci Tessera digitale">
                                 <div class="qr-lens-icon">
-                                    <span class="material-symbols-outlined">zoom_in</span>
+                                    <span class="material-symbols-outlined">qr_code_2</span>
                                 </div>
-                            </div>
+                                <span>Apri Profilo utente V2</span>
+                            </a>
                         </div>
 
                         <!-- Bottom Info: Name + Button -->
@@ -72,8 +73,6 @@
                         </div>
                     </div>
 
-                    <!-- Hidden QR for data access -->
-                    <div id="qrcode-settings" class="hidden"></div>
                 </div>
 
                 <!-- Impostazioni Generali -->

@@ -4,8 +4,8 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.35';
-import { deleteDoc, doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
+import { deleteDoc, doc, getDoc, serverTimestamp, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -23,7 +23,21 @@ async function getScadenza(userId, scadenzaId) {
 }
 
 async function deleteScadenza(userId, scadenzaId) {
-    await deleteDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
+    if (currentScadenza?.sourceRef?.type !== 'profileDocument') {
+        await deleteDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
+        return;
+    }
+    const profileRef = doc(db, 'users', userId);
+    const profileSnap = await getDoc(profileRef);
+    const documents = profileSnap.data()?.documenti || [];
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'users', userId, 'scadenze', scadenzaId));
+    batch.update(profileRef, {
+        documenti: documents.map(item => item.id === currentScadenza.sourceRef.id
+            ? { ...item, expiryReference: null }
+            : item)
+    });
+    await batch.commit();
 }
 
 /**
@@ -125,6 +139,17 @@ function renderScadenza(scadenza) {
 
     document.getElementById('detail-intestatario').textContent = scadenza.name || '---';
     document.getElementById('detail-category').textContent = scadenza.type || 'Generale';
+
+    const actions = document.getElementById('detail-page-actions');
+    if (actions && scadenza.sourceRef?.type === 'profileDocument') {
+        setChildren(actions, createElement('button', {
+            className: 'btn-modal btn-secondary',
+            textContent: 'Apri documento nel Profilo',
+            onclick: () => {
+                window.location.href = `profilo_privato.html?profileTab=documents&profileDocumentId=${encodeURIComponent(scadenza.sourceRef.id)}`;
+            }
+        }));
+    }
 
     if (scadenza.dueDate) {
         const d = new Date(scadenza.dueDate);

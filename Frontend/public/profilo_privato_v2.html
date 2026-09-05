@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="it" class="dark" data-i18n="loading">
+
+<head>
+    <!-- Anti-flicker & Theme Master (V3.9) -->
+    <script src="assets/js/theme-init.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Profilo Utente V2</title>
+
+    <!-- PWA / Mobile Capable -->
+    <link rel="manifest" href="manifest.json?v=1.2.36" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
+
+    <!-- CSS Modular System V5.0 -->
+    <!-- 1. Modulo specifico Base -->
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.36">
+    <!-- 2. Estensioni Core -->
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.36">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.36">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.36">
+    <!-- 3. Stile di Pagina -->
+    <link rel="stylesheet" href="assets/css/profilo_privato_v2.css?v=1.2.36">
+</head>
+
+<body class="base-bg">
+    <!-- CORE JS (Body-Start) -->
+    <!-- CORE JS (Body-Start removed, moved to HEAD) -->
+    <div class="base-container">
+        <!-- Ambient Glow -->
+        <div class="base-glow"></div>
+
+        <!-- Automated Header -->
+        <header id="header-placeholder" class="base-header"></header>
+
+        <main class="base-main">
+            <div class="page-container pt-header-extra pb-footer-extra">
+
+                <!-- Hero Profile Header (V5.0 Variant) -->
+                <div class="hero-profile-header">
+                    <!-- Visual Effects (V5.0 Saette) -->
+                    <div class="saetta-master"></div>
+                    <div class="saetta-drop"></div>
+
+                    <!-- Avatar & QR Code Side by Side -->
+                    <div class="hero-avatar-qr-row">
+                        <div class="avatar-group">
+                            <div id="avatar-trigger" class="profile-avatar-xl cursor-pointer"
+                                data-action="trigger-click" data-target="avatar-input">
+                                <img loading="lazy" id="profile-avatar" src="assets/images/user-avatar-5.png" alt="Profile">
+                                <div class="profile-avatar-overlay">
+                                    <span class="material-symbols-outlined">photo_camera</span>
+                                </div>
+                            </div>
+                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                        </div>
+
+                        <!-- QR Code Section -->
+                        <div class="qr-code-wrapper">
+                            <div id="qrcode-header" class="qr-code-display" title="Clicca per ingrandire"
+                                data-t-title="click_to_enlarge"></div>
+                            <!-- Zoom Icon -->
+                            <div id="qr-zoom-icon" class="qr-zoom-btn">
+                                <span class="material-symbols-outlined">search</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <nav id="profile-tabs" class="profile-tabs" role="tablist" aria-label="Sezioni profilo">
+                    <button class="profile-tab is-active" role="tab" aria-selected="true" data-profile-tab-target="overview">Panoramica</button>
+                    <button class="profile-tab" role="tab" aria-selected="false" data-profile-tab-target="personal">Anagrafica</button>
+                    <button class="profile-tab" role="tab" aria-selected="false" data-profile-tab-target="contacts">Contatti</button>
+                    <button class="profile-tab" role="tab" aria-selected="false" data-profile-tab-target="addresses">Indirizzi</button>
+                    <button class="profile-tab" role="tab" aria-selected="false" data-profile-tab-target="documents">Documenti</button>
+                    <button class="profile-tab" role="tab" aria-selected="false" data-profile-tab-target="digital-card">Tessera digitale</button>
+                </nav>
+
+                <div class="detail-content-wrap">
+                    <section id="profile-overview" class="profile-tab-panel" role="tabpanel" data-profile-tab="overview"></section>
+                    <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
+                    <div class="anti-autofill-trap" aria-hidden="true">
+                        <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
+                        <input type="password" name="password_trap" autocomplete="current-password" tabindex="-1">
+                    </div>
+
+                    <!-- 1. ANAGRAFICA -->
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="personal">
+                        <div class="form-section-header">
+                            <div class="section-title-wrapper">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">person</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_personal">Anagrafica Principale</h3>
+                            </div>
+                            <button class="btn-edit-section" data-action="edit-section" data-target="dati-personali">
+                                <span class="material-symbols-outlined icon-edit">edit</span>
+                            </button>
+                        </div>
+
+                        <div class="form-card">
+                            <div id="field-nome" class="data-display-group">
+                                <div class="field-header">
+                                    <label class="data-label" data-t="label_name_surname">Nome & Cognome</label>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-nome" class="qr-checkbox">
+                                        <label for="qr-toggle-nome" class="qr-mini-label">QR</label>
+                                    </div>
+                                </div>
+                                <div class="field-value-row">
+                                    <span id="nome-view" class="data-value">-</span>
+                                    <button id="copy-nome" class="btn-action-mini">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="field-cf" class="data-display-group">
+                                <div class="field-header">
+                                    <label class="data-label" data-t="label_cf">Codice Fiscale</label>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-cf" class="qr-checkbox">
+                                        <label for="qr-toggle-cf" class="qr-mini-label">QR</label>
+                                    </div>
+                                </div>
+                                <div class="field-value-row">
+                                    <span id="cf-view" class="data-value">-</span>
+                                    <button id="copy-cf" class="btn-action-mini">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="field-nascita" class="data-display-group">
+                                <div class="field-header">
+                                    <label class="data-label" data-t="label_birth_data">Dati Nascita</label>
+                                    <div class="qr-check-badge">
+                                        <input type="checkbox" id="qr-toggle-nascita" class="qr-checkbox">
+                                        <label for="qr-toggle-nascita" class="qr-mini-label">QR</label>
+                                    </div>
+                                </div>
+                                <div class="field-value-row">
+                                    <div class="data-group-row">
+                                        <span id="birth_date-view" class="data-value">-</span>
+                                        <span id="birth_place-view" class="data-value">-</span>
+                                    </div>
+                                    <button id="copy-nascita" class="btn-action-mini">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. RESIDENZA & UTENZE -->
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="addresses">
+                        <div class="form-section-header collapsible-header collapsed" data-section="indirizzi">
+                            <div class="section-title-wrapper">
+                                <div class="settings-icon-box icon-amber">
+                                    <span class="material-symbols-outlined">home</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_addresses_utilities">Indirizzi & Utenze
+                                </h3>
+                            </div>
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        </div>
+                        <div id="indirizzi-view-container" class="guide-content-wrapper collapsed">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- 3. CONTATTI -->
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="contacts">
+                        <div class="form-section-header collapsible-header collapsed" data-section="telefoni">
+                            <div class="section-title-wrapper">
+                                <div class="settings-icon-box icon-emerald">
+                                    <span class="material-symbols-outlined">call</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_phones">Contatti Telefonici</h3>
+                            </div>
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        </div>
+                        <div id="telefoni-view-container" class="guide-content-wrapper collapsed">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- 4. EMAIL -->
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="contacts">
+                        <div class="form-section-header collapsible-header collapsed" data-section="email">
+                            <div class="section-title-wrapper">
+                                <div class="settings-icon-box icon-blue">
+                                    <span class="material-symbols-outlined">mail</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_emails">Account Email</h3>
+                            </div>
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        </div>
+                        <div id="email-view-container" class="guide-content-wrapper collapsed">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- 5. DOCUMENTI -->
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="documents">
+                        <div class="form-section-header collapsible-header collapsed" data-section="documenti">
+                            <div class="section-title-wrapper">
+                                <div class="settings-icon-box icon-purple">
+                                    <span class="material-symbols-outlined">description</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_docs_digital">Documenti Digitali</h3>
+                            </div>
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        </div>
+                        <div id="documenti-view-container" class="guide-content-wrapper collapsed">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+
+                    <!-- 8. NOTE ANAGRAFICA -->
+                    <div class="form-section profile-tab-panel hidden" role="tabpanel" data-profile-tab="personal">
+                        <div class="form-section-header">
+                            <div class="section-title-wrapper">
+                                <div class="settings-icon-box icon-red">
+                                    <span class="material-symbols-outlined">notes</span>
+                                </div>
+                                <h3 class="form-section-title" data-t="profile_notes">Note Anagrafica</h3>
+                            </div>
+                            <button class="btn-edit-section" data-action="edit-section" data-target="note">
+                                <span class="material-symbols-outlined icon-edit">edit</span>
+                            </button>
+                        </div>
+                        <div class="form-card">
+                            <p id="note-view" class="note-text">-</p>
+                        </div>
+                    </div>
+                    <section id="profile-digital-card" class="profile-tab-panel hidden" role="tabpanel" data-profile-tab="digital-card"></section>
+                </div> <!-- Closing Detail Content Wrap -->
+            </div> <!-- Closing Page Container -->
+        </main>
+
+        <!-- FOOTER PLACEHOLDER -->
+        <footer id="footer-placeholder" class="base-footer"></footer>
+    </div>
+
+    <!-- Scripts (V5.0 Ordering) -->
+
+    <script type="module" src="assets/js/main-v129.js"></script>
+
+</body>
+
+</html>

@@ -123,7 +123,6 @@ async function _addPhone() {
         }
     });
 }
-
 export async function editPhone(idx) {
     const { profileLabels, contactPhones } = _getState();
     const phone = contactPhones[idx];

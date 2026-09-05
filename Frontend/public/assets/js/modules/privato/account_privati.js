@@ -3,15 +3,15 @@
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.35';
+import { auth, db } from '../../firebase-config.js?v=1.2.36';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
-import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, query, where, updateDoc, doc, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.35';
+import { initComponents } from '../../components-v129.js?v=1.2.36';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 
@@ -407,7 +407,20 @@ async function handleDelete(item) {
     if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_delete'), "error"); filterAndRender(); return; }
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) { filterAndRender(); return; }
     try {
-        await deleteDoc(doc(db, "users", currentUser.uid, "accounts", id));
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        const emails = userSnap.data()?.contactEmails || [];
+        const hasProfileLink = emails.some(email => email.linkedAccountId === id);
+        const batch = writeBatch(db);
+        batch.delete(doc(db, "users", currentUser.uid, "accounts", id));
+        if (hasProfileLink) {
+            batch.update(userRef, {
+                contactEmails: emails.map(email => email.linkedAccountId === id
+                    ? { ...email, linkedAccountId: null }
+                    : email)
+            });
+        }
+        await batch.commit();
         showToast(t('success_deleted'));
         allAccounts = allAccounts.filter(a => a.id !== id);
         filterAndRender();
