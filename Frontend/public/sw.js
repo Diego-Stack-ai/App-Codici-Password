@@ -160,6 +160,11 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
 
+    // I contenuti protetti e aggiornabili non devono mai essere conservati
+    // nella cache della PWA. La richiesta mantiene così Authorization e
+    // raggiunge sempre l'endpoint, che restituisce Cache-Control: no-store.
+    if (url.pathname === '/protected-media/presentation') return;
+
     // HTML: sempre rete prima; offline usa la pagina esatta o la shell corretta.
     if (request.mode === 'navigate') {
         event.respondWith(fetchAndCache(request).catch(() => navigationFallback(request)));
