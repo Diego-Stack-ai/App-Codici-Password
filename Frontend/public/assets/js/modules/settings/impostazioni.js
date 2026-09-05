@@ -4,7 +4,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.37';
+import { auth, db } from '../../firebase-config.js?v=1.2.38';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';

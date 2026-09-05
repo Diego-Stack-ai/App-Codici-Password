@@ -11,7 +11,7 @@
  *   profilo_privato.js → profilo-sync.js → firebase, security-manager, utils
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.37';
+import { auth, db } from '../../firebase-config.js?v=1.2.38';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

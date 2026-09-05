@@ -5,7 +5,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * - Entry Point: initListaAziende(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.37';
+import { auth, db } from '../../firebase-config.js?v=1.2.38';
 import { LOG } from '../../logger.js';
 import { collection, doc, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

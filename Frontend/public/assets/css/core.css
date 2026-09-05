@@ -319,7 +319,7 @@ textarea::placeholder {
 .offline-status-banner {
     position: fixed;
     z-index: 10000;
-    top: max(8px, env(safe-area-inset-top));
+    bottom: calc(76px + env(safe-area-inset-bottom));
     left: 50%;
     width: min(calc(100% - 24px), 620px);
     padding: 9px 14px;
@@ -333,6 +333,7 @@ textarea::placeholder {
     text-align: center;
     transform: translateX(-50%);
     backdrop-filter: blur(12px);
+    pointer-events: none;
 }
 
 .offline-status-banner[hidden] {

@@ -26,7 +26,7 @@ import { initComponents } from './components-v129.js'; // Imports components sys
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.37';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.38';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.37';
+import * as Pages from './pages-init.js?v=1.2.38';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 
@@ -217,6 +217,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
 
+                // Prima di dichiarare pronta una pagina online, conferma che il
+                // nucleo dei dati sia stato scritto nella cache persistente.
+                if (isPrivatePage && navigator.onLine) {
+                    const readiness = await prepareOfflineData(user);
+                    if (!readiness?.complete) {
+                        console.warn('[OFFLINE] Sincronizzazione preventiva incompleta.', readiness?.failedCollections);
+                    }
+                }
+
                 // ROUTER - Step 2: Inizializza Pagina Privata
                 switch (currentPage) {
                     case 'home': await Pages.initHomePage(user); break;
@@ -246,12 +255,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     case 'account_azienda': await Pages.initAccountAziendaList(user); break;
                     case 'dettaglio_account_azienda': await Pages.initDettaglioAccountAzienda(user); break;
                     case 'form_account_azienda': await Pages.initFormAccountAzienda(user); break;
-                }
-
-                if (isPrivatePage && navigator.onLine) {
-                    prepareOfflineData(user).catch((error) => {
-                        console.warn('[OFFLINE] Sincronizzazione preventiva incompleta.', error);
-                    });
                 }
 
                 // GLOBAL REALTIME INVITE LISTENER (HARDENING V2)
