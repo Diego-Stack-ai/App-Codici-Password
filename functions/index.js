@@ -13,7 +13,6 @@ const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https")
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
-const { getAppCheck } = require("firebase-admin/app-check");
 const { FieldValue, getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 const { getStorage } = require("firebase-admin/storage");
@@ -47,17 +46,13 @@ exports.getAppPresentation = onRequest(
 
         const authorization = String(request.get("Authorization") || "");
         const idToken = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
-        const appCheckToken = String(request.get("X-Firebase-AppCheck") || "");
-        if (!idToken || !appCheckToken) {
+        if (!idToken) {
             response.status(401).send("Accesso richiesto.");
             return;
         }
 
         try {
-            await Promise.all([
-                admin.auth().verifyIdToken(idToken),
-                getAppCheck().verifyToken(appCheckToken)
-            ]);
+            await admin.auth().verifyIdToken(idToken);
             const file = getStorage().bucket().file("app-media/presentazione/codici-password-v2.mp4");
             const [metadata] = await file.getMetadata();
             response.set({
