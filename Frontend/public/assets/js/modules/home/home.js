@@ -4,9 +4,9 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.36';
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { auth, db } from '../../firebase-config.js?v=1.2.37';
+import { onAuthStateChanged, signOut } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, getDoc, collection, getDocs } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
@@ -87,7 +87,7 @@ export async function initHomePage(user) {
     if (assistantEnabled) {
         try {
             document.getElementById('ai-assistant-status')?.classList.remove('hidden');
-            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.36');
+            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.37');
             await initVaultAssistant(user);
         } catch (error) {
             console.warn('[ASSISTANT] Avvio non riuscito.', error);

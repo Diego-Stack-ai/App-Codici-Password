@@ -20,11 +20,11 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, getDoc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -37,7 +37,7 @@ import { syncData as _syncData } from './profilo-sync.js';
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.36';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.37';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)

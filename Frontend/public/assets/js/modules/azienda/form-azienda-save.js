@@ -1,15 +1,15 @@
-﻿/**
+/**
  * FORM ACCOUNT AZIENDA — SAVE MODULE (V1.0)
  * Salvataggio e cancellazione degli account aziendali.
  * Estratto da form_account_azienda.js per ridurre la complessità del modulo principale.
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.36';
+import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';

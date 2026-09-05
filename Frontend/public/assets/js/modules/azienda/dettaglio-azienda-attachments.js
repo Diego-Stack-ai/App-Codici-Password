@@ -5,13 +5,13 @@
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.36';
+import { db, storage } from '../../firebase-config.js?v=1.2.37';
 import {
     doc, collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject, getBytes
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

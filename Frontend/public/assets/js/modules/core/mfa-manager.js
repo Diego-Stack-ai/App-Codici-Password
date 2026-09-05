@@ -1,9 +1,9 @@
-import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.36';
+import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.37';
 import {
     multiFactor,
     TotpMultiFactorGenerator
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
+} from "/assets/js/vendor/firebase-runtime.js";
+import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 

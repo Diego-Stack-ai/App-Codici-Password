@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@firebase/rules-unit-testing": "5.0.2",
+    "esbuild": "^0.28.2",
     "firebase": "12.18.0",
     "firebase-tools": "15.28.2",
     "madge": "^8.0.0",
@@ -8,7 +9,7 @@
     "stylelint-config-standard": "^40.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.36",
+  "version": "1.2.37",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -17,8 +18,11 @@
     "version:minor": "node scripts/bump-version.mjs minor",
     "version:major": "node scripts/bump-version.mjs major",
     "version:check": "node scripts/bump-version.mjs --check",
+    "build:offline-runtime": "node scripts/build-offline-runtime.mjs",
+    "pretest": "npm run build:offline-runtime",
     "release:patch": "npm run version:patch && npm test",
-    "test": "npm run test:security && npm run test:navigation && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:crypto && npm run test:attachments && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules",
+    "test": "npm run test:offline && npm run test:security && npm run test:navigation && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:crypto && npm run test:attachments && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules",
+    "test:offline": "node scripts/audit-offline-shell.mjs",
     "test:security": "node scripts/audit-security-flows.mjs",
     "test:navigation": "node scripts/audit-navigation-flows.mjs",
     "test:ui-foundations": "node scripts/audit-ui-foundations.mjs",

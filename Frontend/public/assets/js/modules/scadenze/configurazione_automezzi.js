@@ -1,12 +1,12 @@
-﻿/**
+/**
  * CONFIGURAZIONE AUTOMEZZI MODULE (V4.1)
  * Gestisce la configurazione delle scadenze per automezzi.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth } from '../../firebase-config.js?v=1.2.36';
+import { db, auth } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { doc, getDoc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

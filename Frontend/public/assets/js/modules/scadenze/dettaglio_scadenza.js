@@ -1,12 +1,12 @@
-﻿/**
+/**
  * DETTAGLIO SCADENZA MODULE (V4.1)
  * Gestisce la visualizzazione del dettaglio di una scadenza.
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
-import { deleteDoc, doc, getDoc, serverTimestamp, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
+import { deleteDoc, doc, getDoc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';

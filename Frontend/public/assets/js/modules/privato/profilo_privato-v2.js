@@ -20,11 +20,11 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { deleteField, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
+import { deleteField, doc, getDoc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -38,7 +38,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.j
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr-v2.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails-v2.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs-v2.js?v=1.2.36';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs-v2.js?v=1.2.37';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';

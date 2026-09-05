@@ -4,12 +4,12 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth, storage } from '../../firebase-config.js?v=1.2.36';
+import { db, auth, storage } from '../../firebase-config.js?v=1.2.37';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
-import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
+import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';

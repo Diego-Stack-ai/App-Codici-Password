@@ -1,15 +1,15 @@
-﻿/**
+/**
  * DETTAGLIO ACCOUNT AZIENDA — SHARING MODULE (V1.0)
  * Gestione condivisione, visualizzazione ospiti e revoca accessi per account aziendali.
  * Estratto da dettaglio_account_azienda.js per ridurre la complessità del modulo principale.
  * Init: initSharingModule(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.36';
+import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
 import {
     doc, getDoc, collection, runTransaction
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -179,7 +179,7 @@ export async function renderGuests(guests) {
     if (needsUpdate) {
         try {
             const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId);
-            const { updateDoc } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
+            const { updateDoc } = await import("/assets/js/vendor/firebase-runtime.js");
             await updateDoc(docRef, { sharedWith: updatedGuests });
         } catch (e) { console.error("Auto-Healing di Stato update failed", e); }
     }

@@ -1,24 +1,24 @@
-﻿/**
+/**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc,
     deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy,
     addDoc
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 import {
     ref, uploadBytes, getDownloadURL, deleteObject, getBytes
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.36';
+import { initComponents } from '../../components-v129.js?v=1.2.37';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';

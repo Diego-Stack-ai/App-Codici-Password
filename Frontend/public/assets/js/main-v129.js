@@ -25,19 +25,21 @@ import { initComponents } from './components-v129.js'; // Imports components sys
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.36';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.37';
 const { auth, db, functions } = firebaseRuntime;
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import {
     doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc,
     onSnapshot, runTransaction, arrayUnion, arrayRemove
-} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+} from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, initLockedUX } from './ui-core-v129.js';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.36';
+import * as Pages from './pages-init.js?v=1.2.37';
+import { initOfflineStatus } from './offline-status.js';
+import { prepareOfflineData } from './offline-sync.js';
 
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
@@ -91,6 +93,7 @@ function getCurrentPage() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    initOfflineStatus();
     // 🔐 BLOCCO SENTINELLA V7.0 - Previene il doppio bootstrap
     if (_v7Bootstrapped) {
         console.warn("⚠️ Rilevato tentativo di doppio bootstrap. Blocco sentinella attivo.");
@@ -170,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
                 const isPrivatePage = !publicPages.includes(currentPage);
-                if (isPrivatePage) firebaseRuntime.enableAppCheck?.();
+                if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck?.();
 
                 // Avvia in parallelo il codice Vault, senza appesantire login e pagine pubbliche.
                 const securityModulesPromise = isPrivatePage
@@ -210,8 +213,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     // Le Push di scadenza devono essere visualizzate anche quando
                     // l'app è aperta su una pagina diversa dalle Impostazioni.
-                    const { listenForDeadlinePushInForeground } = await import('./modules/shared/push-manager.js');
-                    await listenForDeadlinePushInForeground();
+                    if (navigator.onLine) {
+                        const { listenForDeadlinePushInForeground } = await import('./modules/shared/push-manager.js');
+                        await listenForDeadlinePushInForeground();
+                    }
                 }
 
                 // ROUTER - Step 2: Inizializza Pagina Privata
@@ -243,6 +248,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     case 'account_azienda': await Pages.initAccountAziendaList(user); break;
                     case 'dettaglio_account_azienda': await Pages.initDettaglioAccountAzienda(user); break;
                     case 'form_account_azienda': await Pages.initFormAccountAzienda(user); break;
+                }
+
+                if (isPrivatePage && navigator.onLine) {
+                    prepareOfflineData(user).catch((error) => {
+                        console.warn('[OFFLINE] Sincronizzazione preventiva incompleta.', error);
+                    });
                 }
 
                 // GLOBAL REALTIME INVITE LISTENER (HARDENING V2)
@@ -490,7 +501,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error("Non sei autorizzato a rispondere a questo invito.");
             }
 
-            const { httpsCallable } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js");
+            const { httpsCallable } = await import("/assets/js/vendor/firebase-runtime.js");
             const respondToInvitation = httpsCallable(functions, 'respondToInvitation');
             await respondToInvitation({ inviteId, status });
             LOG("[SHARING] Risposta invito convalidata e applicata dal server.");

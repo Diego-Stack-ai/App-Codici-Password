@@ -1,11 +1,11 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app-check.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
-import { getFunctions } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
-import { getMessaging, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
+import { initializeApp, getApp, getApps } from "/assets/js/vendor/firebase-runtime.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "/assets/js/vendor/firebase-runtime.js";
+import { getAuth } from "/assets/js/vendor/firebase-runtime.js";
+import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager } from "/assets/js/vendor/firebase-runtime.js";
+import { getStorage } from "/assets/js/vendor/firebase-runtime.js";
+import { getFunctions } from "/assets/js/vendor/firebase-runtime.js";
+import { getMessaging, isSupported as isMessagingSupported } from "/assets/js/vendor/firebase-runtime.js";
 
 // Mantiene un solo origin per le credenziali WebAuthn/PRF. I due domini
 // Firebase Hosting hanno storage e credenziali browser separati.

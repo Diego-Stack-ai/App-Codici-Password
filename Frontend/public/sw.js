@@ -1,8 +1,8 @@
-const CACHE_NAME = 'codex-shell-v1.2.36';
+const CACHE_NAME = 'codex-shell-v1.2.37';
 const APP_CACHE_PREFIX = 'codex-';
 
-importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging-compat.js');
+importScripts('./assets/js/vendor/firebase-sw-runtime.js');
+importScripts('./offline-assets.js');
 
 firebase.initializeApp({
     apiKey: 'AIzaSyDDt-PacoHtUQg6Ow7-1UxvrGVZLXVYx-o',
@@ -63,63 +63,19 @@ self.addEventListener('notificationclick', (event) => {
     }));
 });
 
-// Shell minima coerente con la release corrente. Le pagine visitate e i
-// relativi asset vengono aggiunti a runtime, senza toccare IndexedDB/Firestore.
-const APP_SHELL = [
-    'login-v115.html',
-    'home_page.html',
-    'manifest.json?v=1.2.36',
-    'assets/images/app-icon.jpg',
-    'assets/images/app-icon-192.png',
-    'assets/images/app-icon-512.png',
-    'assets/images/app-icon-maskable-512.png',
-    'assets/images/apple-touch-icon-180.png',
-    'assets/css/core.css?v=1.2.36',
-    'assets/css/core_ui.css?v=1.2.36',
-    'assets/css/core_fonts.css',
-    'assets/css/core_fascie.css',
-    'assets/css/core_pagine.css?v=1.2.36',
-    'assets/css/home_page.css?v=1.2.36',
-    'assets/css/accesso.css?v=1.2.36',
-    'assets/css/vault-assistant.css?v=1.2.36',
-    'assets/js/theme-init.js',
-    'assets/js/home-bootstrap.js?v=1.2.36',
-    'assets/js/login-entry.js?v=1.2.36',
-    'assets/js/main-v129.js',
-    'assets/js/components-v129.js',
-    'assets/js/ui-core-v129.js',
-    'assets/js/env-v126.js',
-    'assets/js/firebase-config.js?v=1.2.36',
-    'assets/js/auth.js?v=1.2.36',
-    'assets/js/modules/auth/login.js?v=1.2.36',
-    'assets/js/modules/core/mfa-manager.js',
-    'assets/js/modules/core/security-manager.js',
-    'assets/js/modules/core/vault-session.js',
-    'assets/js/modules/core/webauthn-manager.js',
-    'assets/js/modules/core/crypto-utils.js',
-    'assets/js/modules/core/password-policy.js',
-    'assets/js/modules/shared/attachment-security.js',
-    'assets/js/inactivity-timer.js',
-    'assets/js/pages-init.js?v=1.2.36',
-    'assets/js/modules/home/home.js?v=1.2.36',
-    'assets/js/modules/privato/area_privata.js?v=1.2.36',
-    'assets/js/modules/assistant/conversation-engine.js?v=1.2.36',
-    'assets/js/translations.js',
-    'assets/js/dom-utils.js',
-    'assets/js/logger.js',
-    'assets/js/footer-state.js',
-    'assets/js/ui-components.js',
-    'assets/js/cleanup.js',
-    'assets/js/utils.js'
-];
+// Manifest generato dalla build: tutte le pagine e dipendenze statiche della
+// release sono disponibili senza richiedere che l'utente le visiti prima.
+const APP_SHELL = self.__OFFLINE_ASSETS || [];
+const APP_SHELL_PATHS = new Set(APP_SHELL.map(asset => `/${asset.replace(/^\.\//, '')}`));
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil((async () => {
         const cache = await caches.open(CACHE_NAME);
-        await Promise.allSettled(APP_SHELL.map(async (asset) => {
+        await Promise.all(APP_SHELL.map(async (asset) => {
             const response = await fetch(asset, { cache: 'reload' });
-            if (response.ok) await cache.put(asset, response);
+            if (!response.ok) throw new Error(`Risorsa offline non disponibile: ${asset}`);
+            await cache.put(asset, response);
         }));
     })());
 });
@@ -145,7 +101,7 @@ async function fetchAndCache(request) {
 
 async function navigationFallback(request) {
     const cache = await caches.open(CACHE_NAME);
-    const exact = await cache.match(request);
+    const exact = await cache.match(request) || await cache.match(new URL(request.url).pathname.slice(1));
     if (exact) return exact;
 
     const url = new URL(request.url);
@@ -165,6 +121,10 @@ self.addEventListener('fetch', (event) => {
     // raggiunge sempre l'endpoint, che restituisce Cache-Control: no-store.
     if (url.pathname === '/protected-media/presentation') return;
 
+    // Solo le risorse dichiarate nella shell possono entrare nella Cache API.
+    // Evita di conservare accidentalmente future risposte private same-origin.
+    if (!APP_SHELL_PATHS.has(url.pathname)) return;
+
     // HTML: sempre rete prima; offline usa la pagina esatta o la shell corretta.
     if (request.mode === 'navigate') {
         event.respondWith(fetchAndCache(request).catch(() => navigationFallback(request)));
@@ -175,14 +135,15 @@ self.addEventListener('fetch', (event) => {
     // Non usiamo ignoreSearch: una query diversa identifica una release diversa.
     if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
         event.respondWith(fetchAndCache(request).catch(async () => {
-            return (await caches.match(request)) || Response.error();
+            return (await caches.match(request)) ||
+                (await caches.match(url.pathname.slice(1))) || Response.error();
         }));
         return;
     }
 
     // Immagini e manifest: cache prima con aggiornamento in background.
     event.respondWith((async () => {
-        const cached = await caches.match(request);
+        const cached = await caches.match(request) || await caches.match(url.pathname.slice(1));
         const network = fetchAndCache(request).catch(() => null);
         return cached || (await network) || Response.error();
     })());

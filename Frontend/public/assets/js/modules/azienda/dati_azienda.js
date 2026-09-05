@@ -4,8 +4,8 @@
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
+import { doc, getDoc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -14,7 +14,7 @@ import { logError } from '../../utils.js';
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
-import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 
 // --- STATE ---
 let currentAziendaId = null;

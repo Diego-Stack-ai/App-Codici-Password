@@ -26,6 +26,9 @@ const [settings, inactivity, security, webauthn, mfa, auth, login, settingsHtml,
 
 const configuredVersion = env.match(/APP_VERSION\s*=\s*'([^']+)'/)?.[1];
 const assetVersion = configuredVersion?.replace(/^v/, '').replace(/\./g, '\\.');
+const offlineAssets = await read('Frontend/public/offline-assets.js');
+const loginEntry = await read('Frontend/public/assets/js/login-entry.js');
+const offlineSync = await read('Frontend/public/assets/js/offline-sync.js');
 const passwordPolicy = await read('Frontend/public/assets/js/modules/core/password-policy.js');
 const registration = await read('Frontend/public/assets/js/modules/auth/registrati.js');
 const registrationHtml = await read('Frontend/public/registrati.html');
@@ -69,11 +72,17 @@ assert.match(vaultSession, /crypto\.subtle\.importKey\('raw'/, 'La chiave di ses
 assert.doesNotMatch(vaultSession, /localStorage\.getItem\(WRAPPING_KEY\)|localStorage\.setItem\(WRAPPING_KEY/, 'La chiave di sessione non deve persistere dopo la chiusura della scheda');
 assert.match(vaultSession, /sessionStorage\.removeItem\(WRAPPING_KEY\)/, 'Blocco e logout non eliminano la chiave di sessione');
 assert.match(security, /if \(_unlockPromise && !forceReload\) return _unlockPromise/, 'Le richieste concorrenti possono ancora aprire più sblocchi');
-assert.match(serviceWorker, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
+assert.match(offlineAssets, /modules\/core\/vault-session\.js/, 'Il supporto sessione Vault non è disponibile offline');
 assert.match(serviceWorker, /url\.pathname\.endsWith\('\.js'\).*url\.pathname\.endsWith\('\.css'\)/s, 'Gli asset applicativi non usano una strategia network-first coerente');
 assert.doesNotMatch(serviceWorker, /ignoreSearch:\s*true/, 'Il fallback PWA può mescolare release con query-versione differenti');
-assert.match(serviceWorker, new RegExp(`assets/css/home_page\\.css\\?v=${assetVersion}`), 'Lo stile della home non è precaricato per l’avvio PWA');
-assert.match(serviceWorker, new RegExp(`assets/css/accesso\\.css\\?v=${assetVersion}`), 'Lo stile del login non è precaricato per l’avvio PWA');
+assert.match(offlineAssets, /assets\/css\/home_page\.css/, 'Lo stile della home non è precaricato per l’avvio PWA');
+assert.match(offlineAssets, /assets\/css\/accesso\.css/, 'Lo stile del login non è precaricato per l’avvio PWA');
+assert.match(offlineAssets, /assets\/js\/vendor\/firebase-runtime\.js/, 'Il runtime Firebase locale non è precaricato');
+assert.doesNotMatch(firebaseConfig, /www\.gstatic\.com\/firebasejs/, 'Firebase dipende ancora dal CDN durante l’avvio');
+assert.match(serviceWorker, /firebase-sw-runtime\.js/, 'Il Service Worker dipende ancora dal runtime Firebase remoto');
+assert.match(serviceWorker, /Promise\.all\(APP_SHELL/, 'La shell offline accetta ancora installazioni parziali');
+assert.match(loginEntry, /serviceWorker\.register\('\.\/sw\.js'\)/, 'Il login non prepara la PWA per il successivo avvio offline');
+assert.match(offlineSync, /aziende[\s\S]*scadenze[\s\S]*settings/, 'La sincronizzazione preventiva non include i dati principali');
 assert.match(loginHtml, new RegExp(`login-entry\\.js\\?v=${assetVersion}`), 'Il login non usa il bootstrap Auth dedicato aggiornato');
 assert.match(loginHtml, /<form id="login-form">/, 'Il campo password non è contenuto in un form semantico');
 assert.match(loginHtml, /type="submit" id="login-submit-btn"/, 'Il pulsante Accedi non invia il form in modo nativo');
@@ -88,7 +97,7 @@ assert.doesNotMatch(loginHtml, /caches\.keys|registration\?\.update/, 'Il login 
 assert.doesNotMatch(loginHtml, /serviceWorker|getRegistrations|unregister\(/, 'Il login esegue ancora operazioni PWA durante il caricamento');
 assert.match(main, /const serviceWorkerEnabled = true/, 'Il Service Worker ricostruito non è stato riattivato');
 assert.doesNotMatch(main, /controllerchange[\s\S]{0,300}window\.location\.reload/, 'Il Service Worker può ancora innescare un ciclo di ricaricamento');
-assert.match(serviceWorker, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
+assert.match(offlineAssets, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
 assert.match(auth, /login-v115\.html/, 'I redirect Auth non usano il nuovo percorso di login');
 assert.match(loginHtml, /data-i18n="ready"/, 'Il login può restare invisibile se il bootstrap JavaScript fallisce');
 
@@ -152,7 +161,7 @@ assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-192.png') && i
 assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-512.png') && icon.sizes === '512x512' && icon.type === 'image/png'), 'Manifest privo dell\'icona PNG 512x512');
 assert.ok(manifest.icons.some(icon => icon.src.endsWith('app-icon-maskable-512.png') && icon.purpose === 'maskable'), 'Manifest privo della variante maskable');
 assert.match(homeHtml, /apple-touch-icon-180\.png/, 'La home non usa l\'icona Apple dedicata');
-assert.match(serviceWorker, /app-icon-maskable-512\.png/, 'La variante maskable non è disponibile nella shell offline');
+assert.match(offlineAssets, /app-icon-maskable-512\.png/, 'La variante maskable non è disponibile nella shell offline');
 
 const publicHtmlNames = (await readdir(new URL('../Frontend/public/', import.meta.url))).filter(name => name.endsWith('.html'));
 const publicHtmlFiles = await Promise.all(publicHtmlNames.map(name => read(`Frontend/public/${name}`)));

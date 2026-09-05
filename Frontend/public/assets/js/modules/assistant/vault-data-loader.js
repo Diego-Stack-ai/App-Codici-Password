@@ -1,5 +1,5 @@
-import { db } from '../../firebase-config.js?v=1.2.36';
-import { collection, doc, getDoc, getDocs } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js';
+import { db } from '../../firebase-config.js?v=1.2.37';
+import { collection, doc, getDoc, getDocs } from '/assets/js/vendor/firebase-runtime.js';
 
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];

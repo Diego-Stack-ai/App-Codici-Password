@@ -1,12 +1,12 @@
-﻿/**
+/**
  * LISTA AZIENDE MODULE (V5.0 ADAPTER)
  * Visualizzazione e gestione della lista delle aziende dell'utente.
  * - Entry Point: initListaAziende(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.36';
+import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, doc, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

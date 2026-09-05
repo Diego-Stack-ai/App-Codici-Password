@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AREA PRIVATA MODULE (V5.0 - Single Orchestrator Compliant)
  * Logica specifica per la dashboard privata (Counters, Top 10, Rubrica).
  * 
@@ -9,9 +9,9 @@
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.36';
+import { db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, addDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, addDoc, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

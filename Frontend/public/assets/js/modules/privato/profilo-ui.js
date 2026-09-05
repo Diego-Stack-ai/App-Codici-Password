@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PROFILO PRIVATO — UI MODULE (V1.0)
  * Avatar, label management, collapsible sections, custom dropdowns engine.
  * Estratto da profilo_privato.js.
@@ -8,9 +8,9 @@
  *   profilo_privato.js → profilo-ui.js → firebase, ui-core, dom-utils
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
-import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
+import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -84,7 +84,7 @@ async function saveProfileLabels() {
     try {
         await updateDoc(doc(db, 'users', currentUserUid, 'settings', 'profileLabels'), profileLabels);
     } catch (e) {
-        const { setDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+        const { setDoc } = await import('/assets/js/vendor/firebase-runtime.js');
         await setDoc(doc(db, 'users', currentUserUid, 'settings', 'profileLabels'), profileLabels);
     }
 }

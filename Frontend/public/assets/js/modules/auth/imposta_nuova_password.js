@@ -1,16 +1,16 @@
-﻿/**
+/**
  * SET NEW PASSWORD MODULE (V4.1)
  * Gestione finale del reset password o cambio password interno.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/auth/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.36';
-import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { auth } from '../../firebase-config.js?v=1.2.37';
+import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "/assets/js/vendor/firebase-runtime.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
-import { db } from '../../firebase-config.js?v=1.2.36';
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { db } from '../../firebase-config.js?v=1.2.37';
+import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';
 
 export async function initImpostaNuovaPassword() {

@@ -315,3 +315,26 @@ textarea::placeholder {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* Stato di connettività condiviso tra login e area privata. */
+.offline-status-banner {
+    position: fixed;
+    z-index: 10000;
+    top: max(8px, env(safe-area-inset-top));
+    left: 50%;
+    width: min(calc(100% - 24px), 620px);
+    padding: 9px 14px;
+    border: 1px solid rgb(245 158 11 / 45%);
+    border-radius: 999px;
+    color: #fff7d6;
+    background: rgb(76 48 8 / 92%);
+    box-shadow: 0 8px 28px rgb(0 0 0 / 28%);
+    font-size: 0.82rem;
+    line-height: 1.25;
+    text-align: center;
+    transform: translateX(-50%);
+    backdrop-filter: blur(12px);
+}
+
+.offline-status-banner[hidden] {
+    display: none;
+}

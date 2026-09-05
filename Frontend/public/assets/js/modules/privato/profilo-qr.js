@@ -8,8 +8,8 @@
  *   profilo_privato.js → profilo-qr.js → qr_code_utils.js, firebase
  */
 
-import { db } from '../../firebase-config.js?v=1.2.36';
-import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { db } from '../../firebase-config.js?v=1.2.37';
+import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 
@@ -52,7 +52,7 @@ async function _saveQRInclusions() {
     try {
         await updateDoc(doc(db, 'users', currentUserUid, 'settings', 'qrCodeInclusions'), qrCodeInclusions);
     } catch (e) {
-        const { setDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+        const { setDoc } = await import('/assets/js/vendor/firebase-runtime.js');
         await setDoc(doc(db, 'users', currentUserUid, 'settings', 'qrCodeInclusions'), qrCodeInclusions);
     }
 }

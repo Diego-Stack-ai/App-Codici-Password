@@ -1,7 +1,7 @@
-import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.36';
-import { doc, getDoc, serverTimestamp, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-functions.js";
-import { deleteToken, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
+import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.37';
+import { doc, getDoc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
+import { deleteToken, getToken, onMessage } from "/assets/js/vendor/firebase-runtime.js";
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
 const DEVICE_ID_KEY = 'codex_push_device_id';

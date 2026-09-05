@@ -14,8 +14,8 @@
  * modifica_azienda.html carica solo main.js → INVARIATO
  */
 
-import { db } from '../../firebase-config.js?v=1.2.36';
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { db } from '../../firebase-config.js?v=1.2.37';
+import { doc, getDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

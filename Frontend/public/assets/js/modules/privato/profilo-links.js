@@ -1,5 +1,5 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.36';
-import { collection, doc, getDocs, updateDoc } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js';
+import { auth, db } from '../../firebase-config.js?v=1.2.37';
+import { collection, doc, getDocs, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';

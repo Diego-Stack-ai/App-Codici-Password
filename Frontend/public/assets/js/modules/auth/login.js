@@ -4,11 +4,11 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js, modularizzazione.
  */
 
-import { login, completeTotpLogin, checkAuthState } from '../../auth.js?v=1.2.36';
-import { initComponents } from '../../components-v129.js?v=1.2.36';
+import { login, completeTotpLogin, checkAuthState } from '../../auth.js?v=1.2.37';
+import { initComponents } from '../../components-v129.js?v=1.2.37';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.36';
+import { showToast, showInputModal } from '../../ui-core-v129.js?v=1.2.37';
 import { recoverTotpAccess } from '../core/mfa-manager.js';
 
 /**
@@ -152,6 +152,11 @@ function setupLoginForm() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email) && !email.includes('@')) {
             showToast(t('error_invalid_email') || "Inserisci un'email valida", "error");
+            return;
+        }
+
+        if (!navigator.onLine) {
+            showToast('Per effettuare un nuovo accesso o verificare la 2FA è necessaria una connessione. Se questo dispositivo era già autenticato, riapri l’app senza eseguire il logout.', 'warning');
             return;
         }
 

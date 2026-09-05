@@ -6,9 +6,9 @@
 
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.36';
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query, runTransaction } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { db, auth } from '../../firebase-config.js?v=1.2.37';
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
 import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';
 import { evaluatePassword, firstPasswordPolicyError, passwordPolicyMessage } from './password-policy.js';
