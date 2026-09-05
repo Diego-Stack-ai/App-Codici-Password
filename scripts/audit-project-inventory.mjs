@@ -9,6 +9,7 @@ const output = path.join(root, 'docs', 'FILE_INVENTORY.md');
 const candidates = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: root })
   .toString('utf8').split('\0').filter(Boolean)
   .filter(file => !file.includes('node_modules/') && !file.startsWith('.codex-worktrees/'))
+  .filter(file => !path.basename(file).startsWith('~$'))
   .filter(file => file !== 'docs/FILE_INVENTORY.md');
 const tracked = [];
 for (const file of candidates) {

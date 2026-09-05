@@ -3,7 +3,7 @@
  * Creazione e modifica account con gestione IBAN dinamica.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.33';
+import { auth, db } from '../../firebase-config.js?v=1.2.34';
 import { LOG } from '../../logger.js';
 import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
