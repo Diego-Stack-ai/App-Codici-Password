@@ -20,7 +20,7 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.35';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { deleteField, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
@@ -38,7 +38,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.j
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.35';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.36';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -83,13 +83,20 @@ const nameDisplay = document.getElementById('user-display-name');
 export async function initProfiloPrivato(user) {
     if (!user) return;
     currentUserUid = user.uid;
-    await loadUserData(user);
+    await loadUserData(user, false);
     const ctx = buildCtx();
 
     // Inizializza tutti i moduli con getState + callbacks
     initQRModule(
         () => ({ qrCodeInclusions, currentUserUid, currentUserData, contactPhones, contactEmails, userAddresses, customWidgets }),
         { renderPhonesView, renderEmailsView, renderAddressesView }
+    );
+
+    // La dashboard deve essere disponibile appena i dati e il modulo QR sono pronti.
+    // Gli inizializzatori legacy successivi non possono così lasciare una pagina vuota.
+    initProfileDashboard(
+        () => ({ currentUserData, contactPhones, contactEmails, userAddresses, userDocuments, qrCodeInclusions, customWidgets }),
+        { toggleQRInclusion, setQRScalar, setWidgetFieldQr, getVCard: getProfileVCard, downloadVCard, shareVCard }
     );
 
     initPhonesEmailsModule(
@@ -119,18 +126,13 @@ export async function initProfiloPrivato(user) {
     setupQRToggles();
     setupCollapsibleSections();
 
-    initProfileDashboard(
-        () => ({ currentUserData, contactPhones, contactEmails, userAddresses, userDocuments, qrCodeInclusions, customWidgets }),
-        { toggleQRInclusion, setQRScalar, setWidgetFieldQr, getVCard: getProfileVCard, downloadVCard, shareVCard }
-    );
     await initProfileWidgets({ onChanged: widgets => {
         customWidgets = widgets;
         renderDigitalCard();
         generateProfileQRCode();
     } });
 
-    // Render sezioni ora che tutti i moduli sono inizializzati
-    // (la chiamata dentro loadUserData fallisce silenziosamente perché i moduli non sono ancora pronti)
+    // Render sezioni ora che tutti i moduli sono inizializzati.
     renderAllSections();
     generateProfileQRCode();
 }
@@ -152,7 +154,7 @@ function buildCtx() {
 
 // ─── DATA LOADING ─────────────────────────────────────────────────────────────
 
-async function loadUserData(user) {
+async function loadUserData(user, renderImmediately = true) {
     try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (!userDoc.exists()) return;
@@ -255,8 +257,10 @@ async function loadUserData(user) {
         }
         Object.assign(qrCodeInclusions, migrateQrIndexesToIds(qrCodeInclusions, currentUserData));
 
-        renderAllSections();
-        generateProfileQRCode();
+        if (renderImmediately) {
+            renderAllSections();
+            generateProfileQRCode();
+        }
     } catch (e) {
         logError('LoadProfile', e);
         showToast(t('error_generic'), 'error');

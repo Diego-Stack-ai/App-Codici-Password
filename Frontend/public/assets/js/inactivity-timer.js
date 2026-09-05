@@ -1,4 +1,4 @@
-﻿import { auth, db } from './firebase-config.js?v=1.2.35';
+﻿import { auth, db } from './firebase-config.js?v=1.2.36';
 import { LOG } from './logger.js';
 import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
