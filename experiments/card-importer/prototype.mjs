@@ -113,6 +113,7 @@ function selectionCorners() {
 }
 
 preview.addEventListener('pointerdown', event => {
+    event.preventDefault();
     const point = pointerPosition(event);
     const hitRadius = Math.max(35, preview.width / 35);
     resizeCorner = selectionCorners().find(corner => Math.hypot(corner.x - point.x, corner.y - point.y) <= hitRadius)?.name || null;
@@ -122,6 +123,7 @@ preview.addEventListener('pointerdown', event => {
 });
 preview.addEventListener('pointermove', event => {
     if (!dragStart) return;
+    event.preventDefault();
     const end = pointerPosition(event);
     if (resizeCorner && selectionAtStart) {
         const opposite = {

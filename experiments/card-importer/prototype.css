@@ -1,15 +1,15 @@
-:root { color-scheme: dark; font-family: system-ui, sans-serif; }
-body { margin: 0; background: #08111f; color: #edf4ff; }
-main { width: min(720px, calc(100% - 32px)); margin: 32px auto; }
+:root { color-scheme: dark; font-family: system-ui, sans-serif; overscroll-behavior: none; }
+body { margin: 0; background: #08111f; color: #edf4ff; overscroll-behavior: none; }
+main { width: min(720px, calc(100% - 32px)); margin: 20px auto; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
 label { display: grid; gap: 8px; margin: 20px 0; }
 select, input, button, textarea { box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #456; border-radius: 12px; font: inherit; }
 button { background: #1768d5; color: white; cursor: pointer; touch-action: manipulation; }
 button:disabled { opacity: .45; cursor: default; }
 .notice, #editor, #result { padding: 16px; border: 1px solid #345; border-radius: 16px; background: rgb(255 255 255 / 7%); }
 #editor { margin: 16px 0; }
-#preview { display: block; width: 100%; height: auto; border-radius: 12px; background: #000; touch-action: none; }
+#preview { display: block; width: 100%; height: auto; margin-top: 12px; border-radius: 12px; background: #000; touch-action: none; user-select: none; -webkit-user-select: none; }
 #editor[hidden], #result[hidden] { display: none; }
-.toolbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.toolbar { position: sticky; top: 8px; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 8px; border-radius: 14px; background: rgb(8 17 31 / 92%); backdrop-filter: blur(10px); }
 .quality { margin-bottom: 0; }
 .quality[data-level="buona"] { color: #72e6a0; }
 .quality[data-level="media"] { color: #ffd166; }
