@@ -33,6 +33,10 @@ for (const file of textFiles.filter(file => !file.includes(`${path.sep}vendor${p
   const source = await readFile(file, 'utf8');
   assert.doesNotMatch(source, /https:\/\/www\.gstatic\.com\/firebasejs\//,
     `Dipendenza Firebase remota in ${path.relative(root, file)}`);
+  if (file.endsWith('.js') && !file.endsWith('offline-firestore.js')) {
+    assert.doesNotMatch(source, /import\s*\{[^}]*\bgetDocs?\b[^}]*\}\s*from\s*["']\/assets\/js\/vendor\/firebase-runtime\.js["']/,
+      `Lettura Firestore senza percorso cache-first in ${path.relative(root, file)}`);
+  }
 }
 
 assert.ok((await stat(path.join(publicDir, 'assets/js/vendor/firebase-runtime.js'))).size > 500_000,
@@ -44,6 +48,6 @@ assert.match(serviceWorker, /Promise\.all\(APP_SHELL/);
 assert.match(serviceWorker, /APP_SHELL_PATHS\.has\(url\.pathname\)/);
 assert.match(serviceWorker, /protected-media\/presentation/);
 assert.match(loginEntry, /serviceWorker\.register\('\.\/sw\.js'\)/);
+assert.ok(assetSet.has('assets/js/offline-firestore.js'), 'Adattatore Firestore offline non precaricato');
 
 console.log(`Shell offline verificata: ${assets.length} risorse locali, nessuna dipendenza Firebase CDN.`);
-

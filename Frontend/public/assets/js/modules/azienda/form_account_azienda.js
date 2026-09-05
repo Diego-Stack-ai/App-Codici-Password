@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * FORM ACCOUNT AZIENDA MODULE (V6.0 SPLIT)
  * Creazione e modifica account aziendali con gestione dinamica IBAN.
@@ -6,9 +7,7 @@
  */
 
 import { db } from '../../firebase-config.js?v=1.2.37';
-import {
-    doc, getDoc, getDocs, collection
-} from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

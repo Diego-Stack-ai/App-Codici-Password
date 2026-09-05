@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * MODIFICA AZIENDA MODULE (V6.0 MODULAR)
  * Entry point orchestratore — delega tutto ai moduli ma_*.
@@ -15,7 +16,7 @@
  */
 
 import { db } from '../../firebase-config.js?v=1.2.37';
-import { doc, getDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

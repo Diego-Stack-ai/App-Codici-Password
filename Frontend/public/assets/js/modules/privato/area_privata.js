@@ -1,3 +1,4 @@
+import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * AREA PRIVATA MODULE (V5.0 - Single Orchestrator Compliant)
  * Logica specifica per la dashboard privata (Counters, Top 10, Rubrica).
@@ -11,7 +12,7 @@
 
 import { db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { collection, getDocs, query, where, deleteDoc, doc, orderBy, limit, addDoc, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { collection, query, where, deleteDoc, doc, orderBy, limit, addDoc, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

@@ -19,6 +19,7 @@
     "version:major": "node scripts/bump-version.mjs major",
     "version:check": "node scripts/bump-version.mjs --check",
     "build:offline-runtime": "node scripts/build-offline-runtime.mjs",
+    "migrate:offline-reads": "node scripts/migrate-offline-firestore-reads.mjs",
     "pretest": "npm run build:offline-runtime",
     "release:patch": "npm run version:patch && npm test",
     "test": "npm run test:offline && npm run test:security && npm run test:navigation && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:crypto && npm run test:attachments && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules",

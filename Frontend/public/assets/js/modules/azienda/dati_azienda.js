@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * DATI AZIENDA MODULE (V5.0 ADAPTER)
  * Visualizzazione dettagliata anagrafica aziendale, QR vCard, sedi e allegati.
@@ -5,7 +6,7 @@
  */
 
 import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
-import { doc, getDoc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

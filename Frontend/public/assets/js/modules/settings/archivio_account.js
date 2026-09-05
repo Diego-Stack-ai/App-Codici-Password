@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * ARCHIVIO ACCOUNT MODULE (V4.3)
  * Gestisce la visualizzazione e il ripristino di account archiviati (Cestino).
@@ -8,7 +9,7 @@ import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, query, where, updateDoc, deleteDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, showInputModal } from '../../ui-core-v129.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
 import { t } from '../../translations.js';

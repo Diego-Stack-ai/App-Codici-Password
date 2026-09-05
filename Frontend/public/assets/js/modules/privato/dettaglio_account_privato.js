@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
@@ -6,14 +7,8 @@
 import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
-import {
-    doc, getDoc, collection, query, where, getDocs, updateDoc,
-    deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy,
-    addDoc
-} from "/assets/js/vendor/firebase-runtime.js";
-import {
-    ref, uploadBytes, getDownloadURL, deleteObject, getBytes
-} from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy, addDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

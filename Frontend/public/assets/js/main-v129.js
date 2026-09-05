@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * PROTOCOLLO MASTER MAIN ENTRY POINT (V7.0) - release home v126
  * Coordina l'inizializzazione dei moduli UI dell'applicazione secondo il PROTOCOLLO V7.0.
@@ -28,10 +29,7 @@ import { initComponents } from './components-v129.js'; // Imports components sys
 import * as firebaseRuntime from './firebase-config.js?v=1.2.37';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import {
-    doc, getDoc, collection, query, where, getDocs, updateDoc, deleteDoc,
-    onSnapshot, runTransaction, arrayUnion, arrayRemove
-} from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, initLockedUX } from './ui-core-v129.js';
 import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';

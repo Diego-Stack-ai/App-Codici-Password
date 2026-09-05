@@ -1,5 +1,6 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 import { db } from '../../firebase-config.js?v=1.2.37';
-import { collection, doc, getDoc, getDocs } from '/assets/js/vendor/firebase-runtime.js';
+import { collection, doc } from "/assets/js/vendor/firebase-runtime.js";
 
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];

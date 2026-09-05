@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * HOME PAGE MODULE (V4.1)
  * Gestisce l'interfaccia della nuova Home Page statica.
@@ -6,7 +7,7 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { onAuthStateChanged, signOut } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, getDoc, collection, getDocs } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';

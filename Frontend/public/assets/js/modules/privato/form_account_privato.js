@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * FORM ACCOUNT PRIVATO (V6.0 — Unified Banking Renderer)
  * Creazione e modifica account con gestione IBAN dinamica.
@@ -5,7 +6,7 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { doc, getDoc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, getDocs, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

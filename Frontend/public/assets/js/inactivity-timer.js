@@ -1,8 +1,9 @@
+import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 import { auth, db } from './firebase-config.js?v=1.2.37';
 import { LOG } from './logger.js';
 import { getVaultSessionExpiry, touchVaultSession } from './modules/core/vault-session.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, getDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc } from "/assets/js/vendor/firebase-runtime.js";
 
 /**
  * PROTOCOLLO BASE INACTIVITY TIMER (TITAN-LOCK v1.0)

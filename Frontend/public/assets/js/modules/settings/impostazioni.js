@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
@@ -5,7 +6,7 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, getDoc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';

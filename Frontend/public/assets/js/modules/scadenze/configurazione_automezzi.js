@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * CONFIGURAZIONE AUTOMEZZI MODULE (V4.1)
  * Gestisce la configurazione delle scadenze per automezzi.
@@ -6,7 +7,7 @@
 
 import { db, auth } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import { doc, getDoc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

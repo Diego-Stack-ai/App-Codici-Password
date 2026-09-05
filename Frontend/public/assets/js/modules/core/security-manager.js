@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
  * - La masterKey è tenuta in RAM e cifrata per la durata della scheda attiva.
@@ -7,7 +8,7 @@
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { db, auth } from '../../firebase-config.js?v=1.2.37';
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, setDoc, updateDoc, collection, limit, query, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
 import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';

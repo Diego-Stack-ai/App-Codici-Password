@@ -1,3 +1,4 @@
+import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * SCADENZE MODULE (V4.1)
  * Gestione della pagina scadenze (lista completa) e utility per la home.
@@ -9,7 +10,7 @@ import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { collection, getDocs, updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
+import { collection, updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from '../../translations.js';
 import { initComponents } from '../../components-v129.js?v=1.2.37';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

@@ -1,4 +1,5 @@
-import { collection, getDocs } from '/assets/js/vendor/firebase-runtime.js';
+import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
+import { collection } from "/assets/js/vendor/firebase-runtime.js";
 import { db } from './firebase-config.js?v=1.2.37';
 
 const CORE_COLLECTIONS = [

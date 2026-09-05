@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * ACCOUNT AZIENDA MODULE (V5.0 Compliant)
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
@@ -5,7 +6,7 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { doc, getDoc, collection, getDocs, query, where, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, query, where, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

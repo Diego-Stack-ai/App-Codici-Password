@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO ACCOUNT AZIENDA — SHARING MODULE (V1.0)
  * Gestione condivisione, visualizzazione ospiti e revoca accessi per account aziendali.
@@ -7,9 +8,7 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
-import {
-    doc, getDoc, collection, runTransaction
-} from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';

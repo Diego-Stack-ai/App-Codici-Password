@@ -1,3 +1,4 @@
+import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * PROFILO PRIVATO MODULE (V6.0 — Modular)
  * Entry point e orchestratore del profilo privato utente.
@@ -23,7 +24,7 @@
 import { auth, db, storage } from '../../firebase-config.js?v=1.2.37';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, getDoc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';

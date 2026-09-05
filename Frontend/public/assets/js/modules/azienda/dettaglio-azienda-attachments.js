@@ -1,3 +1,4 @@
+import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO ACCOUNT AZIENDA — ATTACHMENTS MODULE (V1.0)
  * Gestione allegati (upload, visualizzazione, eliminazione) per account aziendali.
@@ -6,12 +7,8 @@
  */
 
 import { db, storage } from '../../firebase-config.js?v=1.2.37';
-import {
-    doc, collection, addDoc, query, orderBy, getDocs, deleteDoc, serverTimestamp
-} from "/assets/js/vendor/firebase-runtime.js";
-import {
-    ref, uploadBytes, getDownloadURL, deleteObject, getBytes
-} from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, addDoc, query, orderBy, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
+import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
