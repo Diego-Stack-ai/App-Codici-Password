@@ -37,8 +37,15 @@ function setWorkingImage(source) {
     preview.height = Math.round(height * scale);
     preview.getContext('2d').drawImage(source, 0, 0, preview.width, preview.height);
     workingImage = copyCanvas(preview);
-    selection = null;
-    cropButton.disabled = true;
+    const inset = Math.max(12, Math.round(Math.min(preview.width, preview.height) * .035));
+    selection = {
+        x: inset,
+        y: inset,
+        width: preview.width - (inset * 2),
+        height: preview.height - (inset * 2)
+    };
+    cropButton.disabled = false;
+    paintSelection();
     showQuality();
 }
 
@@ -132,7 +139,14 @@ preview.addEventListener('pointermove', event => {
     paintSelection();
     cropButton.disabled = selection.width < 80 || selection.height < 80;
 });
-preview.addEventListener('pointerup', () => { dragStart = null; resizeCorner = null; selectionAtStart = null; });
+function finishPointer() {
+    dragStart = null;
+    resizeCorner = null;
+    selectionAtStart = null;
+    cropButton.disabled = !selection || selection.width < 40 || selection.height < 40;
+}
+preview.addEventListener('pointerup', finishPointer);
+preview.addEventListener('pointercancel', finishPointer);
 
 byId('rotate-left').addEventListener('click', () => {
     const rotated = document.createElement('canvas');
