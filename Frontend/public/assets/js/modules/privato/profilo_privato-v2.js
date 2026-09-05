@@ -21,7 +21,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.42';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.41';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -39,7 +39,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.j
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr-v2.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails-v2.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs-v2.js?v=1.2.42';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs-v2.js?v=1.2.41';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';

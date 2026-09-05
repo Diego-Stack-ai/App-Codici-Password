@@ -1,5 +1,5 @@
 import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
-import { auth, db } from '../../firebase-config.js?v=1.2.42';
+import { auth, db } from '../../firebase-config.js?v=1.2.41';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';

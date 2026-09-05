@@ -335,17 +335,10 @@ Questi valori sono obiettivi da misurare su PC e iPhone reali, non dichiarazioni
 - [ ] Definire una scelta esplicita “dispositivo fidato” prima di mantenere dati persistenti sensibili nel browser.
 - [ ] Documentare cancellazione cache, logout, cambio account e revoca del dispositivo.
 
-#### FASE P6 — Allegati, AI e funzioni secondarie (P6A–P6B implementate localmente)
+#### FASE P6 — Allegati, AI e funzioni secondarie
 
-- [x] Rendere disponibili offline solo gli allegati scelti esplicitamente dall'utente.
-- [x] Conservare in IndexedDB esclusivamente il ciphertext già presente su Storage, senza file decifrati o metadati originali superflui.
-- [x] Applicare un limite di 25 MB per file e 100 MB complessivi per dispositivo.
-- [x] Consentire apertura offline, rimozione della sola copia locale e pulizia della copia locale quando l'allegato remoto viene eliminato.
-- [x] Integrare lo stato `Solo online` / `Offline` negli allegati di account privati, account aziendali e scadenze.
-- [ ] Aggiungere una gestione centralizzata dello spazio offline e la cancellazione selettiva per dispositivo.
+- [ ] Rendere disponibili offline solo allegati scelti dall'utente, cifrati e soggetti a quota.
 - [ ] Limitare la ricerca AI ai dati locali già autorizzati, con risposta esplicita se la copia è incompleta.
-- [ ] Progettare OCR locale per testo, QR e codici a barre; nessun documento viene inviato a servizi esterni senza consenso esplicito.
-- [ ] Proporre i campi riconosciuti e richiedere conferma prima di salvarli cifrati in Account, Profilo o Azienda.
 - [ ] Attivare nuove funzioni soltanto se i budget di P0 restano rispettati.
 
 ### 10.7 Gate di accettazione

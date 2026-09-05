@@ -120,7 +120,6 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/settings/impostazioni.js",
   "assets/js/modules/shared/attachment-security.js",
   "assets/js/modules/shared/banking-renderer.js",
-  "assets/js/modules/shared/offline-attachment-store.js",
   "assets/js/modules/shared/push-manager.js",
   "assets/js/modules/shared/qr_code_utils-v2.js",
   "assets/js/modules/shared/qr_code_utils.js",

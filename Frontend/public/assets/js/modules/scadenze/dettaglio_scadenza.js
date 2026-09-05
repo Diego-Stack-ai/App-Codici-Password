@@ -5,7 +5,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.42';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.41';
 import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 
@@ -14,11 +14,9 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { ensureMasterKey } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
-import { getOfflineAttachment, hasOfflineAttachment, removeOfflineAttachment, saveOfflineAttachment } from '../shared/offline-attachment-store.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
-let currentUid = null;
 
 async function getScadenza(userId, scadenzaId) {
     const snapshot = await getDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
@@ -48,7 +46,6 @@ async function deleteScadenza(userId, scadenzaId) {
  */
 export async function initDettaglioScadenza(user) {
     if (!user) return;
-    currentUid = user.uid;
     currentScadenzaId = new URLSearchParams(window.location.search).get('id');
     if (!currentScadenzaId) {
         window.location.href = 'scadenze.html';
@@ -65,7 +62,7 @@ async function loadScadenza(uid) {
             showToast("Scadenza non trovata", "error");
             return;
         }
-        await renderScadenza(currentScadenza);
+        renderScadenza(currentScadenza);
         await markOpenedDeadlineNotification(uid);
     } catch (e) {
         console.error(e);
@@ -136,7 +133,7 @@ async function handleDelete() {
     } catch (error) { showToast("Errore", "error"); }
 }
 
-async function renderScadenza(scadenza) {
+function renderScadenza(scadenza) {
     // Titolo: usa title (vecchio) o name + type (nuovo)
     const title = scadenza.title || `${scadenza.type || ''} - ${scadenza.name || ''}`.trim();
     document.getElementById('detail-title').textContent = title || 'Dettaglio Scadenza';
@@ -172,24 +169,18 @@ async function renderScadenza(scadenza) {
     if (scadenza.attachments && scadenza.attachments.length > 0) {
         attSec?.classList.remove('hidden');
         clearElement(attCont);
-        const items = await Promise.all(scadenza.attachments.map(async a => {
+        const items = scadenza.attachments.map(a => {
             const ext = a.name.split('.').pop().toLowerCase();
-            const availableOffline = a.storagePath ? await hasOfflineAttachment(currentUid, a.storagePath) : false;
-            return createElement('div', { className: 'detail-list-item' }, [
-                createElement('button', { type: 'button', onclick: () => openDeadlineAttachment(a), className: 'detail-list-item-left clickable' }, [
+            return createElement('button', { type: 'button', onclick: () => openDeadlineAttachment(a), className: 'detail-list-item clickable' }, [
+                createElement('div', { className: 'detail-list-item-left' }, [
                     createElement('div', { className: 'detail-list-icon-box' }, [
                         createElement('span', { className: `material-symbols-outlined`, textContent: 'description' })
                     ]),
-                    createElement('span', { className: 'detail-list-item-title', textContent: `${a.name}${availableOffline ? ' • Offline' : ' • Solo online'}` })
+                    createElement('span', { className: 'detail-list-item-title', textContent: a.name })
                 ]),
-                a.encryption && a.storagePath ? createElement('button', {
-                    type: 'button', className: 'detail-list-item-arrow',
-                    title: availableOffline ? 'Rimuovi dal dispositivo' : 'Rendi disponibile offline',
-                    onclick: () => toggleDeadlineAttachmentOffline(a, availableOffline)
-                }, [createElement('span', { className: 'material-symbols-outlined', textContent: availableOffline ? 'offline_pin' : 'download_for_offline' })]) :
-                    createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow', textContent: 'open_in_new' })
+                createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow', textContent: 'open_in_new' })
             ]);
-        }));
+        });
         setChildren(attCont, items);
     }
 
@@ -258,30 +249,11 @@ async function openDeadlineAttachment(attachment) {
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureMasterKey();
-        const cached = await getOfflineAttachment(currentUid, attachment.storagePath);
-        const bytes = cached || await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         openDecryptedAttachment(clear, attachment);
     } catch (error) {
         console.error('[DeadlineAttachment]', error);
         showToast('Impossibile aprire l’allegato cifrato.', 'error');
-    }
-}
-
-async function toggleDeadlineAttachmentOffline(attachment, availableOffline) {
-    try {
-        if (availableOffline) {
-            await removeOfflineAttachment(currentUid, attachment.storagePath);
-            showToast('Copia offline rimossa dal dispositivo', 'success');
-        } else {
-            if (!navigator.onLine) throw new Error('OFFLINE_DOWNLOAD_REQUIRES_NETWORK');
-            const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
-            await saveOfflineAttachment(currentUid, attachment, bytes);
-            showToast('Allegato disponibile offline', 'success');
-        }
-        await renderScadenza(currentScadenza);
-    } catch (error) {
-        console.error('[DeadlineAttachmentOffline]', error);
-        showToast(error.message === 'OFFLINE_ATTACHMENT_QUOTA' ? 'Spazio offline esaurito (limite 100 MB)' : 'Impossibile aggiornare la copia offline', 'error');
     }
 }

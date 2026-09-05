@@ -6,7 +6,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * Init: initAttachmentModule(ctx)
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.42';
+import { db, storage } from '../../firebase-config.js?v=1.2.41';
 import { doc, collection, addDoc, query, orderBy, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -15,7 +15,6 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { ensureMasterKey } from '../core/security-manager.js';
-import { getOfflineAttachment, hasOfflineAttachment, removeOfflineAttachment, saveOfflineAttachment } from '../shared/offline-attachment-store.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _currentUid = null;
@@ -118,13 +117,13 @@ export async function loadAttachments() {
         const snap = await getDocs(q);
 
         const attachments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        await renderAttachments(attachments);
+        renderAttachments(attachments);
     } catch (e) {
         logError("LoadAttachments", e);
     }
 }
 
-async function renderAttachments(list) {
+function renderAttachments(list) {
     const container = document.getElementById('attachments-list');
     if (!container) return;
 
@@ -138,7 +137,7 @@ async function renderAttachments(list) {
         return;
     }
 
-    const items = await Promise.all(list.map(async a => {
+    const items = list.map(a => {
         const type = (a.type || "").toLowerCase();
         let icon = 'description';
         let color = 'text-blue-400/40';
@@ -152,7 +151,6 @@ async function renderAttachments(list) {
             : '---';
         const size = (a.size / (1024 * 1024)).toFixed(2);
 
-        const availableOffline = a.storagePath ? await hasOfflineAttachment(_currentUid, a.storagePath) : false;
         return createElement('div', {
             className: 'attachment-item animate-in slide-in-from-left-2'
         }, [
@@ -163,14 +161,9 @@ async function renderAttachments(list) {
                 createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
                 createElement('div', { className: 'attachment-meta' }, [
                     createElement('span', { className: 'attachment-name', textContent: a.name }),
-                    createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}${availableOffline ? ' • Offline' : ' • Solo online'}` })
+                    createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
                 ])
             ]),
-            a.encryption && a.storagePath ? createElement('button', {
-                type: 'button', className: 'btn-delete-attachment',
-                title: availableOffline ? 'Rimuovi dal dispositivo' : 'Rendi disponibile offline',
-                onclick: async (e) => { e.stopPropagation(); await toggleOfflineAttachment(a, availableOffline); }
-            }, [createElement('span', { className: 'material-symbols-outlined', textContent: availableOffline ? 'offline_pin' : 'download_for_offline' })]) : null,
             createElement('button', {
                 type: 'button',
                 className: 'btn-delete-attachment',
@@ -179,7 +172,7 @@ async function renderAttachments(list) {
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
             ])
         ]);
-    }));
+    });
 
     setChildren(container, items);
 }
@@ -192,31 +185,12 @@ async function openAttachment(attachment) {
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
         const vaultKey = await ensureMasterKey();
-        const cached = await getOfflineAttachment(_currentUid, attachment.storagePath);
-        const bytes = cached || await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
+        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         openDecryptedAttachment(clear, attachment);
     } catch (error) {
         logError('OpenEncryptedAttachment', error);
         showToast('Impossibile aprire l’allegato cifrato.', 'error');
-    }
-}
-
-async function toggleOfflineAttachment(attachment, availableOffline) {
-    try {
-        if (availableOffline) {
-            await removeOfflineAttachment(_currentUid, attachment.storagePath);
-            showToast('Copia offline rimossa dal dispositivo', 'success');
-        } else {
-            if (!navigator.onLine) throw new Error('OFFLINE_DOWNLOAD_REQUIRES_NETWORK');
-            const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
-            await saveOfflineAttachment(_currentUid, attachment, bytes);
-            showToast('Allegato disponibile offline', 'success');
-        }
-        await loadAttachments();
-    } catch (error) {
-        logError('ToggleOfflineAttachment', error);
-        showToast(error.message === 'OFFLINE_ATTACHMENT_QUOTA' ? 'Spazio offline esaurito (limite 100 MB)' : 'Impossibile aggiornare la copia offline', 'error');
     }
 }
 
@@ -231,7 +205,6 @@ async function deleteAttachment(att) {
         }
         const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments", att.id);
         await deleteDoc(docRef);
-        if (att.storagePath) await removeOfflineAttachment(_currentUid, att.storagePath);
 
         showToast("Allegato eliminato", "success");
         await loadAttachments();
