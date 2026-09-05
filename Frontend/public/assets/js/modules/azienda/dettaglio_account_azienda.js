@@ -94,12 +94,21 @@ async function loadAccount() {
         if (originalData._encrypted) {
             try {
                 const masterKey = await ensureMasterKey();
-                originalData.username = await decryptIfPossible(originalData.username, masterKey);
-                originalData.account = await decryptIfPossible(originalData.account, masterKey);
-                originalData.password = await decryptIfPossible(originalData.password, masterKey);
-                originalData.numeroIscrizione = await decryptIfPossible(originalData.numeroIscrizione, masterKey);
-                originalData.codiceSocieta = await decryptIfPossible(originalData.codiceSocieta, masterKey);
-                originalData.note = await decryptIfPossible(originalData.note, masterKey);
+                [
+                    originalData.username,
+                    originalData.account,
+                    originalData.password,
+                    originalData.numeroIscrizione,
+                    originalData.codiceSocieta,
+                    originalData.note
+                ] = await Promise.all([
+                    decryptIfPossible(originalData.username, masterKey),
+                    decryptIfPossible(originalData.account, masterKey),
+                    decryptIfPossible(originalData.password, masterKey),
+                    decryptIfPossible(originalData.numeroIscrizione, masterKey),
+                    decryptIfPossible(originalData.codiceSocieta, masterKey),
+                    decryptIfPossible(originalData.note, masterKey)
+                ]);
 
                 if (Array.isArray(originalData.banking)) {
                     originalData.banking = await Promise.all(originalData.banking.map(async b => ({

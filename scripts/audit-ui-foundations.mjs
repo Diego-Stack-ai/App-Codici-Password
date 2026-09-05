@@ -49,6 +49,8 @@ const core = fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core.css'),
 const theme = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'theme-init.js'), 'utf8');
 const components = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'components-v129.js'), 'utf8');
 const home = fs.readFileSync(path.join(publicRoot, 'home_page.html'), 'utf8');
+const privateAccountForm = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modules', 'privato', 'form_account_privato.js'), 'utf8');
+const companyAccountForm = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modules', 'azienda', 'form_account_azienda.js'), 'utf8');
 const privateAccountCss = [
   'area_privata.css',
   'account_privati.css',
@@ -81,6 +83,7 @@ const requiredSignals = [
   ['token --text-body', coreFonts.includes('--text-body:')],
   ['token --touch-target-min', core.includes('--touch-target-min:')],
   ['supporto movimento ridotto', core.includes('prefers-reduced-motion')],
+  ['placeholder leggibili nei due temi', core.includes('--text-placeholder:') && /input::placeholder,[\s\S]*textarea::placeholder[\s\S]*color:\s*var\(--text-placeholder\)/.test(core)],
   ['tema security-dark', theme.includes("themeMode = 'security-dark'")],
   ['header senza elemento fisso annidato', components.includes('setChildren(headerPh, headerContent)') && !components.includes("createElement('header', { className: 'base-header' }")],
   ['saluto Home con tipografia semantica', components.includes("className: 'header-greeting'") && !components.includes('text-[9px]')],
@@ -95,7 +98,9 @@ const requiredSignals = [
   ['scadenze senza testi inferiori a 12px', !/font-size\s*:\s*(?:[0-9]|1[01])px/.test(deadlineCss)],
   ['azioni scadenze con target tattile', deadlineCss.includes('width: var(--touch-target-min, 44px)')],
   ['controlli rimanenti con target tattile', (remainingUiCss.match(/var\(--touch-target-min, 44px\)/g) || []).length >= 12],
-  ['assistente contenuto nel viewport', remainingUiCss.includes('max-height: calc(100dvh') && remainingUiCss.includes('overscroll-behavior: contain')]
+  ['assistente contenuto nel viewport', remainingUiCss.includes('max-height: calc(100dvh') && remainingUiCss.includes('overscroll-behavior: contain')],
+  ['caricamento account e rubrica parallelo', [privateAccountForm, companyAccountForm].every(source => /await Promise\.all\(\[[\s\S]*loadRubrica\(\)[\s\S]*loadData\(\)/.test(source))],
+  ['rubrica vuota comunicata nei form', [privateAccountForm, companyAccountForm].every(source => source.includes("t('empty_contacts')"))]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);

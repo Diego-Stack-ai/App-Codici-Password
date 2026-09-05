@@ -90,6 +90,7 @@ body,
     --bg-primary: #e2e8f0;
     --text-primary: #0f172a;
     --text-secondary: #475569;
+    --text-placeholder: #64748b;
 
     --card-bg: rgba(255, 255, 255, 0.7);
     --card-border: rgba(0, 0, 0, 0.1);
@@ -142,6 +143,7 @@ body,
     --bg-primary: #0a0f1e;
     --text-primary: #fff;
     --text-secondary: #94a3b8;
+    --text-placeholder: #94a3b8;
 
     --card-bg: rgba(255, 255, 255, 0.02);
     --card-border: rgba(255, 255, 255, 0.1);
@@ -176,6 +178,12 @@ body,
     overflow-x: hidden;
     position: relative;
     font-family: 'Manrope', sans-serif;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-placeholder);
+    opacity: 1;
 }
 
 .base-container {

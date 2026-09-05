@@ -87,8 +87,10 @@ export async function initFormAccountPrivato(user) {
     }
 
     setupUI();
-    await loadRubrica();
-    if (isEditing) await loadData();
+    await Promise.all([
+        loadRubrica(),
+        isEditing ? loadData() : Promise.resolve()
+    ]);
 
     
 }
@@ -122,12 +124,19 @@ async function loadData() {
             try { return await decrypt(val, masterKey); } catch (e) { return "---ERRORE DECRYPT---"; }
         };
 
+        const [username, accountCode, password, note] = await Promise.all([
+            decryptIfPossible(data.username),
+            decryptIfPossible(data.account || data.codice),
+            decryptIfPossible(data.password),
+            decryptIfPossible(data.note)
+        ]);
+
         setVal('account-name', data.nomeAccount);
-        setVal('account-username', await decryptIfPossible(data.username));
-        setVal('account-code', await decryptIfPossible(data.account || data.codice));
-        setVal('account-password', await decryptIfPossible(data.password));
+        setVal('account-username', username);
+        setVal('account-code', accountCode);
+        setVal('account-password', password);
         setVal('account-url', data.url || data.sitoWeb);
-        setVal('account-note', await decryptIfPossible(data.note));
+        setVal('account-note', note);
 
         // Referente (Root or Object support)
         const ref = data.referente || {};
@@ -398,16 +407,14 @@ function setupUI() {
 
     if (inviteInput && suggestions) {
         inviteInput.onfocus = () => {
-            if (myContacts.length > 0) {
-                renderSuggestions(myContacts);
-                suggestions.classList.remove('hidden');
-            }
+            renderSuggestions(myContacts);
+            suggestions.classList.remove('hidden');
         };
         inviteInput.oninput = (e) => {
             const val = e.target.value.toLowerCase();
             const filtered = myContacts.filter(c => c.email.toLowerCase().includes(val) || (c.nome && c.nome.toLowerCase().includes(val)));
             renderSuggestions(filtered);
-            suggestions.classList.toggle('hidden', filtered.length === 0);
+            suggestions.classList.remove('hidden');
         };
     }
 
@@ -450,6 +457,13 @@ function renderSuggestions(list) {
     const container = document.getElementById('rubrica-suggestions');
     if (!container) return;
     clearElement(container);
+    if (list.length === 0) {
+        container.appendChild(createElement('p', {
+            className: 'suggestion-empty',
+            textContent: myContacts.length === 0 ? t('empty_contacts') : 'Nessun contatto corrispondente'
+        }));
+        return;
+    }
     list.forEach(c => {
         const div = createElement('div', {
             className: 'suggestion-item',
