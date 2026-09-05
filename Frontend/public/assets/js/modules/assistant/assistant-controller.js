@@ -1,38 +1,72 @@
 import { ensureMasterKey } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.41';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.41';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.42';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.42';
 import { decryptIfPossible } from '../core/crypto-utils.js';
+import { getOfflineReadiness } from '../../offline-sync.js';
 
 let activeController = null;
 
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.41'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.42'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
 export async function initVaultAssistant(user) {
     activeController?.destroy();
     attachStyles();
-    const masterKey = await ensureMasterKey();
-    const records = await loadVaultSearchRecords(user);
-    const conversation = new VaultConversationEngine(records);
+    let masterKey = null;
+    let conversation = null;
+    let preparation = null;
     let dialog = null;
     const close = () => { dialog?.destroy(); dialog = null; };
     const trigger = document.getElementById('ai-assistant-status');
     if (!trigger) throw new Error('Comando Agente AI non disponibile');
-    const open = () => {
-        close(); dialog = createAssistantUI({
+    const prepare = () => {
+        if (preparation) return preparation;
+        preparation = Promise.all([ensureMasterKey(), loadVaultSearchRecords(user)]).then(([key, records]) => {
+            masterKey = key;
+            conversation = new VaultConversationEngine(records);
+            return records.length;
+        }).catch(error => {
+            preparation = null;
+            throw error;
+        });
+        return preparation;
+    };
+    const open = async () => {
+        const label = trigger.querySelector('.ai-assistant-label');
+        const previousLabel = label?.textContent;
+        trigger.disabled = true;
+        if (label) label.textContent = 'Preparazione…';
+        try {
+            await prepare();
+            close();
+            const readiness = getOfflineReadiness(user.uid);
+            const offlineNotice = !navigator.onLine && !readiness?.complete
+                ? 'Ricerca sui dati disponibili offline: alcuni risultati potrebbero mancare.'
+                : '';
+            dialog = createAssistantUI({
             onAsk: query => conversation.ask(query),
             onClose: close,
-            resolveCredential: value => decryptIfPossible(value, masterKey)
-        });
+                resolveCredential: value => decryptIfPossible(value, masterKey),
+                offlineNotice
+            });
+        } catch (error) {
+            console.warn('[ASSISTANT] Preparazione non riuscita.', error);
+            if (label) label.textContent = 'Non disponibile';
+        } finally {
+            trigger.disabled = false;
+            window.setTimeout(() => {
+                if (label) label.textContent = previousLabel || 'AI attiva';
+            }, 1200);
+        }
     };
     trigger.addEventListener('click', open);
-    const destroy = () => { close(); trigger.removeEventListener('click', open); conversation.clear(); };
+    const destroy = () => { close(); trigger.removeEventListener('click', open); conversation?.clear(); };
     window.addEventListener('pagehide', destroy, { once: true });
-    activeController = { destroy, size: records.length };
+    activeController = { destroy, prepare };
     return activeController;
 }

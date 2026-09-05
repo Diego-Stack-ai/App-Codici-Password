@@ -5,7 +5,7 @@ function element(tag, className, text = '') {
     return node;
 }
 
-export function createAssistantUI({ onAsk, onClose, resolveCredential }) {
+export function createAssistantUI({ onAsk, onClose, resolveCredential, offlineNotice = '' }) {
     const pageScrollY = window.scrollY;
     document.documentElement.classList.add('vault-assistant-open');
     document.body.classList.add('vault-assistant-open');
@@ -30,6 +30,7 @@ export function createAssistantUI({ onAsk, onClose, resolveCredential }) {
     microphone.type = 'button'; microphone.setAttribute('aria-label', 'Parla con Codex'); microphone.append(element('span', 'material-symbols-outlined', 'mic'));
     searchRow.append(input, send, microphone);
     const status = element('p', 'vault-assistant-status', 'I dati segreti non vengono mostrati nella conversazione.');
+    if (offlineNotice) status.textContent = offlineNotice;
 
     const speak = message => {
         if (!('speechSynthesis' in window)) return;

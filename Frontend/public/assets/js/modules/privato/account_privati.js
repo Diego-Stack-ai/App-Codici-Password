@@ -4,7 +4,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.41';
+import { auth, db } from '../../firebase-config.js?v=1.2.42';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import { collection, query, where, updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
@@ -12,7 +12,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.41';
+import { initComponents } from '../../components-v129.js?v=1.2.42';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 

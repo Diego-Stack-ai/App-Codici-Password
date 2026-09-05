@@ -1,9 +1,10 @@
 import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
-import { db } from '../../firebase-config.js?v=1.2.41';
+import { db } from '../../firebase-config.js?v=1.2.42';
 import { collection, doc } from "/assets/js/vendor/firebase-runtime.js";
 
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];
+const NESTED_ACCOUNT_CONCURRENCY = 3;
 const make = ({ id, kind, title, subtitle = '', keywords = [], href, scope = 'privato', companyName = '', credentials = null }) => ({
     id: `${kind}:${id}`, kind, title: text(title) || 'Senza nome', subtitle: text(subtitle),
     keywords: keywords.map(text).filter(Boolean), href, scope, companyName: text(companyName), credentials
@@ -51,14 +52,20 @@ export async function loadVaultSearchRecords(user) {
     const records = profile.exists() ? profileRecords(uid, profile.data()) : [];
     accounts.forEach(item => records.push(accountRecord(item.id, item.data())));
     deadlines.forEach(item => records.push(deadlineRecord(item.id, item.data())));
-    const nested = [];
+    const companyItems = [];
     companies.forEach(item => {
         const companyData = item.data();
         const companyName = companyData.ragioneSociale || companyData.nome || companyData.denominazione || 'Azienda';
         records.push(companyRecord(item.id, companyData));
-        nested.push(getDocs(collection(db, 'users', uid, 'aziende', item.id, 'accounts'))
-            .then(snapshot => snapshot.forEach(account => records.push(accountRecord(account.id, account.data(), item.id, companyName)))));
+        companyItems.push({ id: item.id, companyName });
     });
-    await Promise.all(nested);
+    let cursor = 0;
+    await Promise.all(Array.from({ length: Math.min(NESTED_ACCOUNT_CONCURRENCY, companyItems.length) }, async () => {
+        while (cursor < companyItems.length) {
+            const company = companyItems[cursor++];
+            const snapshot = await getDocs(collection(db, 'users', uid, 'aziende', company.id, 'accounts'));
+            snapshot.forEach(account => records.push(accountRecord(account.id, account.data(), company.id, company.companyName)));
+        }
+    }));
     return records;
 }
