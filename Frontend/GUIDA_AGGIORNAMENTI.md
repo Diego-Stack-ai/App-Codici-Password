@@ -371,12 +371,18 @@ Architettura raccomandata:
 
 Gate prima dell'implementazione:
 
-- prototipo isolato, non collegato ai dati reali;
-- almeno 20 immagini di test per ciascun profilo, prive di dati personali reali;
+- [x] prototipo isolato, non collegato ai dati reali;
+- [ ] almeno 20 immagini di test per ciascun profilo, prive di dati personali reali (prima prova: 6 fotografie, dati non conservati nel repository);
 - precisione campo per campo definita e verificata;
 - nessun caricamento di immagini su rete durante il percorso locale;
-- bundle OCR escluso dal caricamento iniziale e dalla cache offline obbligatoria;
+- [x] bundle OCR escluso dal caricamento iniziale e dalla cache offline obbligatoria; il gate automatico `npm run test:lightweight` impedisce riferimenti OCR/QR nel runtime pubblico;
 - revisione specifica per PCI/privacy prima di gestire carte di pagamento reali.
+
+Esito della prima prova reale: l'OCR grezzo su fotografie grandi e ruotate ha richiesto
+circa 15–20 secondi per immagine e ha prodotto risultati insufficienti. Il prototipo
+applica ora ridimensionamento, scala di grigi e contrasto prima dell'OCR, ma resta
+necessario collaudare su iPhone ritaglio e rotazione guidati. Nessun dato illeggibile
+può essere ricostruito o suggerito automaticamente.
 
 ### 10.7 Gate di accettazione
 
