@@ -87,6 +87,12 @@
           </a>
         </div>
 
+        <button id="app-presentation-open" class="app-presentation-open" type="button"
+          aria-haspopup="dialog" aria-controls="app-presentation-modal">
+          <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
+          <span>Presentazione dell’app</span>
+        </button>
+
         <!-- Versione applicazione: valorizzata dalla configurazione centrale -->
         <div class="version-display">
           APP VERSION: <span id="app-version-label" data-app-version>v1.2.36</span>
@@ -97,6 +103,33 @@
 
     <!-- FOOTER (V3.9 Semantic) -->
     <footer id="footer-placeholder" class="base-footer"></footer>
+  </div>
+
+  <div id="app-presentation-modal" class="app-presentation-modal" role="dialog" aria-modal="true"
+    aria-labelledby="app-presentation-title" hidden>
+    <div class="app-presentation-backdrop" data-presentation-close></div>
+    <section class="app-presentation-panel">
+      <header class="app-presentation-heading">
+        <div>
+          <h2 id="app-presentation-title">Codici &amp; Password</h2>
+          <p>Anteprima della presentazione</p>
+        </div>
+        <button class="app-presentation-close" type="button" data-presentation-close
+          aria-label="Chiudi presentazione">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div id="app-presentation-stage" class="app-presentation-stage">
+        <div class="app-presentation-loading" role="status">
+          <span class="material-symbols-outlined" aria-hidden="true">movie</span>
+          <span>Premi Riproduci per caricare il video protetto.</span>
+        </div>
+      </div>
+      <button id="app-presentation-play" class="app-presentation-play" type="button">
+        <span class="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+        <span>Riproduci</span>
+      </button>
+    </section>
   </div>
 
   <!-- Scripts -->

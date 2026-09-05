@@ -20,6 +20,13 @@ service firebase.storage {
             request.resource.metadata.encrypted == 'v1'));
     }
 
+    // Materiale editoriale dell'app: leggibile esclusivamente dopo il login.
+    // Il client non può creare, sostituire o cancellare questi file.
+    match /app-media/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
     // Tutti gli oggetti applicativi sono confinati nello spazio dell'UID.
     // La lettura resta limitata al proprietario: la condivisione degli allegati
     // richiederà un protocollo crittografico dedicato nella fase P3.

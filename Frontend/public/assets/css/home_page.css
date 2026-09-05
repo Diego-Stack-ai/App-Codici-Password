@@ -255,6 +255,142 @@
     text-align: center;
 }
 
+.app-presentation-open {
+    margin: var(--space-5, 1.25rem) auto 0;
+    padding: 0.55rem 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.045);
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+}
+
+.app-presentation-open:hover,
+.app-presentation-open:focus-visible {
+    color: var(--text-primary);
+    border-color: rgba(96, 165, 250, 0.55);
+    background: rgba(96, 165, 250, 0.12);
+}
+
+.app-presentation-open .material-symbols-outlined { font-size: 1.2rem; }
+
+.app-presentation-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+        max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+}
+
+.app-presentation-modal[hidden] { display: none; }
+
+.app-presentation-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.78);
+    backdrop-filter: blur(14px);
+}
+
+.app-presentation-panel {
+    position: relative;
+    width: min(960px, 100%);
+    max-height: 92dvh;
+    padding: clamp(0.85rem, 2vw, 1.25rem);
+    overflow: auto;
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    background: color-mix(in srgb, var(--card-bg) 94%, transparent);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+.app-presentation-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+}
+
+.app-presentation-heading h2,
+.app-presentation-heading p { margin: 0; }
+
+.app-presentation-heading p {
+    margin-top: 0.2rem;
+    color: var(--text-secondary);
+    font: var(--font-caption);
+}
+
+.app-presentation-close {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--card-border);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.app-presentation-stage {
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    background: #020617;
+}
+
+.app-presentation-stage video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.app-presentation-loading {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.app-presentation-loading .material-symbols-outlined { font-size: 2.4rem; }
+
+.app-presentation-play {
+    min-height: 48px;
+    margin: 1rem auto 0;
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 0;
+    border-radius: 14px;
+    background: var(--accent);
+    color: #fff;
+    font: var(--font-label);
+    cursor: pointer;
+}
+
+.app-presentation-play:disabled { opacity: 0.65; cursor: wait; }
+
+@media (max-width: 600px) {
+    .app-presentation-panel { border-radius: 20px; }
+    .app-presentation-stage { border-radius: 12px; }
+}
+
 .header-right .header-ai-status {
     min-height: var(--touch-target-min, 44px);
     margin: 0;

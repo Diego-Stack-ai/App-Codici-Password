@@ -76,3 +76,23 @@ test('il formato binario è ammesso soltanto se marcato come allegato cifrato v1
     customMetadata: {encrypted: 'v1'},
   }));
 });
+
+test('i contenuti editoriali sono leggibili dagli utenti autenticati ma non modificabili dal client', async () => {
+  const mediaPath = 'app-media/presentazione/codici-password-v2.mp4';
+  const adminStorage = testEnv.unauthenticatedContext().storage();
+
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await uploadBytes(ref(context.storage(), mediaPath), new Uint8Array([1, 2, 3]), {
+      contentType: 'video/mp4',
+    });
+  });
+
+  await assertSucceeds(getBytes(ref(testEnv.authenticatedContext(OWNER_UID).storage(), mediaPath)));
+  await assertFails(getBytes(ref(adminStorage, mediaPath)));
+  await assertFails(uploadBytes(
+    ref(testEnv.authenticatedContext(OWNER_UID).storage(), mediaPath),
+    new Uint8Array([4]),
+    {contentType: 'video/mp4'},
+  ));
+  await assertFails(deleteObject(ref(testEnv.authenticatedContext(OWNER_UID).storage(), mediaPath)));
+});
