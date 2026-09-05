@@ -335,11 +335,48 @@ Questi valori sono obiettivi da misurare su PC e iPhone reali, non dichiarazioni
 - [ ] Definire una scelta esplicita “dispositivo fidato” prima di mantenere dati persistenti sensibili nel browser.
 - [ ] Documentare cancellazione cache, logout, cambio account e revoca del dispositivo.
 
-#### FASE P6 — Allegati, AI e funzioni secondarie
+#### FASE P6 — Allegati, AI e funzioni secondarie (chiusa: 5 settembre 2026)
 
-- [ ] Rendere disponibili offline solo allegati scelti dall'utente, cifrati e soggetti a quota.
-- [ ] Limitare la ricerca AI ai dati locali già autorizzati, con risposta esplicita se la copia è incompleta.
-- [ ] Attivare nuove funzioni soltanto se i budget di P0 restano rispettati.
+- [x] **Decisione allegati**: restano cifrati e disponibili soltanto online. Non vengono duplicati nella cache offline, così l'app rimane leggera e non occupa spazio imprevedibile sul dispositivo.
+- [x] **Dati utili offline**: codici e informazioni necessarie devono essere salvati come campi strutturati e cifrati dell'Account/Profilo/Azienda, non recuperati ogni volta dall'immagine.
+- [x] **Agente AI**: continua a lavorare sui dati locali già autorizzati; non scarica allegati né li invia a servizi esterni.
+- [x] **Gate prestazionale**: nessun motore OCR entra nel bootstrap o nella shell offline dell'app.
+- [x] La sperimentazione locale degli allegati offline è stata annullata prima di push e deploy; la versione pubblica non l'ha mai ricevuta.
+
+### 10.6.1 Roadmap separata — Importatore leggero di card
+
+L'importatore non fa parte della P6 runtime e dovrà essere caricato dinamicamente soltanto quando l'utente seleziona **Importa da foto**. La foto resta sul dispositivo durante l'analisi, salvo consenso esplicito a un futuro servizio esterno.
+
+Profili di acquisizione previsti:
+
+1. **Carta di credito/debito**: numero carta, intestatario e scadenza; CVV escluso dall'acquisizione automatica e sempre soggetto a inserimento/conferma esplicita.
+2. **Biglietto da visita**: nome, cognome, azienda, ruolo, telefoni, email, sito e indirizzo.
+3. **QR e codici a barre**: contenuto grezzo prima della classificazione; nessuna apertura automatica di URL o esecuzione di azioni.
+4. **Card generica**: testo libero suddiviso in proposte di campo, senza salvataggio automatico.
+
+Architettura raccomandata:
+
+- tentare prima le API native del browser quando realmente disponibili;
+- usare un decoder QR/barcode locale e lazy-loaded come fallback multipiattaforma, perché `BarcodeDetector` non è disponibile in modo affidabile su Safari/iOS;
+- valutare un worker OCR WebAssembly soltanto per fotografie che richiedono testo libero;
+- scaricare runtime e modello linguistico esclusivamente alla prima richiesta OCR, mostrando dimensione e stato;
+- non aggiungere runtime/modelli OCR al service worker o alla shell PWA;
+- ridimensionare e correggere prospettiva/contrasto dell'immagine prima dell'OCR per limitare memoria e tempo;
+- applicare parser separati per carta, biglietto da visita e card generica;
+- mostrare sempre immagine, valore riconosciuto e confidenza; ogni campo deve essere modificabile e confermato;
+- verificare numero carta con algoritmo di Luhn e data di scadenza, senza considerare la validazione una prova di correttezza;
+- non sovrascrivere campi esistenti e non salvare nulla senza conferma;
+- cifrare i dati approvati attraverso i flussi esistenti e poi liberare bitmap, testo OCR e worker dalla memoria;
+- misurare separatamente peso iniziale dell'app (che deve restare invariato), download opzionale, memoria, tempo e precisione su iPhone e PC.
+
+Gate prima dell'implementazione:
+
+- prototipo isolato, non collegato ai dati reali;
+- almeno 20 immagini di test per ciascun profilo, prive di dati personali reali;
+- precisione campo per campo definita e verificata;
+- nessun caricamento di immagini su rete durante il percorso locale;
+- bundle OCR escluso dal caricamento iniziale e dalla cache offline obbligatoria;
+- revisione specifica per PCI/privacy prima di gestire carte di pagamento reali.
 
 ### 10.7 Gate di accettazione
 
