@@ -7,7 +7,7 @@
 import { auth, db, storage } from '../../firebase-config.js?v=1.2.36';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { getBlob, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
+import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
@@ -134,7 +134,8 @@ function initAppPresentation() {
         playButton.disabled = true;
         playButton.querySelector('span:last-child').textContent = 'Caricamento…';
         try {
-            const blob = await getBlob(ref(storage, 'app-media/presentazione/codici-password-v2.mp4'));
+            const bytes = await getBytes(ref(storage, 'app-media/presentazione/codici-password-v2.mp4'));
+            const blob = new Blob([bytes], { type: 'video/mp4' });
             presentationObjectUrl = URL.createObjectURL(blob);
             const video = document.createElement('video');
             video.src = presentationObjectUrl;
