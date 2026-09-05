@@ -127,6 +127,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/offline-status.js",
   "assets/js/offline-sync.js",
   "assets/js/pages-init.js",
+  "assets/js/performance-metrics.js",
   "assets/js/swipe-list-v6.js",
   "assets/js/theme-init.js",
   "assets/js/translations.js",

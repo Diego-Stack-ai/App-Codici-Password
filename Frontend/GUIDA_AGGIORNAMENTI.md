@@ -28,11 +28,14 @@ Sezione sperimentale per nuovi effetti visivi.
 - [ ] Raffinamento dei Toast di sistema con icone dinamiche.
 
 ## 4. GESTIONE ERRORI PWA & OFFLINE PERMANENTE
-- **Stato**: ✅ Implementato (V7.1 Core).
+- **Stato**: ⚠️ In rivalutazione prestazionale (versione 1.2.38).
 - **Dettagli**:
     - ✅ Attivata persistenza `IndexedDB` in `firebase-config.js` (Multi-tab support).
-    - ✅ Aggiornato `sw.js` al protocollo **V7.0-MASTER** con asset-caching rinforzato.
-    - ✅ L'app è ora pienamente operativa offline per i dati già consultati.
+    - ✅ La shell statica e il runtime Firebase sono disponibili localmente tramite `sw.js`.
+    - ✅ Le letture senza rete usano esplicitamente la cache Firestore.
+    - ⚠️ La release 1.2.38 forza una sincronizzazione completa prima del rendering di ogni pagina privata: rende più affidabile il riempimento iniziale della cache, ma rallenta sensibilmente l'uso online e non rappresenta l'architettura definitiva.
+    - ⚠️ La piena operatività offline end-to-end non è ancora certificata: deve essere verificata su login già persistente, sblocco Vault, liste, dettagli, navigazione, allegati, iPhone/PWA, PC e ritorno online.
+    - ℹ️ Un nuovo login, TOTP, email, Push, inviti e download di allegati non già locali richiedono rete.
 
 ## 5. PROTOCOLLO SICUREZZA (V7.1 Hardened)
 Definizione dei nuovi standard di accesso e protezione dati.
@@ -195,3 +198,161 @@ La cifratura di nome, cognome, nascita, telefoni, indirizzi ed email attualmente
 interrogabili in chiaro non viene cambiata in questa roadmap. La futura migrazione
 deve considerare anche ricerca AI, ordinamento, dati principali, collegamenti e uso
 offline prima di modificare la rappresentazione persistente.
+
+---
+
+## 10. PIANO PROFESSIONALE: PRESTAZIONI, ONLINE/OFFLINE E SINCRONIZZAZIONE
+
+### Stato e obiettivo — 5 settembre 2026
+
+- **Stato**: analisi e progettazione approvate; implementazione non ancora avviata.
+- **Regola di prodotto**: velocità percepita, affidabilità dei dati e sicurezza sono requisiti non negoziabili. Nuove funzioni, inclusa l'AI, non devono peggiorarli.
+- **Obiettivo UX**: mostrare immediatamente la shell e l'ultima copia locale disponibile; aggiornare dalla rete in background; comunicare in modo discreto se i dati sono locali, aggiornati o in attesa di sincronizzazione.
+- **Vincolo di sicurezza**: nessuna Master Password, chiave Vault o dato decifrato deve essere scritto in Cache API, localStorage, log o backend. La cache Firestore può contenere soltanto la rappresentazione persistita e cifrata dei campi protetti.
+
+### 10.1 Evidenze misurate nel repository
+
+- La shell pubblica comprende **175 file** per circa **7,7 MB**; il solo bundle locale Firebase principale pesa circa **727 KB** non compresso. Il service worker precarica l'intero manifest statico durante l'installazione.
+- `offline-firestore.js` sceglie la rete quando `navigator.onLine` è vero e la cache soltanto quando è falso. Questo indicatore non garantisce che Firebase sia effettivamente raggiungibile e non realizza una vera strategia local-first.
+- **32 moduli** usano l'adattatore Firestore, per **33 punti di lettura** rilevati. La migrazione è quindi estesa, ma la politica di lettura resta binaria rete/cache.
+- `main-v129.js` attende `prepareOfflineData(user)` prima di inizializzare qualunque pagina privata.
+- `prepareOfflineData()` legge dal server sette raccolte (`accounts`, `aziende`, `contacts`, `deadlineNotifications`, `profileWidgets`, `scadenze`, `settings`) e poi la sottoraccolta `accounts` di ogni azienda.
+- Dopo questa sincronizzazione globale, la pagina richiesta esegue nuovamente le proprie query. Ne derivano attesa iniziale, letture duplicate e costo crescente con il numero di aziende e account.
+- Diverse liste decifrano in blocco più campi di tutti i record prima o durante il rendering. La cifratura resta necessaria; va ridotto il lavoro iniziale decifrando soltanto ciò che serve alla vista e rinviando segreti e dettagli all'apertura della singola scheda.
+- Il banner offline è già non interattivo e collocato in basso, quindi non deve più impedire l'uso della navigazione.
+
+### 10.2 Modello di riferimento
+
+Le applicazioni vault mature adottano un modello **local-first cifrato**: mantengono sul dispositivo una copia cifrata, la rendono consultabile offline dopo una sincronizzazione riuscita e conservano i dati in chiaro soltanto in memoria durante la sessione sbloccata. Firestore supporta letture, query, listener e scritture dalla cache persistente, quindi non richiede una scansione completa bloccante a ogni navigazione. La sincronizzazione deve essere incrementale e separata dal primo rendering.
+
+Il modello scelto per Codici & Password sarà pertanto:
+
+1. **Shell immediata**: HTML/CSS/JS locali, senza aspettare Firestore.
+2. **Autenticazione persistita**: offline è valida soltanto una sessione precedentemente autenticata sul dispositivo.
+3. **Sblocco Vault locale**: Master Password o WebAuthn secondo le regole esistenti, senza dipendenza dalla rete quando il materiale locale valido è presente.
+4. **Cache-first per la vista corrente**: lettura e rendering della copia locale disponibile.
+5. **Network refresh in background**: richiesta al server non bloccante; aggiornamento della UI soltanto se arrivano dati più recenti.
+6. **Sincronizzazione selettiva**: priorità a home e raccolta della pagina aperta; prefetch delle altre raccolte quando il browser è inattivo o dopo il primo contenuto utile.
+7. **Scritture offline controllate**: consentite soltanto dopo aver definito conflitti, stato “da sincronizzare”, errore permanente e ripetizione idempotente. Fino ad allora, offline resta consultazione sicura.
+
+### 10.3 Budget prestazionali del prodotto
+
+I Core Web Vitals restano il riferimento esterno (LCP massimo 2,5 s, INP massimo 200 ms e CLS massimo 0,1 al 75° percentile), ma per una vault personale si adottano obiettivi percepiti più severi:
+
+- shell/interfaccia visibile: **entro 500 ms** su dispositivo già installato;
+- prima lista dalla cache: **entro 1 s**;
+- dettaglio già locale: **entro 500 ms** dopo il tocco;
+- risposta visiva a un'interazione: **entro 200 ms**;
+- sblocco completato e primo contenuto: **entro 1,5 s**, escluso il tempo umano di biometria/digitazione;
+- nessuna sincronizzazione completa, download allegati o decifratura massiva sul percorso critico;
+- nessun salto rilevante del layout durante il caricamento.
+
+Questi valori sono obiettivi da misurare su PC e iPhone reali, non dichiarazioni già raggiunte.
+
+### 10.4 Contratto funzionale online/offline
+
+**Disponibile offline, dopo una preparazione riuscita sul dispositivo fidato:**
+
+- apertura della PWA e navigazione tra le pagine statiche;
+- riconoscimento della sessione Firebase persistita;
+- sblocco locale della Vault;
+- consultazione di home, profilo, aziende, account e scadenze presenti nella copia locale;
+- ricerca AI locale limitata ai dati effettivamente disponibili nella sessione.
+
+**Non garantibile offline:**
+
+- primo accesso o riautenticazione email/password/TOTP;
+- recupero password, invio email, Push, inviti e risoluzione destinatari;
+- dati mai sincronizzati sul dispositivo;
+- allegati mai scaricati e non esplicitamente conservati offline;
+- garanzia assoluta che iOS/browser non rimuovano storage locale sotto pressione.
+
+**Al ritorno online:**
+
+- la UI resta utilizzabile con i dati locali;
+- il refresh remoto avviene in background e mostra “Aggiornato” soltanto dopo conferma server;
+- gli errori di rete non cancellano né nascondono la copia locale;
+- un conflitto non viene risolto silenziosamente senza una policy documentata.
+
+### 10.5 Architettura target minima
+
+- Sostituire il gate globale bloccante con un coordinatore di sincronizzazione in background.
+- Introdurre un repository dati centrale per evitare che ogni pagina scelga autonomamente tra rete e cache.
+- Per ogni query restituire anche metadati minimi: `source` (`cache`/`server`), `isStale`, `syncedAt`, `pendingWrites`.
+- Deduplicare le richieste concorrenti e mantenere una sola Promise per la medesima query in corso.
+- Usare cache-first + refresh per liste e home; server-confirmed per operazioni sensibili che richiedono certezza corrente.
+- Caricare prima campi indice/riassunto; decifrare i segreti soltanto nel dettaglio o su richiesta esplicita.
+- Separare metadati leggeri e allegati; nessun prefetch automatico di tutti gli allegati.
+- Rendere l'AI una consumatrice del repository locale, non un secondo sistema di caricamento o una scansione completa a ogni domanda.
+- Conservare un indicatore di preparazione offline per utente e versione schema, ma non usarlo per bloccare ogni pagina.
+
+### 10.6 Piano operativo a fasi
+
+#### FASE P0 — Baseline e osservabilità (implementazione tecnica completata; baseline reale demandata a P5)
+
+- [x] Aggiungere misure locali in memoria prive di dati sensibili per bootstrap e sincronizzazione.
+- [ ] Registrare quantità di documenti e durata per raccolta, senza nomi, email, UID o contenuti.
+- [ ] Preparare dataset di test piccolo, medio e grande e una matrice PC/iPhone, Wi-Fi, rete lenta e modalità aereo.
+- [x] Rilevare letture duplicate e query N+1, in particolare `aziende/*/accounts`.
+
+#### FASE P1 — Rimuovere il collo di bottiglia (completata nel codice locale)
+
+- [x] Togliere `await prepareOfflineData(user)` dal percorso critico.
+- [x] Inizializzare subito la pagina e avviare il refresh in background.
+- [x] Impedire sincronizzazioni complete ripetute a ogni navigazione mediante deduplicazione e finestra temporale.
+- [x] Mantenere un fallback reversibile alla release stabile durante il collaudo tramite commit isolato precedente al deploy.
+
+#### FASE P2 — Repository local-first (prima infrastruttura completata)
+
+- [x] Centralizzare letture cache-first e server-confirmed in `offline-firestore.js`.
+- [x] Correggere l'inizializzazione Firebase moderna usando `localCache: persistentLocalCache(...)`.
+- [x] Usare subito una cache non vuota e aggiornare Firestore in background.
+- [x] Se la cache online è vuota, attendere la conferma server per non mostrare falsamente “nessun dato”.
+- [ ] Aggiornare in tempo reale la vista già aperta quando il refresh in background trova dati diversi.
+- [ ] Mostrare nella UI provenienza, obsolescenza e stato “non ancora disponibile offline”.
+
+#### FASE P3 — Sincronizzazione selettiva (prima implementazione completata)
+
+- [x] Dare priorità per pagina a home, aziende, account, profilo, impostazioni e scadenze.
+- [x] Sincronizzare gli account aziendali con concorrenza limitata invece di avviare tutte le richieste insieme.
+- [x] Eseguire il prefetch restante dopo il primo rendering e durante inattività.
+- [x] Applicare una finestra di cinque minuti alla preparazione completa riuscita.
+- [ ] Salvare `lastSuccessfulSync` per singola area e invalidare la preparazione quando cambia lo schema.
+
+#### FASE P4 — Decifratura e rendering progressivi (prima ottimizzazione completata)
+
+- [x] Evitare la decifratura delle password nelle liste account private e aziendali.
+- [ ] Estendere l'inventario campo per campo alle altre liste prima di rinviare ulteriori dati.
+- [ ] Non decifrare PIN, CCV, note estese e dati bancari finché il dettaglio non li richiede.
+- [ ] Renderizzare per piccoli lotti sulle liste grandi, preservando ordinamento e ricerca.
+- [ ] Verificare che nessun valore in chiaro persista oltre la memoria della sessione Vault.
+
+#### FASE P5 — Offline verificabile
+
+- [ ] Aggiungere una schermata/stato “Disponibile offline” con data dell'ultima sincronizzazione riuscita.
+- [ ] Collaudare chiusura forzata, riapertura in modalità aereo, navigazione completa e ritorno online.
+- [ ] Decidere separatamente se abilitare scritture offline; non confonderle con la sola consultazione.
+- [ ] Definire una scelta esplicita “dispositivo fidato” prima di mantenere dati persistenti sensibili nel browser.
+- [ ] Documentare cancellazione cache, logout, cambio account e revoca del dispositivo.
+
+#### FASE P6 — Allegati, AI e funzioni secondarie
+
+- [ ] Rendere disponibili offline solo allegati scelti dall'utente, cifrati e soggetti a quota.
+- [ ] Limitare la ricerca AI ai dati locali già autorizzati, con risposta esplicita se la copia è incompleta.
+- [ ] Attivare nuove funzioni soltanto se i budget di P0 restano rispettati.
+
+### 10.7 Gate di accettazione
+
+La nuova architettura potrà essere dichiarata pronta soltanto quando:
+
+- i test automatici restano verdi;
+- i budget sono verificati con misure reali e dataset rappresentativi;
+- l'app apre liste e dettagli offline dopo una sola sincronizzazione esplicita riuscita;
+- online il primo contenuto non attende la sincronizzazione globale;
+- nessun dato segreto finisce in cache statiche, localStorage o log;
+- logout e rimozione dispositivo eliminano correttamente il materiale locale previsto;
+- il comportamento su cache assente, cache obsoleta e conflitto è comprensibile e non produce perdita dati.
+
+### 10.8 Decisione raccomandata
+
+La priorità successiva non è aggiungere altre funzioni. È completare **P0 e P1**, misurare il miglioramento e poi costruire il repository local-first. L'attuale sincronizzazione globale della 1.2.38 va considerata una misura temporanea di affidabilità, non la soluzione definitiva. L'AI, gli allegati offline e le scritture senza rete restano subordinate al superamento dei gate prestazionali e di sicurezza.

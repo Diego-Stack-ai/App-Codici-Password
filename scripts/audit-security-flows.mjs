@@ -83,6 +83,10 @@ assert.match(serviceWorker, /firebase-sw-runtime\.js/, 'Il Service Worker dipend
 assert.match(serviceWorker, /Promise\.all\(APP_SHELL/, 'La shell offline accetta ancora installazioni parziali');
 assert.match(loginEntry, /serviceWorker\.register\('\.\/sw\.js'\)/, 'Il login non prepara la PWA per il successivo avvio offline');
 assert.match(offlineSync, /aziende[\s\S]*scadenze[\s\S]*settings/, 'La sincronizzazione preventiva non include i dati principali');
+assert.match(firebaseConfig, /localCache:\s*persistentLocalCache/, 'La persistenza Firestore non usa la proprietà localCache prevista dal SDK moderno');
+assert.doesNotMatch(main, /await\s+prepareOfflineData\(/, 'La sincronizzazione offline blocca ancora il rendering della pagina');
+assert.match(offlineSync, /requestIdleCallback/, 'La sincronizzazione secondaria non attende un periodo di inattività');
+assert.match(offlineSync, /syncWithConcurrency/, 'Gli account aziendali vengono ancora richiesti tutti contemporaneamente');
 assert.match(loginHtml, new RegExp(`login-entry\\.js\\?v=${assetVersion}`), 'Il login non usa il bootstrap Auth dedicato aggiornato');
 assert.match(loginHtml, /<form id="login-form">/, 'Il campo password non è contenuto in un form semantico');
 assert.match(loginHtml, /type="submit" id="login-submit-btn"/, 'Il pulsante Accedi non invia il form in modo nativo');

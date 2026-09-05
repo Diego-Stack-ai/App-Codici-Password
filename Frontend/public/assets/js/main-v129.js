@@ -38,6 +38,7 @@ import { sanitizeEmail } from './utils.js';
 import * as Pages from './pages-init.js?v=1.2.38';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
+import { startMetric, endMetric } from './performance-metrics.js';
 
 // Sentinella bootstrap \u2014 sostituisce window.__V7_BOOTSTRAPPED__
 let _v7Bootstrapped = false;
@@ -91,6 +92,7 @@ function getCurrentPage() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    startMetric('private-page-bootstrap');
     initOfflineStatus();
     // 🔐 BLOCCO SENTINELLA V7.0 - Previene il doppio bootstrap
     if (_v7Bootstrapped) {
@@ -217,13 +219,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
 
-                // Prima di dichiarare pronta una pagina online, conferma che il
-                // nucleo dei dati sia stato scritto nella cache persistente.
+                // La preparazione offline non deve bloccare il primo contenuto.
+                // È deduplicata, ordinata per pagina e prosegue in background.
                 if (isPrivatePage && navigator.onLine) {
-                    const readiness = await prepareOfflineData(user);
-                    if (!readiness?.complete) {
-                        console.warn('[OFFLINE] Sincronizzazione preventiva incompleta.', readiness?.failedCollections);
-                    }
+                    void prepareOfflineData(user, currentPage).then((readiness) => {
+                        if (!readiness?.complete) {
+                            console.warn('[OFFLINE] Sincronizzazione preventiva incompleta.', readiness?.failedCollections);
+                        }
+                    }).catch((error) => console.warn('[OFFLINE] Sincronizzazione in background non riuscita.', error));
                 }
 
                 // ROUTER - Step 2: Inizializza Pagina Privata
@@ -256,6 +259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     case 'dettaglio_account_azienda': await Pages.initDettaglioAccountAzienda(user); break;
                     case 'form_account_azienda': await Pages.initFormAccountAzienda(user); break;
                 }
+                if (isPrivatePage) endMetric('private-page-bootstrap', { page: currentPage });
 
                 // GLOBAL REALTIME INVITE LISTENER (HARDENING V2)
                 if (inviteUnsubscribe) inviteUnsubscribe();

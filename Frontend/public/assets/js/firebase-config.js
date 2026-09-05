@@ -54,7 +54,7 @@ const auth = getAuth(app);
 let db;
 try {
   db = initializeFirestore(app, {
-    cache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
   });
 } catch (error) {
   // Una configurazione precedente in cache può avere già inizializzato Firestore.

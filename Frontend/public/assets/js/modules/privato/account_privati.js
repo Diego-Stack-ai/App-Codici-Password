@@ -192,7 +192,8 @@ async function loadAccounts() {
                     try {
                         acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
                         acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
-                        acc.password = acc.password ? await decrypt(acc.password, masterKey) : acc.password;
+                        // La password non è visibile né ricercabile nella lista:
+                        // resta cifrata finché non viene aperto il dettaglio.
                     } catch (e) {
                         console.error("[Accounts] Decryption failed for:", acc.id, e);
                     }

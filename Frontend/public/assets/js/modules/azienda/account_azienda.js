@@ -107,7 +107,8 @@ async function loadAccounts() {
                     try {
                         acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
                         acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
-                        acc.password = acc.password ? await decrypt(acc.password, masterKey) : acc.password;
+                        // La password non è necessaria alla lista e viene
+                        // decifrata soltanto nella pagina di dettaglio.
                     } catch (e) {
                         console.warn("[Azienda] Decryption failed for:", acc.id);
                     }
