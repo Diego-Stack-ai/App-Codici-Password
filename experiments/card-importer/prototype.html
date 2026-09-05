@@ -21,7 +21,16 @@
         <label>Fotografa o scegli un’immagine
             <input id="image-input" type="file" accept="image/*" capture="environment">
         </label>
-        <img id="preview" alt="Anteprima immagine" hidden>
+        <section id="editor" hidden>
+            <canvas id="preview" aria-label="Anteprima e area di ritaglio"></canvas>
+            <p>Trascina un rettangolo sulla card, poi premi Ritaglia. Se necessario ruota l’immagine.</p>
+            <div class="toolbar">
+                <button id="rotate-left" type="button">↶ Ruota</button>
+                <button id="crop" type="button" disabled>Ritaglia</button>
+                <button id="reset" type="button">Ripristina</button>
+            </div>
+            <p id="quality" class="quality"></p>
+        </section>
         <button id="analyze" type="button" disabled>Analizza</button>
         <p id="status" role="status">In attesa di un’immagine.</p>
         <section id="result" hidden>

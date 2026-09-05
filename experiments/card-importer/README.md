@@ -44,12 +44,17 @@ node --test experiments/card-importer/card-parser.test.mjs
 e ottenere una proposta modificabile. Non può salvare dati. QR usa prima l'API nativa
 e poi ZXing; OCR usa Tesseract soltanto dopo la pressione di **Analizza**.
 
+Prima dell'analisi l'utente può ruotare la fotografia e delimitare con il dito o il
+mouse la sola card. Il laboratorio ridimensiona l'immagine, valuta risoluzione,
+contrasto e riflessi e mostra un indicatore di qualità. Se qualità o affidabilità OCR
+sono inferiori alla soglia minima, non propone campi e restituisce “non rilevato”.
+
 Il prototipo non è pubblicato e il bundle generato resta ignorato da Git:
 
 ```text
 npm run build:card-importer-prototype
 ```
 
-Prima di una possibile integrazione servono ancora prove su immagini reali, soprattutto
-su iPhone, e la scelta di come distribuire localmente worker e modello italiano senza
-dipendenze di rete durante il riconoscimento.
+Prima di una possibile integrazione servono ancora prove guidate su iPhone e la scelta
+di come distribuire localmente worker e modello italiano senza dipendenze di rete
+durante il riconoscimento.

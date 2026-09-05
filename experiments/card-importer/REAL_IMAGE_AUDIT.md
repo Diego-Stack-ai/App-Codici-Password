@@ -35,5 +35,6 @@ La rotazione automatica non è risultata affidabile. Questa modalità è respint
 
 Il riconoscimento può essere utile per badge, biglietti da visita e tessere carburante
 ben fotografate. Sulle carte deteriorate deve limitarsi ai dati chiaramente leggibili.
-Prima dell'integrazione occorre una terza prova dal browser iPhone con ritaglio e
-rotazione guidati; l'OCR non è ancora pronto per la produzione.
+Il laboratorio dispone ora di rotazione manuale, ritaglio tattile, ridimensionamento,
+controllo qualità e soglia minima di affidabilità. Prima dell'integrazione occorre una
+terza prova dal browser iPhone; l'OCR non è ancora pronto per la produzione.
