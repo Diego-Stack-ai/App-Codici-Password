@@ -268,6 +268,15 @@ export async function initComponents() {
                     createElement('span', { className: 'material-symbols-outlined', textContent: 'info' })
                 ]);
                 footerCenter.appendChild(guideBtn);
+
+                if (path.endsWith('profilo_privato.html')) {
+                    footerCenter.appendChild(createElement('a', {
+                        className: 'btn-icon-header',
+                        href: 'profilo_privato_v2.html',
+                        title: 'Apri Profilo Utente V2',
+                        ariaLabel: 'Apri Profilo Utente V2'
+                    }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'dashboard_customize' })]));
+                }
             }
 
             const footerRight = createElement('div', { id: 'footer-right-actions', className: 'header-right' });

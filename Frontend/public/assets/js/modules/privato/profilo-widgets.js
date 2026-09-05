@@ -274,7 +274,7 @@ function renderWidgets() {
                     }),
                     createElement('button', { className: 'btn-upload-trigger', textContent: 'Aggiungi campo', onclick: () => addField(widget) })
                 ])
-            ]))
+            ])))
         ]);
         anchor.insertAdjacentElement('afterend', zone);
     });
