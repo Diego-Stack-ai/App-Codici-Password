@@ -5,7 +5,7 @@ function element(tag, className, text = '') {
     return node;
 }
 
-export function createAssistantUI({ onAsk, onClose }) {
+export function createAssistantUI({ onAsk, onClose, resolveCredential }) {
     const pageScrollY = window.scrollY;
     document.documentElement.classList.add('vault-assistant-open');
     document.body.classList.add('vault-assistant-open');
@@ -40,21 +40,65 @@ export function createAssistantUI({ onAsk, onClose }) {
         const bubble = element('div', `vault-assistant-bubble ${role}`, message);
         conversation.append(bubble); conversation.scrollTop = conversation.scrollHeight;
     };
-    const addResults = items => {
+    const addCredentialRow = async (container, label, value, { secret = false } = {}) => {
+        if (!value) return;
+        const row = element('div', 'vault-assistant-credential');
+        const labelNode = element('span', 'vault-assistant-credential-label', `${label}:`);
+        const valueNode = element('span', 'vault-assistant-credential-value', secret ? '••••••••' : '…');
+        row.append(labelNode, valueNode);
+        if (secret) {
+            let revealed = false;
+            let clearValue = null;
+            const reveal = element('button', 'vault-assistant-credential-action');
+            reveal.type = 'button'; reveal.title = 'Mostra password';
+            reveal.append(element('span', 'material-symbols-outlined', 'visibility'));
+            reveal.addEventListener('click', async event => {
+                event.stopPropagation();
+                clearValue ??= await resolveCredential(value);
+                revealed = !revealed;
+                valueNode.textContent = revealed ? (clearValue || '—') : '••••••••';
+                reveal.title = revealed ? 'Nascondi password' : 'Mostra password';
+                reveal.querySelector('.material-symbols-outlined').textContent = revealed ? 'visibility_off' : 'visibility';
+            });
+            const copy = element('button', 'vault-assistant-credential-action');
+            copy.type = 'button'; copy.title = 'Copia password';
+            copy.append(element('span', 'material-symbols-outlined', 'content_copy'));
+            copy.addEventListener('click', async event => {
+                event.stopPropagation();
+                clearValue ??= await resolveCredential(value);
+                if (clearValue) await navigator.clipboard.writeText(clearValue);
+                copy.title = clearValue ? 'Password copiata' : 'Password non disponibile';
+            });
+            row.append(reveal, copy);
+        } else {
+            valueNode.textContent = await resolveCredential(value) || '—';
+        }
+        container.append(row);
+    };
+    const addResults = async items => {
         if (!items.length) return;
         const group = element('div', 'vault-assistant-results');
-        items.forEach((item, index) => {
-            const link = element('a', 'vault-assistant-result'); link.href = item.href;
-            const body = element('span');
+        for (const [index, item] of items.entries()) {
+            const card = element('div', 'vault-assistant-result');
+            card.tabIndex = 0; card.setAttribute('role', 'link');
+            const navigate = () => { window.location.href = item.href; };
+            card.addEventListener('click', navigate);
+            card.addEventListener('keydown', event => { if (event.key === 'Enter') navigate(); });
+            const body = element('div', 'vault-assistant-result-body');
             body.append(element('strong', '', `${index + 1}. ${item.title}`), element('small', '', item.subtitle || item.kind));
-            link.append(body, element('span', 'vault-assistant-kind', item.kind)); group.append(link);
-        });
+            if (item.credentials) {
+                await addCredentialRow(body, 'Username', item.credentials.username);
+                await addCredentialRow(body, 'Account', item.credentials.account);
+                await addCredentialRow(body, 'Password', item.credentials.password, { secret: true });
+            }
+            card.append(body); group.append(card);
+        }
         conversation.append(group); conversation.scrollTop = conversation.scrollHeight;
     };
     const ask = (query, answerByVoice = false) => {
         const value = query.trim(); if (!value) return;
         addBubble('user', value); input.value = '';
-        const answer = onAsk(value); addBubble('assistant', answer.message); addResults(answer.items || []);
+        const answer = onAsk(value); addBubble('assistant', answer.message); void addResults(answer.items || []);
         if (answerByVoice) speak(answer.message);
         if (answer.navigateTo) window.setTimeout(() => { window.location.href = answer.navigateTo; }, 450);
     };

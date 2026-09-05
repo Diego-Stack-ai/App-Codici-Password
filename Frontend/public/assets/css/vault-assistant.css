@@ -54,3 +54,56 @@ body.vault-assistant-open {
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
 }
+
+.vault-assistant-result {
+    display: block;
+    cursor: pointer;
+}
+
+.vault-assistant-result-body {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.vault-assistant-credential {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    font-size: 12px;
+}
+
+.vault-assistant-credential-label {
+    color: #637188;
+    font-weight: 700;
+}
+
+.vault-assistant-credential-value {
+    overflow: hidden;
+    color: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vault-assistant-credential-action {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(72, 108, 166, .1);
+    color: inherit;
+    cursor: pointer;
+}
+
+.vault-assistant-credential-action .material-symbols-outlined {
+    font-size: 17px;
+}
+
+html.dark .vault-assistant-credential-label {
+    color: #a9b8cf;
+}

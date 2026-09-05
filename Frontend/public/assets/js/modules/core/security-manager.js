@@ -7,7 +7,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.40';
+import { db, auth } from '../../firebase-config.js?v=1.2.41';
 import { doc, setDoc, updateDoc, collection, limit, query, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';

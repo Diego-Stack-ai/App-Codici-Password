@@ -5,7 +5,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.40';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.41';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';

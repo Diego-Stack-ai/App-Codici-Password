@@ -4,7 +4,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Creazione e modifica account con gestione IBAN dinamica.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.40';
+import { auth, db } from '../../firebase-config.js?v=1.2.41';
 import { LOG } from '../../logger.js';
 import { doc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

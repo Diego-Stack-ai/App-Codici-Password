@@ -1,12 +1,12 @@
 import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
-import { db } from '../../firebase-config.js?v=1.2.40';
+import { db } from '../../firebase-config.js?v=1.2.41';
 import { collection, doc } from "/assets/js/vendor/firebase-runtime.js";
 
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];
-const make = ({ id, kind, title, subtitle = '', keywords = [], href, scope = 'privato', companyName = '' }) => ({
+const make = ({ id, kind, title, subtitle = '', keywords = [], href, scope = 'privato', companyName = '', credentials = null }) => ({
     id: `${kind}:${id}`, kind, title: text(title) || 'Senza nome', subtitle: text(subtitle),
-    keywords: keywords.map(text).filter(Boolean), href, scope, companyName: text(companyName)
+    keywords: keywords.map(text).filter(Boolean), href, scope, companyName: text(companyName), credentials
 });
 
 function profileRecords(uid, data) {
@@ -22,9 +22,10 @@ function profileRecords(uid, data) {
 
 function accountRecord(id, data, companyId = '', companyName = '') {
     return make({ id, kind: companyId ? 'account aziendale' : 'account', title: data.nomeAccount || data.nome || 'Account',
-        subtitle: companyId ? `Azienda: ${companyName || 'non specificata'}` : 'Account privato',
+        subtitle: companyId ? (companyName || 'Azienda non specificata') : 'Privato',
         keywords: [companyName, data.type, data.tipo, data.categoria, data.url, data.sitoWeb, data.referenteNome],
         scope: companyId ? 'azienda' : 'privato', companyName,
+        credentials: { username: data.username, account: data.account || data.codice, password: data.password },
         href: companyId ? `/dettaglio_account_azienda.html?aziendaId=${encodeURIComponent(companyId)}&id=${encodeURIComponent(id)}` : `/dettaglio_account_privato.html?id=${encodeURIComponent(id)}` });
 }
 
