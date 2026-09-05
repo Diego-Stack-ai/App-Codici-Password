@@ -5,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth, storage } from '../../firebase-config.js?v=1.2.38';
+import { db, auth, storage } from '../../firebase-config.js?v=1.2.39';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { collection, addDoc, Timestamp, doc, updateDoc, setDoc, arrayUnion, writeBatch } from "/assets/js/vendor/firebase-runtime.js";

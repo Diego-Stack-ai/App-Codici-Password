@@ -5,7 +5,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth } from '../../firebase-config.js?v=1.2.38';
+import { db, auth } from '../../firebase-config.js?v=1.2.39';
 import { LOG } from '../../logger.js';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

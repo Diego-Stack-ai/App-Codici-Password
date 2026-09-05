@@ -21,7 +21,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.38';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.39';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -38,7 +38,7 @@ import { syncData as _syncData } from './profilo-sync.js';
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.38';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.39';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)

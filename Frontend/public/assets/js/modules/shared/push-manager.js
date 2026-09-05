@@ -1,5 +1,5 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.38';
+import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.39';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteToken, getToken, onMessage } from "/assets/js/vendor/firebase-runtime.js";

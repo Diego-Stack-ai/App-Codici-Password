@@ -5,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: Eliminazione innerHTML a favore di dom-utils.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.38';
+import { auth, db } from '../../firebase-config.js?v=1.2.39';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";

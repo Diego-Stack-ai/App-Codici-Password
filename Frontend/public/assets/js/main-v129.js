@@ -26,7 +26,7 @@ import { initComponents } from './components-v129.js'; // Imports components sys
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.38';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.39';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.38';
+import * as Pages from './pages-init.js?v=1.2.39';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric } from './performance-metrics.js';
