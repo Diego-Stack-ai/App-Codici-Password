@@ -238,8 +238,10 @@ Immagina di avere una cassaforte. Fino a ieri, se volevi che un tuo collaborator
 
 Dal punto di vista tecnico, la condivisione è l'operazione più delicata: il Protocollo V7.0 impone l'uso di **Transazioni Atomiche** (`runTransaction`). Il database legge i dati, calcola le modifiche e le scrive **tutte insieme**. Se una parte fallisce, l'intero salvataggio viene annullato, evitando "dati orfani" o perdite di integrità.
 
-### 5.1 Esempio Tecnico: Transazione di Risposta (db.js)
-Questo è lo standard per ogni modulo che gestisce i permessi:
+### 5.1 Esempio storico: transazione di risposta
+La versione corrente convalida e applica la risposta agli inviti nella Cloud Function
+`respondToInvitation` di `functions/index.js`. Il frammento seguente descrive il modello atomico
+originario, ma non è più un'API frontend attiva:
 ```javascript
 /**
  * Accetta o rifiuta un invito (V7.0 Master - Atomic).
@@ -697,10 +699,8 @@ users/{uid}/settings/
 2. **Seed Automatico**: Se un documento config non esiste o ha `deadlineTypes: []` vuoto, il sistema inizializza i valori di default su Firebase automaticamente al primo accesso — sia dalle pagine di configurazione che dal form di inserimento scadenza.
 3. **Accumulo Progressivo**: Ad ogni nuova scadenza salvata, il nome dell'intestatario e le email usate vengono aggiunti automaticamente via `arrayUnion` nel config della modalità corrente (nessun duplicato).
 
-**Il Parsing Automatico dell'Oggetto (Syntax Builder)**:
-Tramite la funzione `buildEmailSubject(objectName, detail)` in `scadenza_templates.js`, il front-end genera a tempo di record l'oggetto email. Se l'utente unisce la tipologia "L'Assicurazione" e la targa "AB123CD", l'app pre-assemblerà matematicamente la stringa:
-> *"L'Assicurazione dell'auto targata AB123CD è in scadenza con data DD/MM/YYYY"*
-Questa logica riduce l'errore umano ed è pronta per essere pescata dai demoni di background per l'invio delle comunicazioni primarie (`email1`) e secondarie (`email2`).
+**Anteprima automatica dell'oggetto**:
+Il modulo `aggiungi_scadenza.js` compone l'anteprima a partire dal modello email e, per automezzi e documenti, dal veicolo o codice selezionato. I dati salvati nella scadenza vengono poi letti dalle Cloud Functions per generare le notifiche senza dipendere da configurazioni hardcoded nel client.
 
 
 ### 17.5 Algoritmo di Calcolo "Urgenze e Avvisi in Home"

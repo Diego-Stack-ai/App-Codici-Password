@@ -1,12 +1,12 @@
 /**
  * PROTOCOLLO MASTER MAIN ENTRY POINT (V7.0) - release home v126
  * Coordina l'inizializzazione dei moduli UI dell'applicazione secondo il PROTOCOLLO V7.0.
- * Refactor: Rimozione innerHTML, uso dom-utils.js, centralizzazione in components.js.
+ * Refactor: rimozione innerHTML, uso dom-utils.js e componenti condivisi.
  */
 
 import { LOG, LOG_ERROR, LOG_WARN } from './logger.js';
 
-// APP_ENV ora in env.js — window.__APP_ENV rimosso
+// APP_ENV è centralizzato nel modulo di ambiente; window.__APP_ENV è stato rimosso.
 
 console.log      = (...args) => { try { LOG(...args);       } catch (e) {} };
 console.info     = (...args) => { try { LOG(...args);       } catch (e) {} };

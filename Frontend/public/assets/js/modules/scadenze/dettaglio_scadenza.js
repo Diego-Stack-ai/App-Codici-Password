@@ -3,20 +3,28 @@
  * Gestisce la visualizzazione del dettaglio di una scadenza.
  */
 
-import { getScadenza, updateScadenza, deleteScadenza } from '../../db.js';
 import { getFooterReady } from '../../footer-state.js';
 import { auth, db, storage } from '../../firebase-config.js?v=1.2.32';
-import { doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { deleteDoc, doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { ensureMasterKey } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
+
+async function getScadenza(userId, scadenzaId) {
+    const snapshot = await getDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
+    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null;
+}
+
+async function deleteScadenza(userId, scadenzaId) {
+    await deleteDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
+}
 
 /**
  * DETTAGLIO SCADENZA MODULE (V5.0 ADAPTER) - RESET NOTIFICHE

@@ -12,7 +12,7 @@ import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
 import { getLastCryptoError } from '../core/crypto-utils.js';
-import { showConfirmModal } from '../../ui-core.js';
+import { showConfirmModal } from '../../ui-core-v129.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -247,7 +247,7 @@ async function renderHeaderUser(user) {
 
                     // Se abbiamo decifrato con successo almeno un campo, la chiave è valida!
                     if (nameDecrypted && !sessionStorage.getItem('vault_verified')) {
-                        import('../../ui-core.js').then(ui => ui.showToast("Password Master Corretta!", "success"));
+                        import('../../ui-core-v129.js').then(ui => ui.showToast("Password Master Corretta!", "success"));
                         sessionStorage.setItem('vault_verified', 'true');
                     }
                 }

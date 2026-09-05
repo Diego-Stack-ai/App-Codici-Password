@@ -3,39 +3,7 @@
  * Gestisce la logica dei componenti riutilizzabili (Pulsanti, Toggles, Icone)
  */
 
-import { showToast } from './ui-core.js';
-
-/**
- * [FACTORY] GENERAZIONE INCONA ACCOUNT
- * Crea l'HTML per un'icona di default moderna.
- */
-export function getAccountIcon(name, sizeClass = 'h-10 w-10') {
-    const nameClean = name || 'Account';
-    const gradients = [
-        'from-blue-500 to-indigo-600',
-        'from-emerald-500 to-teal-600',
-        'from-purple-500 to-indigo-600',
-        'from-orange-500 to-red-600',
-        'from-pink-500 to-rose-600',
-        'from-cyan-500 to-blue-600',
-        'from-indigo-500 to-violet-600'
-    ];
-
-    let hash = 0;
-    for (let i = 0; i < nameClean.length; i++) {
-        hash = nameClean.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const gradient = gradients[Math.abs(hash) % gradients.length];
-    const initial = nameClean.charAt(0).toUpperCase();
-
-    const isSmall = sizeClass.includes('h-8') || sizeClass.includes('h-6');
-    const fontSize = isSmall ? 'text-[12px]' : 'text-[16px]';
-
-    return `
-        <div class="${sizeClass} rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold shadow-sm border border-white/20 overflow-hidden shrink-0">
-            <span class="${fontSize} uppercase tracking-tighter">${initial}</span>
-        </div>`;
-}
+import { showToast } from './ui-core-v129.js';
 
 /**
  * [LOGIC] SETUP PASSWORD TOGGLES

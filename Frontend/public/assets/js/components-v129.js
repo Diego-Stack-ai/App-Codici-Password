@@ -125,7 +125,7 @@ export async function initComponents() {
                     fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('configurazione_automezzi.html') || path.endsWith('configurazione_documenti.html') || path.endsWith('configurazione_generali.html')) {
                     fallbackHref = 'regole_scadenze.html';
-                } else if (path.endsWith('archivio_account.html') || path.endsWith('notifiche_storia.html')) {
+                } else if (path.endsWith('archivio_account.html')) {
                     fallbackHref = 'impostazioni.html';
                 } else if (path.endsWith('account_azienda.html') || path.endsWith('dati_azienda.html')) {
                     fallbackHref = 'lista_aziende.html';
@@ -194,7 +194,6 @@ export async function initComponents() {
                     else if (path.includes('configurazione_automezzi.html')) displayTitle = t('vehicles_config_title');
                     else if (path.includes('configurazione_documenti.html')) displayTitle = t('documents_config_title');
                     else if (path.includes('configurazione_generali.html')) displayTitle = t('general_config_title');
-                    else if (path.includes('notifiche_storia.html')) displayTitle = t('notifications_history_title');
 
                     headerCenter.appendChild(createElement('h1', { className: 'header-title', textContent: displayTitle }));
                 }

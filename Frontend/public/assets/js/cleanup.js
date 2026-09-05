@@ -1,7 +1,7 @@
 
 import { t } from './translations.js';
 
-import { showToast, toggleTripleVisibility } from './ui-core.js';
+import { showToast, toggleTripleVisibility } from './ui-core-v129.js';
 /**
  * PROTOCOLLO PULIZIA & SICUREZZA
  * Centralizza la gestione di eventi e traduzioni per rimuovere script inline e unsafe-inline.
@@ -192,4 +192,4 @@ function initTranslations() {
     window.addEventListener('content-updated', translate);
 }
 
-// La funzione toggleTripleVisibility è stata spostata in ui-core.js
+// La funzione toggleTripleVisibility è fornita dal modulo UI canonico.

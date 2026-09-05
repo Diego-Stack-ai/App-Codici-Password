@@ -3,7 +3,7 @@
  * Rimpiazza window.LOG, window.LOG_ERROR, window.LOG_WARN con export ES6.
  * Silenzioso in produzione, attivo in sviluppo.
  *
- * Uso: import { LOG, LOG_ERROR, LOG_WARN } from '../logger.js';
+ * Importato dai moduli frontend che richiedono logging controllato.
  */
 
 const _env = document.documentElement.dataset.env || 'production';

@@ -55,7 +55,6 @@ function encryptionKeyCandidates(keyMaterial) {
         throw new Error('VAULT_KEYRING_INVALID');
     }
 }
-
 async function deriveKek(masterPassword, salt) {
     const material = await crypto.subtle.importKey(
         'raw', new TextEncoder().encode(String(masterPassword).normalize('NFC').trim()),
@@ -319,18 +318,4 @@ export async function decryptIfPossible(val, masterKey, fallback = '') {
     } catch (e) {
         return val;
     }
-}
-
-/**
- * Decritta un sottoinsieme di campi di un oggetto piatto.
- */
-export async function decryptFields(obj, masterKey, fields) {
-    if (!obj || !masterKey) return obj;
-    const result = { ...obj };
-    for (const field of fields) {
-        if (result[field]) {
-            result[field] = await decryptIfPossible(result[field], masterKey);
-        }
-    }
-    return result;
 }

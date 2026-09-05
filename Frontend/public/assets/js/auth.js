@@ -15,7 +15,7 @@ import {
     TotpMultiFactorGenerator
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showToast } from './ui-core.js?v=1.2.32';
+import { showToast } from './ui-core-v129.js?v=1.2.32';
 import { logError } from './utils.js';
 import { ACCOUNT_PASSWORD_POLICY_VERSION, evaluatePassword, firstPasswordPolicyError } from './modules/core/password-policy.js';
 

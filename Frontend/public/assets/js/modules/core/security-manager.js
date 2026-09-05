@@ -5,7 +5,7 @@
  */
 
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
-import { showInputModal, showToast, showConfirmModal } from '../../ui-core.js';
+import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { db, auth } from '../../firebase-config.js?v=1.2.32';
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, limit, query, runTransaction } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
@@ -199,36 +199,12 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-export function enableVaultAutoUnlock(durationMs = null) {
-    if (!_masterKey) {
-        showToast('Sblocca prima la Vault.', 'warning');
-        return false;
-    }
-    _vaultAutoUnlock = true;
-    updateGlobalState();
-    return true;
-}
-
-export function disableVaultAutoUnlock() {
-    _vaultAutoUnlock = false;
-    _masterKey = null;
-    _isSoftLocked = false;
-    _clearSessionStorage();
-    const uid = auth.currentUser?.uid;
-    if (uid) {
-        localStorage.removeItem(getStorageKey(uid));
-    }
-    showToast('La Vault è stata protetta. Biometria disabilitata.', 'info');
-}
-
 export function softLock() {
     _isSoftLocked = true;
     _masterKey = null;
     _clearSessionStorage();
     updateGlobalState();
 }
-
-export function isSoftLocked() { return _isSoftLocked; }
 
 export function isAutoUnlockActive() {
     if (_vaultAutoUnlock && _masterKey) {
@@ -426,55 +402,6 @@ export async function resetVault() {
     showToast("Accesso biometrico rimosso. La Vault richiederà la Master Password.", "info");
     setTimeout(() => window.location.reload(), 1500);
     return !syncFailed;
-}
-
-export async function setMasterKey(pass, saveForBiometrics = false) {
-    const cleanPass = String(pass).normalize('NFC').trim();
-    const uid = auth.currentUser?.uid;
-    
-    // FIX 4: UID SAFETY
-    if (!uid) {
-        _masterKey = null;
-        _vaultAutoUnlock = false;
-        return; // STOP
-    }
-    
-    // Assicura che un verifier esista sempre quando viene impostata una password root
-    try {
-        const verificationResult = await verifyMasterPassword(cleanPass, uid);
-        if (verificationResult === 'LEGACY_MIGRATION_NEEDED') {
-            // FIX 2: NO VERIFIER CREATION CIECA
-            const migrated = await migrateLegacyVault(cleanPass, uid);
-            if (!migrated) {
-                // FIX 1: setMasterKey FAIL-CLOSED
-                _masterKey = null;
-                _vaultAutoUnlock = false;
-                throw new Error("Vault verification/migration failed in setMasterKey");
-            }
-        } else if (verificationResult === false) {
-            // FIX 1: setMasterKey FAIL-CLOSED
-            console.warn('setMasterKey called with wrong password. Rejecting.');
-            _masterKey = null;
-            _vaultAutoUnlock = false;
-            throw new Error("Wrong Vault Password");
-        }
-    } catch(e) {
-        // FIX 3: ERROR PROPAGATION (uscita fail-closed)
-        console.error('setMasterKey verifier check failed:', e);
-        _masterKey = null;
-        _vaultAutoUnlock = false;
-        throw e;
-    }
-    
-    _masterKey = await resolveVaultKey(cleanPass, uid, await isNewVault(uid));
-    _isSoftLocked = false;
-    _vaultAutoUnlock = true;
-    await saveVaultSession(_masterKey, uid);
-    const biometricAlreadyEnabled = !!localStorage.getItem(getStorageKey(uid));
-    if (saveForBiometrics || biometricAlreadyEnabled) {
-        await enableBiometricUnlock(_masterKey);
-    }
-    updateGlobalState();
 }
 
 async function tryBiometricUnlock() {

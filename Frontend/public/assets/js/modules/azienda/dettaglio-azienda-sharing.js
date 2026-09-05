@@ -11,7 +11,7 @@ import {
     doc, getDoc, collection, runTransaction
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
 

@@ -5,7 +5,7 @@
  */
 
 import { createElement, setChildren } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 
 /**

@@ -9,7 +9,7 @@ import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { doc, getDoc, getDocs, collection, query, where, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showToast, showInputModal } from '../../ui-core.js';
+import { showToast, showInputModal } from '../../ui-core-v129.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';

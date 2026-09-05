@@ -30,7 +30,7 @@ function accountRecord(id, data, companyId = '', companyName = '') {
 function companyRecord(id, data) {
     const companyName = data.ragioneSociale || data.nome || data.denominazione || 'Azienda';
     return make({ id, kind: 'azienda', title: companyName, subtitle: 'Azienda', scope: 'azienda', companyName,
-        keywords: [data.nomeBreve, data.partitaIva, data.codiceFiscale, data.citta, data.settore], href: `/dettaglio_azienda.html?id=${encodeURIComponent(id)}` });
+        keywords: [data.nomeBreve, data.partitaIva, data.codiceFiscale, data.citta, data.settore], href: `/dati_azienda.html?id=${encodeURIComponent(id)}` });
 }
 
 function deadlineRecord(id, data) {

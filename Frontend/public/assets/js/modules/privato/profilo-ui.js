@@ -12,17 +12,12 @@ import { auth, db, storage } from '../../firebase-config.js?v=1.2.32';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
+import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { createStorageObjectName, MAX_AVATAR_BYTES, validateAttachmentFile } from '../shared/attachment-security.js';
 
 let _getState = null;
-
-// Callback per aggiornare il modal aperto dopo modifica dropdown label
-let _modalRefreshCallback = null;
-/** Registra una funzione da chiamare dopo ogni modifica alle label nel modal aperto. */
-export function setModalRefreshCallback(fn) { _modalRefreshCallback = fn; }
 
 /**
  * Inizializza il modulo UI del profilo.
@@ -83,7 +78,7 @@ export function setupPersonalDataCopy() {
 
 // ─── PROFILE LABELS ───────────────────────────────────────────────────────────
 
-export async function saveProfileLabels() {
+async function saveProfileLabels() {
     const { currentUserUid, profileLabels } = _getState();
     if (!currentUserUid) return;
     try {
@@ -170,7 +165,6 @@ export function syncCustomDropdowns(container, configKey = null) {
                                 profileLabels[configKey][idx] = newName.trim();
                                 await saveProfileLabels();
                                 showToast('Voce aggiornata!');
-                                _modalRefreshCallback?.();
                             }
                         }
                     }
@@ -184,7 +178,6 @@ export function syncCustomDropdowns(container, configKey = null) {
                             profileLabels[configKey] = profileLabels[configKey].filter(v => v !== opt.value);
                             await saveProfileLabels();
                             showToast('Voce eliminata!');
-                            _modalRefreshCallback?.();
                         }
                     }
                 }, [createElement('span', { className: 'material-symbols-outlined profile-label-action-icon', textContent: 'delete' })])
@@ -215,7 +208,6 @@ export function syncCustomDropdowns(container, configKey = null) {
                         profileLabels[configKey].push(newLabel.trim());
                         await saveProfileLabels();
                         showToast('Voce aggiunta!');
-                        _modalRefreshCallback?.();
                     } else {
                         showToast('Voce già esistente', 'info');
                     }

@@ -10,7 +10,7 @@ import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';

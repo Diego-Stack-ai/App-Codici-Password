@@ -11,7 +11,7 @@ import { db, storage } from '../../firebase-config.js?v=1.2.32';
 import { doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';

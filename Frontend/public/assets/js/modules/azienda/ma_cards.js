@@ -10,7 +10,7 @@ import { state } from './ma_state.js';
 import { renderAttachments } from './ma_attachments.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 
 // ─── POPULATE FORM ────────────────────────────────────────────────────────────

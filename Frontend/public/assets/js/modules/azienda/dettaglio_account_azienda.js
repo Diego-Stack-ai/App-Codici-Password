@@ -11,7 +11,7 @@ import {
     doc, getDoc, updateDoc, increment
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { ensureMasterKey } from '../core/security-manager.js';

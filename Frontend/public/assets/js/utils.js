@@ -1,6 +1,3 @@
-import { LOG } from './logger.js';
-import { APP_ENV } from './env.js';
-
 /**
  * Centralized error logger for the application.
  * @param {string} context - Where the error happened (e.g., "Firestore User")
@@ -8,21 +5,6 @@ import { APP_ENV } from './env.js';
  */
 export function logError(context, error) {
   console.error(`[${context}]`, error?.code || '', error?.message || error);
-}
-
-export function logDebug(context, message) {
-  if (APP_ENV !== 'production' || window.location.hostname === 'localhost') {
-    console.log(`DEBUG [${context}]:`, message);
-  }
-}
-
-/**
- * Pure helper for telephone calls
- */
-export function makeCall(number) {
-  if (!number || number === '-' || number === '') return;
-  const cleanNumber = number.replace(/[\s\-\(\)]/g, '');
-  window.location.href = `tel:${cleanNumber}`;
 }
 
 /**

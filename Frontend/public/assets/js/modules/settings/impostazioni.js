@@ -8,7 +8,7 @@ import { signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
-import { showToast, showConfirmModal } from '../../ui-core.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';

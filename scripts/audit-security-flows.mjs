@@ -3,9 +3,8 @@ import { readFile, readdir } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-const [settings, setup, inactivity, security, webauthn, mfa, auth, login, settingsHtml, loginHtml, password, serviceWorker, firebaseConfig, vaultSession, env, components, homeHtml, packageJson, main] = await Promise.all([
+const [settings, inactivity, security, webauthn, mfa, auth, login, settingsHtml, loginHtml, password, serviceWorker, firebaseConfig, vaultSession, env, components, homeHtml, packageJson, main] = await Promise.all([
     read('Frontend/public/assets/js/modules/settings/impostazioni.js'),
-    read('Frontend/public/assets/js/modules/core/security-setup.js'),
     read('Frontend/public/assets/js/inactivity-timer.js'),
     read('Frontend/public/assets/js/modules/core/security-manager.js'),
     read('Frontend/public/assets/js/modules/core/webauthn-manager.js'),
@@ -122,9 +121,9 @@ assert.match(auth, /browserLocalPersistence/, 'Persistenza ricordata non disponi
 assert.match(login, /completeTotpLogin/, 'Secondo passaggio TOTP assente dalla pagina login');
 assert.match(loginHtml, /autocomplete="one-time-code"/, 'Campo TOTP non predisposto per OTP/autofill');
 assert.match(loginHtml, /id="remember-device"/, 'Scelta Ricordami assente');
-assert.match(setup, /enableBiometricUnlock\(masterKey\)/, 'Onboarding biometrico senza registrazione WebAuthn');
-assert.doesNotMatch(setup, /biometric_lock\s*:/, 'Campo biometrico legacy ancora scritto');
-assert.match(setup, /settings_biometric\s*:/, 'Preferenza biometrica canonica mancante');
+assert.match(settings, /enableBiometricUnlock\(/, 'Le impostazioni biometriche non avviano la registrazione WebAuthn');
+assert.doesNotMatch(settings, /biometric_lock\s*:/, 'Campo biometrico legacy ancora scritto');
+assert.match(security, /settings_biometric:\s*true/, 'Preferenza biometrica canonica mancante');
 assert.doesNotMatch(inactivity, /disableVaultAutoUnlock|signOut/, 'L\'inattività non deve revocare la biometria o cambiare la sessione Auth');
 assert.match(inactivity, /setTimeout\(lockVaultForInactivity, lockTimerMs\)/, 'Il timeout selezionato non governa il blocco Vault');
 assert.match(security, /settings_biometric: false/, 'La rimozione biometrica non viene sincronizzata');

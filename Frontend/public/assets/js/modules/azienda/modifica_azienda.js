@@ -10,14 +10,14 @@
  *   ├── ma_ui.js         (~175r)  ← initFormEvents, toggleSection, openSourceSelector, handleImagePreview
  *   └── ma_save.js       (~155r)  ← saveAzienda, deleteAzienda, resizeImage
  *
- * pages-init.js fa import('./modules/azienda/modifica_azienda.js') → INVARIATO
+ * Il router delle pagine importa questo orchestratore in modo dinamico.
  * modifica_azienda.html carica solo main.js → INVARIATO
  */
 
 import { db } from '../../firebase-config.js?v=1.2.32';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, clearElement, setChildren } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 

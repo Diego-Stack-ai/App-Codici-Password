@@ -21,7 +21,7 @@
  */
 
 import { createElement, clearElement } from '../../dom-utils.js';
-import { showConfirmModal } from '../../ui-core.js';
+import { showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 
 /**

@@ -8,7 +8,7 @@ import { db, auth } from '../../firebase-config.js?v=1.2.32';
 import { LOG } from '../../logger.js';
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal, showInputModal } from '../../ui-core.js';
+import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 
 const DEFAULT_CONFIG = {

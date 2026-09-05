@@ -93,40 +93,6 @@ export function showToast(message, type = 'success') {
 /**
  * [CORE UI] PREMIUM WARNING MODAL
  */
-export function showWarningModal(title, message, callback = null) {
-    const modalId = 'protocol-warning-modal';
-    let modal = document.getElementById(modalId);
-    if (modal) modal.remove();
-
-    modal = createElement('div', { id: modalId, className: 'modal-overlay' });
-
-    const btnOk = createElement('button', {
-        id: 'modal-ok-btn',
-        className: 'btn-modal btn-primary',
-        textContent: t('ok') || 'Ho Capito'
-    });
-
-    const content = createElement('div', { className: 'modal-box' }, [
-        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'info' }),
-        createElement('h3', { className: 'modal-title', textContent: title }),
-        createElement('p', { className: 'modal-text', textContent: message }),
-        createElement('div', { className: 'modal-actions' }, [btnOk])
-    ]);
-
-    modal.appendChild(content);
-    document.body.appendChild(modal);
-
-    setTimeout(() => modal.classList.add('active'), 10);
-
-    btnOk.addEventListener('click', () => {
-        modal.classList.remove('active');
-        setTimeout(() => {
-            modal.remove();
-            if (callback) callback();
-        }, 300);
-    });
-}
-
 
 /**
  * [CORE UI] LOGOUT MODAL
@@ -418,7 +384,7 @@ export function toggleTripleVisibility(id) {
  * [CORE UI] COLLAPSIBLE SYSTEM (Accordion)
  * Gestisce l'apertura/chiusura delle sezioni con classe .collapsible-header
  */
-export function initCollapsibles() {
+function initCollapsibles() {
     document.addEventListener('click', (e) => {
         const header = e.target.closest('.collapsible-header');
         if (!header) return;
@@ -446,33 +412,3 @@ export function initCollapsibles() {
 /**
  * [CORE UI] GUIDE MODAL
  */
-export function showGuideModal(title, steps) {
-    const modalId = 'guide-modal';
-    let current = document.getElementById(modalId);
-    if (current) current.remove();
-
-    const modal = createElement('div', { id: modalId, className: 'modal-overlay' });
-    const content = createElement('div', { className: 'modal-box' }, [
-        createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'help_outline' }),
-        createElement('h3', { className: 'modal-title', textContent: title }),
-        createElement('div', { className: 'modal-text text-left w-full mt-4 mb-4 space-y-2' },
-            steps.map((step, i) => createElement('p', { className: 'flex items-start text-sm text-secondary' }, [
-                createElement('strong', { className: 'text-accent mr-2 min-w-[20px]', textContent: `${i + 1}.` }),
-                createElement('span', { textContent: step })
-            ]))
-        ),
-        createElement('div', { className: 'modal-actions' }, [
-            createElement('button', {
-                className: 'btn-modal btn-primary w-full',
-                textContent: t('close') || 'Chiudi',
-                onclick: () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); }
-            })
-        ])
-    ]);
-
-    modal.appendChild(content);
-    document.body.appendChild(modal);
-    requestAnimationFrame(() => modal.classList.add('active'));
-    modal.onclick = (e) => { if (e.target === modal) modal.querySelector('button').click(); };
-}
-

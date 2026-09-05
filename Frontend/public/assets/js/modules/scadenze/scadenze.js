@@ -6,12 +6,12 @@
 
 import { db } from '../../firebase-config.js?v=1.2.32';
 import { getFooterReady } from '../../footer-state.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { collection, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { t } from '../../translations.js';
-import { initComponents } from '../../components.js?v=1.2.32';
+import { initComponents } from '../../components-v129.js?v=1.2.32';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 

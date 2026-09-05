@@ -7,7 +7,7 @@
  * - Moduli Legacy -> V5.0: Importa dinamicamente il file e chiama la funzione init esportata.
  */
 
-import { initComponents } from './components.js?v=1.2.32';
+import { initComponents } from './components-v129.js?v=1.2.32';
 
 import { LOG } from './logger.js';
 

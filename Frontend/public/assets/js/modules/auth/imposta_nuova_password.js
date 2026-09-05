@@ -8,7 +8,7 @@ import { auth } from '../../firebase-config.js?v=1.2.32';
 import { updatePassword, confirmPasswordReset, signOut, verifyPasswordResetCode } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { db } from '../../firebase-config.js?v=1.2.32';
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ACCOUNT_PASSWORD_POLICY_VERSION, bindPasswordChecklist, evaluatePassword, firstPasswordPolicyError, generateSecurePassword } from '../core/password-policy.js';

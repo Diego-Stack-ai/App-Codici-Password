@@ -13,7 +13,7 @@
 
 import { auth, db } from '../../firebase-config.js?v=1.2.32';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';

@@ -7,7 +7,7 @@
 
 let _footerDetail = null;
 
-/** Chiamata da components.js al momento del dispatch footer:ready */
+/** Chiamata dal modulo componenti canonico al dispatch di footer:ready. */
 export function setFooterReady(detail) {
     _footerDetail = detail;
 }

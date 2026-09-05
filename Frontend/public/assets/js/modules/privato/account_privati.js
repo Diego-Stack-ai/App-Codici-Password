@@ -8,10 +8,10 @@ import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components.js?v=1.2.32';
+import { initComponents } from '../../components-v129.js?v=1.2.32';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 

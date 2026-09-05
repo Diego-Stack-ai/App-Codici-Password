@@ -10,7 +10,7 @@ import {
     doc, getDoc, getDocs, collection
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast } from '../../ui-core.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { logError } from '../../utils.js';
