@@ -9,12 +9,14 @@
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
+const { getAppCheck } = require("firebase-admin/app-check");
 const { FieldValue, getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
+const { getStorage } = require("firebase-admin/storage");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const { setGlobalOptions } = require("firebase-functions");
@@ -34,6 +36,49 @@ const firestore = () => getFirestore();
 firestore.FieldValue = FieldValue;
 const admin = { auth: getAuth, firestore, messaging: getMessaging };
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
+
+exports.getAppPresentation = onRequest(
+    { region: "europe-west1", cors: false },
+    async (request, response) => {
+        if (request.method !== "GET") {
+            response.set("Allow", "GET").status(405).send("Metodo non consentito.");
+            return;
+        }
+
+        const authorization = String(request.get("Authorization") || "");
+        const idToken = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+        const appCheckToken = String(request.get("X-Firebase-AppCheck") || "");
+        if (!idToken || !appCheckToken) {
+            response.status(401).send("Accesso richiesto.");
+            return;
+        }
+
+        try {
+            await Promise.all([
+                admin.auth().verifyIdToken(idToken),
+                getAppCheck().verifyToken(appCheckToken)
+            ]);
+            const file = getStorage().bucket().file("app-media/presentazione/codici-password-v2.mp4");
+            const [metadata] = await file.getMetadata();
+            response.set({
+                "Content-Type": "video/mp4",
+                "Content-Length": metadata.size,
+                "Cache-Control": "private, no-store, max-age=0",
+                "X-Content-Type-Options": "nosniff"
+            });
+            file.createReadStream()
+                .on("error", (error) => {
+                    console.error("[PRESENTAZIONE] Lettura Storage fallita", error);
+                    if (!response.headersSent) response.status(404).send("Video non disponibile.");
+                    else response.destroy(error);
+                })
+                .pipe(response);
+        } catch (error) {
+            console.warn("[PRESENTAZIONE] Richiesta rifiutata", error.message);
+            response.status(401).send("Accesso non valido.");
+        }
+    }
+);
 
 // Segreti cifrati (salvati su Google Secret Manager)
 const GMAIL_USER = defineSecret("GMAIL_USER");

@@ -139,20 +139,16 @@ function initAppPresentation() {
             const appCheckToken = await getAppCheckToken(enableAppCheck(), false);
             const controller = new AbortController();
             const timeout = window.setTimeout(() => controller.abort(), 20000);
-            const objectPath = encodeURIComponent('app-media/presentazione/codici-password-v2.mp4');
             let response;
             try {
-                response = await fetch(
-                    `https://firebasestorage.googleapis.com/v0/b/appcodici-password.firebasestorage.app/o/${objectPath}?alt=media`,
-                    {
-                        headers: {
-                            Authorization: `Firebase ${idToken}`,
-                            'X-Firebase-AppCheck': appCheckToken.token
-                        },
-                        cache: 'no-store',
-                        signal: controller.signal
-                    }
-                );
+                response = await fetch('/protected-media/presentation', {
+                    headers: {
+                        Authorization: `Bearer ${idToken}`,
+                        'X-Firebase-AppCheck': appCheckToken.token
+                    },
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
             } finally {
                 window.clearTimeout(timeout);
             }

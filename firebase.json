@@ -32,6 +32,13 @@
     ],
     "rewrites": [
       {
+        "source": "/protected-media/presentation",
+        "function": {
+          "functionId": "getAppPresentation",
+          "region": "europe-west1"
+        }
+      },
+      {
         "source": "/home",
         "destination": "/home_page.html"
       },
