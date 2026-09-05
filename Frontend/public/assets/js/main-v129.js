@@ -61,6 +61,7 @@ function getCurrentPage() {
 
     // Settings & Profile
     if (path.includes('archivio_account')) return 'archivio';
+    if (path.includes('profilo_privato_v2')) return 'profilo_v2';
     if (path.includes('profilo_privato')) return 'profilo';
     if (path.includes('impostazioni')) return 'impostazioni';
 
@@ -224,6 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     case 'archivio': await Pages.initArchivioAccount(user); break;
                     case 'profilo': await Pages.initProfiloPrivato(user); break;
+                    case 'profilo_v2': await Pages.initProfiloPrivatoV2(user); break;
 
                     case 'scadenze': await Pages.initScadenze(user); break;
                     case 'aggiungi_scadenza': await Pages.initAggiungiScadenza(user); break;

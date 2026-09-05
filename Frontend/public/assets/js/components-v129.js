@@ -147,6 +147,8 @@ export async function initComponents() {
                     // Modifica con id e nuova azienda senza id hanno due parent
                     // distinti e deterministici: non dipendono dalla history.
                     preferHistory = false;
+                } else if (path.endsWith('profilo_privato_v2.html')) {
+                    fallbackHref = 'home_page.html';
                 } else if (path.endsWith('profilo_privato.html')) {
                     fallbackHref = 'home_page.html';
                 } else if (path.endsWith('account_privati.html')) {
@@ -189,6 +191,7 @@ export async function initComponents() {
                     let displayTitle = pageTitle;
                     if (path.includes('impostazioni.html')) displayTitle = t('settings_title');
                     else if (path.includes('archivio_account.html')) displayTitle = t('account_archive');
+                    else if (path.includes('profilo_privato_v2.html')) displayTitle = 'Profilo Utente V2';
                     else if (path.includes('profilo_privato.html')) displayTitle = t('page_title_profile');
                     else if (path.includes('regole_scadenze.html')) displayTitle = t('expiry_rules_title_page');
                     else if (path.includes('configurazione_automezzi.html')) displayTitle = t('vehicles_config_title');
@@ -250,7 +253,7 @@ export async function initComponents() {
             const footerCenter = createElement('div', { id: 'footer-center-actions', className: 'header-center' });
 
             // GUIDA RAPIDA (Icona Centrale - Solo Profilo)
-            if (path.includes('profilo_privato.html')) {
+            if (path.includes('profilo_privato')) {
                 const guideBtn = createElement('button', {
                     className: 'btn-icon-header',
                     title: 'Guida Profilo',

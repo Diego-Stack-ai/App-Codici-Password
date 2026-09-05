@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/privato/profile-model.js', import.meta.url), 'utf8');
 const model = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
-const qrSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/qr_code_utils.js', import.meta.url), 'utf8');
+const qrSource = await readFile(new URL('../Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js', import.meta.url), 'utf8');
 const qr = await import(`data:text/javascript;base64,${Buffer.from(qrSource).toString('base64')}`);
 
 test('normalizza i dati legacy con ID stabili senza mutare la sorgente', () => {

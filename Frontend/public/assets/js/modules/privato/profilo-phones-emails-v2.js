@@ -11,6 +11,7 @@
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
+import { createProfileItemId } from './profile-model.js';
 import { showProfileModal } from './profilo-modal.js';
 
 let _getState = null;
@@ -89,8 +90,8 @@ function _createPhoneCard(phone, idx) {
                     createElement('input', {
                         type: 'checkbox',
                         className: 'qr-checkbox',
-                        checked: qrCodeInclusions.phones.includes(idx),
-                        onclick: (e) => { e.stopPropagation(); _callbacks.toggleQRInclusion('phones', idx); }
+                        checked: qrCodeInclusions.phones.includes(phone.id) || qrCodeInclusions.phones.includes(idx),
+                        onclick: (e) => { e.stopPropagation(); _callbacks.toggleQRInclusion('phones', phone.id); }
                     }),
                     createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
                     createElement('span', { className: 'data-label', textContent: 'Numero' })
@@ -108,10 +109,15 @@ async function _addPhone() {
     const { profileLabels, contactPhones } = _getState();
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
-        { key: 'number', label: 'Numero', icon: 'call' }
+        { key: 'number', label: 'Numero', icon: 'call' },
+        { key: 'primaryChoice', label: 'Telefono principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
     ];
     showProfileModal('Aggiungi Telefono', fields, {}, async (newData) => {
         try {
+            newData.isPrimary = newData.primaryChoice === 'Sì';
+            delete newData.primaryChoice;
+            if (newData.isPrimary) contactPhones.forEach(item => { item.isPrimary = false; });
+            newData.id = createProfileItemId('phone');
             contactPhones.push(newData);
             await _callbacks.syncData();
             renderPhonesView();
@@ -123,18 +129,23 @@ async function _addPhone() {
         }
     });
 }
+
 export async function editPhone(idx) {
     const { profileLabels, contactPhones } = _getState();
     const phone = contactPhones[idx];
     if (!phone.label) phone.label = profileLabels.phoneLabels[0];
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.phoneLabels, configKey: 'phoneLabels' },
-        { key: 'number', label: 'Numero', icon: 'call' }
+        { key: 'number', label: 'Numero', icon: 'call' },
+        { key: 'primaryChoice', label: 'Telefono principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
     ];
-    showProfileModal('Modifica Telefono', fields, phone, async (newData) => {
+    showProfileModal('Modifica Telefono', fields, { ...phone, primaryChoice: phone.isPrimary ? 'Sì' : 'No' }, async (newData) => {
         const backup = { ...contactPhones[idx] };
         try {
-            contactPhones[idx] = newData;
+            newData.isPrimary = newData.primaryChoice === 'Sì';
+            delete newData.primaryChoice;
+            if (newData.isPrimary) contactPhones.forEach(item => { item.isPrimary = false; });
+            contactPhones[idx] = { ...backup, ...newData };
             await _callbacks.syncData();
             renderPhonesView();
             showToast(t('success_save'), 'success');
@@ -169,8 +180,8 @@ export function renderEmailsView() {
                 createElement('input', {
                     type: 'checkbox',
                     className: 'qr-checkbox',
-                    checked: qrCodeInclusions.emails.includes(idx),
-                    onclick: (ev) => { ev.stopPropagation(); _callbacks.toggleQRInclusion('emails', idx); }
+                    checked: qrCodeInclusions.emails.includes(e.id) || qrCodeInclusions.emails.includes(idx),
+                    onclick: (ev) => { ev.stopPropagation(); _callbacks.toggleQRInclusion('emails', e.id); }
                 }),
                 createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
                 createElement('span', { className: 'card-title-accent', textContent: e.label || 'Email' })
@@ -189,26 +200,19 @@ export function renderEmailsView() {
                 createElement('span', { className: 'data-value truncate', textContent: e.address || '-' }),
                 createCopyBtn(e.address)
             ]),
-            e.password ? createElement('div', { className: 'field-value-row' }, [
-                createElement('span', { className: 'data-value-sub', textContent: '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022', dataset: { pwd: e.password, visible: 'false' } }),
-                createElement('div', { className: 'flex-center-row profile-password-actions' }, [
-                    createElement('button', {
-                        className: 'btn-action-mini',
-                        onclick: (event) => {
-                            event.stopPropagation();
-                            const span = event.currentTarget.parentElement.parentElement.querySelector('.data-value-sub');
-                            const isVisible = span.dataset.visible === 'true';
-                            span.textContent = isVisible ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : span.dataset.pwd;
-                            span.dataset.visible = !isVisible;
-                            event.currentTarget.querySelector('span').textContent = isVisible ? 'visibility' : 'visibility_off';
-                        }
-                    }, [createElement('span', { className: 'material-symbols-outlined profile-mini-action-icon', textContent: 'visibility' })]),
-                    createCopyBtn(e.password)
-                ])
-            ]) : createElement('span', { className: 'data-value-sub', textContent: 'No PWD' }),
+            e.password && !e.linkedAccountId
+                ? createElement('span', { className: 'data-value-sub', textContent: 'Password legacy presente: collega un Account per centralizzare le credenziali e rimuoverla dal Profilo.' })
+                : createElement('span', { className: 'data-value-sub', textContent: e.linkedAccountId ? 'Credenziali gestite nell’Account collegato' : 'Nessuna credenziale nel Profilo' }),
             e.note ? createElement('div', {
                 className: 'note-display-lite profile-contact-note'
-            }, [createElement('span', { textContent: e.note })]) : null
+            }, [createElement('span', { textContent: e.note })]) : null,
+            createElement('button', {
+                className: 'btn-upload-trigger',
+                textContent: e.linkedAccountId ? 'Apri Account collegato' : 'Collega un Account',
+                onclick: () => e.linkedAccountId
+                    ? _callbacks.openLinkedAccount(e.linkedAccountId)
+                    : _callbacks.connectEmailAccount(e, _callbacks.syncData)
+            })
         ])
     ]));
 
@@ -220,11 +224,15 @@ async function _addEmail() {
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
         { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
-        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' },
-        { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' }
+        { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' },
+        { key: 'primaryChoice', label: 'Email principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
     ];
     showProfileModal('Aggiungi Email', fields, { label: profileLabels.emailLabels[0] }, async (newData) => {
         try {
+            newData.isPrimary = newData.primaryChoice === 'Sì';
+            delete newData.primaryChoice;
+            if (newData.isPrimary) contactEmails.forEach(item => { item.isPrimary = false; });
+            newData.id = createProfileItemId('email');
             contactEmails.push(newData);
             await _callbacks.syncData();
             renderEmailsView();
@@ -245,13 +253,16 @@ export async function editEmail(idx) {
     const fields = [
         { key: 'label', label: 'Etichetta', icon: 'label', type: 'select', options: profileLabels.emailLabels, configKey: 'emailLabels' },
         { key: 'address', label: 'Indirizzo Email', icon: 'alternate_email', type: 'text' },
-        { key: 'password', label: 'Password (opzionale)', icon: 'key', type: 'password' },
-        { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' }
+        { key: 'note', label: 'Note (opzionale)', icon: 'notes', type: 'textarea' },
+        { key: 'primaryChoice', label: 'Email principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
     ];
-    showProfileModal('Modifica Email', fields, email, async (newData) => {
+    showProfileModal('Modifica Email', fields, { ...email, primaryChoice: email.isPrimary ? 'Sì' : 'No' }, async (newData) => {
         const backup = { ...contactEmails[idx] };
         try {
-            contactEmails[idx] = newData;
+            newData.isPrimary = newData.primaryChoice === 'Sì';
+            delete newData.primaryChoice;
+            if (newData.isPrimary) contactEmails.forEach(item => { item.isPrimary = false; });
+            contactEmails[idx] = { ...backup, ...newData };
             await _callbacks.syncData();
             renderEmailsView();
             showToast(t('success_save'), 'success');
@@ -262,3 +273,5 @@ export async function editEmail(idx) {
         }
     });
 }
+
+

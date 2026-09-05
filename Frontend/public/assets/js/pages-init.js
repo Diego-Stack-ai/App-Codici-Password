@@ -53,6 +53,11 @@ export async function initProfiloPrivato(user) {
     await module.initProfiloPrivato(user);
 }
 
+export async function initProfiloPrivatoV2(user) {
+    const module = await import('./modules/privato/profilo_privato-v2.js?v=1.2.36');
+    await module.initProfiloPrivatoV2(user);
+}
+
 export async function initImpostazioni(user) {
     const module = await import('./modules/settings/impostazioni.js?v=1.2.36');
     await module.initImpostazioni(user);

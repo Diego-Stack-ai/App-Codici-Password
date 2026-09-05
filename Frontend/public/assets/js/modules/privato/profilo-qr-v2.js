@@ -11,7 +11,7 @@
 import { db } from '../../firebase-config.js?v=1.2.36';
 import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { createElement, clearElement } from '../../dom-utils.js';
-import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils.js';
+import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils-v2.js';
 
 let _getState = null;
 let _renders = null;
@@ -57,14 +57,14 @@ async function _saveQRInclusions() {
     }
 }
 
-export async function toggleQRInclusion(type, idx) {
+export async function toggleQRInclusion(type, itemId) {
     const { qrCodeInclusions } = _getState();
     const array = qrCodeInclusions[type];
-    const index = array.indexOf(idx);
+    const index = array.indexOf(itemId);
     if (index > -1) {
         array.splice(index, 1);
     } else {
-        array.push(idx);
+        array.push(itemId);
     }
     await _saveQRInclusions();
 
@@ -75,13 +75,31 @@ export async function toggleQRInclusion(type, idx) {
     generateProfileQRCode();
 }
 
+export async function setQRScalar(field, value) {
+    _getState().qrCodeInclusions[field] = value === true;
+    await _saveQRInclusions();
+    setupQRToggles();
+    generateProfileQRCode();
+}
+
+export function getProfileVCard() {
+    const { currentUserData, qrCodeInclusions, contactPhones, contactEmails, userAddresses, customWidgets } = _getState();
+    return buildVCard(currentUserData, qrCodeInclusions, {
+        contactPhones, contactEmails, userAddresses,
+        customFields: (customWidgets || []).flatMap(widget => widget.fields || [])
+    });
+}
+
 export async function generateProfileQRCode() {
     if (!_getState) return;  // modulo non ancora inizializzato
-    const { currentUserData, qrCodeInclusions, contactPhones, contactEmails, userAddresses } = _getState();
+    const { currentUserData, qrCodeInclusions, contactPhones, contactEmails, userAddresses, customWidgets } = _getState();
     await ensureQRCodeLib();
     const container = document.getElementById('qrcode-header');
     if (!container) return;
-    const vcard = buildVCard(currentUserData, qrCodeInclusions, { contactPhones, contactEmails, userAddresses });
+    const vcard = buildVCard(currentUserData, qrCodeInclusions, {
+        contactPhones, contactEmails, userAddresses,
+        customFields: (customWidgets || []).flatMap(widget => widget.fields || [])
+    });
     clearElement(container);
     renderQRCode(container, vcard, { width: 104, height: 104, colorDark: '#000000', colorLight: '#E3F2FD', correctLevel: 2 });
     container.onclick = () => _showEnlargedQR(vcard);
@@ -111,3 +129,4 @@ function _showEnlargedQR(vcard) {
     };
     renderQRCode(document.getElementById('qr-enlarged'), vcard, { width: qrSize, height: qrSize, colorDark: '#000000', colorLight: '#E3F2FD', correctLevel: 3 });
 }
+
