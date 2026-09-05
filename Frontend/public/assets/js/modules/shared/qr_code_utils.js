@@ -26,38 +26,48 @@ export async function ensureQRCodeLib() {
  */
 export function buildVCard(userData, inclusions, options = {}) {
     let v = ["BEGIN:VCARD", "VERSION:3.0"];
+    const escapeVCard = (value) => String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/\n/g, '\\n')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,');
+    const selected = (items, references) => (Array.isArray(references) ? references : [])
+        .map(reference => typeof reference === 'number'
+            ? items[reference]
+            : items.find(item => String(item?.id) === String(reference)))
+        .filter(Boolean);
     const nome = inclusions.nome ? (userData.nome || '') : '';
-    const cognome = inclusions.cognome ? (userData.cognome || '') : '';
+    const cognome = inclusions.nome || inclusions.cognome ? (userData.cognome || '') : '';
     if (nome || cognome) {
-        v.push(`N:${cognome};${nome};;;`);
-        v.push(`FN:${nome} ${cognome}`.trim());
+        v.push(`N:${escapeVCard(cognome)};${escapeVCard(nome)};;;`);
+        v.push(`FN:${escapeVCard(`${nome} ${cognome}`.trim())}`);
     }
-    if (inclusions.cf && userData.cf) {
-        v.push(`X-CF:${userData.cf}`);
+    const fiscalCode = userData.cf || (userData.documenti || []).find(item =>
+        String(item?.type || '').toLowerCase().includes('fiscale'))?.cf_value ||
+        (userData.documenti || []).find(item => String(item?.type || '').toLowerCase().includes('fiscale'))?.num_serie;
+    if (inclusions.cf && fiscalCode) {
+        v.push(`X-CF:${escapeVCard(fiscalCode)}`);
     }
     if (inclusions.nascita && userData.birth_date) {
         v.push(`BDAY:${userData.birth_date}`);
-        if (userData.birth_place) v.push(`X-BIRTHPLACE:${userData.birth_place}`);
+        if (userData.birth_place) v.push(`X-BIRTHPLACE:${escapeVCard(userData.birth_place)}`);
     }
     // Phones
     if (Array.isArray(options.contactPhones) && Array.isArray(inclusions.phones)) {
-        inclusions.phones.forEach(idx => {
-            const p = options.contactPhones[idx];
-            if (p && p.number) v.push(`TEL:${p.number}`);
+        selected(options.contactPhones, inclusions.phones).forEach(p => {
+            if (p.number) v.push(`TEL:${escapeVCard(p.number)}`);
         });
     }
     // Emails
     if (Array.isArray(options.contactEmails) && Array.isArray(inclusions.emails)) {
-        inclusions.emails.forEach(idx => {
-            const e = options.contactEmails[idx];
-            if (e && e.address) v.push(`EMAIL:${e.address}`);
+        selected(options.contactEmails, inclusions.emails).forEach(e => {
+            if (e.address) v.push(`EMAIL:${escapeVCard(e.address)}`);
         });
     }
     // Addresses
     if (Array.isArray(options.userAddresses) && Array.isArray(inclusions.addresses)) {
-        inclusions.addresses.forEach(idx => {
-            const a = options.userAddresses[idx];
-            if (a && a.address) v.push(`ADR:;;${a.address} ${a.civic};${a.city};;${a.cap};`);
+        selected(options.userAddresses, inclusions.addresses).forEach(a => {
+            if (a.address) v.push(`ADR:;;${escapeVCard(`${a.address} ${a.civic || ''}`.trim())};${escapeVCard(a.city)};;${escapeVCard(a.cap)};`);
         });
     }
     // impostazioni.js style (qr_personal)
@@ -66,6 +76,18 @@ export function buildVCard(userData, inclusions, options = {}) {
     }
     if (inclusions.contactEmails && Array.isArray(userData.contactEmails)) {
         userData.contactEmails.forEach(e => { if (e.shareQr && e.address) v.push(`EMAIL;TYPE=INTERNET:${e.address}`); });
+    }
+    if (Array.isArray(options.customFields)) {
+        options.customFields.filter(field => field?.includeInQr === true && field.encrypted !== true)
+            .sort((a, b) => (a.qrOrder || 0) - (b.qrOrder || 0))
+            .forEach(field => {
+                const value = escapeVCard(field.value || '');
+                if (!value) return;
+                if (field.type === 'phone') v.push(`TEL:${value}`);
+                else if (field.type === 'email') v.push(`EMAIL:${value}`);
+                else if (field.type === 'url') v.push(`URL:${value}`);
+                else v.push(`NOTE:${escapeVCard(field.qrLabel || field.label)}: ${value}`);
+            });
     }
     v.push("END:VCARD");
     return v.join("\n");
@@ -82,17 +104,9 @@ export function renderQRCode(container, text, options = {}) {
     // Remove previous QR canvases/images
     container.querySelectorAll('canvas,img').forEach(el => el.remove());
 
-    // HACK: Aggiungi padding alla fine dei dati per forzare la libreria a scegliere una Versione QR più grande (TypeNumber maggiore).
-    // La libreria qrcode.js attuale sottostima l'overhead binario, causando overflow se il Type scelto è 'giusto giusto'.
-    // Aggiungendo spazi (che sono safe dopo END:VCARD), forziamo il calcolo preliminare a salire di livello.
-    let safeText = text;
-    if (safeText.length > 50) {
-        safeText += " ".repeat(150); // +150 char buffer to force next Version
-    }
-
     try {
         new QRCode(container, {
-            text: safeText,
+            text,
             width: options.width || 104,
             height: options.height || 104,
             colorDark: options.colorDark || '#000000',
@@ -100,12 +114,12 @@ export function renderQRCode(container, text, options = {}) {
             correctLevel: options.correctLevel || (typeof QRCode.CorrectLevel !== 'undefined' ? QRCode.CorrectLevel.M : 1)
         });
     } catch (e) {
-        console.error("QR Code Render Error (Overflow) with padding:", e);
+        console.error("QR Code Render Error:", e);
 
         // Fallback estremo: Riduci ancora correzione e aumenta padding
         try {
             new QRCode(container, {
-                text: safeText + "   ", // Try minimal change
+                text,
                 width: options.width || 104,
                 height: options.height || 104,
                 colorDark: options.colorDark || '#000000',

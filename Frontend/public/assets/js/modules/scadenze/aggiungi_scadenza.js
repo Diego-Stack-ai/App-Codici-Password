@@ -7,7 +7,7 @@
 import { db, auth, storage } from '../../firebase-config.js?v=1.2.35';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
-import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { collection, addDoc, Timestamp, doc, getDoc, getDocs, updateDoc, setDoc, arrayUnion, writeBatch } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
@@ -31,6 +31,8 @@ let selectedFiles = [];
 let existingAttachments = [];
 let deadlineRecipients = [];
 let recipientContacts = [];
+let profileDocumentLinkDraft = null;
+let linkedSourceRef = null;
 
 let dynamicConfig = {
     deadlineTypes: [],
@@ -57,6 +59,13 @@ export async function initAggiungiScadenza(user) {
     currentUser = user;
 
     editingScadenzaId = new URLSearchParams(window.location.search).get('id');
+    const profileDocumentId = new URLSearchParams(window.location.search).get('profileDocumentId');
+    if (!editingScadenzaId && profileDocumentId) {
+        try {
+            const draft = JSON.parse(sessionStorage.getItem('profile-deadline-link-draft') || 'null');
+            if (draft?.profileDocumentId === profileDocumentId) profileDocumentLinkDraft = draft;
+        } catch { profileDocumentLinkDraft = null; }
+    }
 
     // Mode Switching Listeners
     ['automezzi', 'documenti', 'generali'].forEach(mode => {
@@ -187,6 +196,19 @@ export async function initAggiungiScadenza(user) {
     } else {
         // Forza l'aggiornamento UI per la modalità di default ('automezzi') in "Aggiungi"
         setMode(currentMode);
+        if (profileDocumentLinkDraft) {
+            setMode('documenti');
+            const nameInput = document.getElementById('nome_cognome');
+            const dateInput = document.getElementById('dueDate');
+            if (nameInput) nameInput.value = profileDocumentLinkDraft.name || 'Documento';
+            if (dateInput) {
+                dateInput.value = profileDocumentLinkDraft.dueDate || '';
+                dateInput.dataset.isoValue = profileDocumentLinkDraft.dueDate || '';
+            }
+            if (typeSelect && profileDocumentLinkDraft.name && [...typeSelect.options].some(option => option.value === profileDocumentLinkDraft.name)) {
+                typeSelect.value = profileDocumentLinkDraft.name;
+            }
+        }
     }
 
     
@@ -913,6 +935,11 @@ function setupSaveLogic() {
                 notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
                 notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
             };
+            if (profileDocumentLinkDraft?.profileDocumentId) {
+                scadenzaData.sourceRef = { type: 'profileDocument', id: profileDocumentLinkDraft.profileDocumentId };
+            } else if (linkedSourceRef?.type === 'profileDocument') {
+                scadenzaData.sourceRef = linkedSourceRef;
+            }
 
             // Solo per le nuove scadenze aggiungiamo createdAt
             if (!editingScadenzaId) {
@@ -923,8 +950,34 @@ function setupSaveLogic() {
             let finalDocId = editingScadenzaId;
             LOG("[FRONTEND-TRACE] Scrittura documento Firestore...");
 
-            if (editingScadenzaId) {
+            if (editingScadenzaId && linkedSourceRef?.type === 'profileDocument') {
+                const profileRef = doc(db, 'users', currentUser.uid);
+                const profileSnap = await getDoc(profileRef);
+                const documents = profileSnap.data()?.documenti || [];
+                const batch = writeBatch(db);
+                batch.update(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
+                batch.update(profileRef, {
+                    documenti: documents.map(item => item.id === linkedSourceRef.id ? { ...item, expiry_date: date } : item)
+                });
+                await batch.commit();
+            } else if (editingScadenzaId) {
                 await updateDoc(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
+            } else if (profileDocumentLinkDraft?.profileDocumentId) {
+                const deadlineRef = doc(collection(db, "users", currentUser.uid, "scadenze"));
+                finalDocId = deadlineRef.id;
+                const profileRef = doc(db, 'users', currentUser.uid);
+                const profileSnap = await getDoc(profileRef);
+                const documents = profileSnap.data()?.documenti || [];
+                const batch = writeBatch(db);
+                batch.set(deadlineRef, scadenzaData);
+                batch.update(profileRef, {
+                    documenti: documents.map(item => item.id === profileDocumentLinkDraft.profileDocumentId
+                        ? { ...item, expiryReference: { deadlineId: finalDocId } }
+                        : item)
+                });
+                await batch.commit();
+                sessionStorage.removeItem('profile-deadline-link-draft');
+                profileDocumentLinkDraft = null;
             } else {
                 const docRef = await addDoc(collection(db, "users", currentUser.uid, "scadenze"), scadenzaData);
                 finalDocId = docRef.id;
@@ -1095,6 +1148,7 @@ async function loadScadenzaForEdit(id) {
         }
 
         const data = snap.data();
+        linkedSourceRef = data.sourceRef || null;
 
         // 1. Identifica il Mode corretto in base al tipo salvato
         let foundMode = 'automezzi';

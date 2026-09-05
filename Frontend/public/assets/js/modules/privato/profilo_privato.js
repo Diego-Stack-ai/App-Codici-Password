@@ -23,7 +23,7 @@
 import { auth, db, storage } from '../../firebase-config.js?v=1.2.35';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { deleteField, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -33,12 +33,16 @@ import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
 import { syncData as _syncData } from './profilo-sync.js';
+import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.js';
 
 // — Moduli estratti
-import { initQRModule, setupQRToggles, toggleQRInclusion, generateProfileQRCode } from './profilo-qr.js';
+import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
 import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.35';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns } from './profilo-ui.js';
+import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
+import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
+import { connectEmailAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -51,6 +55,7 @@ let contactEmails = [];
 let userAddresses = [];
 let contactPhones = [];
 let userDocuments = [];
+let customWidgets = [];
 let profileLabels = {
     addressTypes: ['Residenza', 'Domicilio', 'Ufficio', 'Altro'],
     utilityTypes: ['Codice POD', 'Contatore Acqua', 'Contatore Metano', 'Fibra', 'Altro'],
@@ -83,13 +88,13 @@ export async function initProfiloPrivato(user) {
 
     // Inizializza tutti i moduli con getState + callbacks
     initQRModule(
-        () => ({ qrCodeInclusions, currentUserUid, currentUserData, contactPhones, contactEmails, userAddresses }),
+        () => ({ qrCodeInclusions, currentUserUid, currentUserData, contactPhones, contactEmails, userAddresses, customWidgets }),
         { renderPhonesView, renderEmailsView, renderAddressesView }
     );
 
     initPhonesEmailsModule(
         () => ({ contactPhones, contactEmails, profileLabels, qrCodeInclusions }),
-        { syncData, toggleQRInclusion, deletePhone, deleteEmail }
+        { syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, openLinkedAccount }
     );
 
     initAddressesDocsModule(
@@ -97,7 +102,8 @@ export async function initProfiloPrivato(user) {
         {
             toggleQRInclusion,
             onAddAddress: () => editAddress(-1, buildCtx()),
-            onAddDoc: () => editUserDocument(-1, buildCtx())
+            onAddDoc: () => editUserDocument(-1, buildCtx()),
+            createDeadlineFromDocument: documentItem => createDeadlineFromDocument(documentItem, syncData)
         }
     );
 
@@ -112,6 +118,16 @@ export async function initProfiloPrivato(user) {
     initProxyDropdowns();
     setupQRToggles();
     setupCollapsibleSections();
+
+    initProfileDashboard(
+        () => ({ currentUserData, contactPhones, contactEmails, userAddresses, userDocuments, qrCodeInclusions, customWidgets }),
+        { toggleQRInclusion, setQRScalar, setWidgetFieldQr, getVCard: getProfileVCard, downloadVCard, shareVCard }
+    );
+    await initProfileWidgets({ onChanged: widgets => {
+        customWidgets = widgets;
+        renderDigitalCard();
+        generateProfileQRCode();
+    } });
 
     // Render sezioni ora che tutti i moduli sono inizializzati
     // (la chiamata dentro loadUserData fallisce silenziosamente perché i moduli non sono ancora pronti)
@@ -198,6 +214,8 @@ async function loadUserData(user) {
             LOG('[VaultCheck] Decrittazione granulare V6.1.5 completata.');
         }
 
+        currentUserData = normalizeLegacyProfile(currentUserData);
+
         // Hero Header
         const fullNameRaw = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim();
         const finalFullName = (fullNameRaw && !fullNameRaw.includes('[ERROR]')) ? fullNameRaw : (user.displayName || 'Utente');
@@ -235,6 +253,7 @@ async function loadUserData(user) {
         if (qrSnap.exists()) {
             Object.assign(qrCodeInclusions, qrSnap.data()); // in-place per preservare i riferimenti nei moduli
         }
+        Object.assign(qrCodeInclusions, migrateQrIndexesToIds(qrCodeInclusions, currentUserData));
 
         renderAllSections();
         generateProfileQRCode();
@@ -249,7 +268,29 @@ function renderAllSections() {
     renderPhonesView();
     renderEmailsView();
     renderDocumentiView();
+    renderProfileOverview();
+    renderDigitalCard();
     focusAssistantDocument();
+}
+
+function downloadVCard() {
+    const blob = new Blob([getProfileVCard()], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'profilo.vcf';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function shareVCard() {
+    const file = new File([getProfileVCard()], 'profilo.vcf', { type: 'text/vcard' });
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ title: 'Tessera digitale', files: [file] });
+    } else {
+        downloadVCard();
+        showToast('Condivisione non disponibile: vCard scaricata.', 'info');
+    }
 }
 
 function focusAssistantDocument() {
@@ -355,9 +396,17 @@ async function deletePhone(idx) {
 async function deleteEmail(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questa email?')) return;
     try {
+        const linkedAccountId = contactEmails[idx]?.linkedAccountId;
         contactEmails.splice(idx, 1);
         contactEmails = contactEmails.filter(e => e !== undefined && e !== null);
         await syncData();
+        if (linkedAccountId) {
+            try {
+                await updateDoc(doc(db, 'users', currentUserUid, 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
+            } catch (unlinkError) {
+                console.warn('[Email] Account collegato non disponibile durante la rimozione del riferimento:', unlinkError);
+            }
+        }
         renderEmailsView();
         LOG(`[Email] Eliminata email #${idx}. Rimanenti: ${contactEmails.length}`);
     } catch (e) {
@@ -369,9 +418,17 @@ async function deleteEmail(idx) {
 async function deleteDocumento(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo documento?')) return;
     try {
+        const linkedDeadlineId = userDocuments[idx]?.expiryReference?.deadlineId;
         userDocuments.splice(idx, 1);
         userDocuments = userDocuments.filter(d => d !== undefined && d !== null);
         await syncData();
+        if (linkedDeadlineId) {
+            try {
+                await updateDoc(doc(db, 'users', currentUserUid, 'scadenze', linkedDeadlineId), { sourceRef: deleteField() });
+            } catch (unlinkError) {
+                console.warn('[Documento] Scadenza collegata non disponibile durante la rimozione del riferimento:', unlinkError);
+            }
+        }
         renderDocumentiView();
         LOG(`[Doc] Eliminato documento #${idx}. Rimanenti: ${userDocuments.length}`);
     } catch (e) {

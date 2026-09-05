@@ -150,3 +150,48 @@ Fino all'approvazione di questo gate non modificare algoritmi, derivazione chiav
 
 ### 📝 Note per l'Agente AI:
 Quando lavori su queste sezioni, documenta qui ogni progresso. Se l'utente approva un nuovo stile o una nuova logica, prepara lo snippet per il trasferimento nel **Protocollo Master**.
+
+---
+
+## 9. DASHBOARD PROFILO E TESSERA DIGITALE
+
+### Decisione approvata — 5 settembre 2026
+
+La pagina Profilo viene evoluta senza eliminare dati o funzioni esistenti e senza
+modificare in questa fase il sistema crittografico. La cifratura integrale di tutti
+i campi resta un progetto separato, con audit, misure prestazionali, migrazione,
+backup e rollback dedicati.
+
+Principi approvati:
+
+- sei linguette: Panoramica, Anagrafica, Contatti, Indirizzi, Documenti e Tessera digitale;
+- mantenimento delle carte espandibili esistenti tramite adattatore legacy;
+- nessuna duplicazione del medesimo dato tra Profilo, Account e Scadenze;
+- email nel Profilo come dato personale, credenziali esclusivamente nell'Account collegato;
+- collegamenti tramite ID stabili e navigazione bidirezionale;
+- proposta guidata di creazione/collegamento Account quando un'email ne è priva;
+- proposta esplicita di creazione o aggiornamento Scadenza per i documenti, senza automazioni silenziose;
+- una sola configurazione QR condivisa; la Tessera digitale è il punto principale di gestione;
+- nessun segreto, password, PIN, PUK, chiave o allegato selezionabile per il QR;
+- widget personalizzati in `users/{uid}/profileWidgets/{widgetId}`;
+- campi dei widget inizialmente contenuti in un array limitato a 30 elementi;
+- un solo elemento `isPrimary` per ciascuna categoria indirizzo, telefono ed email;
+- migrazione incrementale, idempotente e retrocompatibile; il vecchio formato non viene rimosso durante l'introduzione della nuova UI.
+
+### Piano operativo
+
+- [x] **P0 — Contratti e test**: adattatore legacy, ID stabili, fixture e test vCard/QR/offline.
+- [x] **P1 — Linguette**: organizzazione accessibile e responsive delle carte esistenti senza riscrivere Firestore.
+- [x] **P2 — Panoramica**: dati principali, documenti prossimi alla scadenza e azioni rapide.
+- [x] **P3 — Tessera digitale**: provenienza dati, anteprima, selezione esplicita, limite capacità, salvataggio e condivisione.
+- [x] **P4 — Widget personalizzati**: creazione, modifica, duplicazione, ordine, dimensione, compressione ed eliminazione confermata.
+- [x] **P5 — Persistenza**: sottocollezione widget, validazione schema, regole e test dedicati.
+- [x] **P6 — Collegamenti**: Profilo ↔ Account e Documento ↔ Scadenza con riferimenti stabili e gestione dei riferimenti orfani.
+- [ ] **P7 — Migrazione e collaudo**: compatibilità legacy e controlli automatici completati; resta il collaudo autenticato su PC/tablet/telefono, tema chiaro/scuro e riapertura offline prima della pubblicazione.
+
+### Fuori ambito: cifratura completa
+
+La cifratura di nome, cognome, nascita, telefoni, indirizzi ed email attualmente
+interrogabili in chiaro non viene cambiata in questa roadmap. La futura migrazione
+deve considerare anche ricerca AI, ordinamento, dati principali, collegamenti e uso
+offline prima di modificare la rappresentazione persistente.

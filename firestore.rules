@@ -81,7 +81,29 @@ service cloud.firestore {
       allow read, write: if isOwner(userId) &&
         collection != 'pushDevices' &&
         collection != 'notificationDeliveries' &&
-        collection != 'deadlineNotifications';
+        collection != 'deadlineNotifications' &&
+        collection != 'profileWidgets';
+    }
+
+    match /users/{userId}/profileWidgets/{widgetId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) &&
+        request.resource.data.keys().hasOnly([
+          'title', 'description', 'icon', 'color', 'tab', 'order', 'size',
+          'collapsed', 'fields', 'updatedAt', 'schemaVersion'
+        ]) &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.title.size() <= 120 &&
+        request.resource.data.description is string &&
+        request.resource.data.description.size() <= 500 &&
+        request.resource.data.tab in ['personal', 'contacts', 'addresses', 'documents'] &&
+        request.resource.data.size in ['small', 'medium', 'wide'] &&
+        request.resource.data.order is int &&
+        request.resource.data.collapsed is bool &&
+        request.resource.data.fields is list &&
+        request.resource.data.fields.size() <= 30 &&
+        request.resource.data.schemaVersion == 1;
     }
 
     match /users/{userId}/accounts/{accountId} {
