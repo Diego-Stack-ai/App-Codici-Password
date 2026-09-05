@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.32';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.33';
 import { deleteDoc, doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 import { getBytes, ref } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-storage.js";
 
