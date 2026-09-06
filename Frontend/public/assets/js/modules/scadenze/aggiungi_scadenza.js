@@ -12,43 +12,33 @@ import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-run
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
+import { showToast } from '../../ui-core-v129.js';
 
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
-import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
-import { deadlineRecipientFields, deadlineRecipientsFromRecord, normalizeRecipientEmail } from './deadline-recipient-model.js';
+import { getDeadline, getUserProfile } from '../data/vault-repository.js';
+import { deadlineRecipientFields, deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
 import { deadlineDateInputFields, deadlineInputDate } from './deadline-model.js';
 import { createDeadlineAttachmentController } from './deadline-attachment-controller.js';
 import { createDeadlineRecipientController } from './deadline-recipient-controller.js';
+import { createDeadlineConfigController } from './deadline-config-controller.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
 
-let _preventEmailSeed = false;
 let currentUser = null;
-let currentRule = null;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
 const attachmentController = createDeadlineAttachmentController();
 const recipientController = createDeadlineRecipientController();
+const configController = createDeadlineConfigController({
+    recipientController,
+    onRender: () => syncCustomDropdowns()
+});
 let profileDocumentLinkDraft = null;
 let linkedSourceRef = null;
-
-let dynamicConfig = {
-    deadlineTypes: [],
-    models: [],
-    plates: [],
-    emailTemplates: [],
-    names: []
-};
-let unifiedConfigs = {
-    automezzi: null,
-    documenti: null,
-    generali: null
-};
 
 /**
  * AGGIUNGI SCADENZA MODULE (V5.0 ADAPTER)
@@ -158,37 +148,13 @@ export async function initAggiungiScadenza(user) {
         document.addEventListener('footer:ready', (e) => initFooterFromDetail(e.detail), { once: true });
     }
 
-    // LIST MANAGEMENT SYSTEM (Dynamic Config)
-    document.querySelectorAll('.btn-manage-config-inline[data-config-id]').forEach(btn => {
-        btn.onclick = async (e) => {
-            e.stopPropagation();
-            const configId = btn.dataset.configId;
-
-            if (configId === 'tipo_scadenza') {
-                // Chiediamo nome, periodo e frequenza per le Categorie
-                const name = await showInputModal(`Aggiungi Nuova Categoria`, '', `Nome categoria...`);
-                if (!name || !name.trim()) return;
-                const period = await showInputModal(`Giorni di preavviso`, "14", `Inserisci giorni (es. 14)`);
-                if (period === null) return;
-                const freq = await showInputModal(`Frequenza notifica`, "7", `Inserisci giorni (es. 7)`);
-                if (freq === null) return;
-
-                await addConfigItem(configId, {
-                    name: name.trim(),
-                    period: parseInt(period) || 14,
-                    freq: parseInt(freq) || 7
-                });
-            } else {
-                const newVal = await showInputModal(`Aggiungi Nuovo`, '', `Inserisci nuovo valore...`);
-                if (newVal && newVal.trim()) {
-                    await addConfigItem(configId, newVal.trim());
-                }
-            }
-        };
-    });
-
-    initialStaticLoad();
-    await loadDynamicConfig();
+    configController.initManagementButtons();
+    configController.render();
+    try {
+        await configController.load(currentUser);
+    } catch (error) {
+        console.error('Config Load Error', error);
+    }
     updateAttachmentsUI();
 
     if (editingScadenzaId) {
@@ -216,7 +182,6 @@ export async function initAggiungiScadenza(user) {
 
     
 }
-
 function setMode(mode) {
     currentMode = mode;
     updateUIButtons(mode);
@@ -244,8 +209,7 @@ function setMode(mode) {
         vehicleSection?.classList.add('hidden');
     }
 
-    updateCurrentDynamicConfig();
-    finishLoad();
+    configController.setMode(mode);
 }
 
 function updateUIButtons(activeMode) {
@@ -257,447 +221,6 @@ function updateUIButtons(activeMode) {
             } else {
                 btn.classList.remove('active');
             }
-        }
-    });
-}
-
-function initialStaticLoad() {
-    populateTypeSelect();
-    updateDynamicOptions(null);
-}
-
-async function loadDynamicConfig() {
-    if (!currentUser) return;
-    try {
-        const [autoConfig, documentConfig, generalConfig, userProfile, contacts] = await Promise.all([
-            getUserSetting(currentUser.uid, 'deadlineConfig'),
-            getUserSetting(currentUser.uid, 'deadlineConfigDocuments'),
-            getUserSetting(currentUser.uid, 'generalConfig'),
-            getUserProfile(currentUser.uid),
-            listContacts(currentUser.uid)
-        ]);
-
-        const rawGenData = generalConfig || {};
-
-        let notificationEmails = rawGenData.notificationEmails || [];
-        if (notificationEmails.length === 0 && userProfile) {
-            const userData = userProfile;
-            const contactEmails = (userData.contactEmails || []).filter(e => e && e.address).map(e => e.address);
-            if (contactEmails.length > 0) {
-                notificationEmails = contactEmails;
-                rawGenData.notificationEmails = notificationEmails;
-                if (!_preventEmailSeed) {
-                    setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), { notificationEmails }, { merge: true });
-                    _preventEmailSeed = true;
-                }
-            }
-        }
-
-        unifiedConfigs.generali = { deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: [], ...rawGenData };
-        populateEmailSelects(unifiedConfigs.generali.notificationEmails);
-        const recipientContacts = contacts.filter(contact => contact.active !== false);
-        notificationEmails.forEach(email => {
-            const normalized = normalizeRecipientEmail(email);
-            if (normalized && !recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === normalized)) {
-                recipientContacts.push({ id: '', nome: 'Email salvata', cognome: '', email: normalized });
-            }
-        });
-        recipientController.setContacts(recipientContacts);
-
-        // --- AUTOMEZZI ---
-        const defaultAuto = {
-            deadlineTypes: [
-                { name: 'Revisione Moto', freq: 7, period: 14 },
-                { name: 'Assicurazione', freq: 7, period: 14 },
-                { name: 'Revisione Auto', freq: 7, period: 14 },
-                { name: 'Bollo', freq: 7, period: 14 },
-                { name: 'Tagliando', freq: 7, period: 28 },
-                { name: 'Olio motore', freq: 7, period: 14 }
-            ],
-            models: [],
-            // I veicoli vengono aggiunti dall'utente nelle impostazioni
-            emailTemplates: [
-                "l'assicurazione del motociclo targato",
-                "l'assicurazione dell'auto targata",
-                "la revisione del motociclo targato",
-                "la revisione dell'auto targata",
-                "Il bollo del motociclo targato",
-                "Il bollo dell'auto targata",
-                "Il tagliando del motociclo targato",
-                "Il tagliando dell'auto targata",
-                "Il bollo del carrello targato",
-                "Olio motore da controllare"
-            ]
-        };
-        const dAuto = autoConfig || defaultAuto;
-        if (!autoConfig) {
-            setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"), defaultAuto);
-        }
-        unifiedConfigs.automezzi = { deadlineTypes: [], models: [], emailTemplates: [], names: [], notificationEmails: [], ...dAuto };
-
-        // --- DOCUMENTI ---
-        const defaultDoc = {
-            deadlineTypes: [
-                { name: 'Patente', freq: 7, period: 56 },
-                { name: 'Carta Identità', freq: 14, period: 56 },
-                { name: 'Passaporto', freq: 14, period: 28 },
-                { name: 'Codice fiscale', freq: 7, period: 56 }
-            ],
-            models: [],
-            // I documenti vengono aggiunti dall'utente nelle impostazioni
-            emailTemplates: [
-                "la tua patente",
-                "Il tuo documento di Identità",
-                "Il tuo passaporto",
-                "Il tuo codice fiscale"
-            ]
-        };
-        const dDoc = documentConfig || defaultDoc;
-        if (!documentConfig) {
-            setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), defaultDoc);
-        }
-        unifiedConfigs.documenti = { deadlineTypes: [], models: [], emailTemplates: [], names: [], notificationEmails: [], ...dDoc };
-
-        // --- GENERALI ---
-        const defaultGen = {
-            deadlineTypes: [
-                { name: 'Sale Addolcitore', freq: 7, period: 14 },
-                { name: "Comodato d'uso", freq: 7, period: 28 },
-                { name: 'Federazione Italiana Vela', freq: 7, period: 70 },
-                { name: 'Visita medica', freq: 7, period: 14 },
-                { name: 'Contratto', freq: 7, period: 14 },
-                { name: 'Tessera isola ecologica', freq: 7, period: 14 }
-            ],
-            emailTemplates: [
-                "Il sale dell'addolcitore",
-                "Il comodato d'uso dell'auto targata",
-                "E' in scadenza il tuo certificato medico",
-                "E' in scadenza la tua tessera FIV",
-                "Isola ecologica"
-            ]
-        };
-        const dGen = generalConfig ? rawGenData : defaultGen;
-        // Seed se documento assente O se deadlineTypes è vuoto (documento incompleto)
-        const needsSeedGen = !generalConfig || !rawGenData.deadlineTypes || rawGenData.deadlineTypes.length === 0;
-        if (needsSeedGen) {
-            const mergedGen = { ...defaultGen, notificationEmails: rawGenData.notificationEmails || [] };
-            setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), mergedGen, { merge: true });
-            dGen.deadlineTypes = defaultGen.deadlineTypes;
-            dGen.emailTemplates = dGen.emailTemplates && dGen.emailTemplates.length > 0 ? dGen.emailTemplates : defaultGen.emailTemplates;
-        }
-        unifiedConfigs.generali = {
-            deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: rawGenData.notificationEmails || [], ...dGen
-        };
-
-        updateCurrentDynamicConfig();
-        finishLoad();
-    } catch (e) {
-        console.error("Config Load Error", e);
-    }
-}
-
-async function _addNotificationEmailBtn(selectId = 'email_primaria_select') {
-    const v = await showInputModal('Nuova Email', '', 'Inserisci un nuovo indirizzo email...');
-    if (v && v.trim()) await addConfigItem(selectId, v.trim());
-}
-
-function updateCurrentDynamicConfig() {
-    if (currentMode === 'automezzi') dynamicConfig = unifiedConfigs.automezzi;
-    else if (currentMode === 'documenti') dynamicConfig = unifiedConfigs.documenti;
-    else if (currentMode === 'generali') dynamicConfig = unifiedConfigs.generali;
-
-    // names: solo quelli della modalità corrente (contestuali)
-    dynamicConfig.names = (dynamicConfig.names || []).sort();
-
-    // notificationEmails: quelli della modalità corrente
-    populateEmailSelects(dynamicConfig.notificationEmails || []);
-}
-
-async function addConfigItem(selectId, valueStringOrObject) {
-    if (!currentUser) return;
-    try {
-        let field = '';
-        let docName = '';
-
-        if (selectId === 'tipo_scadenza') {
-            field = 'deadlineTypes';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-            else docName = 'generalConfig';
-        } else if (selectId === 'modello_veicolo') {
-            field = 'models';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-        } else if (selectId === 'testo_email_select') {
-            field = 'emailTemplates';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-            else docName = 'generalConfig';
-        } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
-            field = 'notificationEmails';
-            // Opzione B: email per modalità corrente
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-            else docName = 'generalConfig';
-        }
-
-        if (!docName || !field) return;
-
-        // Update local state — per notificationEmails usa il config della modalità corrente
-        const configToUpdate = (currentMode === 'automezzi') ? unifiedConfigs.automezzi :
-            (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali;
-
-        if (!configToUpdate[field]) configToUpdate[field] = [];
-
-        let valueToPush = valueStringOrObject;
-
-        // Check for duplicates
-        if (selectId === 'tipo_scadenza') {
-            const exists = configToUpdate[field].some(item => {
-                const checkedName = typeof item === 'object' ? item.name : item;
-                const newName = typeof valueStringOrObject === 'object' ? valueStringOrObject.name : valueStringOrObject;
-                return checkedName === newName;
-            });
-            if (exists) return showToast("Valore già esistente", "info");
-        } else {
-            if (configToUpdate[field].includes(valueStringOrObject)) return showToast("Valore già esistente", "info");
-        }
-
-        configToUpdate[field].push(valueToPush);
-
-        // Sort
-        if (selectId === 'tipo_scadenza') {
-            configToUpdate[field].sort((a, b) => {
-                const nameA = typeof a === 'object' ? a.name : a;
-                const nameB = typeof b === 'object' ? b.name : b;
-                return nameA.localeCompare(nameB);
-            });
-        } else {
-            configToUpdate[field].sort();
-        }
-
-        // Save to Firestore
-        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), {
-            [field]: configToUpdate[field]
-        }, { merge: true });
-
-        showToast("Lista aggiornata!", "success");
-        updateCurrentDynamicConfig();
-        finishLoad(); // Re-populate and sync
-
-        setTimeout(() => {
-            const select = document.getElementById(selectId);
-            if (select) {
-                select.value = typeof valueToPush === 'object' ? valueToPush.name : valueToPush;
-                select.dispatchEvent(new Event('change'));
-            }
-        }, 100);
-    } catch (e) {
-        console.error("Add Config Error", e);
-        showToast("Errore durante l'aggiornamento", "error");
-    }
-}
-
-async function editConfigItem(selectId, oldValue) {
-    if (!currentUser) return;
-    try {
-        const newValue = await showInputModal(`Modifica Voce`, oldValue, `Inserisci nuovo valore...`);
-        if (!newValue || !newValue.trim() || newValue === oldValue) return;
-
-        let field = '';
-        let docName = '';
-
-        if (selectId === 'tipo_scadenza') {
-            field = 'deadlineTypes';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-            else docName = 'generalConfig';
-        } else if (selectId === 'modello_veicolo') {
-            field = 'models';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-        } else if (selectId === 'testo_email_select') {
-            field = 'emailTemplates';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-            else docName = 'generalConfig';
-        } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
-            field = 'notificationEmails';
-            docName = 'generalConfig';
-        }
-
-        if (!docName || !field) return;
-
-        const configToUpdate = (field === 'notificationEmails') ? unifiedConfigs.generali :
-            ((currentMode === 'automezzi') ? unifiedConfigs.automezzi :
-                (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali);
-
-        const idx = configToUpdate[field].indexOf(oldValue);
-        if (idx !== -1) {
-            configToUpdate[field][idx] = newValue.trim();
-            configToUpdate[field].sort();
-            // Save
-            await setDoc(doc(db, "users", currentUser.uid, "settings", docName), {
-                [field]: configToUpdate[field]
-            }, { merge: true });
-
-            showToast("Voce modificata!", "success");
-            updateCurrentDynamicConfig();
-            finishLoad();
-        }
-    } catch (e) {
-        console.error("Edit Config Error", e);
-        showToast("Errore durante la modifica", "error");
-    }
-}
-
-async function deleteConfigItem(selectId, value) {
-    const confirm = await showConfirmModal("Elimina Voce", `Sei sicuro di voler eliminare "${value}"? Questa azione non influirà sulle scadenze esistenti, ma la voce non sarà più disponibile per le nuove.`);
-    if (!confirm) return;
-
-    try {
-        let field = '';
-        let docName = '';
-
-        if (selectId === 'tipo_scadenza') {
-            field = 'deadlineTypes';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-            else docName = 'generalConfig';
-        } else if (selectId === 'modello_veicolo') {
-            field = 'models';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-        } else if (selectId === 'testo_email_select') {
-            field = 'emailTemplates';
-            if (currentMode === 'automezzi') docName = 'deadlineConfig';
-            else if (currentMode === 'documenti') docName = 'deadlineConfigDocuments';
-            else docName = 'generalConfig';
-        } else if (selectId === 'email_primaria_select' || selectId === 'email_secondaria_select') {
-            field = 'notificationEmails';
-            docName = 'generalConfig';
-        }
-
-        if (!docName || !field) return;
-
-        const configToUpdate = (field === 'notificationEmails') ? unifiedConfigs.generali :
-            ((currentMode === 'automezzi') ? unifiedConfigs.automezzi :
-                (currentMode === 'documenti') ? unifiedConfigs.documenti : unifiedConfigs.generali);
-
-        configToUpdate[field] = configToUpdate[field].filter(v => typeof v === 'object' ? v.name !== value : v !== value);
-
-        await setDoc(doc(db, "users", currentUser.uid, "settings", docName), {
-            [field]: configToUpdate[field]
-        }, { merge: true });
-
-        showToast("Voce eliminata", "success");
-        updateCurrentDynamicConfig();
-        finishLoad();
-    } catch (e) {
-        console.error("Delete Config Error", e);
-        showToast("Errore durante l'eliminazione", "error");
-    }
-}
-
-function finishLoad() {
-    populateTypeSelect();
-    updateDynamicOptions(currentRule);
-    if (unifiedConfigs.generali && unifiedConfigs.generali.notificationEmails) {
-        populateEmailSelects(unifiedConfigs.generali.notificationEmails);
-    }
-
-    const namesList = document.getElementById('names-list');
-    if (namesList && dynamicConfig.names) {
-        clearElement(namesList);
-        const holderNames = [...new Set([
-            ...dynamicConfig.names,
-            ...recipientController.getContacts().map(contact => [contact.nome, contact.cognome].filter(Boolean).join(' ').trim()).filter(Boolean)
-        ])].sort((a, b) => a.localeCompare(b, 'it'));
-        holderNames.forEach(n => {
-            namesList.appendChild(new Option(n, n));
-        });
-    }
-}
-
-function populateTypeSelect() {
-    if (!typeSelect) return;
-    const currentVal = typeSelect.value;
-    clearElement(typeSelect);
-    typeSelect.appendChild(new Option('Scegli categoria...', ''));
-
-    const addItems = (items) => {
-        if (!items || items.length === 0) return;
-        items.forEach(item => {
-            const isObj = typeof item === 'object';
-            const key = isObj ? item.name : item;
-            const opt = new Option(key, key);
-
-            if (isObj) {
-                if (item.period !== undefined) opt.dataset.period = item.period;
-                if (item.freq !== undefined) opt.dataset.freq = item.freq;
-            }
-
-            typeSelect.appendChild(opt);
-        });
-    };
-
-    if (currentMode === 'automezzi') addItems(unifiedConfigs.automezzi?.deadlineTypes);
-    else if (currentMode === 'documenti') addItems(unifiedConfigs.documenti?.deadlineTypes);
-    else if (currentMode === 'generali') addItems(unifiedConfigs.generali?.deadlineTypes);
-
-    // Valida se il valore precedente appartiene ancora al nuovo set
-    const valExists = Array.from(typeSelect.options).some(opt => opt.value === currentVal);
-    if (currentVal && valExists) {
-        typeSelect.value = currentVal;
-    } else {
-        typeSelect.value = '';
-    }
-}
-
-function updateDynamicOptions(rule) {
-    const modelSel = document.getElementById('modello_veicolo');
-    const textSel = document.getElementById('testo_email_select');
-
-    if (!modelSel || !textSel) return;
-
-    if (currentMode !== 'generali') {
-        if (modelSel) populateSimpleSelect(modelSel, dynamicConfig.models || []);
-    }
-
-    if (textSel) {
-        document.getElementById('testo_email_wrapper')?.classList.remove('hidden');
-        const combined = [...new Set([...(dynamicConfig.emailTemplates || []), ...(rule?.emailTextOptions || [])])];
-        populateSimpleSelect(textSel, combined);
-    }
-}
-
-function populateSimpleSelect(select, options) {
-    const currentVal = select.value;
-    clearElement(select);
-    select.appendChild(new Option('Seleziona...', ''));
-    options.forEach(opt => {
-        select.appendChild(new Option(opt, opt));
-    });
-    if (currentVal && options.includes(currentVal)) select.value = currentVal;
-}
-
-function populateEmailSelects(emails) {
-    ['email_primaria_select', 'email_secondaria_select'].forEach(id => {
-        const sel = document.getElementById(id);
-        if (!sel) return;
-        const currentVal = sel.value;
-        clearElement(sel);
-        sel.appendChild(new Option('Seleziona email...', ''));
-
-        emails.forEach(email => {
-            sel.appendChild(new Option(email, email));
-        });
-
-        if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) {
-            sel.value = currentVal;
-        } else if (currentVal && currentVal !== 'manual') {
-            sel.appendChild(new Option(currentVal, currentVal));
-            sel.value = currentVal;
         }
     });
 }
@@ -931,9 +454,7 @@ async function loadScadenzaForEdit(id) {
         linkedSourceRef = data.sourceRef || null;
 
         // 1. Identifica il Mode corretto in base al tipo salvato
-        let foundMode = 'automezzi';
-        if (unifiedConfigs.documenti?.deadlineTypes?.some(t => (t.name || t) === data.type)) foundMode = 'documenti';
-        else if (unifiedConfigs.generali?.deadlineTypes?.some(t => (t.name || t) === data.type)) foundMode = 'generali';
+        const foundMode = configController.getModeForDeadlineType(data.type);
 
         // 2. Imposta il Mode (popola i select nativi)
         setMode(foundMode);
@@ -1096,7 +617,7 @@ function syncCustomDropdowns() {
                     title: 'Modifica voce',
                     onclick: (e) => {
                         e.stopPropagation();
-                        editConfigItem(sel.id, opt.value);
+                        configController.editItem(sel.id, opt.value);
                     }
                 }, [
                     createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
@@ -1108,7 +629,7 @@ function syncCustomDropdowns() {
                     title: 'Elimina voce',
                     onclick: (e) => {
                         e.stopPropagation();
-                        deleteConfigItem(sel.id, opt.value);
+                        configController.deleteItem(sel.id, opt.value);
                     }
                 }, [
                     createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })

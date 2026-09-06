@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/home-deadline-inbox.js');
 const homeDeadlineDashboard = await read('Frontend/public/assets/js/modules/home/home-deadline-dashboard.js');
+const deadlineConfigController = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -39,5 +40,13 @@ assert.match(homeDeadlineDashboard, /thirtyDaysLater\.setDate\(today\.getDate\(\
     'La dashboard Home non applica la finestra di 30 giorni');
 assert.match(homeDeadlineDashboard, /items\.slice\(0, 3\)/,
     'La dashboard Home non limita le anteprime per sezione');
+assert.match(deadline, /createDeadlineConfigController\(\{[\s\S]+recipientController/,
+    'Il form Scadenza non delega la configurazione dinamica al controller dedicato');
+assert.doesNotMatch(deadline, /getUserSetting\(|DEFAULT_CONFIGS|function populateTypeSelect/,
+    'Il form Scadenza contiene ancora caricamento o rendering delle configurazioni');
+assert.match(deadlineConfigController, /Promise\.all\(\[[\s\S]+getUserSetting\(user\.uid, MODE_DOCUMENTS\.automezzi\)/,
+    'Il controller configurazioni non carica in parallelo i dati necessari');
+assert.match(deadlineConfigController, /normalizeDeadlineConfig\(/,
+    'Il controller configurazioni non applica il modello normalizzato condiviso');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');
