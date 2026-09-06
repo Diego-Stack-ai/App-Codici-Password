@@ -19,6 +19,7 @@ import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
+import { isValidRecipientEmail, mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -399,26 +400,10 @@ async function _addNotificationEmailBtn(selectId = 'email_primaria_select') {
     if (v && v.trim()) await addConfigItem(selectId, v.trim());
 }
 
-function normalizeRecipientEmail(value) {
-    return String(value || '').trim().toLowerCase();
-}
-
-function isValidRecipientEmail(value) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeRecipientEmail(value));
-}
-
 function addDeadlineRecipient({ email, displayName = '', contactId = '', sendEmail = true, sendPush = true }) {
-    const normalized = normalizeRecipientEmail(email);
-    if (!isValidRecipientEmail(normalized)) return false;
-    const existing = deadlineRecipients.find(item => item.email === normalized);
-    if (existing) {
-        existing.displayName = existing.displayName || String(displayName || '').trim();
-        existing.contactId = existing.contactId || contactId;
-        existing.sendEmail = existing.sendEmail || sendEmail === true;
-        existing.sendPush = existing.sendPush || sendPush === true;
-    } else {
-        deadlineRecipients.push({ email: normalized, displayName: String(displayName || '').trim(), contactId, sendEmail: sendEmail === true, sendPush: sendPush === true });
-    }
+    const result = mergeDeadlineRecipient(deadlineRecipients, { email, displayName, contactId, sendEmail, sendPush });
+    if (!result.added) return false;
+    deadlineRecipients = result.recipients;
     renderDeadlineRecipients();
     return true;
 }
