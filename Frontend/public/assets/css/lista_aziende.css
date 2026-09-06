@@ -13,85 +13,6 @@
 .btn-pin-azienda.is-hidden { display: none; }
 .company-pin-icon { font-size: 24px; }
 
-/* --- 2. LOADING PLACEHOLDER --- */
-.loading-placeholder {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5rem 1rem;
-    opacity: 0.2;
-}
-
-.loading-icon {
-    font-size: 2.5rem;
-    animation: spin 1.5s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: var(--fs-micro);
-    font-weight: var(--font-strong-weight);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 1rem;
-}
-
-/* --- 3. EMPTY STATE --- */
-.empty-state {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5rem 1rem;
-}
-
-.empty-state-icon {
-    font-size: 2.5rem;
-    opacity: 0.2;
-}
-
-.empty-state-text {
-    font-size: var(--fs-micro);
-    font-weight: var(--font-strong-weight);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.4;
-    margin-top: 1rem;
-}
-
-.btn-empty-add {
-    margin-top: 1.5rem;
-    padding: 0 2rem;
-    height: 3rem;
-    border-radius: 0.75rem;
-    font-size: var(--fs-micro);
-    font-weight: var(--font-strong-weight);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    background: transparent;
-    border: 1px solid var(--card-border);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-}
-
-.btn-empty-add:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--accent);
-}
-
 /* --- 4. AZIENDA CARD --- */
 .azienda-card {
     position: relative;
@@ -283,28 +204,6 @@
 .btn-card-action:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: var(--card-accent, var(--accent));
-}
-
-/* --- 9. ERROR STATE --- */
-.error-text {
-    grid-column: 1 / -1;
-    text-align: center;
-    color: var(--status-error);
-    padding: 2.5rem 1rem;
-    font-size: var(--fs-micro);
-    font-weight: var(--font-strong-weight);
-    text-transform: uppercase;
-}
-
-.timeout-text {
-    grid-column: 1 / -1;
-    text-align: center;
-    color: var(--status-warning);
-    padding: 2.5rem 1rem;
-    font-size: var(--fs-micro);
-    font-weight: var(--font-strong-weight);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 /* --- 10. DELETE MODE --- */

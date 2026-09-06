@@ -40,9 +40,9 @@
                 <!-- Aziende List Container -->
                 <div id="aziende-list-container" class="aziende-grid">
                     <!-- Loading Spinner (rimosso via JS al caricamento) -->
-                    <div class="loading-placeholder">
-                        <span class="material-symbols-outlined loading-icon">sync</span>
-                        <p class="loading-text" data-t="loading_data">Ricezione Dati...</p>
+                    <div class="ui-state ui-state-loading" role="status" aria-live="polite" aria-busy="true">
+                        <span class="material-symbols-outlined ui-state-icon is-spinning" aria-hidden="true">progress_activity</span>
+                        <p class="ui-state-message" data-t="loading_data">Ricezione dati...</p>
                     </div>
                 </div>
             </div>

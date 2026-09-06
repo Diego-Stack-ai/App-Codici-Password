@@ -145,6 +145,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/shared/push-manager.js",
   "assets/js/modules/shared/qr_code_utils-v2.js",
   "assets/js/modules/shared/qr_code_utils.js",
+  "assets/js/modules/shared/ui-state-view.js",
   "assets/js/offline-firestore.js",
   "assets/js/offline-status.js",
   "assets/js/offline-sync.js",

@@ -188,8 +188,8 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 ### M4 — Componenti e design system
 
-- [ ] estrarre componenti soltanto dopo almeno due utilizzi reali;
-- [ ] unificare card Account, righe sensibili, form field e stati di caricamento;
+- [x] estrarre componenti soltanto dopo almeno due utilizzi reali, secondo `UI_DESIGN_SYSTEM_CONTRACT.md`;
+- [x] unificare card Account, righe sensibili, form field e stati di caricamento: viste Account e dati bancari condivise, campi base in `moduli.css`, stati di pagina accessibili in `ui-state-view.js`;
 - [ ] eliminare definitivamente flash e discontinuità di header/footer durante scroll e overscroll su iPhone e desktop;
 - [ ] ridurre CSS duplicato senza aumentare il cascade globale;
 - [ ] completare i18n e accessibilità;

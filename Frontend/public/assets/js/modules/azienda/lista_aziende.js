@@ -11,6 +11,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import {listCompanies} from '../data/vault-repository.js';
 import { deleteCompany, setCompanyPinned } from './company-list-service.js';
+import { createUiState } from '../shared/ui-state-view.js';
 
 // --- STATE ---
 let allAziende = [];
@@ -40,19 +41,13 @@ export async function initListaAziende(user) {
 
     const loadingTimeout = setTimeout(() => {
         const container = document.getElementById('aziende-list-container');
-        if (container && container.querySelector('.loading-placeholder')) {
-            clearElement(container);
-            setChildren(container, [
-                createElement('p', {
-                    className: 'timeout-text',
-                    textContent: "Il caricamento sta impiegando più del previsto. Prova a ricaricare la pagina."
-                }),
-                createElement('button', {
-                    className: 'btn-empty-add',
-                    textContent: 'Ricarica Ora',
-                    onclick: () => window.location.reload()
-                })
-            ]);
+        if (container && container.querySelector('.ui-state-loading')) {
+            setChildren(container, createUiState({
+                kind: 'warning',
+                message: 'Il caricamento sta impiegando più del previsto. Prova a ricaricare la pagina.',
+                actionLabel: 'Ricarica ora',
+                onAction: () => window.location.reload()
+            }));
         }
     }, 8000);
 
@@ -64,10 +59,11 @@ export async function initListaAziende(user) {
         clearTimeout(loadingTimeout);
         const container = document.getElementById('aziende-list-container');
         if (container) {
-            clearElement(container);
-            setChildren(container, createElement('p', {
-                className: 'error-text',
-                textContent: "Errore durante il caricamento. Per favore ricarica la pagina."
+            setChildren(container, createUiState({
+                kind: 'error',
+                message: 'Errore durante il caricamento. Per favore ricarica la pagina.',
+                actionLabel: 'Ricarica ora',
+                onAction: () => window.location.reload()
             }));
         }
     }
@@ -123,17 +119,13 @@ function renderAziende() {
     clearElement(container);
 
     if (allAziende.length === 0) {
-        setChildren(container, createElement('div', { className: 'empty-state' }, [
-            createElement('span', { className: 'material-symbols-outlined empty-state-icon', textContent: 'domain_disabled' }),
-            createElement('p', {
-                className: 'empty-state-text',
-                textContent: t('no_companies_found') || 'Nessuna Azienda Trovata'
-            }),
-            createElement('button', {
-                className: 'btn-empty-add',
-                onclick: () => { window.location.href = 'modifica_azienda.html'; }
-            }, [createElement('span', { textContent: 'Aggiungi Ora' })])
-        ]));
+        setChildren(container, createUiState({
+            kind: 'empty',
+            icon: 'domain_disabled',
+            message: t('no_companies_found') || 'Nessuna azienda trovata',
+            actionLabel: 'Aggiungi ora',
+            onAction: () => { window.location.href = 'modifica_azienda.html'; }
+        }));
         return;
     }
 

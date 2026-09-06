@@ -51,6 +51,9 @@ const components = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'compon
 const home = fs.readFileSync(path.join(publicRoot, 'home_page.html'), 'utf8');
 const privateAccountForm = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modules', 'privato', 'form_account_privato.js'), 'utf8');
 const companyAccountForm = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modules', 'azienda', 'form_account_azienda.js'), 'utf8');
+const companyList = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modules', 'azienda', 'lista_aziende.js'), 'utf8');
+const archive = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modules', 'settings', 'archivio_account.js'), 'utf8');
+const uiStateView = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modules', 'shared', 'ui-state-view.js'), 'utf8');
 const privateAccountCss = [
   'area_privata.css',
   'account_privati.css',
@@ -101,6 +104,9 @@ const requiredSignals = [
   ['assistente contenuto nel viewport', remainingUiCss.includes('max-height: calc(100dvh') && remainingUiCss.includes('overscroll-behavior: contain')],
   ['caricamento account e rubrica parallelo', [privateAccountForm, companyAccountForm].every(source => /await Promise\.all\(\[[\s\S]*loadRubrica\(\)[\s\S]*loadData\(\)/.test(source))],
   ['rubrica vuota comunicata nei form', [privateAccountForm, companyAccountForm].every(source => source.includes("t('empty_contacts')"))]
+  ,['stati di pagina condivisi in almeno due viste', [companyList, archive].every(source => source.includes("from '../shared/ui-state-view.js'"))]
+  ,['stati di pagina annunciati alle tecnologie assistive', uiStateView.includes("role: isAlert ? 'alert' : 'status'") && uiStateView.includes("ariaLive: isAlert ? 'assertive' : 'polite'")]
+  ,['azioni degli stati con target tattile', core.includes('--touch-target-min:') && fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core_ui.css'), 'utf8').includes('.ui-state-action')]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);

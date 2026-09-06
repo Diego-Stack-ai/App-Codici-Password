@@ -15,6 +15,7 @@ import {
     loadArchivedAccounts,
     restoreArchivedAccount
 } from './archive-account-service.js';
+import { createUiState } from '../shared/ui-state-view.js';
 
 let allArchived = [];
 let currentUser = null;
@@ -130,16 +131,10 @@ async function loadArchived() {
     if (!container) return;
 
     clearElement(container);
-    // Loading State
-    const loading = createElement('div', { className: 'archive-loading-container' }, [
-        createElement('div', { className: 'archive-spinner' }),
-        createElement('span', {
-            className: 'archive-loading-text',
-            dataset: { t: 'searching_archives' },
-            textContent: t('searching_archives') || 'Ricerca archivi...'
-        })
-    ]);
-    container.appendChild(loading);
+    container.appendChild(createUiState({
+        kind: 'loading',
+        message: t('searching_archives') || 'Ricerca archivi...'
+    }));
 
     try {
         allArchived = await loadArchivedAccounts(currentUser.uid, currentContext);
@@ -164,14 +159,11 @@ function filterAndRender() {
     clearElement(container);
 
     if (filtered.length === 0) {
-        const emptyState = createElement('div', { className: 'archive-empty-state' }, [
-            createElement('span', { className: 'material-symbols-outlined archive-empty-icon', textContent: 'archive' }),
-            createElement('p', {
-                className: 'archive-empty-text',
-                dataset: { t: 'no_accounts_found' },
-                textContent: t('no_accounts_found') || 'Nessun account trovato'
-            })
-        ]);
+        const emptyState = createUiState({
+            kind: 'empty',
+            icon: 'archive',
+            message: t('no_accounts_found') || 'Nessun account trovato'
+        });
         container.appendChild(emptyState);
         return;
     }
