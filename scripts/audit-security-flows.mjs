@@ -48,6 +48,7 @@ const attachmentSecurity = await read('Frontend/public/assets/js/modules/shared/
 const companyEmbeddedAttachments = await read('Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js');
 const qrCodeUtils = await read('Frontend/public/assets/js/modules/shared/qr_code_utils.js');
 const privateAccountForm = await read('Frontend/public/assets/js/modules/privato/form_account_privato.js');
+const privateAccountSave = await read('Frontend/public/assets/js/modules/privato/form-privato-save.js');
 const companyAccountSave = await read('Frontend/public/assets/js/modules/azienda/form-azienda-save.js');
 const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
 const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
@@ -229,7 +230,7 @@ assert.match(companyEmbeddedAttachments, /if \(!attachment\.storagePath\) throw 
 assert.match(companyEmbeddedAttachments, /getBytes\(ref\(storage, attachment\.storagePath\), 25 \* 1024 \* 1024 \+ 1024\)/, 'L’apertura allegati azienda non applica il limite di lettura');
 assert.match(storageRules, /application\/octet-stream/, 'Storage non accetta il formato cifrato degli allegati');
 assert.doesNotMatch(qrCodeUtils, /\.innerHTML\s*=/, 'Il fallback QR usa ancora HTML dinamico');
-assert.doesNotMatch(privateAccountForm, /Final Transaction Payload[^\n]*finalData/, 'Il form privato registra il payload del Vault');
+assert.doesNotMatch(privateAccountSave, /Final Transaction Payload[^\n]*finalData/, 'Il salvataggio privato registra il payload del Vault');
 assert.doesNotMatch(companyAccountSave, /Final Transaction Payload[^\n]*finalData/, 'Il form aziendale registra il payload del Vault');
 assert.match(cardSecret, /await ensureVaultKeyMaterial\(\)[\s\S]*await decrypt\(value, vaultKeyMaterial\)/, 'Le password nelle card non vengono risolte in modo lazy tramite il Vault');
 assert.ok([privateAccountList, companyAccountList].every(source => /createAccountListView\(\{/.test(source)), 'Le liste Account non usano la vista sicura condivisa');

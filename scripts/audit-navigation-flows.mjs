@@ -11,6 +11,7 @@ const companyAccountList = await read('Frontend/public/assets/js/modules/azienda
 const accountListView = await read('Frontend/public/assets/js/modules/shared/account-list-view.js');
 const companyDetail = await read('Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js');
 const accountBankingView = await read('Frontend/public/assets/js/modules/shared/account-banking-view.js');
+const privateAccountSave = await read('Frontend/public/assets/js/modules/privato/form-privato-save.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -24,7 +25,7 @@ const [company, privateAccount, companyAccount, deadline, privateDetail, private
 
 assert.match(company, /window\.location\.replace\(`dati_azienda\.html\?id=\$\{state\.currentAziendaId\}`\)/,
     'Il salvataggio azienda lascia il modulo Modifica nella cronologia');
-assert.match(privateAccount, /isEditing[\s\S]+dettaglio_account_privato\.html[\s\S]+window\.location\.replace\(destination\)/,
+assert.match(privateAccountSave, /isEditing[\s\S]+dettaglio_account_privato\.html[\s\S]+window\.location\.replace\(destination\)/,
     'Il salvataggio account privato non sostituisce il modulo di modifica');
 assert.match(companyAccount, /isEditing[\s\S]+dettaglio_account_azienda\.html[\s\S]+window\.location\.replace\(destination\)/,
     'Il salvataggio account aziendale non sostituisce il modulo di modifica');
@@ -82,5 +83,11 @@ assert.match(accountBankingView, /hasRealBankingData\(account\)/,
     'La vista bancaria non applica il modello comune ai dati legacy e canonici');
 assert.match(accountBankingView, /card\.pin \? createReadonlyField\('PIN',[^\n]+true\)/,
     'La vista bancaria non protegge visivamente il PIN');
+assert.match(privateAccount, /savePrivateAccount\(\{/,
+    'Il form privato non delega il salvataggio al servizio dedicato');
+assert.doesNotMatch(privateAccount, /runTransaction\(|transaction\.set\(/,
+    'Il form privato contiene ancora dettagli della transazione Firestore');
+assert.match(privateAccountSave, /await runTransaction\(db, async \(transaction\)/,
+    'Il servizio privato non mantiene atomica la transazione Account/Inviti/Profilo');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');
