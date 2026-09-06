@@ -114,6 +114,7 @@ const requiredSignals = [
   ,['solo contenuto centrale scorrevole su mobile', /\.base-main \{[\s\S]+min-height:\s*0;[\s\S]+overflow-y:\s*auto;[\s\S]+overscroll-behavior-y:\s*contain/.test(core)]
   ,['fasce mobile con nebbia sopra il piano di scorrimento', /@media \(max-width: 600px\)[\s\S]+\.base-header,[\s\S]+\.base-footer \{[\s\S]+position:\s*fixed;[\s\S]+isolation:\s*isolate/.test(fixedBars) && /\.base-main \{[\s\S]+mask-image:\s*linear-gradient\(to bottom/.test(fixedBars)]
   ,['fallback overscroll coerente col fondale', /html,[\s\S]+body \{[\s\S]+background-image: var\(--base-box-gradient\)/.test(core)]
+  ,['fondale indipendente esteso alla viewport iOS', /\.base-bg::before \{[\s\S]+position:\s*fixed;[\s\S]+inset:\s*0;[\s\S]+height:\s*100dvh;/.test(core) && /\.base-bg::before \{[\s\S]+height:\s*100lvh;[\s\S]+min-height:\s*100dvh;/.test(core)]
   ,['font e icone serviti localmente', (coreFonts.match(/@font-face/g) || []).length === 3 && !/https?:\/\//.test(coreFonts)]
   ,['font non bloccanti', (coreFonts.match(/font-display:\s*swap/g) || []).length === 3]
   ,['una sola famiglia iconografica', (coreFonts.match(/font-family:\s*'Material Symbols Outlined'/g) || []).length === 2 && coreFonts.includes("material-symbols-0.woff2")]

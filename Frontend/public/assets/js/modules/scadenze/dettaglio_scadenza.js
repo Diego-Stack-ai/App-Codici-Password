@@ -4,7 +4,7 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.56';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.57';
 import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 

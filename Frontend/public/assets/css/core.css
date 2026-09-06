@@ -177,7 +177,26 @@ body,
     min-height: 100dvh;
     overflow-x: hidden;
     position: relative;
+    isolation: isolate;
     font-family: 'Manrope', sans-serif;
+}
+
+/*
+ * Fondale viewport indipendente dal documento.
+ * Copre anche gli schermi molto alti e le variazioni della viewport di iOS,
+ * senza ridimensionare contenuti, header, footer o fasce di nebbia.
+ */
+.base-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100%;
+    background: var(--base-box-gradient);
+    pointer-events: none;
 }
 
 input::placeholder,
@@ -256,6 +275,12 @@ textarea::placeholder {
         background-attachment: scroll;
         background-repeat: no-repeat;
         background-size: cover;
+    }
+
+    .base-bg::before {
+        /* La large viewport include stabilmente anche il bordo inferiore iOS. */
+        height: 100lvh;
+        min-height: 100dvh;
     }
 
     .base-container {
