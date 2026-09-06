@@ -12,6 +12,8 @@ const accountListView = await read('Frontend/public/assets/js/modules/shared/acc
 const companyDetail = await read('Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js');
 const accountBankingView = await read('Frontend/public/assets/js/modules/shared/account-banking-view.js');
 const privateAccountSave = await read('Frontend/public/assets/js/modules/privato/form-privato-save.js');
+const settings = await read('Frontend/public/assets/js/modules/settings/impostazioni.js');
+const pushSettings = await read('Frontend/public/assets/js/modules/settings/push-settings-controller.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -89,5 +91,19 @@ assert.doesNotMatch(privateAccount, /runTransaction\(|transaction\.set\(/,
     'Il form privato contiene ancora dettagli della transazione Firestore');
 assert.match(privateAccountSave, /await runTransaction\(db, async \(transaction\)/,
     'Il servizio privato non mantiene atomica la transazione Account/Inviti/Profilo');
+assert.match(settings, /import\('\.\.\/shared\/qr_code_utils-v2\.js'\)/,
+    'Impostazioni carica ancora staticamente il generatore QR opzionale');
+assert.doesNotMatch(settings, /^import .*qr_code_utils-v2\.js/m,
+    'Impostazioni include il generatore QR nel grafo statico iniziale');
+assert.match(settings, /setupPushSettings\(user\)/,
+    'Impostazioni non delega i canali Push al controller condiviso');
+assert.doesNotMatch(settings, /getCurrentPushState|enableDeadlinePush|enableSharingPush/,
+    'Impostazioni contiene ancora dettagli dei singoli canali Push');
+for (const scope of ['deadlines', 'sharing']) {
+    assert.match(pushSettings, new RegExp(`${scope}: \\{[\\s\\S]+toggleId`),
+        `Il controller Push non dichiara la configurazione ${scope}`);
+}
+assert.match(pushSettings, /Promise\.all\(\[[\s\S]+setupPushToggle\(user, 'deadlines'\)[\s\S]+setupPushToggle\(user, 'sharing'\)/,
+    'Le configurazioni Push non vengono inizializzate in parallelo');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');

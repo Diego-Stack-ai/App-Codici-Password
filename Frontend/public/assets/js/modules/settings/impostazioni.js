@@ -12,11 +12,10 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { decrypt, ensureVaultKeyMaterial, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
 import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
-import { disableDeadlinePush, disableSharingPush, enableDeadlinePush, enableSharingPush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { clearPerformanceSamples, getPerformanceDiagnosticReport, isPerformanceDiagnosticsEnabled, setPerformanceDiagnosticsEnabled } from '../../performance-metrics.js';
-import { buildVCard, ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils-v2.js';
 import { getUserProfile, getUserSetting, listProfileWidgets } from '../data/vault-repository.js';
+import { setupPushSettings } from './push-settings-controller.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -41,8 +40,7 @@ export async function initImpostazioni(user) {
     setupPrivacyShort();
     setupTermsShort();
     setupPerformanceDiagnostics();
-    await setupDeadlinePush(user);
-    await setupSharingPush(user);
+    await setupPushSettings(user);
     showPendingSecurityNotice();
 
     
@@ -52,10 +50,12 @@ async function setupSettingsProfileQr(user) {
     const container = document.getElementById('settings-profile-qrcode');
     if (!container || !currentUserData) return;
     try {
-        const [qrSettings, widgets] = await Promise.all([
+        const [qrModule, qrSettings, widgets] = await Promise.all([
+            import('../shared/qr_code_utils-v2.js'),
             getUserSetting(user.uid, 'qrCodeInclusions'),
             listProfileWidgets(user.uid)
         ]);
+        const { buildVCard, ensureQRCodeLib, renderQRCode } = qrModule;
         const inclusions = qrSettings || { nome: true, cf: false, nascita: false, phones: [], emails: [], addresses: [] };
         const customFields = widgets.flatMap(widget => Array.isArray(widget.fields) ? widget.fields : []);
         const vcard = buildVCard(currentUserData, inclusions, {
@@ -154,31 +154,6 @@ function setupCompanyAreaToggle(user, data) {
     });
 }
 
-async function setupSharingPush(user) {
-    const toggle = document.getElementById('sharing-push-toggle');
-    const status = document.getElementById('sharing-push-status');
-    if (!toggle || !status) return;
-    const render = async () => {
-        const state = await getCurrentPushState(user, 'sharing');
-        toggle.checked = state.enabled;
-        toggle.disabled = !state.compatible;
-        status.textContent = state.compatible ? (state.enabled ? 'Attive su questo dispositivo' : 'Disattivate su questo dispositivo') : state.reason;
-    };
-    await render();
-    toggle.addEventListener('change', async () => {
-        const enabling = toggle.checked;
-        toggle.disabled = true;
-        try {
-            if (enabling) await enableSharingPush(user); else await disableSharingPush(user);
-            showToast(enabling ? 'Notifiche inviti attivate' : 'Notifiche inviti disattivate', 'success');
-            if (enabling) await listenForDeadlinePushInForeground();
-        } catch (error) {
-            console.error('[SHARING PUSH] Configurazione fallita', error);
-            showToast(error.message || 'Configurazione notifiche non riuscita', 'error');
-        } finally { await render(); }
-    });
-}
-
 function setupAIAssistantToggle(user, data) {
     const toggle = document.getElementById('ai-assistant-toggle');
     if (!toggle) return;
@@ -215,55 +190,6 @@ async function requireSecurityReauthentication(message) {
     } finally {
         window.location.replace('login-v115.html?reauth=security-settings');
     }
-}
-
-async function setupDeadlinePush(user) {
-    const toggle = document.getElementById('deadline-push-toggle');
-    const status = document.getElementById('deadline-push-status');
-    const testButton = document.getElementById('btn-test-deadline-push');
-    if (!toggle || !status || !testButton) return;
-
-    const render = async () => {
-        const state = await getCurrentPushState(user);
-        toggle.checked = state.enabled;
-        toggle.disabled = !state.compatible;
-        testButton.classList.toggle('hidden', !state.enabled);
-        status.textContent = state.compatible
-            ? (state.enabled ? 'Attive su questo dispositivo · Solo scadenze' : 'Disattivate su questo dispositivo')
-            : state.reason;
-    };
-
-    await render();
-    await listenForDeadlinePushInForeground();
-    toggle.addEventListener('change', async () => {
-        const enabling = toggle.checked;
-        toggle.disabled = true;
-        try {
-            if (enabling) await enableDeadlinePush(user);
-            else await disableDeadlinePush(user);
-            showToast(enabling ? 'Notifiche scadenze attivate' : 'Notifiche scadenze disattivate', 'success');
-            if (enabling) await listenForDeadlinePushInForeground();
-        } catch (error) {
-            console.error('[PUSH] Configurazione fallita', error);
-            toggle.checked = !enabling;
-            showToast(error.message || 'Configurazione notifiche non riuscita', 'error');
-        } finally {
-            await render();
-        }
-    });
-
-    testButton.addEventListener('click', async () => {
-        testButton.disabled = true;
-        try {
-            await sendDeadlinePushTest();
-            showToast('Notifica di prova inviata', 'success');
-        } catch (error) {
-            if (error.code !== 'functions/resource-exhausted') console.error('[PUSH TEST] Invio fallito', error);
-            showToast(error.message || 'Invio di prova non riuscito', 'error');
-        } finally {
-            testButton.disabled = false;
-        }
-    });
 }
 
 function setupSecurityToggles(data) {

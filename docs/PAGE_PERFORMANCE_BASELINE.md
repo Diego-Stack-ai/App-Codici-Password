@@ -10,10 +10,10 @@ Pagine canoniche analizzate: **29**. Redirect storici esclusi: `home-v126.html`,
 | `aggiungi_scadenza.html` | 1 | 7 | 38 | 1066.8 KB | 310.9 KB |
 | `dettaglio_account_azienda.html` | 1 | 6 | 36 | 1046.3 KB | 305.0 KB |
 | `dettaglio_account_privato.html` | 1 | 6 | 36 | 1044.0 KB | 304.4 KB |
-| `impostazioni.html` | 1 | 5 | 33 | 1030.9 KB | 300.8 KB |
 | `modifica_azienda.html` | 1 | 5 | 35 | 1062.5 KB | 300.4 KB |
 | `form_account_azienda.html` | 1 | 6 | 32 | 1031.0 KB | 299.8 KB |
 | `form_account_privato.html` | 1 | 6 | 32 | 1029.2 KB | 299.5 KB |
+| `impostazioni.html` | 1 | 5 | 33 | 1024.4 KB | 299.2 KB |
 | `dati_azienda.html` | 1 | 5 | 32 | 1006.7 KB | 294.1 KB |
 | `home_page.html` | 1 | 6 | 34 | 983.4 KB | 293.0 KB |
 | `area_privata.html` | 1 | 7 | 31 | 991.0 KB | 291.8 KB |
@@ -42,10 +42,10 @@ Pagine canoniche analizzate: **29**. Redirect storici esclusi: `home-v126.html`,
 - `aggiungi_scadenza.html`: 310.9 KB gzip stimati, 38 moduli JS e 7 fogli CSS.
 - `dettaglio_account_azienda.html`: 305.0 KB gzip stimati, 36 moduli JS e 6 fogli CSS.
 - `dettaglio_account_privato.html`: 304.4 KB gzip stimati, 36 moduli JS e 6 fogli CSS.
-- `impostazioni.html`: 300.8 KB gzip stimati, 33 moduli JS e 5 fogli CSS.
 - `modifica_azienda.html`: 300.4 KB gzip stimati, 35 moduli JS e 5 fogli CSS.
 - `form_account_azienda.html`: 299.8 KB gzip stimati, 32 moduli JS e 6 fogli CSS.
 - `form_account_privato.html`: 299.5 KB gzip stimati, 32 moduli JS e 6 fogli CSS.
+- `impostazioni.html`: 299.2 KB gzip stimati, 33 moduli JS e 5 fogli CSS.
 
 ## Asset condivisi da almeno il 75% delle pagine
 

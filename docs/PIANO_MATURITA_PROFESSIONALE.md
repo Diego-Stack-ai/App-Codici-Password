@@ -176,7 +176,7 @@ Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 3. [x] Aggiungi/Modifica Scadenza: modelli destinatari/data/configurazione, controller destinatari/allegati/configurazione e servizio di persistenza estratti e testati; il form conserva soltanto orchestrazione e UI specifiche;
 4. [x] Dettagli Account Privato e Azienda: modalità canoniche, renderer bancario e compatibilità legacy condivisi; allegati e condivisione isolati, con gate su campi sensibili, listener e revoca;
 5. [x] Form Account Privato e Azienda: regole Account/Memorandum e renderer bancario condivisi; cifratura e transazioni di salvataggio isolate in servizi dedicati e protette da gate;
-6. [~] Impostazioni e configurazioni: modello comune delle tre configurazioni Scadenze estratto e testato; riordino complessivo rinviato al post-M10;
+6. [x] Impostazioni e configurazioni: modello comune delle configurazioni Scadenze estratto e testato; canali Push riuniti in un controller condiviso e QR opzionale caricato fuori dal percorso critico; riordino visivo complessivo rinviato al post-M10;
 7. [~] Aziende e archivio: letture archivio parallelizzate; apertura allegati anagrafica azienda isolata e coperta dai gate di sicurezza; rifattorizzazione da completare;
 8. [x] Home e pagine pubbliche: bootstrap pubblico minimo; presentazione protetta, inbox e dashboard Scadenze isolate dall’orchestratore Home e coperte da gate dedicati.
 

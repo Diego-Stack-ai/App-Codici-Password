@@ -129,6 +129,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/scadenze/scadenze.js",
   "assets/js/modules/settings/archivio_account.js",
   "assets/js/modules/settings/impostazioni.js",
+  "assets/js/modules/settings/push-settings-controller.js",
   "assets/js/modules/shared/account-banking-view.js",
   "assets/js/modules/shared/account-list-view.js",
   "assets/js/modules/shared/account-mode-model.js",
