@@ -1,6 +1,6 @@
 {
-  "smallFontDeclarations": 40,
-  "hardcodedFontDeclarations": 342,
-  "inlineStyleDeclarations": 112,
-  "nativeDialogs": 3
+  "smallFontDeclarations": 1,
+  "hardcodedFontDeclarations": 60,
+  "inlineStyleDeclarations": 1,
+  "nativeDialogs": 0
 }

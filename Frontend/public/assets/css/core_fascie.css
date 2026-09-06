@@ -43,23 +43,15 @@
         will-change: auto;
         backface-visibility: visible;
         -webkit-backface-visibility: visible;
-        contain: layout paint;
-        isolation: isolate;
     }
 
     .base-header {
-        background: linear-gradient(to bottom,
-                color-mix(in srgb, var(--bg-primary) 92%, transparent) 0%,
-                color-mix(in srgb, var(--bg-primary) 82%, transparent) 72%,
-                transparent 100%);
+        background: var(--fixed-header-bg);
         border-bottom-color: transparent;
     }
 
     .base-footer {
-        background: linear-gradient(to top,
-                color-mix(in srgb, var(--bg-primary) 94%, transparent) 0%,
-                color-mix(in srgb, var(--bg-primary) 84%, transparent) 72%,
-                transparent 100%);
+        background: var(--fixed-footer-bg);
         border-top-color: transparent;
     }
 

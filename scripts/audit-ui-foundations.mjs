@@ -46,6 +46,7 @@ for (const file of markupFiles) {
 
 const coreFonts = fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core_fonts.css'), 'utf8');
 const core = fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core.css'), 'utf8');
+const fixedBars = fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core_fascie.css'), 'utf8');
 const theme = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'theme-init.js'), 'utf8');
 const components = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'components-v129.js'), 'utf8');
 const home = fs.readFileSync(path.join(publicRoot, 'home_page.html'), 'utf8');
@@ -57,14 +58,14 @@ const uiStateView = fs.readFileSync(path.join(publicRoot, 'assets', 'js', 'modul
 const privateAccountCss = [
   'area_privata.css',
   'account_privati.css',
-  'form_account_privato.css',
+  'account_form.css',
   'dettaglio_account_privato.css'
 ].map(name => fs.readFileSync(path.join(publicRoot, 'assets', 'css', name), 'utf8')).join('\n');
 const companyAccountCss = [
   'lista_aziende.css',
   'dati_azienda.css',
   'account_azienda.css',
-  'form_account_azienda.css',
+  'account_form.css',
   'dettaglio_account_azienda.css'
 ].map(name => fs.readFileSync(path.join(publicRoot, 'assets', 'css', name), 'utf8')).join('\n');
 const deadlineCss = [
@@ -107,6 +108,11 @@ const requiredSignals = [
   ,['stati di pagina condivisi in almeno due viste', [companyList, archive].every(source => source.includes("from '../shared/ui-state-view.js'"))]
   ,['stati di pagina annunciati alle tecnologie assistive', uiStateView.includes("role: isAlert ? 'alert' : 'status'") && uiStateView.includes("ariaLive: isAlert ? 'assertive' : 'polite'")]
   ,['azioni degli stati con target tattile', core.includes('--touch-target-min:') && fs.readFileSync(path.join(publicRoot, 'assets', 'css', 'core_ui.css'), 'utf8').includes('.ui-state-action')]
+  ,['fasce mobile senza ricomposizione trasparente', /@media \(max-width: 600px\)[\s\S]+\.base-header \{[\s\S]+background: var\(--fixed-header-bg\)/.test(fixedBars) && /\.base-footer \{[\s\S]+background: var\(--fixed-footer-bg\)/.test(fixedBars)]
+  ,['fallback overscroll non bianco', core.includes('--fixed-header-bg:') && core.includes('--fixed-footer-bg:') && /html,[\s\S]+body \{[\s\S]+background-image: var\(--base-box-gradient\)/.test(core)]
+  ,['font e icone serviti localmente', (coreFonts.match(/@font-face/g) || []).length === 3 && !/https?:\/\//.test(coreFonts)]
+  ,['font non bloccanti', (coreFonts.match(/font-display:\s*swap/g) || []).length === 3]
+  ,['una sola famiglia iconografica', (coreFonts.match(/font-family:\s*'Material Symbols Outlined'/g) || []).length === 2 && coreFonts.includes("material-symbols-0.woff2")]
 ];
 
 const regressions = Object.entries(baseline).filter(([key, limit]) => findings[key] > limit);

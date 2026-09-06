@@ -1,5 +1,5 @@
 /* ==========================================================================
-   FORM ACCOUNT AZIENDA (V5.0) - CSS Isolation
+   FORM ACCOUNT CONDIVISO (V5.0) - Privato e Azienda
    ========================================================================== */
 
 /* --- 1. HERO HEADER --- */
@@ -802,12 +802,12 @@ input:checked+.base-switch::after {
 
 .suggestion-item {
     padding: 0.5rem 0.85rem;
-    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
-    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
     gap: 0.08rem;
+    transition: background 0.2s;
 }
 
 .suggestion-item:last-child {
@@ -815,8 +815,55 @@ input:checked+.base-switch::after {
 }
 
 .suggestion-item:hover {
-    background: var(--surface-hover);
-    opacity: 0.9;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.suggestion-name {
+    font-size: var(--fs-micro);
+    font-weight: var(--font-label-weight);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.suggestion-email {
+    font: var(--font-caption);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* --- 13. JS UTILITIES --- */
+.field-icon {
+    margin-left: 1rem;
+    opacity: 0.4;
+    font-size: var(--icon-lg);
+}
+
+/* .field-input shifted to head of file */
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
 }
 
 .account-guest-item {
