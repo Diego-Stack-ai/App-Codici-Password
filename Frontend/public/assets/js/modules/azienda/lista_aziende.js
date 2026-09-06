@@ -1,4 +1,3 @@
-import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * LISTA AZIENDE MODULE (V5.0 ADAPTER)
  * Visualizzazione e gestione della lista delle aziende dell'utente.
@@ -7,11 +6,12 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
-import { collection, doc, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import {listCompanies} from '../data/vault-repository.js';
 
 // --- STATE ---
 let allAziende = [];
@@ -109,9 +109,7 @@ async function initProtocolUI() {
 
 async function loadAziende(uid) {
     try {
-        const colRef = collection(db, "users", uid, "aziende");
-        const snap = await getDocs(colRef);
-        allAziende = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        allAziende = await listCompanies(uid);
         renderAziende();
     } catch (e) {
         logError("LoadAziende", e);

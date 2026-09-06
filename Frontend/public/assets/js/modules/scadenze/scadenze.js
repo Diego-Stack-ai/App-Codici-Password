@@ -1,4 +1,3 @@
-import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * SCADENZE MODULE (V4.1)
  * Gestione della pagina scadenze (lista completa) e utility per la home.
@@ -10,11 +9,12 @@ import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { collection, updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { t } from '../../translations.js';
 import { initComponents } from '../../components-v129.js?v=1.2.52';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
+import {listDeadlines} from '../data/vault-repository.js';
 
 let currentUser = null;
 let allScadenze = [];
@@ -136,9 +136,7 @@ async function loadScadenze() {
 }
 
 async function getScadenze(userId) {
-    const scadenzeRef = collection(db, "users", userId, "scadenze");
-    const querySnapshot = await getDocs(scadenzeRef);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return listDeadlines(userId);
 }
 
 function renderFilteredScadenze() {

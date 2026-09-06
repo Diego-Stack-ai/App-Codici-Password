@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * ACCOUNT PRIVATI MODULE (V4.2)
  * Gestione liste account: personali, condivisi, memorandum.
@@ -7,7 +6,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
-import { collection, query, where, updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -16,6 +15,7 @@ import { initComponents } from '../../components-v129.js?v=1.2.52';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
+import {getRecordByPath, getUserProfile, listAcceptedInvites, listPrivateAccounts} from '../data/vault-repository.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -122,22 +122,15 @@ async function loadAccounts() {
         sharedAccountIds.clear();
 
         // 1. Invitations Accepted
-        const lowerEmail = (currentUser.email || "").toLowerCase().trim();
         LOG('[ACCOUNTS] Searching invites for authenticated user');
-
-        const invitesQ = query(collection(db, "invites"),
-            where("recipientEmail", "==", lowerEmail),
-            where("status", "==", "accepted")
-        );
         // Account propri e inviti sono indipendenti: avviamo entrambe le letture
         // subito, mantenendo invariato il successivo assemblaggio delle card.
-        const ownAccountsPromise = getDocs(collection(db, "users", currentUser.uid, "accounts"));
-        const invitesSnap = await getDocs(invitesQ);
-        LOG(`[ACCOUNTS] Found ${invitesSnap.size} accepted invites.`);
+        const ownAccountsPromise = listPrivateAccounts(currentUser.uid);
+        const invites = await listAcceptedInvites(currentUser.email);
+        LOG(`[ACCOUNTS] Found ${invites.length} accepted invites.`);
 
-        const invitePromises = invitesSnap.docs.map(async invDoc => {
-            const inv = invDoc.data();
-            const inviteId = invDoc.id;
+        const invitePromises = invites.map(async inv => {
+            const inviteId = inv.id;
             try {
                 const senderId = inv.senderId || inv.senderUid || inv.ownerId;
                 if (!senderId) {
@@ -152,13 +145,12 @@ async function loadAccounts() {
                 }
 
                 LOG(`[ACCOUNTS] Fetching doc: ${accPath} for invite ${inviteId}`);
-                const accSnap = await getDoc(doc(db, accPath));
+                const sharedAccount = await getRecordByPath(accPath);
 
-                if (accSnap.exists()) {
-                    const d = accSnap.data();
-                    sharedAccountIds.add(accSnap.id);
+                if (sharedAccount) {
+                    sharedAccountIds.add(sharedAccount.id);
                     LOG('[ACCOUNTS] Shared account loaded');
-                    return { ...d, id: accSnap.id, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
+                    return { ...sharedAccount, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
                 } else {
                     console.warn(`[ACCOUNTS] NOT FOUND: Account doc at ${accPath}. Check permissions or if deleted.`);
                 }
@@ -172,14 +164,13 @@ async function loadAccounts() {
 
         // 2. Own Accounts
         LOG('[ACCOUNTS] Loading own accounts');
-        const ownSnap = await ownAccountsPromise;
-        LOG(`[ACCOUNTS] Found ${ownSnap.size} own accounts.`);
-        const ownAccounts = ownSnap.docs.map(d => {
-            const data = d.data();
+        const ownRecords = await ownAccountsPromise;
+        LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
+        const ownAccounts = ownRecords.map(data => {
             const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;
             return {
                 ...data,
-                id: d.id,
+                id: data.id,
                 isOwner: isRealOwner,
                 ownerId: data.ownerId || currentUser.uid,
                 _isGuest: !isRealOwner
@@ -424,8 +415,8 @@ async function handleDelete(item) {
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) { filterAndRender(); return; }
     try {
         const userRef = doc(db, 'users', currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        const emails = userSnap.data()?.contactEmails || [];
+        const userProfile = await getUserProfile(currentUser.uid);
+        const emails = userProfile?.contactEmails || [];
         const hasProfileLink = emails.some(email => email.linkedAccountId === id);
         const batch = writeBatch(db);
         batch.delete(doc(db, "users", currentUser.uid, "accounts", id));

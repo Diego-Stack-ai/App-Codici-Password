@@ -156,10 +156,12 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 ### M2 — Data access e repository local-first
 
 - [ ] sostituire le letture Firestore replicate con repository di dominio;
-- [ ] formalizzare cache-first e refresh in background;
-- [ ] deduplicare richieste equivalenti;
-- [ ] rendere selettiva la sincronizzazione per pagina;
+- [x] formalizzare cache-first e refresh in background in `DATA_ACCESS_CONTRACT.md`;
+- [x] deduplicare richieste equivalenti nel perimetro già migrato;
+- [x] rendere selettiva la sincronizzazione per pagina tramite le priorità di `offline-sync.js`;
 - [ ] definire conflitti prima di abilitare scritture offline.
+
+Primo incremento completato: Account privati, dashboard privata, Aziende, Account aziendali e Scadenze usano il repository. Dettagli, form, sicurezza e configurazioni restano da migrare prima dell’uscita M2.
 
 **Uscita:** le pagine non conoscono più i dettagli della cache o della rete.
 

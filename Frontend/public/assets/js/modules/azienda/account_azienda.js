@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * ACCOUNT AZIENDA MODULE (V5.0 Compliant)
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
@@ -6,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { doc, collection, query, where, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, query, where, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -14,6 +13,7 @@ import { logError } from '../../utils.js';
 import { initComponents } from '../../components-v129.js?v=1.2.52';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
+import {listCompanyAccounts} from '../data/vault-repository.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -96,9 +96,8 @@ function setupUI() {
 async function loadAccounts() {
     if (!currentUser || !currentAziendaId) return;
     try {
-        const colRef = collection(db, "users", currentUser.uid, "aziende", currentAziendaId, "accounts");
-        const snap = await getDocs(colRef);
-        allAccounts = snap.docs.map(d => ({ id: d.id, ...d.data(), isOwner: true })); // Assumiamo owner per ora in azienda
+        allAccounts = (await listCompanyAccounts(currentUser.uid, currentAziendaId))
+            .map(account => ({...account, isOwner: true}));
 
         // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
         const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);

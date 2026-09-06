@@ -1,4 +1,3 @@
-import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * AREA PRIVATA MODULE (V5.0 - Single Orchestrator Compliant)
  * Logica specifica per la dashboard privata (Counters, Top 10, Rubrica).
@@ -12,12 +11,13 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 
 import { db, functions } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
-import { collection, query, where, doc, orderBy, limit, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
+import { collection, doc, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import {listAcceptedInvites, listContacts, listPrivateAccounts, listTopPrivateAccounts} from '../data/vault-repository.js';
 
 // State locale per evitare reload inutili
 let _isInitialized = false;
@@ -65,20 +65,14 @@ export async function initAreaPrivata(user) {
 async function loadCounters(uid, email) {
     try {
         LOG('[Counters] Fetching own accounts');
-        const lowerEmail = (email || "").toLowerCase().trim();
-        const invitesQ = query(collection(db, "invites"),
-            where("recipientEmail", "==", lowerEmail),
-            where("status", "==", "accepted")
-        );
-        const [allSnap, invitesSnap] = await Promise.all([
-            getDocs(collection(db, "users", uid, "accounts")),
-            getDocs(invitesQ)
+        const [accounts, invites] = await Promise.all([
+            listPrivateAccounts(uid),
+            listAcceptedInvites(email)
         ]);
-        LOG(`[Counters] Own accounts fetched: ${allSnap.size}`);
+        LOG(`[Counters] Own accounts fetched: ${accounts.length}`);
         let counts = { standard: 0, memo: 0, shared: 0, sharedMemo: 0 };
 
-        allSnap.forEach(doc => {
-            const d = doc.data();
+        accounts.forEach(d => {
             if (d.isArchived) return;
             const isShared = d.visibility === 'shared' || !!d.shared || !!d.isMemoShared;
             const isMemo = (d.type === 'memo' || d.type === 'memorandum') || !!d.isMemo || !!d.hasMemo;
@@ -95,9 +89,8 @@ async function loadCounters(uid, email) {
 
         // Controlla inviti accettati (per conteggio condivisi) - Normalizzazione V5.0
         LOG('[Counters] Accepted invites fetched in parallel with own accounts');
-        LOG(`[Counters] Invites fetched: ${invitesSnap.size}`);
-        invitesSnap.forEach(invDoc => {
-            const inv = invDoc.data();
+        LOG(`[Counters] Invites fetched: ${invites.length}`);
+        invites.forEach(inv => {
             const invType = inv.type || 'privato';
             const isMemoInv = (invType === 'memo' || invType === 'memorandum');
 
@@ -129,12 +122,11 @@ async function loadTopAccounts(uid) {
     if (!list) return;
 
     try {
-        const q = query(collection(db, "users", uid, "accounts"), orderBy("views", "desc"), limit(10));
-        const snap = await getDocs(q);
+        const accounts = await listTopPrivateAccounts(uid, 10);
 
         clearElement(list);
 
-        if (snap.empty) {
+        if (accounts.length === 0) {
             list.appendChild(createElement('p', {
                 className: 'card-no-data',
                 textContent: t('no_active_data') || 'Nessun dato attivo'
@@ -145,8 +137,7 @@ async function loadTopAccounts(uid) {
         // 🔐 PRE-SBLOCCO SILENZIOSO (Auto-Unlock Ready)
         const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
 
-        const items = await Promise.all(snap.docs.map(async d => {
-            const data = d.data();
+        const items = await Promise.all(accounts.map(async data => {
 
             // Decrittazione preventiva prima della creazione card
             if (data._encrypted && vaultKeyMaterial) {
@@ -158,10 +149,10 @@ async function loadTopAccounts(uid) {
                         data.email = await decrypt(data.email, vaultKeyMaterial);
                     }
                 } catch (e) {
-                    console.error("[AreaPrivata] Decryption failed for:", d.id, e);
+                    console.error("[AreaPrivata] Decryption failed for:", data.id, e);
                 }
             }
-            return createMicroAccountCard(d.id, data);
+            return createMicroAccountCard(data.id, data);
         }));
 
         setChildren(list, items);
@@ -263,8 +254,7 @@ async function loadRubrica(uid) {
     if (!listContainer) return;
 
     try {
-        const snap = await getDocs(collection(db, "users", uid, "contacts"));
-        const contacts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const contacts = await listContacts(uid);
 
         const counter = document.getElementById('rubrica-counter');
         if (counter) counter.textContent = `(${contacts.length})`;
@@ -352,14 +342,13 @@ async function resetAccountViews(uid) {
     if (!await showConfirmModal(t('confirm_reset_views_title') || "Reset Visti", t('confirm_reset_views_msg') || "Vuoi davvero azzerare tutti i contatori delle visualizzazioni?")) return;
 
     try {
-        const q = query(collection(db, "users", uid, "accounts"));
-        const snap = await getDocs(q);
+        const accounts = await listPrivateAccounts(uid);
 
-        if (snap.empty) return;
+        if (accounts.length === 0) return;
 
         const batch = writeBatch(db);
-        snap.docs.forEach(d => {
-            batch.update(d.ref, { views: 0 });
+        accounts.forEach(account => {
+            batch.update(doc(db, "users", uid, "accounts", account.id), { views: 0 });
         });
 
         await batch.commit();
