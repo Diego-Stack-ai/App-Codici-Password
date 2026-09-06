@@ -427,3 +427,11 @@ Il confronto con password manager maturi e con architetture local-first è stato
 Decisione fondamentale: l'app possiede già una Vault Key casuale protetta da envelope. La variabile storica `_masterKey` contiene il materiale della Vault Key dopo lo sblocco e non deve essere confusa con la Master Password. L'eventuale chiave per singolo record è una proposta distinta, ancora da dimostrare e progettare; non è una correzione automatica né autorizza una migrazione.
 
 Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare progressivamente le implementazioni meno mature soltanto dopo baseline, compatibilità, test, rollback e promozione di un percorso canonico.
+
+# Avanzamento M0 — contratto funzionale e collaudo sicuro (06/09/2026)
+
+- Creato `docs/FUNCTIONAL_DATA_CONTRACT.md`: cataloga aree visibili, moduli, percorsi Firestore/Storage, confini offline e invarianti da preservare.
+- Creato `tests/fixtures/maturity-dataset.json`, composto esclusivamente da identità `.invalid` e password marcate come fixture non segrete.
+- Aggiunto `test:maturity-fixture` alla suite per impedire l'introduzione accidentale di email o credenziali reali nel dataset M0.
+- Definito `scripts/page-performance-budget.json`: soglie statiche iniziali e obiettivi runtime. I valori runtime sono obiettivi, non risultati, finché non vengono misurati su iPhone e PC.
+- M0 resta in corso: manca la baseline runtime reale su entrambi i dispositivi.

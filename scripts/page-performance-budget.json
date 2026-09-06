@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "regressionPolicy": {
+    "maxGzipIncreasePercent": 5,
+    "maxJsModuleIncrease": 2,
+    "maxCssFileIncrease": 1
+  },
+  "absoluteStaticCeilings": {
+    "maxInitialLocalGzipKb": 336,
+    "maxJsModules": 42,
+    "maxCssFiles": 8
+  },
+  "runtimeTargets": {
+    "status": "baseline-pending-real-devices",
+    "warmOnlineFirstUsefulContentMs": 1500,
+    "offlineFirstUsefulContentMs": 1000,
+    "coldOnlineFirstUsefulContentMs": 3000,
+    "maxDuplicateEquivalentRequests": 0,
+    "notes": "Obiettivi iniziali, non risultati misurati. Validare su iPhone e PC con dataset M0 prima di renderli gate bloccanti."
+  }
+}

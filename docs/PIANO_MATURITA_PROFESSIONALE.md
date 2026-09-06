@@ -137,9 +137,9 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 - [x] inventario del repository e grafo dipendenze;
 - [x] baseline statica per pagina con `npm run audit:pages`;
 - [x] prima metrica runtime `private-page-bootstrap`;
-- [ ] catalogo completo delle funzioni visibili e dei relativi percorsi dati;
-- [ ] dataset di prova privo di segreti reali;
-- [ ] budget per apertura, primo contenuto, richieste, memoria e peso.
+- [x] catalogo delle funzioni visibili e dei percorsi dati in `FUNCTIONAL_DATA_CONTRACT.md`;
+- [x] dataset di prova privo di segreti reali, protetto da test automatici;
+- [~] budget statici definiti; obiettivi runtime fissati ma baseline iPhone/PC ancora da acquisire.
 
 **Uscita:** sappiamo misurare prima/dopo senza usare i dati personali come collaudo.
 

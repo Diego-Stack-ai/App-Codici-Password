@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "fixture": true,
+  "owner": {
+    "uid": "fixture-owner-0001",
+    "email": "diego.demo@example.invalid",
+    "displayName": "Diego Dimostrazione"
+  },
+  "contacts": [
+    {
+      "id": "contact-maria",
+      "nome": "Maria",
+      "cognome": "Esempio",
+      "email": "maria.esempio@example.invalid",
+      "normalizedEmail": "maria.esempio@example.invalid"
+    }
+  ],
+  "companies": [
+    {
+      "id": "company-demo",
+      "name": "Azienda Dimostrativa SRL",
+      "accounts": [
+        {
+          "id": "company-account-demo",
+          "name": "Portale fornitori demo",
+          "username": "utente-fittizio",
+          "password": "FIXTURE-NON-SEGRETO-02",
+          "visibility": "private"
+        }
+      ]
+    }
+  ],
+  "privateAccounts": [
+    {
+      "id": "private-account-demo",
+      "name": "Servizio streaming demo",
+      "username": "demo@example.invalid",
+      "password": "FIXTURE-NON-SEGRETO-01",
+      "visibility": "shared",
+      "sharedWith": {
+        "maria_esempio_example_invalid": {
+          "email": "maria.esempio@example.invalid",
+          "status": "pending",
+          "uid": null
+        }
+      }
+    },
+    {
+      "id": "memorandum-demo",
+      "name": "Promemoria fittizio",
+      "visibility": "memorandum"
+    }
+  ],
+  "deadlines": [
+    {
+      "id": "deadline-demo",
+      "title": "Revisione veicolo dimostrativo",
+      "category": "Revisione",
+      "ownerName": "Diego Dimostrazione",
+      "vehicle": "Veicolo Demo AB000CD",
+      "dueDate": "2030-09-30",
+      "recipients": [
+        {
+          "contactId": "contact-maria",
+          "displayName": "Maria Esempio",
+          "email": "maria.esempio@example.invalid",
+          "sendEmail": true,
+          "sendPush": true
+        },
+        {
+          "displayName": "Contatto sospeso",
+          "email": "sospeso@example.invalid",
+          "sendEmail": false,
+          "sendPush": false
+        }
+      ]
+    }
+  ],
+  "notifications": [
+    {
+      "id": "deadline-notification-demo",
+      "deadlineId": "deadline-demo",
+      "read": false,
+      "channel": "inApp"
+    }
+  ]
+}

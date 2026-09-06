@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const publicRoot = path.join(root, 'Frontend', 'public');
 const output = path.join(root, 'docs', 'PAGE_PERFORMANCE_BASELINE.md');
+const budgetFile = path.join(root, 'scripts', 'page-performance-budget.json');
+const checkOnly = process.argv.includes('--check');
 const excludedPages = new Set(['home-v126.html', 'home-v127.html']);
 const pageModules = {
   'account_azienda.html': 'assets/js/modules/azienda/account_azienda.js',
@@ -75,6 +77,7 @@ const htmlFiles = (await readdir(publicRoot))
   .filter(name => name.endsWith('.html') && !excludedPages.has(name))
   .sort((a, b) => a.localeCompare(b));
 const rows = [];
+const budget = JSON.parse(await readFile(budgetFile, 'utf8'));
 
 for (const name of htmlFiles) {
   const htmlFile = path.join(publicRoot, name);
@@ -120,5 +123,23 @@ for (const [file, count] of shared) {
 markdown += '\n## Regola di utilizzo\n\n';
 markdown += 'Rigenerare questa baseline prima e dopo ogni rifattorizzazione. Una riduzione statica non autorizza a cambiare sicurezza, schema dati o UX; il risultato va sempre affiancato ai test automatici e a misure runtime su iPhone e PC.\n';
 
-await writeFile(output, markdown, 'utf8');
-console.log(`Baseline pagine scritta in ${path.relative(root, output)} (${rows.length} pagine).`);
+const ceilings = budget.absoluteStaticCeilings;
+const violations = [];
+for (const row of rows) {
+  const gzipKb = row.gzip / 1024;
+  if (gzipKb > ceilings.maxInitialLocalGzipKb) violations.push(`${row.name}: ${gzipKb.toFixed(1)} KB gzip > ${ceilings.maxInitialLocalGzipKb} KB`);
+  if (row.js.size > ceilings.maxJsModules) violations.push(`${row.name}: ${row.js.size} moduli JS > ${ceilings.maxJsModules}`);
+  if (row.css.size > ceilings.maxCssFiles) violations.push(`${row.name}: ${row.css.size} CSS > ${ceilings.maxCssFiles}`);
+}
+
+if (!checkOnly) {
+  await writeFile(output, markdown, 'utf8');
+  console.log(`Baseline pagine scritta in ${path.relative(root, output)} (${rows.length} pagine).`);
+}
+
+if (violations.length) {
+  console.error(`Budget statico non rispettato:\n- ${violations.join('\n- ')}`);
+  process.exitCode = 1;
+} else {
+  console.log(`Budget statico rispettato da ${rows.length} pagine.`);
+}
