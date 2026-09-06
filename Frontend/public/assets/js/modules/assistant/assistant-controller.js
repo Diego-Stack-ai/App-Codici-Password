@@ -1,7 +1,7 @@
 import { ensureMasterKey } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.45';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.45';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.46';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.46';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 
@@ -10,11 +10,11 @@ let activeController = null;
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.45'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.46'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
-export async function initVaultAssistant(user) {
+export async function initVaultAssistant(user, { includeCompanies = true } = {}) {
     activeController?.destroy();
     attachStyles();
     let masterKey = null;
@@ -26,7 +26,7 @@ export async function initVaultAssistant(user) {
     if (!trigger) throw new Error('Comando Agente AI non disponibile');
     const prepare = () => {
         if (preparation) return preparation;
-        preparation = Promise.all([ensureMasterKey(), loadVaultSearchRecords(user)]).then(([key, records]) => {
+        preparation = Promise.all([ensureMasterKey(), loadVaultSearchRecords(user, { includeCompanies })]).then(([key, records]) => {
             masterKey = key;
             conversation = new VaultConversationEngine(records);
             return records.length;

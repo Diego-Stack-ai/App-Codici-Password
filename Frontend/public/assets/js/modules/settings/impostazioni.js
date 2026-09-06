@@ -4,7 +4,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.45';
+import { auth, db } from '../../firebase-config.js?v=1.2.46';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -14,6 +14,7 @@ import { safeSetText, setChildren, createElement, clearElement } from '../../dom
 import { decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
 import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
 import { disableDeadlinePush, disableSharingPush, enableDeadlinePush, enableSharingPush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
+import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -32,6 +33,7 @@ export async function initImpostazioni(user) {
     initSettingsEvents();
     setupSecurityToggles(currentUserData);
     setupAIAssistantToggle(user, currentUserData);
+    setupCompanyAreaToggle(user, currentUserData);
     setupAppInfo();
     setupPrivacyShort();
     setupTermsShort();
@@ -40,6 +42,29 @@ export async function initImpostazioni(user) {
     showPendingSecurityNotice();
 
     
+}
+
+function setupCompanyAreaToggle(user, data) {
+    const toggle = document.getElementById('company-area-toggle');
+    if (!toggle) return;
+    toggle.checked = getSyncedCompanyAreaPreference(data, user.uid);
+    toggle.addEventListener('change', async () => {
+        const enabled = toggle.checked;
+        toggle.disabled = true;
+        cacheCompanyAreaPreference(enabled, user.uid);
+        try {
+            await updateDoc(doc(db, 'users', user.uid), { settings_show_company_area: enabled });
+            if (currentUserData) currentUserData.settings_show_company_area = enabled;
+            showToast(enabled ? 'Area Azienda attivata' : 'Area Azienda nascosta. I dati restano salvati.', 'success');
+        } catch (error) {
+            console.error('[COMPANY AREA] Salvataggio preferenza fallito.', error);
+            toggle.checked = !enabled;
+            cacheCompanyAreaPreference(!enabled, user.uid);
+            showToast('Impossibile salvare la preferenza Azienda', 'error');
+        } finally {
+            toggle.disabled = false;
+        }
+    });
 }
 
 async function setupSharingPush(user) {

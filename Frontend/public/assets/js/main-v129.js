@@ -21,12 +21,13 @@ console.warn     = (...args) => { try { LOG_WARN(...args);  } catch (e) {} };
 import { setupPasswordToggles, setupCopyButtons, setupCallButtons } from './ui-components.js';
 import { initCleanup } from './cleanup.js';
 import { initComponents } from './components-v129.js'; // Imports components system
+import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-preference.js';
 
 /**
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.45';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.46';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.45';
+import * as Pages from './pages-init.js?v=1.2.46';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric } from './performance-metrics.js';
@@ -186,6 +187,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Security Check
                 const userDoc = await getDoc(doc(db, "users", user.uid));
+                const companyPages = new Set(['lista_aziende', 'modifica_azienda', 'dati_azienda', 'account_azienda', 'dettaglio_account_azienda', 'form_account_azienda']);
+                if (companyPages.has(currentPage) && userDoc.exists() && !getSyncedCompanyAreaPreference(userDoc.data(), user.uid)) {
+                    showToast('L’area Azienda è disattivata. Puoi riattivarla dalle Impostazioni.', 'info');
+                    window.location.replace('home_page.html');
+                    return;
+                }
                 if (userDoc.exists()) {
                     LOG("[AUTH-DEBUG] User document found.");
                 } else {

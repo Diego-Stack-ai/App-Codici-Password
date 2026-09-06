@@ -1,5 +1,5 @@
 import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
-import { db } from '../../firebase-config.js?v=1.2.45';
+import { db } from '../../firebase-config.js?v=1.2.46';
 import { collection, doc } from "/assets/js/vendor/firebase-runtime.js";
 
 const text = value => typeof value === 'string' ? value.trim() : '';
@@ -42,18 +42,19 @@ function deadlineRecord(id, data) {
         keywords: [data.mode, data.categoria, data.type, data.tipo, data.tipoScadenza, data.name, data.intestatario, vehicle, data.riferimento], href: `/dettaglio_scadenza.html?id=${encodeURIComponent(id)}` });
 }
 
-export async function loadVaultSearchRecords(user) {
+export async function loadVaultSearchRecords(user, { includeCompanies = true } = {}) {
     if (!user?.uid) throw new Error('Utente non autenticato');
     const uid = user.uid;
     const [profile, accounts, companies, deadlines] = await Promise.all([
         getDoc(doc(db, 'users', uid)), getDocs(collection(db, 'users', uid, 'accounts')),
-        getDocs(collection(db, 'users', uid, 'aziende')), getDocs(collection(db, 'users', uid, 'scadenze'))
+        includeCompanies ? getDocs(collection(db, 'users', uid, 'aziende')) : Promise.resolve(null),
+        getDocs(collection(db, 'users', uid, 'scadenze'))
     ]);
     const records = profile.exists() ? profileRecords(uid, profile.data()) : [];
     accounts.forEach(item => records.push(accountRecord(item.id, item.data())));
     deadlines.forEach(item => records.push(deadlineRecord(item.id, item.data())));
     const companyItems = [];
-    companies.forEach(item => {
+    companies?.forEach(item => {
         const companyData = item.data();
         const companyName = companyData.ragioneSociale || companyData.nome || companyData.denominazione || 'Azienda';
         records.push(companyRecord(item.id, companyData));

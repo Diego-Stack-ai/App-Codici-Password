@@ -5,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.45';
+import { auth, db } from '../../firebase-config.js?v=1.2.46';
 import { onAuthStateChanged, signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -14,6 +14,7 @@ import { t } from '../../translations.js';
 import { decrypt, ensureMasterKey, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
 import { getLastCryptoError } from '../core/crypto-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
+import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -37,6 +38,8 @@ export async function initHomePage(user) {
 
     
     currentUser = user;
+    const cachedCompanyAreaEnabled = getCachedCompanyAreaPreference(user.uid);
+    applyCompanyAreaVisibility(cachedCompanyAreaEnabled);
 
     const pendingDeadlineLink = sessionStorage.getItem('pending_deadline_link');
     if (pendingDeadlineLink && /^\/dettaglio_scadenza\.html\?/.test(pendingDeadlineLink)) {
@@ -55,12 +58,24 @@ export async function initHomePage(user) {
     // [FIX V8.1] Caricamenti paralleli e indipendenti:
     // Se il fetch delle aziende fallisce per un calo di rete,
     // il nome utente e le scadenze si caricano comunque.
-    const [aziResult] = await Promise.allSettled([
-        getDocs(collection(db, "users", user.uid, "aziende")),
+    const [settingsResult] = await Promise.allSettled([
+        getDoc(doc(db, 'users', user.uid)),
         renderHeaderUser(user),
         renderDashboardDeadlines(user),
         renderDeadlineNotificationInbox(user)
     ]);
+
+    const settingsData = settingsResult.status === 'fulfilled' && settingsResult.value.exists()
+        ? settingsResult.value.data()
+        : null;
+    const companyAreaEnabled = settingsData
+        ? getSyncedCompanyAreaPreference(settingsData, user.uid)
+        : cachedCompanyAreaEnabled;
+    applyCompanyAreaVisibility(companyAreaEnabled);
+
+    const aziResult = companyAreaEnabled
+        ? await Promise.allSettled([getDocs(collection(db, "users", user.uid, "aziende"))]).then(results => results[0])
+        : { status: 'fulfilled', value: { docs: [] } };
 
     // FAB Group dipende solo dal risultato delle aziende
     const aziendes = aziResult.status === 'fulfilled'
@@ -71,25 +86,20 @@ export async function initHomePage(user) {
         console.warn("[HOME] Fetch aziende fallito (rete?), FAB in modalità default.", aziResult.reason);
     }
 
-    setupFABGroup(aziendes);
+    setupFABGroup(aziendes, companyAreaEnabled);
 
     // L'impostazione sincronizzata contiene soltanto il consenso ad attivare la funzione.
     // Indice e risultati rimangono esclusivamente nella memoria della pagina.
     const assistantOverride = new URLSearchParams(window.location.search).get('assistant') === '1';
     let assistantEnabled = assistantOverride;
     if (!assistantEnabled) {
-        try {
-            const settingsSnapshot = await getDoc(doc(db, 'users', user.uid));
-            assistantEnabled = settingsSnapshot.data()?.settings_ai_assistant === true;
-        } catch (error) {
-            console.warn('[ASSISTANT] Preferenza non disponibile.', error);
-        }
+        assistantEnabled = settingsData?.settings_ai_assistant === true;
     }
     if (assistantEnabled) {
         try {
             document.getElementById('ai-assistant-status')?.classList.remove('hidden');
-            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.45');
-            await initVaultAssistant(user);
+            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.46');
+            await initVaultAssistant(user, { includeCompanies: companyAreaEnabled });
         } catch (error) {
             console.warn('[ASSISTANT] Avvio non riuscito.', error);
         }
@@ -530,7 +540,7 @@ function renderMiniItem(item, today) {
 }
 
 // --- FAB GROUP (Quick Add Actions) ---
-function setupFABGroup(aziendes = []) {
+function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
     function initFABFromFooter(detail) {
         const { center: footerCenter } = detail;
         if (!footerCenter) return;
@@ -580,12 +590,12 @@ function setupFABGroup(aziendes = []) {
         // Assemblaggio
         fabGroup.appendChild(btnPrivato);
         fabGroup.appendChild(btnScadenza);
-        fabGroup.appendChild(btnAzienda);
+        if (companyAreaEnabled) fabGroup.appendChild(btnAzienda);
 
         footerCenter.appendChild(fabGroup);
 
         // Animazione Entrata Sequenziale
-        const buttons = [btnPrivato, btnScadenza, btnAzienda];
+        const buttons = companyAreaEnabled ? [btnPrivato, btnScadenza, btnAzienda] : [btnPrivato, btnScadenza];
         buttons.forEach((btn, index) => {
             btn.animate([
                 { transform: 'scale(0) translateY(20px)', opacity: 0 },

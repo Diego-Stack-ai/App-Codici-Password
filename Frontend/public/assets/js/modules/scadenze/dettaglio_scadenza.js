@@ -5,7 +5,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.45';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.46';
 import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 
