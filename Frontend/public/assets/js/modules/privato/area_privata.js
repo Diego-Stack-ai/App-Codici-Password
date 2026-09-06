@@ -10,7 +10,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.44';
+import { db, functions } from '../../firebase-config.js?v=1.2.45';
 import { LOG } from '../../logger.js';
 import { collection, query, where, doc, orderBy, limit, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -46,8 +46,7 @@ export async function initAreaPrivata(user) {
     // 1. Caricamento Dati Parallelo (Performance V5.0)
     await Promise.all([
         loadCounters(user.uid, user.email),
-        loadTopAccounts(user.uid),
-        loadRubrica(user.uid)
+        loadTopAccounts(user.uid)
     ]);
 
     // 2. Setup Event Listeners & FABs (Idempotente)
@@ -382,16 +381,6 @@ function setupEventListeners(uid) {
             el.dataset.listenerAttached = 'true';
         }
     };
-
-    // Toggle Rubrica
-    addListenerOnce('rubrica-toggle-btn', 'click', () => {
-        const content = document.getElementById('rubrica-content');
-        const chevron = document.getElementById('rubrica-chevron');
-        if (content) {
-            const isHidden = content.classList.toggle('hidden');
-            if (chevron) chevron.classList.toggle('rotate-180', !isHidden);
-        }
-    });
 
     // Reset Views
     addListenerOnce('btn-reset-views', 'click', () => {

@@ -15,7 +15,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * modifica_azienda.html carica solo main.js → INVARIATO
  */
 
-import { db } from '../../firebase-config.js?v=1.2.44';
+import { db } from '../../firebase-config.js?v=1.2.45';
 import { doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';

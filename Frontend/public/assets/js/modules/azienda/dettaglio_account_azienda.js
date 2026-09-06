@@ -7,7 +7,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.44';
+import { db } from '../../firebase-config.js?v=1.2.45';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -21,6 +21,7 @@ import {
     openSourceSelector, closeSourceSelector, handleFileUpload
 } from './dettaglio-azienda-attachments.js';
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
+import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -130,6 +131,8 @@ async function loadAccount() {
         updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
 
         render(originalData);
+        const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
+        renderSharingMap(originalData, contactNames);
         await loadAttachments();
 
         if (isReadOnly) setupReadOnlyUI();

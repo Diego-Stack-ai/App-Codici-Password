@@ -20,7 +20,7 @@
  */
 
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { auth, db } from '../../firebase-config.js?v=1.2.44';
+import { auth, db } from '../../firebase-config.js?v=1.2.45';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { createProfileItemId } from './profile-model.js';

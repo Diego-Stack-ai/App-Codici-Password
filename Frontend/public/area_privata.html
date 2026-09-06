@@ -11,20 +11,20 @@
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.44" />
+    <link rel="manifest" href="manifest.json?v=1.2.45" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.44">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.45">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.2.44">
-    <link rel="stylesheet" href="assets/css/account_privati.css?v=1.2.44">
-    <link rel="stylesheet" href="assets/css/area_privata.css?v=1.2.44">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.44">
+    <link rel="stylesheet" href="assets/css/core_pagine.css?v=1.2.45">
+    <link rel="stylesheet" href="assets/css/account_privati.css?v=1.2.45">
+    <link rel="stylesheet" href="assets/css/area_privata.css?v=1.2.45">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.45">
 </head>
 
 <body class="base-bg">
@@ -114,77 +114,6 @@
                             <!-- Loading -->
                             <div class="loading-box">
                                 <span class="material-symbols-outlined animate-spin-slow">sync</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RUBRICA SECTION -->
-                    <div class="area-rubrica mt-section">
-                        <!-- Bottone Toggle -->
-                        <button id="rubrica-toggle-btn" type="button" class="rubrica-toggle-btn">
-                            <div class="rubrica-toggle-content">
-                                <div class="matrix-icon-box icon-orange">
-                                    <span class="material-symbols-outlined">group</span>
-                                </div>
-                                <div class="card-text-block">
-                                    <h3 class="micro-account-name" data-t="rubrica_title">Rubrica Contatti</h3>
-                                    <p class="rubrica-subtitle">
-                                        <span data-t="rubrica_shared_label">Condivisi</span>
-                                        <span id="rubrica-counter">(0)</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <span id="rubrica-chevron" class="material-symbols-outlined chevron-icon">expand_more</span>
-                        </button>
-
-                        <!-- Contenuto Rubrica -->
-                        <div id="rubrica-content" class="hidden rubrica-container rounded-3xl card-orange mt-2">
-                            <div class="rubrica-inner-padding">
-                                <!-- Pulsante Nuovo Contatto -->
-                                <div class="rubrica-actions-row">
-                                    <button id="add-contact-btn" type="button" class="glass-btn rubrica-btn-new"
-                                        data-t="new_contact">
-                                        NUOVO CONTATTO
-                                    </button>
-                                </div>
-
-                                <!-- Form di Inserimento -->
-                                <div id="add-contact-form" class="hidden rubrica-form rounded-2xl p-form">
-                                    <div class="rubrica-form-grid">
-                                        <div class="form-group">
-                                            <label class="rubrica-label" for="contact-nome"
-                                                data-t="label_name">Nome</label>
-                                            <input type="text" id="contact-nome" placeholder="Mario"
-                                                class="glass-input rubrica-input">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="rubrica-label" for="contact-cognome"
-                                                data-t="label_surname">Cognome</label>
-                                            <input type="text" id="contact-cognome" placeholder="Rossi"
-                                                class="glass-input rubrica-input">
-                                        </div>
-                                    </div>
-                                    <div class="form-group mt-form">
-                                        <label class="rubrica-label" for="contact-email" data-t="email_label">Email
-                                            Condivisione</label>
-                                        <input type="email" id="contact-email" placeholder="mario.rossi@email.com"
-                                            class="glass-input rubrica-input">
-                                    </div>
-                                    <div class="flex-center-row gap-3 mt-form">
-                                        <button id="btn-cancel-contact" type="button"
-                                            class="glass-btn rubrica-btn-cancel hidden" data-t="cancel">
-                                            ANNULLA
-                                        </button>
-                                        <button id="btn-add-contact" type="button" class="btn-primary rubrica-btn-save"
-                                            data-t="save_contact">
-                                            SALVA CONTATTO
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div id="contacts-list" class="rubrica-list">
-                                    <!-- JS Generated -->
-                                </div>
                             </div>
                         </div>
                     </div>

@@ -6,7 +6,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Init: initSharingModule(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.44';
+import { auth, db } from '../../firebase-config.js?v=1.2.45';
 import { LOG } from '../../logger.js';
 import { doc, collection, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
@@ -38,7 +38,7 @@ export function initSharingModule({ currentUid, currentAziendaId, currentId, isR
 /**
  * Renderizza la mappa di condivisione dell'account (sezione sharedWith).
  */
-export function renderSharingMap(account) {
+export function renderSharingMap(account, contactNames = new Map()) {
     const listContainer = document.getElementById('guests-list');
     const mgmtSection = document.getElementById('shared-management-section');
 
@@ -86,7 +86,7 @@ export function renderSharingMap(account) {
             createElement('div', { className: 'rubrica-item-info-row' }, [
                 createElement('div', { className: 'rubrica-item-avatar', textContent: inv.email.charAt(0).toUpperCase() }),
                 createElement('div', { className: 'rubrica-item-info' }, [
-                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.email.split('@')[0] }),
+                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: contactNames.get(String(inv.email || '').trim().toLowerCase()) || inv.email.split('@')[0] }),
                     createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.email })
                 ])
             ]),

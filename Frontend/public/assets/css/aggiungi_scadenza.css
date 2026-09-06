@@ -797,3 +797,4 @@
     font-style: italic;
     text-align: center;
 }
+.deadline-recipient-add-row{grid-template-columns:minmax(0,1fr)}

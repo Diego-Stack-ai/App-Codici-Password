@@ -4,7 +4,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.44';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.45';
 import { LOG } from '../../logger.js';
 import { observeAuth } from '../../auth.js';
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy, addDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -13,10 +13,11 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.44';
+import { initComponents } from '../../components-v129.js?v=1.2.45';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
+import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -127,6 +128,8 @@ async function loadAccount() {
         }
 
         renderAccount(accountData);
+        const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
+        renderSharingMap(accountData, contactNames);
         await loadAttachments();
         setupActions();
     } catch (e) {
@@ -381,7 +384,7 @@ function renderBanking(acc) {
  */
 let sharingUnsubscribe = null; // Removed inside loading logic later, left for safety
 
-function renderSharingMap(account) {
+function renderSharingMap(account, contactNames = new Map()) {
     const listContainer = document.getElementById('guests-list');
     const mgmtSection = document.getElementById('shared-management-section');
 
@@ -425,7 +428,7 @@ function renderSharingMap(account) {
             createElement('div', { className: 'rubrica-item-info-row' }, [
                 createElement('div', { className: 'rubrica-item-avatar', textContent: inv.email.charAt(0).toUpperCase() }),
                 createElement('div', { className: 'rubrica-item-info' }, [
-                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: inv.email.split('@')[0] }),
+                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: contactNames.get(normalizeEmailForLookup(inv.email)) || inv.email.split('@')[0] }),
                     createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.email })
                 ])
             ]),
@@ -433,6 +436,10 @@ function renderSharingMap(account) {
         ]);
         listContainer.appendChild(div);
     }
+}
+
+function normalizeEmailForLookup(email) {
+    return String(email || '').trim().toLowerCase();
 }
 
 /**

@@ -5,7 +5,7 @@
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.44';
+import { auth, db } from '../../firebase-config.js?v=1.2.45';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
@@ -86,6 +86,17 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
     const isSharedUI = document.getElementById('flag-shared')?.checked || false;
     const isMemoUI = document.getElementById('flag-memo')?.checked || false;
     const isMemoSharedUI = document.getElementById('flag-memo-shared')?.checked || false;
+    const hasCredentialValues = ['account-username', 'account-code', 'account-password'].some(id => String(get(id) || '').trim());
+    if ((isMemoUI || isMemoSharedUI) && hasCredentialValues) {
+        showToast('Memorandum non può contenere Utente, Account/Codice o Password. Cancella manualmente questi campi.', 'warning');
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
+    if (isSharedUI && !hasCredentialValues) {
+        showToast('Un Account condiviso deve contenere almeno una credenziale.', 'warning');
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
 
     data.type = (isMemoUI || isMemoSharedUI) ? "memo" : "account";
     data.visibility = (isSharedUI || isMemoSharedUI) ? "shared" : "private";

@@ -4,7 +4,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Creazione e modifica account con gestione IBAN dinamica.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.44';
+import { auth, db } from '../../firebase-config.js?v=1.2.45';
 import { LOG } from '../../logger.js';
 import { doc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -45,6 +45,11 @@ export async function initFormAccountPrivato(user) {
     const params = new URLSearchParams(window.location.search);
     currentDocId = params.get('id');
     isEditing = !!currentDocId;
+    document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
+    if (isEditing) {
+        ['flag-shared', 'flag-memo', 'flag-memo-shared'].forEach(id => document.getElementById(id)?.closest('label')?.classList.add('hidden'));
+        document.getElementById('shared-management')?.classList.add('hidden');
+    }
     document.querySelectorAll('.manage-recipients-link').forEach(link => {
         const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
         link.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
@@ -429,7 +434,7 @@ function setupUI() {
         };
         inviteInput.oninput = (e) => {
             const val = e.target.value.toLowerCase();
-            const filtered = myContacts.filter(c => c.email.toLowerCase().includes(val) || (c.nome && c.nome.toLowerCase().includes(val)));
+            const filtered = myContacts.filter(c => [c.email, c.nome, c.cognome, [c.nome, c.cognome].filter(Boolean).join(' ')].some(value => String(value || '').toLowerCase().includes(val)));
             renderSuggestions(filtered);
             suggestions.classList.remove('hidden');
         };
@@ -498,7 +503,7 @@ function renderSuggestions(list) {
         }, [
             createElement('p', {
                 className: 'suggestion-contact-name',
-                textContent: c.nome || c.email.split('@')[0]
+                textContent: [c.nome, c.cognome].filter(Boolean).join(' ').trim() || c.email.split('@')[0]
             }),
             createElement('p', {
                 className: 'suggestion-contact-email',
@@ -545,6 +550,17 @@ async function saveAccount() {
     const isSharedUI = document.getElementById('flag-shared')?.checked || false;
     const isMemoUI = document.getElementById('flag-memo')?.checked || false;
     const isMemoSharedUI = document.getElementById('flag-memo-shared')?.checked || false;
+    const hasCredentialValues = ['account-username', 'account-code', 'account-password'].some(id => String(get(id) || '').trim());
+    if ((isMemoUI || isMemoSharedUI) && hasCredentialValues) {
+        showToast('Memorandum non può contenere Utente, Account/Codice o Password. Cancella manualmente questi campi.', 'warning');
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
+    if (isSharedUI && !hasCredentialValues) {
+        showToast('Un Account condiviso deve contenere almeno una credenziale.', 'warning');
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
 
     const data = {
         nomeAccount: (get('account-name') || '').trim(), // In chiaro

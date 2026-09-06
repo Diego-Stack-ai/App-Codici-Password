@@ -5,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth, storage } from '../../firebase-config.js?v=1.2.44';
+import { db, auth, storage } from '../../firebase-config.js?v=1.2.45';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { collection, addDoc, Timestamp, doc, updateDoc, setDoc, arrayUnion, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
@@ -470,30 +470,13 @@ function setupDeadlineRecipientsUI() {
         const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
         window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
     });
-    document.getElementById('btn-add-deadline-contact')?.addEventListener('click', () => {
-        const select = document.getElementById('deadline-contact-select');
-        const selectedValue = select?.value || '';
+    document.getElementById('deadline-contact-select')?.addEventListener('change', event => {
+        const select = event.currentTarget;
+        const selectedValue = select.value || '';
         const contact = recipientContacts.find(item => item.id === selectedValue || `email:${normalizeRecipientEmail(item.email)}` === selectedValue);
-        if (!contact) return showToast('Seleziona prima una persona dalla rubrica.', 'info');
+        if (!contact) return;
         addDeadlineRecipient({ contactId: contact.id, displayName: [contact.nome, contact.cognome].filter(Boolean).join(' '), email: contact.email });
         select.value = '';
-    });
-    document.getElementById('btn-add-deadline-email')?.addEventListener('click', async () => {
-        const email = normalizeRecipientEmail(await showInputModal('Nuovo destinatario', '', 'Inserisci indirizzo email'));
-        if (!email) return;
-        if (!isValidRecipientEmail(email)) return showToast('Inserisci un indirizzo email valido.', 'warning');
-        const displayName = String(await showInputModal('Nome o descrizione', '', 'Es. Maria Rossi o Commercialista') || '').trim();
-        if (!addDeadlineRecipient({ email, displayName })) return;
-        const known = recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === email);
-        if (!known && await showConfirmModal('Salva in rubrica', 'Vuoi riutilizzare questa persona anche in futuro?')) {
-            const parts = displayName.split(/\s+/).filter(Boolean);
-            const contactData = { nome: parts.shift() || displayName || email, cognome: parts.join(' '), email, emailNormalized: email, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-            const ref = await addDoc(collection(db, 'users', currentUser.uid, 'contacts'), contactData);
-            recipientContacts.push({ id: ref.id, ...contactData });
-            const recipient = deadlineRecipients.find(item => item.email === email);
-            if (recipient) recipient.contactId = ref.id;
-            populateRecipientContacts(); renderDeadlineRecipients();
-        }
     });
     document.getElementById('deadline-recipients-list')?.addEventListener('change', event => {
         const input = event.target.closest('input[data-recipient-index]');
@@ -720,7 +703,11 @@ function finishLoad() {
     const namesList = document.getElementById('names-list');
     if (namesList && dynamicConfig.names) {
         clearElement(namesList);
-        dynamicConfig.names.forEach(n => {
+        const holderNames = [...new Set([
+            ...dynamicConfig.names,
+            ...recipientContacts.map(contact => [contact.nome, contact.cognome].filter(Boolean).join(' ').trim()).filter(Boolean)
+        ])].sort((a, b) => a.localeCompare(b, 'it'));
+        holderNames.forEach(n => {
             namesList.appendChild(new Option(n, n));
         });
     }
