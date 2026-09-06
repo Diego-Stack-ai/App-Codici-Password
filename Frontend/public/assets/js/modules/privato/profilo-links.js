@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.54';
+import { auth, db } from '../../firebase-config.js?v=1.2.55';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';

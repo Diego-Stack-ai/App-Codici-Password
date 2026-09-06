@@ -195,7 +195,10 @@ assert.match(await read('Frontend/public/assets/css/account_privati.css'), /@med
 assert.doesNotMatch(await read('Frontend/public/assets/js/ui-core-v129.js'), /autocomplete:\s*['"]current-password['"]/, 'Il popup Vault viene ancora associato alla password di login');
 assert.match(await read('Frontend/public/assets/js/ui-core-v129.js'), /options\.vaultSecret[\s\S]*?data-form-type[\s\S]*?data-1p-ignore/, 'La Master Password non è esclusa dai password manager');
 assert.match(security, /vaultSecret:\s*true/, 'Lo sblocco Vault non identifica il campo come segreto locale');
-assert.match(await read('Frontend/public/assets/css/core_fascie.css'), /@media \(max-width:\s*600px\)[\s\S]*?\.base-header,[\s\S]*?backdrop-filter:\s*none;[\s\S]*?mask-image:\s*none;/, 'Le fasce mobili usano ancora la composizione che causa sfarfallio');
+const mobileShellCss = await read('Frontend/public/assets/css/core_fascie.css');
+assert.match(mobileShellCss, /@media \(max-width:\s*600px\)[\s\S]*?\.base-header,[\s\S]*?position:\s*relative;[\s\S]*?flex-shrink:\s*0;/, 'Le fasce mobili non sono isolate dallo scorrimento del contenuto');
+assert.match(coreCss, /@media \(max-width:\s*600px\)[\s\S]*?html,[\s\S]*?body[\s\S]*?overflow:\s*hidden;[\s\S]*?\.base-bg[\s\S]*?height:\s*100dvh;[\s\S]*?\.base-main[\s\S]*?min-height:\s*0;[\s\S]*?overflow-y:\s*auto;/, 'La shell mobile non mantiene lo scorrimento nella sola area centrale');
+assert.match(mobileShellCss, /\.base-header[\s\S]*?mask-image:\s*linear-gradient\(to bottom, black 40%, transparent 100%\);[\s\S]*?\.base-footer[\s\S]*?mask-image:\s*linear-gradient\(to top, black 40%, transparent 100%\);/, 'La dissolvenza storica delle fasce non è preservata');
 assert.match(auth, /async function resetPassword\(email\)[\s\S]*?await sendPasswordResetEmail\(auth, email\);[\s\S]*?return true;/, 'Il reset password non propaga correttamente gli errori Firebase');
 assert.doesNotMatch(auth, /async function resetPassword\(email\)\s*\{\s*try\s*\{/, 'Il reset password intercetta ancora gli errori prima della UI');
 assert.match(password, /verifyPasswordResetCode[\s\S]*?codex_password_reset_policy_v1/, 'Il reset completato non prepara la sincronizzazione della policy');
