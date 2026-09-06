@@ -14,6 +14,7 @@ import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -86,20 +87,21 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
     const isSharedUI = document.getElementById('flag-shared')?.checked || false;
     const isMemoUI = document.getElementById('flag-memo')?.checked || false;
     const isMemoSharedUI = document.getElementById('flag-memo-shared')?.checked || false;
-    const hasCredentialValues = ['account-username', 'account-code', 'account-password'].some(id => String(get(id) || '').trim());
-    if ((isMemoUI || isMemoSharedUI) && hasCredentialValues) {
+    const mode = accountModeFromFlags({ shared: isSharedUI, memo: isMemoUI, memoShared: isMemoSharedUI });
+    const credentialValues = { username: get('account-username'), account: get('account-code'), password: get('account-password') };
+    const modeValidation = validateAccountMode(mode, credentialValues);
+    if (modeValidation.reason === 'memo-has-credentials') {
         showToast('Memorandum non può contenere Utente, Account/Codice o Password. Cancella manualmente questi campi.', 'warning');
         if (btnSave) btnSave.disabled = false;
         return;
     }
-    if (isSharedUI && !hasCredentialValues) {
+    if (modeValidation.reason === 'shared-account-without-credentials') {
         showToast('Un Account condiviso deve contenere almeno una credenziale.', 'warning');
         if (btnSave) btnSave.disabled = false;
         return;
     }
 
-    data.type = (isMemoUI || isMemoSharedUI) ? "memo" : "account";
-    data.visibility = (isSharedUI || isMemoSharedUI) ? "shared" : "private";
+    Object.assign(data, recordFieldsFromAccountMode(mode));
 
     const isSharingActive = data.visibility === 'shared';
 

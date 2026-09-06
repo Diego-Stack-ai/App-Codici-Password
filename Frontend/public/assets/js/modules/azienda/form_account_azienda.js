@@ -15,6 +15,7 @@ import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
 import { getCompanyAccount, listContacts } from '../data/vault-repository.js';
+import { accountModeFromRecord } from '../shared/account-mode-model.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -203,9 +204,10 @@ async function loadData() {
         isExplicitMemo = data.isExplicitMemo || false;
 
         // Flags & Sharing UI (V5.1 Master - Strict Mode)
-        const isMemo = (data.type === 'memo' || data.type === 'memorandum');
-        const isShared = (data.visibility === 'shared');
-        const isMemoShared = isShared && isMemo;
+        const loadedMode = accountModeFromRecord(data);
+        const isMemo = loadedMode.startsWith('memo-');
+        const isShared = loadedMode.endsWith('-shared');
+        const isMemoShared = loadedMode === 'memo-shared';
 
         if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared && !isMemo;
         if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = isMemo && !isShared;

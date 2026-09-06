@@ -13,6 +13,7 @@ import { logError, sanitizeEmail } from '../../utils.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { encrypt, decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, listContacts } from '../data/vault-repository.js';
+import { accountModeFromFlags, accountModeFromRecord, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -217,9 +218,10 @@ async function loadData() {
         isExplicitMemo = data.isExplicitMemo || false;
 
         // Flags & Sharing UI (V5.1 Master - Strict Mode)
-        const isMemo = (data.type === 'memo' || data.type === 'memorandum');
-        const isShared = (data.visibility === 'shared') || data._isGuest;
-        const isMemoShared = isShared && isMemo;
+        const loadedMode = accountModeFromRecord(data);
+        const isMemo = loadedMode.startsWith('memo-');
+        const isShared = loadedMode.endsWith('-shared');
+        const isMemoShared = loadedMode === 'memo-shared';
 
         if (document.getElementById('flag-shared')) document.getElementById('flag-shared').checked = isShared && !isMemo;
         if (document.getElementById('flag-memo')) document.getElementById('flag-memo').checked = isMemo && !isShared;
@@ -547,13 +549,15 @@ async function saveAccount() {
     const isSharedUI = document.getElementById('flag-shared')?.checked || false;
     const isMemoUI = document.getElementById('flag-memo')?.checked || false;
     const isMemoSharedUI = document.getElementById('flag-memo-shared')?.checked || false;
-    const hasCredentialValues = ['account-username', 'account-code', 'account-password'].some(id => String(get(id) || '').trim());
-    if ((isMemoUI || isMemoSharedUI) && hasCredentialValues) {
+    const mode = accountModeFromFlags({ shared: isSharedUI, memo: isMemoUI, memoShared: isMemoSharedUI });
+    const credentialValues = { username: get('account-username'), account: get('account-code'), password: get('account-password') };
+    const modeValidation = validateAccountMode(mode, credentialValues);
+    if (modeValidation.reason === 'memo-has-credentials') {
         showToast('Memorandum non può contenere Utente, Account/Codice o Password. Cancella manualmente questi campi.', 'warning');
         if (btnSave) btnSave.disabled = false;
         return;
     }
-    if (isSharedUI && !hasCredentialValues) {
+    if (modeValidation.reason === 'shared-account-without-credentials') {
         showToast('Un Account condiviso deve contenere almeno una credenziale.', 'warning');
         if (btnSave) btnSave.disabled = false;
         return;
@@ -572,8 +576,7 @@ async function saveAccount() {
         referenteCellulare: (document.getElementById('ref-mobile')?.value || '').trim(),
 
         // V3.1: Deterministc Types
-        type: (isMemoUI || isMemoSharedUI) ? "memo" : "account",
-        visibility: (isSharedUI || isMemoSharedUI) ? "shared" : "private",
+        ...recordFieldsFromAccountMode(mode),
 
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
         banking: await Promise.all((bankAccounts || []).map(async b => ({

@@ -4,8 +4,8 @@ import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { sanitizeEmail } from '../../utils.js';
 import { listContacts } from '../data/vault-repository.js';
+import { accountModeFromRecord, hasAccountCredentials, validateAccountMode } from './account-mode-model.js';
 
-const modeKey = account => `${account?.type === 'memo' ? 'memo' : 'account'}-${account?.visibility === 'shared' ? 'shared' : 'private'}`;
 const fullName = contact => [contact?.nome, contact?.cognome].filter(Boolean).join(' ').trim() || contact?.email || '';
 const normalizeEmail = email => String(email || '').trim().toLowerCase();
 
@@ -23,7 +23,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     }
 
     section.classList.remove('hidden');
-    const initialMode = modeKey(account);
+    const initialMode = accountModeFromRecord(account);
     let selectedMode = initialMode;
     let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean));
     let contacts = [];
@@ -42,7 +42,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
         ['memo-shared', 'Memorandum condiviso', 'group_work']
     ];
 
-    const hasCredentials = () => [account.username, account.account, account.password].some(value => String(value || '').trim());
+    const hasCredentials = () => hasAccountCredentials(account);
     const render = () => {
         clearElement(options);
         definitions.forEach(([key, label, icon]) => {
@@ -51,11 +51,12 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                 className: `account-mode-option${selectedMode === key ? ' is-active' : ''}`,
                 dataset: { mode: key },
                 onclick: () => {
-                    if (key.startsWith('memo-') && hasCredentials()) {
+                    const validation = validateAccountMode(key, account);
+                    if (validation.reason === 'memo-has-credentials') {
                         showToast('Per passare a Memorandum apri Modifica e cancella manualmente Utente, Account/Codice e Password.', 'warning');
                         return;
                     }
-                    if (key === 'account-shared' && !hasCredentials()) {
+                    if (validation.reason === 'shared-account-without-credentials') {
                         showToast('Un Account condiviso deve contenere almeno una credenziale tra Utente, Account/Codice e Password.', 'warning');
                         return;
                     }
