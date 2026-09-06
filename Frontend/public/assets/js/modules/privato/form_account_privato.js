@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * FORM ACCOUNT PRIVATO (V6.0 — Unified Banking Renderer)
  * Creazione e modifica account con gestione IBAN dinamica.
@@ -13,6 +12,7 @@ import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { encrypt, decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { getPrivateAccount, listContacts } from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -122,10 +122,8 @@ export async function initFormAccountPrivato(user) {
  */
 async function loadData() {
     try {
-        const snap = await getDoc(doc(db, "users", currentUid, "accounts", currentDocId));
-        if (!snap.exists()) { showToast(t('account_not_found'), "error"); return; }
-
-        const data = snap.data();
+        const data = await getPrivateAccount(currentUid, currentDocId);
+        if (!data) { showToast(t('account_not_found'), "error"); return; }
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario
@@ -252,8 +250,7 @@ async function loadData() {
 
 async function loadRubrica() {
     try {
-        const snap = await getDocs(collection(db, "users", currentUid, "contacts"));
-        myContacts = snap.docs.map(d => d.data()).filter(contact => contact.active !== false);
+        myContacts = (await listContacts(currentUid)).filter(contact => contact.active !== false);
     } catch (e) { logError("LoadRubrica", e); }
 }
 

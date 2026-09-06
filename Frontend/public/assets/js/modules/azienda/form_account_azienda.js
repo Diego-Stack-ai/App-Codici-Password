@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * FORM ACCOUNT AZIENDA MODULE (V6.0 SPLIT)
  * Creazione e modifica account aziendali con gestione dinamica IBAN.
@@ -15,6 +14,7 @@ import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
+import { getCompanyAccount, listContacts } from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -122,12 +122,8 @@ function initBaseUI() {
 
 async function loadData() {
     try {
-        const docRef = doc(db, "users", currentUid, "aziende", currentAziendaId, "accounts", currentDocId);
-        const snap = await getDoc(docRef);
-
-        if (!snap.exists()) { showToast(t('account_not_found'), "error"); return; }
-
-        const data = snap.data();
+        const data = await getCompanyAccount(currentUid, currentAziendaId, currentDocId);
+        if (!data) { showToast(t('account_not_found'), "error"); return; }
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario (V6.0)
@@ -241,8 +237,7 @@ async function loadData() {
 
 async function loadRubrica() {
     try {
-        const snap = await getDocs(collection(db, "users", currentUid, "contacts"));
-        myContacts = snap.docs.map(d => d.data()).filter(contact => contact.active !== false);
+        myContacts = (await listContacts(currentUid)).filter(contact => contact.active !== false);
     } catch (e) { logError("LoadRubrica", e); }
 }
 

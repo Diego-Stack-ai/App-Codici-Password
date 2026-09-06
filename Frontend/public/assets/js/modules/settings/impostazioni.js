@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
@@ -6,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
-import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -17,6 +16,7 @@ import { disableDeadlinePush, disableSharingPush, enableDeadlinePush, enableShar
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { clearPerformanceSamples, getPerformanceDiagnosticReport, isPerformanceDiagnosticsEnabled, setPerformanceDiagnosticsEnabled } from '../../performance-metrics.js';
 import { buildVCard, ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils-v2.js';
+import { getUserProfile, getUserSetting, listProfileWidgets } from '../data/vault-repository.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -52,12 +52,12 @@ async function setupSettingsProfileQr(user) {
     const container = document.getElementById('settings-profile-qrcode');
     if (!container || !currentUserData) return;
     try {
-        const [qrSnap, widgetsSnap] = await Promise.all([
-            getDoc(doc(db, 'users', user.uid, 'settings', 'qrCodeInclusions')),
-            getDocs(collection(db, 'users', user.uid, 'profileWidgets'))
+        const [qrSettings, widgets] = await Promise.all([
+            getUserSetting(user.uid, 'qrCodeInclusions'),
+            listProfileWidgets(user.uid)
         ]);
-        const inclusions = qrSnap.exists() ? qrSnap.data() : { nome: true, cf: false, nascita: false, phones: [], emails: [], addresses: [] };
-        const customFields = widgetsSnap.docs.flatMap(widget => Array.isArray(widget.data()?.fields) ? widget.data().fields : []);
+        const inclusions = qrSettings || { nome: true, cf: false, nascita: false, phones: [], emails: [], addresses: [] };
+        const customFields = widgets.flatMap(widget => Array.isArray(widget.fields) ? widget.fields : []);
         const vcard = buildVCard(currentUserData, inclusions, {
             contactPhones: currentUserData.contactPhones || [],
             contactEmails: currentUserData.contactEmails || [],
@@ -376,8 +376,7 @@ async function generateAndShowRecoveryCodes() {
 
 async function loadUserData(user) {
     try {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        currentUserData = snap.exists() ? snap.data() : {};
+        currentUserData = await getUserProfile(user.uid) || {};
 
         const nameEl = document.getElementById('user-name-settings');
         const avatarEl = document.getElementById('user-avatar-settings');

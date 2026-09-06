@@ -34,5 +34,7 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 - Profilo, impostazioni del Profilo e widget;
 - dettaglio Account aziendale, Dati azienda e caricamento del form Azienda;
 - lettura principale del dettaglio Account privato, mantenendo il fallback per gli ID legacy.
+- form Account privato e aziendale: caricamento del record in modifica e rubrica destinatari;
+- pagina Impostazioni: profilo, configurazione QR e widget del profilo.
 
-I dettagli, i form, la sicurezza e alcune configurazioni mantengono temporaneamente il vecchio adapter `offline-firestore.js` e verranno migrati per dominio prima di chiudere M2.
+Allegati, sicurezza, Home, Archivio e alcune configurazioni mantengono temporaneamente il vecchio adapter `offline-firestore.js` e verranno migrati per dominio prima di chiudere M2.

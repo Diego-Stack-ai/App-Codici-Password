@@ -26,7 +26,10 @@ const migratedPages = await Promise.all([
     'Frontend/public/assets/js/modules/azienda/modifica_azienda.js',
     'Frontend/public/assets/js/modules/privato/profilo_privato.js',
     'Frontend/public/assets/js/modules/privato/profilo-links.js',
-    'Frontend/public/assets/js/modules/privato/profilo-widgets.js'
+    'Frontend/public/assets/js/modules/privato/profilo-widgets.js',
+    'Frontend/public/assets/js/modules/privato/form_account_privato.js',
+    'Frontend/public/assets/js/modules/azienda/form_account_azienda.js',
+    'Frontend/public/assets/js/modules/settings/impostazioni.js'
 ].map(read));
 
 assert.ok(migratedPages.every(source => !source.includes('offline-firestore.js')),
