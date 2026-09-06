@@ -14,7 +14,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components-v129.js?v=1.2.52';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
 
 // --- STATE ---
@@ -189,13 +189,13 @@ async function loadAccounts() {
         allAccounts = [...ownAccounts, ...sharedWithMe];
 
         // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
-        const masterKey = await ensureMasterKey().catch(() => null);
-        if (masterKey) {
+        const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
+        if (vaultKeyMaterial) {
             allAccounts = await Promise.all(allAccounts.map(async acc => {
                 if (acc._encrypted) {
                     try {
-                        acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
-                        acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
+                        acc.username = acc.username ? await decrypt(acc.username, vaultKeyMaterial) : acc.username;
+                        acc.account = acc.account ? await decrypt(acc.account, vaultKeyMaterial) : acc.account;
                         // La password non è visibile né ricercabile nella lista:
                         // resta cifrata finché non viene aperto il dettaglio.
                     } catch (e) {

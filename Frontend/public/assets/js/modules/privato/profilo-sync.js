@@ -16,7 +16,7 @@ import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { encrypt, ensureMasterKey } from '../core/security-manager.js';
+import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { LOG } from '../../logger.js';
 
 /**
@@ -41,8 +41,8 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
             return;
         }
 
-        const masterKey = await ensureMasterKey();
-        if (!masterKey) {
+        const vaultKeyMaterial = await ensureVaultKeyMaterial();
+        if (!vaultKeyMaterial) {
             showToast("Chiave Master mancante: impossibile cifrare.", "error");
             return;
         }
@@ -58,7 +58,7 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
                 'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
             ];
             for (const f of fields) {
-                if (enc[f]) enc[f] = await encrypt(enc[f] || '', masterKey);
+                if (enc[f]) enc[f] = await encrypt(enc[f] || '', vaultKeyMaterial);
             }
             return enc;
         }));
@@ -66,8 +66,8 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
         // Cifratura Email (Selective: solo password e note)
         const encryptedEmails = await Promise.all((contactEmails || []).map(async e => ({
             ...e,
-            password: await encrypt(e.password || '', masterKey),
-            note: await encrypt(e.note || '', masterKey)
+            password: await encrypt(e.password || '', vaultKeyMaterial),
+            note: await encrypt(e.note || '', vaultKeyMaterial)
         })));
 
         // Cifratura Indirizzi (V7.5: Indirizzo in chiaro, solo Utenze cifrate)
@@ -76,7 +76,7 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
             // address, civic, city, cap, province rimangono in chiaro
             utilities: await Promise.all((a.utilities || []).map(async u => ({
                 ...u,
-                value: await encrypt(u.value || '', masterKey)
+                value: await encrypt(u.value || '', vaultKeyMaterial)
             })))
         })));
 
@@ -90,7 +90,7 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
             birth_date: currentUserData.birth_date || '',   // plaintext
             birth_place: currentUserData.birth_place || '', // V7.5 In Chiaro
             birth_province: currentUserData.birth_province || '', // plaintext
-            note: await encrypt(currentUserData.note || '', masterKey),
+            note: await encrypt(currentUserData.note || '', vaultKeyMaterial),
             userAddresses: encryptedAddresses,
             contactPhones: encryptedPhones,
             contactEmails: encryptedEmails,

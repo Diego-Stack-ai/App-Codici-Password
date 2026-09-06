@@ -14,7 +14,7 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
-import { ensureMasterKey } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _currentUid = null;
@@ -79,7 +79,7 @@ export async function handleFileUpload(input) {
     try {
         const storagePath = `users/${_currentUid}/aziende/${_currentAziendaId}/accounts/${_currentId}/attachments/${createStorageObjectName(file)}`;
         const sRef = ref(storage, storagePath);
-        const vaultKey = await ensureMasterKey();
+        const vaultKey = await ensureVaultKeyMaterial();
         const encryptedFile = await encryptAttachmentFile(file, vaultKey);
         const snap = await uploadBytes(sRef, encryptedFile.blob, {
             contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
@@ -184,7 +184,7 @@ async function openAttachment(attachment) {
             return;
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
-        const vaultKey = await ensureMasterKey();
+        const vaultKey = await ensureVaultKeyMaterial();
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         openDecryptedAttachment(clear, attachment);

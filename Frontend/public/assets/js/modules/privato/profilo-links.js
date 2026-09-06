@@ -2,7 +2,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
 
 export function openLinkedAccount(accountId) {
@@ -13,11 +13,11 @@ export async function connectEmailAccount(email, syncData) {
     const user = auth.currentUser;
     if (!user || !email?.id) return;
     const snapshot = await getDocs(collection(db, 'users', user.uid, 'accounts'));
-    const masterKey = await ensureMasterKey();
+    const vaultKeyMaterial = await ensureVaultKeyMaterial();
     const accounts = await Promise.all(snapshot.docs.map(async item => {
         const data = item.data();
         let username = '';
-        try { username = data._encrypted && data.username ? await decrypt(data.username, masterKey) : (data.username || ''); } catch { username = ''; }
+        try { username = data._encrypted && data.username ? await decrypt(data.username, vaultKeyMaterial) : (data.username || ''); } catch { username = ''; }
         return { id: item.id, name: data.nomeAccount || 'Account', username };
     }));
     if (accounts.length === 0) {

@@ -13,7 +13,7 @@ import { doc, collection, query, where, updateDoc, deleteDoc, writeBatch } from 
 import { showToast, showInputModal } from '../../ui-core-v129.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
 import { t } from '../../translations.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 
 let allArchived = [];
 let currentUser = null;
@@ -208,14 +208,14 @@ async function loadArchived() {
         allArchived = results;
 
         // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
-        const masterKey = await ensureMasterKey().catch(() => null);
-        if (masterKey) {
+        const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
+        if (vaultKeyMaterial) {
             allArchived = await Promise.all(allArchived.map(async acc => {
                 if (acc._encrypted) {
                     try {
-                        acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
-                        acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
-                        acc.password = acc.password ? await decrypt(acc.password, masterKey) : acc.password;
+                        acc.username = acc.username ? await decrypt(acc.username, vaultKeyMaterial) : acc.username;
+                        acc.account = acc.account ? await decrypt(acc.account, vaultKeyMaterial) : acc.account;
+                        acc.password = acc.password ? await decrypt(acc.password, vaultKeyMaterial) : acc.password;
                     } catch (e) {
                         console.error("[Archive] Decryption failed for:", acc.id, e);
                     }

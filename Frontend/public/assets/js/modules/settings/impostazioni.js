@@ -11,7 +11,7 @@ import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
-import { decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
 import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
 import { disableDeadlinePush, disableSharingPush, enableDeadlinePush, enableSharingPush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
@@ -331,7 +331,7 @@ function setupSecurityToggles(data) {
             const val = tFace.checked;
             try {
                 if (val) {
-                    const key = await ensureMasterKey();
+                    const key = await ensureVaultKeyMaterial();
                     // WebAuthn richiede interazione diretta dell'utente. enableBiometricUnlock lancia la registrazione.
                     const { enableBiometricUnlock } = await import('../core/security-manager.js');
                     const success = await enableBiometricUnlock(key);
@@ -384,7 +384,7 @@ async function loadUserData(user) {
 
         // 🔐 PROTOCOLLO BLINDA (V7.0): Decifrazione Profilo Utente
         try {
-            const mk = await ensureMasterKey();
+            const mk = await ensureVaultKeyMaterial();
             const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
 
             // 1. Dati Anagrafici
@@ -486,7 +486,7 @@ function initSettingsEvents() {
     document.getElementById('logout-btn-settings')?.addEventListener('click', async () => {
         const ok = await showConfirmModal(t('section_security') || 'Sicurezza', "Vuoi davvero uscire dall'account?", "Esci", "Annulla");
         if (ok) {
-            clearSession(); // 🔐 Pulisce masterKey e sessionStorage
+            clearSession(); // 🔐 Pulisce vaultKeyMaterial e sessionStorage
             await signOut(auth);
             window.location.href = 'login-v115.html';
         }

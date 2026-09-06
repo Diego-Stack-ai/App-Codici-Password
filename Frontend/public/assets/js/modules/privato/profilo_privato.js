@@ -31,7 +31,7 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { editSection, editAddress, editUserDocument, addUtility, editUtility } from './profilo-actions.js';
 import { logError, formatDateToIT } from '../../utils.js';
-import { encrypt, decrypt, ensureMasterKey, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
+import { encrypt, decrypt, ensureVaultKeyMaterial, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
 import { syncData as _syncData } from './profilo-sync.js';
 import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.js';
@@ -181,31 +181,31 @@ async function loadUserData(user, renderImmediately = true) {
         currentUserData = userDoc.data();
 
         // 🔐 PROTOCOLLO BLINDA (V6.1.5): Decrittazione Granulare Universale
-        const masterKey = await ensureMasterKey();
-        if (masterKey) {
-            currentUserData.nome = await decryptIfPossible(currentUserData.nome, masterKey);
-            currentUserData.cognome = await decryptIfPossible(currentUserData.cognome, masterKey);
-            currentUserData.birth_place = await decryptIfPossible(currentUserData.birth_place, masterKey);
-            currentUserData.note = await decryptIfPossible(currentUserData.note, masterKey);
+        const vaultKeyMaterial = await ensureVaultKeyMaterial();
+        if (vaultKeyMaterial) {
+            currentUserData.nome = await decryptIfPossible(currentUserData.nome, vaultKeyMaterial);
+            currentUserData.cognome = await decryptIfPossible(currentUserData.cognome, vaultKeyMaterial);
+            currentUserData.birth_place = await decryptIfPossible(currentUserData.birth_place, vaultKeyMaterial);
+            currentUserData.note = await decryptIfPossible(currentUserData.note, vaultKeyMaterial);
 
             if (Array.isArray(currentUserData.contactPhones)) {
                 currentUserData.contactPhones = await Promise.all(currentUserData.contactPhones.map(async p => ({
                     ...p,
-                    number: await decryptIfPossible(p.number, masterKey)
+                    number: await decryptIfPossible(p.number, vaultKeyMaterial)
                 })));
             }
 
             if (Array.isArray(currentUserData.userAddresses)) {
                 currentUserData.userAddresses = await Promise.all(currentUserData.userAddresses.map(async a => ({
                     ...a,
-                    address: await decryptIfPossible(a.address, masterKey),
-                    civic: await decryptIfPossible(a.civic, masterKey),
-                    city: await decryptIfPossible(a.city, masterKey),
-                    cap: await decryptIfPossible(a.cap, masterKey),
-                    province: await decryptIfPossible(a.province, masterKey),
+                    address: await decryptIfPossible(a.address, vaultKeyMaterial),
+                    civic: await decryptIfPossible(a.civic, vaultKeyMaterial),
+                    city: await decryptIfPossible(a.city, vaultKeyMaterial),
+                    cap: await decryptIfPossible(a.cap, vaultKeyMaterial),
+                    province: await decryptIfPossible(a.province, vaultKeyMaterial),
                     utilities: await Promise.all((a.utilities || []).map(async u => ({
                         ...u,
-                        value: await decryptIfPossible(u.value, masterKey)
+                        value: await decryptIfPossible(u.value, vaultKeyMaterial)
                     })))
                 })));
             }
@@ -219,7 +219,7 @@ async function loadUserData(user, renderImmediately = true) {
                         'pin', 'puk', 'codice_app', 'note', 'categoria', 'home_page'
                     ];
                     for (const f of fields) {
-                        if (dec[f]) dec[f] = await decryptIfPossible(dec[f], masterKey);
+                        if (dec[f]) dec[f] = await decryptIfPossible(dec[f], vaultKeyMaterial);
                     }
                     return dec;
                 }));
@@ -228,8 +228,8 @@ async function loadUserData(user, renderImmediately = true) {
             if (Array.isArray(currentUserData.contactEmails)) {
                 currentUserData.contactEmails = await Promise.all(currentUserData.contactEmails.map(async e => ({
                     ...e,
-                    password: await decryptIfPossible(e.password, masterKey),
-                    note: await decryptIfPossible(e.note, masterKey)
+                    password: await decryptIfPossible(e.password, vaultKeyMaterial),
+                    note: await decryptIfPossible(e.note, vaultKeyMaterial)
                 })));
             }
             LOG('[VaultCheck] Decrittazione granulare V6.1.5 completata.');

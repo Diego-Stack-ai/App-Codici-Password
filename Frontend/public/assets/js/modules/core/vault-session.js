@@ -19,12 +19,12 @@ async function getSessionKey(create = false) {
     return crypto.subtle.importKey('raw', fromBase64(encodedKey), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
-export async function saveVaultSession(masterKey, uid, expiresAt = null) {
-    if (!masterKey || !uid) return;
+export async function saveVaultSession(vaultKeyMaterial, uid, expiresAt = null) {
+    if (!vaultKeyMaterial || !uid) return;
     try {
         const key = await getSessionKey(true);
         const iv = crypto.getRandomValues(new Uint8Array(12));
-        const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(masterKey));
+        const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(vaultKeyMaterial));
         sessionStorage.setItem(SESSION_KEY, JSON.stringify({
             version: 1, uid, iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(encrypted)),
             expiresAt: Number(expiresAt) || null

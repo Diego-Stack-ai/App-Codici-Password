@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Se la pagina è privata, assicuriamoci che il Vault sia sbloccato
                 if (isPrivatePage) {
                     try {
-                        await securityModules[0].ensureMasterKey();
+                        await securityModules[0].ensureVaultKeyMaterial();
                     } catch (e) {
                         console.error("[BLINDA] Vault lock required.");
                         // Se l'utente annulla lo sblocco su una pagina privata, potremmo volerlo reindirizzare

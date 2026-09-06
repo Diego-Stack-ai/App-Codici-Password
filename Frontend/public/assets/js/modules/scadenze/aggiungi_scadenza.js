@@ -17,7 +17,7 @@ import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.
 
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
-import { ensureMasterKey } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
@@ -870,7 +870,7 @@ function setupSaveLogic() {
             // --- 1. UPLOAD ALLEGATI (PRIMA della scrittura DB) ---
             const uploadedAttachments = [];
             if (selectedFiles.length > 0) {
-                const vaultKey = await ensureMasterKey();
+                const vaultKey = await ensureVaultKeyMaterial();
                 LOG(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const file = selectedFiles[i];

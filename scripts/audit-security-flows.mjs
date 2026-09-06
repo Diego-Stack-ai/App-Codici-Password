@@ -66,7 +66,7 @@ assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visu
 assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');
 
 assert.match(security, /restoreVaultSession\(uid\)/, 'La chiave Vault non viene ripristinata tra le pagine');
-assert.match(security, /saveVaultSession\(_masterKey, uid\)/, 'Lo sblocco Vault non viene conservato nella sessione');
+assert.match(security, /saveVaultSession\(_vaultKeyMaterial, uid\)/, 'Lo sblocco Vault non viene conservato nella sessione');
 assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica la scadenza condivisa tra pagine');
 assert.match(inactivity, /if \(!expired\) startMonitoring\(\)/, 'La nuova pagina resetta il timer prima di verificarne la scadenza');
 assert.match(vaultSession, /AES-GCM/, 'Il segreto della sessione Vault non è cifrato');
@@ -226,7 +226,7 @@ assert.match(storageRules, /application\/octet-stream/, 'Storage non accetta il 
 assert.doesNotMatch(qrCodeUtils, /\.innerHTML\s*=/, 'Il fallback QR usa ancora HTML dinamico');
 assert.doesNotMatch(privateAccountForm, /Final Transaction Payload[^\n]*finalData/, 'Il form privato registra il payload del Vault');
 assert.doesNotMatch(companyAccountSave, /Final Transaction Payload[^\n]*finalData/, 'Il form aziendale registra il payload del Vault');
-assert.match(cardSecret, /await ensureMasterKey\(\)[\s\S]*await decrypt\(value, masterKey\)/, 'Le password nelle card non vengono risolte in modo lazy tramite il Vault');
+assert.match(cardSecret, /await ensureVaultKeyMaterial\(\)[\s\S]*await decrypt\(value, vaultKeyMaterial\)/, 'Le password nelle card non vengono risolte in modo lazy tramite il Vault');
 assert.ok([privateAccountList, companyAccountList].every(source => /createCardSecretResolver\(copyValue, encrypted && isPassword\)/.test(source)), 'Le liste Account non condividono il risolutore sicuro delle password');
 assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Firebase Admin non è aggiornato alla baseline P4');
 assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');

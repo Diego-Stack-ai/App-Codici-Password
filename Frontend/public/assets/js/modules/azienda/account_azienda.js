@@ -12,7 +12,7 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { initComponents } from '../../components-v129.js?v=1.2.52';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
 
 // --- STATE ---
@@ -101,13 +101,13 @@ async function loadAccounts() {
         allAccounts = snap.docs.map(d => ({ id: d.id, ...d.data(), isOwner: true })); // Assumiamo owner per ora in azienda
 
         // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
-        const masterKey = await ensureMasterKey().catch(() => null);
-        if (masterKey) {
+        const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
+        if (vaultKeyMaterial) {
             allAccounts = await Promise.all(allAccounts.map(async acc => {
                 if (acc._encrypted) {
                     try {
-                        acc.username = acc.username ? await decrypt(acc.username, masterKey) : acc.username;
-                        acc.account = acc.account ? await decrypt(acc.account, masterKey) : acc.account;
+                        acc.username = acc.username ? await decrypt(acc.username, vaultKeyMaterial) : acc.username;
+                        acc.account = acc.account ? await decrypt(acc.account, vaultKeyMaterial) : acc.account;
                         // La password non è necessaria alla lista e viene
                         // decifrata soltanto nella pagina di dettaglio.
                     } catch (e) {

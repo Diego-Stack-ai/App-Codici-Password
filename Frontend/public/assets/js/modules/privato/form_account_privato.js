@@ -12,7 +12,7 @@ import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
-import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { encrypt, decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -129,11 +129,11 @@ async function loadData() {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario
-        let masterKey = null;
+        let vaultKeyMaterial = null;
         const needsDecryption = data._encrypted === true;
         if (needsDecryption) {
             try {
-                masterKey = await ensureMasterKey();
+                vaultKeyMaterial = await ensureVaultKeyMaterial();
             } catch (e) {
                 showToast("Dati cifrati: chiave obbligatoria.", "error");
                 history.back();
@@ -143,7 +143,7 @@ async function loadData() {
 
         const decryptIfPossible = async (val) => {
             if (!needsDecryption || !val) return val;
-            try { return await decrypt(val, masterKey); } catch (e) { return "---ERRORE DECRYPT---"; }
+            try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return "---ERRORE DECRYPT---"; }
         };
 
         const [username, accountCode, password, note] = await Promise.all([
@@ -535,9 +535,9 @@ async function saveAccount() {
     });
 
     // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili
-    let masterKey;
+    let vaultKeyMaterial;
     try {
-        masterKey = await ensureMasterKey();
+        vaultKeyMaterial = await ensureVaultKeyMaterial();
     } catch (e) {
         showToast("Accesso negato: Chiave di crittografia richiesta.", "error");
         if (btnSave) btnSave.disabled = false;
@@ -564,11 +564,11 @@ async function saveAccount() {
 
     const data = {
         nomeAccount: (get('account-name') || '').trim(), // In chiaro
-        username: await encrypt((get('account-username') || '').trim(), masterKey),
-        account: await encrypt((get('account-code') || '').trim(), masterKey),
-        password: await encrypt((get('account-password') || '').trim(), masterKey),
+        username: await encrypt((get('account-username') || '').trim(), vaultKeyMaterial),
+        account: await encrypt((get('account-code') || '').trim(), vaultKeyMaterial),
+        password: await encrypt((get('account-password') || '').trim(), vaultKeyMaterial),
         url: (get('account-url') || '').trim(), // In chiaro
-        note: await encrypt((get('account-note') || '').trim(), masterKey),
+        note: await encrypt((get('account-note') || '').trim(), vaultKeyMaterial),
         logo: logoSrc || null,
         referenteNome: (document.getElementById('ref-name')?.value || '').trim(),
         referenteTelefono: (document.getElementById('ref-phone')?.value || '').trim(),
@@ -581,12 +581,12 @@ async function saveAccount() {
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
         banking: await Promise.all((bankAccounts || []).map(async b => ({
             ...b,
-            passwordDispositiva: await encrypt(b.passwordDispositiva || '', masterKey),
+            passwordDispositiva: await encrypt(b.passwordDispositiva || '', vaultKeyMaterial),
             cards: await Promise.all((b.cards || []).map(async c => ({
                 ...c,
-                cardNumber: await encrypt(c.cardNumber || '', masterKey),
-                pin: await encrypt(c.pin || '', masterKey),
-                ccv: await encrypt(c.ccv || '', masterKey)
+                cardNumber: await encrypt(c.cardNumber || '', vaultKeyMaterial),
+                pin: await encrypt(c.pin || '', vaultKeyMaterial),
+                ccv: await encrypt(c.ccv || '', vaultKeyMaterial)
             })))
         }))),
         isExplicitMemo: isExplicitMemo,

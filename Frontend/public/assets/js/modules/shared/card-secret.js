@@ -1,4 +1,4 @@
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 
 /**
  * Crea un risolutore lazy per un segreto mostrato direttamente in una card.
@@ -9,8 +9,8 @@ export function createCardSecretResolver(value, encrypted) {
     let resolvedValue = encrypted ? null : value;
     return async () => {
         if (resolvedValue != null) return resolvedValue;
-        const masterKey = await ensureMasterKey();
-        resolvedValue = await decrypt(value, masterKey);
+        const vaultKeyMaterial = await ensureVaultKeyMaterial();
+        resolvedValue = await decrypt(value, vaultKeyMaterial);
         return resolvedValue;
     };
 }

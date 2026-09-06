@@ -17,7 +17,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 
 // State locale per evitare reload inutili
 let _isInitialized = false;
@@ -143,19 +143,19 @@ async function loadTopAccounts(uid) {
         }
 
         // 🔐 PRE-SBLOCCO SILENZIOSO (Auto-Unlock Ready)
-        const masterKey = await ensureMasterKey().catch(() => null);
+        const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
 
         const items = await Promise.all(snap.docs.map(async d => {
             const data = d.data();
 
             // Decrittazione preventiva prima della creazione card
-            if (data._encrypted && masterKey) {
+            if (data._encrypted && vaultKeyMaterial) {
                 try {
-                    data.username = data.username ? await decrypt(data.username, masterKey) : data.username;
-                    data.account = data.account ? await decrypt(data.account, masterKey) : data.account;
-                    data.password = data.password ? await decrypt(data.password, masterKey) : data.password;
+                    data.username = data.username ? await decrypt(data.username, vaultKeyMaterial) : data.username;
+                    data.account = data.account ? await decrypt(data.account, vaultKeyMaterial) : data.account;
+                    data.password = data.password ? await decrypt(data.password, vaultKeyMaterial) : data.password;
                     if (data.email && data.email.includes(':')) {
-                        data.email = await decrypt(data.email, masterKey);
+                        data.email = await decrypt(data.email, vaultKeyMaterial);
                     }
                 } catch (e) {
                     console.error("[AreaPrivata] Decryption failed for:", d.id, e);

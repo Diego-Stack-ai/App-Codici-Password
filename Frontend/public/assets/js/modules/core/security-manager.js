@@ -1,7 +1,7 @@
 import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
- * - La masterKey è tenuta in RAM e cifrata per la durata della scheda attiva.
+ * - Il materiale della Vault Key è tenuto in RAM e cifrato per la durata della scheda attiva.
  * - Sblocco biometrico usa WebAuthn PRF.
  */
 
@@ -14,7 +14,7 @@ import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decr
 import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';
 import { evaluatePassword, firstPasswordPolicyError, passwordPolicyMessage } from './password-policy.js';
 
-let _masterKey = null;
+let _vaultKeyMaterial = null;
 let _vaultAutoUnlock = false;
 let _isSoftLocked = false;
 let _unlockPromise = null;
@@ -202,13 +202,13 @@ onAuthStateChanged(auth, (user) => {
 
 export function softLock() {
     _isSoftLocked = true;
-    _masterKey = null;
+    _vaultKeyMaterial = null;
     _clearSessionStorage();
     updateGlobalState();
 }
 
 export function isAutoUnlockActive() {
-    if (_vaultAutoUnlock && _masterKey) {
+    if (_vaultAutoUnlock && _vaultKeyMaterial) {
         updateGlobalState();
         return true;
     }
@@ -275,12 +275,12 @@ export function isBiometricUnlockConfigured() {
     return !!(scopedKey && localStorage.getItem(scopedKey));
 }
 
-export async function ensureMasterKey(options = {}) {
+export async function ensureVaultKeyMaterial(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
-    if (_masterKey && !forceReload) return _masterKey;
+    if (_vaultKeyMaterial && !forceReload) return _vaultKeyMaterial;
     if (_unlockPromise && !forceReload) return _unlockPromise;
 
-    const operation = ensureMasterKeyInternal(options);
+    const operation = ensureVaultKeyMaterialInternal(options);
     _unlockPromise = operation;
     try {
         return await operation;
@@ -289,30 +289,30 @@ export async function ensureMasterKey(options = {}) {
     }
 }
 
-async function ensureMasterKeyInternal(options = {}) {
+async function ensureVaultKeyMaterialInternal(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
 
-    if (_masterKey && !forceReload) return _masterKey;
+    if (_vaultKeyMaterial && !forceReload) return _vaultKeyMaterial;
 
     const uid = auth.currentUser?.uid;
     if (!forceReload && uid) {
         const sessionKey = await restoreVaultSession(uid);
         if (sessionKey) {
-            _masterKey = sessionKey;
+            _vaultKeyMaterial = sessionKey;
             _isSoftLocked = false;
             _vaultAutoUnlock = true;
             updateGlobalState();
-            return _masterKey;
+            return _vaultKeyMaterial;
         }
     }
 
     if (!forceReload) {
         const recovered = await tryBiometricUnlock();
         if (recovered) {
-            _masterKey = recovered;
-            await saveVaultSession(_masterKey, uid);
+            _vaultKeyMaterial = recovered;
+            await saveVaultSession(_vaultKeyMaterial, uid);
             updateGlobalState();
-            return _masterKey;
+            return _vaultKeyMaterial;
         }
     }
 
@@ -369,21 +369,21 @@ async function ensureMasterKeyInternal(options = {}) {
             throw e;
         }
 
-        _masterKey = await resolveVaultKey(cleanPass, uid, await isNewVault(uid));
+        _vaultKeyMaterial = await resolveVaultKey(cleanPass, uid, await isNewVault(uid));
         _isSoftLocked = false;
         _vaultAutoUnlock = true;
-        await saveVaultSession(_masterKey, uid);
+        await saveVaultSession(_vaultKeyMaterial, uid);
         updateGlobalState();
 
         showToast("Vault sbloccata correttamente!", "success");
-        return _masterKey;
+        return _vaultKeyMaterial;
     }
 
     throw new Error("Chiave di crittografia non fornita.");
 }
 
 export async function resetVault() {
-    _masterKey = null;
+    _vaultKeyMaterial = null;
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
     _clearSessionStorage();
@@ -543,14 +543,14 @@ export async function changeMasterPassword() {
     localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
     localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(newEnvelope));
     localStorage.removeItem(getStorageKey(uid));
-    _masterKey = vaultKey;
+    _vaultKeyMaterial = vaultKey;
     await saveVaultSession(vaultKey, uid);
     showToast('Master Password modificata. Riattiva la biometria su questo dispositivo.', 'success');
     return true;
 }
 
 export function clearSession() {
-    _masterKey = null;
+    _vaultKeyMaterial = null;
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
     _clearSessionStorage();
@@ -558,4 +558,6 @@ export function clearSession() {
 }
 
 updateGlobalState();
+// Alias di compatibilità: i moduli esistenti migreranno gradualmente al nome canonico.
+export const ensureMasterKey = ensureVaultKeyMaterial;
 export { encrypt, decrypt };

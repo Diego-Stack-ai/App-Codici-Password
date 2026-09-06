@@ -12,7 +12,7 @@ import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { ensureMasterKey } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
 
 let currentScadenza = null;
@@ -269,7 +269,7 @@ async function openDeadlineAttachment(attachment) {
             return;
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
-        const vaultKey = await ensureMasterKey();
+        const vaultKey = await ensureVaultKeyMaterial();
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         openDecryptedAttachment(clear, attachment);

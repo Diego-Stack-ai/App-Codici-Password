@@ -3,7 +3,7 @@ import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { collection, deleteDoc, doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
-import { encrypt, decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { encrypt, decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { PROFILE_TABS, PROFILE_WIDGET_FIELD_LIMIT, PROFILE_WIDGET_TABS, validateProfileWidget } from './profile-model.js';
 import { showProfileModal } from './profilo-modal.js';
 
@@ -32,12 +32,12 @@ async function loadWidgets() {
     const user = auth.currentUser;
     if (!user) return;
     const snapshot = await getDocs(widgetCollection(user.uid));
-    const masterKey = await ensureMasterKey();
+    const vaultKeyMaterial = await ensureVaultKeyMaterial();
     widgets = await Promise.all(snapshot.docs.map(async item => {
         const data = { id: item.id, ...item.data() };
         data.fields = await Promise.all((data.fields || []).map(async field => ({
             ...field,
-            value: field.encrypted && field.valueEnc && masterKey ? await decrypt(field.valueEnc, masterKey) : (field.value || '')
+            value: field.encrypted && field.valueEnc && vaultKeyMaterial ? await decrypt(field.valueEnc, vaultKeyMaterial) : (field.value || '')
         })));
         return data;
     }));
@@ -49,11 +49,11 @@ async function persistWidget(widget) {
     if (!user) return;
     const validation = validateProfileWidget(widget);
     if (!validation.valid) throw new Error(`Widget non valido: ${validation.errors.join(', ')}`);
-    const masterKey = await ensureMasterKey();
+    const vaultKeyMaterial = await ensureVaultKeyMaterial();
     const fields = await Promise.all(widget.fields.map(async field => {
         const stored = { ...field };
         if (field.encrypted === true) {
-            stored.valueEnc = await encrypt(field.value || '', masterKey);
+            stored.valueEnc = await encrypt(field.value || '', vaultKeyMaterial);
             delete stored.value;
         } else {
             stored.value = field.value || '';

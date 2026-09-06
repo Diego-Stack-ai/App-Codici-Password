@@ -13,7 +13,7 @@ import { createElement, setChildren, clearElement, createSafeAccountIcon } from 
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { ensureMasterKey } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
 import {
@@ -93,7 +93,7 @@ async function loadAccount() {
         // 🔐 DECRIPTAZIONE (Auto-Unlock Compliant)
         if (originalData._encrypted) {
             try {
-                const masterKey = await ensureMasterKey();
+                const vaultKeyMaterial = await ensureVaultKeyMaterial();
                 [
                     originalData.username,
                     originalData.account,
@@ -102,23 +102,23 @@ async function loadAccount() {
                     originalData.codiceSocieta,
                     originalData.note
                 ] = await Promise.all([
-                    decryptIfPossible(originalData.username, masterKey),
-                    decryptIfPossible(originalData.account, masterKey),
-                    decryptIfPossible(originalData.password, masterKey),
-                    decryptIfPossible(originalData.numeroIscrizione, masterKey),
-                    decryptIfPossible(originalData.codiceSocieta, masterKey),
-                    decryptIfPossible(originalData.note, masterKey)
+                    decryptIfPossible(originalData.username, vaultKeyMaterial),
+                    decryptIfPossible(originalData.account, vaultKeyMaterial),
+                    decryptIfPossible(originalData.password, vaultKeyMaterial),
+                    decryptIfPossible(originalData.numeroIscrizione, vaultKeyMaterial),
+                    decryptIfPossible(originalData.codiceSocieta, vaultKeyMaterial),
+                    decryptIfPossible(originalData.note, vaultKeyMaterial)
                 ]);
 
                 if (Array.isArray(originalData.banking)) {
                     originalData.banking = await Promise.all(originalData.banking.map(async b => ({
                         ...b,
-                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, masterKey),
+                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, vaultKeyMaterial),
                         cards: await Promise.all((b.cards || []).map(async c => ({
                             ...c,
-                            cardNumber: await decryptIfPossible(c.cardNumber, masterKey),
-                            pin: await decryptIfPossible(c.pin, masterKey),
-                            ccv: await decryptIfPossible(c.ccv, masterKey)
+                            cardNumber: await decryptIfPossible(c.cardNumber, vaultKeyMaterial),
+                            pin: await decryptIfPossible(c.pin, vaultKeyMaterial),
+                            ccv: await decryptIfPossible(c.ccv, vaultKeyMaterial)
                         })))
                     })));
                 }

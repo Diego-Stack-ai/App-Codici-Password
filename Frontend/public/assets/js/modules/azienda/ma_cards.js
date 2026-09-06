@@ -8,7 +8,7 @@
 
 import { state } from './ma_state.js';
 import { renderAttachments } from './ma_attachments.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -40,10 +40,10 @@ export async function populateForm(data) {
 
     // 🔐 PROTOCOLLO BLINDA: logica decrypt hoistata fuori da if(data.emails)
     // così copre anche il campo note (cifrato in saveAzienda)
-    let masterKey = null;
+    let vaultKeyMaterial = null;
     const needsDecryption = data._encrypted === true;
     if (needsDecryption) {
-        try { masterKey = await ensureMasterKey(); } catch (e) {
+        try { vaultKeyMaterial = await ensureVaultKeyMaterial(); } catch (e) {
             showToast('Dati cifrati: chiave obbligatoria per modificare.', 'error');
             history.back();
             return;
@@ -52,7 +52,7 @@ export async function populateForm(data) {
 
     const decryptIfPossible = async (val) => {
         if (!needsDecryption || !val) return val;
-        try { return await decrypt(val, masterKey); } catch (e) { return '---ERRORE DECRYPT---'; }
+        try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return '---ERRORE DECRYPT---'; }
     };
 
     // Campo note (cifrato su save) → decifrato qui

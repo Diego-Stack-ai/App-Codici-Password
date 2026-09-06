@@ -13,7 +13,7 @@ import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { logError } from '../../utils.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
 
 // --- STATE ---
@@ -131,11 +131,11 @@ async function loadData() {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario (V6.0)
-        let masterKey = null;
+        let vaultKeyMaterial = null;
         const needsDecryption = data._encrypted === true;
         if (needsDecryption) {
             try {
-                masterKey = await ensureMasterKey();
+                vaultKeyMaterial = await ensureVaultKeyMaterial();
             } catch (e) {
                 showToast("Dati cifrati: chiave obbligatoria.", "error");
                 history.back();
@@ -145,7 +145,7 @@ async function loadData() {
 
         const decryptIfPossible = async (val) => {
             if (!needsDecryption || !val) return val;
-            try { return await decrypt(val, masterKey); } catch (e) { return "---ERRORE DECRYPT---"; }
+            try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return "---ERRORE DECRYPT---"; }
         };
 
         const [username, accountCode, password, registrationNumber, companyCode, note] = await Promise.all([

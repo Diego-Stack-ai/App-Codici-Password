@@ -145,11 +145,11 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 
 ### M1 — Nomenclatura e contratti della Vault
 
-- [ ] rinominare gradualmente `_masterKey` in `vaultKeyMaterial` senza cambiare il valore;
-- [ ] documentare verifier, KEK, envelope, Vault Key, keyring legacy e session wrapping;
-- [ ] inventariare ogni campo cifrato e relativo formato;
-- [ ] dimostrare che logout e blocco eliminino il materiale previsto;
-- [ ] vietare nuovi usi ambigui di `masterKey` tramite audit.
+- [x] rinominare gradualmente `_masterKey` in `vaultKeyMaterial` senza cambiare il valore;
+- [x] documentare verifier, KEK, envelope, Vault Key, keyring legacy e session wrapping in `VAULT_KEY_CONTRACT.md`;
+- [x] inventariare ogni campo cifrato e relativo formato in `ENCRYPTED_FIELD_INVENTORY.md`;
+- [x] dimostrare con test che logout e blocco eliminino il materiale previsto;
+- [x] vietare il ritorno della variabile interna ambigua `_masterKey` tramite audit.
 
 **Uscita:** nessuna ambiguità fra password e chiavi; nessuna migrazione dati in questa fase.
 

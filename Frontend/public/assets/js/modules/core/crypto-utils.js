@@ -309,12 +309,12 @@ export function isEncryptedValue(val) {
  * Tenta la decrittazione di un valore. Se non sembra cifrato o fallisce,
  * restituisce il valore originale senza errori.
  */
-export async function decryptIfPossible(val, masterKey, fallback = '') {
+export async function decryptIfPossible(val, vaultKeyMaterial, fallback = '') {
     if (val === undefined || val === null) return fallback;
-    if (!masterKey) return val;                // ← guard: senza chiave non tentiamo
+    if (!vaultKeyMaterial) return val;                // ← guard: senza chiave non tentiamo
     if (!isEncryptedValue(val)) return val;
     try {
-        return await decrypt(val, masterKey);
+        return await decrypt(val, vaultKeyMaterial);
     } catch (e) {
         return val;
     }

@@ -13,7 +13,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 
@@ -170,7 +170,7 @@ async function loadData(uid) {
             // 🔐 PROTOCOLLO BLINDA (V6.0): Decrittazione automatica dati sensibili (Note e Passwords)
             if (currentAziendaData._encrypted) {
                 try {
-                    const mk = await ensureMasterKey();
+                    const mk = await ensureVaultKeyMaterial();
                     const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
 
                     if (isEnc(currentAziendaData.note)) {
@@ -606,7 +606,7 @@ async function openCompanyAttachment(attachment) {
             if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
             return;
         }
-        const vaultKey = await ensureMasterKey();
+        const vaultKey = await ensureVaultKeyMaterial();
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         openDecryptedAttachment(clear, attachment);

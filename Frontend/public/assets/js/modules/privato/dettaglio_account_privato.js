@@ -14,7 +14,7 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
 import { initComponents } from '../../components-v129.js?v=1.2.52';
-import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
@@ -102,22 +102,22 @@ async function loadAccount() {
         // 🔐 PROTOCOLLO BLINDA (Auto-Unlock Compliant)
         if (accountData._encrypted) {
             try {
-                const masterKey = await ensureMasterKey();
+                const vaultKeyMaterial = await ensureVaultKeyMaterial();
                 [accountData.username, accountData.account, accountData.password, accountData.note] = await Promise.all([
-                    decryptIfPossible(accountData.username, masterKey),
-                    decryptIfPossible(accountData.account, masterKey),
-                    decryptIfPossible(accountData.password, masterKey),
-                    decryptIfPossible(accountData.note, masterKey)
+                    decryptIfPossible(accountData.username, vaultKeyMaterial),
+                    decryptIfPossible(accountData.account, vaultKeyMaterial),
+                    decryptIfPossible(accountData.password, vaultKeyMaterial),
+                    decryptIfPossible(accountData.note, vaultKeyMaterial)
                 ]);
                 if (Array.isArray(accountData.banking)) {
                     accountData.banking = await Promise.all(accountData.banking.map(async b => ({
                         ...b,
-                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, masterKey),
+                        passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, vaultKeyMaterial),
                         cards: await Promise.all((b.cards || []).map(async c => ({
                             ...c,
-                            cardNumber: await decryptIfPossible(c.cardNumber, masterKey),
-                            pin: await decryptIfPossible(c.pin, masterKey),
-                            ccv: await decryptIfPossible(c.ccv, masterKey)
+                            cardNumber: await decryptIfPossible(c.cardNumber, vaultKeyMaterial),
+                            pin: await decryptIfPossible(c.pin, vaultKeyMaterial),
+                            ccv: await decryptIfPossible(c.ccv, vaultKeyMaterial)
                         })))
                     })));
                 }
@@ -759,7 +759,7 @@ async function handleFileUpload(input) {
     try {
         const storagePath = `users/${ownerId}/accounts/${currentId}/attachments/${createStorageObjectName(file)}`;
         const sRef = ref(storage, storagePath);
-        const vaultKey = await ensureMasterKey();
+        const vaultKey = await ensureVaultKeyMaterial();
         const encryptedFile = await encryptAttachmentFile(file, vaultKey);
         const snap = await uploadBytes(sRef, encryptedFile.blob, {
             contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
@@ -862,7 +862,7 @@ async function openAttachment(attachment) {
             return;
         }
         if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
-        const vaultKey = await ensureMasterKey();
+        const vaultKey = await ensureVaultKeyMaterial();
         const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
         const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
         openDecryptedAttachment(clear, attachment);

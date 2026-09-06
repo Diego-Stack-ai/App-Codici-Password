@@ -13,7 +13,7 @@ import {
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
-import { encrypt, ensureMasterKey } from '../core/security-manager.js';
+import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -29,9 +29,9 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
     const hasBankingData = bankAccounts.some(acc => acc.iban?.trim() || (acc.cards && acc.cards.length > 0));
 
     // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili
-    let masterKey;
+    let vaultKeyMaterial;
     try {
-        masterKey = await ensureMasterKey();
+        vaultKeyMaterial = await ensureVaultKeyMaterial();
     } catch (e) {
         showToast("Accesso negato: Chiave di crittografia richiesta.", "error");
         if (btnSave) btnSave.disabled = false;
@@ -40,13 +40,13 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
     const data = {
         nomeAccount: (get('account-name') || '').trim(), // In chiaro
-        username: await encrypt((get('account-username') || '').trim(), masterKey),
-        account: await encrypt((get('account-code') || '').trim(), masterKey),
-        password: await encrypt((get('account-password') || '').trim(), masterKey),
+        username: await encrypt((get('account-username') || '').trim(), vaultKeyMaterial),
+        account: await encrypt((get('account-code') || '').trim(), vaultKeyMaterial),
+        password: await encrypt((get('account-password') || '').trim(), vaultKeyMaterial),
         url: (get('account-url') || '').trim(), // In chiaro
-        numeroIscrizione: await encrypt((get('account-numero-iscrizione') || '').trim(), masterKey),
-        codiceSocieta: await encrypt((get('account-codice-societa') || '').trim(), masterKey),
-        note: await encrypt((get('account-note') || '').trim(), masterKey),
+        numeroIscrizione: await encrypt((get('account-numero-iscrizione') || '').trim(), vaultKeyMaterial),
+        codiceSocieta: await encrypt((get('account-codice-societa') || '').trim(), vaultKeyMaterial),
+        note: await encrypt((get('account-note') || '').trim(), vaultKeyMaterial),
         referenteNome: (get('ref-name') || '').trim(),
         referenteTelefono: (get('ref-phone') || '').trim(),
         referenteCellulare: (get('ref-mobile') || '').trim(),
@@ -54,17 +54,17 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         isBanking: (document.getElementById('flag-banking')?.checked && hasBankingData) || false,
         banking: await Promise.all(bankAccounts.map(async b => ({
             iban: (b.iban || '').trim(),
-            passwordDispositiva: await encrypt((b.passwordDispositiva || '').trim(), masterKey),
+            passwordDispositiva: await encrypt((b.passwordDispositiva || '').trim(), vaultKeyMaterial),
             referenteNome: (b.referenteNome || '').trim(),
             referenteTelefono: (b.referenteTelefono || '').trim(),
             referenteCellulare: (b.referenteCellulare || '').trim(),
             cards: await Promise.all((b.cards || []).map(async c => ({
                 cardType: (c.cardType || '').trim(),
                 titolare: (c.titolare || '').trim(),
-                cardNumber: await encrypt((c.cardNumber || '').trim(), masterKey),
+                cardNumber: await encrypt((c.cardNumber || '').trim(), vaultKeyMaterial),
                 expiry: (c.expiry || '').trim(),
-                pin: await encrypt((c.pin || '').trim(), masterKey),
-                ccv: await encrypt((c.ccv || '').trim(), masterKey)
+                pin: await encrypt((c.pin || '').trim(), vaultKeyMaterial),
+                ccv: await encrypt((c.ccv || '').trim(), vaultKeyMaterial)
             })))
         }))),
         isExplicitMemo: isExplicitMemo,

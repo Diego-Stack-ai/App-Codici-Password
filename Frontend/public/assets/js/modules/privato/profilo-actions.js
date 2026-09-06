@@ -25,7 +25,7 @@ import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { createProfileItemId } from './profile-model.js';
 import { logError } from '../../utils.js';
-import { encrypt, ensureMasterKey } from '../core/security-manager.js';
+import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
 
 /**
@@ -61,8 +61,8 @@ export async function editSection(sectionId, ctx) {
         const fields = [{ key: 'note', label: 'Note', type: 'textarea', icon: 'description' }];
         showProfileModal('Note Anagrafica', fields, currentUserData, async (newData) => {
             try {
-                const masterKey = await ensureMasterKey();
-                const encryptedNote = await encrypt(newData.note || '', masterKey);
+                const vaultKeyMaterial = await ensureVaultKeyMaterial();
+                const encryptedNote = await encrypt(newData.note || '', vaultKeyMaterial);
                 await updateDoc(doc(db, "users", currentUserUid), { note: encryptedNote });
                 currentUserData.note = newData.note;
                 await loadUserData(auth.currentUser);

@@ -1,4 +1,4 @@
-import { ensureMasterKey } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
 import { VaultConversationEngine } from './conversation-engine.js?v=1.2.52';
 import { createAssistantUI } from './assistant-ui.js?v=1.2.52';
@@ -17,7 +17,7 @@ function attachStyles() {
 export async function initVaultAssistant(user, { includeCompanies = true } = {}) {
     activeController?.destroy();
     attachStyles();
-    let masterKey = null;
+    let vaultKeyMaterial = null;
     let conversation = null;
     let preparation = null;
     let dialog = null;
@@ -26,8 +26,8 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
     if (!trigger) throw new Error('Comando Agente AI non disponibile');
     const prepare = () => {
         if (preparation) return preparation;
-        preparation = Promise.all([ensureMasterKey(), loadVaultSearchRecords(user, { includeCompanies })]).then(([key, records]) => {
-            masterKey = key;
+        preparation = Promise.all([ensureVaultKeyMaterial(), loadVaultSearchRecords(user, { includeCompanies })]).then(([key, records]) => {
+            vaultKeyMaterial = key;
             conversation = new VaultConversationEngine(records);
             return records.length;
         }).catch(error => {
@@ -51,7 +51,7 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             dialog = createAssistantUI({
             onAsk: query => conversation.ask(query),
             onClose: close,
-                resolveCredential: value => decryptIfPossible(value, masterKey),
+                resolveCredential: value => decryptIfPossible(value, vaultKeyMaterial),
                 offlineNotice
             });
         } catch (error) {

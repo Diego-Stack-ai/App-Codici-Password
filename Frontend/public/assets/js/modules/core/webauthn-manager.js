@@ -196,9 +196,9 @@ export async function deriveHkdfKey(prfOutput, hkdfSaltBase64) {
 /**
  * Cifra la Master Key usando la chiave AES derivata.
  */
-export async function encryptVaultSecret(masterKey, aesKey) {
+export async function encryptVaultSecret(vaultKeyMaterial, aesKey) {
     const iv = crypto.getRandomValues(new Uint8Array(AES_IV_SIZE));
-    const encodedData = new TextEncoder().encode(masterKey);
+    const encodedData = new TextEncoder().encode(vaultKeyMaterial);
 
     const ciphertext = await crypto.subtle.encrypt(
         { name: "AES-GCM", iv: iv, additionalData: new TextEncoder().encode("codex-v1") },

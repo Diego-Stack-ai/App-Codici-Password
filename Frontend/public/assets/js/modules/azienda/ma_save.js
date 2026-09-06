@@ -14,7 +14,7 @@ import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { encrypt, ensureMasterKey } from '../core/security-manager.js';
+import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // ─── SAVE ─────────────────────────────────────────────────────────────────────
@@ -30,9 +30,9 @@ export async function saveAzienda() {
     }
 
     // 🔐 PROTOCOLLO BLINDA: Crittografia Dati Sensibili
-    let masterKey;
+    let vaultKeyMaterial;
     try {
-        masterKey = await ensureMasterKey();
+        vaultKeyMaterial = await ensureVaultKeyMaterial();
     } catch (e) {
         showToast("Accesso negato: Chiave di crittografia richiesta.", "error");
         if (btn) {
@@ -78,32 +78,32 @@ export async function saveAzienda() {
                 pec: document.getElementById('type-pec') ? {
                     tipo: document.getElementById('type-pec').value.trim(),
                     email: document.getElementById('email-pec')?.value.trim(),
-                    password: await encrypt(document.getElementById('email-pec-password')?.value.trim() || '', masterKey),
+                    password: await encrypt(document.getElementById('email-pec-password')?.value.trim() || '', vaultKeyMaterial),
                     note: document.getElementById('email-pec-note')?.value.trim()
                 } : null,
                 amministrazione: document.getElementById('type-amministrazione') ? {
                     tipo: document.getElementById('type-amministrazione').value.trim(),
                     email: document.getElementById('email-amministrazione')?.value.trim(),
-                    password: await encrypt(document.getElementById('email-amministrazione-password')?.value.trim() || '', masterKey),
+                    password: await encrypt(document.getElementById('email-amministrazione-password')?.value.trim() || '', vaultKeyMaterial),
                     note: document.getElementById('email-amministrazione-note')?.value.trim()
                 } : null,
                 personale: document.getElementById('type-personale') ? {
                     tipo: document.getElementById('type-personale').value.trim(),
                     email: document.getElementById('email-personale')?.value.trim(),
-                    password: await encrypt(document.getElementById('email-personale-password')?.value.trim() || '', masterKey),
+                    password: await encrypt(document.getElementById('email-personale-password')?.value.trim() || '', vaultKeyMaterial),
                     note: document.getElementById('email-personale-note')?.value.trim()
                 } : null,
                 extra: await Promise.all(
                     Array.from(document.querySelectorAll('.email-extra-item')).map(async el => ({
                         tipo: el.querySelector('.email-type')?.value.trim(),
                         email: el.querySelector('.email-value')?.value.trim(),
-                        password: await encrypt(el.querySelector('.email-pass')?.value.trim() || '', masterKey),
+                        password: await encrypt(el.querySelector('.email-pass')?.value.trim() || '', vaultKeyMaterial),
                         note: el.querySelector('.email-note')?.value.trim(),
                         qr: el.querySelector('.email-qr')?.checked
                     }))
                 )
             },
-            note: await encrypt(document.getElementById('note-azienda')?.value.trim() || '', masterKey),
+            note: await encrypt(document.getElementById('note-azienda')?.value.trim() || '', vaultKeyMaterial),
             qrConfig,
             altreSedi,
             updatedAt: serverTimestamp(),
@@ -127,7 +127,7 @@ export async function saveAzienda() {
             validateAttachmentFile(file);
             const storagePath = `users/${state.currentUid}/aziende_allegati/${createStorageObjectName(file)}`;
             const sRef = ref(storage, storagePath);
-            const encryptedFile = await encryptAttachmentFile(file, masterKey);
+            const encryptedFile = await encryptAttachmentFile(file, vaultKeyMaterial);
             const snap = await uploadBytes(sRef, encryptedFile.blob, {
                 contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
             });

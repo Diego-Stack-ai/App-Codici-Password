@@ -11,7 +11,7 @@ import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
-import { decrypt, ensureMasterKey, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
+import { decrypt, ensureVaultKeyMaterial, isAutoUnlockActive, resetVault } from '../core/security-manager.js';
 import { getLastCryptoError } from '../core/crypto-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
@@ -318,7 +318,7 @@ async function renderHeaderUser(user) {
             try {
                 // Tentativo di sblocco silenzioso
                 if (isAutoUnlockActive()) {
-                    const mk = await ensureMasterKey();
+                    const mk = await ensureVaultKeyMaterial();
                     // [FIX V7.15] Regex più tollerante per Safari (include URL-safe e padding flessibile)
                     const isEnc = (v) => v && typeof v === 'string' && v.trim().length > 20 && /^[A-Za-z0-9+/=_-]+$/.test(v.trim());
 
