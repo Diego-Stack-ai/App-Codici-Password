@@ -1,19 +1,18 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * ARCHIVIO ACCOUNT MODULE (V4.3)
  * Gestisce la visualizzazione e il ripristino di account archiviati (Cestino).
  * Refactor: Eliminazione innerHTML a favore di dom-utils.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.52';
+import { db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, collection, query, where, updateDoc, deleteDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc, deleteDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, showInputModal } from '../../ui-core-v129.js';
 import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
 import { t } from '../../translations.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { getCompany, listArchivedPrivateAccounts, listCompanies, listCompanyAccounts } from '../data/vault-repository.js';
 
 let allArchived = [];
 let currentUser = null;
@@ -111,13 +110,12 @@ async function loadCompanies() {
     if (!filterMenu) return;
 
     try {
-        const snap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
-        snap.forEach(docSnap => {
-            const data = docSnap.data();
+        const companies = await listCompanies(currentUser.uid);
+        companies.forEach(data => {
             const item = createElement('div', {
                 className: 'base-dropdown-item',
-                dataset: { value: docSnap.id },
-                textContent: data.ragioneSociale || docSnap.id
+                dataset: { value: data.id },
+                textContent: data.ragioneSociale || data.id
             });
             filterMenu.appendChild(item);
         });
@@ -149,9 +147,9 @@ async function loadArchived() {
         // 1. PRIVATO
         if (currentContext === 'all' || currentContext === 'privato') {
             try {
-                const snap = await getDocs(query(collection(db, "users", currentUser.uid, "accounts"), where("isArchived", "==", true)));
-                snap.forEach(d => results.push({ ...d.data(), id: d.id, context: 'privato' }));
-                LOG(`[ARCHIVIO] Found ${snap.size} private archived items`);
+                const archivedAccounts = await listArchivedPrivateAccounts(currentUser.uid);
+                archivedAccounts.forEach(account => results.push({ ...account, context: 'privato' }));
+                LOG(`[ARCHIVIO] Found ${archivedAccounts.length} private archived items`);
             } catch (err) {
                 console.error("[ARCHIVIO] Private query error:", err);
                 if (currentContext === 'privato') throw err; // Re-throw if it's the only one
@@ -161,23 +159,21 @@ async function loadArchived() {
         // 2. AZIENDE
         if (currentContext === 'all') {
             try {
-                const bizSnap = await getDocs(collection(db, "users", currentUser.uid, "aziende"));
-                LOG(`[ARCHIVIO] Searching archived items in ${bizSnap.size} companies...`);
+                const companies = await listCompanies(currentUser.uid);
+                LOG(`[ARCHIVIO] Searching archived items in ${companies.length} companies...`);
 
-                for (const b of bizSnap.docs) {
+                for (const company of companies) {
                     try {
-                        const bData = b.data();
                         // Strategy V3.1: Fetch all and filter in-memory to avoid elusive index requirement on nested subcollections
-                        const snap = await getDocs(collection(db, "users", currentUser.uid, "aziende", b.id, "accounts"));
-                        const archived = snap.docs
-                            .map(d => ({ ...d.data(), id: d.id }))
+                        const accounts = await listCompanyAccounts(currentUser.uid, company.id);
+                        const archived = accounts
                             .filter(acc => acc.isArchived === true);
 
                         archived.forEach(acc => {
-                            results.push({ ...acc, context: b.id, businessName: bData.ragioneSociale });
+                            results.push({ ...acc, context: company.id, businessName: company.ragioneSociale });
                         });
                     } catch (err) {
-                        console.warn(`[ARCHIVIO] Accesso limitato agli account dell'azienda ${b.id}.`, err.message);
+                        console.warn(`[ARCHIVIO] Accesso limitato agli account dell'azienda ${company.id}.`, err.message);
                     }
                 }
             } catch (err) {
@@ -187,12 +183,11 @@ async function loadArchived() {
             // Specific Company Context
             try {
                 // Fetch company data first to get the name
-                const bizDoc = await getDoc(doc(db, "users", currentUser.uid, "aziende", currentContext));
-                const bData = bizDoc.exists() ? bizDoc.data() : { ragioneSociale: currentContext };
+                const company = await getCompany(currentUser.uid, currentContext);
+                const bData = company || { ragioneSociale: currentContext };
 
-                const snap = await getDocs(collection(db, "users", currentUser.uid, "aziende", currentContext, "accounts"));
-                const archived = snap.docs
-                    .map(d => ({ ...d.data(), id: d.id }))
+                const accounts = await listCompanyAccounts(currentUser.uid, currentContext);
+                const archived = accounts
                     .filter(acc => acc.isArchived === true);
 
                 archived.forEach(acc => {

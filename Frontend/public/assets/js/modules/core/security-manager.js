@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * SECURITY MANAGER (V9.0 - Vault Verifier & PRF)
  * - Il materiale della Vault Key è tenuto in RAM e cifrato per la durata della scheda attiva.
@@ -8,11 +7,12 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { db, auth } from '../../firebase-config.js?v=1.2.52';
-import { doc, setDoc, updateDoc, collection, limit, query, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
 import { saveVaultSession, restoreVaultSession, clearVaultSession } from './vault-session.js';
 import { evaluatePassword, firstPasswordPolicyError, passwordPolicyMessage } from './password-policy.js';
+import { getFirstCompany, getFirstPrivateAccount, getUserProfile, getUserSetting } from '../data/vault-repository.js';
 
 let _vaultKeyMaterial = null;
 let _vaultAutoUnlock = false;
@@ -89,9 +89,9 @@ async function verifyMasterPassword(masterPassword, uid) {
     
     if (!verifier || verifier.type !== 'vault-verifier' || !verifier.ciphertext) {
         try {
-            const snap = await getDoc(doc(db, 'users', uid, 'settings', 'security'));
-            if (snap.exists() && snap.data().verifier) {
-                verifier = snap.data().verifier;
+            const security = await getUserSetting(uid, 'security');
+            if (security?.verifier) {
+                verifier = security.verifier;
                 localStorage.setItem(getVerifierStorageKey(uid), JSON.stringify(verifier));
             }
         } catch (e) {
@@ -125,8 +125,7 @@ async function verifyMasterPassword(masterPassword, uid) {
 
 async function migrateLegacyVault(candidatePassword, uid) {
     try {
-        const snap = await getDoc(doc(db, 'users', uid));
-        const data = snap.exists() ? snap.data() : null;
+        const data = await getUserProfile(uid);
         if (data) {
             const testFields = ['nome', 'cognome', 'cf', 'birth_place', 'note'];
             for (const field of testFields) {
@@ -142,9 +141,8 @@ async function migrateLegacyVault(candidatePassword, uid) {
             }
         }
         
-        const accountsSnap = await getDocs(query(collection(db, 'users', uid, 'accounts'), limit(1)));
-        if (!accountsSnap.empty) {
-            const accountData = accountsSnap.docs[0].data();
+        const accountData = await getFirstPrivateAccount(uid);
+        if (accountData) {
             const testFields = ['username', 'account', 'password', 'note'];
             for (const field of testFields) {
                 if (accountData[field] && isEncryptedValue(accountData[field])) {
@@ -161,8 +159,8 @@ async function migrateLegacyVault(candidatePassword, uid) {
             return false;
         }
         
-        const aziendeSnap = await getDocs(query(collection(db, 'users', uid, 'aziende'), limit(1)));
-        if (aziendeSnap.empty) {
+        const firstCompany = await getFirstCompany(uid);
+        if (!firstCompany) {
             await createVerifier(candidatePassword, uid);
             return true;
         } else {
@@ -230,8 +228,8 @@ async function loadVaultEnvelope(uid) {
             if (parsed?.version === 2) return parsed;
         } catch (error) { /* recupera dalla copia remota */ }
     }
-    const snap = await getDoc(doc(db, 'users', uid, 'settings', 'security'));
-    const envelope = snap.exists() ? snap.data().vaultKeyEnvelope : null;
+    const security = await getUserSetting(uid, 'security');
+    const envelope = security?.vaultKeyEnvelope || null;
     if (envelope?.version === 2) localStorage.setItem(getEnvelopeStorageKey(uid), JSON.stringify(envelope));
     return envelope || null;
 }
@@ -257,15 +255,14 @@ async function resolveVaultKey(masterPassword, uid, newVault) {
 }
 
 async function isNewVault(uid) {
-    const [userSnap, accountsSnap, aziendeSnap] = await Promise.all([
-        getDoc(doc(db, 'users', uid)),
-        getDocs(query(collection(db, 'users', uid, 'accounts'), limit(1))),
-        getDocs(query(collection(db, 'users', uid, 'aziende'), limit(1)))
+    const [userData, firstAccount, firstCompany] = await Promise.all([
+        getUserProfile(uid),
+        getFirstPrivateAccount(uid),
+        getFirstCompany(uid)
     ]);
-    const userData = userSnap.exists() ? userSnap.data() : {};
     const encryptedProfileFields = ['nome', 'cognome', 'cf', 'birth_place', 'note']
-        .some(field => isEncryptedValue(userData[field]));
-    return !encryptedProfileFields && accountsSnap.empty && aziendeSnap.empty;
+        .some(field => isEncryptedValue(userData?.[field]));
+    return !encryptedProfileFields && !firstAccount && !firstCompany;
 }
 
 export function isBiometricUnlockConfigured() {

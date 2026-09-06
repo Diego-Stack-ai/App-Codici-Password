@@ -155,13 +155,13 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 
 ### M2 — Data access e repository local-first
 
-- [ ] sostituire le letture Firestore replicate con repository di dominio;
+- [x] sostituire le letture Firestore replicate con repository di dominio;
 - [x] formalizzare cache-first e refresh in background in `DATA_ACCESS_CONTRACT.md`;
 - [x] deduplicare richieste equivalenti nel perimetro già migrato;
 - [x] rendere selettiva la sincronizzazione per pagina tramite le priorità di `offline-sync.js`;
-- [ ] definire conflitti prima di abilitare scritture offline.
+- [x] definire conflitti prima di abilitare scritture offline in `OFFLINE_WRITE_CONFLICT_POLICY.md`.
 
-Primi incrementi completati: Account privati, dashboard privata, Aziende, Account aziendali, Scadenze, Profilo e dettagli principali usano il repository. Form Account, allegati, sicurezza, Home e configurazioni restano da migrare prima dell’uscita M2.
+M2 completata: i moduli applicativi usano il repository unico; richieste equivalenti sono coordinate senza introdurre una seconda cache permanente. Le scritture offline restano disabilitate fino all'implementazione dei gate M6.
 
 **Uscita:** le pagine non conoscono più i dettagli della cache o della rete.
 
@@ -283,7 +283,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 |---|---|
 | M0 | completata il 06/09/2026 |
 | M1 | completata il 06/09/2026 |
-| M2 | infrastruttura parziale esistente |
+| M2 | completata il 06/09/2026 |
 | M3 | Profilo completato; Account/Area Privata avviati |
 | M4 | fondazioni presenti, consolidamento da fare |
 | M5 | da progettare prima di modificare le condivisioni |

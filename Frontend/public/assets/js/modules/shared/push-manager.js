@@ -1,8 +1,8 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.52';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteToken, getToken, onMessage } from "/assets/js/vendor/firebase-runtime.js";
+import { getPushDevice } from '../data/vault-repository.js';
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
 const DEVICE_ID_KEY = 'codex_push_device_id';
@@ -87,12 +87,12 @@ async function getTokenWithLocalRecovery(messaging, registration) {
 export async function getCurrentPushState(user = auth.currentUser, scope = 'deadlines') {
     const compatibility = getPushCompatibility();
     if (!user || !compatibility.compatible) return { enabled: false, ...compatibility };
-    const snap = await getDoc(doc(db, 'users', user.uid, 'pushDevices', getDeviceId()));
-    const scopes = snap.exists() && Array.isArray(snap.data().notificationScopes)
-        ? snap.data().notificationScopes : (snap.exists() ? [snap.data().notificationScope] : []);
+    const device = await getPushDevice(user.uid, getDeviceId());
+    const scopes = Array.isArray(device?.notificationScopes)
+        ? device.notificationScopes : (device ? [device.notificationScope] : []);
     return {
         compatible: true,
-        enabled: Notification.permission === 'granted' && snap.exists() && snap.data().enabled === true && scopes.includes(scope),
+        enabled: Notification.permission === 'granted' && device?.enabled === true && scopes.includes(scope),
         permission: Notification.permission
     };
 }
@@ -125,9 +125,9 @@ async function enablePushScope(scope, user = auth.currentUser) {
 
     const deviceId = getDeviceId();
     const deviceRef = doc(db, 'users', user.uid, 'pushDevices', deviceId);
-    const existing = await getDoc(deviceRef);
-    const previousScopes = existing.exists() && Array.isArray(existing.data().notificationScopes)
-        ? existing.data().notificationScopes : (existing.exists() && existing.data().notificationScope ? [existing.data().notificationScope] : []);
+    const existing = await getPushDevice(user.uid, deviceId);
+    const previousScopes = Array.isArray(existing?.notificationScopes)
+        ? existing.notificationScopes : (existing?.notificationScope ? [existing.notificationScope] : []);
     const notificationScopes = [...new Set([...previousScopes, scope])];
     await setDoc(deviceRef, {
         token,
@@ -154,9 +154,9 @@ export async function disableDeadlinePush(user = auth.currentUser) {
 async function disablePushScope(scope, user = auth.currentUser) {
     if (!user) return;
     const deviceRef = doc(db, 'users', user.uid, 'pushDevices', getDeviceId());
-    const snap = await getDoc(deviceRef);
-    const scopes = snap.exists() && Array.isArray(snap.data().notificationScopes)
-        ? snap.data().notificationScopes : (snap.exists() && snap.data().notificationScope ? [snap.data().notificationScope] : []);
+    const device = await getPushDevice(user.uid, getDeviceId());
+    const scopes = Array.isArray(device?.notificationScopes)
+        ? device.notificationScopes : (device?.notificationScope ? [device.notificationScope] : []);
     const remaining = scopes.filter(item => item !== scope);
     if (remaining.length) return setDoc(deviceRef, { notificationScopes: remaining, updatedAt: serverTimestamp() }, { merge: true });
     const messaging = await getMessagingInstance();

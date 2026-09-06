@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO ACCOUNT AZIENDA — SHARING MODULE (V1.0)
  * Gestione condivisione, visualizzazione ospiti e revoca accessi per account aziendali.
@@ -13,6 +12,7 @@ import { createElement, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
+import { getInvite } from '../data/vault-repository.js';
 
 // --- STATE (inizializzato da initSharingModule, immutabile per tutta la vita della pagina) ---
 let _currentUid = null;
@@ -126,10 +126,9 @@ export async function renderGuests(guests) {
         if (isPending) {
             try {
                 const inviteId = `${_currentId}_${sanitizeEmail(displayEmail)}`;
-                const invSnap = await getDoc(doc(db, "invites", inviteId));
+                const invData = await getInvite(inviteId);
 
-                if (invSnap.exists()) {
-                    const invData = invSnap.data();
+                if (invData) {
                     if (invData.status === 'accepted') {
                         isPending = false;
                         displayStatus = t('status_accepted') || 'Accettato';

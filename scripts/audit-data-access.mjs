@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {readdir} from 'node:fs/promises';
 
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
 const repository = await read('Frontend/public/assets/js/modules/data/vault-repository.js');
@@ -34,7 +35,10 @@ const migratedPages = await Promise.all([
     'Frontend/public/assets/js/modules/scadenze/configurazione_documenti.js',
     'Frontend/public/assets/js/modules/scadenze/configurazione_automezzi.js',
     'Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js',
-    'Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js'
+    'Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js',
+    'Frontend/public/assets/js/modules/home/home.js',
+    'Frontend/public/assets/js/modules/assistant/vault-data-loader.js',
+    'Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js'
 ].map(read));
 
 assert.ok(migratedPages.every(source => !source.includes('offline-firestore.js')),
@@ -42,4 +46,21 @@ assert.ok(migratedPages.every(source => !source.includes('offline-firestore.js')
 assert.ok(migratedPages.every(source => source.includes("../data/vault-repository.js")),
     'Una pagina migrata non usa il repository di dominio');
 
-console.log('Audit accesso dati M2: primo perimetro protetto.');
+const modulesRoot = new URL('../Frontend/public/assets/js/modules/', import.meta.url);
+async function listJavaScript(directory) {
+    const entries = await readdir(directory, {withFileTypes: true});
+    const nested = await Promise.all(entries.map(entry => {
+        const target = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, directory);
+        return entry.isDirectory() ? listJavaScript(target) : (entry.name.endsWith('.js') ? [target] : []);
+    }));
+    return nested.flat();
+}
+const moduleFiles = await listJavaScript(modulesRoot);
+for (const file of moduleFiles) {
+    if (file.pathname.endsWith('/data/vault-repository.js')) continue;
+    const source = await readFile(file, 'utf8');
+    assert.ok(!source.includes('offline-firestore.js'),
+        `Accesso cache/rete diretto fuori dal repository: ${file.pathname}`);
+}
+
+console.log('Audit accesso dati M2: repository unico protetto.');

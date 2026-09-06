@@ -7,9 +7,19 @@ const records = snapshot => snapshot.docs.map(item => ({id: item.id, ...item.dat
 const readRecords = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(records);
 const readRecord = (key, reference) => coalesceRead(key, () => getDocSmart(reference)).then(snapshot =>
     snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
+const readFirstRecord = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(snapshot =>
+    snapshot.empty ? null : {id: snapshot.docs[0].id, ...snapshot.docs[0].data()});
 
 export const listPrivateAccounts = uid => readRecords(`accounts:${uid}`,
     collection(db, 'users', uid, 'accounts'));
+
+export const getFirstPrivateAccount = uid => readFirstRecord(`first-account:${uid}`, query(
+    collection(db, 'users', uid, 'accounts'), limit(1)
+));
+
+export const listArchivedPrivateAccounts = uid => readRecords(`archived-accounts:${uid}`, query(
+    collection(db, 'users', uid, 'accounts'), where('isArchived', '==', true)
+));
 
 export const listTopPrivateAccounts = (uid, maximum = 10) => readRecords(`top-accounts:${uid}:${maximum}`,
     query(
@@ -44,6 +54,10 @@ export const getUserSetting = (uid, settingId) => getRecordByPath(`users/${uid}/
 export const listCompanies = uid => readRecords(`companies:${uid}`,
     collection(db, 'users', uid, 'aziende'));
 
+export const getFirstCompany = uid => readFirstRecord(`first-company:${uid}`, query(
+    collection(db, 'users', uid, 'aziende'), limit(1)
+));
+
 export const listCompanyAccounts = (uid, companyId) => readRecords(`company-accounts:${uid}:${companyId}`,
     collection(db, 'users', uid, 'aziende', companyId, 'accounts'));
 
@@ -55,6 +69,24 @@ export const getDeadline = (uid, deadlineId) =>
 
 export const getDeadlineNotification = (uid, notificationId) =>
     getRecordByPath(`users/${uid}/deadlineNotifications/${notificationId}`);
+
+export const listDeadlineNotifications = uid => readRecords(`deadline-notifications:${uid}`,
+    collection(db, 'users', uid, 'deadlineNotifications'));
+
+export const listCompanyAccountAttachments = (uid, companyId, accountId) =>
+    readRecords(`company-account-attachments:${uid}:${companyId}:${accountId}`, query(
+        collection(db, 'users', uid, 'aziende', companyId, 'accounts', accountId, 'attachments'),
+        orderBy('createdAt', 'desc')
+    ));
+
+export const listPrivateAccountAttachments = (uid, accountId) =>
+    readRecords(`private-account-attachments:${uid}:${accountId}`, query(
+        collection(db, 'users', uid, 'accounts', accountId, 'attachments'),
+        orderBy('createdAt', 'desc')
+    ));
+
+export const getInvite = inviteId => getRecordByPath(`invites/${inviteId}`);
+export const getPushDevice = (uid, deviceId) => getRecordByPath(`users/${uid}/pushDevices/${deviceId}`);
 
 export const listContacts = uid => readRecords(`contacts:${uid}`,
     collection(db, 'users', uid, 'contacts'));

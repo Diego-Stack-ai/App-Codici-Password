@@ -1,13 +1,10 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * HOME PAGE MODULE (V4.1)
  * Gestisce l'interfaccia della nuova Home Page statica.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.52';
-import { onAuthStateChanged, signOut } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
+import { auth } from '../../firebase-config.js?v=1.2.52';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
@@ -15,6 +12,7 @@ import { decrypt, ensureVaultKeyMaterial, isAutoUnlockActive, resetVault } from 
 import { getLastCryptoError } from '../core/crypto-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
+import { getDeadline, getUserProfile, listCompanies, listDeadlineNotifications, listDeadlines } from '../data/vault-repository.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -59,27 +57,25 @@ export async function initHomePage(user) {
     // Se il fetch delle aziende fallisce per un calo di rete,
     // il nome utente e le scadenze si caricano comunque.
     const [settingsResult] = await Promise.allSettled([
-        getDoc(doc(db, 'users', user.uid)),
+        getUserProfile(user.uid),
         renderHeaderUser(user),
         renderDashboardDeadlines(user),
         renderDeadlineNotificationInbox(user)
     ]);
 
-    const settingsData = settingsResult.status === 'fulfilled' && settingsResult.value.exists()
-        ? settingsResult.value.data()
-        : null;
+    const settingsData = settingsResult.status === 'fulfilled' ? settingsResult.value : null;
     const companyAreaEnabled = settingsData
         ? getSyncedCompanyAreaPreference(settingsData, user.uid)
         : cachedCompanyAreaEnabled;
     applyCompanyAreaVisibility(companyAreaEnabled);
 
     const aziResult = companyAreaEnabled
-        ? await Promise.allSettled([getDocs(collection(db, "users", user.uid, "aziende"))]).then(results => results[0])
-        : { status: 'fulfilled', value: { docs: [] } };
+        ? await Promise.allSettled([listCompanies(user.uid)]).then(results => results[0])
+        : { status: 'fulfilled', value: [] };
 
     // FAB Group dipende solo dal risultato delle aziende
     const aziendes = aziResult.status === 'fulfilled'
-        ? aziResult.value.docs.map(d => ({ id: d.id, ...d.data() }))
+        ? aziResult.value
         : [];
 
     if (aziResult.status === 'rejected') {
@@ -189,21 +185,20 @@ function initAppPresentation() {
 }
 
 async function renderDeadlineNotificationInbox(user) {
-    const notificationSnap = await getDocs(collection(db, 'users', user.uid, 'deadlineNotifications'));
-    const unread = notificationSnap.docs
-        .filter((item) => item.data().status === 'unread')
+    const notifications = await listDeadlineNotifications(user.uid);
+    const unread = notifications
+        .filter((item) => item.status === 'unread')
         .sort((left, right) => {
-            const leftTime = left.data().createdAt?.toMillis?.() || 0;
-            const rightTime = right.data().createdAt?.toMillis?.() || 0;
+            const leftTime = left.createdAt?.toMillis?.() || 0;
+            const rightTime = right.createdAt?.toMillis?.() || 0;
             return rightTime - leftTime;
         });
     if (!unread.length || document.getElementById('deadline-inbox-modal')) return;
 
     const entries = (await Promise.all(unread.slice(0, 10).map(async (notification) => {
-        const data = notification.data();
-        const deadline = await getDoc(doc(db, 'users', user.uid, 'scadenze', data.deadlineId));
-        if (!deadline.exists() || deadline.data().completed) return null;
-        const item = deadline.data();
+        const data = notification;
+        const item = await getDeadline(user.uid, data.deadlineId);
+        if (!item || item.completed) return null;
         const label = `${item.type || 'Scadenza'}${item.veicolo_modello ? ` · ${item.veicolo_modello}` : ''}`;
         const when = data.diffDays === 0 ? 'Scade oggi' : data.diffDays === 1 ? 'Scade domani' : `Scadenza tra ${data.diffDays} giorni`;
         return createElement('button', {
@@ -298,11 +293,9 @@ async function renderHeaderUser(user) {
 
     // 5. Firestore Profile Sync
     try {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+        const data = await getUserProfile(user.uid);
 
-        if (docSnap.exists()) {
-            const data = docSnap.data();
+        if (data) {
 
             // ?? PROTOCOLLO BLINDA (V7.0): Decifrazione Profilo Utente
             let nomeRaw = data.nome;
@@ -446,14 +439,12 @@ async function renderDashboardDeadlines(user) {
         const thirtyDaysLater = new Date(today);
         thirtyDaysLater.setDate(today.getDate() + 30);
 
-        const scadenzeRef = collection(db, "users", user.uid, "scadenze");
-        const snap = await getDocs(scadenzeRef);
+        const deadlines = await listDeadlines(user.uid);
 
         const expired = [];
         const upcoming = [];
 
-        snap.forEach(d => {
-            const data = d.data();
+        deadlines.forEach(data => {
             if (data.completed) return;
 
             const dueDateValue = data.dueDate || data.date;
@@ -463,9 +454,9 @@ async function renderDashboardDeadlines(user) {
             dueDate.setHours(0, 0, 0, 0);
 
             if (dueDate < today) {
-                expired.push({ ...data, id: d.id, dateObj: dueDate });
+                expired.push({ ...data, dateObj: dueDate });
             } else if (dueDate >= today && dueDate <= thirtyDaysLater) {
-                upcoming.push({ ...data, id: d.id, dateObj: dueDate });
+                upcoming.push({ ...data, dateObj: dueDate });
             }
         });
 

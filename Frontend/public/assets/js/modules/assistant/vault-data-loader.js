@@ -1,6 +1,4 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
-import { db } from '../../firebase-config.js?v=1.2.52';
-import { collection, doc } from "/assets/js/vendor/firebase-runtime.js";
+import { getUserProfile, listCompanies, listCompanyAccounts, listDeadlines, listPrivateAccounts } from '../data/vault-repository.js';
 
 const text = value => typeof value === 'string' ? value.trim() : '';
 const list = value => Array.isArray(value) ? value : [];
@@ -46,26 +44,25 @@ export async function loadVaultSearchRecords(user, { includeCompanies = true } =
     if (!user?.uid) throw new Error('Utente non autenticato');
     const uid = user.uid;
     const [profile, accounts, companies, deadlines] = await Promise.all([
-        getDoc(doc(db, 'users', uid)), getDocs(collection(db, 'users', uid, 'accounts')),
-        includeCompanies ? getDocs(collection(db, 'users', uid, 'aziende')) : Promise.resolve(null),
-        getDocs(collection(db, 'users', uid, 'scadenze'))
+        getUserProfile(uid), listPrivateAccounts(uid),
+        includeCompanies ? listCompanies(uid) : Promise.resolve([]),
+        listDeadlines(uid)
     ]);
-    const records = profile.exists() ? profileRecords(uid, profile.data()) : [];
-    accounts.forEach(item => records.push(accountRecord(item.id, item.data())));
-    deadlines.forEach(item => records.push(deadlineRecord(item.id, item.data())));
+    const records = profile ? profileRecords(uid, profile) : [];
+    accounts.forEach(item => records.push(accountRecord(item.id, item)));
+    deadlines.forEach(item => records.push(deadlineRecord(item.id, item)));
     const companyItems = [];
-    companies?.forEach(item => {
-        const companyData = item.data();
+    companies.forEach(companyData => {
         const companyName = companyData.ragioneSociale || companyData.nome || companyData.denominazione || 'Azienda';
-        records.push(companyRecord(item.id, companyData));
-        companyItems.push({ id: item.id, companyName });
+        records.push(companyRecord(companyData.id, companyData));
+        companyItems.push({ id: companyData.id, companyName });
     });
     let cursor = 0;
     await Promise.all(Array.from({ length: Math.min(NESTED_ACCOUNT_CONCURRENCY, companyItems.length) }, async () => {
         while (cursor < companyItems.length) {
             const company = companyItems[cursor++];
-            const snapshot = await getDocs(collection(db, 'users', uid, 'aziende', company.id, 'accounts'));
-            snapshot.forEach(account => records.push(accountRecord(account.id, account.data(), company.id, company.companyName)));
+            const accounts = await listCompanyAccounts(uid, company.id);
+            accounts.forEach(account => records.push(accountRecord(account.id, account, company.id, company.companyName)));
         }
     }));
     return records;

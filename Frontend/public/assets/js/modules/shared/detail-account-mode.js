@@ -1,9 +1,9 @@
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { collection, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
-import { getDocsSmart as getDocs } from '/assets/js/offline-firestore.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { sanitizeEmail } from '../../utils.js';
+import { listContacts } from '../data/vault-repository.js';
 
 const modeKey = account => `${account?.type === 'memo' ? 'memo' : 'account'}-${account?.visibility === 'shared' ? 'shared' : 'private'}`;
 const fullName = contact => [contact?.nome, contact?.cognome].filter(Boolean).join(' ').trim() || contact?.email || '';
@@ -28,8 +28,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
     let selectedEmails = new Set(Object.values(account.sharedWith || {}).filter(g => g?.status !== 'rejected').map(g => normalizeEmail(g.email)).filter(Boolean));
     let contacts = [];
     try {
-        const snap = await getDocs(collection(db, 'users', ownerId, 'contacts'));
-        contacts = snap.docs.map(item => ({ id: item.id, ...item.data() }))
+        contacts = (await listContacts(ownerId))
             .filter(item => item.active !== false && normalizeEmail(item.email))
             .sort((a, b) => fullName(a).localeCompare(fullName(b), 'it'));
     } catch (error) {

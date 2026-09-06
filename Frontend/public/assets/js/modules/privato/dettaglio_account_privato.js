@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO ACCOUNT PRIVATO (V5.9.5)
  * Visualizzazione dettagli, gestione banking e condivisioni.
@@ -18,7 +17,7 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
-import {findPrivateAccountByLegacyId, getPrivateAccount} from '../data/vault-repository.js';
+import {findPrivateAccountByLegacyId, getPrivateAccount, listPrivateAccountAttachments} from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -785,11 +784,7 @@ async function loadAttachments() {
     if (!container) return;
 
     try {
-        const colRef = collection(db, "users", ownerId, "accounts", currentId, "attachments");
-        const q = query(colRef, orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-
-        const attachments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const attachments = await listPrivateAccountAttachments(ownerId, currentId);
         renderAttachments(attachments);
     } catch (e) {
         logError("LoadAttachments", e);

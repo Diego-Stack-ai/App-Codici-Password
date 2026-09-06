@@ -1,4 +1,3 @@
-import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO ACCOUNT AZIENDA — ATTACHMENTS MODULE (V1.0)
  * Gestione allegati (upload, visualizzazione, eliminazione) per account aziendali.
@@ -7,7 +6,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  */
 
 import { db, storage } from '../../firebase-config.js?v=1.2.52';
-import { doc, collection, addDoc, query, orderBy, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -15,6 +14,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { listCompanyAccountAttachments } from '../data/vault-repository.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
 let _currentUid = null;
@@ -112,11 +112,7 @@ export async function loadAttachments() {
     if (!container) return;
 
     try {
-        const colRef = collection(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments");
-        const q = query(colRef, orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-
-        const attachments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const attachments = await listCompanyAccountAttachments(_currentUid, _currentAziendaId, _currentId);
         renderAttachments(attachments);
     } catch (e) {
         logError("LoadAttachments", e);

@@ -39,5 +39,10 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 - configurazioni Scadenze per automezzi, documenti e generali;
 - creazione/modifica Scadenza: configurazioni, profilo, rubrica e record in modifica;
 - dettaglio Scadenza e relativo stato di notifica.
+- Home: profilo, Aziende, Scadenze e casella notifiche;
+- indice locale dell'Agente Codex;
+- allegati degli Account aziendali.
 
-Allegati, sicurezza, Home e Archivio mantengono temporaneamente il vecchio adapter `offline-firestore.js` e verranno migrati per dominio prima di chiudere M2.
+Tutti i moduli applicativi passano ora dal repository. `offline-firestore.js` resta confinato all'infrastruttura del repository.
+
+Le scritture offline non sono ancora abilitate. Il contratto preventivo per revisioni, idempotenza e conflitti è definito in `OFFLINE_WRITE_CONFLICT_POLICY.md` e verrà implementato in M6.

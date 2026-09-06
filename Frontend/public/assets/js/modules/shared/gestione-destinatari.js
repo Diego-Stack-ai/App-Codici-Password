@@ -1,8 +1,8 @@
-import { getDocsSmart as getDocs } from '/assets/js/offline-firestore.js';
 import { db, functions } from '../../firebase-config.js?v=1.2.52';
 import { addDoc, collection, doc, httpsCallable, serverTimestamp, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
+import { listContacts } from '../data/vault-repository.js';
 
 let currentUser = null;
 let contacts = [];
@@ -100,8 +100,7 @@ function renderContacts() {
 }
 
 async function loadContacts() {
-    const snap = await getDocs(collection(db, 'users', currentUser.uid, 'contacts'));
-    contacts = snap.docs.map(item => ({ id: item.id, ...item.data() }))
+    contacts = (await listContacts(currentUser.uid))
         .sort((a, b) => `${a.nome || ''} ${a.cognome || ''}`.localeCompare(`${b.nome || ''} ${b.cognome || ''}`, 'it'));
     renderContacts();
 }
