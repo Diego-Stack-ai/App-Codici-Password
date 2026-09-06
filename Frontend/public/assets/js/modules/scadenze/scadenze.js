@@ -10,6 +10,7 @@ import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
+import { deadlineDate, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
 import { initComponents } from '../../components-v129.js?v=1.2.52';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -149,8 +150,8 @@ function renderFilteredScadenze() {
 
     // Apply Filter (SEMPRE APPLICATO ORA)
     filtered = filtered.filter(s => {
-        const dueDateValue = s.dueDate || s.date;
-        const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
+        const dueDate = deadlineDate(s);
+        if (!dueDate) return activeFilter === 'completed' && s.completed;
         const expired = dueDate < now;
         const isUpcoming = dueDate >= now && dueDate <= thirtyDaysLater;
 
@@ -173,25 +174,22 @@ function renderFilteredScadenze() {
     // Apply Search
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(s =>
-            (s.title && s.title.toLowerCase().includes(q)) ||
-            (s.category && s.category.toLowerCase().includes(q)) ||
-            (s.name && s.name.toLowerCase().includes(q)) ||
-            (s.veicolo_targa && s.veicolo_targa.toLowerCase().includes(q))
-        );
+        filtered = filtered.filter(s => {
+            const presentation = deadlinePresentation(s);
+            return [presentation.title, presentation.category, presentation.owner, presentation.vehicle, s.veicolo_targa]
+                .some(value => String(value || '').toLowerCase().includes(q));
+        });
     }
 
     // Apply Sort
     filtered.sort((a, b) => {
         if (sortType.startsWith('date')) {
-            const dateAValue = a.dueDate || a.date;
-            const dateBValue = b.dueDate || b.date;
-            const dateA = (dateAValue && dateAValue.toDate) ? dateAValue.toDate() : new Date(dateAValue);
-            const dateB = (dateBValue && dateBValue.toDate) ? dateBValue.toDate() : new Date(dateBValue);
+            const dateA = deadlineDate(a) || new Date(0);
+            const dateB = deadlineDate(b) || new Date(0);
             return sortType === 'date-asc' ? dateA - dateB : dateB - dateA;
         } else {
-            const nameA = (a.title || "").toLowerCase();
-            const nameB = (b.title || "").toLowerCase();
+            const nameA = deadlinePresentation(a).title.toLowerCase();
+            const nameB = deadlinePresentation(b).title.toLowerCase();
             return sortType === 'name-asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
         }
     });
@@ -220,8 +218,7 @@ function renderFilteredScadenze() {
 }
 
 function createScadenzaCard(scadenza) {
-    const dueDateValue = scadenza.dueDate || scadenza.date;
-    const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
+    const dueDate = deadlineDate(scadenza) || new Date(0);
     const now = new Date();
     const thirtyDaysLater = new Date();
     thirtyDaysLater.setDate(now.getDate() + 30);
@@ -247,9 +244,7 @@ function createScadenzaCard(scadenza) {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
     ]);
 
-    const cardOwner = scadenza.name || 'Intestatario non specificato';
-    const cardCategory = scadenza.type || scadenza.category || scadenza.title || 'Scadenza Generale';
-    const cardVehicle = scadenza.veicolo_modello || 'Veicolo non specificato';
+    const { owner: cardOwner, category: cardCategory, vehicleLabel: cardVehicle } = deadlinePresentation(scadenza);
 
     // 2. CONTENUTO VISIBILE (Sopra)
     const swipeContent = createElement('div', { className: 'swipe-content' }, [

@@ -15,6 +15,7 @@ import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
 import { getDeadline, getDeadlineNotification, getUserProfile } from '../data/vault-repository.js';
 import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
+import { deadlineDate, deadlinePresentation } from './deadline-model.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
@@ -130,12 +131,10 @@ async function handleDelete() {
 }
 
 function renderScadenza(scadenza) {
-    // Titolo: usa title (vecchio) o name + type (nuovo)
-    const title = scadenza.title || `${scadenza.type || ''} - ${scadenza.name || ''}`.trim();
-    document.getElementById('detail-title').textContent = title || 'Dettaglio Scadenza';
-
-    document.getElementById('detail-intestatario').textContent = scadenza.name || '---';
-    document.getElementById('detail-category').textContent = scadenza.type || 'Generale';
+    const presentation = deadlinePresentation(scadenza);
+    document.getElementById('detail-title').textContent = presentation.title;
+    document.getElementById('detail-intestatario').textContent = presentation.owner;
+    document.getElementById('detail-category').textContent = presentation.category;
 
     const actions = document.getElementById('detail-page-actions');
     if (actions && scadenza.sourceRef?.type === 'profileDocument') {
@@ -148,16 +147,16 @@ function renderScadenza(scadenza) {
         }));
     }
 
-    if (scadenza.dueDate) {
-        const d = new Date(scadenza.dueDate);
+    const d = deadlineDate(scadenza);
+    if (d) {
         document.getElementById('detail-date-day').textContent = `${d.getDate()} ${d.toLocaleString('it-IT', { month: 'short' }).toUpperCase()}`;
         document.getElementById('detail-date-year').textContent = d.getFullYear();
     }
 
     const vSec = document.getElementById('section-vehicle');
-    if (scadenza.veicolo_modello) {
+    if (presentation.vehicle) {
         vSec?.classList.remove('hidden');
-        document.getElementById('display-veicolo').textContent = scadenza.veicolo_modello;
+        document.getElementById('display-veicolo').textContent = presentation.vehicle;
     }
 
     const attCont = document.getElementById('display-attachments');
