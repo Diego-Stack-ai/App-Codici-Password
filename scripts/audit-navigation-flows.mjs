@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/home-deadline-inbox.js');
+const homeDeadlineDashboard = await read('Frontend/public/assets/js/modules/home/home-deadline-dashboard.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -34,5 +35,9 @@ assert.match(homeDeadlineInbox, /unread\.slice\(0, 10\)/,
     'La Home non limita il lavoro dell’inbox Scadenze');
 assert.match(homeDeadlineInbox, /dettaglio_scadenza\.html\?id=\$\{encodeURIComponent\(notification\.deadlineId\)\}&notification=\$\{encodeURIComponent\(notification\.id\)\}/,
     'L’inbox Home non apre la Scadenza e la consegna specifiche');
+assert.match(homeDeadlineDashboard, /thirtyDaysLater\.setDate\(today\.getDate\(\) \+ 30\)/,
+    'La dashboard Home non applica la finestra di 30 giorni');
+assert.match(homeDeadlineDashboard, /items\.slice\(0, 3\)/,
+    'La dashboard Home non limita le anteprime per sezione');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');

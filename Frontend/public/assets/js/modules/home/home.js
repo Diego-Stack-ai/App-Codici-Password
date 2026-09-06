@@ -11,10 +11,10 @@ import { decrypt, ensureVaultKeyMaterial, isAutoUnlockActive, resetVault } from 
 import { getLastCryptoError } from '../core/crypto-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
-import { getUserProfile, listCompanies, listDeadlines } from '../data/vault-repository.js';
-import { deadlineDate, deadlinePresentation } from '../scadenze/deadline-model.js';
+import { getUserProfile, listCompanies } from '../data/vault-repository.js';
 import { initHomePresentation } from './home-presentation.js';
 import { renderHomeDeadlineInbox } from './home-deadline-inbox.js';
+import { renderHomeDeadlineDashboard } from './home-deadline-dashboard.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -60,7 +60,7 @@ export async function initHomePage(user) {
     const [settingsResult] = await Promise.allSettled([
         getUserProfile(user.uid),
         renderHeaderUser(user),
-        renderDashboardDeadlines(user),
+        renderHomeDeadlineDashboard(user),
         renderHomeDeadlineInbox(user)
     ]);
 
@@ -290,106 +290,6 @@ function showSelfHealingBanner() {
     if (pageContainer) {
         pageContainer.prepend(banner);
     }
-}
-
-/**
- * Carica e renderizza i badge e le mini-liste di Scadenze e Urgenze
- */
-async function renderDashboardDeadlines(user) {
-    try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const thirtyDaysLater = new Date(today);
-        thirtyDaysLater.setDate(today.getDate() + 30);
-
-        const deadlines = await listDeadlines(user.uid);
-
-        const expired = [];
-        const upcoming = [];
-
-        deadlines.forEach(data => {
-            if (data.completed) return;
-
-            const dueDate = deadlineDate(data);
-            if (!dueDate) return;
-            dueDate.setHours(0, 0, 0, 0);
-
-            if (dueDate < today) {
-                expired.push({ ...data, dateObj: dueDate });
-            } else if (dueDate >= today && dueDate <= thirtyDaysLater) {
-                upcoming.push({ ...data, dateObj: dueDate });
-            }
-        });
-
-        // Ordinamento
-        expired.sort((a, b) => a.dateObj - b.dateObj);
-        upcoming.sort((a, b) => a.dateObj - b.dateObj);
-
-        // Update UI Badge Scadenze (Prossime)
-        const upBadge = document.getElementById('upcoming-count-badge');
-        const upCount = document.getElementById('upcoming-count');
-        const upList = document.getElementById('upcoming-list-container');
-
-        if (upCount) upCount.textContent = upcoming.length;
-        if (upBadge) {
-            if (upcoming.length > 0) {
-                upBadge.classList.remove('badge-initial-hide');
-            } else {
-                upBadge.classList.add('badge-initial-hide');
-            }
-        }
-        if (upList) {
-            clearElement(upList);
-            upcoming.slice(0, 3).forEach(item => {
-                upList.appendChild(renderMiniItem(item, today));
-            });
-        }
-
-        // Update UI Badge Urgenze (Scadute)
-        const exBadge = document.getElementById('expired-count-badge');
-        const exCount = document.getElementById('expired-count');
-        const exList = document.getElementById('expired-list-container');
-
-        if (exCount) exCount.textContent = expired.length;
-        if (exBadge) {
-            if (expired.length > 0) {
-                exBadge.classList.remove('badge-initial-hide');
-            } else {
-                exBadge.classList.add('badge-initial-hide');
-            }
-        }
-        if (exList) {
-            clearElement(exList);
-            expired.slice(0, 3).forEach(item => {
-                exList.appendChild(renderMiniItem(item, today));
-            });
-        }
-
-    } catch (e) {
-        console.error("Errore caricamento dashboard:", e);
-    }
-}
-
-function renderMiniItem(item, today) {
-    const diffTime = item.dateObj - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    let labelText = "";
-    if (diffDays < 0) labelText = t('expired');
-    else if (diffDays === 0) labelText = t('today');
-    else if (diffDays === 1) labelText = t('tomorrow');
-    else labelText = `${diffDays}g`;
-
-    const titleText = deadlinePresentation(item).category;
-
-    return createElement('div', { className: 'dashboard-list-item' }, [
-        createElement('div', { className: 'item-icon-box' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: item.icon || 'event' })
-        ]),
-        createElement('span', { className: 'item-title', textContent: titleText }),
-        createElement('span', { className: 'item-badge', textContent: labelText })
-    ]);
 }
 
 // --- FAB GROUP (Quick Add Actions) ---
