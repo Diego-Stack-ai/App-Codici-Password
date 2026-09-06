@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * AGGIUNGI SCADENZA MODULE (V4.1)
  * Gestisce l'aggiunta o la modifica di scadenze.
@@ -19,6 +18,7 @@ import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
+import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -267,19 +267,19 @@ function initialStaticLoad() {
 async function loadDynamicConfig() {
     if (!currentUser) return;
     try {
-        const [autoSnap, docSnap, genSnap, userSnap, contactsSnap] = await Promise.all([
-            getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig")),
-            getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments")),
-            getDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig")),
-            getDoc(doc(db, "users", currentUser.uid)),
-            getDocs(collection(db, "users", currentUser.uid, "contacts"))
+        const [autoConfig, documentConfig, generalConfig, userProfile, contacts] = await Promise.all([
+            getUserSetting(currentUser.uid, 'deadlineConfig'),
+            getUserSetting(currentUser.uid, 'deadlineConfigDocuments'),
+            getUserSetting(currentUser.uid, 'generalConfig'),
+            getUserProfile(currentUser.uid),
+            listContacts(currentUser.uid)
         ]);
 
-        const rawGenData = genSnap.exists() ? genSnap.data() : {};
+        const rawGenData = generalConfig || {};
 
         let notificationEmails = rawGenData.notificationEmails || [];
-        if (notificationEmails.length === 0 && userSnap.exists()) {
-            const userData = userSnap.data();
+        if (notificationEmails.length === 0 && userProfile) {
+            const userData = userProfile;
             const contactEmails = (userData.contactEmails || []).filter(e => e && e.address).map(e => e.address);
             if (contactEmails.length > 0) {
                 notificationEmails = contactEmails;
@@ -293,8 +293,7 @@ async function loadDynamicConfig() {
 
         unifiedConfigs.generali = { deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: [], ...rawGenData };
         populateEmailSelects(unifiedConfigs.generali.notificationEmails);
-        recipientContacts = contactsSnap.docs.map(contactDoc => ({ id: contactDoc.id, ...contactDoc.data() }))
-            .filter(contact => contact.active !== false);
+        recipientContacts = contacts.filter(contact => contact.active !== false);
         notificationEmails.forEach(email => {
             const normalized = normalizeRecipientEmail(email);
             if (normalized && !recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === normalized)) {
@@ -328,8 +327,8 @@ async function loadDynamicConfig() {
                 "Olio motore da controllare"
             ]
         };
-        const dAuto = autoSnap.exists() ? autoSnap.data() : defaultAuto;
-        if (!autoSnap.exists()) {
+        const dAuto = autoConfig || defaultAuto;
+        if (!autoConfig) {
             setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfig"), defaultAuto);
         }
         unifiedConfigs.automezzi = { deadlineTypes: [], models: [], emailTemplates: [], names: [], notificationEmails: [], ...dAuto };
@@ -351,8 +350,8 @@ async function loadDynamicConfig() {
                 "Il tuo codice fiscale"
             ]
         };
-        const dDoc = docSnap.exists() ? docSnap.data() : defaultDoc;
-        if (!docSnap.exists()) {
+        const dDoc = documentConfig || defaultDoc;
+        if (!documentConfig) {
             setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), defaultDoc);
         }
         unifiedConfigs.documenti = { deadlineTypes: [], models: [], emailTemplates: [], names: [], notificationEmails: [], ...dDoc };
@@ -375,9 +374,9 @@ async function loadDynamicConfig() {
                 "Isola ecologica"
             ]
         };
-        const dGen = genSnap.exists() ? rawGenData : defaultGen;
+        const dGen = generalConfig ? rawGenData : defaultGen;
         // Seed se documento assente O se deadlineTypes è vuoto (documento incompleto)
-        const needsSeedGen = !genSnap.exists() || !rawGenData.deadlineTypes || rawGenData.deadlineTypes.length === 0;
+        const needsSeedGen = !generalConfig || !rawGenData.deadlineTypes || rawGenData.deadlineTypes.length === 0;
         if (needsSeedGen) {
             const mergedGen = { ...defaultGen, notificationEmails: rawGenData.notificationEmails || [] };
             setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), mergedGen, { merge: true });
@@ -951,8 +950,8 @@ function setupSaveLogic() {
 
             if (editingScadenzaId && linkedSourceRef?.type === 'profileDocument') {
                 const profileRef = doc(db, 'users', currentUser.uid);
-                const profileSnap = await getDoc(profileRef);
-                const documents = profileSnap.data()?.documenti || [];
+                const profile = await getUserProfile(currentUser.uid);
+                const documents = profile?.documenti || [];
                 const batch = writeBatch(db);
                 batch.update(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
                 batch.update(profileRef, {
@@ -965,8 +964,8 @@ function setupSaveLogic() {
                 const deadlineRef = doc(collection(db, "users", currentUser.uid, "scadenze"));
                 finalDocId = deadlineRef.id;
                 const profileRef = doc(db, 'users', currentUser.uid);
-                const profileSnap = await getDoc(profileRef);
-                const documents = profileSnap.data()?.documenti || [];
+                const profile = await getUserProfile(currentUser.uid);
+                const documents = profile?.documenti || [];
                 const batch = writeBatch(db);
                 batch.set(deadlineRef, scadenzaData);
                 batch.update(profileRef, {
@@ -1140,13 +1139,11 @@ async function showSuccessModal() {
 
 async function loadScadenzaForEdit(id) {
     try {
-        const snap = await getDoc(doc(db, "users", currentUser.uid, "scadenze", id));
-        if (!snap.exists()) {
+        const data = await getDeadline(currentUser.uid, id);
+        if (!data) {
             showToast("Scadenza non trovata", "error");
             return;
         }
-
-        const data = snap.data();
         linkedSourceRef = data.sourceRef || null;
 
         // 1. Identifica il Mode corretto in base al tipo salvato

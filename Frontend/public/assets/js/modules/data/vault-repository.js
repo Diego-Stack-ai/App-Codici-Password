@@ -50,6 +50,12 @@ export const listCompanyAccounts = (uid, companyId) => readRecords(`company-acco
 export const listDeadlines = uid => readRecords(`deadlines:${uid}`,
     collection(db, 'users', uid, 'scadenze'));
 
+export const getDeadline = (uid, deadlineId) =>
+    getRecordByPath(`users/${uid}/scadenze/${deadlineId}`);
+
+export const getDeadlineNotification = (uid, notificationId) =>
+    getRecordByPath(`users/${uid}/deadlineNotifications/${notificationId}`);
+
 export const listContacts = uid => readRecords(`contacts:${uid}`,
     collection(db, 'users', uid, 'contacts'));
 

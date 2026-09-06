@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO SCADENZA MODULE (V4.1)
  * Gestisce la visualizzazione del dettaglio di una scadenza.
@@ -14,14 +13,10 @@ import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
+import { getDeadline, getDeadlineNotification, getUserProfile } from '../data/vault-repository.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
-
-async function getScadenza(userId, scadenzaId) {
-    const snapshot = await getDoc(doc(db, 'users', userId, 'scadenze', scadenzaId));
-    return snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null;
-}
 
 async function deleteScadenza(userId, scadenzaId) {
     if (currentScadenza?.sourceRef?.type !== 'profileDocument') {
@@ -29,8 +24,8 @@ async function deleteScadenza(userId, scadenzaId) {
         return;
     }
     const profileRef = doc(db, 'users', userId);
-    const profileSnap = await getDoc(profileRef);
-    const documents = profileSnap.data()?.documenti || [];
+    const profile = await getUserProfile(userId);
+    const documents = profile?.documenti || [];
     const batch = writeBatch(db);
     batch.delete(doc(db, 'users', userId, 'scadenze', scadenzaId));
     batch.update(profileRef, {
@@ -57,7 +52,7 @@ export async function initDettaglioScadenza(user) {
 
 async function loadScadenza(uid) {
     try {
-        currentScadenza = await getScadenza(uid, currentScadenzaId);
+        currentScadenza = await getDeadline(uid, currentScadenzaId);
         if (!currentScadenza) {
             showToast("Scadenza non trovata", "error");
             return;
@@ -74,8 +69,8 @@ async function markOpenedDeadlineNotification(uid) {
     if (!notificationId) return;
     try {
         const notificationRef = doc(db, 'users', uid, 'deadlineNotifications', notificationId);
-        const notification = await getDoc(notificationRef);
-        if (notification.exists() && notification.data().deadlineId === currentScadenzaId && notification.data().status === 'unread') {
+        const notification = await getDeadlineNotification(uid, notificationId);
+        if (notification?.deadlineId === currentScadenzaId && notification.status === 'unread') {
             await updateDoc(notificationRef, { status: 'viewed', readAt: serverTimestamp() });
         }
     } catch (error) {

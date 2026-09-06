@@ -1,16 +1,16 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * CONFIGURAZIONE DOCUMENTI MODULE (V4.1)
  * Gestisce la configurazione delle scadenze per documenti.
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth } from '../../firebase-config.js?v=1.2.52';
+import { db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
+import { getUserSetting } from '../data/vault-repository.js';
 
 const DEFAULT_CONFIG = {
     deadlineTypes: [
@@ -87,9 +87,9 @@ export async function initConfigurazioneDocumenti(user) {
 
 async function loadConfig() {
     try {
-        const snap = await getDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"));
-        if (snap.exists()) {
-            currentConfig = snap.data();
+        const storedConfig = await getUserSetting(currentUser.uid, 'deadlineConfigDocuments');
+        if (storedConfig) {
+            currentConfig = storedConfig;
             if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
             if (!currentConfig.models) currentConfig.models = [];
             if (!currentConfig.emailTemplates) currentConfig.emailTemplates = [];

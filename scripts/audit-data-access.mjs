@@ -29,7 +29,12 @@ const migratedPages = await Promise.all([
     'Frontend/public/assets/js/modules/privato/profilo-widgets.js',
     'Frontend/public/assets/js/modules/privato/form_account_privato.js',
     'Frontend/public/assets/js/modules/azienda/form_account_azienda.js',
-    'Frontend/public/assets/js/modules/settings/impostazioni.js'
+    'Frontend/public/assets/js/modules/settings/impostazioni.js',
+    'Frontend/public/assets/js/modules/scadenze/configurazione_generali.js',
+    'Frontend/public/assets/js/modules/scadenze/configurazione_documenti.js',
+    'Frontend/public/assets/js/modules/scadenze/configurazione_automezzi.js',
+    'Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js',
+    'Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js'
 ].map(read));
 
 assert.ok(migratedPages.every(source => !source.includes('offline-firestore.js')),
