@@ -2,6 +2,9 @@
 // impedisce che assegnare la versione a <html> cancelli l'intera pagina.
 (() => {
     const root = document.documentElement;
+    if (new URLSearchParams(window.location.search).get('visual') === 'ab532e2') {
+        root.classList.add('legacy-home-comparison');
+    }
     const descriptor = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent');
     if (!descriptor) return;
 

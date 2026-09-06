@@ -3,8 +3,8 @@
  * Caricato soltanto dentro home_confronto.html: non modifica l'app canonica.
  */
 @media (max-width: 600px) {
-    html,
-    body {
+    html.legacy-home-comparison,
+    html.legacy-home-comparison body {
         width: 100%;
         height: auto;
         min-height: 100%;
@@ -13,7 +13,7 @@
         overscroll-behavior-y: none;
     }
 
-    .base-bg {
+    html.legacy-home-comparison .base-bg {
         height: auto;
         min-height: 100vh;
         overflow-x: hidden;
@@ -23,21 +23,21 @@
         background-size: 100% 100%;
     }
 
-    .base-container {
+    html.legacy-home-comparison .base-container {
         height: auto;
         min-height: 100vh;
         padding: max(1.25rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(1.25rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
         overflow: visible;
     }
 
-    .base-main {
+    html.legacy-home-comparison .base-main {
         min-height: auto;
         overflow: visible;
         overscroll-behavior-y: auto;
     }
 
-    .base-header,
-    .base-footer {
+    html.legacy-home-comparison .base-header,
+    html.legacy-home-comparison .base-footer {
         position: fixed;
         left: 0;
         right: 0;
@@ -56,7 +56,7 @@
         isolation: isolate;
     }
 
-    .base-header {
+    html.legacy-home-comparison .base-header {
         top: 0;
         background: linear-gradient(to bottom,
                 color-mix(in srgb, var(--bg-primary) 92%, transparent) 0%,
@@ -65,7 +65,7 @@
         border-bottom-color: transparent;
     }
 
-    .base-footer {
+    html.legacy-home-comparison .base-footer {
         bottom: 0;
         background: linear-gradient(to top,
                 color-mix(in srgb, var(--bg-primary) 94%, transparent) 0%,
@@ -74,11 +74,11 @@
         border-top-color: transparent;
     }
 
-    .base-main > .page-container.pt-header-extra {
+    html.legacy-home-comparison .base-main > .page-container.pt-header-extra {
         padding-top: 7.5rem;
     }
 
-    .base-main > .page-container.pb-footer-extra {
+    html.legacy-home-comparison .base-main > .page-container.pb-footer-extra {
         padding-bottom: 7.5rem;
     }
 }
