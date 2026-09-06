@@ -1,0 +1,84 @@
+/*
+ * Confronto isolato delle fasce mobili al commit ab532e2.
+ * Caricato soltanto dentro home_confronto.html: non modifica l'app canonica.
+ */
+@media (max-width: 600px) {
+    html,
+    body {
+        width: 100%;
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior-y: none;
+    }
+
+    .base-bg {
+        height: auto;
+        min-height: 100vh;
+        overflow-x: hidden;
+        overflow-y: visible;
+        background-attachment: scroll;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+    }
+
+    .base-container {
+        height: auto;
+        min-height: 100vh;
+        padding: max(1.25rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(1.25rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+        overflow: visible;
+    }
+
+    .base-main {
+        min-height: auto;
+        overflow: visible;
+        overscroll-behavior-y: auto;
+    }
+
+    .base-header,
+    .base-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        width: auto;
+        max-width: none;
+        flex-shrink: 1;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        mask-image: none;
+        -webkit-mask-image: none;
+        transform: none;
+        will-change: auto;
+        backface-visibility: visible;
+        -webkit-backface-visibility: visible;
+        contain: layout paint;
+        isolation: isolate;
+    }
+
+    .base-header {
+        top: 0;
+        background: linear-gradient(to bottom,
+                color-mix(in srgb, var(--bg-primary) 92%, transparent) 0%,
+                color-mix(in srgb, var(--bg-primary) 82%, transparent) 72%,
+                transparent 100%);
+        border-bottom-color: transparent;
+    }
+
+    .base-footer {
+        bottom: 0;
+        background: linear-gradient(to top,
+                color-mix(in srgb, var(--bg-primary) 94%, transparent) 0%,
+                color-mix(in srgb, var(--bg-primary) 84%, transparent) 72%,
+                transparent 100%);
+        border-top-color: transparent;
+    }
+
+    .base-main > .page-container.pt-header-extra {
+        padding-top: 7.5rem;
+    }
+
+    .base-main > .page-container.pb-footer-extra {
+        padding-bottom: 7.5rem;
+    }
+}
