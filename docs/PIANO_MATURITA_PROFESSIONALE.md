@@ -167,6 +167,8 @@ M2 completata: i moduli applicativi usano il repository unico; richieste equival
 
 ### M3 — Rifattorizzazione delle pagine
 
+Registro canonico e redirect di compatibilità formalizzati in `CANONICAL_PAGE_REGISTRY.md`; il gate automatico impedisce che le vecchie Home vengano trattate come pagine applicative.
+
 Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 
 1. [x] Profilo Utente unico;

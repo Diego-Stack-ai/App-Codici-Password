@@ -8,7 +8,7 @@ const publicRoot = path.join(root, 'Frontend', 'public');
 const output = path.join(root, 'docs', 'PAGE_PERFORMANCE_BASELINE.md');
 const budgetFile = path.join(root, 'scripts', 'page-performance-budget.json');
 const checkOnly = process.argv.includes('--check');
-const excludedPages = new Set(['home-v126.html', 'home-v127.html']);
+const excludedPages = new Set(['home-v126.html', 'home-v127.html', 'home-v128.html', 'home-v129.html']);
 const pageModules = {
   'account_azienda.html': 'assets/js/modules/azienda/account_azienda.js',
   'account_privati.html': 'assets/js/modules/privato/account_privati.js',
