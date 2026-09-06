@@ -9,19 +9,19 @@
     <title data-t="title_settings">Impostazioni - PROTOCOLLO BASE V5.0</title>
 
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.49" />
+    <link rel="manifest" href="manifest.json?v=1.2.50" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.49">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.50">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.49">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.50">
 
-    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.49">
+    <link rel="stylesheet" href="assets/css/impostazioni.css?v=1.2.50">
 </head>
 
 <body class="base-bg">
@@ -344,6 +344,37 @@
                         </div>
                     </div>
 
+                </div>
+
+                <!-- Diagnostica prestazioni: locale, volontaria e priva di contenuti utente -->
+                <div class="settings-container mt-section">
+                    <h3 class="settings-desc">Diagnostica</h3>
+                    <div class="settings-item settings-item-stack">
+                        <div class="settings-item-header-row">
+                            <div class="settings-icon-box icon-blue">
+                                <span class="material-symbols-outlined">speed</span>
+                            </div>
+                            <div class="settings-item-info">
+                                <span class="settings-label">Misura velocità app</span>
+                                <span class="settings-desc">Solo tempi, conteggi e stato rete su questo dispositivo. Nessun dato della Vault.</span>
+                            </div>
+                            <input type="checkbox" id="performance-diagnostics-toggle" class="settings-toggle" aria-label="Misura velocità app">
+                        </div>
+                        <div id="performance-diagnostics-panel" class="diagnostics-panel hidden">
+                            <div id="performance-diagnostics-summary" aria-live="polite"></div>
+                            <div class="diagnostics-actions">
+                                <button type="button" id="btn-refresh-performance-diagnostics" class="btn-maintenance-accent">
+                                    <span class="material-symbols-outlined">refresh</span>Aggiorna
+                                </button>
+                                <button type="button" id="btn-copy-performance-diagnostics" class="btn-maintenance-accent">
+                                    <span class="material-symbols-outlined">content_copy</span>Copia report
+                                </button>
+                                <button type="button" id="btn-clear-performance-diagnostics" class="btn-maintenance-danger">
+                                    <span class="material-symbols-outlined">delete_sweep</span>Cancella misure
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Supporto e Info -->

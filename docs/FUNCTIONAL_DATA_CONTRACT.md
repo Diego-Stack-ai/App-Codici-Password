@@ -70,3 +70,5 @@ Le Scadenze nuove usano `recipients[]` con `contactId?`, `displayName`, `email`,
 Ogni sostituzione deve conservare: percorso dati leggibile, schema legacy, Rules, cifratura, navigazione diretta, consultazione offline prevista e test. Un vecchio percorso può essere rimosso soltanto dopo confronto con questo catalogo e collaudo sul dataset M0.
 
 I budget statici sono applicati da `npm run test:performance-budget`. Gli obiettivi runtime in `scripts/page-performance-budget.json` diventano bloccanti soltanto dopo una baseline ripetibile su dispositivi reali; fino ad allora non costituiscono una dichiarazione delle prestazioni correnti.
+
+La diagnostica runtime è attivabile nelle Impostazioni del singolo dispositivo. Conserva localmente al massimo 80 campioni con nome della fase, durata, pagina, stato rete e conteggi tecnici ammessi da una lista chiusa. Non registra contenuti, identificativi utente, email, URL visitati, token, credenziali o valori decifrati; disattivandola vengono cancellati i campioni persistiti.

@@ -5,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.49';
+import { auth, db } from '../../firebase-config.js?v=1.2.50';
 import { onAuthStateChanged, signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -98,7 +98,7 @@ export async function initHomePage(user) {
     if (assistantEnabled) {
         try {
             document.getElementById('ai-assistant-status')?.classList.remove('hidden');
-            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.49');
+            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.50');
             await initVaultAssistant(user, { includeCompanies: companyAreaEnabled });
         } catch (error) {
             console.warn('[ASSISTANT] Avvio non riuscito.', error);

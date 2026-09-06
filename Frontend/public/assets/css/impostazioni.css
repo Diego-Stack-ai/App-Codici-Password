@@ -662,6 +662,58 @@ h3.settings-desc {
     transform: scale(0.98);
 }
 
+.diagnostics-panel {
+    width: 100%;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--card-border);
+}
+
+.diagnostics-context {
+    margin: 0.75rem 0;
+    color: var(--text-secondary);
+    font: var(--font-input);
+}
+
+.diagnostics-sample-list {
+    display: grid;
+    gap: 0.45rem;
+    max-height: 18rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.diagnostics-sample {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font: var(--font-input);
+}
+
+.diagnostics-sample strong {
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.diagnostics-sample span {
+    text-align: right;
+}
+
+.diagnostics-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.diagnostics-actions button {
+    justify-content: center;
+    padding: 0.75rem;
+}
+
 .recovery-code-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -703,5 +755,17 @@ h3.settings-desc {
 
     .settings-controls-row {
         flex-wrap: wrap;
+    }
+
+    .diagnostics-sample {
+        flex-direction: column;
+    }
+
+    .diagnostics-sample span {
+        text-align: left;
+    }
+
+    .diagnostics-actions {
+        grid-template-columns: 1fr;
     }
 }

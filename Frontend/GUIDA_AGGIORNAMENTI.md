@@ -435,3 +435,10 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Aggiunto `test:maturity-fixture` alla suite per impedire l'introduzione accidentale di email o credenziali reali nel dataset M0.
 - Definito `scripts/page-performance-budget.json`: soglie statiche iniziali e obiettivi runtime. I valori runtime sono obiettivi, non risultati, finché non vengono misurati su iPhone e PC.
 - M0 resta in corso: manca la baseline runtime reale su entrambi i dispositivi.
+
+# Pannello diagnostico runtime M0 (06/09/2026)
+
+- Aggiunto nelle Impostazioni il comando locale «Misura velocità app», disattivato per impostazione iniziale.
+- Il pannello conserva al massimo 80 misure tecniche tra le pagine e mostra bootstrap, navigazione, stato online/offline, conteggio risorse e traffico trasferito disponibile.
+- La raccolta usa una lista chiusa di dettagli ammessi: non salva email, UID, URL, token, contenuti della Vault o dati decifrati.
+- Sono disponibili aggiornamento, copia del report tecnico e cancellazione; la disattivazione elimina automaticamente le misure dal dispositivo.

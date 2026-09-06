@@ -4,7 +4,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.49';
+import { auth, db } from '../../firebase-config.js?v=1.2.50';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -15,6 +15,7 @@ import { decrypt, ensureMasterKey, clearSession, resetVault, isBiometricUnlockCo
 import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
 import { disableDeadlinePush, disableSharingPush, enableDeadlinePush, enableSharingPush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
+import { clearPerformanceSamples, getPerformanceDiagnosticReport, isPerformanceDiagnosticsEnabled, setPerformanceDiagnosticsEnabled } from '../../performance-metrics.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -37,11 +38,71 @@ export async function initImpostazioni(user) {
     setupAppInfo();
     setupPrivacyShort();
     setupTermsShort();
+    setupPerformanceDiagnostics();
     await setupDeadlinePush(user);
     await setupSharingPush(user);
     showPendingSecurityNotice();
 
     
+}
+
+function setupPerformanceDiagnostics() {
+    const toggle = document.getElementById('performance-diagnostics-toggle');
+    const panel = document.getElementById('performance-diagnostics-panel');
+    const summary = document.getElementById('performance-diagnostics-summary');
+    if (!toggle || !panel || !summary) return;
+
+    const render = () => {
+        const report = getPerformanceDiagnosticReport();
+        toggle.checked = report.enabled;
+        panel.classList.toggle('hidden', !report.enabled);
+        clearElement(summary);
+        if (!report.enabled) return;
+
+        const latest = report.samples.slice(-12).reverse();
+        const context = createElement('p', {
+            className: 'diagnostics-context',
+            textContent: `${report.context.online ? 'Online' : 'Offline'} · ${report.context.deviceClass} · schermo ${report.context.viewport} · rete ${report.context.connection}`
+        });
+        const list = createElement('div', { className: 'diagnostics-sample-list' });
+        if (!latest.length) {
+            list.appendChild(createElement('p', { className: 'settings-desc', textContent: 'Nessuna misura registrata. Naviga nell’app e torna qui.' }));
+        } else {
+            latest.forEach(sample => {
+                const details = [sample.page, `${sample.durationMs} ms`];
+                if (Number.isFinite(sample.records)) details.push(`${sample.records} record`);
+                if (Number.isFinite(sample.resources)) details.push(`${sample.resources} risorse`);
+                if (Number.isFinite(sample.transferKb)) details.push(`${sample.transferKb} KB rete`);
+                list.appendChild(createElement('div', { className: 'diagnostics-sample' }, [
+                    createElement('strong', { textContent: sample.name }),
+                    createElement('span', { textContent: details.filter(Boolean).join(' · ') })
+                ]));
+            });
+        }
+        setChildren(summary, context, list);
+    };
+
+    toggle.addEventListener('change', () => {
+        setPerformanceDiagnosticsEnabled(toggle.checked);
+        render();
+        showToast(toggle.checked ? 'Diagnostica locale attivata' : 'Diagnostica disattivata e misure cancellate', 'success');
+    });
+    document.getElementById('btn-refresh-performance-diagnostics')?.addEventListener('click', render);
+    document.getElementById('btn-clear-performance-diagnostics')?.addEventListener('click', () => {
+        clearPerformanceSamples();
+        render();
+        showToast('Misure diagnostiche cancellate', 'success');
+    });
+    document.getElementById('btn-copy-performance-diagnostics')?.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(JSON.stringify(getPerformanceDiagnosticReport(), null, 2));
+            showToast('Report tecnico copiato', 'success');
+        } catch {
+            showToast('Copia non disponibile su questo dispositivo', 'error');
+        }
+    });
+    window.addEventListener('codex:performance', render);
+    render();
 }
 
 function setupCompanyAreaToggle(user, data) {
