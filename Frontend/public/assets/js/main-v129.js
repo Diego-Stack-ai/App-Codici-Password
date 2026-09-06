@@ -27,7 +27,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.47';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.48';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.47';
+import * as Pages from './pages-init.js?v=1.2.48';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric } from './performance-metrics.js';
@@ -63,7 +63,6 @@ function getCurrentPage() {
 
     // Settings & Profile
     if (path.includes('archivio_account')) return 'archivio';
-    if (path.includes('profilo_privato_v2')) return 'profilo_v2';
     if (path.includes('profilo_privato')) return 'profilo';
     if (path.includes('impostazioni')) return 'impostazioni';
     if (path.includes('gestione_destinatari')) return 'gestione_destinatari';
@@ -248,7 +247,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     case 'archivio': await Pages.initArchivioAccount(user); break;
                     case 'profilo': await Pages.initProfiloPrivato(user); break;
-                    case 'profilo_v2': await Pages.initProfiloPrivatoV2(user); break;
 
                     case 'scadenze': await Pages.initScadenze(user); break;
                     case 'aggiungi_scadenza': await Pages.initAggiungiScadenza(user); break;

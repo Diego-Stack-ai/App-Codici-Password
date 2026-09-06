@@ -25,7 +25,6 @@ export function initAddressesDocsModule(getState, callbacks) {
     _getState = getState;
     _callbacks = callbacks;
 }
-
 // ─── Helper locale ────────────────────────────────────────────────────────────
 
 function createCopyBtn(text) {
@@ -42,7 +41,6 @@ function createCopyBtn(text) {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })
     ]);
 }
-
 // ─── ADDRESSES ───────────────────────────────────────────────────────────────
 
 export function renderAddressesView() {
@@ -89,8 +87,8 @@ function _createAddressCard(addr, idx) {
                     createElement('input', {
                         type: 'checkbox',
                         className: 'qr-checkbox',
-                        checked: qrCodeInclusions.addresses.includes(idx),
-                        onclick: (e) => { e.stopPropagation(); _callbacks.toggleQRInclusion('addresses', idx); }
+                        checked: qrCodeInclusions.addresses.includes(addr.id) || qrCodeInclusions.addresses.includes(idx),
+                        onclick: (e) => { e.stopPropagation(); _callbacks.toggleQRInclusion('addresses', addr.id); }
                     }),
                     createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
                     createElement('span', { className: 'data-label', textContent: t('label_address') })
@@ -174,7 +172,7 @@ export function renderDocumentiView() {
         if (docItem.luogo_rilascio) subDetails.push(docItem.luogo_rilascio);
         if (docItem.id_number) subDetails.push(docItem.id_number);
 
-        return createElement('div', { className: 'form-card', dataset: { assistantDocIndex: idx } }, [
+        return createElement('div', { className: 'form-card', dataset: { assistantDocIndex: idx, profileDocumentId: docItem.id } }, [
             createElement('div', { className: 'card-header-row' }, [
                 createElement('div', { className: 'card-icon-stack' }, [
                     createElement('div', { className: 'card-icon-box' }, [
@@ -266,7 +264,12 @@ export function renderDocumentiView() {
                     docItem.note ? createElement('p', {
                         className: 'note-text document-note',
                         textContent: docItem.note
-                    }) : null
+                    }) : null,
+                    createElement('button', {
+                        className: 'btn-upload-trigger',
+                        textContent: docItem.expiryReference?.deadlineId ? 'Apri scadenza collegata' : 'Crea scadenza collegata',
+                        onclick: () => _callbacks.createDeadlineFromDocument(docItem)
+                    })
                 ])
             ])
         ]);

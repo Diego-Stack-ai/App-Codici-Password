@@ -399,3 +399,13 @@ La nuova architettura potrà essere dichiarata pronta soltanto quando:
 ### 10.8 Decisione raccomandata
 
 La priorità successiva non è aggiungere altre funzioni. È completare **P0 e P1**, misurare il miglioramento e poi costruire il repository local-first. L'attuale sincronizzazione globale della 1.2.38 va considerata una misura temporanea di affidabilità, non la soluzione definitiva. L'AI, gli allegati offline e le scritture senza rete restano subordinate al superamento dei gate prestazionali e di sicurezza.
+
+## 11. Versione 1.2.48 — Profilo Utente unico e caricamento progressivo
+
+- La precedente pagina **Profilo Utente V2** è diventata la pagina canonica `profilo_privato.html`; la vecchia pagina Profilo e tutti i duplicati con suffisso `v2` sono stati rimossi.
+- Navigazione, Impostazioni, inizializzazione delle pagine e shell offline puntano ora a un solo Profilo Utente.
+- Il primo contenuto del Profilo non attende più il caricamento dei widget personalizzati: i widget vengono inizializzati in background e aggiornano la vista quando disponibili.
+- Le impostazioni delle etichette e del QR vengono lette in parallelo anziché in sequenza.
+- Tessera digitale e QR vengono generati in modo differito e, quando possibile, soltanto all'apertura della relativa scheda.
+- La scelta UX delle liste Account resta intenzionalmente invariata: username, account e password continuano a essere disponibili direttamente nelle card autorizzate. La decifratura progressiva va applicata agli altri dati non visibili senza trasformare il dettaglio in un passaggio obbligatorio per consultare le credenziali.
+- La nuova struttura riduce il lavoro bloccante prima del rendering, ma il miglioramento percepito deve essere confermato con una prova reale su iPhone e PC.

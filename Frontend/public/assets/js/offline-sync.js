@@ -1,5 +1,5 @@
 import { collection, getDocsFromServer } from "/assets/js/vendor/firebase-runtime.js";
-import { db } from './firebase-config.js?v=1.2.47';
+import { db } from './firebase-config.js?v=1.2.48';
 import { startMetric, endMetric } from './performance-metrics.js';
 
 const CORE_COLLECTIONS = [
@@ -19,7 +19,6 @@ const PAGE_PRIORITIES = {
     account_azienda: ['aziende'],
     scadenze: ['scadenze', 'deadlineNotifications'],
     profilo: ['profileWidgets', 'contacts'],
-    profilo_v2: ['profileWidgets', 'contacts'],
     impostazioni: ['settings', 'contacts']
 };
 

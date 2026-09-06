@@ -20,9 +20,10 @@
  */
 
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { auth, db } from '../../firebase-config.js?v=1.2.47';
+import { auth, db } from '../../firebase-config.js?v=1.2.48';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
+import { createProfileItemId } from './profile-model.js';
 import { logError } from '../../utils.js';
 import { encrypt, ensureMasterKey } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
@@ -70,7 +71,6 @@ export async function editSection(sectionId, ctx) {
         });
     }
 }
-
 /**
  * Apre il modal per aggiungere o modificare un indirizzo.
  * @param {number} idx - Indice indirizzo, -1 per nuovo
@@ -88,11 +88,16 @@ export async function editAddress(idx, ctx) {
         { key: 'civic', label: 'Civico', icon: 'numbers' },
         { key: 'cap', label: 'CAP', icon: 'mail_outline' },
         { key: 'city', label: 'Città', icon: 'location_city' },
-        { key: 'province', label: 'Provincia', icon: 'map' }
+        { key: 'province', label: 'Provincia', icon: 'map' },
+        { key: 'primaryChoice', label: 'Indirizzo principale', icon: 'star', type: 'select', options: ['No', 'Sì'] }
     ];
 
-    showProfileModal(isNew ? 'Nuovo Indirizzo' : 'Modifica Indirizzo', fields, addr, async (newData) => {
+    showProfileModal(isNew ? 'Nuovo Indirizzo' : 'Modifica Indirizzo', fields, { ...addr, primaryChoice: addr.isPrimary ? 'Sì' : 'No' }, async (newData) => {
+        newData.isPrimary = newData.primaryChoice === 'Sì';
+        delete newData.primaryChoice;
+        if (newData.isPrimary) userAddresses.forEach(item => { item.isPrimary = false; });
         if (isNew) {
+            newData.id = createProfileItemId('address');
             newData.utilities = [];
             userAddresses.push(newData);
         } else {
@@ -102,7 +107,6 @@ export async function editAddress(idx, ctx) {
         renderAddressesView();
     });
 }
-
 /**
  * Apre il modal per aggiungere o modificare un documento.
  * @param {number} idx - Indice documento, -1 per nuovo
@@ -177,6 +181,7 @@ export async function editUserDocument(idx, ctx) {
             if (finalData.type.toLowerCase().includes('patente')) finalData.license_number = finalData.num_serie;
             if (finalData.type.toLowerCase().includes('fiscale')) finalData.cf_value = finalData.num_serie;
             if (isNew) {
+                finalData.id = createProfileItemId('document');
                 userDocuments.push(finalData);
             } else {
                 userDocuments[idx] = finalData;
@@ -209,12 +214,12 @@ export async function addUtility(addrIdx, ctx) {
     ];
     showProfileModal('Aggiungi Utenza', fields, {}, async (newData) => {
         if (!userAddresses[addrIdx].utilities) userAddresses[addrIdx].utilities = [];
+        newData.id = createProfileItemId('utility');
         userAddresses[addrIdx].utilities.push(newData);
         await syncData();
         renderAddressesView();
     });
 }
-
 /**
  * Apre il modal per modificare una utenza esistente.
  */
@@ -231,3 +236,6 @@ export async function editUtility(addrIdx, uIdx, ctx) {
         renderAddressesView();
     });
 }
+
+// Fine modulo azioni profilo.
+

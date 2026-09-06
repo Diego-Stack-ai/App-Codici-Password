@@ -9,7 +9,6 @@ export function initProfileDashboard(getState, callbacks) {
     _callbacks = callbacks;
     setupTabs();
     renderProfileOverview();
-    renderDigitalCard();
 }
 
 function setupTabs() {
@@ -43,6 +42,7 @@ export function activateProfileTab(name) {
         panel.classList.toggle('hidden', panel.dataset.profileTab !== name);
     });
     sessionStorage.setItem('profile-active-tab', name);
+    _callbacks?.onTabActivated?.(name);
 }
 
 export function renderProfileOverview() {
