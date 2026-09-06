@@ -13,6 +13,7 @@ import { getLastCryptoError } from '../core/crypto-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { getDeadline, getUserProfile, listCompanies, listDeadlineNotifications, listDeadlines } from '../data/vault-repository.js';
+import { deadlineDate, deadlinePresentation } from '../scadenze/deadline-model.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -199,7 +200,8 @@ async function renderDeadlineNotificationInbox(user) {
         const data = notification;
         const item = await getDeadline(user.uid, data.deadlineId);
         if (!item || item.completed) return null;
-        const label = `${item.type || 'Scadenza'}${item.veicolo_modello ? ` · ${item.veicolo_modello}` : ''}`;
+        const presentation = deadlinePresentation(item);
+        const label = `${presentation.category}${presentation.vehicle ? ` · ${presentation.vehicle}` : ''}`;
         const when = data.diffDays === 0 ? 'Scade oggi' : data.diffDays === 1 ? 'Scade domani' : `Scadenza tra ${data.diffDays} giorni`;
         return createElement('button', {
             className: 'deadline-inbox-item',
@@ -447,10 +449,8 @@ async function renderDashboardDeadlines(user) {
         deadlines.forEach(data => {
             if (data.completed) return;
 
-            const dueDateValue = data.dueDate || data.date;
-            if (!dueDateValue) return;
-
-            const dueDate = (dueDateValue && dueDateValue.toDate) ? dueDateValue.toDate() : new Date(dueDateValue);
+            const dueDate = deadlineDate(data);
+            if (!dueDate) return;
             dueDate.setHours(0, 0, 0, 0);
 
             if (dueDate < today) {
@@ -519,7 +519,7 @@ function renderMiniItem(item, today) {
     else if (diffDays === 1) labelText = t('tomorrow');
     else labelText = `${diffDays}g`;
 
-    const titleText = item.type || item.title || 'Scadenza Generale';
+    const titleText = deadlinePresentation(item).category;
 
     return createElement('div', { className: 'dashboard-list-item' }, [
         createElement('div', { className: 'item-icon-box' }, [
