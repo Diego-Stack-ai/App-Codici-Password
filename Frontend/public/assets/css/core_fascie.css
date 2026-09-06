@@ -31,21 +31,35 @@
 @media (max-width: 600px) {
     .base-header,
     .base-footer {
+        left: 0;
+        right: 0;
+        width: auto;
+        max-width: none;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         mask-image: none;
         -webkit-mask-image: none;
-        transform: translateX(-50%);
+        transform: none;
         will-change: auto;
+        backface-visibility: visible;
+        -webkit-backface-visibility: visible;
+        contain: layout paint;
+        isolation: isolate;
     }
 
     .base-header {
-        background: linear-gradient(to bottom, var(--card-bg) 0%, var(--card-bg) 68%, transparent 100%);
+        background: linear-gradient(to bottom,
+                color-mix(in srgb, var(--bg-primary) 92%, transparent) 0%,
+                color-mix(in srgb, var(--bg-primary) 82%, transparent) 72%,
+                transparent 100%);
         border-bottom-color: transparent;
     }
 
     .base-footer {
-        background: linear-gradient(to top, var(--card-bg) 0%, var(--card-bg) 58%, transparent 100%);
+        background: linear-gradient(to top,
+                color-mix(in srgb, var(--bg-primary) 94%, transparent) 0%,
+                color-mix(in srgb, var(--bg-primary) 84%, transparent) 72%,
+                transparent 100%);
         border-top-color: transparent;
     }
 

@@ -234,9 +234,19 @@ textarea::placeholder {
 }
 
 @media (max-width: 600px) {
+    html,
+    body {
+        min-height: 100%;
+        background-color: var(--bg-primary);
+        background-image: var(--base-box-gradient);
+        overscroll-behavior-y: none;
+    }
+
     .base-bg {
         /* background-attachment: fixed provoca repaint bianchi su Chromium mobile. */
         background-attachment: scroll;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
     }
 
     .base-container {
@@ -249,6 +259,7 @@ textarea::placeholder {
 
     .base-glow {
         /* Evita la ricomposizione continua di un layer fixed filtrato durante lo scroll. */
+        position: absolute;
         animation: none;
         filter: none;
         opacity: 0.55;
