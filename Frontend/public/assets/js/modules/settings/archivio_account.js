@@ -162,31 +162,28 @@ async function loadArchived() {
                 const companies = await listCompanies(currentUser.uid);
                 LOG(`[ARCHIVIO] Searching archived items in ${companies.length} companies...`);
 
-                for (const company of companies) {
-                    try {
-                        // Strategy V3.1: Fetch all and filter in-memory to avoid elusive index requirement on nested subcollections
-                        const accounts = await listCompanyAccounts(currentUser.uid, company.id);
-                        const archived = accounts
-                            .filter(acc => acc.isArchived === true);
-
-                        archived.forEach(acc => {
-                            results.push({ ...acc, context: company.id, businessName: company.ragioneSociale });
-                        });
-                    } catch (err) {
-                        console.warn(`[ARCHIVIO] Accesso limitato agli account dell'azienda ${company.id}.`, err.message);
-                    }
-                }
+                const companyResults = await Promise.allSettled(companies.map(async company => {
+                    // Letture indipendenti: un'azienda non accessibile non rallenta o blocca le altre.
+                    const accounts = await listCompanyAccounts(currentUser.uid, company.id);
+                    return accounts
+                        .filter(acc => acc.isArchived === true)
+                        .map(acc => ({ ...acc, context: company.id, businessName: company.ragioneSociale }));
+                }));
+                companyResults.forEach((result, index) => {
+                    if (result.status === 'fulfilled') results.push(...result.value);
+                    else console.warn(`[ARCHIVIO] Accesso limitato agli account dell'azienda ${companies[index].id}.`, result.reason?.message);
+                });
             } catch (err) {
                 console.error("[ARCHIVIO] Error listing companies:", err);
             }
         } else if (currentContext !== 'privato') {
             // Specific Company Context
             try {
-                // Fetch company data first to get the name
-                const company = await getCompany(currentUser.uid, currentContext);
+                const [company, accounts] = await Promise.all([
+                    getCompany(currentUser.uid, currentContext),
+                    listCompanyAccounts(currentUser.uid, currentContext)
+                ]);
                 const bData = company || { ragioneSociale: currentContext };
-
-                const accounts = await listCompanyAccounts(currentUser.uid, currentContext);
                 const archived = accounts
                     .filter(acc => acc.isArchived === true);
 
