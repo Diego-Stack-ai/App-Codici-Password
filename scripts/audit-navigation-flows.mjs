@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/home-deadline-inbox.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -29,5 +30,9 @@ if (/\bauth\.currentUser\b/.test(privateSharing)) {
 }
 assert.match(privateSharing, /const guestUid = wasAccepted[\s\S]+delete sharedWith\[normalizedEmail\]/,
     'La revoca privata perde l’UID ospite prima di creare la notifica');
+assert.match(homeDeadlineInbox, /unread\.slice\(0, 10\)/,
+    'La Home non limita il lavoro dell’inbox Scadenze');
+assert.match(homeDeadlineInbox, /dettaglio_scadenza\.html\?id=\$\{encodeURIComponent\(notification\.deadlineId\)\}&notification=\$\{encodeURIComponent\(notification\.id\)\}/,
+    'L’inbox Home non apre la Scadenza e la consegna specifiche');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');

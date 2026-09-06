@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **266**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **267**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/public/assets/js/modules/home/home-presentation.js` | JS | 3581 | 88 | Supporto frontend: home-presentation. |
+| `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 3389 | 71 | Supporto frontend: home-deadline-inbox. |
 | `Frontend/GUIDA.md` | MD | 60618 | 977 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 38951 | 467 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3618 | 78 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
@@ -103,7 +103,8 @@ File censiti: **266**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7279 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 672 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 4824 | 98 | Supporto frontend: vault-repository. |
-| `Frontend/public/assets/js/modules/home/home.js` | JS | 21425 | 529 | Supporto frontend: home. |
+| `Frontend/public/assets/js/modules/home/home-presentation.js` | JS | 3581 | 88 | Supporto frontend: home-presentation. |
+| `Frontend/public/assets/js/modules/home/home.js` | JS | 18432 | 473 | Supporto frontend: home. |
 | `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 19157 | 437 | Flusso profilo/account personali: account privati. |
 | `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 20879 | 503 | Flusso profilo/account personali: area privata. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 8386 | 218 | Flusso profilo/account personali: dettaglio-privato-attachments. |
@@ -189,7 +190,7 @@ File censiti: **266**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 6892 | 148 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 886 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 64542 | 825 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 7445 | 190 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 7496 | 191 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13777 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15328 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/registrati.html` | HTML | 7358 | 154 | Struttura della pagina registrati; comportamento demandato ai moduli. |
@@ -236,7 +237,7 @@ File censiti: **266**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 7232 | 75 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5430 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 16341 | 300 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 16340 | 300 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
 
@@ -303,7 +304,7 @@ File censiti: **266**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
 | `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
 | `scripts/audit-lightweight-features.mjs` | MJS | 2648 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
-| `scripts/audit-navigation-flows.mjs` | MJS | 2314 | 34 | Strumento manutenzione/test: audit-navigation-flows. |
+| `scripts/audit-navigation-flows.mjs` | MJS | 2777 | 39 | Strumento manutenzione/test: audit-navigation-flows. |
 | `scripts/audit-offline-shell.mjs` | MJS | 2896 | 54 | Strumento manutenzione/test: audit-offline-shell. |
 | `scripts/audit-page-performance.mjs` | MJS | 8053 | 146 | Strumento manutenzione/test: audit-page-performance. |
 | `scripts/audit-project-inventory.mjs` | MJS | 8409 | 127 | Strumento manutenzione/test: audit-project-inventory. |

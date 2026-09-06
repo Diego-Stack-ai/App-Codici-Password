@@ -11,9 +11,10 @@ import { decrypt, ensureVaultKeyMaterial, isAutoUnlockActive, resetVault } from 
 import { getLastCryptoError } from '../core/crypto-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
-import { getDeadline, getUserProfile, listCompanies, listDeadlineNotifications, listDeadlines } from '../data/vault-repository.js';
+import { getUserProfile, listCompanies, listDeadlines } from '../data/vault-repository.js';
 import { deadlineDate, deadlinePresentation } from '../scadenze/deadline-model.js';
 import { initHomePresentation } from './home-presentation.js';
+import { renderHomeDeadlineInbox } from './home-deadline-inbox.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -60,7 +61,7 @@ export async function initHomePage(user) {
         getUserProfile(user.uid),
         renderHeaderUser(user),
         renderDashboardDeadlines(user),
-        renderDeadlineNotificationInbox(user)
+        renderHomeDeadlineInbox(user)
     ]);
 
     const settingsData = settingsResult.status === 'fulfilled' ? settingsResult.value : null;
@@ -102,61 +103,6 @@ export async function initHomePage(user) {
     }
 
     
-}
-
-async function renderDeadlineNotificationInbox(user) {
-    const notifications = await listDeadlineNotifications(user.uid);
-    const unread = notifications
-        .filter((item) => item.status === 'unread')
-        .sort((left, right) => {
-            const leftTime = left.createdAt?.toMillis?.() || 0;
-            const rightTime = right.createdAt?.toMillis?.() || 0;
-            return rightTime - leftTime;
-        });
-    if (!unread.length || document.getElementById('deadline-inbox-modal')) return;
-
-    const entries = (await Promise.all(unread.slice(0, 10).map(async (notification) => {
-        const data = notification;
-        const item = await getDeadline(user.uid, data.deadlineId);
-        if (!item || item.completed) return null;
-        const presentation = deadlinePresentation(item);
-        const label = `${presentation.category}${presentation.vehicle ? ` · ${presentation.vehicle}` : ''}`;
-        const when = data.diffDays === 0 ? 'Scade oggi' : data.diffDays === 1 ? 'Scade domani' : `Scadenza tra ${data.diffDays} giorni`;
-        return createElement('button', {
-            className: 'deadline-inbox-item',
-            onclick: () => {
-                window.location.href = `dettaglio_scadenza.html?id=${encodeURIComponent(data.deadlineId)}&notification=${encodeURIComponent(notification.id)}`;
-            }
-        }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'notification_important' }),
-            createElement('span', { className: 'deadline-inbox-copy' }, [
-                createElement('strong', { textContent: label }),
-                createElement('small', { textContent: when })
-            ]),
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'chevron_right' })
-        ]);
-    }))).filter(Boolean);
-    if (!entries.length) return;
-
-    const modal = createElement('div', { id: 'deadline-inbox-modal', className: 'modal-overlay deadline-inbox-modal' }, [
-        createElement('div', { className: 'modal-box deadline-inbox-box' }, [
-            createElement('div', { className: 'deadline-inbox-heading' }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'notifications_active' }),
-                createElement('div', {}, [
-                    createElement('h2', { className: 'modal-title', textContent: 'Promemoria scadenze' }),
-                    createElement('p', { textContent: `${entries.length} avvis${entries.length === 1 ? 'o' : 'i'} da controllare` })
-                ])
-            ]),
-            createElement('div', { className: 'deadline-inbox-list' }, entries),
-            createElement('button', {
-                className: 'btn-modal btn-secondary',
-                textContent: 'Ricordamelo dopo',
-                onclick: () => modal.classList.remove('active')
-            })
-        ])
-    ]);
-    document.body.appendChild(modal);
-    requestAnimationFrame(() => modal.classList.add('active'));
 }
 
 /**
@@ -300,7 +246,6 @@ async function renderHeaderUser(user) {
         console.warn("Errore profilo Firestore:", e);
     }
 }
-
 // Helper per impostare l'immagine avatar
 function setAvatarImage(element, url) {
     if (!url) return;
@@ -525,4 +470,3 @@ function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
         document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
     }
 }
-
