@@ -4,11 +4,9 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth, storage } from '../../firebase-config.js?v=1.2.52';
+import { auth } from '../../firebase-config.js?v=1.2.52';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
-import { collection, addDoc, Timestamp, doc, updateDoc, setDoc, arrayUnion, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
-import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -16,14 +14,14 @@ import { showToast } from '../../ui-core-v129.js';
 
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
-import { ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
-import { getDeadline, getUserProfile } from '../data/vault-repository.js';
-import { deadlineRecipientFields, deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
+import { normalizeExternalUrl } from '../shared/attachment-security.js';
+import { getDeadline } from '../data/vault-repository.js';
+import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
 import { deadlineDateInputFields, deadlineInputDate } from './deadline-model.js';
 import { createDeadlineAttachmentController } from './deadline-attachment-controller.js';
 import { createDeadlineRecipientController } from './deadline-recipient-controller.js';
 import { createDeadlineConfigController } from './deadline-config-controller.js';
+import { saveDeadline } from './deadline-save-service.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -285,136 +283,40 @@ function setupSaveLogic() {
             ]);
             const btnText = document.getElementById('save-btn-text');
 
-            // --- 1. UPLOAD ALLEGATI (PRIMA della scrittura DB) ---
-            const uploadedAttachments = [];
-            const selectedFiles = attachmentController.getSelectedFiles();
-            if (selectedFiles.length > 0) {
-                const vaultKey = await ensureVaultKeyMaterial();
-                LOG(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
-                for (let i = 0; i < selectedFiles.length; i++) {
-                    const file = selectedFiles[i];
-                    validateAttachmentFile(file);
-                    if (btnText) btnText.textContent = `Upload ${i + 1}/${selectedFiles.length}...`;
-
-                    const folderId = editingScadenzaId || `new_${Date.now()}`;
-                    const storagePath = `users/${currentUser.uid}/scadenze/${folderId}/${createStorageObjectName(file)}`;
-                    const sRef = ref(storage, storagePath);
-
-                    const encryptedFile = await encryptAttachmentFile(file, vaultKey);
-                    const snap = await uploadBytes(sRef, encryptedFile.blob, {
-                        contentType: 'application/octet-stream',
-                        customMetadata: { encrypted: 'v1' }
-                    });
-                    const url = await getDownloadURL(snap.ref);
-
-                    uploadedAttachments.push({
-                        name: file.name,
-                        url: url,
-                        storagePath,
-                        type: file.type,
-                        size: file.size,
-                        encryption: encryptedFile.metadata,
-                        createdAt: new Date().toISOString()
-                    });
-                    LOG(`[FRONTEND-TRACE] File ${i + 1} caricato con successo.`);
-                }
-            }
-
-            // --- 2. COSTRUZIONE DOCUMENTO UNIFICATO ---
-            if (btnText) btnText.textContent = "Salvataggio DB...";
-            const finalAttachments = [...attachmentController.getExistingAttachments(), ...uploadedAttachments];
-
-            const recipientFields = deadlineRecipientFields(recipientController.getRecipients());
-            const recipients = recipientFields.recipients;
-            const scadenzaData = {
-                uid: currentUser.uid,
-                name: name,
-                type: type,
-                dueDate: date,
-                veicolo_modello: document.getElementById('modello_veicolo')?.value || '',
-                referenceUrl,
-                notes: document.getElementById('notes').value,
-                status: 'active',
-                completed: false,
-                attachments: finalAttachments,
-                updatedAt: Timestamp.now(),
+            const result = await saveDeadline({
+                user: currentUser,
+                editingDeadlineId: editingScadenzaId,
+                profileDocumentLinkDraft,
+                linkedSourceRef,
                 mode: currentMode,
-                templateText: document.getElementById('testo_email_select')?.value || '',
-                ...recipientFields,
-                notifChannel: 'multichannel',
-                notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
-                notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
-            };
-            if (profileDocumentLinkDraft?.profileDocumentId) {
-                scadenzaData.sourceRef = { type: 'profileDocument', id: profileDocumentLinkDraft.profileDocumentId };
-            } else if (linkedSourceRef?.type === 'profileDocument') {
-                scadenzaData.sourceRef = linkedSourceRef;
-            }
-
-            // Solo per le nuove scadenze aggiungiamo createdAt
-            if (!editingScadenzaId) {
-                scadenzaData.createdAt = Timestamp.now();
-            }
-
-            // --- 3. SCRITTURA UNICA (SINGLE WRITE) ---
-            let finalDocId = editingScadenzaId;
-            LOG("[FRONTEND-TRACE] Scrittura documento Firestore...");
-
-            if (editingScadenzaId && linkedSourceRef?.type === 'profileDocument') {
-                const profileRef = doc(db, 'users', currentUser.uid);
-                const profile = await getUserProfile(currentUser.uid);
-                const documents = profile?.documenti || [];
-                const batch = writeBatch(db);
-                batch.update(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
-                batch.update(profileRef, {
-                    documenti: documents.map(item => item.id === linkedSourceRef.id ? { ...item, expiry_date: date } : item)
-                });
-                await batch.commit();
-            } else if (editingScadenzaId) {
-                await updateDoc(doc(db, "users", currentUser.uid, "scadenze", editingScadenzaId), scadenzaData);
-            } else if (profileDocumentLinkDraft?.profileDocumentId) {
-                const deadlineRef = doc(collection(db, "users", currentUser.uid, "scadenze"));
-                finalDocId = deadlineRef.id;
-                const profileRef = doc(db, 'users', currentUser.uid);
-                const profile = await getUserProfile(currentUser.uid);
-                const documents = profile?.documenti || [];
-                const batch = writeBatch(db);
-                batch.set(deadlineRef, scadenzaData);
-                batch.update(profileRef, {
-                    documenti: documents.map(item => item.id === profileDocumentLinkDraft.profileDocumentId
-                        ? { ...item, expiryReference: { deadlineId: finalDocId } }
-                        : item)
-                });
-                await batch.commit();
+                data: {
+                    name,
+                    type,
+                    dueDate: date,
+                    veicolo_modello: document.getElementById('modello_veicolo')?.value || '',
+                    referenceUrl,
+                    notes: document.getElementById('notes').value,
+                    status: 'active',
+                    completed: false,
+                    templateText: document.getElementById('testo_email_select')?.value || '',
+                    notifChannel: 'multichannel',
+                    notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
+                    notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
+                },
+                recipients: recipientController.getRecipients(),
+                selectedFiles: attachmentController.getSelectedFiles(),
+                existingAttachments: attachmentController.getExistingAttachments(),
+                onProgress(progress) {
+                    if (!btnText) return;
+                    btnText.textContent = progress.phase === 'upload'
+                        ? `Upload ${progress.current}/${progress.total}...`
+                        : 'Salvataggio DB...';
+                }
+            });
+            const finalDocId = result.deadlineId;
+            if (result.consumedProfileDocumentDraft) {
                 sessionStorage.removeItem('profile-deadline-link-draft');
                 profileDocumentLinkDraft = null;
-            } else {
-                const docRef = await addDoc(collection(db, "users", currentUser.uid, "scadenze"), scadenzaData);
-                finalDocId = docRef.id;
-            }
-
-            LOG(`[FRONTEND-TRACE] Documento ${finalDocId} salvato. Trigger backend atteso.`);
-
-            // Aggiorna il campo 'names' nel documento config corretto per l'autocomplete
-            if (!editingScadenzaId && name) {
-                let configDocName = 'generalConfig';
-                if (currentMode === 'automezzi') configDocName = 'deadlineConfig';
-                else if (currentMode === 'documenti') configDocName = 'deadlineConfigDocuments';
-                setDoc(
-                    doc(db, "users", currentUser.uid, "settings", configDocName),
-                    { names: arrayUnion(name) },
-                    { merge: true }
-                ).catch(e => console.warn('[TRACE] names update failed:', e));
-
-                // Salva anche le email nel config della modalità corrente (Opzione B)
-                const emailsToSave = recipients.map(recipient => recipient.email);
-                if (emailsToSave.length > 0) {
-                    setDoc(
-                        doc(db, "users", currentUser.uid, "settings", configDocName),
-                        { notificationEmails: arrayUnion(...emailsToSave) },
-                        { merge: true }
-                    ).catch(e => console.warn('[TRACE] emails update failed:', e));
-                }
             }
 
             if (btnText) btnText.textContent = "Completato!";

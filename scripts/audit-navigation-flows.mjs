@@ -5,6 +5,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/home-deadline-inbox.js');
 const homeDeadlineDashboard = await read('Frontend/public/assets/js/modules/home/home-deadline-dashboard.js');
 const deadlineConfigController = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
+const deadlineSaveService = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -48,5 +49,13 @@ assert.match(deadlineConfigController, /Promise\.all\(\[[\s\S]+getUserSetting\(u
     'Il controller configurazioni non carica in parallelo i dati necessari');
 assert.match(deadlineConfigController, /normalizeDeadlineConfig\(/,
     'Il controller configurazioni non applica il modello normalizzato condiviso');
+assert.match(deadline, /await saveDeadline\(\{/,
+    'Il form Scadenza non delega la persistenza al servizio dedicato');
+assert.doesNotMatch(deadline, /uploadBytes\(|writeBatch\(|addDoc\(/,
+    'Il form Scadenza contiene ancora dettagli Storage o Firestore della persistenza');
+assert.match(deadlineSaveService, /contentType: 'application\/octet-stream'[\s\S]+encrypted: 'v1'/,
+    'Il servizio Scadenze non conserva il contratto degli allegati cifrati');
+assert.match(deadlineSaveService, /batch\.set\(deadlineRef, deadlineData\)[\s\S]+expiryReference/,
+    'Il servizio Scadenze non mantiene atomico il collegamento ai documenti Profilo');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');
