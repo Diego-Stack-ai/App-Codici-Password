@@ -265,7 +265,7 @@ function setupUI() {
     flags.forEach(f => {
         f.onchange = () => {
             const namePopulated = !!get('account-name');
-            const fieldsPopulated = !!(get('account-username') || get('account-code') || get('account-password'));
+            const credentialValues = { username: get('account-username'), account: get('account-code'), password: get('account-password') };
 
             if (f.checked) {
                 if (!namePopulated) {
@@ -274,13 +274,19 @@ function setupUI() {
                     return;
                 }
 
-                if (f.id === 'flag-shared' && !fieldsPopulated) {
+                const candidateMode = accountModeFromFlags({
+                    shared: f.id === 'flag-shared',
+                    memo: f.id === 'flag-memo',
+                    memoShared: f.id === 'flag-memo-shared'
+                });
+                const validation = validateAccountMode(candidateMode, credentialValues);
+                if (validation.reason === 'shared-account-without-credentials') {
                     f.checked = false;
                     showToast("Per l'Account Condiviso devi compilare almeno uno tra Username, Codice o Password.", "warning");
                     return;
                 }
 
-                if ((f.id === 'flag-memo' || f.id === 'flag-memo-shared') && fieldsPopulated) {
+                if (validation.reason === 'memo-has-credentials') {
                     f.checked = false;
                     const msg = f.id === 'flag-memo-shared' ? "Per il Memorandum Condiviso NON devono essere compilati Username, Codice o Password." : "Per usare Memorandum devi svuotare Username, Codice e Password.";
                     showToast(msg, "warning");
