@@ -176,7 +176,7 @@ Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 3. [~] Aggiungi/Modifica Scadenza: modello destinatari normalizzato e testato; rifattorizzazione pagina da completare;
 4. [~] Dettagli Account Privato e Azienda: modalità canoniche condivise; rifattorizzazione pagina da completare;
 5. [~] Form Account Privato e Azienda: regole Account/Memorandum condivise e testate; rifattorizzazione pagina da completare;
-6. [ ] Impostazioni e configurazioni;
+6. [~] Impostazioni e configurazioni: modello comune delle tre configurazioni Scadenze estratto e testato; riordino complessivo rinviato al post-M10;
 7. [ ] Aziende e archivio;
 8. [ ] Home e pagine pubbliche.
 

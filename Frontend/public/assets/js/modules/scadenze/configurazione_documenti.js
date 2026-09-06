@@ -11,7 +11,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { getUserSetting } from '../data/vault-repository.js';
-import { cloneDeadlineConfig, normalizeDeadlineConfig } from './deadline-config-model.js';
+import { appendDeadlineListItem, appendDeadlineType, cloneDeadlineConfig, normalizeDeadlineConfig, removeDeadlineListItem, updateDeadlineListItem, updateDeadlineType } from './deadline-config-model.js';
 
 const DEFAULT_CONFIG = {
     deadlineTypes: [
@@ -139,15 +139,11 @@ async function saveInlineEdit() {
 
         if (!name || !name.trim()) return;
 
-        currentConfig.deadlineTypes[index] = {
-            name: name.trim(),
-            period: parseInt(period) || 14,
-            freq: parseInt(freq) || 7
-        };
+        currentConfig = updateDeadlineType(currentConfig, index, { name, period, freq });
     } else {
         const val = document.getElementById(`edit-item-${list}-${index}`)?.value;
         if (val === undefined || !val.trim()) return;
-        currentConfig[list][index] = val.trim();
+        currentConfig = updateDeadlineListItem(currentConfig, list, index, val);
     }
 
     editingState = { list: null, index: null };
@@ -249,20 +245,20 @@ async function addTypeItem() {
     const freq = await showInputModal(t('prompt_freq_days'), "7");
     if (freq === null) return;
 
-    currentConfig.deadlineTypes.push({ name: name.trim(), period: parseInt(period) || 14, freq: parseInt(freq) || 7 });
+    currentConfig = appendDeadlineType(currentConfig, { name, period, freq });
     saveConfig();
 }
 
 async function addItem(listKey, promptText) {
     const val = await showInputModal(t('modal_title_add'), "", promptText);
     if (!val || !val.trim()) return;
-    currentConfig[listKey].push(val.trim());
+    currentConfig = appendDeadlineListItem(currentConfig, listKey, val);
     saveConfig();
 }
 
 async function deleteItem(listKey, index) {
     const confirmed = await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_item'));
     if (!confirmed) return;
-    currentConfig[listKey].splice(index, 1);
+    currentConfig = removeDeadlineListItem(currentConfig, listKey, index);
     saveConfig();
 }

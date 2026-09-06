@@ -29,3 +29,16 @@ test('scarta tipi vuoti e ripara liste con formato errato', () => {
         'deadlineTypes', 'emailTemplates'
     ]), { deadlineTypes: [], emailTemplates: [] });
 });
+
+test('aggiorna liste e tipi senza mutare la configurazione corrente', () => {
+    const original = { deadlineTypes: [{ name: 'Bollo', period: 14, freq: 7 }], models: ['Auto'] };
+    const withType = model.updateDeadlineType(original, 0, { name: 'Revisione', period: '30', freq: '5' });
+    const withModel = model.appendDeadlineListItem(withType, 'models', ' Moto ');
+    const renamed = model.updateDeadlineListItem(withModel, 'models', 0, 'Automobile');
+    const removed = model.removeDeadlineListItem(renamed, 'models', 1);
+    assert.equal(original.deadlineTypes[0].name, 'Bollo');
+    assert.deepEqual(removed, {
+        deadlineTypes: [{ name: 'Revisione', period: 30, freq: 5 }],
+        models: ['Automobile']
+    });
+});

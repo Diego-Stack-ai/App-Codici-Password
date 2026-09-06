@@ -26,3 +26,38 @@ export function normalizeDeadlineConfig(config = {}, listKeys = []) {
         .filter(Boolean);
     return normalized;
 }
+
+export function updateDeadlineType(config, index, values) {
+    const item = normalizeDeadlineType(values);
+    if (!item || !Array.isArray(config.deadlineTypes) || !config.deadlineTypes[index]) return config;
+    const deadlineTypes = [...config.deadlineTypes];
+    deadlineTypes[index] = item;
+    return { ...config, deadlineTypes };
+}
+
+export function appendDeadlineType(config, values) {
+    const item = normalizeDeadlineType(values);
+    if (!item) return config;
+    return { ...config, deadlineTypes: [...(config.deadlineTypes || []), item] };
+}
+
+export function updateDeadlineListItem(config, listKey, index, value) {
+    const normalized = String(value || '').trim();
+    const source = Array.isArray(config[listKey]) ? config[listKey] : [];
+    if (!normalized || !source[index]) return config;
+    const list = [...source];
+    list[index] = normalized;
+    return { ...config, [listKey]: list };
+}
+
+export function appendDeadlineListItem(config, listKey, value) {
+    const normalized = String(value || '').trim();
+    if (!normalized) return config;
+    return { ...config, [listKey]: [...(Array.isArray(config[listKey]) ? config[listKey] : []), normalized] };
+}
+
+export function removeDeadlineListItem(config, listKey, index) {
+    const source = Array.isArray(config[listKey]) ? config[listKey] : [];
+    if (!source[index]) return config;
+    return { ...config, [listKey]: source.filter((_, itemIndex) => itemIndex !== index) };
+}
