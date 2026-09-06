@@ -33,3 +33,9 @@ Ripetere sulle stesse pagine con finestra massimizzata e ridotta a circa 390 px 
 ## Registrazione esito
 
 Annotare dispositivo, versione del sistema operativo, browser/PWA, tema e pagina dell’eventuale difetto. Una sola voce negativa mantiene M4 aperta e richiede correzione prima di M5.
+
+## Esito del primo collaudo iPhone
+
+Il collaudo del 6 settembre 2026 non ha superato il gate. Le schermate fornite mostrano che, durante lo scroll/overscroll, il footer viene ricomposto nel mezzo del viewport e il contenuto continua a scorrere dietro di esso; compare inoltre una fascia terminale estranea al fondale. È stato anche chiarito che, nel tema chiaro, le fasce devono essere bianche e sfumate, non celesti o azzurre.
+
+Correzione candidata applicata: su viewport mobile il documento esterno non scorre più. Il guscio dell'app occupa `100dvh`, header e footer sono elementi non scorrevoli del layout e soltanto `.base-main` gestisce lo scorrimento verticale. Le fasce chiare conservano un gradiente bianco sfumato. Il gate resta aperto fino al nuovo collaudo fisico.
