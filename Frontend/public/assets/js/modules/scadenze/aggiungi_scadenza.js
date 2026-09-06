@@ -21,6 +21,7 @@ import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, v
 import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
 import { deadlineRecipientFields, deadlineRecipientsFromRecord, mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
 import { deadlineDateInputFields, deadlineInputDate } from './deadline-model.js';
+import { createDeadlineAttachmentController } from './deadline-attachment-controller.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -30,8 +31,7 @@ let currentUser = null;
 let currentRule = null;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
-let selectedFiles = [];
-let existingAttachments = [];
+const attachmentController = createDeadlineAttachmentController();
 let deadlineRecipients = [];
 let recipientContacts = [];
 let profileDocumentLinkDraft = null;
@@ -82,7 +82,7 @@ export async function initAggiungiScadenza(user) {
     initDatePickerV5('dueDate');
 
     initProxyDropdowns();
-    initAttachmentSystem();
+    attachmentController.init();
 
     setupDeadlineRecipientsUI();
 
@@ -843,6 +843,7 @@ function setupSaveLogic() {
 
             // --- 1. UPLOAD ALLEGATI (PRIMA della scrittura DB) ---
             const uploadedAttachments = [];
+            const selectedFiles = attachmentController.getSelectedFiles();
             if (selectedFiles.length > 0) {
                 const vaultKey = await ensureVaultKeyMaterial();
                 LOG(`[FRONTEND-TRACE] Inizio upload di ${selectedFiles.length} file...`);
@@ -877,7 +878,7 @@ function setupSaveLogic() {
 
             // --- 2. COSTRUZIONE DOCUMENTO UNIFICATO ---
             if (btnText) btnText.textContent = "Salvataggio DB...";
-            const finalAttachments = [...existingAttachments, ...uploadedAttachments];
+            const finalAttachments = [...attachmentController.getExistingAttachments(), ...uploadedAttachments];
 
             const recipientFields = deadlineRecipientFields(deadlineRecipients);
             const recipients = recipientFields.recipients;
@@ -995,111 +996,6 @@ function setupSaveLogic() {
  * SISTEMA ALLEGATI (V4.1)
  * Gestione Modali, Picker e Render
  */
-function initAttachmentSystem() {
-    const btnTrigger = document.getElementById('btn-trigger-upload');
-    const modal = document.getElementById('source-selector-modal');
-    const btnCancel = document.getElementById('btn-cancel-source');
-
-    if (!btnTrigger || !modal) return;
-
-    btnTrigger.onclick = () => {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    };
-
-    const closeModal = () => {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    };
-
-    btnCancel.onclick = closeModal;
-
-    // Source Selection
-    modal.querySelectorAll('[data-source]').forEach(btn => {
-        btn.onclick = () => {
-            const type = btn.dataset.source;
-            const input = document.getElementById(`input-${type}`);
-            if (input) input.click();
-            closeModal();
-        };
-    });
-
-    // Inputs Change Listeners
-    ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
-        document.getElementById(id)?.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            if (files.length > 0) {
-                selectedFiles.push(...files);
-                renderAttachments();
-            }
-            e.target.value = ''; // Reset per permettere ricaricamento stesso file
-        });
-    });
-}
-
-function renderAttachments() {
-    const container = document.getElementById('attachments-list');
-    if (!container) return;
-
-    clearElement(container);
-
-    const all = [
-        ...existingAttachments.map((f, i) => ({ ...f, existing: true, idx: i })),
-        ...selectedFiles.map((f, i) => ({ name: f.name, existing: false, idx: i }))
-    ];
-
-    if (all.length === 0) {
-        container.appendChild(createElement('p', {
-            className: 'placeholder-text-standard',
-            textContent: 'Nessun allegato'
-        }));
-        return;
-    }
-
-    all.forEach(file => {
-        const ext = file.name.split('.').pop().toLowerCase();
-        let icon = 'description';
-        let color = 'text-white/20';
-
-        if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) { icon = 'image'; color = 'text-purple-400/40'; }
-        else if (ext === 'pdf') { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
-
-        const item = createElement('div', {
-            className: 'attachment-item animate-in slide-in-from-left-2'
-        }, [
-            createElement('div', { className: 'attachment-info' }, [
-                createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
-                createElement('div', { className: 'attachment-meta' }, [
-                    createElement('span', { className: 'attachment-name', textContent: file.name }),
-                    createElement('span', { className: 'attachment-status', textContent: file.existing ? 'Caricato' : 'Nuovo' })
-                ])
-            ]),
-            createElement('button', {
-                type: 'button',
-                className: 'btn-delete-attachment',
-                onclick: async (e) => {
-                    e.stopPropagation();
-                    const ok = await showConfirmModal("ELIMINA ALLEGATO", `Vuoi rimuovere l'allegato ${file.name}?`, "Elimina", "Annulla");
-                    if (ok) removeAttachment(file.idx, file.existing);
-                }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
-            ])
-        ]);
-
-        container.appendChild(item);
-    });
-}
-
-function removeAttachment(idx, existing) {
-    if (existing) {
-        existingAttachments.splice(idx, 1);
-    } else {
-        selectedFiles.splice(idx, 1);
-    }
-    renderAttachments();
-}
-
 async function showSuccessModal() {
     window.location.href = 'scadenze.html';
 }
@@ -1162,8 +1058,7 @@ async function loadScadenzaForEdit(id) {
         }
 
         // 6. Allegati esistenti
-        existingAttachments = data.attachments || [];
-        renderAttachments();
+        attachmentController.setExistingAttachments(data.attachments);
 
         // 7. Sincronizzazione Dropdown Custom (V4.1 System)
         syncCustomDropdowns();
