@@ -5,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth, storage } from '../../firebase-config.js?v=1.2.42';
+import { db, auth, storage } from '../../firebase-config.js?v=1.2.43';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { collection, addDoc, Timestamp, doc, updateDoc, setDoc, arrayUnion, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
@@ -18,7 +18,7 @@ import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.
 import { t } from '../../translations.js';
 import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { ensureMasterKey } from '../core/security-manager.js';
-import { createStorageObjectName, encryptAttachmentFile, validateAttachmentFile } from '../shared/attachment-security.js';
+import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -856,6 +856,12 @@ function setupSaveLogic() {
             return showToast("Compila i campi obbligatori (Nome, Categoria, Data)", "error");
         }
 
+        const rawReferenceUrl = document.getElementById('deadline_url')?.value.trim() || '';
+        const referenceUrl = rawReferenceUrl ? normalizeExternalUrl(rawReferenceUrl) : '';
+        if (rawReferenceUrl && !referenceUrl) {
+            return showToast('Inserisci un URL valido (http o https).', 'error');
+        }
+
         try {
             isSubmitting = true;
             LOG("[FRONTEND-TRACE] Lock UI attivato. Singolo salvataggio in corso...");
@@ -915,13 +921,13 @@ function setupSaveLogic() {
                 sendPush: recipient.sendPush === true
             }));
             const legacyEmailRecipients = recipients.filter(recipient => recipient.sendEmail).map(recipient => recipient.email);
-
             const scadenzaData = {
                 uid: currentUser.uid,
                 name: name,
                 type: type,
                 dueDate: date,
                 veicolo_modello: document.getElementById('modello_veicolo')?.value || '',
+                referenceUrl,
                 notes: document.getElementById('notes').value,
                 status: 'active',
                 completed: false,
@@ -1202,6 +1208,8 @@ async function loadScadenzaForEdit(id) {
             dateInput.value = '';
             dateInput.dataset.isoValue = '';
         }
+        const referenceUrlInput = document.getElementById('deadline_url');
+        if (referenceUrlInput) referenceUrlInput.value = data.referenceUrl || data.url || '';
         document.getElementById('notes').value = data.notes || '';
 
         // 4. Notifiche (Valori numerici)

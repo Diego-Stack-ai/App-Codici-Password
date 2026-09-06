@@ -5,7 +5,7 @@ import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.42';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.43';
 import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 
@@ -182,6 +182,27 @@ function renderScadenza(scadenza) {
             ]);
         });
         setChildren(attCont, items);
+    }
+
+    const referenceUrl = scadenza.referenceUrl || scadenza.url || '';
+    const referenceUrlSection = document.getElementById('section-reference-url');
+    const referenceUrlContainer = document.getElementById('display-reference-url');
+    if (referenceUrl && referenceUrlSection && referenceUrlContainer) {
+        referenceUrlSection.classList.remove('hidden');
+        const linkButton = createElement('button', {
+            type: 'button',
+            className: 'detail-list-item clickable',
+            onclick: () => openExternalUrl(referenceUrl)
+        }, [
+            createElement('div', { className: 'detail-list-item-left' }, [
+                createElement('div', { className: 'detail-list-icon-box' }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'language' })
+                ]),
+                createElement('span', { className: 'detail-list-item-title', textContent: referenceUrl })
+            ]),
+            createElement('span', { className: 'material-symbols-outlined detail-list-item-arrow', textContent: 'open_in_new' })
+        ]);
+        setChildren(referenceUrlContainer, [linkButton]);
     }
 
     const noteBody = document.getElementById('detail-note-body');

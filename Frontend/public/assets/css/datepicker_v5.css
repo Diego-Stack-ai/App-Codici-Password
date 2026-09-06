@@ -50,6 +50,11 @@
     padding-bottom: 0.5rem;
 }
 
+.dp-nav-group {
+    display: flex;
+    gap: 0.25rem;
+}
+
 .dp-title-btn {
     background: transparent;
     border: none;
@@ -80,6 +85,22 @@
 .dp-nav-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: scale(1.05);
+}
+
+@media (max-width: 390px) {
+    .dp-nav-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+    }
+
+    .dp-nav-group {
+        gap: 0.125rem;
+    }
+
+    .dp-title-btn {
+        font-size: var(--fs-sm);
+    }
 }
 
 /* Grid */

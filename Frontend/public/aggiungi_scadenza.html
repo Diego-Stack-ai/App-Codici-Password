@@ -13,17 +13,17 @@
 
     <!-- PWA / Mobile Capable -->
     <link rel="icon" type="image/jpeg" href="assets/images/app-icon.jpg">
-    <link rel="manifest" href="manifest.json?v=1.2.42" />
+    <link rel="manifest" href="manifest.json?v=1.2.43" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.42">
-    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.42">
-    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.42">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.42">
-    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.42">
-    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.42">
-    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.42">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.43">
+    <link rel="stylesheet" href="assets/css/core_fonts.css?v=1.2.43">
+    <link rel="stylesheet" href="assets/css/core_fascie.css?v=1.2.43">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.43">
+    <link rel="stylesheet" href="assets/css/moduli.css?v=1.2.43">
+    <link rel="stylesheet" href="assets/css/datepicker_v5.css?v=1.2.43">
+    <link rel="stylesheet" href="assets/css/aggiungi_scadenza.css?v=1.2.43">
 
     <!-- CORE JS (Orchestrator V5.0) -->
 </head>
@@ -252,6 +252,16 @@
                 </div>
 
                 <div class="attachments-notes-container">
+                    <!-- Collegamento web -->
+                    <div class="form-group">
+                        <label class="label-sm" for="deadline_url">
+                            <span class="material-symbols-outlined icon-amber label-icon">link</span>
+                            <span>URL</span>
+                        </label>
+                        <input id="deadline_url" class="input" type="url" inputmode="url" autocomplete="url"
+                            placeholder="https://esempio.it">
+                    </div>
+
                     <!-- Note -->
                     <div class="form-group">
                         <label class="label-sm" for="notes">
