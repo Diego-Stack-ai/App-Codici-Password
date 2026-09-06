@@ -52,6 +52,8 @@ const companyAccountSave = await read('Frontend/public/assets/js/modules/azienda
 const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
 const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
 const cardSecret = await read('Frontend/public/assets/js/modules/shared/card-secret.js');
+const accountListView = await read('Frontend/public/assets/js/modules/shared/account-list-view.js');
+const privateArea = await read('Frontend/public/assets/js/modules/privato/area_privata.js');
 const functionsPackage = JSON.parse(await read('functions/package.json'));
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
@@ -230,7 +232,12 @@ assert.doesNotMatch(qrCodeUtils, /\.innerHTML\s*=/, 'Il fallback QR usa ancora H
 assert.doesNotMatch(privateAccountForm, /Final Transaction Payload[^\n]*finalData/, 'Il form privato registra il payload del Vault');
 assert.doesNotMatch(companyAccountSave, /Final Transaction Payload[^\n]*finalData/, 'Il form aziendale registra il payload del Vault');
 assert.match(cardSecret, /await ensureVaultKeyMaterial\(\)[\s\S]*await decrypt\(value, vaultKeyMaterial\)/, 'Le password nelle card non vengono risolte in modo lazy tramite il Vault');
-assert.ok([privateAccountList, companyAccountList].every(source => /createCardSecretResolver\(copyValue, encrypted && isPassword\)/.test(source)), 'Le liste Account non condividono il risolutore sicuro delle password');
+assert.ok([privateAccountList, companyAccountList].every(source => /createAccountListView\(\{/.test(source)), 'Le liste Account non usano la vista sicura condivisa');
+assert.match(accountListView, /createCardSecretResolver\(copyValue, encrypted && isPassword\)/, 'La vista Account non usa il risolutore lazy delle password');
+assert.doesNotMatch(privateArea, /data\.password\s*=\s*data\.password\s*\?\s*await decrypt/,
+    'La dashboard privata decifra ancora preventivamente le password più usate');
+assert.match(privateArea, /createCardSecretResolver\(copyValue, encrypted && isPassword\)/,
+    'La dashboard privata non risolve le password soltanto su richiesta');
 assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Firebase Admin non è aggiornato alla baseline P4');
 assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');

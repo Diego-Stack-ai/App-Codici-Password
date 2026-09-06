@@ -172,7 +172,7 @@ Registro canonico e redirect di compatibilità formalizzati in `CANONICAL_PAGE_R
 Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 
 1. [x] Profilo Utente unico;
-2. [~] Area Privata e liste Account: prima parallelizzazione e segreti lazy completati;
+2. [x] Area Privata e liste Account: letture parallelizzate, password lazy anche nei più usati e vista card/Swipe condivisa tra Privato e Azienda;
 3. [x] Aggiungi/Modifica Scadenza: modelli destinatari/data/configurazione, controller destinatari/allegati/configurazione e servizio di persistenza estratti e testati; il form conserva soltanto orchestrazione e UI specifiche;
 4. [~] Dettagli Account Privato e Azienda: modalità canoniche e compatibilità bancaria condivise; allegati e condivisione isolati dai renderer principali, con gate su listener e revoca; rifattorizzazione pagina da completare;
 5. [~] Form Account Privato e Azienda: regole Account/Memorandum condivise e testate; rifattorizzazione pagina da completare;

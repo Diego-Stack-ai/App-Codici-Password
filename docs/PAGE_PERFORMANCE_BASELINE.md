@@ -7,20 +7,20 @@ Pagine canoniche analizzate: **29**. Redirect storici esclusi: `home-v126.html`,
 | Pagina | HTML | CSS | Moduli JS | Peso grezzo | Stima gzip |
 |---|---:|---:|---:|---:|---:|
 | `profilo_privato.html` | 1 | 5 | 42 | 1116.0 KB | 321.8 KB |
-| `aggiungi_scadenza.html` | 1 | 7 | 37 | 1065.7 KB | 310.2 KB |
+| `aggiungi_scadenza.html` | 1 | 7 | 38 | 1066.9 KB | 310.9 KB |
 | `dettaglio_account_azienda.html` | 1 | 6 | 35 | 1047.3 KB | 304.6 KB |
 | `dettaglio_account_privato.html` | 1 | 6 | 35 | 1044.3 KB | 304.0 KB |
 | `impostazioni.html` | 1 | 5 | 33 | 1031.0 KB | 300.8 KB |
 | `modifica_azienda.html` | 1 | 5 | 35 | 1062.7 KB | 300.4 KB |
 | `form_account_azienda.html` | 1 | 6 | 32 | 1031.1 KB | 299.8 KB |
 | `form_account_privato.html` | 1 | 6 | 31 | 1029.4 KB | 298.7 KB |
-| `account_privati.html` | 1 | 6 | 33 | 993.1 KB | 294.4 KB |
 | `dati_azienda.html` | 1 | 5 | 32 | 1006.9 KB | 294.2 KB |
 | `home_page.html` | 1 | 6 | 34 | 983.6 KB | 293.0 KB |
-| `area_privata.html` | 1 | 7 | 30 | 989.9 KB | 291.4 KB |
+| `area_privata.html` | 1 | 7 | 31 | 991.1 KB | 291.9 KB |
+| `account_privati.html` | 1 | 6 | 33 | 982.4 KB | 291.4 KB |
 | `dettaglio_scadenza.html` | 1 | 6 | 32 | 985.3 KB | 290.8 KB |
 | `archivio_account.html` | 1 | 6 | 30 | 982.1 KB | 290.5 KB |
-| `account_azienda.html` | 1 | 6 | 32 | 978.1 KB | 290.0 KB |
+| `account_azienda.html` | 1 | 6 | 33 | 978.6 KB | 290.3 KB |
 | `scadenze.html` | 1 | 6 | 28 | 944.4 KB | 280.8 KB |
 | `configurazione_automezzi.html` | 1 | 6 | 27 | 936.6 KB | 276.5 KB |
 | `configurazione_generali.html` | 1 | 6 | 27 | 935.9 KB | 276.4 KB |
@@ -39,7 +39,7 @@ Pagine canoniche analizzate: **29**. Redirect storici esclusi: `home-v126.html`,
 ## Pagine con il maggiore carico statico
 
 - `profilo_privato.html`: 321.8 KB gzip stimati, 42 moduli JS e 5 fogli CSS.
-- `aggiungi_scadenza.html`: 310.2 KB gzip stimati, 37 moduli JS e 7 fogli CSS.
+- `aggiungi_scadenza.html`: 310.9 KB gzip stimati, 38 moduli JS e 7 fogli CSS.
 - `dettaglio_account_azienda.html`: 304.6 KB gzip stimati, 35 moduli JS e 6 fogli CSS.
 - `dettaglio_account_privato.html`: 304.0 KB gzip stimati, 35 moduli JS e 6 fogli CSS.
 - `impostazioni.html`: 300.8 KB gzip stimati, 33 moduli JS e 5 fogli CSS.

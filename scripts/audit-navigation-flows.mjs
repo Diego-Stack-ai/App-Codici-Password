@@ -6,6 +6,9 @@ const homeDeadlineInbox = await read('Frontend/public/assets/js/modules/home/hom
 const homeDeadlineDashboard = await read('Frontend/public/assets/js/modules/home/home-deadline-dashboard.js');
 const deadlineConfigController = await read('Frontend/public/assets/js/modules/scadenze/deadline-config-controller.js');
 const deadlineSaveService = await read('Frontend/public/assets/js/modules/scadenze/deadline-save-service.js');
+const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
+const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
+const accountListView = await read('Frontend/public/assets/js/modules/shared/account-list-view.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -57,5 +60,15 @@ assert.match(deadlineSaveService, /contentType: 'application\/octet-stream'[\s\S
     'Il servizio Scadenze non conserva il contratto degli allegati cifrati');
 assert.match(deadlineSaveService, /batch\.set\(deadlineRef, deadlineData\)[\s\S]+expiryReference/,
     'Il servizio Scadenze non mantiene atomico il collegamento ai documenti Profilo');
+for (const [name, source] of [['privata', privateAccountList], ['aziendale', companyAccountList]]) {
+    assert.match(source, /createAccountListView\(\{/,
+        `La lista Account ${name} non usa la vista condivisa`);
+    assert.doesNotMatch(source, /function createDataRow|new SwipeList/,
+        `La lista Account ${name} duplica ancora righe sensibili o SwipeList`);
+}
+assert.match(accountListView, /createCardSecretResolver\(copyValue, encrypted && isPassword\)/,
+    'La vista Account condivisa non mantiene la risoluzione lazy delle password');
+assert.match(accountListView, /account\.password \? createDataRow\([^\n]+true, account\._encrypted\)/,
+    'La vista Account condivisa non mantiene la password cifrata fino a reveal/copia');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');

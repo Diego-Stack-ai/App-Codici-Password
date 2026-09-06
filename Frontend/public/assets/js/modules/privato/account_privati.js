@@ -3,26 +3,21 @@
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.52';
+import { db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
-import { observeAuth } from '../../auth.js';
 import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.52';
-import { SwipeList } from '../../swipe-list-v6.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { createCardSecretResolver } from '../shared/card-secret.js';
 import {getRecordByPath, getUserProfile, listAcceptedInvites, listPrivateAccounts} from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
+import { createAccountListView } from '../shared/account-list-view.js';
 
 // --- STATE ---
 let allAccounts = [];
 let currentUser = null;
-let currentSwipeList = null;
-let sharedAccountIds = new Set();
 let sortOrder = 'asc';
 
 const THEMES = {
@@ -31,6 +26,23 @@ const THEMES = {
     memo: { accent: 'bg-amber-500', text: 'text-amber-400' },
     shared_memo: { accent: 'bg-emerald-500', text: 'text-emerald-400' }
 };
+
+const accountListView = createAccountListView({
+    themes: THEMES,
+    emptyStateClass: 'text-center py-10',
+    emptyTextClass: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6',
+    getSubtitle: account => account.username || account.email || 'Utente Nascosto',
+    onNavigate(account) {
+        if (account._aziendaId) {
+            window.location.href = `dettaglio_account_azienda.html?id=${account.id}&aziendaId=${account._aziendaId}&ownerId=${account.ownerId}`;
+        } else {
+            window.location.href = `dettaglio_account_privato.html?id=${account.id}${account.isOwner ? '' : `&ownerId=${account.ownerId}`}`;
+        }
+    },
+    onPin: togglePin,
+    onDelete: handleDelete,
+    onArchive: handleArchive
+});
 
 /**
  * ACCOUNT PRIVATI MODULE (V5.0 ADAPTER)
@@ -120,7 +132,6 @@ async function loadAccounts() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         let sharedWithMe = [];
-        sharedAccountIds.clear();
 
         // 1. Invitations Accepted
         LOG('[ACCOUNTS] Searching invites for authenticated user');
@@ -149,7 +160,6 @@ async function loadAccounts() {
                 const sharedAccount = await getRecordByPath(accPath);
 
                 if (sharedAccount) {
-                    sharedAccountIds.add(sharedAccount.id);
                     LOG('[ACCOUNTS] Shared account loaded');
                     return { ...sharedAccount, isOwner: false, ownerId: senderId, _isGuest: true, _aziendaId: inv.aziendaId };
                 } else {
@@ -237,152 +247,7 @@ function filterAndRender() {
         return sortOrder === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
     });
 
-    renderList(filtered);
-}
-
-function renderList(list) {
-    const container = document.getElementById('accounts-container');
-    if (!container) return;
-    clearElement(container);
-
-    if (list.length === 0) {
-        const type = new URLSearchParams(window.location.search).get('type') || 'standard';
-        setChildren(container, createElement('div', { className: 'text-center py-10' }, [
-            createElement('p', { className: 'opacity-40 text-xs uppercase font-black tracking-widest mb-6', textContent: t('no_accounts_found') || 'Nessun account trovato' })
-        ]));
-        return;
-    }
-
-    const cards = list.map(acc => createAccountCard(acc));
-    setChildren(container, cards);
-
-    // Re-init Swipe
-    if (currentSwipeList) currentSwipeList = null;
-    currentSwipeList = new SwipeList('.swipe-row', {
-        threshold: 0.15,
-        onSwipeLeft: (item) => handleDelete(item),  // Swipe Left <<<< reveals Right (Red/Delete)
-        onSwipeRight: (item) => handleArchive(item) // Swipe Right >>>> reveals Left (Amber/Archive)
-    });
-}
-
-function createAccountCard(acc) {
-    const mode = accountModeFromRecord(acc);
-    const isMemo = mode.startsWith('memo-');
-    const isShared = mode.endsWith('-shared');
-    const isPinned = !!acc.isPinned;
-
-    let theme = THEMES.standard;
-    if (isShared && isMemo) theme = THEMES.shared_memo;
-    else if (isShared) theme = THEMES.shared;
-    else if (isMemo) theme = THEMES.memo;
-
-    const card = createElement('div', {
-        className: 'account-card swipe-row',
-        dataset: { id: acc.id, owner: acc.isOwner, action: 'navigate' },
-        onclick: () => {
-            if (acc._aziendaId) {
-                window.location.href = `dettaglio_account_azienda.html?id=${acc.id}&aziendaId=${acc._aziendaId}&ownerId=${acc.ownerId}`;
-            } else {
-                window.location.href = `dettaglio_account_privato.html?id=${acc.id}${acc.isOwner ? '' : `&ownerId=${acc.ownerId}`}`;
-            }
-        }
-    }, [
-        // Swipe Backgrounds
-        // Swipe Backgrounds (Archive Left, Delete Right)
-        createElement('div', { className: 'swipe-action-bg bg-archive' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'archive' })
-        ]),
-        createElement('div', { className: 'swipe-action-bg bg-delete' }, [
-            createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
-        ]),
-
-        // Content
-        createElement('div', { className: 'swipe-content' }, [
-            createElement('div', { className: 'account-card-layout' }, [
-                createElement('div', { className: 'account-card-left' }, [
-                    createElement('div', { className: 'account-icon-box' }, [
-                        createElement('img', { className: 'account-avatar', src: acc.logo || acc.avatar || 'assets/images/google-avatar.png' }),
-                        createElement('div', { className: `account-badge-dot ${theme.accent}` })
-                    ]),
-                    createElement('div', { className: 'account-card-info-group' }, [
-                        createElement('h3', { className: 'account-card-title' }, [
-                            document.createTextNode(acc.nomeAccount || t('without_name'))
-                        ]),
-                        createElement('p', { className: 'account-card-subtitle', textContent: acc.username || acc.email || 'Utente Nascosto' })
-                    ])
-                ]),
-                // Right Actions (Pin Only)
-                createElement('div', { className: 'account-card-right' }, [
-                    createElement('button', {
-                        className: `btn-mini-action ${isPinned ? 'active' : ''}`,
-                        onclick: (e) => { e.stopPropagation(); togglePin(acc); }
-                    }, [
-                        createElement('span', { className: `material-symbols-outlined account-pin-icon ${isPinned ? 'filled' : ''}`, textContent: 'push_pin' })
-                    ])
-                ])
-            ]),
-            createElement('div', { className: 'account-data-display' }, [
-                acc.username ? createDataRow(t('label_user'), acc.username) : null,
-                acc.account ? createDataRow(t('label_account'), acc.account) : null,
-                acc.password ? createDataRow(t('label_password'), '••••••••', acc.password, true, acc._encrypted) : null
-            ].filter(Boolean))
-        ])
-    ]);
-    return card;
-}
-
-function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false) {
-    const rowId = Math.random().toString(36).substr(2, 9);
-    const resolveCopyValue = createCardSecretResolver(copyValue, encrypted && isPassword);
-    return createElement('div', { className: 'account-data-row' }, [
-        createElement('span', { className: 'account-data-label', textContent: `${label}:` }),
-        createElement('span', {
-            className: 'account-data-value',
-            id: isPassword ? `pass-val-${rowId}` : undefined,
-            textContent: displayValue
-        }),
-        createElement('div', { className: 'account-card-right' }, [
-            isPassword ? createElement('button', {
-                className: 'btn-mini-action',
-                onclick: async (e) => {
-                    e.stopPropagation();
-                    try {
-                        const el = document.getElementById(`pass-val-${rowId}`);
-                        const span = e.currentTarget.querySelector('span');
-                        if (el && span) {
-                            if (el.textContent === '••••••••') {
-                                el.textContent = await resolveCopyValue();
-                                span.textContent = 'visibility_off';
-                            } else {
-                                el.textContent = '••••••••';
-                                span.textContent = 'visibility';
-                            }
-                        }
-                    } catch (error) {
-                        logError('RevealCardPassword', error);
-                        showToast(t('error_generic'), 'error');
-                    }
-                }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'visibility' })
-            ]) : null,
-            createElement('button', {
-                className: 'btn-mini-action',
-                onclick: async (e) => {
-                    e.stopPropagation();
-                    try {
-                        await navigator.clipboard.writeText(isPassword ? await resolveCopyValue() : (copyValue || displayValue));
-                        showToast(t('copied') || "Copiato!");
-                    } catch (error) {
-                        logError('CopyCardValue', error);
-                        showToast(t('error_generic'), 'error');
-                    }
-                }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'content_copy' })
-            ])
-        ].filter(Boolean))
-    ]);
+    accountListView.render(filtered);
 }
 
 /**
