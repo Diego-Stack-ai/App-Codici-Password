@@ -5,7 +5,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db, auth, storage } from '../../firebase-config.js?v=1.2.43';
+import { db, auth, storage } from '../../firebase-config.js?v=1.2.44';
 import { getFooterReady } from '../../footer-state.js';
 import { LOG } from '../../logger.js';
 import { collection, addDoc, Timestamp, doc, updateDoc, setDoc, arrayUnion, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
@@ -157,7 +157,7 @@ export async function initAggiungiScadenza(user) {
     }
 
     // LIST MANAGEMENT SYSTEM (Dynamic Config)
-    document.querySelectorAll('.btn-manage-config-inline').forEach(btn => {
+    document.querySelectorAll('.btn-manage-config-inline[data-config-id]').forEach(btn => {
         btn.onclick = async (e) => {
             e.stopPropagation();
             const configId = btn.dataset.configId;
@@ -293,7 +293,8 @@ async function loadDynamicConfig() {
 
         unifiedConfigs.generali = { deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: [], ...rawGenData };
         populateEmailSelects(unifiedConfigs.generali.notificationEmails);
-        recipientContacts = contactsSnap.docs.map(contactDoc => ({ id: contactDoc.id, ...contactDoc.data() }));
+        recipientContacts = contactsSnap.docs.map(contactDoc => ({ id: contactDoc.id, ...contactDoc.data() }))
+            .filter(contact => contact.active !== false);
         notificationEmails.forEach(email => {
             const normalized = normalizeRecipientEmail(email);
             if (normalized && !recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === normalized)) {
@@ -465,6 +466,10 @@ function populateRecipientContacts() {
 }
 
 function setupDeadlineRecipientsUI() {
+    document.getElementById('btn-manage-deadline-contacts')?.addEventListener('click', () => {
+        const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
+        window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
+    });
     document.getElementById('btn-add-deadline-contact')?.addEventListener('click', () => {
         const select = document.getElementById('deadline-contact-select');
         const selectedValue = select?.value || '';

@@ -10,9 +10,9 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.43';
+import { db, functions } from '../../firebase-config.js?v=1.2.44';
 import { LOG } from '../../logger.js';
-import { collection, query, where, deleteDoc, doc, orderBy, limit, addDoc, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
+import { collection, query, where, doc, orderBy, limit, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -331,9 +331,19 @@ async function deleteContact(uid, id) {
     // Usa showConfirmModal di ui-core (esportata)
     if (!await showConfirmModal(t('confirm_delete_title'), t('confirm_delete_msg'))) return;
     try {
-        await deleteDoc(doc(db, "users", uid, "contacts", id));
+        const removeContact = httpsCallable(functions, 'deleteContactIfUnused');
+        const result = await removeContact({ contactId: id });
+        if (!result.data?.deleted) {
+            const usage = result.data?.usage || {};
+            const parts = [];
+            if (usage.deadlines) parts.push(`${usage.deadlines} Scadenze`);
+            if (usage.shares) parts.push(`${usage.shares} condivisioni`);
+            if (usage.invites) parts.push(`${usage.invites} inviti`);
+            showToast(`Contatto in uso: ${parts.join(', ')}. Disattivalo dalla Gestione destinatari.`, 'warning');
+            return;
+        }
         showToast(t('contact_removed'));
-        loadRubrica(uid); // Ricarica rubrica
+        loadRubrica(uid);
     } catch (e) { logError("RubricaDelete", e); }
 }
 

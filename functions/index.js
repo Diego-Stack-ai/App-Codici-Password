@@ -461,6 +461,68 @@ exports.respondToInvitation = onCall(
     }
 );
 
+function contactMatchesDeadline(deadline, contactId, email) {
+    const recipients = Array.isArray(deadline.recipients) ? deadline.recipients : [];
+    if (recipients.some((item) => String(item?.contactId || "") === contactId || normalizeEmail(item?.email || item?.address) === email)) return true;
+    const legacy = [deadline.email1, deadline.email2, ...(Array.isArray(deadline.emails) ? deadline.emails : [])];
+    return legacy.some((item) => normalizeEmail(typeof item === "object" ? item?.address : item) === email);
+}
+
+function contactMatchesShare(account, email) {
+    if (Object.values(account.sharedWith || {}).some((item) => normalizeEmail(item?.email) === email)) return true;
+    if (Array.isArray(account.sharedWithEmails) && account.sharedWithEmails.some((item) => normalizeEmail(item) === email)) return true;
+    return normalizeEmail(account.recipientEmail) === email;
+}
+
+exports.deleteContactIfUnused = onCall(
+    { region: "europe-west1", enforceAppCheck: true },
+    async (request) => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        const contactId = String(request.data?.contactId || "").trim();
+        if (!/^[A-Za-z0-9_-]{1,160}$/.test(contactId)) throw new HttpsError("invalid-argument", "Destinatario non valido.");
+
+        const uid = request.auth.uid;
+        const store = admin.firestore();
+        const contactRef = store.collection("users").doc(uid).collection("contacts").doc(contactId);
+        const contactSnap = await contactRef.get();
+        if (!contactSnap.exists) throw new HttpsError("not-found", "Destinatario non trovato.");
+        const email = normalizeEmail(contactSnap.data().emailNormalized || contactSnap.data().email);
+        if (!email) throw new HttpsError("failed-precondition", "Il destinatario non possiede un'email valida.");
+
+        const usage = { deadlines: 0, shares: 0, invites: 0 };
+        const deadlinesSnap = await store.collection("users").doc(uid).collection("scadenze").get();
+        deadlinesSnap.forEach((item) => {
+            if (contactMatchesDeadline(item.data(), contactId, email)) usage.deadlines += 1;
+        });
+
+        const privateAccountsSnap = await store.collection("users").doc(uid).collection("accounts").get();
+        privateAccountsSnap.forEach((item) => {
+            if (contactMatchesShare(item.data(), email)) usage.shares += 1;
+        });
+        const companiesSnap = await store.collection("users").doc(uid).collection("aziende").get();
+        for (const company of companiesSnap.docs) {
+            const companyAccounts = await company.ref.collection("accounts").get();
+            companyAccounts.forEach((item) => {
+                if (contactMatchesShare(item.data(), email)) usage.shares += 1;
+            });
+        }
+
+        const inviteDocs = new Map();
+        const [ownerInvites, senderInvites] = await Promise.all([
+            store.collection("invites").where("ownerId", "==", uid).get(),
+            store.collection("invites").where("senderId", "==", uid).get()
+        ]);
+        [...ownerInvites.docs, ...senderInvites.docs].forEach((item) => inviteDocs.set(item.id, item));
+        inviteDocs.forEach((item) => {
+            if (normalizeEmail(item.data().recipientEmail) === email) usage.invites += 1;
+        });
+
+        if (usage.deadlines || usage.shares || usage.invites) return { deleted: false, usage };
+        await contactRef.delete();
+        return { deleted: true, usage };
+    }
+);
+
 // ─────────────────────────────────────────────────────────────
 // UTILITY — Crea il trasportatore Nodemailer
 // ─────────────────────────────────────────────────────────────

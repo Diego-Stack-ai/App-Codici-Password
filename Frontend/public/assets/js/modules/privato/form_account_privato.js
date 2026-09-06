@@ -4,7 +4,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Creazione e modifica account con gestione IBAN dinamica.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.43';
+import { auth, db } from '../../firebase-config.js?v=1.2.44';
 import { LOG } from '../../logger.js';
 import { doc, getDocFromServer, updateDoc, deleteDoc, collection, addDoc, setDoc, query, where, runTransaction, arrayUnion, arrayRemove, deleteField } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -45,6 +45,10 @@ export async function initFormAccountPrivato(user) {
     const params = new URLSearchParams(window.location.search);
     currentDocId = params.get('id');
     isEditing = !!currentDocId;
+    document.querySelectorAll('.manage-recipients-link').forEach(link => {
+        const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
+        link.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
+    });
     const profileEmailId = params.get('profileEmailId');
     if (!isEditing && profileEmailId) {
         try {
@@ -244,7 +248,7 @@ async function loadData() {
 async function loadRubrica() {
     try {
         const snap = await getDocs(collection(db, "users", currentUid, "contacts"));
-        myContacts = snap.docs.map(d => d.data());
+        myContacts = snap.docs.map(d => d.data()).filter(contact => contact.active !== false);
     } catch (e) { logError("LoadRubrica", e); }
 }
 

@@ -39,3 +39,14 @@ test('schema non previsto, tab non valida e oltre 30 campi vengono respinti', as
   await assertFails(setDoc(base, {...validWidget(), tab: 'overview'}));
   await assertFails(setDoc(base, validWidget(Array.from({length: 31}, (_, id) => ({id})))));
 });
+
+test('i contatti sono gestibili dal proprietario ma la cancellazione diretta è bloccata', async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER_UID).firestore();
+  const contactRef = doc(ownerDb, 'users', OWNER_UID, 'contacts', 'contact-1');
+  await assertSucceeds(setDoc(contactRef, {
+    nome: 'Maria', cognome: 'Rossi', email: 'maria@example.com',
+    emailNormalized: 'maria@example.com', active: true,
+  }));
+  await assertSucceeds(getDoc(contactRef));
+  await assertFails(deleteDoc(contactRef));
+});

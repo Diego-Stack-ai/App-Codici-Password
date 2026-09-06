@@ -26,7 +26,7 @@ import { initComponents } from './components-v129.js'; // Imports components sys
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.43';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.44';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -35,7 +35,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.43';
+import * as Pages from './pages-init.js?v=1.2.44';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric } from './performance-metrics.js';
@@ -65,6 +65,7 @@ function getCurrentPage() {
     if (path.includes('profilo_privato_v2')) return 'profilo_v2';
     if (path.includes('profilo_privato')) return 'profilo';
     if (path.includes('impostazioni')) return 'impostazioni';
+    if (path.includes('gestione_destinatari')) return 'gestione_destinatari';
 
     // Scadenze
     if (path.includes('scadenze')) return 'scadenze';
@@ -247,6 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     case 'dettaglio_scadenza': await Pages.initDettaglioScadenza(user); break;
 
                     case 'impostazioni': await Pages.initImpostazioni(user); break;
+                    case 'gestione_destinatari': await Pages.initGestioneDestinatari(user); break;
                     case 'regole': await Pages.initRegoleScadenze(user); break;
                     case 'automezzi': await Pages.initConfigurazioneAutomezzi(user); break;
                     case 'documenti': await Pages.initConfigurazioneDocumenti(user); break;

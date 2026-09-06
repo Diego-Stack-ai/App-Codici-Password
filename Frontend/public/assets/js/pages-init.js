@@ -7,12 +7,12 @@
  * - Moduli Legacy -> V5.0: Importa dinamicamente il file e chiama la funzione init esportata.
  */
 
-import { initComponents } from './components-v129.js?v=1.2.43';
+import { initComponents } from './components-v129.js?v=1.2.44';
 
 import { LOG } from './logger.js';
 
 export async function initAreaPrivata(user) {
-    const module = await import('./modules/privato/area_privata.js?v=1.2.43');
+    const module = await import('./modules/privato/area_privata.js?v=1.2.44');
     await module.initAreaPrivata(user);
 }
 
@@ -23,7 +23,7 @@ export async function initRegistrati() {
 }
 
 export async function initIndex() {
-    const module = await import('./modules/auth/login.js?v=1.2.43');
+    const module = await import('./modules/auth/login.js?v=1.2.44');
     await module.initLogin();
 }
 
@@ -39,7 +39,7 @@ export async function initImpostaNuovaPassword() {
 
 export async function initHomePage(user) {
     LOG("[Router] Loading Home V5.0...");
-    const module = await import('./modules/home/home.js?v=1.2.43');
+    const module = await import('./modules/home/home.js?v=1.2.44');
     await module.initHomePage(user);
 }
 
@@ -49,23 +49,28 @@ export async function initArchivioAccount(user) {
 }
 
 export async function initProfiloPrivato(user) {
-    const module = await import('./modules/privato/profilo_privato.js?v=1.2.43');
+    const module = await import('./modules/privato/profilo_privato.js?v=1.2.44');
     await module.initProfiloPrivato(user);
 }
 
 export async function initProfiloPrivatoV2(user) {
-    const module = await import('./modules/privato/profilo_privato-v2.js?v=1.2.43');
+    const module = await import('./modules/privato/profilo_privato-v2.js?v=1.2.44');
     await module.initProfiloPrivatoV2(user);
 }
 
 export async function initImpostazioni(user) {
-    const module = await import('./modules/settings/impostazioni.js?v=1.2.43');
+    const module = await import('./modules/settings/impostazioni.js?v=1.2.44');
     await module.initImpostazioni(user);
 }
 
 // --- CONFIG SCADENZE ---
 export async function initRegoleScadenze(user) {
     LOG("[Router] Init Regole Scadenze (Static)");
+}
+
+export async function initGestioneDestinatari(user) {
+    const module = await import('./modules/shared/gestione-destinatari.js');
+    await module.initGestioneDestinatari(user);
 }
 
 export async function initConfigurazioneAutomezzi(user) {
@@ -109,7 +114,7 @@ export async function initScadenze(user) {
 }
 
 export async function initAggiungiScadenza(user) {
-    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=1.2.43');
+    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=1.2.44');
     await module.initAggiungiScadenza(user);
 }
 

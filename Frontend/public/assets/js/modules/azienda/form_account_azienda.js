@@ -6,7 +6,7 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.43';
+import { db } from '../../firebase-config.js?v=1.2.44';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -42,6 +42,10 @@ export async function initFormAccountAzienda(user) {
     currentDocId = urlParams.get('id');
     currentAziendaId = urlParams.get('aziendaId');
     isEditing = !!currentDocId;
+    document.querySelectorAll('.manage-recipients-link').forEach(link => {
+        const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
+        link.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
+    });
 
     if (!currentAziendaId) {
         showToast("ID Azienda mancante", "error");
@@ -233,7 +237,7 @@ async function loadData() {
 async function loadRubrica() {
     try {
         const snap = await getDocs(collection(db, "users", currentUid, "contacts"));
-        myContacts = snap.docs.map(d => d.data());
+        myContacts = snap.docs.map(d => d.data()).filter(contact => contact.active !== false);
     } catch (e) { logError("LoadRubrica", e); }
 }
 

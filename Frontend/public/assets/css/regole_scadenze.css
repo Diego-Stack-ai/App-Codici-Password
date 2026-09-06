@@ -78,6 +78,11 @@
     color: var(--status-warning);
 }
 
+.icon-purple {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+}
+
 .settings-item-info {
     flex: 1;
     display: flex;
