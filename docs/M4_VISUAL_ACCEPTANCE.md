@@ -2,6 +2,8 @@
 
 Questo gate completa M4 soltanto dopo una prova sulla versione pubblicata. I test automatici verificano struttura e regressioni CSS, ma non possono certificare la composizione grafica del browser fisico.
 
+Il contratto delle due famiglie e del viewport è definito in `PAGE_SHELL_CONTRACT.md`; il relativo gate statico è `npm run test:page-shells`.
+
 ## iPhone
 
 Eseguire in tema chiaro e scuro sulle pagine Home, Area privata, Account privati, Aziende, Scadenze, Archivio e Impostazioni:
@@ -40,4 +42,4 @@ Il collaudo del 6 settembre 2026 non ha superato il gate. Le schermate fornite m
 
 Correzione candidata applicata: su viewport mobile il documento esterno non scorre più e soltanto `.base-main` gestisce lo scorrimento verticale. Il collaudo comparativo del 6 settembre ha scelto la variante "nebbia V2": maschera progressiva sul contenuto, velo bianco tramite pseudo-elemento e blur da 12 px, senza bordi visibili. La tecnica deriva dai commit storici `ba7f85f` e `2c19860` e conserva intenzionalmente l'effetto delle card che sfumano sotto le fasce.
 
-Fallback preservato: la variante storica del commit `ab532e2`, corretta eliminando i bordi bianchi, resta isolata in `home_confronto.html` e `assets/css/home_confronto_legacy.css`. In caso di regressioni fisiche la scelta può essere invertita senza ricostruire lo stile. Il gate M4 resta aperto fino al nuovo collaudo su iPhone e Windows.
+Fallback preservato fuori dal runtime: la variante storica del commit `ab532e2`, il confronto della nebbia e i relativi supporti sono conservati in `archive/home-experiments/`. La specifica descritta in questo documento resta la fonte ufficiale; l'archivio consente un confronto manuale senza pubblicare o memorizzare offline i laboratori. Il gate M4 resta aperto fino al nuovo collaudo su iPhone e Windows.

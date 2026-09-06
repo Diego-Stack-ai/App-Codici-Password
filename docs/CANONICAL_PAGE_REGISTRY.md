@@ -5,22 +5,22 @@ Contratto M3 per distinguere le funzioni reali dai percorsi storici di compatibi
 ## Regola
 
 - Ogni funzione visibile possiede una sola pagina HTML e un solo modulo inizializzatore canonici.
-- Un redirect storico non contiene logica applicativa, non entra nella baseline prestazionale e punta direttamente alla pagina canonica.
 - Nuove pagine con suffissi di versione sono vietate. Le evoluzioni modificano la pagina canonica e sono protette da Git e test.
-- La rimozione di un redirect storico richiede prima prova di assenza da link, manifest, installazioni PWA e metriche reali.
+- Laboratori e redirect storici non appartengono alla superficie pubblica e restano conservati soltanto nell'archivio del repository.
 
 ## Compatibilità Home
 
 Pagina canonica: `home_page.html` → `modules/home/home.js`.
 
-Redirect storici temporanei:
+Riferimenti storici archiviati in `archive/home-experiments/`:
 
+- `home_confronto.html` e `home_nebbia.html`, con i relativi supporti;
 - `home-v126.html`;
 - `home-v127.html`;
 - `home-v128.html`;
 - `home-v129.html`.
 
-I quattro file devono restare redirect statici senza script e senza dipendenze applicative.
+Questi file non vengono pubblicati, memorizzati offline o inclusi negli audit delle pagine attive.
 
 ## Domini canonici
 

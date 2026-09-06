@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.57",
+  "version": "1.2.58",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -25,12 +25,13 @@
     "migrate:offline-reads": "node scripts/migrate-offline-firestore-reads.mjs",
     "pretest": "npm run build:offline-runtime",
     "release:patch": "npm run version:patch && npm test",
-    "test": "npm run test:offline && npm run test:security && npm run test:vault-contract && npm run test:data-access && npm run test:navigation && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:lightweight && npm run test:performance-budget && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:maturity-fixture && npm run test:crypto && npm run test:attachments && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules",
+    "test": "npm run test:offline && npm run test:security && npm run test:vault-contract && npm run test:data-access && npm run test:navigation && npm run test:page-shells && npm run test:ui-foundations && npm run test:html-purity && npm run test:static-references && npm run test:lightweight && npm run test:performance-budget && npm run test:js-syntax && npm run test:css && npm run test:dependencies && npm run test:assistant && npm run test:profile && npm run test:maturity-fixture && npm run test:crypto && npm run test:attachments && npm run test:functions-security && npm run test:firestore-rules && npm run test:storage-rules",
     "test:offline": "node scripts/audit-offline-shell.mjs",
     "test:security": "node scripts/audit-security-flows.mjs",
     "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs",
     "test:data-access": "node scripts/audit-data-access.mjs && node --test tests/request-coordinator.test.mjs",
     "test:navigation": "node scripts/audit-navigation-flows.mjs && node scripts/audit-canonical-pages.mjs && node --test tests/deadline-recipient-model.test.mjs tests/deadline-model.test.mjs tests/deadline-config-model.test.mjs tests/account-mode-model.test.mjs tests/banking-model.test.mjs",
+    "test:page-shells": "node scripts/audit-page-shells.mjs",
     "test:ui-foundations": "node scripts/audit-ui-foundations.mjs",
     "test:html-purity": "node scripts/audit-html-purity.mjs",
     "test:static-references": "node scripts/audit-static-references.mjs",

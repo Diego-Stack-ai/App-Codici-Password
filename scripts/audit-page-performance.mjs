@@ -8,7 +8,6 @@ const publicRoot = path.join(root, 'Frontend', 'public');
 const output = path.join(root, 'docs', 'PAGE_PERFORMANCE_BASELINE.md');
 const budgetFile = path.join(root, 'scripts', 'page-performance-budget.json');
 const checkOnly = process.argv.includes('--check');
-const excludedPages = new Set(['home-v126.html', 'home-v127.html', 'home-v128.html', 'home-v129.html']);
 const pageModules = {
   'account_azienda.html': 'assets/js/modules/azienda/account_azienda.js',
   'account_privati.html': 'assets/js/modules/privato/account_privati.js',
@@ -74,7 +73,7 @@ async function metrics(files) {
 }
 
 const htmlFiles = (await readdir(publicRoot))
-  .filter(name => name.endsWith('.html') && !excludedPages.has(name))
+  .filter(name => name.endsWith('.html'))
   .sort((a, b) => a.localeCompare(b));
 const rows = [];
 const budget = JSON.parse(await readFile(budgetFile, 'utf8'));
@@ -106,7 +105,7 @@ const shared = [...counts.entries()].filter(([, count]) => count >= Math.ceil(ro
 
 let markdown = '# Baseline statica delle prestazioni per pagina\n\n';
 markdown += '> Generata con `npm run audit:pages`. Misura il peso locale inizialmente raggiungibile da HTML, CSS e grafo degli import JavaScript. Non misura rete Firebase, decifratura, rendering o prestazioni del dispositivo: questi valori richiedono il collaudo runtime P5.\n\n';
-markdown += `Pagine canoniche analizzate: **${rows.length}**. Redirect storici esclusi: ${[...excludedPages].map(name => `\`${name}\``).join(', ')}.\n\n`;
+markdown += `Pagine canoniche analizzate: **${rows.length}**. Laboratori e redirect storici sono conservati fuori dalla cartella pubblica.\n\n`;
 markdown += '| Pagina | HTML | CSS | Moduli JS | Peso grezzo | Stima gzip |\n|---|---:|---:|---:|---:|---:|\n';
 for (const row of sorted) markdown += `| \`${row.name}\` | 1 | ${row.css.size} | ${row.js.size} | ${formatKb(row.bytes)} | ${formatKb(row.gzip)} |\n`;
 

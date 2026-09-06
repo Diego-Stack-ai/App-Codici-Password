@@ -47,8 +47,8 @@ sono complementari: la prima rende disponibile l'interfaccia, la seconda i dati 
   essere verificata visivamente senza alterare la livrea corrente.
 - Gli entry point segnalati come “orfani” dal grafo non sono automaticamente codice morto: molti
   sono caricati direttamente dall'HTML o tramite import dinamico.
-- L'unico duplicato byte-per-byte rimasto è intenzionale: `home-v126.html` e `home-v127.html`
-  conservano due URL storici già distribuiti, ma ora effettuano entrambi un solo redirect diretto.
+- I laboratori Home e i quattro redirect versionati sono stati rimossi dalla superficie pubblica e
+  conservati in `archive/home-experiments/`; il runtime espone soltanto le 29 pagine ufficiali.
 
 ## Ottimizzazioni applicate
 
@@ -61,8 +61,8 @@ sono complementari: la prima rende disponibile l'interfaccia, la seconda i dati 
   canonica `dati_azienda.html`.
 - Eliminati quattro moduli alias privi di logica (`components.js`, `components-v126.js`,
   `ui-core.js`, `env.js`) dopo avere convertito tutti gli import ai moduli canonici.
-- Accorciati i redirect storici `home-v126.html` e `home-v127.html`: ora raggiungono direttamente
-  `home_page.html` senza scaricare due documenti intermedi.
+- Archiviati i redirect storici `home-v126.html`–`home-v129.html`: non vengono più pubblicati,
+  precacheati o considerati dagli audit delle pagine attive.
 - Rimossa `googleapis` dalle Cloud Functions: non era importata; email e notifiche usano
   rispettivamente `nodemailer` e Firebase Admin Messaging.
 - Rimosse le dipendenze Playwright: il progetto non contiene test che le importino e il browser

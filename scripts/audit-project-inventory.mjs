@@ -58,7 +58,7 @@ const exactPurpose = new Map(Object.entries({
 function purpose(file) {
   if (exactPurpose.has(file)) return exactPurpose.get(file);
   const name = path.basename(file, path.extname(file)).replaceAll('_', ' ');
-  if (/home-v12[6-9]\.html$/.test(file)) return 'Redirect storico di compatibilità verso la Home canonica.';
+  if (file.startsWith('archive/home-experiments/')) return 'Riferimento storico Home escluso dal runtime e dalla pubblicazione.';
   if (file.endsWith('.html')) return `Struttura della pagina ${name}; comportamento demandato ai moduli.`;
   if (file.includes('/assets/css/')) return `Stili della ${name === 'core' ? 'base e dei token globali' : `sezione ${name}`}.`;
   if (file.includes('/translations/')) return `Dizionario differito per la lingua ${name}.`;

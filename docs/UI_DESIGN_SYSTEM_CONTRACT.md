@@ -2,6 +2,8 @@
 
 Questo documento definisce i vincoli tecnici della fase M4. Non sostituisce la revisione completa di lingue e organizzazione delle Impostazioni prevista dopo M10.
 
+La struttura di viewport, fondale, contenitori, area scorrevole, fasce e spaziatori è regolata separatamente da `PAGE_SHELL_CONTRACT.md`. Ombre, vetro e decorazioni non fanno parte di quel contratto strutturale.
+
 ## Principi
 
 - Un componente condiviso nasce soltanto quando esistono almeno due utilizzi reali.
