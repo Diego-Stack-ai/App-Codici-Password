@@ -3,13 +3,13 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.52';
+import { db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
-import { doc, collection, query, where, updateDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core-v129.js';
+import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
+import { logError, formatDateToIT } from '../../utils.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
@@ -17,6 +17,7 @@ import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { hasRealBankingData, normalizeBankingAccounts } from '../shared/banking-model.js';
 import { findPrivateAccountByLegacyId, getPrivateAccount } from '../data/vault-repository.js';
 import { initPrivateAttachmentModule, loadPrivateAttachments, openSourceSelector } from './dettaglio-privato-attachments.js';
+import { initPrivateSharingModule, renderPrivateSharingMap } from './dettaglio-privato-sharing.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -72,6 +73,7 @@ export async function initDettaglioAccountPrivato(user) {
     if (isReadOnly) setupReadOnlyUI();
     setupActions();
     initPrivateAttachmentModule({ ownerId, accountId: currentId, readOnly: isReadOnly });
+    initPrivateSharingModule({ currentUid, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
 
     await loadAccount();
 
@@ -119,7 +121,7 @@ async function loadAccount() {
 
         renderAccount(accountData);
         const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
-        renderSharingMap(accountData, contactNames);
+        renderPrivateSharingMap(accountData, contactNames);
         await loadPrivateAttachments();
         setupActions();
     } catch (e) {
@@ -208,7 +210,7 @@ function renderAccount(acc) {
     if (acc.visibility === 'shared') {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.remove('hidden');
-        renderSharingMap(acc);
+        renderPrivateSharingMap(acc);
     } else {
         const mgmt = document.getElementById('shared-management-section');
         if (mgmt) mgmt.classList.add('hidden');
@@ -343,186 +345,6 @@ function renderBanking(acc) {
             createElement('div', { className: 'bank-details' }, fields)
         ]);
         content.appendChild(cardEl);
-    });
-}
-
-/**
- * SHARING MONITOR & CONSISTENCY (HARDENING V2)
- */
-let sharingUnsubscribe = null; // Removed inside loading logic later, left for safety
-
-function renderSharingMap(account, contactNames = new Map()) {
-    const listContainer = document.getElementById('guests-list');
-    const mgmtSection = document.getElementById('shared-management-section');
-
-    if (!listContainer) return;
-
-    clearElement(listContainer);
-
-    if (account.visibility !== 'shared' || !account.sharedWith || Object.keys(account.sharedWith).length === 0) {
-        if (mgmtSection) mgmtSection.classList.add('hidden');
-        listContainer.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Nessuna condivisione attiva' }));
-        return;
-    }
-
-    if (mgmtSection) mgmtSection.classList.remove('hidden');
-
-    const guests = Object.values(account.sharedWith);
-
-    for (const inv of guests) {
-        if (inv.status === 'rejected') continue; // Should be handled/removed cleanly by backend, but safe fallback
-
-        const displayStatus = inv.status === 'pending' ? (t('status_pending') || 'In attesa') : (t('status_accepted') || 'Accettato');
-        const statusClass = inv.status === 'pending' ? 'bg-orange-500/20 text-orange-400 border-orange-500/20 animate-pulse' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20';
-
-        const items = [
-            createElement('span', {
-                className: `text-[8px] font-black uppercase px-2 py-1 rounded border ${statusClass}`,
-                textContent: displayStatus
-            })
-        ];
-
-        if (!isReadOnly) {
-            items.push(createElement('button', {
-                className: 'ml-2 p-2 rounded-lg bg-transparent border-none text-red-600 hover:text-red-500 hover:scale-110 transition-all cursor-pointer flex items-center justify-center sharing-revoke-button',
-                onclick: () => revokeRecipientV3(inv.email)
-            }, [
-                createElement('span', { className: 'material-symbols-outlined text-sm', textContent: 'delete' })
-            ]));
-        }
-
-        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
-            createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-avatar', textContent: inv.email.charAt(0).toUpperCase() }),
-                createElement('div', { className: 'rubrica-item-info' }, [
-                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: contactNames.get(normalizeEmailForLookup(inv.email)) || inv.email.split('@')[0] }),
-                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: inv.email })
-                ])
-            ]),
-            createElement('div', { className: 'flex items-center gap-2' }, items)
-        ]);
-        listContainer.appendChild(div);
-    }
-}
-
-function normalizeEmailForLookup(email) {
-    return String(email || '').trim().toLowerCase();
-}
-
-/**
- * REVOKE SINGLE RECIPIENT V3.1 (Atomic Transaction over Map)
- */
-async function revokeRecipientV3(email) {
-    if (!email) return;
-    const ok = await showConfirmModal(t('confirm_revoke_title') || "REVOCA ACCESSO", `${t('confirm_revoke_msg') || 'Vuoi rimuovere l\'accesso per'} ${email}?`, t('revoke') || "Revoca");
-    if (!ok) return;
-
-    try {
-        await runTransaction(db, async (transaction) => {
-            const accRef = doc(db, "users", currentUid, "accounts", currentId);
-            const targetSanitized = sanitizeEmail(email);
-            const inviteId = `${currentId}_${targetSanitized}`;
-            const invRef = doc(db, "invites", inviteId);
-
-            const accSnap = await transaction.get(accRef);
-            if (!accSnap.exists()) return;
-
-            let data = accSnap.data();
-            let sharedWith = data.sharedWith || {};
-            let wasAccepted = sharedWith[targetSanitized]?.status === 'accepted';
-
-            // 1. Array Remove
-            delete sharedWith[targetSanitized];
-
-            let newCount = data.acceptedCount || 0;
-            if (wasAccepted) newCount = Math.max(0, newCount - 1);
-
-            let hasActiveGests = Object.values(sharedWith).some(g => g.status === 'pending' || g.status === 'accepted');
-            let newVisibility = hasActiveGests ? "shared" : "private";
-
-            // V5.2 AUTO-HEALING DI STATO: Se torna privato e non era un Memo esplicito, torna ad essere Account
-            let newType = data.type;
-            if (newVisibility === 'private' && data.type === 'memo' && data.isExplicitMemo !== true) {
-                newType = 'account';
-            }
-
-            transaction.update(accRef, {
-                sharedWith: sharedWith,
-                sharedWithUids: Object.values(sharedWith).filter(g => g.status === 'accepted' && g.uid).map(g => g.uid),
-                acceptedCount: newCount,
-                visibility: newVisibility,
-                type: newType,
-                updatedAt: new Date().toISOString()
-            });
-
-            // 2. Clear technical invite (silent fail if not found natively in V3)
-            transaction.delete(invRef);
-
-            // 3. V3 Notification to Owner
-            const ownerNotifRef = doc(collection(db, "users", currentUid, "notifications"));
-            transaction.set(ownerNotifRef, {
-                title: "Accesso Revocato",
-                message: `Hai revocato l'accesso a ${email} per l'account ${data.nomeAccount || 'selezionato'}.`,
-                accountName: data.nomeAccount || 'Account',
-                type: "share_revoked",
-                accountId: currentId,
-                guestEmail: email,
-                timestamp: new Date().toISOString(),
-                read: false
-            });
-
-            // 4. [NEW] Notification to Guest (if accepted)
-            const guestUid = wasAccepted ? accSnap.data().sharedWith[targetSanitized]?.uid : null;
-            if (guestUid) {
-                const guestNotifRef = doc(collection(db, "users", guestUid, "notifications"));
-                transaction.set(guestNotifRef, {
-                    title: "Accesso Revocato",
-                    message: `Il proprietario ha rimosso il tuo accesso a: ${data.nomeAccount || 'un account condiviso'}.`,
-                    accountName: data.nomeAccount || 'Account',
-                    type: "share_revoked",
-                    ownerEmail: auth.currentUser?.email || 'Proprietario',
-                    timestamp: new Date().toISOString(),
-                    read: false
-                });
-                LOG(`[V5.9-REVOKE] Notification sent to guest: ${guestUid}`);
-            }
-        });
-
-        showToast("Accesso revocato con successo");
-        // Reload account internally or via UI bounce since we killed the listener
-        await loadAccount();
-    } catch (e) {
-        console.error("RevokeRecipient failed", e);
-        showToast(t('error_generic'), 'error');
-    }
-}
-
-function renderGuests(guests) {
-    const list = document.getElementById('guests-list');
-    if (!list) return;
-    clearElement(list);
-
-    if (!guests || guests.length === 0) {
-        list.appendChild(createElement('p', { className: 'text-[10px] opacity-40 italic', textContent: 'Sola lettura' }));
-        return;
-    }
-
-    guests.forEach(item => {
-        const displayEmail = typeof item === 'string' ? item : item.email;
-        const div = createElement('div', { className: 'rubrica-list-item flex items-center justify-between' }, [
-            createElement('div', { className: 'rubrica-item-info-row' }, [
-                createElement('div', { className: 'rubrica-item-avatar', textContent: displayEmail.charAt(0).toUpperCase() }),
-                createElement('div', { className: 'rubrica-item-info' }, [
-                    createElement('p', { className: 'truncate m-0 rubrica-item-name', textContent: displayEmail.split('@')[0] }),
-                    createElement('p', { className: 'truncate m-0 opacity-60 text-[10px]', textContent: displayEmail })
-                ])
-            ]),
-            createElement('span', {
-                className: `ml-auto text-[8px] font-black uppercase px-2 py-1 rounded border bg-emerald-500/20 text-emerald-400 border-emerald-500/20`,
-                textContent: t('status_accepted') || 'Accettato'
-            })
-        ]);
-        list.appendChild(div);
     });
 }
 
