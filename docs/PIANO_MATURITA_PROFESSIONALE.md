@@ -178,7 +178,7 @@ Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 5. [~] Form Account Privato e Azienda: regole Account/Memorandum condivise e testate; rifattorizzazione pagina da completare;
 6. [~] Impostazioni e configurazioni: modello comune delle tre configurazioni Scadenze estratto e testato; riordino complessivo rinviato al post-M10;
 7. [~] Aziende e archivio: letture archivio parallelizzate; apertura allegati anagrafica azienda isolata e coperta dai gate di sicurezza; rifattorizzazione da completare;
-8. [ ] Home e pagine pubbliche.
+8. [~] Home e pagine pubbliche: bootstrap pubblico già minimo; presentazione protetta estratta dalla Home e mantenuta strettamente su richiesta; dashboard e inbox da completare.
 
 Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricamento progressivo, test, confronto e rimozione del vecchio percorso.
 

@@ -4,7 +4,6 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/home/.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.52';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { getFooterReady } from '../../footer-state.js';
 import { t } from '../../translations.js';
@@ -14,6 +13,7 @@ import { showConfirmModal } from '../../ui-core-v129.js';
 import { applyCompanyAreaVisibility, getCachedCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { getDeadline, getUserProfile, listCompanies, listDeadlineNotifications, listDeadlines } from '../data/vault-repository.js';
 import { deadlineDate, deadlinePresentation } from '../scadenze/deadline-model.js';
+import { initHomePresentation } from './home-presentation.js';
 
 // [V8.0] FLAG DI SICUREZZA - In produzione è FALSE per nascondere i meccanismi di auto-cura
 const SAFE_MODE = false;
@@ -26,7 +26,6 @@ const SAFE_MODE = false;
 
 // Stato Globale Modulo
 let currentUser = null;
-let presentationObjectUrl = null;
 
 // 1. INIT FUNCTION (Single Orchestrator)
 export async function initHomePage(user) {
@@ -49,7 +48,7 @@ export async function initHomePage(user) {
 
     // Inizializza Listeners immediatamente (non dipende da dati remoti)
     initHomeListeners();
-    initAppPresentation();
+    initHomePresentation();
 
     // Sblocco visibilità subito
     document.documentElement.setAttribute("data-i18n", "ready");
@@ -103,86 +102,6 @@ export async function initHomePage(user) {
     }
 
     
-}
-
-function initAppPresentation() {
-    const openButton = document.getElementById('app-presentation-open');
-    const modal = document.getElementById('app-presentation-modal');
-    const playButton = document.getElementById('app-presentation-play');
-    const stage = document.getElementById('app-presentation-stage');
-    if (!openButton || !modal || !playButton || !stage) return;
-
-    const closeModal = () => {
-        modal.hidden = true;
-        document.body.style.removeProperty('overflow');
-        stage.querySelector('video')?.pause();
-        openButton.focus();
-    };
-
-    openButton.addEventListener('click', () => {
-        modal.hidden = false;
-        document.body.style.overflow = 'hidden';
-        playButton.focus();
-    });
-    modal.querySelectorAll('[data-presentation-close]').forEach((element) => {
-        element.addEventListener('click', closeModal);
-    });
-    modal.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') closeModal();
-    });
-
-    playButton.addEventListener('click', async () => {
-        const existingVideo = stage.querySelector('video');
-        if (existingVideo) {
-            await existingVideo.play();
-            return;
-        }
-
-        playButton.disabled = true;
-        playButton.querySelector('span:last-child').textContent = 'Caricamento…';
-        try {
-            const idToken = await auth.currentUser?.getIdToken();
-            if (!idToken) throw new Error('Sessione non disponibile.');
-            const controller = new AbortController();
-            const timeout = window.setTimeout(() => controller.abort(), 20000);
-            let response;
-            try {
-                response = await fetch('/protected-media/presentation', {
-                    headers: { Authorization: `Bearer ${idToken}` },
-                    cache: 'no-store',
-                    signal: controller.signal
-                });
-            } finally {
-                window.clearTimeout(timeout);
-            }
-            if (!response.ok) throw new Error(`Download non disponibile (${response.status}).`);
-            const blob = await response.blob();
-            presentationObjectUrl = URL.createObjectURL(blob);
-            const video = document.createElement('video');
-            video.src = presentationObjectUrl;
-            video.controls = true;
-            video.playsInline = true;
-            video.preload = 'metadata';
-            video.setAttribute('aria-label', 'Presentazione di Codici e Password');
-            stage.replaceChildren(video);
-            playButton.querySelector('span:last-child').textContent = 'Riproduci';
-            await video.play();
-        } catch (error) {
-            console.warn('[PRESENTAZIONE] Video non disponibile.', error);
-            const message = document.createElement('div');
-            message.className = 'app-presentation-loading';
-            message.setAttribute('role', 'alert');
-            message.textContent = 'Il video non è ancora disponibile. Riprova tra poco.';
-            stage.replaceChildren(message);
-            playButton.querySelector('span:last-child').textContent = 'Riprova';
-        } finally {
-            playButton.disabled = false;
-        }
-    });
-
-    window.addEventListener('pagehide', () => {
-        if (presentationObjectUrl) URL.revokeObjectURL(presentationObjectUrl);
-    }, { once: true });
 }
 
 async function renderDeadlineNotificationInbox(user) {
@@ -252,8 +171,6 @@ function initHomeListeners() {
         });
     }
 }
-
-
 /**
  * Gestisce il rendering dell'utente nell'Header
  * (Foto, Nome, Saluto)
@@ -608,3 +525,4 @@ function setupFABGroup(aziendes = [], companyAreaEnabled = true) {
         document.addEventListener('footer:ready', (e) => initFABFromFooter(e.detail), { once: true });
     }
 }
+

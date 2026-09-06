@@ -91,6 +91,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/core/webauthn-manager.js",
   "assets/js/modules/data/request-coordinator.js",
   "assets/js/modules/data/vault-repository.js",
+  "assets/js/modules/home/home-presentation.js",
   "assets/js/modules/home/home.js",
   "assets/js/modules/privato/account_privati.js",
   "assets/js/modules/privato/area_privata.js",

@@ -33,6 +33,14 @@ for (const dependency of ['tesseract.js', '@zxing/browser']) {
 const gitignore = await readFile(join(root, '.gitignore'), 'utf8');
 if (!gitignore.includes('experiments/card-importer/dist/')) failures.push('Il bundle sperimentale deve essere ignorato da Git');
 
+const homeModule = await readFile(join(publicRoot, 'assets', 'js', 'modules', 'home', 'home.js'), 'utf8');
+const presentationModule = await readFile(join(publicRoot, 'assets', 'js', 'modules', 'home', 'home-presentation.js'), 'utf8');
+if (!homeModule.includes("from './home-presentation.js'")) failures.push('La presentazione non è isolata dal controller Home');
+if (homeModule.includes('/protected-media/presentation')) failures.push('Il controller Home contiene ancora il download della presentazione');
+if (!/playButton\.addEventListener\('click',[\s\S]*fetch\('\/protected-media\/presentation'/.test(presentationModule)) {
+    failures.push('Il video di presentazione può essere richiesto prima del gesto utente');
+}
+
 if (failures.length) {
     console.error('Gate app leggera non superato:');
     failures.forEach(failure => console.error(`- ${failure}`));
