@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * DETTAGLIO ACCOUNT AZIENDA MODULE (V6.0 SPLIT)
  * Visualizzazione dettagliata credenziali e coordinate bancarie aziendali.
@@ -22,6 +21,7 @@ import {
 } from './dettaglio-azienda-attachments.js';
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
+import {getCompanyAccount} from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -80,15 +80,15 @@ function initProtocolUI() {
 async function loadAccount() {
     try {
         const docRef = doc(db, "users", ownerId, "aziende", currentAziendaId, "accounts", currentId);
-        const docSnap = await getDoc(docRef);
+        const account = await getCompanyAccount(ownerId, currentAziendaId, currentId);
 
-        if (!docSnap.exists()) {
+        if (!account) {
             showToast(t('account_not_found'), "error");
             setTimeout(() => history.back(), 1000);
             return;
         }
 
-        originalData = { id: docSnap.id, ...docSnap.data() };
+        originalData = account;
 
         // 🔐 DECRIPTAZIONE (Auto-Unlock Compliant)
         if (originalData._encrypted) {

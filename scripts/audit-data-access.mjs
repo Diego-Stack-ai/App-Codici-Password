@@ -12,13 +12,21 @@ assert.match(repository, /listAcceptedInvites/, 'Repository inviti accettati man
 assert.match(repository, /listCompanies/, 'Repository Aziende mancante');
 assert.match(repository, /listCompanyAccounts/, 'Repository Account aziendali mancante');
 assert.match(repository, /listDeadlines/, 'Repository Scadenze mancante');
+assert.match(repository, /coalesceRead\(key,[\s\S]*?\.then\(records\)/,
+    'Il repository non separa la lettura condivisa dagli oggetti consegnati alle pagine');
 
 const migratedPages = await Promise.all([
     'Frontend/public/assets/js/modules/privato/account_privati.js',
     'Frontend/public/assets/js/modules/privato/area_privata.js',
     'Frontend/public/assets/js/modules/azienda/lista_aziende.js',
     'Frontend/public/assets/js/modules/azienda/account_azienda.js',
-    'Frontend/public/assets/js/modules/scadenze/scadenze.js'
+    'Frontend/public/assets/js/modules/scadenze/scadenze.js',
+    'Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js',
+    'Frontend/public/assets/js/modules/azienda/dati_azienda.js',
+    'Frontend/public/assets/js/modules/azienda/modifica_azienda.js',
+    'Frontend/public/assets/js/modules/privato/profilo_privato.js',
+    'Frontend/public/assets/js/modules/privato/profilo-links.js',
+    'Frontend/public/assets/js/modules/privato/profilo-widgets.js'
 ].map(read));
 
 assert.ok(migratedPages.every(source => !source.includes('offline-firestore.js')),

@@ -161,7 +161,7 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 - [x] rendere selettiva la sincronizzazione per pagina tramite le priorità di `offline-sync.js`;
 - [ ] definire conflitti prima di abilitare scritture offline.
 
-Primo incremento completato: Account privati, dashboard privata, Aziende, Account aziendali e Scadenze usano il repository. Dettagli, form, sicurezza e configurazioni restano da migrare prima dell’uscita M2.
+Primi incrementi completati: Account privati, dashboard privata, Aziende, Account aziendali, Scadenze, Profilo e dettagli principali usano il repository. Form Account, allegati, sicurezza, Home e configurazioni restano da migrare prima dell’uscita M2.
 
 **Uscita:** le pagine non conoscono più i dettagli della cache o della rete.
 

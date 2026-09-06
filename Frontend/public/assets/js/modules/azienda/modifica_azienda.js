@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * MODIFICA AZIENDA MODULE (V6.0 MODULAR)
  * Entry point orchestratore — delega tutto ai moduli ma_*.
@@ -21,6 +20,7 @@ import { createElement, clearElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import {getCompany} from '../data/vault-repository.js';
 
 import { state } from './ma_state.js';
 import { populateForm } from './ma_cards.js';
@@ -81,13 +81,12 @@ function initProtocolUI() {
 
 async function loadAzienda() {
     try {
-        const docRef = doc(db, "users", state.currentUid, "aziende", state.currentAziendaId);
-        const snap = await getDoc(docRef);
-        if (!snap.exists()) {
+        const company = await getCompany(state.currentUid, state.currentAziendaId);
+        if (!company) {
             showToast(t('error_not_found'), "error");
             return;
         }
-        await populateForm(snap.data());
+        await populateForm(company);
     } catch (e) {
         logError("LoadAzienda", e);
         showToast(t('error_generic'), "error");

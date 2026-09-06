@@ -1,4 +1,3 @@
-import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { collection, deleteDoc, doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
@@ -6,6 +5,7 @@ import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { encrypt, decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { PROFILE_TABS, PROFILE_WIDGET_FIELD_LIMIT, PROFILE_WIDGET_TABS, validateProfileWidget } from './profile-model.js';
 import { showProfileModal } from './profilo-modal.js';
+import {listProfileWidgets} from '../data/vault-repository.js';
 
 let widgets = [];
 let onChanged = null;
@@ -31,10 +31,10 @@ export async function setWidgetFieldQr(widgetId, fieldId, includeInQr) {
 async function loadWidgets() {
     const user = auth.currentUser;
     if (!user) return;
-    const snapshot = await getDocs(widgetCollection(user.uid));
+    const widgetRecords = await listProfileWidgets(user.uid);
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
-    widgets = await Promise.all(snapshot.docs.map(async item => {
-        const data = { id: item.id, ...item.data() };
+    widgets = await Promise.all(widgetRecords.map(async item => {
+        const data = {...item};
         data.fields = await Promise.all((data.fields || []).map(async field => ({
             ...field,
             value: field.encrypted && field.valueEnc && vaultKeyMaterial ? await decrypt(field.valueEnc, vaultKeyMaterial) : (field.value || '')

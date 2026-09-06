@@ -20,6 +20,7 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 4. Le scritture restano sui percorsi esistenti finché non è definito il modello M6 di conflitto e coda offline.
 5. Un errore di refresh remoto non deve cancellare un risultato locale valido.
 6. Nessun dato decifrato viene conservato dal repository.
+7. La lettura remota/cache può essere condivisa, ma ogni consumatore riceve nuovi oggetti: la decifratura o la normalizzazione di una pagina non contamina le altre.
 
 ## Domini migrati nel primo incremento M2
 
@@ -30,5 +31,8 @@ Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e
 - lista Aziende;
 - lista Account di una singola Azienda;
 - lista Scadenze.
+- Profilo, impostazioni del Profilo e widget;
+- dettaglio Account aziendale, Dati azienda e caricamento del form Azienda;
+- lettura principale del dettaglio Account privato, mantenendo il fallback per gli ID legacy.
 
 I dettagli, i form, la sicurezza e alcune configurazioni mantengono temporaneamente il vecchio adapter `offline-firestore.js` e verranno migrati per dominio prima di chiudere M2.

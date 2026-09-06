@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * DATI AZIENDA MODULE (V5.0 ADAPTER)
  * Visualizzazione dettagliata anagrafica aziendale, QR vCard, sedi e allegati.
@@ -11,6 +10,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
+import {getCompany} from '../data/vault-repository.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -163,9 +163,9 @@ function setupEventListeners() {
 
 async function loadData(uid) {
     try {
-        const snap = await getDoc(doc(db, "users", uid, "aziende", currentAziendaId));
-        if (snap.exists()) {
-            currentAziendaData = snap.data();
+        const company = await getCompany(uid, currentAziendaId);
+        if (company) {
+            currentAziendaData = company;
 
             // 🔐 PROTOCOLLO BLINDA (V6.0): Decrittazione automatica dati sensibili (Note e Passwords)
             if (currentAziendaData._encrypted) {

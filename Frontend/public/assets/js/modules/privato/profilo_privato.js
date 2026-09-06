@@ -1,4 +1,3 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
 /**
  * PROFILO PRIVATO MODULE (V7.0 — Dashboard modulare e caricamento progressivo)
  * Entry point e orchestratore del profilo privato utente.
@@ -33,6 +32,7 @@ import { editSection, editAddress, editUserDocument, addUtility, editUtility } f
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureVaultKeyMaterial, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
+import {getUserProfile, getUserSetting} from '../data/vault-repository.js';
 import { syncData as _syncData } from './profilo-sync.js';
 import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.js';
 
@@ -175,10 +175,10 @@ function buildCtx() {
 
 async function loadUserData(user, renderImmediately = true) {
     try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (!userDoc.exists()) return;
+        const profile = await getUserProfile(user.uid);
+        if (!profile) return;
 
-        currentUserData = userDoc.data();
+        currentUserData = profile;
 
         // 🔐 PROTOCOLLO BLINDA (V6.1.5): Decrittazione Granulare Universale
         const vaultKeyMaterial = await ensureVaultKeyMaterial();
@@ -264,17 +264,17 @@ async function loadUserData(user, renderImmediately = true) {
         userDocuments = currentUserData.documenti || [];
 
         // Custom Labels
-        const [labelsSnap, qrSnap] = await Promise.all([
-            getDoc(doc(db, 'users', user.uid, 'settings', 'profileLabels')),
-            getDoc(doc(db, 'users', user.uid, 'settings', 'qrCodeInclusions'))
+        const [storedLabels, storedQrInclusions] = await Promise.all([
+            getUserSetting(user.uid, 'profileLabels'),
+            getUserSetting(user.uid, 'qrCodeInclusions')
         ]);
-        if (labelsSnap.exists()) {
-            Object.assign(profileLabels, labelsSnap.data()); // in-place per preservare i riferimenti nei moduli
+        if (storedLabels) {
+            Object.assign(profileLabels, storedLabels); // in-place per preservare i riferimenti nei moduli
         }
 
         // QR Code Inclusions
-        if (qrSnap.exists()) {
-            Object.assign(qrCodeInclusions, qrSnap.data()); // in-place per preservare i riferimenti nei moduli
+        if (storedQrInclusions) {
+            Object.assign(qrCodeInclusions, storedQrInclusions); // in-place per preservare i riferimenti nei moduli
         }
         Object.assign(qrCodeInclusions, migrateQrIndexesToIds(qrCodeInclusions, currentUserData));
 

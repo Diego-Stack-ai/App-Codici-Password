@@ -1,9 +1,9 @@
-import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
+import {listPrivateAccounts} from '../data/vault-repository.js';
 
 export function openLinkedAccount(accountId) {
     if (accountId) window.location.href = `dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}`;
@@ -12,13 +12,12 @@ export function openLinkedAccount(accountId) {
 export async function connectEmailAccount(email, syncData) {
     const user = auth.currentUser;
     if (!user || !email?.id) return;
-    const snapshot = await getDocs(collection(db, 'users', user.uid, 'accounts'));
+    const accountRecords = await listPrivateAccounts(user.uid);
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
-    const accounts = await Promise.all(snapshot.docs.map(async item => {
-        const data = item.data();
+    const accounts = await Promise.all(accountRecords.map(async data => {
         let username = '';
         try { username = data._encrypted && data.username ? await decrypt(data.username, vaultKeyMaterial) : (data.username || ''); } catch { username = ''; }
-        return { id: item.id, name: data.nomeAccount || 'Account', username };
+        return { id: data.id, name: data.nomeAccount || 'Account', username };
     }));
     if (accounts.length === 0) {
         const create = await showConfirmModal('Account email assente', 'Non esiste ancora un Account collegabile. Vuoi aprire la creazione guidata?');

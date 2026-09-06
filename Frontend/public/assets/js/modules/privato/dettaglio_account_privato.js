@@ -18,6 +18,7 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
+import {findPrivateAccountByLegacyId, getPrivateAccount} from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -85,18 +86,10 @@ export async function initDettaglioAccountPrivato(user) {
  */
 async function loadAccount() {
     try {
-        let docRef = doc(db, "users", ownerId, "accounts", currentId);
-        let snap = await getDoc(docRef);
-
-        if (!snap.exists()) {
-            const q = query(collection(db, "users", ownerId, "accounts"), where("id", "==", currentId));
-            const qSnap = await getDocs(q);
-            if (qSnap.empty) { showToast(t('account_not_found'), "error"); return; }
-            snap = qSnap.docs[0];
-            docRef = snap.ref;
-        }
-
-        accountData = { id: snap.id, ...snap.data() };
+        accountData = await getPrivateAccount(ownerId, currentId)
+            || await findPrivateAccountByLegacyId(ownerId, currentId);
+        if (!accountData) { showToast(t('account_not_found'), "error"); return; }
+        const docRef = doc(db, "users", ownerId, "accounts", accountData.id);
         if (!isReadOnly) updateDoc(docRef, { views: increment(1) }).catch(console.warn);
 
         // 🔐 PROTOCOLLO BLINDA (Auto-Unlock Compliant)
