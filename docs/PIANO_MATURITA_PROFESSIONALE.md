@@ -184,6 +184,7 @@ Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricame
 
 - [ ] estrarre componenti soltanto dopo almeno due utilizzi reali;
 - [ ] unificare card Account, righe sensibili, form field e stati di caricamento;
+- [ ] eliminare definitivamente flash e discontinuità di header/footer durante scroll e overscroll su iPhone e desktop;
 - [ ] ridurre CSS duplicato senza aumentare il cascade globale;
 - [ ] completare i18n e accessibilità;
 - [ ] applicare budget per font e icone.

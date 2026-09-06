@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.50';
+import { auth, db } from '../../firebase-config.js?v=1.2.51';
 import { collection, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { getDocsSmart as getDocs } from '/assets/js/offline-firestore.js';
 import { clearElement, createElement } from '../../dom-utils.js';

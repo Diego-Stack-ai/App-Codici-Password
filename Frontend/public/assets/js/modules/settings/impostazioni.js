@@ -1,12 +1,12 @@
-import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
+import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
 /**
  * IMPOSTAZIONI MODULE (V4.6)
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.50';
+import { auth, db } from '../../firebase-config.js?v=1.2.51';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
-import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
+import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -16,6 +16,7 @@ import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revok
 import { disableDeadlinePush, disableSharingPush, enableDeadlinePush, enableSharingPush, getCurrentPushState, listenForDeadlinePushInForeground, sendDeadlinePushTest } from '../shared/push-manager.js';
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { clearPerformanceSamples, getPerformanceDiagnosticReport, isPerformanceDiagnosticsEnabled, setPerformanceDiagnosticsEnabled } from '../../performance-metrics.js';
+import { buildVCard, ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils-v2.js';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -31,6 +32,7 @@ export async function initImpostazioni(user) {
     if (!user) return;
 
     await loadUserData(user);
+    setupSettingsProfileQr(user);
     initSettingsEvents();
     setupSecurityToggles(currentUserData);
     setupAIAssistantToggle(user, currentUserData);
@@ -44,6 +46,30 @@ export async function initImpostazioni(user) {
     showPendingSecurityNotice();
 
     
+}
+
+async function setupSettingsProfileQr(user) {
+    const container = document.getElementById('settings-profile-qrcode');
+    if (!container || !currentUserData) return;
+    try {
+        const [qrSnap, widgetsSnap] = await Promise.all([
+            getDoc(doc(db, 'users', user.uid, 'settings', 'qrCodeInclusions')),
+            getDocs(collection(db, 'users', user.uid, 'profileWidgets'))
+        ]);
+        const inclusions = qrSnap.exists() ? qrSnap.data() : { nome: true, cf: false, nascita: false, phones: [], emails: [], addresses: [] };
+        const customFields = widgetsSnap.docs.flatMap(widget => Array.isArray(widget.data()?.fields) ? widget.data().fields : []);
+        const vcard = buildVCard(currentUserData, inclusions, {
+            contactPhones: currentUserData.contactPhones || [],
+            contactEmails: currentUserData.contactEmails || [],
+            userAddresses: currentUserData.userAddresses || [],
+            customFields
+        });
+        await ensureQRCodeLib();
+        renderQRCode(container, vcard, { width: 104, height: 104, colorDark: '#000000', colorLight: '#E3F2FD', correctLevel: 2 });
+    } catch (error) {
+        console.warn('[IMPOSTAZIONI] Anteprima QR non disponibile.', error);
+        setChildren(container, createElement('span', { className: 'material-symbols-outlined settings-qr-fallback', textContent: 'qr_code_2' }));
+    }
 }
 
 function setupPerformanceDiagnostics() {

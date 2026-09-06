@@ -442,3 +442,10 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Il pannello conserva al massimo 80 misure tecniche tra le pagine e mostra bootstrap, navigazione, stato online/offline, conteggio risorse e traffico trasferito disponibile.
 - La raccolta usa una lista chiusa di dettagli ammessi: non salva email, UID, URL, token, contenuti della Vault o dati decifrati.
 - Sono disponibili aggiornamento, copia del report tecnico e cancellazione; la disattivazione elimina automaticamente le misure dal dispositivo.
+
+# Anteprima QR reale nelle Impostazioni (06/09/2026)
+
+- Rimossa la scritta duplicata «Apri Profilo utente» dalla card principale delle Impostazioni.
+- Il riquadro vicino all’avatar genera ora la stessa vCard configurata nel Profilo, usando inclusioni QR e widget consentiti; il tocco continua ad aprire la scheda Tessera digitale.
+- Il caricamento del QR è asincrono e non blocca le altre Impostazioni; in caso di indisponibilità resta una semplice icona QR.
+- Il flash residuo di header/footer durante scroll e overscroll è registrato come difetto trasversale della fase M4 e sarà verificato unitariamente sulle pagine canoniche.

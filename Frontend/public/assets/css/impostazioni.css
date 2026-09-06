@@ -662,6 +662,28 @@ h3.settings-desc {
     transform: scale(0.98);
 }
 
+.settings-profile-qrcode {
+    width: 104px;
+    height: 104px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+.settings-profile-qrcode canvas,
+.settings-profile-qrcode img {
+    display: block;
+    width: 104px;
+    height: 104px;
+}
+
+.settings-qr-fallback {
+    color: #0f172a;
+    font-size: 3rem;
+}
+
 .diagnostics-panel {
     width: 100%;
     padding-top: 0.25rem;
