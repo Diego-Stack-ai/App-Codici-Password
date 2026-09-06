@@ -556,3 +556,32 @@ html:not(.dark) .rubrica-toggle-btn:hover {
     opacity: 0.6;
     font-weight: var(--font-label-weight);
 }
+/* Stabilità compositing durante lo scroll mobile (in particolare PWA iOS). */
+@media (max-width: 600px) {
+    .area-private-page .base-header,
+    .area-private-page .base-footer {
+        right: 0;
+        left: 0;
+        width: auto;
+        max-width: none;
+        transform: none;
+        background: var(--card-bg);
+        backface-visibility: visible;
+        contain: layout paint;
+        isolation: isolate;
+    }
+
+    .area-private-page .base-glow {
+        position: absolute;
+    }
+
+    .area-private-page .matrix-card {
+        background: rgba(255, 255, 255, 0.045);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    html:not(.dark) .area-private-page .matrix-card {
+        background: rgba(255, 255, 255, 0.72);
+    }
+}
