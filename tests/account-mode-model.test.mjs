@@ -10,6 +10,8 @@ test('riconosce i quattro modi canonici anche dai record storici', () => {
     assert.equal(model.accountModeFromRecord({ visibility: 'shared' }), model.ACCOUNT_MODES.SHARED);
     assert.equal(model.accountModeFromRecord({ type: 'memorandum' }), model.ACCOUNT_MODES.MEMO_PRIVATE);
     assert.equal(model.accountModeFromRecord({ type: 'memo', visibility: 'shared' }), model.ACCOUNT_MODES.MEMO_SHARED);
+    assert.equal(model.accountModeFromRecord({ isMemoShared: true }), model.ACCOUNT_MODES.MEMO_SHARED);
+    assert.equal(model.accountModeFromRecord({ hasMemo: true }), model.ACCOUNT_MODES.MEMO_PRIVATE);
 });
 
 test('non consente credenziali nei memorandum', () => {

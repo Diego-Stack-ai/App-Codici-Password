@@ -18,6 +18,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {listAcceptedInvites, listContacts, listPrivateAccounts, listTopPrivateAccounts} from '../data/vault-repository.js';
+import { accountModeFromRecord } from '../shared/account-mode-model.js';
 
 // State locale per evitare reload inutili
 let _isInitialized = false;
@@ -74,8 +75,9 @@ async function loadCounters(uid, email) {
 
         accounts.forEach(d => {
             if (d.isArchived) return;
-            const isShared = d.visibility === 'shared' || !!d.shared || !!d.isMemoShared;
-            const isMemo = (d.type === 'memo' || d.type === 'memorandum') || !!d.isMemo || !!d.hasMemo;
+            const mode = accountModeFromRecord(d);
+            const isShared = mode.endsWith('-shared');
+            const isMemo = mode.startsWith('memo-');
 
             if (isShared) {
                 if (isMemo) counts.sharedMemo++;
@@ -91,8 +93,7 @@ async function loadCounters(uid, email) {
         LOG('[Counters] Accepted invites fetched in parallel with own accounts');
         LOG(`[Counters] Invites fetched: ${invites.length}`);
         invites.forEach(inv => {
-            const invType = inv.type || 'privato';
-            const isMemoInv = (invType === 'memo' || invType === 'memorandum');
+            const isMemoInv = accountModeFromRecord({ type: inv.type, visibility: 'shared' }).startsWith('memo-');
 
             if (isMemoInv) counts.sharedMemo++;
             else counts.shared++;
@@ -164,8 +165,9 @@ async function loadTopAccounts(uid) {
 
 function createMicroAccountCard(id, data) {
     const avatar = data.logo || data.avatar || 'assets/images/google-avatar.png';
-    const isMemo = (data.type === 'memo' || data.type === 'memorandum') || !!data.isMemo || !!data.hasMemo;
-    const isShared = data.visibility === 'shared' || !!data.shared || !!data.isMemoShared;
+    const mode = accountModeFromRecord(data);
+    const isMemo = mode.startsWith('memo-');
+    const isShared = mode.endsWith('-shared');
 
     let badgeClass = 'bg-blue-500';
     if (isShared && isMemo) badgeClass = 'bg-emerald-500';

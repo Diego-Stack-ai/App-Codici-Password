@@ -11,8 +11,8 @@ export function hasAccountCredentials(account = {}) {
 }
 
 export function accountModeFromRecord(account = {}) {
-    const isMemo = account.type === 'memo' || account.type === 'memorandum';
-    const isShared = account.visibility === 'shared' || account._isGuest === true;
+    const isMemo = account.type === 'memo' || account.type === 'memorandum' || account.isMemo === true || account.hasMemo === true || account.isMemoShared === true;
+    const isShared = account.visibility === 'shared' || account._isGuest === true || account.shared === true || account.isMemoShared === true;
     if (isMemo) return isShared ? ACCOUNT_MODES.MEMO_SHARED : ACCOUNT_MODES.MEMO_PRIVATE;
     return isShared ? ACCOUNT_MODES.SHARED : ACCOUNT_MODES.PRIVATE;
 }

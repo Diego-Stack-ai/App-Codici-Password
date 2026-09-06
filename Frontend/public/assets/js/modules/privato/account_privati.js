@@ -16,6 +16,7 @@ import { SwipeList } from '../../swipe-list-v6.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
 import {getRecordByPath, getUserProfile, listAcceptedInvites, listPrivateAccounts} from '../data/vault-repository.js';
+import { accountModeFromRecord } from '../shared/account-mode-model.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -212,13 +213,11 @@ function filterAndRender() {
     const searchVal = document.getElementById('account-search')?.value.toLowerCase() || '';
 
     let filtered = allAccounts.filter(acc => {
-        const isMemo = (acc.type === 'memo' || acc.type === 'memorandum');
-        const isShared = acc.visibility === 'shared' || acc._isGuest;
-
-        if (type === 'standard') return !isShared && !isMemo;
-        if (type === 'shared') return isShared && !isMemo;
-        if (type === 'memo') return isMemo && !isShared;
-        if (type === 'shared_memo') return isMemo && isShared;
+        const mode = accountModeFromRecord(acc);
+        if (type === 'standard') return mode === 'account-private';
+        if (type === 'shared') return mode === 'account-shared';
+        if (type === 'memo') return mode === 'memo-private';
+        if (type === 'shared_memo') return mode === 'memo-shared';
         return true;
     });
 
@@ -267,8 +266,9 @@ function renderList(list) {
 }
 
 function createAccountCard(acc) {
-    const isMemo = (acc.type === 'memo' || acc.type === 'memorandum');
-    const isShared = acc.visibility === 'shared' || acc._isGuest;
+    const mode = accountModeFromRecord(acc);
+    const isMemo = mode.startsWith('memo-');
+    const isShared = mode.endsWith('-shared');
     const isPinned = !!acc.isPinned;
 
     let theme = THEMES.standard;

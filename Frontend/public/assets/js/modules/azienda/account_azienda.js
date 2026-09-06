@@ -14,6 +14,7 @@ import { initComponents } from '../../components-v129.js?v=1.2.52';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createCardSecretResolver } from '../shared/card-secret.js';
 import {listCompanyAccounts} from '../data/vault-repository.js';
+import { accountModeFromRecord } from '../shared/account-mode-model.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -171,8 +172,9 @@ function renderList(list) {
 }
 
 function createAccountCard(acc) {
-    const isMemo = (acc.type === 'memo' || acc.type === 'memorandum');
-    const isShared = (acc.visibility === 'shared');
+    const mode = accountModeFromRecord(acc);
+    const isMemo = mode.startsWith('memo-');
+    const isShared = mode.endsWith('-shared');
     const isPinned = !!acc.isPinned;
 
     let theme = THEMES.standard;
