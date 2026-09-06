@@ -9,6 +9,8 @@ const deadlineSaveService = await read('Frontend/public/assets/js/modules/scaden
 const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
 const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
 const accountListView = await read('Frontend/public/assets/js/modules/shared/account-list-view.js');
+const companyDetail = await read('Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js');
+const accountBankingView = await read('Frontend/public/assets/js/modules/shared/account-banking-view.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -70,5 +72,15 @@ assert.match(accountListView, /createCardSecretResolver\(copyValue, encrypted &&
     'La vista Account condivisa non mantiene la risoluzione lazy delle password');
 assert.match(accountListView, /account\.password \? createDataRow\([^\n]+true, account\._encrypted\)/,
     'La vista Account condivisa non mantiene la password cifrata fino a reveal/copia');
+for (const [name, source] of [['privato', privateDetail], ['aziendale', companyDetail]]) {
+    assert.match(source, /renderAccountBanking\(acc, \{/,
+        `Il dettaglio Account ${name} non usa la vista bancaria condivisa`);
+    assert.doesNotMatch(source, /function renderBanking|normalizeBankingAccounts/,
+        `Il dettaglio Account ${name} duplica ancora il renderer bancario`);
+}
+assert.match(accountBankingView, /hasRealBankingData\(account\)/,
+    'La vista bancaria non applica il modello comune ai dati legacy e canonici');
+assert.match(accountBankingView, /card\.pin \? createReadonlyField\('PIN',[^\n]+true\)/,
+    'La vista bancaria non protegge visivamente il PIN');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');
