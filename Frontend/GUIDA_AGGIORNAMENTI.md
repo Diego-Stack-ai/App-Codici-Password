@@ -419,3 +419,11 @@ La priorità successiva non è aggiungere altre funzioni. È completare **P0 e P
 5. **Pagina per pagina**: il Profilo è la prima pagina promossa e ottimizzata integralmente. Area Privata e liste Account ricevono il primo intervento mirato; le altre pagine saranno affrontate secondo la baseline e con confronto prima/dopo.
 
 Il listener Push in primo piano viene inizializzato in background: un servizio accessorio non può ritardare il contenuto della pagina.
+
+## 13. Programma di maturità professionale
+
+Il confronto con password manager maturi e con architetture local-first è stato trasformato in un programma verificabile: [`docs/PIANO_MATURITA_PROFESSIONALE.md`](../docs/PIANO_MATURITA_PROFESSIONALE.md).
+
+Decisione fondamentale: l'app possiede già una Vault Key casuale protetta da envelope. La variabile storica `_masterKey` contiene il materiale della Vault Key dopo lo sblocco e non deve essere confusa con la Master Password. L'eventuale chiave per singolo record è una proposta distinta, ancora da dimostrare e progettare; non è una correzione automatica né autorizza una migrazione.
+
+Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare progressivamente le implementazioni meno mature soltanto dopo baseline, compatibilità, test, rollback e promozione di un percorso canonico.
