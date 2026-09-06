@@ -19,7 +19,7 @@ import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
-import { isValidRecipientEmail, mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
+import { deadlineRecipientFields, deadlineRecipientsFromRecord, mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -889,14 +889,8 @@ function setupSaveLogic() {
             if (btnText) btnText.textContent = "Salvataggio DB...";
             const finalAttachments = [...existingAttachments, ...uploadedAttachments];
 
-            const recipients = deadlineRecipients.map(recipient => ({
-                ...(recipient.contactId ? { contactId: recipient.contactId } : {}),
-                displayName: String(recipient.displayName || '').trim(),
-                email: normalizeRecipientEmail(recipient.email),
-                sendEmail: recipient.sendEmail === true,
-                sendPush: recipient.sendPush === true
-            }));
-            const legacyEmailRecipients = recipients.filter(recipient => recipient.sendEmail).map(recipient => recipient.email);
+            const recipientFields = deadlineRecipientFields(deadlineRecipients);
+            const recipients = recipientFields.recipients;
             const scadenzaData = {
                 uid: currentUser.uid,
                 name: name,
@@ -911,9 +905,7 @@ function setupSaveLogic() {
                 updatedAt: Timestamp.now(),
                 mode: currentMode,
                 templateText: document.getElementById('testo_email_select')?.value || '',
-                recipients,
-                email1: legacyEmailRecipients[0] || '',
-                email2: legacyEmailRecipients[1] || '',
+                ...recipientFields,
                 notifChannel: 'multichannel',
                 notif_days_before: Number(document.getElementById('notif_days_before')?.value || 14),
                 notif_frequency: Number(document.getElementById('notif_frequency')?.value || 7)
@@ -1200,19 +1192,7 @@ async function loadScadenzaForEdit(id) {
         if (iFreq) iFreq.value = freq;
 
 
-        const storedRecipients = Array.isArray(data.recipients) ? data.recipients : [];
-        const legacyEmails = Array.isArray(data.emails)
-            ? data.emails.map(email => typeof email === 'object' && email !== null ? email.address : email)
-            : [data.email1, data.email2];
-        deadlineRecipients = (storedRecipients.length ? storedRecipients : legacyEmails
-            .filter(Boolean).map(email => ({ email, sendEmail: true, sendPush: false })))
-            .map(recipient => ({
-                contactId: String(recipient.contactId || ''),
-                displayName: String(recipient.displayName || recipient.name || '').trim(),
-                email: normalizeRecipientEmail(recipient.email || recipient.address),
-                sendEmail: recipient.sendEmail !== false,
-                sendPush: recipient.sendPush === true
-            })).filter(recipient => isValidRecipientEmail(recipient.email));
+        deadlineRecipients = deadlineRecipientsFromRecord(data);
         renderDeadlineRecipients();
 
         const testoEmailSelect = document.getElementById('testo_email_select');

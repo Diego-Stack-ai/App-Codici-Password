@@ -14,6 +14,7 @@ import { t } from '../../translations.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
 import { getDeadline, getDeadlineNotification, getUserProfile } from '../data/vault-repository.js';
+import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
@@ -205,15 +206,13 @@ function renderScadenza(scadenza) {
 
     // Notifiche Email
     const emailSec = document.getElementById('section-emails');
-    const recipientLines = Array.isArray(scadenza.recipients)
-        ? scadenza.recipients.map(recipient => {
+    const recipientLines = deadlineRecipientsFromRecord(scadenza)
+        .map(recipient => {
             const channels = [recipient.sendEmail ? 'Email' : '', recipient.sendPush ? 'Push' : ''].filter(Boolean).join(' + ') || 'Sospeso';
             return `${recipient.displayName ? `${recipient.displayName} — ` : ''}${recipient.email} (${channels})`;
-        })
-        : [];
-    const legacyEmails = scadenza.emails || [scadenza.email1, scadenza.email2].filter(Boolean);
-    const e1 = recipientLines[0] || legacyEmails[0];
-    const e2 = recipientLines.length > 1 ? recipientLines.slice(1).join(' · ') : legacyEmails[1];
+        });
+    const e1 = recipientLines[0];
+    const e2 = recipientLines.length > 1 ? recipientLines.slice(1).join(' · ') : '';
     if (e1 || e2) {
         if (emailSec) emailSec.classList.remove('hidden');
         document.getElementById('detail-email1').textContent = e1 || '';

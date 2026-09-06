@@ -6,15 +6,39 @@ export function isValidRecipientEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeRecipientEmail(value));
 }
 
-export function normalizeDeadlineRecipient(recipient = {}) {
+export function normalizeDeadlineRecipient(recipient = {}, { defaultSendEmail = false } = {}) {
     const email = normalizeRecipientEmail(recipient.email || recipient.address);
     if (!isValidRecipientEmail(email)) return null;
     return {
         email,
         displayName: String(recipient.displayName || recipient.name || '').trim(),
         contactId: String(recipient.contactId || '').trim(),
-        sendEmail: recipient.sendEmail === true,
+        sendEmail: recipient.sendEmail === undefined ? defaultSendEmail : recipient.sendEmail === true,
         sendPush: recipient.sendPush === true
+    };
+}
+
+export function deadlineRecipientsFromRecord(record = {}) {
+    const stored = Array.isArray(record.recipients) ? record.recipients : [];
+    const legacy = Array.isArray(record.emails)
+        ? record.emails.map(item => typeof item === 'object' && item !== null ? item.address : item)
+        : [record.email1, record.email2];
+    const source = stored.length
+        ? stored
+        : legacy.filter(Boolean).map(email => ({ email, sendEmail: true, sendPush: false }));
+
+    return source
+        .map(recipient => normalizeDeadlineRecipient(recipient, { defaultSendEmail: true }))
+        .filter(Boolean);
+}
+
+export function deadlineRecipientFields(recipients = []) {
+    const normalized = recipients.map(recipient => normalizeDeadlineRecipient(recipient)).filter(Boolean);
+    const legacyEmails = normalized.filter(recipient => recipient.sendEmail).map(recipient => recipient.email);
+    return {
+        recipients: normalized,
+        email1: legacyEmails[0] || '',
+        email2: legacyEmails[1] || ''
     };
 }
 

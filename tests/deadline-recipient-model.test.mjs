@@ -4,7 +4,8 @@ import {readFile} from 'node:fs/promises';
 
 const source = await readFile(new URL('../Frontend/public/assets/js/modules/scadenze/deadline-recipient-model.js', import.meta.url), 'utf8');
 const {
-    isValidRecipientEmail, mergeDeadlineRecipient, normalizeDeadlineRecipient, normalizeRecipientEmail
+    deadlineRecipientFields, deadlineRecipientsFromRecord, isValidRecipientEmail,
+    mergeDeadlineRecipient, normalizeDeadlineRecipient, normalizeRecipientEmail
 } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
 test('normalizza e valida l’email senza esporre identificatori tecnici', () => {
@@ -31,4 +32,31 @@ test('deduplica per email normalizzata e unisce i canali richiesti', () => {
         email: 'maria@example.it', displayName: 'Maria Rossi', contactId: 'c1', sendEmail: true, sendPush: true
     });
     assert.notEqual(result.recipients, initial);
+});
+
+test('legge i destinatari legacy come Email attiva e Push disattiva', () => {
+    assert.deepEqual(deadlineRecipientsFromRecord({ email1: ' A@Example.it ', email2: '' }), [{
+        email: 'a@example.it', displayName: '', contactId: '', sendEmail: true, sendPush: false
+    }]);
+});
+
+test('i destinatari moderni prevalgono sui campi legacy', () => {
+    assert.deepEqual(deadlineRecipientsFromRecord({
+        recipients: [{ email: 'push@example.it', sendEmail: false, sendPush: true }],
+        email1: 'legacy@example.it'
+    }), [{ email: 'push@example.it', displayName: '', contactId: '', sendEmail: false, sendPush: true }]);
+});
+
+test('scrive i campi email retrocompatibili senza perdere Push only', () => {
+    assert.deepEqual(deadlineRecipientFields([
+        { email: 'email@example.it', sendEmail: true, sendPush: false },
+        { email: 'push@example.it', sendEmail: false, sendPush: true }
+    ]), {
+        recipients: [
+            { email: 'email@example.it', displayName: '', contactId: '', sendEmail: true, sendPush: false },
+            { email: 'push@example.it', displayName: '', contactId: '', sendEmail: false, sendPush: true }
+        ],
+        email1: 'email@example.it',
+        email2: ''
+    });
 });
