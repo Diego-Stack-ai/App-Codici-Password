@@ -647,11 +647,6 @@ function setupActions() {
     });
 }
 
-// Listeners for hidden inputs
-['input-camera', 'input-video', 'input-gallery', 'input-file'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', (e) => handleFileUpload(e.target));
-});
-
 // --- ATTACHMENTS LOGIC ---
 
 
