@@ -3,11 +3,12 @@ import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-const [company, privateAccount, companyAccount, deadline, privateAttachments] = await Promise.all([
+const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
     read('Frontend/public/assets/js/modules/privato/form_account_privato.js'),
     read('Frontend/public/assets/js/modules/azienda/form-azienda-save.js'),
     read('Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js'),
+    read('Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js'),
     read('Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js')
 ]);
 
@@ -21,5 +22,9 @@ assert.match(deadline, /window\.location\.replace\(`dettaglio_scadenza\.html\?id
     'Il salvataggio scadenza lascia il modulo Modifica nella cronologia');
 assert.equal((privateAttachments.match(/handleFileUpload\(/g) || []).length, 2,
     'Il dettaglio privato collega più volte lo stesso caricamento allegato');
+if (/\bauth\.currentUser\b/.test(privateDetail)) {
+    assert.match(privateDetail, /import \{[^}]*\bauth\b[^}]*\} from ['"]\.\.\/\.\.\/firebase-config\.js/,
+        'Il dettaglio privato usa auth senza importarlo');
+}
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');
