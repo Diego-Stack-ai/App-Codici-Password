@@ -14,6 +14,10 @@ const accountBankingView = await read('Frontend/public/assets/js/modules/shared/
 const privateAccountSave = await read('Frontend/public/assets/js/modules/privato/form-privato-save.js');
 const settings = await read('Frontend/public/assets/js/modules/settings/impostazioni.js');
 const pushSettings = await read('Frontend/public/assets/js/modules/settings/push-settings-controller.js');
+const archive = await read('Frontend/public/assets/js/modules/settings/archivio_account.js');
+const archiveService = await read('Frontend/public/assets/js/modules/settings/archive-account-service.js');
+const companyList = await read('Frontend/public/assets/js/modules/azienda/lista_aziende.js');
+const companyListService = await read('Frontend/public/assets/js/modules/azienda/company-list-service.js');
 
 const [company, privateAccount, companyAccount, deadline, privateDetail, privateAttachments, privateSharing] = await Promise.all([
     read('Frontend/public/assets/js/modules/azienda/ma_save.js'),
@@ -105,5 +109,21 @@ for (const scope of ['deadlines', 'sharing']) {
 }
 assert.match(pushSettings, /Promise\.all\(\[[\s\S]+setupPushToggle\(user, 'deadlines'\)[\s\S]+setupPushToggle\(user, 'sharing'\)/,
     'Le configurazioni Push non vengono inizializzate in parallelo');
+assert.match(archive, /loadArchivedAccounts\(currentUser\.uid, currentContext\)/,
+    'La pagina Archivio non delega il caricamento al servizio dedicato');
+assert.doesNotMatch(archive, /listCompanyAccounts|writeBatch|updateDoc|deleteDoc|\bdecrypt\(/,
+    'La pagina Archivio contiene ancora accesso dati, mutazioni o decifratura');
+assert.match(archiveService, /Promise\.allSettled\(\[[\s\S]+loadPrivateArchive\(uid\)[\s\S]+loadAllCompanyArchives\(uid\)/,
+    'Il servizio Archivio non carica in parallelo le sorgenti indipendenti');
+assert.doesNotMatch(archiveService, /decrypt\(account\.(?:password|account)/,
+    'L’Archivio decifra segreti che non mostra né usa');
+assert.match(companyList, /setCompanyPinned\(currentUser\.uid, id, state\)/,
+    'La lista Aziende non delega la persistenza del pin');
+assert.match(companyList, /deleteCompany\(currentUser\.uid, id\)/,
+    'La lista Aziende non delega la cancellazione');
+assert.doesNotMatch(companyList, /updateDoc|deleteDoc|\bdoc\(/,
+    'La lista Aziende contiene ancora dettagli delle scritture Firestore');
+assert.match(companyListService, /updateDoc\(doc\(db,[\s\S]+isPinned/,
+    'Il servizio Aziende non conserva il contratto di aggiornamento del pin');
 
 console.log('Navigazione post-salvataggio coerente: i moduli completati non restano nella cronologia.');

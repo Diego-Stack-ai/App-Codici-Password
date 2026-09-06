@@ -4,15 +4,17 @@
  * Refactor: Eliminazione innerHTML a favore di dom-utils.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.52';
-import { LOG } from '../../logger.js';
 import { SwipeList } from '../../swipe-list-v6.js';
-import { doc, updateDoc, deleteDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast, showInputModal } from '../../ui-core-v129.js';
-import { clearElement, createElement, setChildren, safeSetText } from '../../dom-utils.js';
+import { clearElement, createElement, setChildren } from '../../dom-utils.js';
 import { t } from '../../translations.js';
-import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { getCompany, listArchivedPrivateAccounts, listCompanies, listCompanyAccounts } from '../data/vault-repository.js';
+import {
+    deleteArchivedAccount,
+    emptyArchivedAccounts,
+    listArchiveContexts,
+    loadArchivedAccounts,
+    restoreArchivedAccount
+} from './archive-account-service.js';
 
 let allArchived = [];
 let currentUser = null;
@@ -104,13 +106,12 @@ export async function initArchivioAccount(user) {
 
     
 }
-
 async function loadCompanies() {
     const filterMenu = document.getElementById('archive-context-menu');
     if (!filterMenu) return;
 
     try {
-        const companies = await listCompanies(currentUser.uid);
+        const companies = await listArchiveContexts(currentUser.uid);
         companies.forEach(data => {
             const item = createElement('div', {
                 className: 'base-dropdown-item',
@@ -141,80 +142,7 @@ async function loadArchived() {
     container.appendChild(loading);
 
     try {
-        let results = [];
-        LOG(`[ARCHIVIO] Loading context: ${currentContext}`);
-
-        // 1. PRIVATO
-        if (currentContext === 'all' || currentContext === 'privato') {
-            try {
-                const archivedAccounts = await listArchivedPrivateAccounts(currentUser.uid);
-                archivedAccounts.forEach(account => results.push({ ...account, context: 'privato' }));
-                LOG(`[ARCHIVIO] Found ${archivedAccounts.length} private archived items`);
-            } catch (err) {
-                console.error("[ARCHIVIO] Private query error:", err);
-                if (currentContext === 'privato') throw err; // Re-throw if it's the only one
-            }
-        }
-
-        // 2. AZIENDE
-        if (currentContext === 'all') {
-            try {
-                const companies = await listCompanies(currentUser.uid);
-                LOG(`[ARCHIVIO] Searching archived items in ${companies.length} companies...`);
-
-                const companyResults = await Promise.allSettled(companies.map(async company => {
-                    // Letture indipendenti: un'azienda non accessibile non rallenta o blocca le altre.
-                    const accounts = await listCompanyAccounts(currentUser.uid, company.id);
-                    return accounts
-                        .filter(acc => acc.isArchived === true)
-                        .map(acc => ({ ...acc, context: company.id, businessName: company.ragioneSociale }));
-                }));
-                companyResults.forEach((result, index) => {
-                    if (result.status === 'fulfilled') results.push(...result.value);
-                    else console.warn(`[ARCHIVIO] Accesso limitato agli account dell'azienda ${companies[index].id}.`, result.reason?.message);
-                });
-            } catch (err) {
-                console.error("[ARCHIVIO] Error listing companies:", err);
-            }
-        } else if (currentContext !== 'privato') {
-            // Specific Company Context
-            try {
-                const [company, accounts] = await Promise.all([
-                    getCompany(currentUser.uid, currentContext),
-                    listCompanyAccounts(currentUser.uid, currentContext)
-                ]);
-                const bData = company || { ragioneSociale: currentContext };
-                const archived = accounts
-                    .filter(acc => acc.isArchived === true);
-
-                archived.forEach(acc => {
-                    results.push({ ...acc, context: currentContext, businessName: bData.ragioneSociale });
-                });
-                LOG(`[ARCHIVIO] Found ${archived.length} archived items for biz ${currentContext}`);
-            } catch (err) {
-                console.error(`[ARCHIVIO] Error querying accounts for biz ${currentContext}:`, err);
-                throw err;
-            }
-        }
-
-        allArchived = results;
-
-        // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
-        const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
-        if (vaultKeyMaterial) {
-            allArchived = await Promise.all(allArchived.map(async acc => {
-                if (acc._encrypted) {
-                    try {
-                        acc.username = acc.username ? await decrypt(acc.username, vaultKeyMaterial) : acc.username;
-                        acc.account = acc.account ? await decrypt(acc.account, vaultKeyMaterial) : acc.account;
-                        acc.password = acc.password ? await decrypt(acc.password, vaultKeyMaterial) : acc.password;
-                    } catch (e) {
-                        console.error("[Archive] Decryption failed for:", acc.id, e);
-                    }
-                }
-                return acc;
-            }));
-        }
+        allArchived = await loadArchivedAccounts(currentUser.uid, currentContext);
 
         filterAndRender();
     } catch (e) {
@@ -315,8 +243,7 @@ async function handleRestore(id) {
     if (!item) return;
 
     try {
-        const ref = getCollectionRef(id, item.context);
-        await updateDoc(ref, { isArchived: false });
+        await restoreArchivedAccount(currentUser.uid, item);
         showToast(t('success_restored') || "Ripristinato", "success");
         allArchived = allArchived.filter(a => a.id !== id);
         const el = document.getElementById(`arch-${id}`);
@@ -331,7 +258,6 @@ async function handleRestore(id) {
         showToast(t('error_generic') || "Errore", "error");
     }
 }
-
 async function handleDeleteForever(id) {
     // Assuming showInputModal is globally available or we should import it if it's in ui-core?
     // Usually it's attached to window in main.js or similar? 
@@ -349,8 +275,7 @@ async function handleDeleteForever(id) {
 
     try {
         const item = allArchived.find(a => a.id === id);
-        const ref = getCollectionRef(id, item.context);
-        await deleteDoc(ref);
+        await deleteArchivedAccount(currentUser.uid, item);
         showToast(t('success_deleted_forever') || "Eliminato definitivamente", "success");
         allArchived = allArchived.filter(a => a.id !== id);
         filterAndRender();
@@ -372,11 +297,7 @@ async function handleEmptyTrash() {
     if (confirmReq !== 'SVUOTA' && confirmReq !== 'EMPTY') return;
 
     try {
-        const batch = writeBatch(db);
-        allArchived.forEach(acc => {
-            batch.delete(getCollectionRef(acc.id, acc.context));
-        });
-        await batch.commit();
+        await emptyArchivedAccounts(currentUser.uid, allArchived);
         showToast(t('success_trash_emptied') || "Cestino svuotato", "success");
         allArchived = [];
         filterAndRender();
@@ -384,10 +305,5 @@ async function handleEmptyTrash() {
         console.error(e);
         showToast(t('error_generic') || "Errore", "error");
     }
-}
-
-function getCollectionRef(id, context) {
-    if (context === 'privato') return doc(db, "users", currentUser.uid, "accounts", id);
-    return doc(db, "users", currentUser.uid, "aziende", context, "accounts", id);
 }
 

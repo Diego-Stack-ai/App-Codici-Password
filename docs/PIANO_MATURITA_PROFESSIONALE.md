@@ -177,12 +177,14 @@ Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 4. [x] Dettagli Account Privato e Azienda: modalità canoniche, renderer bancario e compatibilità legacy condivisi; allegati e condivisione isolati, con gate su campi sensibili, listener e revoca;
 5. [x] Form Account Privato e Azienda: regole Account/Memorandum e renderer bancario condivisi; cifratura e transazioni di salvataggio isolate in servizi dedicati e protette da gate;
 6. [x] Impostazioni e configurazioni: modello comune delle configurazioni Scadenze estratto e testato; canali Push riuniti in un controller condiviso e QR opzionale caricato fuori dal percorso critico; riordino visivo complessivo rinviato al post-M10;
-7. [~] Aziende e archivio: letture archivio parallelizzate; apertura allegati anagrafica azienda isolata e coperta dai gate di sicurezza; rifattorizzazione da completare;
+7. [x] Aziende e archivio: letture archivio parallelizzate e isolate dalla vista, mutazioni Archivio/Aziende delegate a servizi dedicati, decifratura preventiva limitata al solo indice username; apertura allegati anagrafica azienda isolata e coperta dai gate di sicurezza;
 8. [x] Home e pagine pubbliche: bootstrap pubblico minimo; presentazione protetta, inbox e dashboard Scadenze isolate dall’orchestratore Home e coperte da gate dedicati.
 
 Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricamento progressivo, test, confronto e rimozione del vecchio percorso.
 
 **Uscita:** una sola implementazione canonica per funzione, senza suffissi di versione applicativi.
+
+M3 completata: le pagine canoniche sono state separate in orchestratori, viste condivise e servizi di dominio dove necessario; i percorsi precedenti non sono più concorrenti e i gate impediscono il ritorno delle duplicazioni rimosse.
 
 ### M4 — Componenti e design system
 
@@ -286,7 +288,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M0 | completata il 06/09/2026 |
 | M1 | completata il 06/09/2026 |
 | M2 | completata il 06/09/2026 |
-| M3 | Profilo completato; registro pagine, destinatari Scadenze, modalità Account/Memorandum e dati bancari consolidati; pagine ancora in lavorazione |
+| M3 | completata il 06/09/2026 |
 | M4 | fondazioni presenti, consolidamento da fare |
 | M5 | da progettare prima di modificare le condivisioni |
 | M6 | sola consultazione offline parzialmente operativa |

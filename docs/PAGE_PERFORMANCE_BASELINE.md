@@ -19,13 +19,13 @@ Pagine canoniche analizzate: **29**. Redirect storici esclusi: `home-v126.html`,
 | `area_privata.html` | 1 | 7 | 31 | 991.0 KB | 291.8 KB |
 | `account_privati.html` | 1 | 6 | 33 | 982.3 KB | 291.4 KB |
 | `dettaglio_scadenza.html` | 1 | 6 | 32 | 985.1 KB | 290.8 KB |
-| `archivio_account.html` | 1 | 6 | 30 | 982.0 KB | 290.5 KB |
+| `archivio_account.html` | 1 | 6 | 31 | 981.6 KB | 290.5 KB |
 | `account_azienda.html` | 1 | 6 | 33 | 978.5 KB | 290.3 KB |
 | `scadenze.html` | 1 | 6 | 28 | 944.3 KB | 280.7 KB |
 | `configurazione_automezzi.html` | 1 | 6 | 27 | 936.4 KB | 276.5 KB |
 | `configurazione_generali.html` | 1 | 6 | 27 | 935.8 KB | 276.4 KB |
 | `configurazione_documenti.html` | 1 | 6 | 27 | 936.0 KB | 276.4 KB |
-| `lista_aziende.html` | 1 | 6 | 26 | 918.8 KB | 274.0 KB |
+| `lista_aziende.html` | 1 | 6 | 27 | 919.1 KB | 274.1 KB |
 | `gestione_destinatari.html` | 1 | 6 | 26 | 919.6 KB | 273.8 KB |
 | `registrati.html` | 1 | 4 | 25 | 917.1 KB | 273.5 KB |
 | `reset_password.html` | 1 | 4 | 25 | 911.3 KB | 272.4 KB |

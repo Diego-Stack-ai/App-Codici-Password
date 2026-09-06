@@ -4,14 +4,13 @@
  * - Entry Point: initListaAziende(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
-import { doc, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import {listCompanies} from '../data/vault-repository.js';
+import { deleteCompany, setCompanyPinned } from './company-list-service.js';
 
 // --- STATE ---
 let allAziende = [];
@@ -237,7 +236,7 @@ async function togglePin(id) {
     renderAziende();
 
     try {
-        await updateDoc(doc(db, "users", auth.currentUser.uid, "aziende", id), { isPinned: state });
+        await setCompanyPinned(currentUser.uid, id, state);
         showToast(state ? (t('pinned_to_top') || "Fissata in alto") : (t('removed_from_pinned') || "Rimossa dai fissati"), "success");
     } catch (e) {
         logError("TogglePin", e);
@@ -262,7 +261,7 @@ async function deleteAziendaList(id, name) {
     if (!await showConfirmModal(title, msg)) return;
 
     try {
-        await deleteDoc(doc(db, "users", auth.currentUser.uid, "aziende", id));
+        await deleteCompany(currentUser.uid, id);
         showToast(t('success_deleted') || "Azienda eliminata", "success");
         allAziende = allAziende.filter(a => a.id !== id);
         renderAziende();
