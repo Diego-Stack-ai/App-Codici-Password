@@ -112,7 +112,7 @@ const requiredSignals = [
   ,['fasce con dissolvenza ampia verso il centro', /\.base-header \{[\s\S]+mask-image:\s*linear-gradient\(to bottom, black 40%, transparent 100%\)/.test(fixedBars) && /\.base-footer \{[\s\S]+mask-image:\s*linear-gradient\(to top, black 40%, transparent 100%\)/.test(fixedBars)]
   ,['viewport mobile non scorrevole', /html,[\s\S]+body \{[\s\S]+overflow:\s*hidden/.test(core) && /\.base-bg \{[\s\S]+height:\s*100dvh;[\s\S]+overflow:\s*hidden/.test(core)]
   ,['solo contenuto centrale scorrevole su mobile', /\.base-main \{[\s\S]+min-height:\s*0;[\s\S]+overflow-y:\s*auto;[\s\S]+overscroll-behavior-y:\s*contain/.test(core)]
-  ,['fasce mobile fuori dal piano di scorrimento', /@media \(max-width: 600px\)[\s\S]+\.base-header,[\s\S]+\.base-footer \{[\s\S]+position:\s*relative;[\s\S]+flex-shrink:\s*0/.test(fixedBars)]
+  ,['fasce mobile con nebbia sopra il piano di scorrimento', /@media \(max-width: 600px\)[\s\S]+\.base-header,[\s\S]+\.base-footer \{[\s\S]+position:\s*fixed;[\s\S]+isolation:\s*isolate/.test(fixedBars) && /\.base-main \{[\s\S]+mask-image:\s*linear-gradient\(to bottom/.test(fixedBars)]
   ,['fallback overscroll coerente col fondale', /html,[\s\S]+body \{[\s\S]+background-image: var\(--base-box-gradient\)/.test(core)]
   ,['font e icone serviti localmente', (coreFonts.match(/@font-face/g) || []).length === 3 && !/https?:\/\//.test(coreFonts)]
   ,['font non bloccanti', (coreFonts.match(/font-display:\s*swap/g) || []).length === 3]
