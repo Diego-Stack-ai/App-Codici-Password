@@ -250,6 +250,20 @@ Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricame
 
 **Uscita:** release candidata documentata, misurata e ripristinabile.
 
+### Attività conclusiva dopo M10 — Lingue e riordino Impostazioni
+
+Questa attività è un promemoria vincolante, ma **non deve essere anticipata durante le fasi M0–M10**. Una volta completato l’intero programma di maturazione:
+
+- riesaminare tutte le lingue e tutte le stringhe dell’app;
+- completare e uniformare le traduzioni, eliminando testi mancanti, duplicati o incoerenti;
+- verificare terminologia, maiuscole, messaggi di errore, accessibilità e adattamento dei testi su mobile;
+- riesaminare integralmente la pagina **Impostazioni**;
+- riordinare card e comandi in gruppi logici, coerenti e facilmente riconoscibili;
+- eliminare eventuali doppioni soltanto dopo averne verificato utilizzo e collegamenti;
+- collaudare il risultato su iPhone, PC e in tutte le lingue supportate.
+
+**Uscita:** lingue coerenti e pagina Impostazioni organizzata definitivamente per gruppi, dopo la stabilizzazione tecnica M0–M10.
+
 ## 7. Regole di esecuzione
 
 1. Una sola fase strutturale attiva per volta; correzioni urgenti possono essere isolate.
@@ -266,7 +280,7 @@ Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricame
 | Fase | Stato |
 |---|---|
 | M0 | completata il 06/09/2026 |
-| M1 | da avviare |
+| M1 | completata il 06/09/2026 |
 | M2 | infrastruttura parziale esistente |
 | M3 | Profilo completato; Account/Area Privata avviati |
 | M4 | fondazioni presenti, consolidamento da fare |
@@ -276,5 +290,6 @@ Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricame
 | M8 | da avviare |
 | M9 | da valutare dopo il core |
 | M10 | da avviare dopo stabilizzazione architetturale |
+| Post-M10 | revisione lingue e riordino per gruppi della pagina Impostazioni |
 
 Questo documento è la fonte principale del programma di maturazione. `GUIDA.md` resta il contratto tecnico e di sicurezza; `GUIDA_AGGIORNAMENTI.md` registra decisioni e avanzamento delle release.
