@@ -11,6 +11,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { getUserSetting } from '../data/vault-repository.js';
+import { cloneDeadlineConfig, normalizeDeadlineConfig } from './deadline-config-model.js';
 
 const DEFAULT_CONFIG = {
     deadlineTypes: [
@@ -32,7 +33,7 @@ const DEFAULT_CONFIG = {
     ]
 };
 
-let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+let currentConfig = cloneDeadlineConfig(DEFAULT_CONFIG);
 let currentUser = null;
 let editingState = { list: null, index: null };
 
@@ -89,13 +90,10 @@ async function loadConfig() {
     try {
         const storedConfig = await getUserSetting(currentUser.uid, 'deadlineConfigDocuments');
         if (storedConfig) {
-            currentConfig = storedConfig;
-            if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
-            if (!currentConfig.models) currentConfig.models = [];
-            if (!currentConfig.emailTemplates) currentConfig.emailTemplates = [];
+            currentConfig = normalizeDeadlineConfig(storedConfig, ['deadlineTypes', 'models', 'emailTemplates']);
         } else {
             // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
-            currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            currentConfig = cloneDeadlineConfig(DEFAULT_CONFIG);
             LOG("[CONF-DOC] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "deadlineConfigDocuments"), currentConfig);
         }
@@ -169,11 +167,6 @@ function renderTypes() {
     }
 
     currentConfig.deadlineTypes.forEach((item, index) => {
-        if (typeof item === 'string') {
-            item = { name: item, period: 14, freq: 7 };
-            currentConfig.deadlineTypes[index] = item;
-        }
-
         const isEditing = editingState.list === 'deadlineTypes' && editingState.index === index;
 
         if (isEditing) {

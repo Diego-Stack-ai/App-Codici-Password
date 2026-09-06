@@ -11,6 +11,7 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { getUserSetting } from '../data/vault-repository.js';
+import { cloneDeadlineConfig, normalizeDeadlineConfig } from './deadline-config-model.js';
 
 const DEFAULT_CONFIG = {
     deadlineTypes: [
@@ -30,7 +31,7 @@ const DEFAULT_CONFIG = {
     ]
 };
 
-let currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+let currentConfig = cloneDeadlineConfig(DEFAULT_CONFIG);
 let currentUser = null;
 let editingState = { list: null, index: null };
 
@@ -84,23 +85,21 @@ async function loadConfig() {
     try {
         const storedConfig = await getUserSetting(currentUser.uid, 'generalConfig');
         if (storedConfig) {
-            currentConfig = storedConfig;
-            if (!currentConfig.deadlineTypes) currentConfig.deadlineTypes = [];
-            if (!currentConfig.emailTemplates) currentConfig.emailTemplates = [];
+            currentConfig = normalizeDeadlineConfig(storedConfig, ['deadlineTypes', 'emailTemplates']);
         } else {
             // Prima visita: nessun documento su Firebase → inizializza con i default e salva subito
-            currentConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            currentConfig = cloneDeadlineConfig(DEFAULT_CONFIG);
             LOG("[CONF-GEN] Prima visita: salvataggio config default su Firebase...");
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig);
         }
         // Documento esistente ma deadlineTypes vuoto → re-seed
         if (currentConfig.deadlineTypes.length === 0) {
             LOG("[CONF-GEN] deadlineTypes vuoto: ripristino valori default...");
-            currentConfig.deadlineTypes = JSON.parse(JSON.stringify(DEFAULT_CONFIG.deadlineTypes));
+            currentConfig.deadlineTypes = cloneDeadlineConfig(DEFAULT_CONFIG.deadlineTypes);
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig, { merge: true });
         }
         if (currentConfig.emailTemplates.length === 0) {
-            currentConfig.emailTemplates = JSON.parse(JSON.stringify(DEFAULT_CONFIG.emailTemplates));
+            currentConfig.emailTemplates = cloneDeadlineConfig(DEFAULT_CONFIG.emailTemplates);
             await setDoc(doc(db, "users", currentUser.uid, "settings", "generalConfig"), currentConfig, { merge: true });
         }
         renderAll();
@@ -173,11 +172,6 @@ function renderTypes() {
     }
 
     const items = currentConfig.deadlineTypes.map((item, index) => {
-        if (typeof item === 'string') {
-            item = { name: item, period: 14, freq: 7 };
-            currentConfig.deadlineTypes[index] = item;
-        }
-
         const isEditing = editingState.list === 'deadlineTypes' && editingState.index === index;
 
         if (isEditing) {
