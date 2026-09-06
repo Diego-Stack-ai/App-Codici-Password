@@ -449,3 +449,11 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Il riquadro vicino all’avatar genera ora la stessa vCard configurata nel Profilo, usando inclusioni QR e widget consentiti; il tocco continua ad aprire la scheda Tessera digitale.
 - Il caricamento del QR è asincrono e non blocca le altre Impostazioni; in caso di indisponibilità resta una semplice icona QR.
 - Il flash residuo di header/footer durante scroll e overscroll è registrato come difetto trasversale della fase M4 e sarà verificato unitariamente sulle pagine canoniche.
+
+# Chiusura baseline runtime M0 (06/09/2026)
+
+- Acquisiti report reali online e offline su PC portatile e iPhone tramite il pannello diagnostico locale.
+- La baseline è documentata in `docs/RUNTIME_PERFORMANCE_BASELINE.md`; M0 è completata.
+- Criticità misurate: liste Account private/aziendali lente anche offline, Archivio con campione da 25,14 s, picchi Home e prima navigazione offline PC da 28,85 s.
+- Su iPhone online risultano circa 229–238 KB trasferiti per pagina: va verificato il rapporto tra Service Worker, cache Safari e header `no-store`.
+- Le pagine già rapide costituiscono un vincolo di non regressione per le fasi successive.

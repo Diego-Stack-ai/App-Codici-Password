@@ -139,7 +139,7 @@ Riferimenti di confronto: [Bitwarden Security Whitepaper](https://bitwarden.com/
 - [x] prima metrica runtime `private-page-bootstrap`;
 - [x] catalogo delle funzioni visibili e dei percorsi dati in `FUNCTIONAL_DATA_CONTRACT.md`;
 - [x] dataset di prova privo di segreti reali, protetto da test automatici;
-- [~] budget statici definiti; obiettivi runtime fissati ma baseline iPhone/PC ancora da acquisire.
+- [x] budget statici e obiettivi runtime definiti; baseline reale iPhone/PC registrata in `RUNTIME_PERFORMANCE_BASELINE.md`.
 
 **Uscita:** sappiamo misurare prima/dopo senza usare i dati personali come collaudo.
 
@@ -265,7 +265,7 @@ Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricame
 
 | Fase | Stato |
 |---|---|
-| M0 | in corso |
+| M0 | completata il 06/09/2026 |
 | M1 | da avviare |
 | M2 | infrastruttura parziale esistente |
 | M3 | Profilo completato; Account/Area Privata avviati |

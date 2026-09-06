@@ -11,11 +11,11 @@
     "maxCssFiles": 8
   },
   "runtimeTargets": {
-    "status": "baseline-pending-real-devices",
+    "status": "baseline-captured-real-devices-2026-09-06",
     "warmOnlineFirstUsefulContentMs": 1500,
     "offlineFirstUsefulContentMs": 1000,
     "coldOnlineFirstUsefulContentMs": 3000,
     "maxDuplicateEquivalentRequests": 0,
-    "notes": "Obiettivi iniziali, non risultati misurati. Validare su iPhone e PC con dataset M0 prima di renderli gate bloccanti."
+    "notes": "Baseline manuale registrata in docs/RUNTIME_PERFORMANCE_BASELINE.md. Gli obiettivi restano gate di confronto manuale finché la raccolta runtime non è automatizzata."
   }
 }
