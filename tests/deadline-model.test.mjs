@@ -25,3 +25,19 @@ test('interpreta date ISO, italiane e Timestamp-like', () => {
     assert.equal(model.deadlineDate({ dueDate: { toDate: () => new Date(2026, 8, 30) } }).getFullYear(), 2026);
     assert.equal(model.deadlineDate({ dueDate: 'non valida' }), null);
 });
+
+test('normalizza esclusivamente date di input realmente valide', () => {
+    assert.equal(model.deadlineInputDate('2026-09-30', ''), '2026-09-30');
+    assert.equal(model.deadlineInputDate('', '30/09/2026'), '2026-09-30');
+    assert.equal(model.deadlineInputDate('', '2026-02-31'), '');
+    assert.equal(model.deadlineInputDate('', 'domani'), '');
+});
+
+test('prepara data ISO e visuale senza duplicare la logica del form', () => {
+    assert.deepEqual(model.deadlineDateInputFields({ dueDate: '30/09/2026' }), {
+        isoValue: '2026-09-30', displayValue: '30/09/2026'
+    });
+    assert.deepEqual(model.deadlineDateInputFields({ dueDate: 'dato storico non valido' }), {
+        isoValue: '', displayValue: 'dato storico non valido'
+    });
+});

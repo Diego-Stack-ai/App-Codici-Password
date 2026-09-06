@@ -20,6 +20,7 @@ import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
 import { deadlineRecipientFields, deadlineRecipientsFromRecord, mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
+import { deadlineDateInputFields, deadlineInputDate } from './deadline-model.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -815,18 +816,7 @@ function setupSaveLogic() {
         const name = document.getElementById('nome_cognome').value.trim();
         const type = typeSelect.value;
         const dateInput = document.getElementById('dueDate');
-        let date = dateInput.dataset.isoValue;
-
-        // Fallback or Manual Parse if isoValue missing
-        if (!date && dateInput.value) {
-            const v = dateInput.value;
-            if (v.includes('/')) {
-                const parts = v.split('/');
-                if (parts.length === 3) date = `${parts[2]}-${parts[1]}-${parts[0]}`;
-            } else {
-                date = v;
-            }
-        }
+        const date = deadlineInputDate(dateInput.dataset.isoValue, dateInput.value);
 
         if (!name || !type || !date) {
             return showToast("Compila i campi obbligatori (Nome, Categoria, Data)", "error");
@@ -1140,40 +1130,10 @@ async function loadScadenzaForEdit(id) {
 
         const notifChannel = document.getElementById('notif_channel_select');
         if (notifChannel && data.notifChannel) notifChannel.value = data.notifChannel;
-        // Date Formatting for V5.0 Custom Datepicker
-        // Date Formatting for V5.0 Custom Datepicker & Robust Parsing
         const dateInput = document.getElementById('dueDate');
-        if (data.dueDate) {
-            let d = new Date(data.dueDate);
-            let isValid = !isNaN(d.getTime());
-
-            // Tentativo caricamento fallback se data salvata come DD/MM/YYYY string
-            if (!isValid && typeof data.dueDate === 'string' && data.dueDate.includes('/')) {
-                const parts = data.dueDate.split('/');
-                if (parts.length === 3) {
-                    // Try DD/MM/YYYY -> YYYY-MM-DD
-                    const isoFix = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    d = new Date(isoFix);
-                    isValid = !isNaN(d.getTime());
-                }
-            }
-
-            if (isValid) {
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-
-                dateInput.value = `${day}/${month}/${year}`;
-                dateInput.dataset.isoValue = `${year}-${month}-${day}`;
-            } else {
-                console.warn("Invalid Date found:", data.dueDate);
-                dateInput.value = data.dueDate || ''; // Show raw
-                dateInput.dataset.isoValue = '';
-            }
-        } else {
-            dateInput.value = '';
-            dateInput.dataset.isoValue = '';
-        }
+        const dateFields = deadlineDateInputFields(data);
+        dateInput.value = dateFields.displayValue;
+        dateInput.dataset.isoValue = dateFields.isoValue;
         const referenceUrlInput = document.getElementById('deadline_url');
         if (referenceUrlInput) referenceUrlInput.value = data.referenceUrl || data.url || '';
         document.getElementById('notes').value = data.notes || '';
