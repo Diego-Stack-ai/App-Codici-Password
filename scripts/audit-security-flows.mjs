@@ -48,6 +48,9 @@ const attachmentSecurity = await read('Frontend/public/assets/js/modules/shared/
 const qrCodeUtils = await read('Frontend/public/assets/js/modules/shared/qr_code_utils.js');
 const privateAccountForm = await read('Frontend/public/assets/js/modules/privato/form_account_privato.js');
 const companyAccountSave = await read('Frontend/public/assets/js/modules/azienda/form-azienda-save.js');
+const privateAccountList = await read('Frontend/public/assets/js/modules/privato/account_privati.js');
+const companyAccountList = await read('Frontend/public/assets/js/modules/azienda/account_azienda.js');
+const cardSecret = await read('Frontend/public/assets/js/modules/shared/card-secret.js');
 const functionsPackage = JSON.parse(await read('functions/package.json'));
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
@@ -85,6 +88,7 @@ assert.match(loginEntry, /serviceWorker\.register\('\.\/sw\.js'\)/, 'Il login no
 assert.match(offlineSync, /aziende[\s\S]*scadenze[\s\S]*settings/, 'La sincronizzazione preventiva non include i dati principali');
 assert.match(firebaseConfig, /localCache:\s*persistentLocalCache/, 'La persistenza Firestore non usa la proprietà localCache prevista dal SDK moderno');
 assert.doesNotMatch(main, /await\s+prepareOfflineData\(/, 'La sincronizzazione offline blocca ancora il rendering della pagina');
+assert.doesNotMatch(main, /await\s+listenForDeadlinePushInForeground\(/, 'Il listener Push blocca ancora il rendering della pagina');
 assert.match(offlineSync, /requestIdleCallback/, 'La sincronizzazione secondaria non attende un periodo di inattività');
 assert.match(offlineSync, /syncWithConcurrency/, 'Gli account aziendali vengono ancora richiesti tutti contemporaneamente');
 assert.match(loginHtml, new RegExp(`login-entry\\.js\\?v=${assetVersion}`), 'Il login non usa il bootstrap Auth dedicato aggiornato');
@@ -222,6 +226,8 @@ assert.match(storageRules, /application\/octet-stream/, 'Storage non accetta il 
 assert.doesNotMatch(qrCodeUtils, /\.innerHTML\s*=/, 'Il fallback QR usa ancora HTML dinamico');
 assert.doesNotMatch(privateAccountForm, /Final Transaction Payload[^\n]*finalData/, 'Il form privato registra il payload del Vault');
 assert.doesNotMatch(companyAccountSave, /Final Transaction Payload[^\n]*finalData/, 'Il form aziendale registra il payload del Vault');
+assert.match(cardSecret, /await ensureMasterKey\(\)[\s\S]*await decrypt\(value, masterKey\)/, 'Le password nelle card non vengono risolte in modo lazy tramite il Vault');
+assert.ok([privateAccountList, companyAccountList].every(source => /createCardSecretResolver\(copyValue, encrypted && isPassword\)/.test(source)), 'Le liste Account non condividono il risolutore sicuro delle password');
 assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Firebase Admin non è aggiornato alla baseline P4');
 assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
@@ -245,4 +251,4 @@ assert.match(security, /export async function changeMasterPassword/, 'Cambio Mas
 assert.match(settingsHtml, /id="btn-change-master-password"/, 'Cambio Master Password non esposto in Impostazioni');
 assert.match(coreUi, /passwordType[\s\S]*?bindPasswordChecklist/, 'Il cambio Master Password non mostra i requisiti dinamici');
 
-console.log('Audit sicurezza e offline: 77 controlli superati.');
+console.log('Audit sicurezza e offline: 80 controlli superati.');

@@ -10,7 +10,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.48';
+import { db, functions } from '../../firebase-config.js?v=1.2.49';
 import { LOG } from '../../logger.js';
 import { collection, query, where, doc, orderBy, limit, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -65,7 +65,15 @@ export async function initAreaPrivata(user) {
 async function loadCounters(uid, email) {
     try {
         LOG('[Counters] Fetching own accounts');
-        const allSnap = await getDocs(collection(db, "users", uid, "accounts"));
+        const lowerEmail = (email || "").toLowerCase().trim();
+        const invitesQ = query(collection(db, "invites"),
+            where("recipientEmail", "==", lowerEmail),
+            where("status", "==", "accepted")
+        );
+        const [allSnap, invitesSnap] = await Promise.all([
+            getDocs(collection(db, "users", uid, "accounts")),
+            getDocs(invitesQ)
+        ]);
         LOG(`[Counters] Own accounts fetched: ${allSnap.size}`);
         let counts = { standard: 0, memo: 0, shared: 0, sharedMemo: 0 };
 
@@ -86,13 +94,7 @@ async function loadCounters(uid, email) {
         });
 
         // Controlla inviti accettati (per conteggio condivisi) - Normalizzazione V5.0
-        const lowerEmail = (email || "").toLowerCase().trim();
-        LOG('[Counters] Fetching invites for authenticated user');
-        const invitesQ = query(collection(db, "invites"),
-            where("recipientEmail", "==", lowerEmail),
-            where("status", "==", "accepted")
-        );
-        const invitesSnap = await getDocs(invitesQ);
+        LOG('[Counters] Accepted invites fetched in parallel with own accounts');
         LOG(`[Counters] Invites fetched: ${invitesSnap.size}`);
         invitesSnap.forEach(invDoc => {
             const inv = invDoc.data();

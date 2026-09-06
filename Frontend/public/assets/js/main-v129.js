@@ -27,7 +27,7 @@ import { getSyncedCompanyAreaPreference } from './modules/shared/company-area-pr
  * INITIALIZATION
  * Attiva tutte le funzionalità globali al caricamento del DOM.
  */
-import * as firebaseRuntime from './firebase-config.js?v=1.2.48';
+import * as firebaseRuntime from './firebase-config.js?v=1.2.49';
 const { auth, db, functions } = firebaseRuntime;
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove } from "/assets/js/vendor/firebase-runtime.js";
@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.48';
+import * as Pages from './pages-init.js?v=1.2.49';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric } from './performance-metrics.js';
@@ -221,8 +221,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Le Push di scadenza devono essere visualizzate anche quando
                     // l'app è aperta su una pagina diversa dalle Impostazioni.
                     if (navigator.onLine) {
-                        const { listenForDeadlinePushInForeground } = await import('./modules/shared/push-manager.js');
-                        await listenForDeadlinePushInForeground();
+                        // Il listener non produce contenuto necessario alla pagina:
+                        // inizializzarlo in background evita di ritardare il primo render.
+                        void import('./modules/shared/push-manager.js')
+                            .then(({ listenForDeadlinePushInForeground }) => listenForDeadlinePushInForeground())
+                            .catch((error) => console.warn('[PUSH] Listener foreground non inizializzato.', error));
                     }
                 }
 

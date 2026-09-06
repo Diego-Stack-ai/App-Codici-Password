@@ -409,3 +409,13 @@ La priorità successiva non è aggiungere altre funzioni. È completare **P0 e P
 - Tessera digitale e QR vengono generati in modo differito e, quando possibile, soltanto all'apertura della relativa scheda.
 - La scelta UX delle liste Account resta intenzionalmente invariata: username, account e password continuano a essere disponibili direttamente nelle card autorizzate. La decifratura progressiva va applicata agli altri dati non visibili senza trasformare il dettaglio in un passaggio obbligatorio per consultare le credenziali.
 - La nuova struttura riduce il lavoro bloccante prima del rendering, ma il miglioramento percepito deve essere confermato con una prova reale su iPhone e PC.
+
+## 12. Rifattorizzazione professionale in cinque punti — baseline 1.2.48
+
+1. **Misurazione**: introdotto `npm run audit:pages`, che genera `docs/PAGE_PERFORMANCE_BASELINE.md` con peso grezzo, gzip stimato, CSS e grafo JavaScript per ogni pagina canonica. Le misure statiche non sostituiscono quelle runtime su iPhone e PC.
+2. **Colli di bottiglia**: la baseline individua Firebase come costo condiviso principale e Profilo, Aggiungi Scadenza e dettagli Account come pagine applicative più pesanti. Sono state rilevate inoltre attese sequenziali evitabili nel bootstrap e nell'area privata.
+3. **Uniformità**: le liste Account Privato e Azienda condividono ora un solo risolutore per i segreti delle card. Account propri e inviti, oltre ai relativi contatori, vengono richiesti in parallelo quando indipendenti.
+4. **Sicurezza e comportamento**: la password resta cifrata durante il caricamento della lista e viene decifrata soltanto dopo il comando esplicito Occhio o Copia. Il valore non viene scritto in localStorage, cache o documento; la consultazione continua ad avvenire direttamente nella card.
+5. **Pagina per pagina**: il Profilo è la prima pagina promossa e ottimizzata integralmente. Area Privata e liste Account ricevono il primo intervento mirato; le altre pagine saranno affrontate secondo la baseline e con confronto prima/dopo.
+
+Il listener Push in primo piano viene inizializzato in background: un servizio accessorio non può ritardare il contenuto della pagina.

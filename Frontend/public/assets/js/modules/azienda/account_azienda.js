@@ -4,15 +4,16 @@ import { getDocSmart as getDoc, getDocsSmart as getDocs } from "/assets/js/offli
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.48';
+import { auth, db } from '../../firebase-config.js?v=1.2.49';
 import { SwipeList } from '../../swipe-list-v6.js';
 import { doc, collection, query, where, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.48';
+import { initComponents } from '../../components-v129.js?v=1.2.49';
 import { decrypt, ensureMasterKey } from '../core/security-manager.js';
+import { createCardSecretResolver } from '../shared/card-secret.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -229,15 +230,16 @@ function createAccountCard(acc) {
             createElement('div', { className: 'account-data-display' }, [
                 acc.username ? createDataRow(t('label_user'), acc.username) : null,
                 acc.account ? createDataRow(t('label_account'), acc.account) : null,
-                acc.password ? createDataRow(t('label_password'), '••••••••', acc.password, true, acc.id) : null
+                acc.password ? createDataRow(t('label_password'), '••••••••', acc.password, true, acc._encrypted) : null
             ].filter(Boolean))
         ])
     ]);
     return card;
 }
 
-function createDataRow(label, displayValue, copyValue = null, isPassword = false, id = null) {
+function createDataRow(label, displayValue, copyValue = null, isPassword = false, encrypted = false) {
     const rowId = Math.random().toString(36).substr(2, 9);
+    const resolveCopyValue = createCardSecretResolver(copyValue, encrypted && isPassword);
     return createElement('div', { className: 'account-data-row' }, [
         createElement('span', { className: 'account-data-label', textContent: `${label}:` }),
         createElement('span', {
@@ -248,18 +250,23 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
         createElement('div', { className: 'account-card-right' }, [
             isPassword ? createElement('button', {
                 className: 'btn-mini-action',
-                onclick: (e) => {
+                onclick: async (e) => {
                     e.stopPropagation();
-                    const el = document.getElementById(`pass-val-${rowId}`);
-                    const span = e.currentTarget.querySelector('span');
-                    if (el && span) {
-                        if (el.textContent === '••••••••') {
-                            el.textContent = copyValue;
-                            span.textContent = 'visibility_off';
-                        } else {
-                            el.textContent = '••••••••';
-                            span.textContent = 'visibility';
+                    try {
+                        const el = document.getElementById(`pass-val-${rowId}`);
+                        const span = e.currentTarget.querySelector('span');
+                        if (el && span) {
+                            if (el.textContent === '••••••••') {
+                                el.textContent = await resolveCopyValue();
+                                span.textContent = 'visibility_off';
+                            } else {
+                                el.textContent = '••••••••';
+                                span.textContent = 'visibility';
+                            }
                         }
+                    } catch (error) {
+                        logError('RevealCardPassword', error);
+                        showToast(t('error_generic'), 'error');
                     }
                 }
             }, [
@@ -267,10 +274,15 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
             ]) : null,
             createElement('button', {
                 className: 'btn-mini-action',
-                onclick: (e) => {
+                onclick: async (e) => {
                     e.stopPropagation();
-                    navigator.clipboard.writeText(copyValue || displayValue);
-                    showToast(t('copied') || "Copiato!");
+                    try {
+                        await navigator.clipboard.writeText(isPassword ? await resolveCopyValue() : (copyValue || displayValue));
+                        showToast(t('copied') || "Copiato!");
+                    } catch (error) {
+                        logError('CopyCardValue', error);
+                        showToast(t('error_generic'), 'error');
+                    }
                 }
             }, [
                 createElement('span', { className: 'material-symbols-outlined account-action-icon', textContent: 'content_copy' })
