@@ -21,6 +21,7 @@ import {
 } from './dettaglio-azienda-attachments.js';
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
+import { hasRealBankingData, normalizeBankingAccounts } from '../shared/banking-model.js';
 import {getCompanyAccount} from '../data/vault-repository.js';
 
 // --- STATE ---
@@ -235,7 +236,7 @@ function renderBanking(acc) {
     if (sectionBanking) sectionBanking.classList.toggle('hidden', !hasBanking);
 
     // Gestione Suggerimento Conto Bancario
-    const hasRealBanking = checkRealBankingData(acc);
+    const hasRealBanking = hasRealBankingData(acc);
     const bankingPrompt = document.getElementById('add-banking-prompt');
     if (bankingPrompt) {
         if (!hasRealBanking && !isReadOnly) {
@@ -254,9 +255,7 @@ function renderBanking(acc) {
     if (hasBanking) {
         const bankingContent = document.getElementById('banking-content');
         if (bankingContent) {
-            const bankingArr = Array.isArray(acc.banking) ? acc.banking :
-                (acc.banking?.iban ? [acc.banking] :
-                    (acc.iban ? [{ iban: acc.iban }] : []));
+            const bankingArr = normalizeBankingAccounts(acc);
 
             const rows = bankingArr.map((bank, bIdx) => {
                 const handleCopy = (val) => {
@@ -458,32 +457,6 @@ function getAccentColors(acc) {
     if (acc.shared) return { rgb: '244, 63, 94', hex: '#f43f5e' };
     if (acc.hasMemo) return { rgb: '245, 158, 11', hex: '#f59e0b' };
     return { rgb: '59, 130, 246', hex: '#3b82f6' };
-}
-
-/**
- * Utility per rilevare se ci sono dati bancari reali
- */
-function checkRealBankingData(acc) {
-    let bankingArr = [];
-    if (Array.isArray(acc.banking)) {
-        bankingArr = acc.banking;
-    } else if (acc.iban || (acc.cards && acc.cards.length > 0)) {
-        bankingArr = [{
-            iban: acc.iban || '',
-            cards: acc.cards || [],
-            passwordDispositiva: acc.passwordDispositiva || '',
-            referenteNome: acc.referenteNome || '',
-            referenteTelefono: acc.referenteTelefono || '',
-            referenteCellulare: acc.referenteCellulare || ''
-        }];
-    }
-    return bankingArr.some(bank => {
-        const hasIban = bank.iban && bank.iban.trim().length > 0;
-        const hasDisp = bank.passwordDispositiva && bank.passwordDispositiva.trim().length > 0;
-        const hasCards = bank.cards && bank.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-        const hasRef = (bank.referenteTelefono?.trim() || bank.referenteCellulare?.trim());
-        return hasIban || hasDisp || hasCards || hasRef;
-    });
 }
 
 function setupReadOnlyUI() {

@@ -17,6 +17,7 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
+import { hasRealBankingData, normalizeBankingAccounts } from '../shared/banking-model.js';
 import {findPrivateAccountByLegacyId, getPrivateAccount, listPrivateAccountAttachments} from '../data/vault-repository.js';
 
 // --- STATE ---
@@ -189,7 +190,7 @@ function renderAccount(acc) {
     renderBanking(acc);
 
     // Gestione Suggerimento Conto Bancario
-    const hasRealBanking = checkRealBankingData(acc);
+    const hasRealBanking = hasRealBankingData(acc);
     const bankingPrompt = document.getElementById('add-banking-prompt');
     if (bankingPrompt) {
         if (!hasRealBanking && !isReadOnly) {
@@ -246,32 +247,9 @@ function renderBanking(acc) {
     section.classList.remove('hidden');
     clearElement(content);
 
-    // Normalizzazione dati per compatibilità:
-    // Supportiamo l'array 'banking' (standard attuale) o i campi a radice (legacy)
-    let bankingArr = [];
-    if (Array.isArray(acc.banking)) {
-        bankingArr = acc.banking;
-    } else if (acc.iban || hasCardsAtRoot) {
-        bankingArr = [{
-            iban: acc.iban || '',
-            cards: acc.cards || [],
-            passwordDispositiva: acc.passwordDispositiva || '',
-            referenteNome: acc.referenteNome || '',
-            referenteTelefono: acc.referenteTelefono || '',
-            referenteCellulare: acc.referenteCellulare || ''
-        }];
-    }
+    const bankingArr = normalizeBankingAccounts(acc);
 
-    // Double check: if still no banking array or empty elements, hide
-    const hasRealBankingData = bankingArr.some(bank => {
-        const hasIban = bank.iban && bank.iban.trim().length > 0;
-        const hasDisp = bank.passwordDispositiva && bank.passwordDispositiva.trim().length > 0;
-        const hasCards = bank.cards && bank.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-        const hasRef = (bank.referenteTelefono?.trim() || bank.referenteCellulare?.trim());
-        return hasIban || hasDisp || hasCards || hasRef;
-    });
-
-    if (!hasRealBankingData) {
+    if (!hasRealBankingData(acc)) {
         section.classList.add('hidden');
         return;
     }
@@ -873,32 +851,5 @@ async function deleteAttachment(att) {
         logError("DeleteAttachment", e);
         showToast("Errore durante l'eliminazione", "error");
     }
-}
-
-
-/**
- * Utility per rilevare se ci sono dati bancari reali
- */
-function checkRealBankingData(acc) {
-    let bankingArr = [];
-    if (Array.isArray(acc.banking)) {
-        bankingArr = acc.banking;
-    } else if (acc.iban || (acc.cards && acc.cards.length > 0)) {
-        bankingArr = [{
-            iban: acc.iban || '',
-            cards: acc.cards || [],
-            passwordDispositiva: acc.passwordDispositiva || '',
-            referenteNome: acc.referenteNome || '',
-            referenteTelefono: acc.referenteTelefono || '',
-            referenteCellulare: acc.referenteCellulare || ''
-        }];
-    }
-    return bankingArr.some(bank => {
-        const hasIban = bank.iban && bank.iban.trim().length > 0;
-        const hasDisp = bank.passwordDispositiva && bank.passwordDispositiva.trim().length > 0;
-        const hasCards = bank.cards && bank.cards.some(c => c.cardNumber?.trim() || c.cardType?.trim() || c.pin?.trim() || c.ccv?.trim());
-        const hasRef = (bank.referenteTelefono?.trim() || bank.referenteCellulare?.trim());
-        return hasIban || hasDisp || hasCards || hasRef;
-    });
 }
 

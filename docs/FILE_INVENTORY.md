@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **262**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/public/assets/js/modules/scadenze/deadline-recipient-controller.js` | JS | 5589 | 100 | Flusso scadenze/configurazione: deadline-recipient-controller. |
+| `Frontend/public/assets/js/modules/shared/banking-model.js` | JS | 1896 | 62 | Supporto frontend: banking-model. |
 | `Frontend/GUIDA.md` | MD | 60618 | 977 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 38951 | 467 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3618 | 78 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
@@ -84,7 +84,7 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/azienda/dati_azienda.js` | JS | 26519 | 619 | Flusso aziende/account aziendali: dati azienda. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js` | JS | 8533 | 212 | Flusso aziende/account aziendali: dettaglio-azienda-attachments. |
 | `Frontend/public/assets/js/modules/azienda/dettaglio-azienda-sharing.js` | JS | 12699 | 276 | Flusso aziende/account aziendali: dettaglio-azienda-sharing. |
-| `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 22255 | 497 | Flusso aziende/account aziendali: dettaglio account azienda. |
+| `Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js` | JS | 21146 | 474 | Flusso aziende/account aziendali: dettaglio account azienda. |
 | `Frontend/public/assets/js/modules/azienda/form-azienda-save.js` | JS | 15304 | 300 | Flusso aziende/account aziendali: form-azienda-save. |
 | `Frontend/public/assets/js/modules/azienda/form_account_azienda.js` | JS | 22542 | 530 | Flusso aziende/account aziendali: form account azienda. |
 | `Frontend/public/assets/js/modules/azienda/lista_aziende.js` | JS | 10621 | 274 | Flusso aziende/account aziendali: lista aziende. |
@@ -105,7 +105,7 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/home/home.js` | JS | 25394 | 611 | Supporto frontend: home. |
 | `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 19157 | 437 | Flusso profilo/account personali: account privati. |
 | `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 20879 | 503 | Flusso profilo/account personali: area privata. |
-| `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 39686 | 910 | Flusso profilo/account personali: dettaglio account privato. |
+| `Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js` | JS | 37519 | 864 | Flusso profilo/account personali: dettaglio account privato. |
 | `Frontend/public/assets/js/modules/privato/form_account_privato.js` | JS | 36809 | 802 | Flusso profilo/account personali: form account privato. |
 | `Frontend/public/assets/js/modules/privato/profile-model.js` | JS | 4698 | 102 | Flusso profilo/account personali: profile-model. |
 | `Frontend/public/assets/js/modules/privato/profilo-actions.js` | JS | 12048 | 242 | Flusso profilo/account personali: profilo-actions. |
@@ -126,6 +126,7 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/scadenze/deadline-attachment-controller.js` | JS | 4171 | 90 | Flusso scadenze/configurazione: deadline-attachment-controller. |
 | `Frontend/public/assets/js/modules/scadenze/deadline-config-model.js` | JS | 2509 | 64 | Flusso scadenze/configurazione: deadline-config-model. |
 | `Frontend/public/assets/js/modules/scadenze/deadline-model.js` | JS | 3076 | 70 | Flusso scadenze/configurazione: deadline-model. |
+| `Frontend/public/assets/js/modules/scadenze/deadline-recipient-controller.js` | JS | 5589 | 100 | Flusso scadenze/configurazione: deadline-recipient-controller. |
 | `Frontend/public/assets/js/modules/scadenze/deadline-recipient-model.js` | JS | 2689 | 64 | Flusso scadenze/configurazione: deadline-recipient-model. |
 | `Frontend/public/assets/js/modules/scadenze/dettaglio_scadenza.js` | JS | 12759 | 274 | Flusso scadenze/configurazione: dettaglio scadenza. |
 | `Frontend/public/assets/js/modules/scadenze/scadenze.js` | JS | 14044 | 383 | Flusso scadenze/configurazione: scadenze. |
@@ -184,7 +185,7 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 6892 | 148 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 886 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 64542 | 825 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 7166 | 185 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 7213 | 186 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13777 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15328 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/registrati.html` | HTML | 7358 | 154 | Struttura della pagina registrati; comportamento demandato ai moduli. |
@@ -193,6 +194,25 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/scadenze.html` | HTML | 5180 | 104 | Struttura della pagina scadenze; comportamento demandato ai moduli. |
 | `Frontend/public/sw.js` | JS | 7147 | 155 | Service worker: shell offline, cache runtime, push in background e deep link. |
 | `Frontend/public/termini.html` | HTML | 11522 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
+
+## tests
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
+| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
+| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
+| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
+| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
+| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
+| `tests/deadline-recipient-model.test.mjs` | MJS | 3086 | 63 | Test automatico: deadline-recipient-model.test. |
+| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 2450 | 53 | Test automatico: firestore.profile-widgets.rules.test. |
+| `tests/fixtures/maturity-dataset.json` | JSON | 2121 | 88 | Test automatico: maturity-dataset. |
+| `tests/maturity-dataset.test.mjs` | MJS | 1851 | 39 | Test automatico: maturity-dataset.test. |
+| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
+| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
+| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
+| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
 
 ## .firebaserc
 
@@ -287,7 +307,7 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 4304 | 66 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 4333 | 66 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -298,7 +318,7 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-html-purity.mjs` | MJS | 2726 | 69 | Strumento manutenzione/test: audit-html-purity. |
 | `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
 | `scripts/audit-lightweight-features.mjs` | MJS | 1924 | 43 | Strumento manutenzione/test: audit-lightweight-features. |
-| `scripts/audit-navigation-flows.mjs` | MJS | 1450 | 23 | Strumento manutenzione/test: audit-navigation-flows. |
+| `scripts/audit-navigation-flows.mjs` | MJS | 1699 | 26 | Strumento manutenzione/test: audit-navigation-flows. |
 | `scripts/audit-offline-shell.mjs` | MJS | 2896 | 54 | Strumento manutenzione/test: audit-offline-shell. |
 | `scripts/audit-page-performance.mjs` | MJS | 8053 | 146 | Strumento manutenzione/test: audit-page-performance. |
 | `scripts/audit-project-inventory.mjs` | MJS | 8409 | 127 | Strumento manutenzione/test: audit-project-inventory. |
@@ -330,24 +350,6 @@ File censiti: **260**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `stylelint.config.mjs` | MJS | 510 | 17 | File di progetto: stylelint.config. |
-
-## tests
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
-| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
-| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
-| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
-| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
-| `tests/deadline-recipient-model.test.mjs` | MJS | 3086 | 63 | Test automatico: deadline-recipient-model.test. |
-| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 2450 | 53 | Test automatico: firestore.profile-widgets.rules.test. |
-| `tests/fixtures/maturity-dataset.json` | JSON | 2121 | 88 | Test automatico: maturity-dataset. |
-| `tests/maturity-dataset.test.mjs` | MJS | 1851 | 39 | Test automatico: maturity-dataset.test. |
-| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
-| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
-| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
-| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
 
 ## Duplicati esatti
 

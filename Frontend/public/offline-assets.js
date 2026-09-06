@@ -122,6 +122,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/settings/impostazioni.js",
   "assets/js/modules/shared/account-mode-model.js",
   "assets/js/modules/shared/attachment-security.js",
+  "assets/js/modules/shared/banking-model.js",
   "assets/js/modules/shared/banking-renderer.js",
   "assets/js/modules/shared/card-secret.js",
   "assets/js/modules/shared/company-area-preference.js",

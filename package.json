@@ -30,7 +30,7 @@
     "test:security": "node scripts/audit-security-flows.mjs",
     "test:vault-contract": "node scripts/audit-vault-key-terminology.mjs && node --test tests/vault-session.test.mjs",
     "test:data-access": "node scripts/audit-data-access.mjs && node --test tests/request-coordinator.test.mjs",
-    "test:navigation": "node scripts/audit-navigation-flows.mjs && node scripts/audit-canonical-pages.mjs && node --test tests/deadline-recipient-model.test.mjs tests/deadline-model.test.mjs tests/deadline-config-model.test.mjs tests/account-mode-model.test.mjs",
+    "test:navigation": "node scripts/audit-navigation-flows.mjs && node scripts/audit-canonical-pages.mjs && node --test tests/deadline-recipient-model.test.mjs tests/deadline-model.test.mjs tests/deadline-config-model.test.mjs tests/account-mode-model.test.mjs tests/banking-model.test.mjs",
     "test:ui-foundations": "node scripts/audit-ui-foundations.mjs",
     "test:html-purity": "node scripts/audit-html-purity.mjs",
     "test:static-references": "node scripts/audit-static-references.mjs",

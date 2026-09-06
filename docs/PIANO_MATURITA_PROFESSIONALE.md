@@ -174,7 +174,7 @@ Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 1. [x] Profilo Utente unico;
 2. [~] Area Privata e liste Account: prima parallelizzazione e segreti lazy completati;
 3. [~] Aggiungi/Modifica Scadenza: modello destinatari normalizzato e testato; rifattorizzazione pagina da completare;
-4. [~] Dettagli Account Privato e Azienda: modalità canoniche condivise; rifattorizzazione pagina da completare;
+4. [~] Dettagli Account Privato e Azienda: modalità canoniche e compatibilità dei dati bancari condivise e testate; rifattorizzazione pagina da completare;
 5. [~] Form Account Privato e Azienda: regole Account/Memorandum condivise e testate; rifattorizzazione pagina da completare;
 6. [~] Impostazioni e configurazioni: modello comune delle tre configurazioni Scadenze estratto e testato; riordino complessivo rinviato al post-M10;
 7. [ ] Aziende e archivio;
@@ -286,7 +286,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M0 | completata il 06/09/2026 |
 | M1 | completata il 06/09/2026 |
 | M2 | completata il 06/09/2026 |
-| M3 | Profilo completato; registro pagine, destinatari Scadenze e modalità Account/Memorandum consolidati; pagine ancora in lavorazione |
+| M3 | Profilo completato; registro pagine, destinatari Scadenze, modalità Account/Memorandum e dati bancari consolidati; pagine ancora in lavorazione |
 | M4 | fondazioni presenti, consolidamento da fare |
 | M5 | da progettare prima di modificare le condivisioni |
 | M6 | sola consultazione offline parzialmente operativa |
