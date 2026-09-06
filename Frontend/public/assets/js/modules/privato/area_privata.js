@@ -10,7 +10,7 @@ import { getDocsSmart as getDocs } from "/assets/js/offline-firestore.js";
  * - Espone initAreaPrivata(user) come entry point unico.
  */
 
-import { db, functions } from '../../firebase-config.js?v=1.2.51';
+import { db, functions } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
 import { collection, query, where, doc, orderBy, limit, addDoc, updateDoc, writeBatch, httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

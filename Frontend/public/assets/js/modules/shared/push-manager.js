@@ -1,5 +1,5 @@
 import { getDocSmart as getDoc } from "/assets/js/offline-firestore.js";
-import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.51';
+import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.52';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteToken, getToken, onMessage } from "/assets/js/vendor/firebase-runtime.js";
@@ -44,6 +44,46 @@ async function serviceWorkerRegistration() {
     return registration;
 }
 
+function pushErrorMessage(error) {
+    const code = String(error?.code || '');
+    if (code.includes('permission-blocked') || Notification.permission === 'denied') {
+        return 'Le notifiche sono bloccate nel browser. Abilitale nelle autorizzazioni del sito e riprova.';
+    }
+    if (code.includes('unsupported-browser') || code.includes('indexed-db-unsupported')) {
+        return 'Il browser non supporta completamente le notifiche Push o il relativo archivio locale.';
+    }
+    if (code.includes('token-subscribe') || code.includes('fid-registration')) {
+        return 'Registrazione notifiche non riuscita. Controlla la connessione e riprova.';
+    }
+    return 'Configurazione notifiche non riuscita su questo dispositivo. Ricarica la pagina e riprova.';
+}
+
+async function resetLocalPushSubscription(messaging, registration) {
+    try { await deleteToken(messaging); } catch (error) { console.warn('[PUSH] Token locale precedente non revocabile.', error); }
+    try {
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) await subscription.unsubscribe();
+    } catch (error) {
+        console.warn('[PUSH] Sottoscrizione browser precedente non revocabile.', error);
+    }
+}
+
+async function getTokenWithLocalRecovery(messaging, registration) {
+    const options = { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration };
+    try {
+        return await getToken(messaging, options);
+    } catch (firstError) {
+        console.warn('[PUSH] Registrazione locale non valida: eseguo un solo tentativo di ripristino.', firstError);
+        await resetLocalPushSubscription(messaging, registration);
+        try {
+            return await getToken(messaging, options);
+        } catch (retryError) {
+            console.error('[PUSH] Ripristino registrazione locale fallito.', retryError);
+            throw new Error(pushErrorMessage(retryError));
+        }
+    }
+}
+
 export async function getCurrentPushState(user = auth.currentUser, scope = 'deadlines') {
     const compatibility = getPushCompatibility();
     if (!user || !compatibility.compatible) return { enabled: false, ...compatibility };
@@ -65,10 +105,22 @@ async function enablePushScope(scope, user = auth.currentUser) {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') throw new Error('Permesso notifiche non concesso.');
 
-    const messaging = await getMessagingInstance();
+    let messaging;
+    try {
+        messaging = await getMessagingInstance();
+    } catch (error) {
+        console.error('[PUSH] Inizializzazione Firebase Messaging fallita.', error);
+        throw new Error(pushErrorMessage(error));
+    }
     if (!messaging) throw new Error('Firebase Messaging non è supportato su questo dispositivo.');
-    const registration = await serviceWorkerRegistration();
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+    let registration;
+    try {
+        registration = await serviceWorkerRegistration();
+    } catch (error) {
+        console.error('[PUSH] Service Worker non disponibile.', error);
+        throw new Error('Impossibile preparare le notifiche su questo dispositivo. Ricarica la pagina e riprova.');
+    }
+    const token = await getTokenWithLocalRecovery(messaging, registration);
     if (!token) throw new Error('Firebase non ha restituito il token del dispositivo.');
 
     const deviceId = getDeviceId();

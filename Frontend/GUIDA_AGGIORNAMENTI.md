@@ -457,3 +457,10 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Criticità misurate: liste Account private/aziendali lente anche offline, Archivio con campione da 25,14 s, picchi Home e prima navigazione offline PC da 28,85 s.
 - Su iPhone online risultano circa 229–238 KB trasferiti per pagina: va verificato il rapporto tra Service Worker, cache Safari e header `no-store`.
 - Le pagine già rapide costituiscono un vincolo di non regressione per le fasi successive.
+
+# Autoripristino registrazione Push locale (06/09/2026)
+
+- Corretto il percorso comune degli switch «Notifiche scadenze» e «Notifiche inviti condivisi» in presenza di una registrazione FCM/browser locale incoerente.
+- Al primo fallimento l’app revoca esclusivamente token e sottoscrizione Push del dispositivo corrente, quindi tenta una sola nuova registrazione.
+- Nessun dato applicativo, destinatario o dispositivo remoto viene modificato; gli ambiti Scadenze e Condivisioni restano indipendenti.
+- Se il recupero fallisce, la UI mostra un messaggio italiano classificato per permesso, compatibilità o registrazione, senza esporre l’errore interno dell’SDK.

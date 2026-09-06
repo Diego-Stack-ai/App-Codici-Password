@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.51';
+const CACHE_NAME = 'codex-shell-v1.2.52';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('./assets/js/vendor/firebase-sw-runtime.js');
