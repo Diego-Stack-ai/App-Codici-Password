@@ -93,6 +93,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/home/home.js",
   "assets/js/modules/privato/account_privati.js",
   "assets/js/modules/privato/area_privata.js",
+  "assets/js/modules/privato/dettaglio-privato-attachments.js",
   "assets/js/modules/privato/dettaglio_account_privato.js",
   "assets/js/modules/privato/form_account_privato.js",
   "assets/js/modules/privato/profile-model.js",

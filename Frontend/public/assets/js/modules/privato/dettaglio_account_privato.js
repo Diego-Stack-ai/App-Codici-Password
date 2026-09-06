@@ -3,22 +3,20 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.52';
+import { db } from '../../firebase-config.js?v=1.2.52';
 import { LOG } from '../../logger.js';
-import { observeAuth } from '../../auth.js';
-import { doc, collection, query, where, updateDoc, deleteDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment, serverTimestamp, orderBy, addDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
+import { doc, collection, query, where, updateDoc, onSnapshot, runTransaction, arrayUnion, arrayRemove, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError, formatDateToIT, sanitizeEmail } from '../../utils.js';
-import { initComponents } from '../../components-v129.js?v=1.2.52';
-import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptIfPossible } from '../core/crypto-utils.js';
-import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
+import { openExternalUrl } from '../shared/attachment-security.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { hasRealBankingData, normalizeBankingAccounts } from '../shared/banking-model.js';
-import {findPrivateAccountByLegacyId, getPrivateAccount, listPrivateAccountAttachments} from '../data/vault-repository.js';
+import { findPrivateAccountByLegacyId, getPrivateAccount } from '../data/vault-repository.js';
+import { initPrivateAttachmentModule, loadPrivateAttachments, openSourceSelector } from './dettaglio-privato-attachments.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -73,8 +71,7 @@ export async function initDettaglioAccountPrivato(user) {
 
     if (isReadOnly) setupReadOnlyUI();
     setupActions();
-    // Setup modal allegati (listener pulsanti sorgente)
-    setupSourceSelector();
+    initPrivateAttachmentModule({ ownerId, accountId: currentId, readOnly: isReadOnly });
 
     await loadAccount();
 
@@ -123,7 +120,7 @@ async function loadAccount() {
         renderAccount(accountData);
         const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
         renderSharingMap(accountData, contactNames);
-        await loadAttachments();
+        await loadPrivateAttachments();
         setupActions();
     } catch (e) {
         logError("LoadAccount", e);
@@ -618,238 +615,4 @@ function setupActions() {
         };
     }
 
-    // Pulsante Annulla
-    document.getElementById('btn-cancel-source')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        closeSourceSelector();
-    });
 }
-
-// --- ATTACHMENTS LOGIC ---
-
-
-function openSourceSelector() {
-    
-    const modal = document.getElementById('source-selector-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        // Piccolo delay per permettere al browser di vedere la rimozione di 'hidden' prima di animare
-        setTimeout(() => modal.classList.add('active'), 10);
-        document.body.style.overflow = 'hidden';
-    } else {
-        console.error("Modale non trovato");
-    }
-}
-
-function closeSourceSelector() {
-    const modal = document.getElementById('source-selector-modal');
-    if (modal) {
-        modal.classList.remove('active');
-        // Aspettiamo la fine della transizione CSS (0.3s in core_ui.css) prima di rimettere hidden
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-        }, 300);
-    }
-}
-
-/**
- * Collega i pulsanti del modal sorgente agli input file nascosti.
- * Deve essere chiamata UNA VOLTA all'init della pagina.
- */
-function setupSourceSelector() {
-    const modal = document.getElementById('source-selector-modal');
-    if (!modal) return;
-
-    // Mappa: data-source -> id input file
-    const sourceMap = {
-        camera: 'input-camera',
-        gallery: 'input-gallery',
-        file: 'input-file'
-    };
-
-    // Pulsanti sorgente
-    // Pulsanti sorgente (ora sono LABEL): il browser gestisce il click nativamente.
-    // Non aggiungiamo listener click qui per evitare doppi trigger.
-
-    // Listener per chiusura modal dopo selezione (opzionale, gestito nel change)
-    // Se l'utente clicca la label, si apre il file picker.
-    // Se seleziona, scatta 'change' -> handleFileUpload -> closeSourceSelector.
-    // Se annulla, il modal resta aperto (corretto).
-
-    // Pulsante Annulla
-    const cancelBtn = document.getElementById('btn-cancel-source');
-    if (cancelBtn) cancelBtn.addEventListener('click', closeSourceSelector);
-
-    // Click sull'overlay (fuori dalla card) per chiudere
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeSourceSelector();
-    });
-
-    // Input file: al cambio avvia upload
-    ['input-camera', 'input-gallery', 'input-file'].forEach(id => {
-        const input = document.getElementById(id);
-        if (input) input.addEventListener('change', () => handleFileUpload(input));
-    });
-
-    LOG('[DETTAGLIO] setupSourceSelector: listener agganciati');
-}
-
-async function handleFileUpload(input) {
-    // Chiudi il modal sorgente se aperto
-    closeSourceSelector();
-
-    const file = input.files[0];
-    if (!file) return;
-    try { validateAttachmentFile(file); } catch (error) {
-        showToast(error.message, 'error');
-        input.value = '';
-        return;
-    }
-
-    // Feedback immediato per mobile
-    showToast(`File selezionato: ${file.name}`, 'info');
-
-    // Piccolo delay per permettere alla UI mobile di stabilizzarsi dopo chiusura picker/modal
-    await new Promise(r => setTimeout(r, 800));
-
-    const ok = await showConfirmModal("CARICA ALLEGATO", `Vuoi caricare il file ${file.name}?`, "Carica", "Annulla");
-    if (!ok) {
-        input.value = '';
-        return;
-    }
-
-    showToast("Caricamento in corso...", "info");
-
-    try {
-        const storagePath = `users/${ownerId}/accounts/${currentId}/attachments/${createStorageObjectName(file)}`;
-        const sRef = ref(storage, storagePath);
-        const vaultKey = await ensureVaultKeyMaterial();
-        const encryptedFile = await encryptAttachmentFile(file, vaultKey);
-        const snap = await uploadBytes(sRef, encryptedFile.blob, {
-            contentType: 'application/octet-stream', customMetadata: { encrypted: 'v1' }
-        });
-        const url = await getDownloadURL(snap.ref);
-
-        const colRef = collection(db, "users", ownerId, "accounts", currentId, "attachments");
-        await addDoc(colRef, {
-            name: file.name,
-            url: url,
-            storagePath: storagePath,
-            type: file.type || 'application/octet-stream',
-            size: file.size,
-            encryption: encryptedFile.metadata,
-            createdAt: serverTimestamp()
-        });
-
-        showToast("Allegato caricato!", "success");
-        await loadAttachments();
-    } catch (e) {
-        logError("UploadAttachment", e);
-        showToast("Errore durante il caricamento", "error");
-    } finally {
-        input.value = '';
-    }
-}
-
-async function loadAttachments() {
-    const container = document.getElementById('attachments-list');
-    if (!container) return;
-
-    try {
-        const attachments = await listPrivateAccountAttachments(ownerId, currentId);
-        renderAttachments(attachments);
-    } catch (e) {
-        logError("LoadAttachments", e);
-    }
-}
-
-function renderAttachments(list) {
-    const container = document.getElementById('attachments-list');
-    if (!container) return;
-
-    clearElement(container);
-
-    if (list.length === 0) {
-        container.appendChild(createElement('p', {
-            className: 'text-[10px] text-white/20 uppercase text-center py-4',
-            textContent: 'Nessun allegato'
-        }));
-        return;
-    }
-
-    const items = list.map(a => {
-        const type = (a.type || "").toLowerCase();
-        let icon = 'description';
-        let color = 'text-blue-400/40';
-
-        if (type.includes('image')) { icon = 'image'; color = 'text-purple-400/40'; }
-        else if (type.includes('video')) { icon = 'movie'; color = 'text-pink-400/40'; }
-        else if (type.includes('pdf')) { icon = 'picture_as_pdf'; color = 'text-red-400/40'; }
-
-        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '---';
-        const size = (a.size / (1024 * 1024)).toFixed(2);
-
-        return createElement('div', {
-            className: 'attachment-item animate-in slide-in-from-left-2'
-        }, [
-            createElement('div', {
-                className: 'attachment-info cursor-pointer',
-                onclick: () => openAttachment(a)
-            }, [
-                createElement('span', { className: `material-symbols-outlined attachment-icon ${color}`, textContent: icon }),
-                createElement('div', { className: 'attachment-meta' }, [
-                    createElement('span', { className: 'attachment-name', textContent: a.name }),
-                    createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
-                ])
-            ]),
-            !isReadOnly ? createElement('button', {
-                type: 'button',
-                className: 'btn-delete-attachment',
-                onclick: (e) => { e.stopPropagation(); deleteAttachment(a); }
-            }, [
-                createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
-            ]) : null
-        ]);
-    });
-
-    setChildren(container, items);
-}
-
-async function openAttachment(attachment) {
-    try {
-        if (!attachment.encryption) {
-            if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
-            return;
-        }
-        if (!attachment.storagePath) throw new Error('Percorso allegato mancante.');
-        const vaultKey = await ensureVaultKeyMaterial();
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
-        const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
-        openDecryptedAttachment(clear, attachment);
-    } catch (error) {
-        logError('OpenEncryptedAttachment', error);
-        showToast('Impossibile aprire l’allegato cifrato.', 'error');
-    }
-}
-
-async function deleteAttachment(att) {
-    const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", t('cancel') || "Annulla");
-    if (!ok) return;
-
-    try {
-        if (att.storagePath) {
-            const sRef = ref(storage, att.storagePath);
-            await deleteObject(sRef);
-        }
-        const docRef = doc(db, "users", ownerId, "accounts", currentId, "attachments", att.id);
-        await deleteDoc(docRef);
-
-        showToast("Allegato eliminato", "success");
-        await loadAttachments();
-    } catch (e) {
-        logError("DeleteAttachment", e);
-        showToast("Errore durante l'eliminazione", "error");
-    }
-}
-

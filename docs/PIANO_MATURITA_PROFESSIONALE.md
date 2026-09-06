@@ -174,7 +174,7 @@ Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 1. [x] Profilo Utente unico;
 2. [~] Area Privata e liste Account: prima parallelizzazione e segreti lazy completati;
 3. [~] Aggiungi/Modifica Scadenza: modello destinatari normalizzato e testato; rifattorizzazione pagina da completare;
-4. [~] Dettagli Account Privato e Azienda: modalità canoniche e compatibilità dei dati bancari condivise e testate; rifattorizzazione pagina da completare;
+4. [~] Dettagli Account Privato e Azienda: modalità canoniche e compatibilità bancaria condivise; gestione allegati isolata in entrambi i percorsi e protetta da gate anti-listener duplicati; rifattorizzazione pagina da completare;
 5. [~] Form Account Privato e Azienda: regole Account/Memorandum condivise e testate; rifattorizzazione pagina da completare;
 6. [~] Impostazioni e configurazioni: modello comune delle tre configurazioni Scadenze estratto e testato; riordino complessivo rinviato al post-M10;
 7. [ ] Aziende e archivio;
