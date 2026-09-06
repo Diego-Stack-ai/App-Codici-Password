@@ -19,9 +19,10 @@ import { initDatePickerV5 } from '../../datepicker_v5.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createStorageObjectName, encryptAttachmentFile, normalizeExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
 import { getDeadline, getUserProfile, getUserSetting, listContacts } from '../data/vault-repository.js';
-import { deadlineRecipientFields, deadlineRecipientsFromRecord, mergeDeadlineRecipient, normalizeRecipientEmail } from './deadline-recipient-model.js';
+import { deadlineRecipientFields, deadlineRecipientsFromRecord, normalizeRecipientEmail } from './deadline-recipient-model.js';
 import { deadlineDateInputFields, deadlineInputDate } from './deadline-model.js';
 import { createDeadlineAttachmentController } from './deadline-attachment-controller.js';
+import { createDeadlineRecipientController } from './deadline-recipient-controller.js';
 
 // --- CONFIGURAZIONE E ELEMENTI DOM ---
 const typeSelect = document.getElementById('tipo_scadenza');
@@ -32,8 +33,7 @@ let currentRule = null;
 let currentMode = 'automezzi';
 let editingScadenzaId = new URLSearchParams(window.location.search).get('id');
 const attachmentController = createDeadlineAttachmentController();
-let deadlineRecipients = [];
-let recipientContacts = [];
+const recipientController = createDeadlineRecipientController();
 let profileDocumentLinkDraft = null;
 let linkedSourceRef = null;
 
@@ -84,7 +84,7 @@ export async function initAggiungiScadenza(user) {
     initProxyDropdowns();
     attachmentController.init();
 
-    setupDeadlineRecipientsUI();
+    recipientController.init();
 
     // --- FOOTER ACTIONS SYSTEM (Event Contract V6.1) ---
     function initFooterFromDetail(detail) {
@@ -295,14 +295,14 @@ async function loadDynamicConfig() {
 
         unifiedConfigs.generali = { deadlineTypes: [], emailTemplates: [], names: [], notificationEmails: [], ...rawGenData };
         populateEmailSelects(unifiedConfigs.generali.notificationEmails);
-        recipientContacts = contacts.filter(contact => contact.active !== false);
+        const recipientContacts = contacts.filter(contact => contact.active !== false);
         notificationEmails.forEach(email => {
             const normalized = normalizeRecipientEmail(email);
             if (normalized && !recipientContacts.some(contact => normalizeRecipientEmail(contact.email) === normalized)) {
                 recipientContacts.push({ id: '', nome: 'Email salvata', cognome: '', email: normalized });
             }
         });
-        populateRecipientContacts();
+        recipientController.setContacts(recipientContacts);
 
         // --- AUTOMEZZI ---
         const defaultAuto = {
@@ -399,85 +399,6 @@ async function loadDynamicConfig() {
 async function _addNotificationEmailBtn(selectId = 'email_primaria_select') {
     const v = await showInputModal('Nuova Email', '', 'Inserisci un nuovo indirizzo email...');
     if (v && v.trim()) await addConfigItem(selectId, v.trim());
-}
-
-function addDeadlineRecipient({ email, displayName = '', contactId = '', sendEmail = true, sendPush = true }) {
-    const result = mergeDeadlineRecipient(deadlineRecipients, { email, displayName, contactId, sendEmail, sendPush });
-    if (!result.added) return false;
-    deadlineRecipients = result.recipients;
-    renderDeadlineRecipients();
-    return true;
-}
-
-function renderDeadlineRecipients() {
-    const container = document.getElementById('deadline-recipients-list');
-    if (!container) return;
-    clearElement(container);
-    if (!deadlineRecipients.length) {
-        container.appendChild(createElement('p', { className: 'deadline-recipient-help', textContent: 'Nessun destinatario aggiuntivo. Il proprietario continuerà a ricevere le proprie Push.' }));
-        return;
-    }
-    deadlineRecipients.forEach((recipient, index) => {
-        const emailToggle = createElement('input', { type: 'checkbox', checked: recipient.sendEmail, dataset: { recipientIndex: String(index), channel: 'email' } });
-        const pushToggle = createElement('input', { type: 'checkbox', checked: recipient.sendPush, dataset: { recipientIndex: String(index), channel: 'push' } });
-        const card = createElement('div', { className: `deadline-recipient-card${recipient.sendEmail || recipient.sendPush ? '' : ' is-paused'}` }, [
-            createElement('div', {}, [
-                createElement('span', { className: 'deadline-recipient-name', textContent: recipient.displayName || 'Destinatario' }),
-                createElement('span', { className: 'deadline-recipient-email', textContent: recipient.email })
-            ]),
-            createElement('div', { className: 'deadline-recipient-controls' }, [
-                createElement('label', { className: 'deadline-channel-label' }, [emailToggle, document.createTextNode('Email')]),
-                createElement('label', { className: 'deadline-channel-label' }, [pushToggle, document.createTextNode('Push')]),
-                createElement('button', { type: 'button', className: 'deadline-recipient-remove', dataset: { recipientRemove: String(index) }, title: 'Rimuovi destinatario' }, [
-                    createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
-                ])
-            ])
-        ]);
-        container.appendChild(card);
-    });
-}
-
-function populateRecipientContacts() {
-    const select = document.getElementById('deadline-contact-select');
-    if (!select) return;
-    clearElement(select);
-    select.appendChild(new Option('Seleziona dalla rubrica…', ''));
-    recipientContacts.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'it')).forEach(contact => {
-        const email = normalizeRecipientEmail(contact.email);
-        if (!email) return;
-        const label = [contact.nome, contact.cognome].filter(Boolean).join(' ').trim() || email;
-        select.appendChild(new Option(`${label} — ${email}`, contact.id || `email:${email}`));
-    });
-}
-
-function setupDeadlineRecipientsUI() {
-    document.getElementById('btn-manage-deadline-contacts')?.addEventListener('click', () => {
-        const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
-        window.location.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
-    });
-    document.getElementById('deadline-contact-select')?.addEventListener('change', event => {
-        const select = event.currentTarget;
-        const selectedValue = select.value || '';
-        const contact = recipientContacts.find(item => item.id === selectedValue || `email:${normalizeRecipientEmail(item.email)}` === selectedValue);
-        if (!contact) return;
-        addDeadlineRecipient({ contactId: contact.id, displayName: [contact.nome, contact.cognome].filter(Boolean).join(' '), email: contact.email });
-        select.value = '';
-    });
-    document.getElementById('deadline-recipients-list')?.addEventListener('change', event => {
-        const input = event.target.closest('input[data-recipient-index]');
-        if (!input) return;
-        const recipient = deadlineRecipients[Number(input.dataset.recipientIndex)];
-        if (!recipient) return;
-        if (input.dataset.channel === 'email') recipient.sendEmail = input.checked;
-        if (input.dataset.channel === 'push') recipient.sendPush = input.checked;
-        renderDeadlineRecipients();
-    });
-    document.getElementById('deadline-recipients-list')?.addEventListener('click', event => {
-        const button = event.target.closest('[data-recipient-remove]');
-        if (!button) return;
-        deadlineRecipients.splice(Number(button.dataset.recipientRemove), 1); renderDeadlineRecipients();
-    });
-    renderDeadlineRecipients();
 }
 
 function updateCurrentDynamicConfig() {
@@ -690,7 +611,7 @@ function finishLoad() {
         clearElement(namesList);
         const holderNames = [...new Set([
             ...dynamicConfig.names,
-            ...recipientContacts.map(contact => [contact.nome, contact.cognome].filter(Boolean).join(' ').trim()).filter(Boolean)
+            ...recipientController.getContacts().map(contact => [contact.nome, contact.cognome].filter(Boolean).join(' ').trim()).filter(Boolean)
         ])].sort((a, b) => a.localeCompare(b, 'it'));
         holderNames.forEach(n => {
             namesList.appendChild(new Option(n, n));
@@ -880,7 +801,7 @@ function setupSaveLogic() {
             if (btnText) btnText.textContent = "Salvataggio DB...";
             const finalAttachments = [...attachmentController.getExistingAttachments(), ...uploadedAttachments];
 
-            const recipientFields = deadlineRecipientFields(deadlineRecipients);
+            const recipientFields = deadlineRecipientFields(recipientController.getRecipients());
             const recipients = recipientFields.recipients;
             const scadenzaData = {
                 uid: currentUser.uid,
@@ -1048,8 +969,7 @@ async function loadScadenzaForEdit(id) {
         if (iFreq) iFreq.value = freq;
 
 
-        deadlineRecipients = deadlineRecipientsFromRecord(data);
-        renderDeadlineRecipients();
+        recipientController.setRecipients(deadlineRecipientsFromRecord(data));
 
         const testoEmailSelect = document.getElementById('testo_email_select');
         if (data.templateText && testoEmailSelect) {
