@@ -45,6 +45,7 @@ const coreUi = await read('Frontend/public/assets/js/ui-core-v129.js');
 const homeBootstrap = await read('Frontend/public/assets/js/home-bootstrap.js');
 const homeCss = await read('Frontend/public/assets/css/home_page.css');
 const attachmentSecurity = await read('Frontend/public/assets/js/modules/shared/attachment-security.js');
+const companyEmbeddedAttachments = await read('Frontend/public/assets/js/modules/azienda/dati-azienda-attachments.js');
 const qrCodeUtils = await read('Frontend/public/assets/js/modules/shared/qr_code_utils.js');
 const privateAccountForm = await read('Frontend/public/assets/js/modules/privato/form_account_privato.js');
 const companyAccountSave = await read('Frontend/public/assets/js/modules/azienda/form-azienda-save.js');
@@ -222,6 +223,8 @@ assert.match(attachmentSecurity, /export async function encryptAttachmentFile/, 
 assert.match(attachmentSecurity, /additionalData: ATTACHMENT_AAD/, 'La cifratura allegati non autentica il contesto del formato');
 assert.match(attachmentSecurity, /crypto\.getRandomValues\(new Uint8Array\(32\)\)/, 'La chiave casuale per-file degli allegati non è presente');
 assert.match(attachmentSecurity, /HKDF[\s\S]*?SHA-256/, 'La chiave per-file non è protetta con derivazione HKDF');
+assert.match(companyEmbeddedAttachments, /if \(!attachment\.storagePath\) throw new Error/, 'Gli allegati azienda cifrati non verificano il percorso Storage');
+assert.match(companyEmbeddedAttachments, /getBytes\(ref\(storage, attachment\.storagePath\), 25 \* 1024 \* 1024 \+ 1024\)/, 'L’apertura allegati azienda non applica il limite di lettura');
 assert.match(storageRules, /application\/octet-stream/, 'Storage non accetta il formato cifrato degli allegati');
 assert.doesNotMatch(qrCodeUtils, /\.innerHTML\s*=/, 'Il fallback QR usa ancora HTML dinamico');
 assert.doesNotMatch(privateAccountForm, /Final Transaction Payload[^\n]*finalData/, 'Il form privato registra il payload del Vault');
@@ -251,4 +254,4 @@ assert.match(security, /export async function changeMasterPassword/, 'Cambio Mas
 assert.match(settingsHtml, /id="btn-change-master-password"/, 'Cambio Master Password non esposto in Impostazioni');
 assert.match(coreUi, /passwordType[\s\S]*?bindPasswordChecklist/, 'Il cambio Master Password non mostra i requisiti dinamici');
 
-console.log('Audit sicurezza e offline: 80 controlli superati.');
+console.log('Audit sicurezza e offline: 82 controlli superati.');

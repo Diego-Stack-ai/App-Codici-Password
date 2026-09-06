@@ -177,7 +177,7 @@ Ordine iniziale determinato dalla baseline, corretto dal rischio funzionale:
 4. [~] Dettagli Account Privato e Azienda: modalità canoniche e compatibilità bancaria condivise; allegati e condivisione isolati dai renderer principali, con gate su listener e revoca; rifattorizzazione pagina da completare;
 5. [~] Form Account Privato e Azienda: regole Account/Memorandum condivise e testate; rifattorizzazione pagina da completare;
 6. [~] Impostazioni e configurazioni: modello comune delle tre configurazioni Scadenze estratto e testato; riordino complessivo rinviato al post-M10;
-7. [ ] Aziende e archivio;
+7. [~] Aziende e archivio: letture archivio parallelizzate; apertura allegati anagrafica azienda isolata e coperta dai gate di sicurezza; rifattorizzazione da completare;
 8. [ ] Home e pagine pubbliche.
 
 Per ogni pagina: baseline, mappa responsabilità, componenti condivisi, caricamento progressivo, test, confronto e rimozione del vecchio percorso.

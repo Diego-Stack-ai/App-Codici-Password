@@ -4,7 +4,7 @@
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.52';
+import { auth, db } from '../../firebase-config.js?v=1.2.52';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -14,8 +14,7 @@ import {getCompany} from '../data/vault-repository.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
-import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
+import { renderCompanyEmbeddedAttachments } from './dati-azienda-attachments.js';
 
 // --- STATE ---
 let currentAziendaId = null;
@@ -195,7 +194,7 @@ async function loadData(uid) {
 
             populateFields(currentAziendaData);
             handleLogoAndQR(currentAziendaData);
-            renderAllegati(currentAziendaData.allegati);
+            renderCompanyEmbeddedAttachments(currentAziendaData.allegati);
         } else {
             showToast(t('error_not_found'), "error");
         }
@@ -579,40 +578,5 @@ function openQRZoom() {
 function closeQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');
     if (modal) modal.classList.remove('active');
-}
-
-function renderAllegati(allegati) {
-    const container = document.getElementById('allegati-list');
-    if (!container || !allegati || allegati.length === 0) return;
-
-    const items = allegati.map(a => createElement('button', {
-        type: 'button',
-        onclick: () => openCompanyAttachment(a),
-        className: 'attachment-item group'
-    }, [
-        createElement('div', { className: 'attachment-info' }, [
-            createElement('span', { className: 'material-symbols-outlined icon-accent-blue', textContent: 'description' }),
-            createElement('span', { className: 'attachment-name', textContent: a.name || a.nome })
-        ]),
-        createElement('span', { className: 'material-symbols-outlined attachment-icon-open', textContent: 'open_in_new' })
-    ]));
-
-    setChildren(container, items);
-}
-
-async function openCompanyAttachment(attachment) {
-    try {
-        if (!attachment.encryption) {
-            if (!openExternalUrl(attachment.url)) throw new Error('URL allegato non valido.');
-            return;
-        }
-        const vaultKey = await ensureVaultKeyMaterial();
-        const bytes = await getBytes(ref(storage, attachment.storagePath), 25 * 1024 * 1024 + 1024);
-        const clear = await decryptAttachmentBytes(bytes, attachment.encryption, vaultKey);
-        openDecryptedAttachment(clear, attachment);
-    } catch (error) {
-        logError('OpenCompanyAttachment', error);
-        showToast('Impossibile aprire l’allegato cifrato.', 'error');
-    }
 }
 

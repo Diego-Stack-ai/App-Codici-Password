@@ -69,6 +69,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/auth/registrati.js",
   "assets/js/modules/auth/reset_password.js",
   "assets/js/modules/azienda/account_azienda.js",
+  "assets/js/modules/azienda/dati-azienda-attachments.js",
   "assets/js/modules/azienda/dati_azienda.js",
   "assets/js/modules/azienda/dettaglio-azienda-attachments.js",
   "assets/js/modules/azienda/dettaglio-azienda-sharing.js",
