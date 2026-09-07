@@ -23,6 +23,28 @@
     <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.58">
 
     <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.58">
+
+    <!-- Fix locale: la pagina registrazione non usa .base-main, quindi su mobile
+         deve gestire direttamente lo scroll del contenitore auth. -->
+    <style>
+        @media (max-width: 600px) {
+            .base-container {
+                height: 100dvh;
+                min-height: 100dvh;
+                overflow-x: hidden;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+                padding-top: max(0.75rem, env(safe-area-inset-top));
+                padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            }
+
+            .vault {
+                margin: 0 auto;
+                flex: 0 0 auto;
+            }
+        }
+    </style>
 </head>
 
 <body class="base-bg">
