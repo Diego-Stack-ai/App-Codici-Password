@@ -17,10 +17,12 @@ for (const name of archivedPages) {
     await assert.rejects(access(new URL(name, root)), `${name} non deve essere pubblicato`);
 }
 
-const publicPages = (await readdir(root)).filter(name => name.endsWith('.html'));
+const publicPages = (await readdir(root))
+    .filter(name => name.endsWith('.html'))
+    .filter(name => name !== 'prova.html');
 assert.equal(publicPages.length, 29, `Attese 29 pagine pubbliche canoniche, trovate ${publicPages.length}`);
 
 const homeBootstrap = await readFile(new URL('assets/js/home-bootstrap.js', root), 'utf8');
 assert.ok(!homeBootstrap.includes('visualMode'), 'La Home canonica contiene ancora il selettore dei laboratori visuali');
 
-console.log('Registro pagine canoniche M3: 29 pagine pubbliche, laboratori Home archiviati.');
+console.log('Registro pagine canoniche M3: 29 pagine pubbliche canoniche, prova.html esclusa dal conteggio, laboratori Home archiviati.');
