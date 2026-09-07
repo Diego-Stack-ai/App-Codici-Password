@@ -1,0 +1,18 @@
+/* Registrazione: scroll mobile locale alla sola pagina registrati.html */
+@media (max-width: 600px) {
+    .base-container {
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        padding-top: max(0.75rem, env(safe-area-inset-top));
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+
+    .vault {
+        margin: 0 auto;
+        flex: 0 0 auto;
+    }
+}
