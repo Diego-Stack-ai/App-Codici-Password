@@ -15,36 +15,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-
-
     <!-- Design System Master (PROTOCOLLO V5.0) -->
     <link rel="stylesheet" href="assets/css/core.css?v=1.2.58">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.58">
-
     <link rel="stylesheet" href="assets/css/accesso.css?v=1.2.58">
-
-    <!-- Fix locale: la pagina registrazione non usa .base-main, quindi su mobile
-         deve gestire direttamente lo scroll del contenitore auth. -->
-    <style>
-        @media (max-width: 600px) {
-            .base-container {
-                height: 100dvh;
-                min-height: 100dvh;
-                overflow-x: hidden;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                justify-content: flex-start;
-                padding-top: max(0.75rem, env(safe-area-inset-top));
-                padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-            }
-
-            .vault {
-                margin: 0 auto;
-                flex: 0 0 auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/registrati.css?v=1.2.58">
 </head>
 
 <body class="base-bg">
@@ -140,13 +116,11 @@
                             data-t-placeholder="password_placeholder_reg" placeholder="********">
                     </div>
 
-
                     <!-- Submit Button -->
                     <button type="submit" id="register-submit-btn" class="btn-primary" data-t="create_account_btn">
                         <span class="material-symbols-outlined">person_add_alt</span>
                         Nuova registrazione
                     </button>
-
                 </form>
 
                 <!-- Login Link -->
@@ -168,8 +142,6 @@
 
     <!-- Scripts -->
     <script type="module" src="assets/js/main-v129.js"></script>
-
-
 </body>
 
 </html>
