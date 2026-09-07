@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import {readFile, readdir} from 'node:fs/promises';
 
 const publicRoot = new URL('../Frontend/public/', import.meta.url);
+const testPages = new Set([
+  'prova.html'
+]);
 const accessPages = new Set([
   'index.html',
   'login-v115.html',
@@ -36,7 +39,9 @@ const internalPages = new Set([
   'termini.html'
 ]);
 
-const publicPages = (await readdir(publicRoot)).filter(name => name.endsWith('.html')).sort();
+const publicPages = (await readdir(publicRoot))
+  .filter(name => name.endsWith('.html') && !testPages.has(name))
+  .sort();
 const contractedPages = [...accessPages, ...internalPages].sort();
 assert.deepEqual(publicPages, contractedPages, 'Le pagine pubbliche non coincidono con le 29 pagine contrattualizzate');
 
@@ -86,4 +91,4 @@ assert.match(bars, /\.pb-footer-extra\s*\{[\s\S]*?safe-area-inset-bottom/, 'core
 assert.match(bars, /\.pt-header-extra\s*\{[\s\S]*?safe-area-inset-top/, 'core_fascie.css: spazio superiore sicuro mancante');
 assert.match(access, /\.base-container\s*\{\s*justify-content:\s*center/, 'accesso.css: centratura famiglia accesso mancante');
 
-console.log('Contratto shell: 5 pagine accesso e 24 pagine interne conformi.');
+console.log('Contratto shell: 5 pagine accesso e 24 pagine interne conformi; prova.html esclusa dal contratto.');
