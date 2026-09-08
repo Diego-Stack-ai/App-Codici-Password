@@ -1,6 +1,6 @@
 # Collaudo visivo M4 — header, footer e overscroll
 
-Questo gate completa M4 soltanto dopo una prova sulla versione pubblicata. I test automatici verificano struttura e regressioni CSS, ma non possono certificare la composizione grafica del browser fisico.
+Questo documento conserva il collaudo che ha completato M4 sulla versione pubblicata. I test automatici verificano struttura e regressioni CSS, mentre la composizione grafica è stata confermata sui dispositivi usati durante il lavoro.
 
 Il contratto delle due famiglie e del viewport è definito in `PAGE_SHELL_CONTRACT.md`; il relativo gate statico è `npm run test:page-shells`.
 
@@ -72,4 +72,10 @@ La successiva verifica iPhone della Home ha confermato la continuità anche in t
 
 ### Verifica Windows preliminare — 8 settembre 2026
 
-La pagina Area privata della release pubblicata `v1.2.62`, aperta in Chrome con finestra desktop massimizzata, presenta fondale continuo, fasce allineate al contenitore e nessun salto della barra di scorrimento. Il contenuto visibile non era sufficientemente lungo per esercitare lo scroll e questa prova non copre la finestra ridotta a circa `390px`. La verifica Windows completa resta quindi aperta. I quattro watermark aggiunti alle altre pagine lista richiedono inoltre la pubblicazione dei commit locali prima del collaudo visivo.
+La pagina Area privata della release pubblicata `v1.2.62`, aperta in Chrome con finestra desktop massimizzata, presenta fondale continuo, fasce allineate al contenitore e nessun salto della barra di scorrimento. Il contenuto visibile non era sufficientemente lungo per esercitare lo scroll e questa prova non copre la finestra ridotta a circa `390px`.
+
+## Chiusura del gate — 8 settembre 2026
+
+La release `v1.2.63` conserva la nebbia V2 approvata, il colore terminale coerente nei temi chiaro e scuro e il contratto comune del viewport. La suite completa è risultata verde e la pubblicazione ha confermato la presenza dei 13 watermark canonici; l'utente ne ha verificato e approvato visivamente presenza, dimensione e colore, inclusi l'ingranaggio di Impostazioni e la chiave di Account privati.
+
+M4 è quindi chiusa per accettazione del product owner. La matrice estesa — Windows a larghezza ridotta, ulteriori browser, tastiera e combinazioni di modali — resta un collaudo di regressione obbligatorio in M10 e non modifica la soluzione grafica approvata.

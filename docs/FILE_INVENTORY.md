@@ -2,7 +2,26 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **294**. Duplicati byte-per-byte: **1 gruppi**.
+
+## docs
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 6431 | 89 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7922 | 116 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2396 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8697 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17521 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
 
 ## .firebaserc
 
@@ -36,42 +55,44 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `Frontend/GUIDA.md` | MD | 60951 | 979 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 40518 | 477 | Documentazione: GUIDA AGGIORNAMENTI. |
-| `Frontend/public/account_azienda.html` | HTML | 3618 | 78 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
-| `Frontend/public/account_privati.html` | HTML | 3580 | 78 | Struttura della pagina account privati; comportamento demandato ai moduli. |
-| `Frontend/public/aggiungi_scadenza.html` | HTML | 19768 | 344 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
-| `Frontend/public/archivio_account.html` | HTML | 5725 | 118 | Struttura della pagina archivio account; comportamento demandato ai moduli. |
-| `Frontend/public/area_privata.html` | HTML | 6282 | 134 | Struttura della pagina area privata; comportamento demandato ai moduli. |
+| `Frontend/public/account_azienda.html` | HTML | 3784 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
+| `Frontend/public/account_privati.html` | HTML | 3734 | 82 | Struttura della pagina account privati; comportamento demandato ai moduli. |
+| `Frontend/public/aggiungi_scadenza.html` | HTML | 19788 | 344 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
+| `Frontend/public/archivio_account.html` | HTML | 5745 | 118 | Struttura della pagina archivio account; comportamento demandato ai moduli. |
+| `Frontend/public/area_privata.html` | HTML | 6302 | 134 | Struttura della pagina area privata; comportamento demandato ai moduli. |
 | `Frontend/public/assets/css/accesso.css` | CSS | 11889 | 526 | Stili della sezione accesso. |
 | `Frontend/public/assets/css/account_azienda.css` | CSS | 10090 | 464 | Stili della sezione account azienda. |
-| `Frontend/public/assets/css/account_form.css` | CSS | 19442 | 921 | Stili della sezione account form. |
+| `Frontend/public/assets/css/account_detail.css` | CSS | 9644 | 474 | Stili della sezione account detail. |
+| `Frontend/public/assets/css/account_form.css` | CSS | 19311 | 913 | Stili della sezione account form. |
 | `Frontend/public/assets/css/account_privati.css` | CSS | 9392 | 431 | Stili della sezione account privati. |
 | `Frontend/public/assets/css/aggiungi_scadenza.css` | CSS | 18862 | 801 | Stili della sezione aggiungi scadenza. |
-| `Frontend/public/assets/css/archivio_account.css` | CSS | 6464 | 279 | Stili della sezione archivio account. |
+| `Frontend/public/assets/css/archivio_account.css` | CSS | 6232 | 270 | Stili della sezione archivio account. |
 | `Frontend/public/assets/css/area_privata.css` | CSS | 12830 | 559 | Stili della sezione area privata. |
-| `Frontend/public/assets/css/configurazione_automezzi.css` | CSS | 8027 | 371 | Stili della sezione configurazione automezzi. |
-| `Frontend/public/assets/css/configurazione_documenti.css` | CSS | 8142 | 376 | Stili della sezione configurazione documenti. |
-| `Frontend/public/assets/css/configurazione_generali.css` | CSS | 7788 | 360 | Stili della sezione configurazione generali. |
-| `Frontend/public/assets/css/core.css` | CSS | 9986 | 409 | Stili della base e dei token globali. |
-| `Frontend/public/assets/css/core_fascie.css` | CSS | 8919 | 346 | Stili della sezione core fascie. |
+| `Frontend/public/assets/css/azienda_shared.css` | CSS | 358 | 21 | Stili della sezione azienda shared. |
+| `Frontend/public/assets/css/configurazione_automezzi.css` | CSS | 7815 | 363 | Stili della sezione configurazione automezzi. |
+| `Frontend/public/assets/css/configurazione_documenti.css` | CSS | 7930 | 368 | Stili della sezione configurazione documenti. |
+| `Frontend/public/assets/css/configurazione_generali.css` | CSS | 7576 | 352 | Stili della sezione configurazione generali. |
+| `Frontend/public/assets/css/core.css` | CSS | 10588 | 433 | Stili della base e dei token globali. |
+| `Frontend/public/assets/css/core_fascie.css` | CSS | 8962 | 346 | Stili della sezione core fascie. |
 | `Frontend/public/assets/css/core_fonts.css` | CSS | 4599 | 136 | Stili della sezione core fonts. |
 | `Frontend/public/assets/css/core_pagine.css` | CSS | 5538 | 242 | Stili della sezione core pagine. |
-| `Frontend/public/assets/css/core_ui.css` | CSS | 19035 | 786 | Stili della sezione core ui. |
-| `Frontend/public/assets/css/datepicker_v5.css` | CSS | 4806 | 218 | Stili della sezione datepicker v5. |
-| `Frontend/public/assets/css/dati_azienda.css` | CSS | 14998 | 718 | Stili della sezione dati azienda. |
-| `Frontend/public/assets/css/dettaglio_account_azienda.css` | CSS | 15878 | 731 | Stili della sezione dettaglio account azienda. |
-| `Frontend/public/assets/css/dettaglio_account_privato.css` | CSS | 23017 | 1054 | Stili della sezione dettaglio account privato. |
+| `Frontend/public/assets/css/core_ui.css` | CSS | 19225 | 794 | Stili della sezione core ui. |
+| `Frontend/public/assets/css/datepicker_v5.css` | CSS | 4820 | 218 | Stili della sezione datepicker v5. |
+| `Frontend/public/assets/css/dati_azienda.css` | CSS | 14446 | 682 | Stili della sezione dati azienda. |
+| `Frontend/public/assets/css/dettaglio_account_azienda.css` | CSS | 5897 | 257 | Stili della sezione dettaglio account azienda. |
+| `Frontend/public/assets/css/dettaglio_account_privato.css` | CSS | 12593 | 568 | Stili della sezione dettaglio account privato. |
 | `Frontend/public/assets/css/dettaglio_scadenza.css` | CSS | 7398 | 349 | Stili della sezione dettaglio scadenza. |
-| `Frontend/public/assets/css/form_azienda.css` | CSS | 18453 | 948 | Stili della sezione form azienda. |
+| `Frontend/public/assets/css/form_azienda.css` | CSS | 17901 | 912 | Stili della sezione form azienda. |
 | `Frontend/public/assets/css/gestione_destinatari.css` | CSS | 3029 | 155 | Stili della sezione gestione destinatari. |
 | `Frontend/public/assets/css/home_page.css` | CSS | 10102 | 422 | Stili della sezione home page. |
-| `Frontend/public/assets/css/impostazioni.css` | CSS | 17518 | 794 | Stili della sezione impostazioni. |
+| `Frontend/public/assets/css/impostazioni.css` | CSS | 17231 | 779 | Stili della sezione impostazioni. |
 | `Frontend/public/assets/css/lista_aziende.css` | CSS | 5551 | 260 | Stili della sezione lista aziende. |
-| `Frontend/public/assets/css/moduli.css` | CSS | 12660 | 481 | Stili della sezione moduli. |
-| `Frontend/public/assets/css/privacy.css` | CSS | 5464 | 257 | Stili della sezione privacy. |
+| `Frontend/public/assets/css/moduli.css` | CSS | 12699 | 481 | Stili della sezione moduli. |
+| `Frontend/public/assets/css/privacy.css` | CSS | 5177 | 242 | Stili della sezione privacy. |
 | `Frontend/public/assets/css/profilo_privato.css` | CSS | 29507 | 1226 | Stili della sezione profilo privato. |
 | `Frontend/public/assets/css/prova.css` | CSS | 1989 | 112 | Stili della sezione prova. |
 | `Frontend/public/assets/css/registrati.css` | CSS | 533 | 19 | Stili della sezione registrati. |
-| `Frontend/public/assets/css/regole_scadenze.css` | CSS | 3480 | 159 | Stili della sezione regole scadenze. |
+| `Frontend/public/assets/css/regole_scadenze.css` | CSS | 3246 | 148 | Stili della sezione regole scadenze. |
 | `Frontend/public/assets/css/scadenze.css` | CSS | 9473 | 386 | Stili della sezione scadenze. |
 | `Frontend/public/assets/css/vault-assistant.css` | CSS | 8522 | 110 | Stili della sezione vault-assistant. |
 | `Frontend/public/assets/fonts/manrope/manrope-11.woff2` | FONT | 24836 | — | Font locale manrope-11.woff2. |
@@ -207,35 +228,35 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 724725 | 70 | Supporto frontend: firebase-runtime. |
 | `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80549 | 8 | Supporto frontend: firebase-sw-runtime. |
 | `Frontend/public/assets/js/vendor/qrcode.min.js` | JS | 19927 | 1 | Supporto frontend: qrcode.min. |
-| `Frontend/public/configurazione_automezzi.html` | HTML | 8252 | 159 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
-| `Frontend/public/configurazione_documenti.html` | HTML | 8263 | 159 | Struttura della pagina configurazione documenti; comportamento demandato ai moduli. |
-| `Frontend/public/configurazione_generali.html` | HTML | 6629 | 133 | Struttura della pagina configurazione generali; comportamento demandato ai moduli. |
-| `Frontend/public/dati_azienda.html` | HTML | 21179 | 354 | Struttura della pagina dati azienda; comportamento demandato ai moduli. |
-| `Frontend/public/dettaglio_account_azienda.html` | HTML | 24935 | 390 | Struttura della pagina dettaglio account azienda; comportamento demandato ai moduli. |
-| `Frontend/public/dettaglio_account_privato.html` | HTML | 22056 | 356 | Struttura della pagina dettaglio account privato; comportamento demandato ai moduli. |
-| `Frontend/public/dettaglio_scadenza.html` | HTML | 8860 | 176 | Struttura della pagina dettaglio scadenza; comportamento demandato ai moduli. |
+| `Frontend/public/configurazione_automezzi.html` | HTML | 8281 | 159 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
+| `Frontend/public/configurazione_documenti.html` | HTML | 8292 | 159 | Struttura della pagina configurazione documenti; comportamento demandato ai moduli. |
+| `Frontend/public/configurazione_generali.html` | HTML | 6658 | 133 | Struttura della pagina configurazione generali; comportamento demandato ai moduli. |
+| `Frontend/public/dati_azienda.html` | HTML | 21272 | 355 | Struttura della pagina dati azienda; comportamento demandato ai moduli. |
+| `Frontend/public/dettaglio_account_azienda.html` | HTML | 25029 | 391 | Struttura della pagina dettaglio account azienda; comportamento demandato ai moduli. |
+| `Frontend/public/dettaglio_account_privato.html` | HTML | 22150 | 357 | Struttura della pagina dettaglio account privato; comportamento demandato ai moduli. |
+| `Frontend/public/dettaglio_scadenza.html` | HTML | 8882 | 176 | Struttura della pagina dettaglio scadenza; comportamento demandato ai moduli. |
 | `Frontend/public/firebase-messaging-sw.js` | JS | 2874 | 60 | File di progetto: firebase-messaging-sw. |
-| `Frontend/public/form_account_azienda.html` | HTML | 18721 | 304 | Struttura della pagina form account azienda; comportamento demandato ai moduli. |
-| `Frontend/public/form_account_privato.html` | HTML | 17220 | 284 | Struttura della pagina form account privato; comportamento demandato ai moduli. |
-| `Frontend/public/gestione_destinatari.html` | HTML | 4274 | 73 | Struttura della pagina gestione destinatari; comportamento demandato ai moduli. |
-| `Frontend/public/home_page.html` | HTML | 6194 | 141 | Struttura della pagina home page; comportamento demandato ai moduli. |
+| `Frontend/public/form_account_azienda.html` | HTML | 18741 | 304 | Struttura della pagina form account azienda; comportamento demandato ai moduli. |
+| `Frontend/public/form_account_privato.html` | HTML | 17240 | 284 | Struttura della pagina form account privato; comportamento demandato ai moduli. |
+| `Frontend/public/gestione_destinatari.html` | HTML | 4304 | 73 | Struttura della pagina gestione destinatari; comportamento demandato ai moduli. |
+| `Frontend/public/home_page.html` | HTML | 6213 | 141 | Struttura della pagina home page; comportamento demandato ai moduli. |
 | `Frontend/public/imposta_nuova_password.html` | HTML | 6124 | 132 | Struttura della pagina imposta nuova password; comportamento demandato ai moduli. |
-| `Frontend/public/impostazioni.html` | HTML | 26856 | 457 | Struttura della pagina impostazioni; comportamento demandato ai moduli. |
+| `Frontend/public/impostazioni.html` | HTML | 26885 | 457 | Struttura della pagina impostazioni; comportamento demandato ai moduli. |
 | `Frontend/public/index.html` | HTML | 800 | 19 | Struttura della pagina index; comportamento demandato ai moduli. |
-| `Frontend/public/lista_aziende.html` | HTML | 2718 | 61 | Struttura della pagina lista aziende; comportamento demandato ai moduli. |
+| `Frontend/public/lista_aziende.html` | HTML | 2878 | 65 | Struttura della pagina lista aziende; comportamento demandato ai moduli. |
 | `Frontend/public/login-v115.html` | HTML | 6892 | 148 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 886 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
-| `Frontend/public/modifica_azienda.html` | HTML | 64542 | 825 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 8020 | 199 | File di progetto: offline-assets. |
-| `Frontend/public/privacy.html` | HTML | 13777 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
-| `Frontend/public/profilo_privato.html` | HTML | 15328 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
+| `Frontend/public/modifica_azienda.html` | HTML | 64633 | 826 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
+| `Frontend/public/offline-assets.js` | JS | 8090 | 201 | File di progetto: offline-assets. |
+| `Frontend/public/privacy.html` | HTML | 13804 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
+| `Frontend/public/profilo_privato.html` | HTML | 15350 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1375 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
 | `Frontend/public/registrati.html` | HTML | 7415 | 148 | Struttura della pagina registrati; comportamento demandato ai moduli. |
-| `Frontend/public/regole_scadenze.html` | HTML | 6875 | 133 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
+| `Frontend/public/regole_scadenze.html` | HTML | 6904 | 133 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
 | `Frontend/public/reset_password.html` | HTML | 4137 | 107 | Struttura della pagina reset password; comportamento demandato ai moduli. |
-| `Frontend/public/scadenze.html` | HTML | 5205 | 104 | Struttura della pagina scadenze; comportamento demandato ai moduli. |
+| `Frontend/public/scadenze.html` | HTML | 5361 | 108 | Struttura della pagina scadenze; comportamento demandato ai moduli. |
 | `Frontend/public/sw.js` | JS | 3930 | 95 | Service worker: shell offline, cache runtime, push in background e deep link. |
-| `Frontend/public/termini.html` | HTML | 11522 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
+| `Frontend/public/termini.html` | HTML | 11549 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
 
 ## archive
 
@@ -250,24 +271,6 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `archive/home-experiments/home_confronto.html` | HTML | 573 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_confronto_legacy.css` | CSS | 2631 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_nebbia.html` | HTML | 586 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
-
-## docs
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7922 | 116 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2396 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 7145 | 70 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17525 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 2759 | 49 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
 
 ## experiments
 
@@ -335,7 +338,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-navigation-flows.mjs` | MJS | 10030 | 130 | Strumento manutenzione/test: audit-navigation-flows. |
 | `scripts/audit-offline-shell.mjs` | MJS | 3607 | 70 | Strumento manutenzione/test: audit-offline-shell. |
 | `scripts/audit-page-performance.mjs` | MJS | 7910 | 145 | Strumento manutenzione/test: audit-page-performance. |
-| `scripts/audit-page-shells.mjs` | MJS | 5412 | 99 | Strumento manutenzione/test: audit-page-shells. |
+| `scripts/audit-page-shells.mjs` | MJS | 7907 | 169 | Strumento manutenzione/test: audit-page-shells. |
 | `scripts/audit-project-inventory.mjs` | MJS | 8428 | 127 | Strumento manutenzione/test: audit-project-inventory. |
 | `scripts/audit-security-flows.mjs` | MJS | 31800 | 273 | Strumento manutenzione/test: audit-security-flows. |
 | `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |

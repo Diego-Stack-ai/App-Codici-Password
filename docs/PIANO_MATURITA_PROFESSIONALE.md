@@ -190,7 +190,7 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 - [x] estrarre componenti soltanto dopo almeno due utilizzi reali, secondo `UI_DESIGN_SYSTEM_CONTRACT.md`;
 - [x] unificare card Account, righe sensibili, form field e stati di caricamento: viste Account e dati bancari condivise, campi base in `moduli.css`, stati di pagina accessibili in `ui-state-view.js`;
-- [~] eliminare definitivamente flash e discontinuità di header/footer durante scroll e overscroll: ricomposizione mobile rimossa e fallback opaco implementato; resta il collaudo fisico su iPhone/Windows;
+- [x] eliminare flash e discontinuità di header/footer durante scroll e overscroll: nebbia V2 e colore del canvas esterno approvati su iPhone, contratto strutturale verificato su Windows; la matrice estesa resta nel collaudo finale M10;
 - [x] ridurre CSS duplicato senza aumentare il cascade globale: i due form Account usano un solo foglio canonico e gli stati pagina sono nel core condiviso;
 - [x] completare l’infrastruttura i18n e l’accessibilità tecnica: stati asincroni, focus, target tattili, movimento ridotto e dialoghi sono coperti; revisione editoriale di tutte le lingue resta vincolata al post-M10;
 - [x] applicare budget per font e icone: Manrope e Material Symbols restano locali, non bloccanti e protetti dal gate M4.
@@ -289,8 +289,8 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M1 | completata il 06/09/2026 |
 | M2 | completata il 06/09/2026 |
 | M3 | completata il 06/09/2026 |
-| M4 | implementazione automatizzabile completata; gate fisico iPhone/Windows in `M4_VISUAL_ACCEPTANCE.md` ancora da eseguire |
-| M5 | da progettare prima di modificare le condivisioni |
+| M4 | completata l'08/09/2026; matrice estesa di regressione trasferita a M10 |
+| M5 | attiva: threat model e verifica del materiale di decifratura |
 | M6 | sola consultazione offline parzialmente operativa |
 | M7 | da avviare |
 | M8 | da avviare |
