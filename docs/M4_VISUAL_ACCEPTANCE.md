@@ -48,4 +48,6 @@ Fallback preservato fuori dal runtime: la variante storica del commit `ab532e2`,
 
 `prova.html` è stato pubblicato temporaneamente per riprodurre su iPhone la sola estensione del fondale con `100vh`/`100dvh` e `viewport-fit=cover`, senza cambiare nebbia, livelli, safe area o componenti dell'app. Serve a stabilire se la fascia inferiore nasce dalla superficie radice oppure dalla shell interna.
 
+Il laboratorio mostra separatamente il perimetro di `100dvh`, quello di `100lvh`, le misure di `innerHeight`, `visualViewport`, schermo e documento, oltre a un marcatore fissato al bordo inferiore. Se il marcatore tocca il bordo fisico e il gradiente continua sotto di esso, la superficie radice copre correttamente il viewport e la fascia dell'app nasce dalla shell interna. Se sotto il marcatore compare ancora un'area estranea, il difetto appartiene invece al canvas o alla viewport esposta dal browser. Le misure sono soltanto diagnostiche: non pilotano il layout e non introducono un ridimensionamento JavaScript.
+
 Il laboratorio non certifica da solo la correzione. Dopo la prova fisica, la candidata va applicata al CSS comune e ricollaudata almeno su Home, Registrazione e una pagina interna lunga; nebbia V2, ombre, pulsanti e ordine dei livelli devono restare invariati.

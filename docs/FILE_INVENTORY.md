@@ -2,40 +2,15 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
-
-## .firebaserc
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.firebaserc` | CONFIG | 60 | 6 | Associa Firebase CLI al progetto appcodici-password. |
-
-## .github
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.github/copilot-instructions.md` | MD | 1318 | 24 | Documentazione: copilot-instructions. |
-| `.github/workflows/firebase-deploy.yml` | YML | 1102 | 41 | File di progetto: firebase-deploy. |
-
-## .gitignore
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.gitignore` | CONFIG | 1564 | 84 | Esclusioni Git per file generati o locali. |
-
-## .vscode
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
-| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
+File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
+| `Frontend/public/assets/js/prova.js` | JS | 936 | 23 | Supporto frontend: prova. |
 | `Frontend/GUIDA.md` | MD | 60951 | 979 | Documentazione: GUIDA. |
-| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 40008 | 475 | Documentazione: GUIDA AGGIORNAMENTI. |
+| `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 40518 | 477 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3618 | 78 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/account_privati.html` | HTML | 3580 | 78 | Struttura della pagina account privati; comportamento demandato ai moduli. |
 | `Frontend/public/aggiungi_scadenza.html` | HTML | 19768 | 344 | Struttura della pagina aggiungi scadenza; comportamento demandato ai moduli. |
@@ -69,7 +44,7 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/css/moduli.css` | CSS | 12660 | 481 | Stili della sezione moduli. |
 | `Frontend/public/assets/css/privacy.css` | CSS | 5464 | 257 | Stili della sezione privacy. |
 | `Frontend/public/assets/css/profilo_privato.css` | CSS | 29507 | 1226 | Stili della sezione profilo privato. |
-| `Frontend/public/assets/css/prova.css` | CSS | 799 | 39 | Stili della sezione prova. |
+| `Frontend/public/assets/css/prova.css` | CSS | 1888 | 105 | Stili della sezione prova. |
 | `Frontend/public/assets/css/registrati.css` | CSS | 533 | 19 | Stili della sezione registrati. |
 | `Frontend/public/assets/css/regole_scadenze.css` | CSS | 3480 | 159 | Stili della sezione regole scadenze. |
 | `Frontend/public/assets/css/scadenze.css` | CSS | 9473 | 386 | Stili della sezione scadenze. |
@@ -95,7 +70,7 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/inactivity-timer.js` | JS | 4628 | 140 | Blocco Vault dopo inattività secondo la preferenza utente. |
 | `Frontend/public/assets/js/logger.js` | JS | 663 | 18 | Supporto frontend: logger. |
 | `Frontend/public/assets/js/login-entry.js` | JS | 949 | 24 | Bootstrap minimo della pagina di accesso. |
-| `Frontend/public/assets/js/main-v129.js` | JS | 30041 | 557 | Bootstrap autenticato globale, router, inviti e notifiche. |
+| `Frontend/public/assets/js/main-v129.js` | JS | 30745 | 568 | Bootstrap autenticato globale, router, inviti e notifiche. |
 | `Frontend/public/assets/js/modules/assistant/assistant-controller.js` | JS | 3167 | 73 | Modulo dell’assistente Vault: assistant-controller. |
 | `Frontend/public/assets/js/modules/assistant/assistant-ui.js` | JS | 12119 | 179 | Modulo dell’assistente Vault: assistant-ui. |
 | `Frontend/public/assets/js/modules/assistant/conversation-engine.js` | JS | 5615 | 120 | Modulo dell’assistente Vault: conversation-engine. |
@@ -180,7 +155,7 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/shared/company-area-preference.js` | JS | 817 | 24 | Supporto frontend: company-area-preference. |
 | `Frontend/public/assets/js/modules/shared/detail-account-mode.js` | JS | 10264 | 184 | Supporto frontend: detail-account-mode. |
 | `Frontend/public/assets/js/modules/shared/gestione-destinatari.js` | JS | 7345 | 138 | Supporto frontend: gestione-destinatari. |
-| `Frontend/public/assets/js/modules/shared/push-manager.js` | JS | 12404 | 255 | Registrazione dispositivo FCM e preferenze push per ambito. |
+| `Frontend/public/assets/js/modules/shared/push-manager.js` | JS | 12157 | 255 | Registrazione dispositivo FCM e preferenze push per ambito. |
 | `Frontend/public/assets/js/modules/shared/qr_code_utils-v2.js` | JS | 6504 | 139 | Supporto frontend: qr code utils-v2. |
 | `Frontend/public/assets/js/modules/shared/qr_code_utils.js` | JS | 5573 | 124 | Caricamento QR e generazione vCard. |
 | `Frontend/public/assets/js/modules/shared/ui-state-view.js` | JS | 1290 | 45 | Supporto frontend: ui-state-view. |
@@ -203,7 +178,7 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/ui-components.js` | JS | 3887 | 98 | Supporto frontend: ui-components. |
 | `Frontend/public/assets/js/ui-core-v129.js` | JS | 18019 | 415 | Toast, modali, input protetti e componenti UI globali. |
 | `Frontend/public/assets/js/utils.js` | JS | 1481 | 48 | Supporto frontend: utils. |
-| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 726465 | 70 | Supporto frontend: firebase-runtime. |
+| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 726534 | 70 | Supporto frontend: firebase-runtime. |
 | `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80549 | 8 | Supporto frontend: firebase-sw-runtime. |
 | `Frontend/public/assets/js/vendor/qrcode.min.js` | JS | 19927 | 1 | Supporto frontend: qrcode.min. |
 | `Frontend/public/configurazione_automezzi.html` | HTML | 8252 | 159 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
@@ -228,13 +203,39 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/offline-assets.js` | JS | 8262 | 201 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13777 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15328 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
-| `Frontend/public/prova.html` | HTML | 649 | 18 | Struttura della pagina prova; comportamento demandato ai moduli. |
+| `Frontend/public/prova.html` | HTML | 1375 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
 | `Frontend/public/registrati.html` | HTML | 7415 | 148 | Struttura della pagina registrati; comportamento demandato ai moduli. |
 | `Frontend/public/regole_scadenze.html` | HTML | 6875 | 133 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
 | `Frontend/public/reset_password.html` | HTML | 4137 | 107 | Struttura della pagina reset password; comportamento demandato ai moduli. |
 | `Frontend/public/scadenze.html` | HTML | 5205 | 104 | Struttura della pagina scadenze; comportamento demandato ai moduli. |
-| `Frontend/public/sw.js` | JS | 7494 | 162 | Service worker: shell offline, cache runtime, push in background e deep link. |
+| `Frontend/public/sw.js` | JS | 3930 | 95 | Service worker: shell offline, cache runtime, push in background e deep link. |
 | `Frontend/public/termini.html` | HTML | 11522 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
+
+## .firebaserc
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.firebaserc` | CONFIG | 60 | 6 | Associa Firebase CLI al progetto appcodici-password. |
+
+## .github
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.github/copilot-instructions.md` | MD | 1318 | 24 | Documentazione: copilot-instructions. |
+| `.github/workflows/firebase-deploy.yml` | YML | 1102 | 41 | File di progetto: firebase-deploy. |
+
+## .gitignore
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.gitignore` | CONFIG | 1564 | 84 | Esclusioni Git per file generati o locali. |
+
+## .vscode
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
+| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
 
 ## archive
 
@@ -254,12 +255,12 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7597 | 111 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7922 | 116 | Documentazione: APP ARCHITECTURE AUDIT. |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2396 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8538 | 80 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 3729 | 52 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 4349 | 54 | Documentazione: M4 VISUAL ACCEPTANCE. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
@@ -296,7 +297,7 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `firestore.rules` | RULES | 7176 | 164 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
+| `firestore.rules` | RULES | 7337 | 169 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
 
 ## functions
 
@@ -304,7 +305,7 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `functions/.gitignore` | CONFIG | 21 | 2 | Esclusioni Git per file generati o locali. |
 | `functions/eslint.config.js` | JS | 544 | 25 | File di progetto: eslint.config. |
-| `functions/index.js` | JS | 54918 | 1107 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
+| `functions/index.js` | JS | 56070 | 1130 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
 | `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
 | `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
 | `functions/recovery-security.js` | JS | 1887 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
@@ -332,11 +333,11 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-js-syntax.mjs` | MJS | 1237 | 38 | Strumento manutenzione/test: audit-js-syntax. |
 | `scripts/audit-lightweight-features.mjs` | MJS | 2648 | 51 | Strumento manutenzione/test: audit-lightweight-features. |
 | `scripts/audit-navigation-flows.mjs` | MJS | 10030 | 130 | Strumento manutenzione/test: audit-navigation-flows. |
-| `scripts/audit-offline-shell.mjs` | MJS | 3117 | 57 | Strumento manutenzione/test: audit-offline-shell. |
+| `scripts/audit-offline-shell.mjs` | MJS | 3288 | 59 | Strumento manutenzione/test: audit-offline-shell. |
 | `scripts/audit-page-performance.mjs` | MJS | 7910 | 145 | Strumento manutenzione/test: audit-page-performance. |
 | `scripts/audit-page-shells.mjs` | MJS | 5047 | 95 | Strumento manutenzione/test: audit-page-shells. |
 | `scripts/audit-project-inventory.mjs` | MJS | 8428 | 127 | Strumento manutenzione/test: audit-project-inventory. |
-| `scripts/audit-security-flows.mjs` | MJS | 31255 | 269 | Strumento manutenzione/test: audit-security-flows. |
+| `scripts/audit-security-flows.mjs` | MJS | 31800 | 273 | Strumento manutenzione/test: audit-security-flows. |
 | `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |
 | `scripts/audit-ui-foundations.mjs` | MJS | 10138 | 138 | Strumento manutenzione/test: audit-ui-foundations. |
 | `scripts/audit-vault-key-terminology.mjs` | MJS | 1984 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
@@ -376,7 +377,7 @@ File censiti: **290**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
 | `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
 | `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
-| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3430 | 77 | Test automatico: firestore.profile-widgets.rules.test. |
+| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3789 | 84 | Test automatico: firestore.profile-widgets.rules.test. |
 | `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
 | `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
 | `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |

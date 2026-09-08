@@ -12,6 +12,19 @@
     <link rel="stylesheet" href="assets/css/prova.css?v=1.2.59">
 </head>
 <body>
-    <main class="proof">PROVA</main>
+    <div class="large-viewport" aria-hidden="true"></div>
+    <div class="dynamic-viewport" aria-hidden="true"></div>
+    <main class="proof">
+        <h1>PROVA VIEWPORT</h1>
+        <p>Il gradiente deve arrivare fino al bordo inferiore dello schermo.</p>
+        <dl class="metrics" aria-label="Misure del viewport">
+            <div><dt>innerHeight</dt><dd id="inner-height">—</dd></div>
+            <div><dt>visualViewport</dt><dd id="visual-height">—</dd></div>
+            <div><dt>schermo</dt><dd id="screen-height">—</dd></div>
+            <div><dt>documento</dt><dd id="document-height">—</dd></div>
+        </dl>
+    </main>
+    <div class="bottom-probe" aria-hidden="true">BORDO INFERIORE</div>
+    <script src="assets/js/prova.js?v=1.2.59"></script>
 </body>
 </html>
