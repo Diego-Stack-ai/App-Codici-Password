@@ -204,7 +204,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/ui-components.js` | JS | 3887 | 98 | Supporto frontend: ui-components. |
 | `Frontend/public/assets/js/ui-core-v129.js` | JS | 18019 | 415 | Toast, modali, input protetti e componenti UI globali. |
 | `Frontend/public/assets/js/utils.js` | JS | 1481 | 48 | Supporto frontend: utils. |
-| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 726534 | 70 | Supporto frontend: firebase-runtime. |
+| `Frontend/public/assets/js/vendor/firebase-runtime.js` | JS | 724725 | 70 | Supporto frontend: firebase-runtime. |
 | `Frontend/public/assets/js/vendor/firebase-sw-runtime.js` | JS | 80549 | 8 | Supporto frontend: firebase-sw-runtime. |
 | `Frontend/public/assets/js/vendor/qrcode.min.js` | JS | 19927 | 1 | Supporto frontend: qrcode.min. |
 | `Frontend/public/configurazione_automezzi.html` | HTML | 8252 | 159 | Struttura della pagina configurazione automezzi; comportamento demandato ai moduli. |
@@ -226,10 +226,10 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/login-v115.html` | HTML | 6892 | 148 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 886 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 64542 | 825 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 8218 | 199 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 8020 | 199 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13777 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15328 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
-| `Frontend/public/prova.html` | HTML | 1377 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
+| `Frontend/public/prova.html` | HTML | 1375 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
 | `Frontend/public/registrati.html` | HTML | 7415 | 148 | Struttura della pagina registrati; comportamento demandato ai moduli. |
 | `Frontend/public/regole_scadenze.html` | HTML | 6875 | 133 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
 | `Frontend/public/reset_password.html` | HTML | 4137 | 107 | Struttura della pagina reset password; comportamento demandato ai moduli. |

@@ -5,7 +5,7 @@
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.59';
+import { auth, db } from '../../firebase-config.js?v=1.2.60';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
