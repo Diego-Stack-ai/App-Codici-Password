@@ -24,6 +24,7 @@ Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso 
 - [~] esportazione runtime integrata con i dati e gli allegati reali; usa scrittura progressiva quando il browser espone File System Access e fallback Blob su iOS; manca il collaudo fisico;
 - [x] comando Backup cifrato integrato nelle Impostazioni con caricamento differito, scelta esplicita del file e Recovery Key mostrata una sola volta con conferma obbligatoria di salvataggio;
 - [~] callable transazionale `restoreBackupChunk` integrata localmente con anteprima collisioni, allowlist, conversione tipi, limiti, idempotenza e App Check; manca il collegamento del lettore file e la distribuzione;
+- [~] lettore file in due passaggi e UI di ripristino integrati localmente: verifica completa e anteprima collisioni precedono la conferma digitata; allegati trasferiti soltanto dopo i chunk record; manca distribuzione e collaudo fisico;
 - [ ] collaudo fisico esporta/cancella/ripristina su copia non produttiva.
 
 M8 resta attiva fino alla prova reale di ripristino.

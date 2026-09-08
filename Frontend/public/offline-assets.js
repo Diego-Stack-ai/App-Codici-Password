@@ -142,6 +142,8 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/settings/backup-crypto.js",
   "assets/js/modules/settings/backup-export-model.js",
   "assets/js/modules/settings/backup-export-service.js",
+  "assets/js/modules/settings/backup-import-model.js",
+  "assets/js/modules/settings/backup-import-service.js",
   "assets/js/modules/settings/impostazioni.js",
   "assets/js/modules/settings/push-settings-controller.js",
   "assets/js/modules/shared/account-banking-view.js",

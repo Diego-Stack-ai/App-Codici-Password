@@ -8,7 +8,7 @@ import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
 import { syncTimeoutWithFirestore } from '../../inactivity-timer.js';
-import { showToast, showConfirmModal } from '../../ui-core-v129.js';
+import { showToast, showConfirmModal, showInputModal } from '../../ui-core-v129.js';
 import { safeSetText, setChildren, createElement, clearElement } from '../../dom-utils.js';
 import { decrypt, ensureVaultKeyMaterial, clearSession, resetVault, isBiometricUnlockConfigured, changeMasterPassword } from '../core/security-manager.js';
 import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revokeAllSessions } from '../core/mfa-manager.js';
@@ -41,10 +41,58 @@ export async function initImpostazioni(user) {
     setupTermsShort();
     setupPerformanceDiagnostics();
     setupEncryptedBackup(user);
+    setupEncryptedRestore(user);
     await setupPushSettings(user);
     showPendingSecurityNotice();
 
     
+}
+
+function setupEncryptedRestore(user) {
+    const button = document.getElementById('btn-restore-encrypted-backup');
+    if (!button) return;
+    const input = createElement('input', {
+        type: 'file', accept: '.cpbackup,application/x-codici-password-backup', className: 'hidden'
+    });
+    document.body.appendChild(input);
+    button.addEventListener('click', () => input.click());
+    input.addEventListener('change', async () => {
+        const file = input.files?.[0];
+        input.value = '';
+        if (!file) return;
+        const recoveryKey = await showInputModal(
+            'Recovery Key del backup', '', 'xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx',
+            'La chiave viene usata soltanto in memoria per verificare e aprire questo file.',
+            {vaultSecret: true}
+        );
+        if (!recoveryKey) return;
+        button.disabled = true;
+        showToast('Verifica completa del backup in corso…', 'info');
+        try {
+            const {prepareBackupRestore, executeBackupRestore} = await import('./backup-import-service.js');
+            const plan = await prepareBackupRestore(file, user.uid, recoveryKey.trim().toLowerCase());
+            const typed = await showInputModal(
+                'Conferma ripristino', '', 'RIPRISTINA',
+                `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Scrivi RIPRISTINA per applicare i dati.`
+            );
+            if (typed !== 'RIPRISTINA') return;
+            showToast('Ripristino in corso. Non chiudere la pagina.', 'info');
+            const result = await executeBackupRestore(plan);
+            await showConfirmModal(
+                'Ripristino completato',
+                `${result.recordCount} record e ${result.attachmentCount} allegati ripristinati. Riapri l’app per rileggere i dati.`,
+                'Ricarica', 'Più tardi'
+            ).then(reload => { if (reload) window.location.reload(); });
+        } catch (error) {
+            console.error('[BACKUP] Ripristino non riuscito.', error?.message);
+            const collision = String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
+            showToast(collision
+                ? 'Ripristino bloccato: nel Vault esistono già record con gli stessi identificativi.'
+                : 'Backup non valido, incompleto o non applicabile.', 'error');
+        } finally {
+            button.disabled = false;
+        }
+    });
 }
 
 function showRecoveryKeyOnce(recoveryKey, summary) {
