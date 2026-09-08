@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.58';
+import * as Pages from './pages-init.js?v=1.2.58&push=20260908b';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
