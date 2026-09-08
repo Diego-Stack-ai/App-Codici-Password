@@ -6,6 +6,7 @@ self.__OFFLINE_ASSETS = [
   "area_privata.html",
   "assets/css/accesso.css",
   "assets/css/account_azienda.css",
+  "assets/css/account_detail.css",
   "assets/css/account_form.css",
   "assets/css/account_privati.css",
   "assets/css/aggiungi_scadenza.css",
