@@ -3,7 +3,7 @@
  * Il video protetto viene richiesto soltanto dopo un gesto esplicito.
  */
 
-import { auth } from '../../firebase-config.js?v=1.2.62';
+import { auth } from '../../firebase-config.js?v=1.2.63';
 
 let presentationObjectUrl = null;
 
