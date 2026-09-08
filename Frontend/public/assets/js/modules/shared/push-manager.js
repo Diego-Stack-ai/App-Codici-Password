@@ -92,23 +92,41 @@ async function resetLocalPushSubscription(messaging, registration) {
     }
 }
 
+function technicalPushError(error) {
+    const code = String(error?.code || error?.name || '').trim();
+    const message = String(error?.message || '').trim();
+    return [code, message].filter(Boolean).join(': ');
+}
+
 async function getTokenWithLocalRecovery(messaging, registration) {
-    // Il worker convenzionale è già attivo; Firebase deve associarlo internamente
-    // al proprio componente Messaging invece di ricevere una registrazione esterna.
+    // Il worker convenzionale è già attivo; Firebase lo associa internamente
+    // al proprio componente Messaging.
     const options = { vapidKey: VAPID_KEY };
     try {
         return await getToken(messaging, options);
     } catch (firstError) {
-        console.warn('[PUSH] Registrazione locale non valida: eseguo un solo tentativo di ripristino.', firstError);
+        const firstCode = String(firstError?.code || '');
+        const recoverable = firstCode.includes('token-subscribe')
+            || firstCode.includes('token-unsubscribe')
+            || firstCode.includes('fid-registration');
+        console.warn('[PUSH] Prima registrazione FCM fallita.', firstError);
+        if (!recoverable) {
+            const details = technicalPushError(firstError);
+            const message = pushErrorMessage(firstError);
+            throw new Error(details ? `${message} [${details}]` : message);
+        }
+
+        console.warn('[PUSH] Registrazione locale non valida: eseguo un solo tentativo di ripristino.');
         await resetLocalPushSubscription(messaging, registration);
         try {
             return await getToken(messaging, options);
         } catch (retryError) {
             console.error('[PUSH] Ripristino registrazione locale fallito.', retryError);
-            const technicalCode = String(retryError?.code || retryError?.name || '').trim();
-            const technicalMessage = String(retryError?.message || '').trim();
+            const firstDetails = technicalPushError(firstError);
+            const retryDetails = technicalPushError(retryError);
+            const details = [firstDetails && `primo: ${firstDetails}`, retryDetails && `secondo: ${retryDetails}`]
+                .filter(Boolean).join(' | ');
             const message = pushErrorMessage(retryError);
-            const details = [technicalCode, technicalMessage].filter(Boolean).join(': ');
             throw new Error(details ? `${message} [${details}]` : message);
         }
     }
