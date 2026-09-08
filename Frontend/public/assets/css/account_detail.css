@@ -338,6 +338,146 @@
     text-transform: uppercase;
 }
 
+/* Richiamo informativo per le coordinate bancarie. */
+.banking-prompt-box {
+    margin-top: 0.75rem;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+#btn-banking-info {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(14, 165, 233, 0.06);
+    color: #0f172a;
+    -webkit-text-fill-color: #0f172a;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dark #btn-banking-info {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(186, 230, 253, 0.9);
+    -webkit-text-fill-color: rgba(186, 230, 253, 0.9);
+}
+
+#btn-banking-info:hover {
+    background: rgba(14, 165, 233, 0.12);
+}
+
+.dark #btn-banking-info:hover {
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.info-icon {
+    flex-shrink: 0;
+    color: #0369a1;
+    font-size: var(--fs-md);
+}
+
+.dark .info-icon {
+    color: #7dd3fc;
+}
+
+.dark .info-text {
+    color: rgba(186, 230, 253, 0.85);
+}
+
+.icon-chevron-muted {
+    color: var(--text-secondary);
+    opacity: 0.3;
+    font-size: var(--fs-xl);
+    transition: transform 0.3s;
+}
+
+/* Selettore condiviso della sorgente di acquisizione. */
+.source-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.btn-source-option {
+    padding: 0.75rem;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: rgba(14, 165, 233, 0.06);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dark .btn-source-option {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.btn-source-option:hover {
+    border-color: rgba(14, 165, 233, 0.5);
+    background: rgba(14, 165, 233, 0.12);
+}
+
+.dark .btn-source-label {
+    color: rgba(186, 230, 253, 0.75);
+}
+
+.btn-source-wide {
+    grid-column: span 2;
+}
+
+.modal-footer {
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(14, 165, 233, 0.15);
+    text-align: center;
+}
+
+/* Utilità strutturali condivise dai dettagli. */
+.section-bottom {
+    margin-bottom: 2.5rem;
+}
+
+.detail-section-header-spread {
+    justify-content: space-between;
+}
+
+.sharing-revoke-button {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.visually-hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    visibility: hidden;
+    white-space: nowrap;
+}
+
 @media (max-width: 600px) {
     .form-grid-2 {
         grid-template-columns: 1fr;

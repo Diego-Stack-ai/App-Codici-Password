@@ -163,56 +163,11 @@
     color: #7dd3fc;
 }
 
-.source-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-}
-
-.btn-source-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    border: 1px solid rgba(14, 165, 233, 0.2);
-    background: rgba(14, 165, 233, 0.06);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.dark .btn-source-option {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.btn-source-option:hover {
-    background: rgba(14, 165, 233, 0.12);
-    border-color: rgba(14, 165, 233, 0.5);
-}
-
 .btn-source-label {
     font: var(--font-caption);
     font-weight: var(--font-label-weight);
     text-transform: uppercase;
     color: #0c4a6e;
-}
-
-.dark .btn-source-label {
-    color: rgba(186, 230, 253, 0.75);
-}
-
-.btn-source-wide {
-    grid-column: span 2;
-}
-
-.modal-footer {
-    margin-top: 1rem;
-    border-top: 1px solid rgba(14, 165, 233, 0.15);
-    padding-top: 0.5rem;
-    text-align: center;
 }
 
 .btn-modal-cancel {
@@ -227,62 +182,10 @@
     cursor: pointer;
 }
 
-/* --- 6. BANKING PROMPT BOX (Standard V5.0) --- */
-.banking-prompt-box {
-    margin-top: 0.75rem;
-    border-radius: 1rem;
-    overflow: hidden;
-}
-
-#btn-banking-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
-    border: 1px solid rgba(14, 165, 233, 0.2);
-    background: rgba(14, 165, 233, 0.06);
-    cursor: pointer;
-    transition: background 0.2s;
-    text-align: left;
-    color: #0f172a;
-    -webkit-text-fill-color: #0f172a;
-}
-
-.dark #btn-banking-info {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(186, 230, 253, 0.9);
-    -webkit-text-fill-color: rgba(186, 230, 253, 0.9);
-}
-
-#btn-banking-info:hover {
-    background: rgba(14, 165, 233, 0.12);
-}
-
-.dark #btn-banking-info:hover {
-    background: rgba(56, 189, 248, 0.1);
-}
-
-.info-icon {
-    font-size: var(--fs-md);
-    color: #0369a1;
-    flex-shrink: 0;
-}
-
-.dark .info-icon {
-    color: #7dd3fc;
-}
-
 .info-text {
     font-size: 13px;
     font-weight: var(--font-weight-medium);
     color: #0f172a;
-}
-
-.dark .info-text {
-    color: rgba(186, 230, 253, 0.85);
 }
 
 /* --- 7. COORDINATE BANCARIE & UTILS --- */
@@ -338,42 +241,6 @@
 
 .content-spacing {
     margin-top: 1rem;
-}
-
-.section-bottom {
-    margin-bottom: 2.5rem;
-}
-
-.detail-section-header-spread {
-    justify-content: space-between;
-}
-
-.sharing-revoke-button { border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important; }
-
-.header-left-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.visually-hidden-input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-    visibility: hidden;
-}
-
-.icon-chevron-muted {
-    font-size: var(--fs-xl);
-    color: var(--text-secondary);
-    opacity: 0.3;
-    transition: transform 0.3s;
 }
 
 /* --- 10. BANKING CARDS (READONLY) --- */

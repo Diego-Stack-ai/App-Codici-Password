@@ -85,6 +85,8 @@ Il consolidamento procede senza variazioni grafiche intenzionali in questo ordin
 
 La presenza duplicata di `base-glow` nelle due pagine di dettaglio Account è registrata come anomalia da verificare durante il punto 2; non deve essere rimossa senza confronto visivo.
 
+Il consolidamento statico dei dettagli Account è completato in `account_detail.css`: fondazioni, allegati, viste bancarie, richiamo informativo, selettore sorgente e utilità equivalenti sono condivisi. Nei due fogli locali non restano regole esattamente identiche; ogni ulteriore convergenza richiede quindi una scelta visiva esplicita e relativo collaudo, non una semplice deduplicazione meccanica.
+
 ## Contratto degli stati di pagina
 
 `createUiState()` è la sola implementazione dinamica per i nuovi stati di caricamento, vuoto, avviso ed errore. Usa:
