@@ -172,6 +172,12 @@ Il simulatore locale `migration-simulator.mjs` accetta soltanto input con `fixtu
 
 Il backup reale non potrà essere un semplice snapshot in chiaro come quello didattico del simulatore: dovrà essere cifrato, versionato, autenticato e coperto dal progetto M8. Per M5 il rollback richiesto consiste nel conservare il documento legacy intatto finché la verifica del nuovo record non è conclusa.
 
+## Esito allegati e offline del laboratorio
+
+Il laboratorio cifra ogni allegato con una chiave-file casuale e avvolge quest'ultima con la chiave per-record. Il destinatario autorizzato può quindi aprire record e allegato usando un solo grant, senza ricevere la Vault Key del proprietario. In caso di rotazione si può riavvolgere la chiave-file per i soggetti rimasti autorizzati senza ricifrare il contenuto binario, purché la politica scelta consenta loro l'accesso storico.
+
+La prova offline conferma il limite del modello: un destinatario revocato che aveva già envelope e ciphertext della generazione precedente può continuare a leggere quella copia. La chiave precedente non apre però la revisione ricifrata con la generazione successiva. UI e documentazione dovranno spiegare che revocare impedisce l'accesso futuro, non cancella copie già viste o esportate.
+
 ## Gate di M5
 
 - [x] mappare attori, dati, confini e flusso attuale;
@@ -180,7 +186,7 @@ Il backup reale non potrà essere un semplice snapshot in chiaro come quello did
 - [x] definire il contratto iniziale per ruoli, scadenza, revoca e cronologia senza plaintext nei log;
 - [x] costruire un prototipo isolato con utenti e chiavi di prova;
 - [x] dimostrare lettura autorizzata e fallimento di lettura non autorizzata;
-- [~] dimostrare rotazione dopo revoca; resta da definire e provare il comportamento offline;
+- [x] dimostrare rotazione dopo revoca e comportamento della copia offline già consegnata;
 - [~] definire lettore retrocompatibile, backup e rollback; contratto e simulatore pronti, integrazione runtime non avviata;
 - [x] provare la trasformazione e il rollback sul dataset fittizio M0;
 - [ ] modificare la produzione soltanto dopo approvazione esplicita.

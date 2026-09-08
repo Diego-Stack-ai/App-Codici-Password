@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  decryptAttachmentForRecord,
   decryptRecordPayload,
+  encryptAttachmentForRecord,
   encryptRecordPayload,
   generateIdentityKeyPair,
   generateRecordKey,
@@ -37,4 +39,31 @@ test('la rotazione esclude il revocato dalle versioni future', async () => {
 
   assert.deepEqual(await decryptRecordPayload(newPayload, activeKey, 'record-2'), {revision: 2});
   await assert.rejects(decryptRecordPayload(newPayload, retainedOldKey, 'record-2'));
+});
+
+test('un allegato usa una chiave-file avvolta dalla chiave del record', async () => {
+  const recordKey = generateRecordKey();
+  const wrongKey = generateRecordKey();
+  const clear = new TextEncoder().encode('allegato fittizio non sensibile');
+  const encrypted = await encryptAttachmentForRecord(clear, recordKey, 'record-3', 'attachment-1');
+
+  assert.deepEqual(
+    await decryptAttachmentForRecord(encrypted, recordKey, 'record-3', 'attachment-1'),
+    clear
+  );
+  await assert.rejects(decryptAttachmentForRecord(encrypted, wrongKey, 'record-3', 'attachment-1'));
+});
+
+test('la cache offline conserva solo la generazione già ricevuta', async () => {
+  const recipient = await generateIdentityKeyPair();
+  const oldKey = generateRecordKey();
+  const cachedPayload = await encryptRecordPayload({revision: 1}, oldKey, 'record-4');
+  const cachedEnvelope = await wrapRecordKeyForRecipient(oldKey, recipient.publicKey, 'record-4', 'recipient-offline');
+  const cachedKey = await unwrapRecordKeyForRecipient(
+    cachedEnvelope, recipient.privateKey, 'record-4', 'recipient-offline'
+  );
+  assert.deepEqual(await decryptRecordPayload(cachedPayload, cachedKey, 'record-4'), {revision: 1});
+
+  const rotatedPayload = await encryptRecordPayload({revision: 2}, generateRecordKey(), 'record-4');
+  await assert.rejects(decryptRecordPayload(rotatedPayload, cachedKey, 'record-4'));
 });

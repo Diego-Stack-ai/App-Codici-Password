@@ -61,6 +61,46 @@ export async function decryptRecordPayload(encrypted, recordKey, recordId) {
   return JSON.parse(decoder.decode(clear));
 }
 
+export async function encryptAttachmentForRecord(bytes, recordKey, recordId, attachmentId) {
+  const fileKeyBytes = randomBytes(32);
+  const fileKey = await importRecordKey(fileKeyBytes, ['encrypt']);
+  const contentIv = randomBytes(12);
+  const aad = encoder.encode(`CodiciPassword:attachment:v1:${recordId}:${attachmentId}`);
+  const ciphertext = await crypto.subtle.encrypt(
+    {name: 'AES-GCM', iv: contentIv, additionalData: aad}, fileKey, bytes
+  );
+  const wrapIv = randomBytes(12);
+  const wrappingKey = await importRecordKey(recordKey, ['encrypt']);
+  const wrappedFileKey = await crypto.subtle.encrypt(
+    {name: 'AES-GCM', iv: wrapIv, additionalData: aad}, wrappingKey, fileKeyBytes
+  );
+  return {
+    version: 1,
+    cipher: 'AES-GCM-256',
+    contentIv: bytesToBase64(contentIv),
+    wrapIv: bytesToBase64(wrapIv),
+    wrappedFileKey: bytesToBase64(wrappedFileKey),
+    ciphertext: bytesToBase64(ciphertext)
+  };
+}
+
+export async function decryptAttachmentForRecord(encrypted, recordKey, recordId, attachmentId) {
+  if (encrypted?.version !== 1 || encrypted?.cipher !== 'AES-GCM-256') throw new Error('ATTACHMENT_FORMAT_INVALID');
+  const aad = encoder.encode(`CodiciPassword:attachment:v1:${recordId}:${attachmentId}`);
+  const wrappingKey = await importRecordKey(recordKey, ['decrypt']);
+  const fileKeyBytes = await crypto.subtle.decrypt(
+    {name: 'AES-GCM', iv: base64ToBytes(encrypted.wrapIv), additionalData: aad},
+    wrappingKey,
+    base64ToBytes(encrypted.wrappedFileKey)
+  );
+  const fileKey = await importRecordKey(fileKeyBytes, ['decrypt']);
+  return new Uint8Array(await crypto.subtle.decrypt(
+    {name: 'AES-GCM', iv: base64ToBytes(encrypted.contentIv), additionalData: aad},
+    fileKey,
+    base64ToBytes(encrypted.ciphertext)
+  ));
+}
+
 export async function wrapRecordKeyForRecipient(recordKey, recipientPublicKey, recordId, recipientId) {
   const ephemeral = await generateIdentityKeyPair();
   const salt = randomBytes(32);
