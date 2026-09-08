@@ -8,6 +8,7 @@ test("costruisce soltanto percorsi appartenenti allo UID autenticato", () => {
   assert.equal(restorePath("owner", {scope: "profile"}), "users/owner");
   assert.equal(restorePath("owner", {scope: "private-account", id: "a1"}), "users/owner/accounts/a1");
   assert.equal(restorePath("owner", {scope: "company-account", companyId: "c1", id: "a1"}), "users/owner/aziende/c1/accounts/a1");
+  assert.equal(restorePath("owner", {scope: "private-account-attachment", accountId: "a1", id: "f1"}), "users/owner/accounts/a1/attachments/f1");
   assert.throws(() => restorePath("owner", {scope: "notifications", id: "n1"}), /SCOPE/);
   assert.throws(() => restorePath("owner", {scope: "settings", id: "..\/security"}), /IDENTIFIER/);
 });

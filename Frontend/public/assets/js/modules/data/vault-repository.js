@@ -1,4 +1,6 @@
-import {getDocSmart, getDocsSmart} from '/assets/js/offline-firestore.js';
+import {
+    getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
+} from '/assets/js/offline-firestore.js';
 import {db} from '../../firebase-config.js?v=1.2.64';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
@@ -9,6 +11,9 @@ const readRecord = (key, reference) => coalesceRead(key, () => getDocSmart(refer
     snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
 const readFirstRecord = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(snapshot =>
     snapshot.empty ? null : {id: snapshot.docs[0].id, ...snapshot.docs[0].data()});
+const readConfirmedRecords = reference => getDocsServerConfirmed(reference).then(records);
+const readConfirmedRecord = reference => getDocServerConfirmed(reference).then(snapshot =>
+    snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
 
 export const listPrivateAccounts = uid => readRecords(`accounts:${uid}`,
     collection(db, 'users', uid, 'accounts'));
@@ -101,6 +106,22 @@ export const listProfileWidgets = uid => readRecords(`profile-widgets:${uid}`,
     collection(db, 'users', uid, 'profileWidgets'));
 
 export const getUserProfile = uid => readRecord(`profile:${uid}`, doc(db, 'users', uid));
+
+// M8: fotografia server-confermata dei soli domini proprietari ammessi dal
+// contratto backup. Non usa cache perché un file incompleto sembrerebbe valido.
+export const getBackupProfile = uid => readConfirmedRecord(doc(db, 'users', uid));
+export const listBackupSettings = uid => readConfirmedRecords(collection(db, 'users', uid, 'settings'));
+export const listBackupPrivateAccounts = uid => readConfirmedRecords(collection(db, 'users', uid, 'accounts'));
+export const listBackupCompanies = uid => readConfirmedRecords(collection(db, 'users', uid, 'aziende'));
+export const listBackupCompanyAccounts = (uid, companyId) => readConfirmedRecords(
+    collection(db, 'users', uid, 'aziende', companyId, 'accounts'));
+export const listBackupDeadlines = uid => readConfirmedRecords(collection(db, 'users', uid, 'scadenze'));
+export const listBackupContacts = uid => readConfirmedRecords(collection(db, 'users', uid, 'contacts'));
+export const listBackupProfileWidgets = uid => readConfirmedRecords(collection(db, 'users', uid, 'profileWidgets'));
+export const listBackupPrivateAttachments = (uid, accountId) => readConfirmedRecords(
+    collection(db, 'users', uid, 'accounts', accountId, 'attachments'));
+export const listBackupCompanyAttachments = (uid, companyId, accountId) => readConfirmedRecords(
+    collection(db, 'users', uid, 'aziende', companyId, 'accounts', accountId, 'attachments'));
 
 // Punto d'integrazione M5 deliberatamente inattivo: i chiamanti esistenti
 // continuano a usare i record legacy finché il cutover non viene autorizzato.

@@ -2,13 +2,14 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **351**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/public/assets/js/modules/settings/backup-crypto.js` | JS | 5190 | 125 | Impostazioni applicative: backup-crypto. |
+| `Frontend/public/assets/js/modules/settings/backup-export-model.js` | JS | 3829 | 85 | Impostazioni applicative: backup-export-model. |
+| `Frontend/public/assets/js/modules/settings/backup-export-service.js` | JS | 5346 | 109 | Impostazioni applicative: backup-export-service. |
 | `Frontend/GUIDA.md` | MD | 60951 | 979 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 40518 | 477 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3784 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
@@ -41,7 +42,7 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/css/form_azienda.css` | CSS | 17901 | 912 | Stili della sezione form azienda. |
 | `Frontend/public/assets/css/gestione_destinatari.css` | CSS | 3029 | 155 | Stili della sezione gestione destinatari. |
 | `Frontend/public/assets/css/home_page.css` | CSS | 10102 | 422 | Stili della sezione home page. |
-| `Frontend/public/assets/css/impostazioni.css` | CSS | 17231 | 779 | Stili della sezione impostazioni. |
+| `Frontend/public/assets/css/impostazioni.css` | CSS | 17491 | 793 | Stili della sezione impostazioni. |
 | `Frontend/public/assets/css/lista_aziende.css` | CSS | 5551 | 260 | Stili della sezione lista aziende. |
 | `Frontend/public/assets/css/moduli.css` | CSS | 12699 | 481 | Stili della sezione moduli. |
 | `Frontend/public/assets/css/privacy.css` | CSS | 5177 | 242 | Stili della sezione privacy. |
@@ -112,7 +113,7 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/data/offline-mutation-sync.js` | JS | 2262 | 60 | Supporto frontend: offline-mutation-sync. |
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 672 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/shared-record-reader.js` | JS | 2664 | 70 | Supporto frontend: shared-record-reader. |
-| `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 5539 | 111 | Supporto frontend: vault-repository. |
+| `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 7237 | 132 | Supporto frontend: vault-repository. |
 | `Frontend/public/assets/js/modules/home/home-deadline-dashboard.js` | JS | 2682 | 67 | Supporto frontend: home-deadline-dashboard. |
 | `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 3389 | 71 | Supporto frontend: home-deadline-inbox. |
 | `Frontend/public/assets/js/modules/home/home-presentation.js` | JS | 3581 | 88 | Supporto frontend: home-presentation. |
@@ -152,7 +153,8 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/settings/archive-account-model.js` | JS | 998 | 26 | Impostazioni applicative: archive-account-model. |
 | `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 4823 | 122 | Impostazioni applicative: archive-account-service. |
 | `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 11086 | 310 | Impostazioni applicative: archivio account. |
-| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 24962 | 533 | Impostazioni applicative: impostazioni. |
+| `Frontend/public/assets/js/modules/settings/backup-crypto.js` | JS | 5190 | 125 | Impostazioni applicative: backup-crypto. |
+| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 30239 | 630 | Impostazioni applicative: impostazioni. |
 | `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3468 | 93 | Impostazioni applicative: push-settings-controller. |
 | `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 6718 | 148 | Supporto frontend: account-banking-view. |
 | `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 7582 | 160 | Supporto frontend: account-list-view. |
@@ -204,13 +206,13 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/gestione_destinatari.html` | HTML | 4304 | 73 | Struttura della pagina gestione destinatari; comportamento demandato ai moduli. |
 | `Frontend/public/home_page.html` | HTML | 5896 | 133 | Struttura della pagina home page; comportamento demandato ai moduli. |
 | `Frontend/public/imposta_nuova_password.html` | HTML | 6124 | 132 | Struttura della pagina imposta nuova password; comportamento demandato ai moduli. |
-| `Frontend/public/impostazioni.html` | HTML | 26885 | 457 | Struttura della pagina impostazioni; comportamento demandato ai moduli. |
+| `Frontend/public/impostazioni.html` | HTML | 27700 | 470 | Struttura della pagina impostazioni; comportamento demandato ai moduli. |
 | `Frontend/public/index.html` | HTML | 800 | 19 | Struttura della pagina index; comportamento demandato ai moduli. |
 | `Frontend/public/lista_aziende.html` | HTML | 2878 | 65 | Struttura della pagina lista aziende; comportamento demandato ai moduli. |
 | `Frontend/public/login-v115.html` | HTML | 6892 | 148 | Struttura della pagina login-v115; comportamento demandato ai moduli. |
 | `Frontend/public/manifest.json` | JSON | 886 | 33 | Manifest PWA, icone, nome, scope e pagina iniziale. |
 | `Frontend/public/modifica_azienda.html` | HTML | 64633 | 826 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
-| `Frontend/public/offline-assets.js` | JS | 8469 | 208 | File di progetto: offline-assets. |
+| `Frontend/public/offline-assets.js` | JS | 8630 | 211 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13804 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15327 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1375 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
@@ -225,10 +227,11 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/backup-crypto-runtime.test.mjs` | MJS | 2674 | 43 | Test automatico: backup-crypto-runtime.test. |
+| `tests/backup-export-model.test.mjs` | MJS | 1902 | 35 | Test automatico: backup-export-model.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
 | `tests/archive-account-model.test.mjs` | MJS | 1358 | 21 | Test automatico: archive-account-model.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
+| `tests/backup-crypto-runtime.test.mjs` | MJS | 2674 | 43 | Test automatico: backup-crypto-runtime.test. |
 | `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
 | `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
 | `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
@@ -309,7 +312,7 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6394 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 3036 | 48 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 1590 | 27 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M8_BACKUP_RECUPERO.md` | MD | 2179 | 29 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 2498 | 30 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 1827 | 25 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
@@ -372,7 +375,7 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `functions/.gitignore` | CONFIG | 21 | 2 | Esclusioni Git per file generati o locali. |
 | `functions/archive-purge-service.js` | JS | 3037 | 73 | File di progetto: archive-purge-service. |
-| `functions/backup-restore-service.js` | JS | 3239 | 90 | File di progetto: backup-restore-service. |
+| `functions/backup-restore-service.js` | JS | 3621 | 97 | File di progetto: backup-restore-service. |
 | `functions/eslint.config.js` | JS | 581 | 26 | File di progetto: eslint.config. |
 | `functions/history-recovery-service.js` | JS | 1819 | 37 | File di progetto: history-recovery-service. |
 | `functions/index.js` | JS | 65024 | 1296 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
@@ -381,7 +384,7 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 | `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
 | `functions/recovery-security.js` | JS | 1887 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
 | `functions/test/archive-purge-service.test.js` | JS | 2853 | 46 | Test automatico: archive-purge-service.test. |
-| `functions/test/backup-restore-service.test.js` | JS | 2129 | 44 | Test automatico: backup-restore-service.test. |
+| `functions/test/backup-restore-service.test.js` | JS | 2275 | 45 | Test automatico: backup-restore-service.test. |
 | `functions/test/history-recovery-service.test.js` | JS | 1407 | 19 | Test automatico: history-recovery-service.test. |
 | `functions/test/offline-sync-service.test.js` | JS | 1273 | 24 | Test automatico: offline-sync-service.test. |
 | `functions/test/recovery-security.test.js` | JS | 1398 | 35 | Test automatico: recovery-security.test. |
@@ -396,7 +399,7 @@ File censiti: **348**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 5638 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 5673 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

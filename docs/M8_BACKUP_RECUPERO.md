@@ -21,7 +21,8 @@ Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso 
 - [x] importazione isolata in staging e piano transazionale con blocco collisioni nel laboratorio;
 - [x] contratto backend dei chunk di ripristino: allowlist delle collezioni, percorsi costruiti dallo UID autenticato, limiti per record/chunk, collisioni e idempotenza verificati;
 - [x] formato runtime v2 incrementale, autenticato e concatenato implementato e verificato;
-- [ ] esportazione streaming integrata con gli allegati reali;
+- [~] esportazione runtime integrata con i dati e gli allegati reali; usa scrittura progressiva quando il browser espone File System Access e fallback Blob su iOS; manca il collaudo fisico;
+- [x] comando Backup cifrato integrato nelle Impostazioni con caricamento differito, scelta esplicita del file e Recovery Key mostrata una sola volta con conferma obbligatoria di salvataggio;
 - [ ] ripristino transazionale integrato nel backend;
 - [ ] collaudo fisico esporta/cancella/ripristina su copia non produttiva.
 

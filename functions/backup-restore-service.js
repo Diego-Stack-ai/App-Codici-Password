@@ -3,6 +3,7 @@ const MAX_RECORDS_PER_CHUNK = 400;
 const MAX_RECORD_BYTES = 800 * 1024;
 const SCOPES = new Set([
   "profile", "settings", "private-account", "company", "company-account",
+  "private-account-attachment", "company-account-attachment",
   "deadline", "contact", "profile-widget"
 ]);
 
@@ -35,6 +36,12 @@ function restorePath(uid, record) {
   };
   if (record.scope === "company-account") {
     return `${root}/aziende/${identifier(record.companyId)}/accounts/${id}`;
+  }
+  if (record.scope === "private-account-attachment") {
+    return `${root}/accounts/${identifier(record.accountId)}/attachments/${id}`;
+  }
+  if (record.scope === "company-account-attachment") {
+    return `${root}/aziende/${identifier(record.companyId)}/accounts/${identifier(record.accountId)}/attachments/${id}`;
   }
   return paths[record.scope];
 }

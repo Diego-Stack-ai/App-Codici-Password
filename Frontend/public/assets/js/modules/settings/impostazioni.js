@@ -40,10 +40,107 @@ export async function initImpostazioni(user) {
     setupPrivacyShort();
     setupTermsShort();
     setupPerformanceDiagnostics();
+    setupEncryptedBackup(user);
     await setupPushSettings(user);
     showPendingSecurityNotice();
 
     
+}
+
+function showRecoveryKeyOnce(recoveryKey, summary) {
+    return new Promise(resolve => {
+        const modal = createElement('div', {className: 'modal-overlay'});
+        const keyField = createElement('input', {
+            className: 'modal-input', value: recoveryKey, readOnly: true,
+            'aria-label': 'Recovery Key del backup', autocomplete: 'off', spellcheck: false
+        });
+        const acknowledged = createElement('input', {type: 'checkbox', id: 'backup-key-saved'});
+        const closeButton = createElement('button', {
+            className: 'btn-modal btn-primary', textContent: 'Ho salvato la chiave', disabled: true
+        });
+        const copyButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Copia chiave'});
+        acknowledged.addEventListener('change', () => { closeButton.disabled = !acknowledged.checked; });
+        copyButton.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(recoveryKey);
+                showToast('Recovery Key copiata', 'success');
+            } catch {
+                keyField.focus(); keyField.select();
+                showToast('Seleziona e copia manualmente la Recovery Key', 'info');
+            }
+        });
+        closeButton.addEventListener('click', () => {
+            if (!acknowledged.checked) return;
+            modal.classList.remove('active');
+            setTimeout(() => { modal.remove(); resolve(); }, 300);
+        });
+        const confirmation = createElement('label', {className: 'backup-key-confirmation'}, [
+            acknowledged,
+            createElement('span', {textContent: 'Confermo di aver salvato la Recovery Key in un luogo sicuro.'})
+        ]);
+        modal.appendChild(createElement('div', {className: 'modal-box'}, [
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'key'}),
+            createElement('h3', {className: 'modal-title', textContent: 'Recovery Key — unica visualizzazione'}),
+            createElement('p', {
+                className: 'modal-text',
+                textContent: `Backup completato: ${summary.recordCount} record e ${summary.attachmentCount} allegati. Senza questa chiave il file non è recuperabile.`
+            }),
+            keyField,
+            confirmation,
+            createElement('div', {className: 'modal-actions'}, [copyButton, closeButton])
+        ]));
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
+    });
+}
+
+function setupEncryptedBackup(user) {
+    const button = document.getElementById('btn-export-encrypted-backup');
+    if (!button) return;
+    button.addEventListener('click', () => {
+        const modal = createElement('div', {className: 'modal-overlay'});
+        const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
+        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Preparazione…', disabled: true});
+        const modulePromise = import('./backup-export-service.js');
+        modulePromise.then(() => {
+            startButton.disabled = false;
+            startButton.textContent = 'Scegli file e crea backup';
+        }).catch(() => {
+            startButton.textContent = 'Backup non disponibile';
+        });
+        const close = () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); };
+        cancelButton.addEventListener('click', close);
+        startButton.addEventListener('click', async () => {
+            startButton.disabled = true;
+            try {
+                const {exportOwnerBackup} = await modulePromise;
+                const exportPromise = exportOwnerBackup(user.uid);
+                close();
+                button.disabled = true;
+                showToast('Preparazione backup in corso…', 'info');
+                const result = await exportPromise;
+                await showRecoveryKeyOnce(result.recoveryKey, result);
+            } catch (error) {
+                if (error?.name !== 'AbortError') {
+                    console.error('[BACKUP] Esportazione non riuscita.', error?.message);
+                    showToast('Backup non completato. Nessun dato è stato modificato.', 'error');
+                }
+            } finally {
+                button.disabled = false;
+            }
+        });
+        modal.appendChild(createElement('div', {className: 'modal-box'}, [
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'encrypted'}),
+            createElement('h3', {className: 'modal-title', textContent: 'Crea backup cifrato'}),
+            createElement('p', {
+                className: 'modal-text',
+                textContent: 'Verranno esportati Profilo, impostazioni, Account, Aziende, Scadenze, contatti, widget e allegati. La Recovery Key sarà mostrata una sola volta.'
+            }),
+            createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
+        ]));
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
+    });
 }
 
 async function setupSettingsProfileQr(user) {

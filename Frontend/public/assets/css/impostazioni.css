@@ -776,3 +776,17 @@ h3.settings-desc {
         grid-template-columns: 1fr;
     }
 }
+.backup-key-confirmation {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+.backup-key-confirmation input {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+}
