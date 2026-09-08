@@ -2,46 +2,27 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **302**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **303**. Duplicati byte-per-byte: **1 gruppi**.
 
-## experiments
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1655 | 53 | File di progetto: storage.candidate. |
-| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
-| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
-| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
-| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
-| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
-| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
-| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
-| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
-| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
-| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5789 | 139 | File di progetto: record-sharing-crypto. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3594 | 70 | File di progetto: record-sharing-crypto.test. |
-
-## tests
+## docs
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 3971 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
-| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
-| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
-| `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
-| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
-| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
-| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
-| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
-| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3789 | 84 | Test automatico: firestore.profile-widgets.rules.test. |
-| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
-| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
-| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
-| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
-| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
-| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
-| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
+| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10156 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7922 | 116 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2396 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8697 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19072 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17618 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
 
 ## .firebaserc
 
@@ -292,24 +273,23 @@ File censiti: **302**. Duplicati byte-per-byte: **1 gruppi**.
 | `archive/home-experiments/home_confronto_legacy.css` | CSS | 2631 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_nebbia.html` | HTML | 586 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 
-## docs
+## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7922 | 116 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2396 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8697 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 18985 | 205 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
-| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17618 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
+| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
+| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
+| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
+| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
+| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
+| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
+| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
+| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
+| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
+| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5789 | 139 | File di progetto: record-sharing-crypto. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3594 | 70 | File di progetto: record-sharing-crypto.test. |
+| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1655 | 53 | File di progetto: storage.candidate. |
 
 ## firebase.json
 
@@ -395,6 +375,27 @@ File censiti: **302**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `stylelint.config.mjs` | MJS | 510 | 17 | File di progetto: stylelint.config. |
+
+## tests
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
+| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
+| `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
+| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
+| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
+| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
+| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
+| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3789 | 84 | Test automatico: firestore.profile-widgets.rules.test. |
+| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
+| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
+| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
+| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
+| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
+| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 3971 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
+| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
+| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
 
 ## Duplicati esatti
 

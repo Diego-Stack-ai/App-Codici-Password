@@ -184,11 +184,13 @@ Il laboratorio cifra ogni allegato con una chiave-file casuale e avvolge quest'u
 
 La prova offline conferma il limite del modello: un destinatario revocato che aveva già envelope e ciphertext della generazione precedente può continuare a leggere quella copia. La chiave precedente non apre però la revisione ricifrata con la generazione successiva. UI e documentazione dovranno spiegare che revocare impedisce l'accesso futuro, non cancella copie già viste o esportate.
 
+L'inventario verificato dei percorsi e dei dati è conservato in `M5_INVENTARIO_DATI_CONDIVISI.md`.
+
 ## Gate di M5
 
 - [x] mappare attori, dati, confini e flusso attuale;
 - [x] distinguere ACL da decifratura e identificare la lacuna corrente;
-- [~] censire campi, allegati e cache; restano i percorsi legacy e tutti i metadati da classificare;
+- [x] censire campi, allegati, cache, notifiche, percorsi legacy e metadati in chiaro;
 - [x] definire il contratto iniziale per ruoli, scadenza, revoca e cronologia senza plaintext nei log;
 - [x] costruire un prototipo isolato con utenti e chiavi di prova;
 - [x] dimostrare lettura autorizzata e fallimento di lettura non autorizzata;
