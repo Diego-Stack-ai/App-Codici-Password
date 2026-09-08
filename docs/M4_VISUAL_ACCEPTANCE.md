@@ -51,3 +51,9 @@ Fallback preservato fuori dal runtime: la variante storica del commit `ab532e2`,
 Il laboratorio mostra separatamente il perimetro di `100dvh`, quello di `100lvh`, le misure di `innerHeight`, `visualViewport`, schermo e documento, oltre a un marcatore fissato al bordo inferiore. Se il marcatore tocca il bordo fisico e il gradiente continua sotto di esso, la superficie radice copre correttamente il viewport e la fascia dell'app nasce dalla shell interna. Se sotto il marcatore compare ancora un'area estranea, il difetto appartiene invece al canvas o alla viewport esposta dal browser. Le misure sono soltanto diagnostiche: non pilotano il layout e non introducono un ridimensionamento JavaScript.
 
 Il laboratorio non certifica da solo la correzione. Dopo la prova fisica, la candidata va applicata al CSS comune e ricollaudata almeno su Home, Registrazione e una pagina interna lunga; nebbia V2, ombre, pulsanti e ordine dei livelli devono restare invariati.
+
+### Esito sonda iPhone — 8 settembre 2026
+
+Prima prova eseguita nel browser incorporato della chat su iPhone, schermo dichiarato `393 × 852`. La sonda ha rilevato `innerHeight = 631 px`, `visualViewport = 631 px` e altezza documento `631 px`; il marcatore fissato in basso coincide con il limite del contenuto web. Il gradiente copre quindi tutta la viewport concessa alla pagina. La sottile separazione successiva al marcatore è esterna al documento e precede i controlli del browser incorporato.
+
+Questa evidenza esclude, in quel contesto, un fondale HTML più corto della viewport. Non chiude il gate: occorre ripetere la prova in modalità PWA avviata dall'icona Home, dove non esiste la barra del browser e le safe area vengono calcolate diversamente.
