@@ -24,6 +24,66 @@ La struttura di viewport, fondale, contenitori, area scorrevole, fasce e spaziat
 - Campi sensibili: `modules/shared/card-secret.js`.
 - Stati di pagina: `modules/shared/ui-state-view.js`.
 
+## Famiglie della superficie UI
+
+Le due famiglie definite dal contratto strutturale restano il livello esterno:
+
+- **Accesso**: `index.html` come ingresso tecnico e le quattro pagine di autenticazione;
+- **Operativa**: le 24 pagine dotate di header, area centrale scorrevole e footer condivisi.
+
+La famiglia operativa non implica che tutte le pagine abbiano la stessa composizione interna. Per evitare CSS monolitici e duplicazioni locali, le pagine operative adottano cinque modelli di composizione:
+
+1. **Hub e rappresentative**: Home, Area privata, Profilo privato, Impostazioni e Lista aziende. Presentano funzioni o identità attraverso hero, card di navigazione, badge, tab e indicatori.
+2. **Elenchi**: Account privati, Account azienda, Scadenze e Archivio account. Ripetono righe o card, ricerca, filtri, ordinamento e azioni sugli elementi.
+3. **Dettagli**: Dettaglio account privato, Dettaglio account azienda, Dettaglio scadenza e Dati azienda. Organizzano informazioni in sezioni, campi consultabili e azioni contestuali.
+4. **Form e modifica**: Form account privato, Form account azienda, Modifica azienda e Aggiungi scadenza. Condividono campi, griglie, validazione, allegati e azioni di salvataggio.
+5. **Configurazione e informative**: Regole scadenze, Gestione destinatari, le tre configurazioni, Privacy e Termini. Usano card amministrative, controlli di configurazione o contenuto documentale.
+
+Una pagina può usare componenti appartenenti a più modelli, ma deve avere un solo modello primario. Il modello non modifica il contratto del viewport e non autorizza una seconda implementazione di header, footer o area scorrevole.
+
+### Responsabilità delle pagine rappresentative
+
+- **Area privata** è un hub di navigazione: distingue Account standard, Condivisi, Note private e Note condivise e mostra gli elementi più utilizzati.
+- **Profilo privato** è uno spazio dati operativo: gestisce identità, contatti, indirizzi, documenti, QR e tessera digitale tramite tab e sezioni modificabili.
+- **Impostazioni** è un centro di controllo: raccoglie preferenze, servizi e accessi alle configurazioni.
+
+Le tre pagine condividono il linguaggio visivo rappresentativo, non la stessa struttura funzionale. Hero, card, badge, tab e sezioni devono essere componenti riusabili; i contenuti e il comportamento restano dei rispettivi moduli.
+
+## Livelli di proprietà dello stile
+
+Ogni regola deve appartenere al livello più ristretto che ne descrive correttamente la responsabilità:
+
+1. **Fondazioni**: temi, token, viewport, spazi, tipografia e livelli semantici nel core.
+2. **Componenti**: card, campi glass, badge, tab, pulsanti, allegati e stati riutilizzati da almeno due pagine.
+3. **Modelli di pagina**: composizione interna comune a hub, elenchi, dettagli, form o configurazioni.
+4. **Pagina**: solo identità o comportamento realmente esclusivo.
+
+Non si crea un unico foglio globale per assorbire ogni differenza. Una classe locale viene promossa soltanto quando due utilizzi reali hanno stesso significato, stessa struttura e stessi stati. L'uguaglianza puramente estetica non è sufficiente.
+
+## Contratto degli effetti visivi
+
+- Fondale, colori di tema e glow ambientale appartengono a `core.css`.
+- Nebbia, vetro delle fasce e dissolvenza del contenuto appartengono a `core_fascie.css`.
+- Profondità, bordi e ombre dei componenti devono usare token condivisi; una pagina non ridefinisce una variante già esistente cambiandone soltanto il nome.
+- Watermark e decorazioni fisse non partecipano al layout, non intercettano input e non cambiano le dimensioni del documento.
+- Animazioni decorative non possono essere necessarie per comprendere uno stato e devono avere una variante senza movimento.
+- Il tema scuro non è una semplice inversione: ogni livello glass deve conservare contrasto, separazione e leggibilità equivalenti al tema chiaro.
+
+## Debito censito e ordine di consolidamento
+
+La ricognizione M4 ha rilevato una forte sovrapposizione tra i CSS dei form, dei dettagli Account e delle pagine Azienda, mentre Area privata, Profilo privato e Impostazioni condividono soprattutto il linguaggio visivo e non la funzione. Sono inoltre presenti watermark ripetuti, effetti locali e valori di livello non ancora espressi tramite una scala semantica.
+
+Il consolidamento procede senza variazioni grafiche intenzionali in questo ordine:
+
+1. form Account privato e azienda, già basati su `account_form.css`;
+2. dettagli Account privato e azienda;
+3. Dati azienda e Modifica azienda;
+4. componenti rappresentativi realmente comuni tra Area privata, Profilo privato e Impostazioni;
+5. watermark, decorazioni e scala semantica dei livelli;
+6. rimozione delle regole locali soltanto dopo equivalenza visiva e funzionale verificata.
+
+La presenza duplicata di `base-glow` nelle due pagine di dettaglio Account è registrata come anomalia da verificare durante il punto 2; non deve essere rimossa senza confronto visivo.
+
 ## Contratto degli stati di pagina
 
 `createUiState()` è la sola implementazione dinamica per i nuovi stati di caricamento, vuoto, avviso ed errore. Usa:
