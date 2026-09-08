@@ -51,11 +51,22 @@ export async function initImpostazioni(user) {
 
 function showCredentialHealthResults(report) {
     const flagLabels = {weak: 'Debole', duplicate: 'Duplicata', dated: 'Datata'};
-    const modal = createElement('div', {className: 'modal-overlay'});
+    const modal = createElement('div', {
+        className: 'modal-overlay', role: 'dialog', 'aria-modal': 'true',
+        'aria-labelledby': 'credential-health-title'
+    });
     const closeButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Chiudi'});
-    closeButton.addEventListener('click', () => {
+    const previouslyFocused = document.activeElement;
+    const close = () => {
         modal.classList.remove('active');
-        setTimeout(() => modal.remove(), 300);
+        setTimeout(() => {
+            modal.remove();
+            previouslyFocused?.focus?.();
+        }, 300);
+    };
+    closeButton.addEventListener('click', close);
+    modal.addEventListener('keydown', event => {
+        if (event.key === 'Escape') close();
     });
     const list = createElement('div', {className: 'credential-health-list'});
     if (!report.results.length) {
@@ -88,7 +99,7 @@ function showCredentialHealthResults(report) {
         : '';
     modal.appendChild(createElement('div', {className: 'modal-box credential-health-modal'}, [
         createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'health_and_safety'}),
-        createElement('h3', {className: 'modal-title', textContent: 'Salute credenziali'}),
+        createElement('h3', {id: 'credential-health-title', className: 'modal-title', textContent: 'Salute credenziali'}),
         createElement('p', {
             className: 'modal-text',
             textContent: `${report.scanned} password controllate · ${report.atRisk} Account da verificare${unavailable}. Analisi eseguita soltanto in memoria.`
@@ -101,7 +112,10 @@ function showCredentialHealthResults(report) {
         createElement('div', {className: 'modal-actions'}, [closeButton])
     ]));
     document.body.appendChild(modal);
-    setTimeout(() => modal.classList.add('active'), 10);
+    setTimeout(() => {
+        modal.classList.add('active');
+        closeButton.focus();
+    }, 10);
 }
 
 function setupCredentialHealth(user) {

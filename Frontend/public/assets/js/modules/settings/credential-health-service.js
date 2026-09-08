@@ -20,6 +20,21 @@ function isCredentialRecord(record) {
         && mode !== ACCOUNT_MODES.MEMO_SHARED;
 }
 
+async function mapWithConcurrency(items, concurrency, worker) {
+    const results = new Array(items.length);
+    let cursor = 0;
+    const consume = async () => {
+        while (cursor < items.length) {
+            const index = cursor++;
+            results[index] = await worker(items[index], index);
+        }
+    };
+    await Promise.all(Array.from(
+        {length: Math.min(Math.max(1, concurrency), items.length)}, consume
+    ));
+    return results;
+}
+
 export async function inspectOwnerCredentialHealth(uid) {
     if (!uid) throw new Error('CREDENTIAL_HEALTH_UID_REQUIRED');
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
@@ -37,22 +52,25 @@ export async function inspectOwnerCredentialHealth(uid) {
         })))
     ].filter(({account}) => isCredentialRecord(account));
 
-    const readable = [];
-    let unavailable = 0;
-    for (const source of sources) {
+    const decrypted = await mapWithConcurrency(sources, 4, async source => {
         try {
             const password = await decryptPassword(source.account, vaultKeyMaterial);
-            if (!password) continue;
-            readable.push({
-                id: `${source.area}:${source.account.id}`,
-                password,
-                passwordUpdatedAt: source.account.passwordUpdatedAt,
-                updatedAt: source.account.updatedAt
-            });
+            if (!password) return {record: null, unavailable: false};
+            return {
+                unavailable: false,
+                record: {
+                    id: `${source.area}:${source.account.id}`,
+                    password,
+                    passwordUpdatedAt: source.account.passwordUpdatedAt,
+                    updatedAt: source.account.updatedAt
+                }
+            };
         } catch {
-            unavailable += 1;
+            return {record: null, unavailable: true};
         }
-    }
+    });
+    const readable = decrypted.flatMap(item => item.record ? [item.record] : []);
+    const unavailable = decrypted.filter(item => item.unavailable).length;
 
     const findings = await analyzeCredentialHealth(readable);
     const labels = new Map(sources.map(({account, area, companyName}) => [

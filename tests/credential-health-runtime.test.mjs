@@ -37,3 +37,13 @@ test('la chiave HMAC di sessione non compare nei risultati', async () => {
     assert.deepEqual(Object.keys(results[0]), ['recordId', 'flags']);
 });
 
+test('date Firestore e date ISO sono confrontate senza serializzare il segreto', async () => {
+    const {analyzeCredentialHealth} = await loadModel();
+    const now = Date.parse('2026-09-08T00:00:00Z');
+    const results = await analyzeCredentialHealth([
+        {id: 'timestamp', password: 'Aa#123456789', passwordUpdatedAt: {seconds: 1_700_000_000}},
+        {id: 'iso', password: 'Bb#123456789', passwordUpdatedAt: '2026-08-01T00:00:00Z'}
+    ], {now});
+    assert.deepEqual(results[0], {recordId: 'timestamp', flags: ['dated']});
+    assert.deepEqual(results[1], {recordId: 'iso', flags: []});
+});
