@@ -2,23 +2,57 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **322**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **325**. Duplicati byte-per-byte: **1 gruppi**.
 
-## functions
+## docs
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `functions/history-recovery-service.js` | JS | 1819 | 37 | File di progetto: history-recovery-service. |
-| `functions/test/history-recovery-service.test.js` | JS | 1407 | 19 | Test automatico: history-recovery-service.test. |
-| `functions/.gitignore` | CONFIG | 21 | 2 | Esclusioni Git per file generati o locali. |
-| `functions/eslint.config.js` | JS | 544 | 25 | File di progetto: eslint.config. |
-| `functions/index.js` | JS | 60937 | 1225 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
-| `functions/offline-sync-service.js` | JS | 1451 | 34 | File di progetto: offline-sync-service. |
-| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
-| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
-| `functions/recovery-security.js` | JS | 1887 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
-| `functions/test/offline-sync-service.test.js` | JS | 1273 | 24 | Test automatico: offline-sync-service.test. |
-| `functions/test/recovery-security.test.js` | JS | 1398 | 35 | Test automatico: recovery-security.test. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 1357 | 23 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7922 | 116 | Documentazione: APP ARCHITECTURE AUDIT. |
+| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2396 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
+| `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
+| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
+| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8697 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19152 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10156 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
+| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6027 | 113 | Documentazione: M5 PIANO INTEGRAZIONE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 2893 | 47 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 1183 | 26 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
+| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
+| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
+| `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17798 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
+| `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
+
+## experiments
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `experiments/backup-recovery/backup-format.mjs` | MJS | 2237 | 28 | File di progetto: backup-format. |
+| `experiments/backup-recovery/backup-format.test.mjs` | MJS | 1470 | 19 | File di progetto: backup-format.test. |
+| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
+| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
+| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
+| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
+| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
+| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
+| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
+| `experiments/history-recovery/firestore.candidate.rules` | RULES | 625 | 20 | File di progetto: firestore.candidate. |
+| `experiments/history-recovery/history-model.mjs` | MJS | 1591 | 28 | File di progetto: history-model. |
+| `experiments/history-recovery/history-model.test.mjs` | MJS | 1574 | 24 | File di progetto: history-model.test. |
+| `experiments/offline-sync/firestore.candidate.rules` | RULES | 690 | 22 | File di progetto: firestore.candidate. |
+| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4593 | 68 | File di progetto: offline-mutation-model. |
+| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3901 | 58 | File di progetto: offline-mutation-model.test. |
+| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
+| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
+| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5789 | 139 | File di progetto: record-sharing-crypto. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3594 | 70 | File di progetto: record-sharing-crypto.test. |
+| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1655 | 53 | File di progetto: storage.candidate. |
 
 ## .firebaserc
 
@@ -271,53 +305,6 @@ File censiti: **322**. Duplicati byte-per-byte: **1 gruppi**.
 | `archive/home-experiments/home_confronto_legacy.css` | CSS | 2631 | 87 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 | `archive/home-experiments/home_nebbia.html` | HTML | 586 | 20 | Riferimento storico Home escluso dal runtime e dalla pubblicazione. |
 
-## docs
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `docs/APP_ARCHITECTURE_AUDIT.md` | MD | 7922 | 116 | Documentazione: APP ARCHITECTURE AUDIT. |
-| `docs/CANONICAL_PAGE_REGISTRY.md` | MD | 2396 | 42 | Documentazione: CANONICAL PAGE REGISTRY. |
-| `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
-| `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
-| `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8697 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19152 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
-| `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10156 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
-| `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6027 | 113 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 2893 | 47 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
-| `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 1183 | 26 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
-| `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
-| `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17745 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
-| `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
-
-## experiments
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
-| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
-| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
-| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
-| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
-| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
-| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
-| `experiments/history-recovery/firestore.candidate.rules` | RULES | 625 | 20 | File di progetto: firestore.candidate. |
-| `experiments/history-recovery/history-model.mjs` | MJS | 1591 | 28 | File di progetto: history-model. |
-| `experiments/history-recovery/history-model.test.mjs` | MJS | 1574 | 24 | File di progetto: history-model.test. |
-| `experiments/offline-sync/firestore.candidate.rules` | RULES | 690 | 22 | File di progetto: firestore.candidate. |
-| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4593 | 68 | File di progetto: offline-mutation-model. |
-| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3901 | 58 | File di progetto: offline-mutation-model.test. |
-| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
-| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
-| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5789 | 139 | File di progetto: record-sharing-crypto. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3594 | 70 | File di progetto: record-sharing-crypto.test. |
-| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1655 | 53 | File di progetto: storage.candidate. |
-
 ## firebase.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -336,6 +323,22 @@ File censiti: **322**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `firestore.rules` | RULES | 7337 | 169 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
 
+## functions
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `functions/.gitignore` | CONFIG | 21 | 2 | Esclusioni Git per file generati o locali. |
+| `functions/eslint.config.js` | JS | 544 | 25 | File di progetto: eslint.config. |
+| `functions/history-recovery-service.js` | JS | 1819 | 37 | File di progetto: history-recovery-service. |
+| `functions/index.js` | JS | 60937 | 1225 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
+| `functions/offline-sync-service.js` | JS | 1451 | 34 | File di progetto: offline-sync-service. |
+| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
+| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
+| `functions/recovery-security.js` | JS | 1887 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
+| `functions/test/history-recovery-service.test.js` | JS | 1407 | 19 | Test automatico: history-recovery-service.test. |
+| `functions/test/offline-sync-service.test.js` | JS | 1273 | 24 | Test automatico: offline-sync-service.test. |
+| `functions/test/recovery-security.test.js` | JS | 1398 | 35 | Test automatico: recovery-security.test. |
+
 ## package-lock.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -346,7 +349,7 @@ File censiti: **322**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 4956 | 70 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 5039 | 71 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

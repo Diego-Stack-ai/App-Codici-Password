@@ -293,7 +293,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M5 | laboratorio e architettura completati; attivazione reale subordinata a collaudo fisico, M6, M8 e approvazione |
 | M6 | attiva: modello revisioni, coda cifrata e conflitti dimostrati in laboratorio |
 | M7 | attiva: cestino, ripristino e audit modellati in laboratorio |
-| M8 | da avviare |
+| M8 | attiva: formato backup e Recovery Key dimostrati in laboratorio |
 | M9 | da valutare dopo il core |
 | M10 | da avviare dopo stabilizzazione architetturale |
 | Post-M10 | revisione lingue e riordino per gruppi della pagina Impostazioni |
