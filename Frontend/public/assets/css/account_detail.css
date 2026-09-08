@@ -120,6 +120,85 @@
     -webkit-text-security: disc;
 }
 
+/* Elenco allegati in sola lettura. */
+.attachment-item {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    background: var(--surface-glass);
+    transition: all 0.2s ease;
+}
+
+.attachment-item:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.attachment-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.attachment-icon {
+    opacity: 0.6;
+    font-size: var(--icon-md);
+}
+
+.attachment-meta {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.attachment-name {
+    overflow: hidden;
+    color: var(--text-primary);
+    font: var(--font-label);
+    font-weight: var(--font-label-weight);
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.attachment-status {
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    font-weight: var(--font-title-weight);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.btn-delete-attachment {
+    width: var(--touch-target-min, 44px);
+    height: var(--touch-target-min, 44px);
+    flex-shrink: 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--status-error);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-attachment:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
 @media (max-width: 600px) {
     .form-grid-2 {
         grid-template-columns: 1fr;
