@@ -27,6 +27,9 @@ const {
     recoveryCodeHash
 } = require("./recovery-security");
 const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
+const {
+    RETENTION_MS, restoreDecision, safeAudit, trashDecision, validateRecoveryCommand
+} = require("./history-recovery-service");
 
 initializeApp();
 
@@ -79,6 +82,54 @@ exports.applyOfflineMutation = onCall(
         });
     }
 );
+
+async function runRecoveryCommand(request, mode) {
+    if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+    let command;
+    try { command = validateRecoveryCommand(request.data); } catch {
+        throw new HttpsError("invalid-argument", "Comando di recupero non valido.");
+    }
+    const store = getFirestore();
+    const userRef = store.collection("users").doc(request.auth.uid);
+    const recordRef = userRef.collection("syncRecords").doc(command.recordId);
+    const trashRef = userRef.collection("trash").doc(command.recordId);
+    const resultRef = userRef.collection("operationResults").doc(command.operationId);
+    return store.runTransaction(async transaction => {
+        const [record, trash, previous] = await Promise.all([
+            transaction.get(recordRef), transaction.get(trashRef), transaction.get(resultRef)
+        ]);
+        const result = mode === "trash" ? trashDecision({
+            recordExists: record.exists,
+            currentRevision: Number(record.data()?.revision || 0),
+            expectedRevision: command.expectedRevision,
+            alreadyProcessed: previous.exists
+        }) : restoreDecision({
+            trashExists: trash.exists,
+            destinationExists: record.exists,
+            trashedRevision: Number(trash.data()?.revision || 0),
+            alreadyProcessed: previous.exists
+        });
+        if (result.duplicate || !["trashed", "restored"].includes(result.status)) return result;
+        const action = result.status;
+        if (mode === "trash") {
+            transaction.set(trashRef, {...record.data(), deletedAt: FieldValue.serverTimestamp(), purgeAfterMs: Date.now() + RETENTION_MS});
+            transaction.delete(recordRef);
+        } else {
+            const restored = {...trash.data(), revision: result.revision, restoredAt: FieldValue.serverTimestamp()};
+            delete restored.deletedAt; delete restored.purgeAfterMs;
+            transaction.set(recordRef, restored); transaction.delete(trashRef);
+        }
+        transaction.set(resultRef, {...result, ownerUid: request.auth.uid, createdAt: FieldValue.serverTimestamp()});
+        transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
+            ...safeAudit({action, actorUid: request.auth.uid, recordId: command.recordId, operationId: command.operationId}),
+            at: FieldValue.serverTimestamp()
+        });
+        return result;
+    });
+}
+
+exports.trashSyncRecord = onCall({region: "europe-west1", enforceAppCheck: true}, request => runRecoveryCommand(request, "trash"));
+exports.restoreSyncRecord = onCall({region: "europe-west1", enforceAppCheck: true}, request => runRecoveryCommand(request, "restore"));
 
 exports.getAppPresentation = onRequest(
     { region: "europe-west1", cors: false },
