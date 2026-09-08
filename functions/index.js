@@ -30,6 +30,9 @@ const {mutationDecision, validateOfflineMutation} = require("./offline-sync-serv
 const {
     RETENTION_MS, restoreDecision, safeAudit, trashDecision, validateRecoveryCommand
 } = require("./history-recovery-service");
+const {
+    accountPath, isSafeAttachmentPath, purgeDecision, unlinkProfileEmails, validatePurgeCommand
+} = require("./archive-purge-service");
 
 initializeApp();
 
@@ -130,6 +133,74 @@ async function runRecoveryCommand(request, mode) {
 
 exports.trashSyncRecord = onCall({region: "europe-west1", enforceAppCheck: true}, request => runRecoveryCommand(request, "trash"));
 exports.restoreSyncRecord = onCall({region: "europe-west1", enforceAppCheck: true}, request => runRecoveryCommand(request, "restore"));
+
+exports.purgeArchivedAccount = onCall(
+    {region: "europe-west1", enforceAppCheck: true},
+    async request => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        let command;
+        try { command = validatePurgeCommand(request.data); } catch {
+            throw new HttpsError("invalid-argument", "Comando di eliminazione non valido.");
+        }
+        const store = getFirestore();
+        const ownerUid = request.auth.uid;
+        const userRef = store.collection("users").doc(ownerUid);
+        const recordRef = store.doc(accountPath(ownerUid, command));
+        const operationRef = userRef.collection("archiveOperations").doc(command.operationId);
+        const preparation = await store.runTransaction(async transaction => {
+            const [recordSnapshot, operationSnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(operationRef)
+            ]);
+            const previous = operationSnapshot.exists ? operationSnapshot.data() : null;
+            if (previous && (previous.accountId !== command.accountId ||
+                previous.context !== command.context || previous.companyId !== command.companyId)) {
+                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            }
+            const decision = purgeDecision({
+                record: recordSnapshot.exists ? recordSnapshot.data() : null,
+                expectedRevision: command.expectedRevision,
+                confirmed: command.confirmation,
+                previous
+            });
+            if (decision.duplicate || !["ready", "resume"].includes(decision.status)) return decision;
+            if (decision.status === "resume") return decision;
+            transaction.set(operationRef, {
+                status: "processing", ownerUid, accountId: command.accountId,
+                context: command.context, companyId: command.companyId,
+                createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp()
+            }, {merge: true});
+            return decision;
+        });
+        if (preparation.duplicate) return preparation;
+        if (!["ready", "resume"].includes(preparation.status)) {
+            throw new HttpsError("failed-precondition", `Eliminazione non consentita: ${preparation.status}.`);
+        }
+
+        const attachments = await recordRef.collection("attachments").get();
+        const storagePaths = attachments.docs.map(snapshot => snapshot.data()?.storagePath).filter(Boolean);
+        if (storagePaths.some(path => !isSafeAttachmentPath(ownerUid, command, path))) {
+            throw new HttpsError("failed-precondition", "Percorso allegato non sicuro: eliminazione interrotta.");
+        }
+        const bucket = getStorage().bucket();
+        await Promise.all(storagePaths.map(path => bucket.file(path).delete({ignoreNotFound: true})));
+        await store.recursiveDelete(recordRef);
+
+        await store.runTransaction(async transaction => {
+            const profileSnapshot = await transaction.get(userRef);
+            if (command.context === "private" && profileSnapshot.exists) {
+                const existingEmails = profileSnapshot.data()?.contactEmails;
+                const unlinkedEmails = unlinkProfileEmails(existingEmails, command.accountId);
+                if (Array.isArray(unlinkedEmails)) transaction.update(userRef, {contactEmails: unlinkedEmails});
+            }
+            transaction.set(operationRef, {status: "purged", updatedAt: FieldValue.serverTimestamp()}, {merge: true});
+            transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
+                action: "account-purged", actorUid: ownerUid, accountId: command.accountId,
+                context: command.context, at: FieldValue.serverTimestamp()
+            });
+        });
+        return {status: "purged", duplicate: false};
+    }
+);
 
 exports.getAppPresentation = onRequest(
     { region: "europe-west1", cors: false },

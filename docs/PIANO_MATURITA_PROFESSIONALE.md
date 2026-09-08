@@ -220,10 +220,10 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 ### M7 — Cronologia, cestino e audit
 
-- [ ] cestino con conservazione definita;
-- [ ] ripristino e cancellazione definitiva;
-- [ ] cronologia limitata ai cambiamenti necessari;
-- [ ] audit delle azioni condivise senza registrare segreti.
+- [x] cestino con conservazione definita;
+- [~] ripristino e cancellazione definitiva implementati; manca il collaudo su copia non produttiva e la distribuzione della callable;
+- [x] cronologia limitata ai cambiamenti necessari;
+- [x] audit delle azioni condivise senza registrare segreti.
 
 **Uscita:** gli errori dell'utente e della sincronizzazione sono recuperabili.
 
@@ -292,7 +292,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M4 | completata l'08/09/2026; matrice estesa di regressione trasferita a M10 |
 | M5 | laboratorio e architettura completati; attivazione reale subordinata a collaudo fisico, M6, M8 e approvazione |
 | M6 | attiva: modello revisioni, coda cifrata e conflitti dimostrati in laboratorio |
-| M7 | attiva: cestino, ripristino e audit modellati in laboratorio |
+| M7 | attiva: cestino e purge backend integrati localmente; manca collaudo non produttivo e distribuzione |
 | M8 | attiva: formato backup e Recovery Key dimostrati in laboratorio |
 | M9 | laboratorio locale completato; UI, provider violazioni e collaudo fisico restano subordinati ai gate |
 | M10 | attiva: gate statici e procedura incidenti presenti; restano verifiche reali, matrice fisica e audit indipendente |

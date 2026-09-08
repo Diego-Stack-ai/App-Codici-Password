@@ -1,5 +1,5 @@
-import { db } from '../../firebase-config.js?v=1.2.64';
-import { deleteDoc, deleteField, doc, updateDoc, writeBatch } from '/assets/js/vendor/firebase-runtime.js';
+import { db, functions } from '../../firebase-config.js?v=1.2.64';
+import { deleteField, doc, httpsCallable, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {
     getCompany,
@@ -102,11 +102,20 @@ export async function restoreArchivedAccount(uid, account) {
 }
 
 export async function deleteArchivedAccount(uid, account) {
-    await deleteDoc(accountReference(uid, account));
+    if (!uid || !account?.id) throw new Error('Account archiviato non valido.');
+    const purgeAccount = httpsCallable(functions, 'purgeArchivedAccount');
+    const isPrivate = account.context === 'privato';
+    const result = await purgeAccount({
+        accountId: account.id,
+        operationId: crypto.randomUUID(),
+        context: isPrivate ? 'private' : 'company',
+        companyId: isPrivate ? null : account.context,
+        expectedRevision: Number.isInteger(account.revision) ? account.revision : 0,
+        confirmation: 'DELETE_FOREVER'
+    });
+    if (result.data?.status !== 'purged') throw new Error('Eliminazione definitiva non completata.');
 }
 
 export async function emptyArchivedAccounts(uid, accounts) {
-    const batch = writeBatch(db);
-    accounts.forEach(account => batch.delete(accountReference(uid, account)));
-    await batch.commit();
+    for (const account of accounts) await deleteArchivedAccount(uid, account);
 }

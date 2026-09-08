@@ -20,7 +20,7 @@ Il laboratorio `experiments/history-recovery` dimostra retention, ripristino sen
 - [x] cronologia limitata;
 - [x] Archivio Account riutilizzato come UI cestino; nuovi elementi ricevono data, scadenza a 30 giorni e revisione, mentre i record legacy non vengono eliminati automaticamente;
 - [x] Rules candidate verificate e callable atomiche/idempotenti implementate, non distribuite;
-- [ ] UI cestino e conferma forte integrate;
+- [x] conferma forte della UI collegata alla callable backend `purgeArchivedAccount`, con controllo archivio/revisione, ripresa idempotente, rimozione degli allegati confinata allo UID e scollegamento delle email del Profilo; implementazione locale non ancora distribuita;
 - [ ] prova su copia non produttiva.
 
 M7 resta attiva fino all'integrazione verificata.
