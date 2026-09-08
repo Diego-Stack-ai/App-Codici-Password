@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {applyOperation, createOperation, decryptQueuedOperation, encryptQueuedOperation, resolveConflict} from './offline-mutation-model.mjs';
+import {acquireLease, applyOperation, createOperation, decryptQueuedOperation, encryptQueuedOperation, processOperationStore, resolveConflict} from './offline-mutation-model.mjs';
 const key = () => crypto.getRandomValues(new Uint8Array(32));
 const operation = overrides => createOperation({operationId: 'device-a:1', recordId: 'record-1', deviceId: 'device-a', expectedRevision: 0, changes: {title: 'Modifica offline'}, ...overrides});
 
@@ -38,4 +38,20 @@ test('chiusura e ritorno online conservano una sola operazione applicabile', asy
   const restored = await decryptQueuedOperation(JSON.parse(persisted), queueKey);
   const result = applyOperation({records: {}, processed: []}, restored);
   assert.equal(result.result.status, 'applied'); assert.equal(result.state.records['record-1'].revision, 1);
+});
+
+test('una sola scheda possiede il lease finché non scade', () => {
+  const first = acquireLease(null, {tabId: 'tab-a', now: 1_000});
+  assert.equal(first.acquired, true);
+  assert.equal(acquireLease(first.lease, {tabId: 'tab-b', now: 2_000}).acquired, false);
+  assert.equal(acquireLease(first.lease, {tabId: 'tab-b', now: 20_000}).acquired, true);
+});
+
+test('il backend isola operationId per utente e restituisce lo stesso esito', () => {
+  const store = {records: {}, results: {}};
+  const first = processOperationStore(store, 'owner-a', operation());
+  const duplicate = processOperationStore(store, 'owner-a', operation());
+  const other = processOperationStore(store, 'owner-b', operation());
+  assert.equal(first.status, 'applied'); assert.equal(duplicate.duplicate, true);
+  assert.equal(other.status, 'applied'); assert.equal(store.records['owner-b:record-1'].revision, 1);
 });

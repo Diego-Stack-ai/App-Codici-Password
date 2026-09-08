@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(userId) { return request.auth != null && request.auth.uid == userId; }
+
+    // Scritture e confronto revisione appartengono alla callable/backend.
+    match /users/{userId}/syncRecords/{recordId} {
+      allow get: if owns(userId);
+      allow list, create, update, delete: if false;
+    }
+
+    // Esito deterministico consultabile dopo retry o riapertura dell'app.
+    match /users/{userId}/operationResults/{operationId} {
+      allow get: if owns(userId);
+      allow list, create, update, delete: if false;
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}

@@ -42,3 +42,26 @@ export function resolveConflict({localOperation, serverRecord, choice}) {
   if (choice === 'keep-server') return {status: 'discarded', record: structuredClone(serverRecord)};
   return {status: 'retry', operation: createOperation({...localOperation, operationId: `${localOperation.operationId}:retry:${serverRecord.revision}`, expectedRevision: serverRecord.revision})};
 }
+
+export function acquireLease(currentLease, {tabId, now, ttlMs = 15_000}) {
+  if (!tabId || !Number.isFinite(now) || ttlMs < 1000) throw new Error('LEASE_INPUT_INVALID');
+  if (currentLease && currentLease.tabId !== tabId && currentLease.expiresAt > now) {
+    return {acquired: false, lease: currentLease};
+  }
+  return {acquired: true, lease: {tabId, acquiredAt: now, expiresAt: now + ttlMs}};
+}
+
+export function processOperationStore(store, ownerUid, operation) {
+  if (!ownerUid || !operation?.operationId) throw new Error('BACKEND_INPUT_INVALID');
+  const scopedId = `${ownerUid}:${operation.operationId}`;
+  if (store.results[scopedId]) return {...store.results[scopedId], duplicate: true};
+  const current = store.records[`${ownerUid}:${operation.recordId}`] || {revision: 0};
+  if (current.revision !== operation.expectedRevision) {
+    return {status: 'conflict', operationId: operation.operationId, currentRevision: current.revision, duplicate: false};
+  }
+  const record = {...current, ...structuredClone(operation.changes), revision: current.revision + 1};
+  const result = {status: 'applied', operationId: operation.operationId, revision: record.revision, duplicate: false};
+  store.records[`${ownerUid}:${operation.recordId}`] = record;
+  store.results[scopedId] = result;
+  return result;
+}

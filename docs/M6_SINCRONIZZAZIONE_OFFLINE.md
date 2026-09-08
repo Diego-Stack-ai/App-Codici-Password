@@ -35,8 +35,11 @@ Il laboratorio `experiments/offline-sync` dimostra cifratura e autenticità dell
 - [x] idempotenza per `operationId`;
 - [x] conflitto esplicito tra due dispositivi;
 - [x] simulazione modalità aereo, chiusura e ritorno online;
+- [x] lease multi-tab con subentro soltanto dopo scadenza;
+- [x] isolamento degli esiti idempotenti per utente;
+- [x] Rules candidate: lettura puntuale del proprietario e scritture esclusivamente backend;
 - [ ] archivio IndexedDB e coordinamento multi-tab integrati nel runtime;
-- [ ] callable idempotente e Rules testate in emulatore;
+- [~] servizio idempotente dimostrato come modello e Rules testate in emulatore; callable non collegata;
 - [ ] collaudo fisico su due dispositivi.
 
 M6 resta attiva finché runtime e backend non dimostrano che nessuna scrittura può essere persa o sovrascritta silenziosamente.

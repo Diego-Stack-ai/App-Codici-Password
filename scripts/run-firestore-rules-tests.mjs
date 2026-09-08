@@ -7,7 +7,8 @@ const configRoot = resolve(projectRoot, '.codex-tmp', 'firebase-config');
 const firebaseCli = resolve(projectRoot, 'node_modules', 'firebase-tools', 'lib', 'bin', 'firebase.js');
 const testFiles = [
   resolve(projectRoot, 'tests', 'firestore.profile-widgets.rules.test.mjs'),
-  resolve(projectRoot, 'tests', 'sharing-prototype.rules.test.mjs')
+  resolve(projectRoot, 'tests', 'sharing-prototype.rules.test.mjs'),
+  resolve(projectRoot, 'tests', 'offline-sync.rules.test.mjs')
 ];
 mkdirSync(configRoot, {recursive: true});
 
