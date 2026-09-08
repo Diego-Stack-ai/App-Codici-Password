@@ -31,8 +31,11 @@ for (const file of files) {
 
 for (const file of textFiles.filter(file => !file.includes(`${path.sep}vendor${path.sep}`))) {
   const source = await readFile(file, 'utf8');
-  assert.doesNotMatch(source, /https:\/\/www\.gstatic\.com\/firebasejs\//,
-    `Dipendenza Firebase remota in ${path.relative(root, file)}`);
+  const isOnlinePushRuntime = file.endsWith(`${path.sep}assets${path.sep}js${path.sep}push-messaging-client.js`);
+  if (!isOnlinePushRuntime) {
+    assert.doesNotMatch(source, /https:\/\/www\.gstatic\.com\/firebasejs\//,
+      `Dipendenza Firebase remota in ${path.relative(root, file)}`);
+  }
   if (file.endsWith('.js') && !file.endsWith('offline-firestore.js')) {
     assert.doesNotMatch(source, /import\s*\{[^}]*\bgetDocs?\b[^}]*\}\s*from\s*["']\/assets\/js\/vendor\/firebase-runtime\.js["']/,
       `Lettura Firestore senza percorso cache-first in ${path.relative(root, file)}`);
@@ -50,4 +53,4 @@ assert.match(serviceWorker, /protected-media\/presentation/);
 assert.match(loginEntry, /serviceWorker\.register\('\.\/sw\.js'\)/);
 assert.ok(assetSet.has('assets/js/offline-firestore.js'), 'Adattatore Firestore offline non precaricato');
 
-console.log(`Shell offline verificata: ${assets.length} risorse locali, nessuna dipendenza Firebase CDN.`);
+console.log(`Shell offline verificata: ${assets.length} risorse locali; eccezione CDN limitata al client Push online.`);
