@@ -57,3 +57,7 @@ Il laboratorio non certifica da solo la correzione. Dopo la prova fisica, la can
 Prima prova eseguita nel browser incorporato della chat su iPhone, schermo dichiarato `393 × 852`. La sonda ha rilevato `innerHeight = 631 px`, `visualViewport = 631 px` e altezza documento `631 px`; il marcatore fissato in basso coincide con il limite del contenuto web. Il gradiente copre quindi tutta la viewport concessa alla pagina. La sottile separazione successiva al marcatore è esterna al documento e precede i controlli del browser incorporato.
 
 Questa evidenza esclude, in quel contesto, un fondale HTML più corto della viewport. Non chiude il gate: occorre ripetere la prova in modalità PWA avviata dall'icona Home, dove non esiste la barra del browser e le safe area vengono calcolate diversamente.
+
+Seconda prova eseguita dalla PWA installata: `innerHeight`, `visualViewport` e documento coincidono a `793 px`, mentre lo schermo misura `852 px`. Il marcatore raggiunge esattamente il limite dei 793 px e sotto compare una fascia alta 59 px del colore `--bg-primary`. La fascia è quindi il canvas esterno alla layout viewport che iOS colora con il fallback della radice; non deriva da contenuto insufficiente, safe-area interna, nebbia o altezza del footer.
+
+Candidata isolata da verificare nel laboratorio: lasciare il gradiente sul `body` e assegnare a `html` il colore pieno con cui termina la nebbia al bordo fisico (bianco nel tema chiaro, colore scuro equivalente nel tema dark). La candidata non modifica dimensioni, scroll, maschere o stacking.

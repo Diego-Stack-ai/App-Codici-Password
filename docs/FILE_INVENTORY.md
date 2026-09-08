@@ -69,7 +69,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/css/moduli.css` | CSS | 12660 | 481 | Stili della sezione moduli. |
 | `Frontend/public/assets/css/privacy.css` | CSS | 5464 | 257 | Stili della sezione privacy. |
 | `Frontend/public/assets/css/profilo_privato.css` | CSS | 29507 | 1226 | Stili della sezione profilo privato. |
-| `Frontend/public/assets/css/prova.css` | CSS | 1888 | 105 | Stili della sezione prova. |
+| `Frontend/public/assets/css/prova.css` | CSS | 1989 | 112 | Stili della sezione prova. |
 | `Frontend/public/assets/css/registrati.css` | CSS | 533 | 19 | Stili della sezione registrati. |
 | `Frontend/public/assets/css/regole_scadenze.css` | CSS | 3480 | 159 | Stili della sezione regole scadenze. |
 | `Frontend/public/assets/css/scadenze.css` | CSS | 9473 | 386 | Stili della sezione scadenze. |
@@ -260,7 +260,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 5111 | 60 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 5866 | 64 | Documentazione: M4 VISUAL ACCEPTANCE. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
