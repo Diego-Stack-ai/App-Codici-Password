@@ -54,7 +54,7 @@ export async function initProfiloPrivato(user) {
 }
 
 export async function initImpostazioni(user) {
-    const module = await import('./modules/settings/impostazioni.js?v=1.2.58');
+    const module = await import('./modules/settings/impostazioni.js?v=1.2.58&push=20260908b');
     await module.initImpostazioni(user);
 }
 
