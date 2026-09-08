@@ -51,7 +51,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/css/configurazione_automezzi.css` | CSS | 8027 | 371 | Stili della sezione configurazione automezzi. |
 | `Frontend/public/assets/css/configurazione_documenti.css` | CSS | 8142 | 376 | Stili della sezione configurazione documenti. |
 | `Frontend/public/assets/css/configurazione_generali.css` | CSS | 7788 | 360 | Stili della sezione configurazione generali. |
-| `Frontend/public/assets/css/core.css` | CSS | 9983 | 409 | Stili della base e dei token globali. |
+| `Frontend/public/assets/css/core.css` | CSS | 9986 | 409 | Stili della base e dei token globali. |
 | `Frontend/public/assets/css/core_fascie.css` | CSS | 8919 | 346 | Stili della sezione core fascie. |
 | `Frontend/public/assets/css/core_fonts.css` | CSS | 4599 | 136 | Stili della sezione core fonts. |
 | `Frontend/public/assets/css/core_pagine.css` | CSS | 5538 | 242 | Stili della sezione core pagine. |
@@ -260,7 +260,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/DATA_ACCESS_CONTRACT.md` | MD | 2749 | 49 | Documentazione: DATA ACCESS CONTRACT. |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
-| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 6311 | 66 | Documentazione: M4 VISUAL ACCEPTANCE. |
+| `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 6775 | 68 | Documentazione: M4 VISUAL ACCEPTANCE. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
@@ -335,7 +335,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-navigation-flows.mjs` | MJS | 10030 | 130 | Strumento manutenzione/test: audit-navigation-flows. |
 | `scripts/audit-offline-shell.mjs` | MJS | 3607 | 70 | Strumento manutenzione/test: audit-offline-shell. |
 | `scripts/audit-page-performance.mjs` | MJS | 7910 | 145 | Strumento manutenzione/test: audit-page-performance. |
-| `scripts/audit-page-shells.mjs` | MJS | 5409 | 99 | Strumento manutenzione/test: audit-page-shells. |
+| `scripts/audit-page-shells.mjs` | MJS | 5412 | 99 | Strumento manutenzione/test: audit-page-shells. |
 | `scripts/audit-project-inventory.mjs` | MJS | 8428 | 127 | Strumento manutenzione/test: audit-project-inventory. |
 | `scripts/audit-security-flows.mjs` | MJS | 31800 | 273 | Strumento manutenzione/test: audit-security-flows. |
 | `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |

@@ -84,7 +84,7 @@ const core = await readFile(new URL('assets/css/core.css', publicRoot), 'utf8');
 const bars = await readFile(new URL('assets/css/core_fascie.css', publicRoot), 'utf8');
 const access = await readFile(new URL('assets/css/accesso.css', publicRoot), 'utf8');
 assert.match(core, /\.base-bg\s*\{[\s\S]*?min-height:\s*100dvh/, 'core.css: fondale dinamico mancante');
-assert.match(core, /--viewport-edge-color:\s*#fff/, 'core.css: colore canvas chiaro mancante');
+assert.match(core, /--viewport-edge-color:\s*#ebf4fd/, 'core.css: colore canvas chiaro mancante');
 assert.match(core, /\.dark\s*\{[\s\S]*?--viewport-edge-color:\s*#0a0f1e/, 'core.css: colore canvas dark mancante');
 assert.match(core, /html\s*\{[\s\S]*?background-color:\s*var\(--viewport-edge-color\)/,
   'core.css: canvas radice non collegato al colore terminale');

@@ -88,7 +88,7 @@ body,
     --premium-border-gradient: linear-gradient(120deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(255, 255, 255, 0.6) 100%);
 
     --bg-primary: #e2e8f0;
-    --viewport-edge-color: #fff;
+    --viewport-edge-color: #ebf4fd;
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-placeholder: #475569;
