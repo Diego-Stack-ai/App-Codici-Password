@@ -93,7 +93,9 @@ async function resetLocalPushSubscription(messaging, registration) {
 }
 
 async function getTokenWithLocalRecovery(messaging, registration) {
-    const options = { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration };
+    // Il worker convenzionale è già attivo; Firebase deve associarlo internamente
+    // al proprio componente Messaging invece di ricevere una registrazione esterna.
+    const options = { vapidKey: VAPID_KEY };
     try {
         return await getToken(messaging, options);
     } catch (firstError) {
