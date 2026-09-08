@@ -55,6 +55,8 @@ invites/{inviteId}
 
 Le Scadenze nuove usano `recipients[]` con `contactId?`, `displayName`, `email`, `sendEmail`, `sendPush`, `canManage`; `emails[]`, `email1` ed `email2` restano letti come formato legacy. Per un destinatario registrato con Push o permesso di gestione, il backend mantiene una copia minima in `receivedDeadlines`: il client può leggerla ma non scriverla. La callable `manageReceivedDeadline` verifica identità, email e permesso corrente prima di segnare l'originale come completato o aggiornarne la data. Le condivisioni Account usano invece `sharedWith`, `sharedWithUids` e inviti con `recipientEmail`; gli UID accettati non sostituiscono l'email nell'interfaccia.
 
+Il backend conserva inoltre in `deadlineShares/{shareId}` l'elenco tecnico degli UID destinatari già risolti. Il client non accede a questa collezione: serve esclusivamente a eliminare in modo affidabile le copie revocate o cancellate anche quando l'email dell'utente non è più risolvibile.
+
 ## Confini offline
 
 | Operazione | Offline atteso |

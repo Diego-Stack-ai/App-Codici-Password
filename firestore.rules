@@ -20,6 +20,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Indice tecnico degli UID usato solo dal backend per revocare copie ricevute.
+    match /deadlineShares/{shareId} {
+      allow read, write: if false;
+    }
+
     match /users/{userId} {
       allow read, write: if isOwner(userId);
     }

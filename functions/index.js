@@ -221,6 +221,10 @@ function receivedDeadlineId(ownerUid, deadlineId) {
     return crypto.createHash("sha256").update(`${ownerUid}:${deadlineId}`).digest("hex").slice(0, 40);
 }
 
+function receivedDeadlineShareRef(db, ownerUid, deadlineId) {
+    return db.collection("deadlineShares").doc(receivedDeadlineId(ownerUid, deadlineId));
+}
+
 function receivedDeadlineData(owner, ownerUid, deadlineId, scadenza, recipient) {
     return {
         schemaVersion: 1,
@@ -263,6 +267,12 @@ async function syncReceivedDeadlines(db, ownerUid, deadlineId, scadenza, previou
         ? await resolveRecipientUsers(deadlineRecipients(previousScadenza), ownerUid)
         : new Map();
     const shareId = receivedDeadlineId(ownerUid, deadlineId);
+    const shareRef = receivedDeadlineShareRef(db, ownerUid, deadlineId);
+    const shareSnapshot = await shareRef.get();
+    const recordedRecipientUids = Array.isArray(shareSnapshot.data()?.recipientUids)
+        ? shareSnapshot.data().recipientUids.filter((uid) => typeof uid === "string" && uid)
+        : [];
+    for (const uid of recordedRecipientUids) previous.set(uid, previous.get(uid) || {});
     const batch = db.batch();
 
     for (const [recipientUid] of previous) {
@@ -274,6 +284,12 @@ async function syncReceivedDeadlines(db, ownerUid, deadlineId, scadenza, previou
         const ref = db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId);
         batch.set(ref, receivedDeadlineData(owner, ownerUid, deadlineId, scadenza, resolved.recipient), { merge: true });
     }
+    batch.set(shareRef, {
+        ownerUid,
+        deadlineId,
+        recipientUids: [...current.keys()],
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
     await batch.commit();
     return current;
 }
@@ -281,10 +297,17 @@ async function syncReceivedDeadlines(db, ownerUid, deadlineId, scadenza, previou
 async function removeReceivedDeadlines(db, ownerUid, deadlineId, scadenza) {
     const recipients = await resolveRecipientUsers(deadlineRecipients(scadenza), ownerUid);
     const shareId = receivedDeadlineId(ownerUid, deadlineId);
+    const shareRef = receivedDeadlineShareRef(db, ownerUid, deadlineId);
+    const shareSnapshot = await shareRef.get();
+    const recordedRecipientUids = Array.isArray(shareSnapshot.data()?.recipientUids)
+        ? shareSnapshot.data().recipientUids.filter((uid) => typeof uid === "string" && uid)
+        : [];
+    for (const uid of recordedRecipientUids) recipients.set(uid, recipients.get(uid) || {});
     const batch = db.batch();
     for (const [recipientUid] of recipients) {
         batch.delete(db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId));
     }
+    batch.delete(shareRef);
     await batch.commit();
 }
 

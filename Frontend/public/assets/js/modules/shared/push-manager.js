@@ -7,7 +7,12 @@ import { getPushDevice } from '../data/vault-repository.js';
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
 const DEVICE_ID_KEY = 'codex_push_device_id';
 const LAST_TEST_KEY = 'codex_push_last_test_at';
+const ACTIVE_SCOPES_KEY = 'codex_push_active_scopes';
 let foregroundListenerStarted = false;
+
+function rememberActiveScopes(scopes) {
+    localStorage.setItem(ACTIVE_SCOPES_KEY, JSON.stringify([...new Set(scopes.filter(Boolean))]));
+}
 
 function getDeviceId() {
     let id = localStorage.getItem(DEVICE_ID_KEY);
@@ -92,12 +97,6 @@ async function resetLocalPushSubscription(messaging, registration) {
     }
 }
 
-function technicalPushError(error) {
-    const code = String(error?.code || error?.name || '').trim();
-    const message = String(error?.message || '').trim();
-    return [code, message].filter(Boolean).join(': ');
-}
-
 async function getTokenWithLocalRecovery(messaging, registration) {
     // Il worker convenzionale è già attivo; Firebase lo associa internamente
     // al proprio componente Messaging.
@@ -111,9 +110,7 @@ async function getTokenWithLocalRecovery(messaging, registration) {
             || firstCode.includes('fid-registration');
         console.warn('[PUSH] Prima registrazione FCM fallita.', firstError);
         if (!recoverable) {
-            const details = technicalPushError(firstError);
-            const message = pushErrorMessage(firstError);
-            throw new Error(details ? `${message} [${details}]` : message);
+            throw new Error(pushErrorMessage(firstError));
         }
 
         console.warn('[PUSH] Registrazione locale non valida: eseguo un solo tentativo di ripristino.');
@@ -122,12 +119,7 @@ async function getTokenWithLocalRecovery(messaging, registration) {
             return await getToken(messaging, options);
         } catch (retryError) {
             console.error('[PUSH] Ripristino registrazione locale fallito.', retryError);
-            const firstDetails = technicalPushError(firstError);
-            const retryDetails = technicalPushError(retryError);
-            const details = [firstDetails && `primo: ${firstDetails}`, retryDetails && `secondo: ${retryDetails}`]
-                .filter(Boolean).join(' | ');
-            const message = pushErrorMessage(retryError);
-            throw new Error(details ? `${message} [${details}]` : message);
+            throw new Error(pushErrorMessage(retryError));
         }
     }
 }
@@ -138,6 +130,7 @@ export async function getCurrentPushState(user = auth.currentUser, scope = 'dead
     const device = await getPushDevice(user.uid, getDeviceId());
     const scopes = Array.isArray(device?.notificationScopes)
         ? device.notificationScopes : (device ? [device.notificationScope] : []);
+    rememberActiveScopes(device?.enabled === true ? scopes : []);
     return {
         compatible: true,
         enabled: Notification.permission === 'granted' && device?.enabled === true && scopes.includes(scope),
@@ -189,6 +182,7 @@ async function enablePushScope(scope, user = auth.currentUser) {
         updatedAt: serverTimestamp(),
         lastSeenAt: serverTimestamp()
     }, { merge: true });
+    rememberActiveScopes(notificationScopes);
     return true;
 }
 
@@ -206,10 +200,14 @@ async function disablePushScope(scope, user = auth.currentUser) {
     const scopes = Array.isArray(device?.notificationScopes)
         ? device.notificationScopes : (device?.notificationScope ? [device.notificationScope] : []);
     const remaining = scopes.filter(item => item !== scope);
-    if (remaining.length) return setDoc(deviceRef, { notificationScopes: remaining, updatedAt: serverTimestamp() }, { merge: true });
+    if (remaining.length) {
+        rememberActiveScopes(remaining);
+        return setDoc(deviceRef, { notificationScopes: remaining, updatedAt: serverTimestamp() }, { merge: true });
+    }
     const messaging = await getPushMessagingInstance();
     if (messaging) try { await deleteToken(messaging); } catch (error) { console.warn('[PUSH] Revoca token locale non riuscita', error); }
     await deleteDoc(deviceRef);
+    rememberActiveScopes([]);
 }
 
 export async function disableSharingPush(user = auth.currentUser) { return disablePushScope('sharing', user); }
@@ -230,6 +228,8 @@ export async function sendDeadlinePushTest() {
 
 export async function listenForDeadlinePushInForeground() {
     if (foregroundListenerStarted || Notification.permission !== 'granted') return;
+    const state = await getCurrentPushState(auth.currentUser, 'deadlines');
+    if (!state.enabled) return;
     const messaging = await getPushMessagingInstance();
     if (!messaging) return;
     foregroundListenerStarted = true;

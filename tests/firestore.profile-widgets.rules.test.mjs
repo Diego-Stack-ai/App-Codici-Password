@@ -74,3 +74,10 @@ test('la scadenza ricevuta è leggibile solo dal destinatario e non è scrivibil
   await assertFails(updateDoc(ownerRef, {dueDate: '2028-09-08'}));
   await assertFails(deleteDoc(ownerRef));
 });
+
+test('l’indice tecnico delle scadenze condivise non è accessibile ai client', async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER_UID).firestore();
+  const shareRef = doc(ownerDb, 'deadlineShares', 'share-1');
+  await assertFails(getDoc(shareRef));
+  await assertFails(setDoc(shareRef, {ownerUid: OWNER_UID, recipientUids: [OTHER_UID]}));
+});

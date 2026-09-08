@@ -19,6 +19,7 @@ const offlineSource = await readFile(path.join(publicDir, 'offline-assets.js'), 
 const assets = JSON.parse(offlineSource.match(/=\s*(\[[\s\S]*\]);?\s*$/)?.[1] || '[]');
 const assetSet = new Set(assets);
 const serviceWorker = await readFile(path.join(publicDir, 'sw.js'), 'utf8');
+const pushWorker = await readFile(path.join(publicDir, 'firebase-messaging-sw.js'), 'utf8');
 const loginEntry = await readFile(path.join(publicDir, 'assets/js/login-entry.js'), 'utf8');
 
 assert.ok(assets.length >= 150, `Shell offline incompleta: solo ${assets.length} risorse`);
@@ -46,7 +47,8 @@ assert.ok((await stat(path.join(publicDir, 'assets/js/vendor/firebase-runtime.js
   'Runtime Firebase browser locale assente o incompleto');
 assert.ok((await stat(path.join(publicDir, 'assets/js/vendor/firebase-sw-runtime.js'))).size > 50_000,
   'Runtime Firebase del Service Worker assente o incompleto');
-assert.match(serviceWorker, /importScripts\('\.\/assets\/js\/vendor\/firebase-sw-runtime\.js'\)/);
+assert.doesNotMatch(serviceWorker, /firebase-sw-runtime\.js|firebase\.messaging/);
+assert.match(pushWorker, /importScripts\('\.\/assets\/js\/vendor\/firebase-sw-runtime\.js'\)/);
 assert.match(serviceWorker, /Promise\.all\(APP_SHELL/);
 assert.match(serviceWorker, /APP_SHELL_PATHS\.has\(url\.pathname\)/);
 assert.match(serviceWorker, /protected-media\/presentation/);

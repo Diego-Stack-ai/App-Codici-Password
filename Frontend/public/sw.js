@@ -1,74 +1,7 @@
 const CACHE_NAME = 'codex-shell-v1.2.58';
 const APP_CACHE_PREFIX = 'codex-';
 
-importScripts('./assets/js/vendor/firebase-sw-runtime.js');
 importScripts('./offline-assets.js');
-
-firebase.initializeApp({
-    apiKey: 'AIzaSyDDt-PacoHtUQg6Ow7-1UxvrGVZLXVYx-o',
-    authDomain: 'appcodici-password.firebaseapp.com',
-    projectId: 'appcodici-password',
-    storageBucket: 'appcodici-password.firebasestorage.app',
-    messagingSenderId: '343696844738',
-    appId: '1:343696844738:web:3e62fa1fdd9375535b985b'
-});
-
-firebase.messaging().onBackgroundMessage((payload) => {
-    if (!['deadline', 'external_deadline', 'share_invite'].includes(payload.data?.eventType)) return;
-    return self.registration.showNotification(payload.data.title || 'Codici & Password', {
-        body: payload.data.body || 'Hai una scadenza in arrivo.',
-        icon: './assets/images/app-icon-192.png',
-        badge: './assets/images/app-icon-192.png',
-        tag: payload.data.deliveryTag || `deadline-${payload.data.deadlineId || 'reminder'}`,
-        renotify: true,
-        timestamp: Date.now(),
-        data: {
-            eventType: payload.data.eventType,
-            deadlineId: payload.data.deadlineId || '',
-            receivedDeadlineId: payload.data.receivedDeadlineId || '',
-            notificationId: payload.data.notificationId || ''
-        }
-    });
-});
-
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    if (!['deadline', 'external_deadline', 'share_invite'].includes(event.notification.data?.eventType)) return;
-    if (event.notification.data.eventType !== 'deadline') {
-        const receivedDeadlineId = encodeURIComponent(event.notification.data.receivedDeadlineId || '');
-        const path = event.notification.data.eventType === 'share_invite'
-            ? '/home_page.html'
-            : receivedDeadlineId
-                ? `/dettaglio_scadenza.html?received=${receivedDeadlineId}`
-                : '/scadenze.html';
-        const target = new URL(path, self.location.origin).href;
-        event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
-            const existing = windows.find((client) => client.url.startsWith(self.location.origin));
-            if (existing) {
-                try { const navigated = await existing.navigate(target); return navigated ? navigated.focus() : existing.focus(); }
-                catch (error) { console.warn('[PUSH] Navigazione finestra esistente non riuscita', error); }
-            }
-            return self.clients.openWindow(target);
-        }));
-        return;
-    }
-    const deadlineId = encodeURIComponent(event.notification.data?.deadlineId || '');
-    const notificationId = encodeURIComponent(event.notification.data?.notificationId || '');
-    const query = notificationId ? `&notification=${notificationId}` : '';
-    const target = new URL(deadlineId ? `/dettaglio_scadenza.html?id=${deadlineId}${query}` : '/scadenze.html', self.location.origin).href;
-    event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
-        const existing = windows.find((client) => client.url.startsWith(self.location.origin));
-        if (existing) {
-            try {
-                const navigated = await existing.navigate(target);
-                return navigated ? navigated.focus() : existing.focus();
-            } catch (error) {
-                console.warn('[PUSH] Navigazione finestra esistente non riuscita', error);
-            }
-        }
-        return self.clients.openWindow(target);
-    }));
-});
 
 // Manifest generato dalla build: tutte le pagine e dipendenze statiche della
 // release sono disponibili senza richiedere che l'utente le visiti prima.

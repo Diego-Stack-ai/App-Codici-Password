@@ -28,6 +28,11 @@ esplicito `/firebase-cloud-messaging-push-scope` e non importa `sw.js`. Firestor
 cache locale persistente multi-tab. Cache della shell, cache dati e messaggistica hanno quindi
 responsabilità distinte.
 
+`sw.js` non inizializza più Firebase Messaging e non gestisce notifiche: questa responsabilità è
+esclusiva del worker Push. Il runtime online del listener in primo piano viene caricato soltanto sui
+dispositivi che risultano localmente abilitati; il primo controllo migra in modo conservativo le
+registrazioni precedenti.
+
 ## Flussi principali verificati
 
 1. Login: `login-v115.html` → `login-entry.js` → `modules/auth/login.js` → `auth.js`.

@@ -40,6 +40,7 @@ const cloudFunctions = await read('functions/index.js');
 const manifest = JSON.parse(await read('Frontend/public/manifest.json'));
 const resetPasswordModule = await read('Frontend/public/assets/js/modules/auth/reset_password.js');
 const pushManager = await read('Frontend/public/assets/js/modules/shared/push-manager.js');
+const pushWorker = await read('Frontend/public/firebase-messaging-sw.js');
 const cryptoUtils = await read('Frontend/public/assets/js/modules/core/crypto-utils.js');
 const coreUi = await read('Frontend/public/assets/js/ui-core-v129.js');
 const homeBootstrap = await read('Frontend/public/assets/js/home-bootstrap.js');
@@ -86,7 +87,8 @@ assert.match(offlineAssets, /assets\/css\/home_page\.css/, 'Lo stile della home 
 assert.match(offlineAssets, /assets\/css\/accesso\.css/, 'Lo stile del login non è precaricato per l’avvio PWA');
 assert.match(offlineAssets, /assets\/js\/vendor\/firebase-runtime\.js/, 'Il runtime Firebase locale non è precaricato');
 assert.doesNotMatch(firebaseConfig, /www\.gstatic\.com\/firebasejs/, 'Firebase dipende ancora dal CDN durante l’avvio');
-assert.match(serviceWorker, /firebase-sw-runtime\.js/, 'Il Service Worker dipende ancora dal runtime Firebase remoto');
+assert.doesNotMatch(serviceWorker, /firebase-sw-runtime\.js|firebase\.messaging|onBackgroundMessage/, 'Il worker PWA contiene ancora responsabilità Push');
+assert.match(pushWorker, /firebase-sw-runtime\.js[\s\S]*onBackgroundMessage/, 'Il worker Push dedicato non gestisce i messaggi Firebase');
 assert.match(serviceWorker, /Promise\.all\(APP_SHELL/, 'La shell offline accetta ancora installazioni parziali');
 assert.match(loginEntry, /serviceWorker\.register\('\.\/sw\.js'\)/, 'Il login non prepara la PWA per il successivo avvio offline');
 assert.match(offlineSync, /aziende[\s\S]*scadenze[\s\S]*settings/, 'La sincronizzazione preventiva non include i dati principali');
@@ -206,8 +208,10 @@ assert.match(auth, /consumePasswordResetPolicyMarker\(updatedUser\)/, 'Il login 
 assert.match(resetPasswordModule, /auth\/network-request-failed[\s\S]*?Connessione assente/, 'Il recupero password non distingue un errore di rete reale');
 assert.match(settings, /auth\/user-token-expired[\s\S]*?requireSecurityReauthentication/, 'La disattivazione 2FA non gestisce il token scaduto');
 assert.match(auth, /reauthFlow === 'security-settings'[\s\S]*?impostazioni\.html/, 'La riautenticazione 2FA non torna alle Impostazioni');
-assert.match(pushManager, /getToken\(messaging[\s\S]*?serviceWorkerRegistration/, 'La correzione sicurezza ha rimosso la registrazione push');
-assert.match(serviceWorker, /onBackgroundMessage[\s\S]*?eventType !== 'deadline'/, 'La correzione sicurezza ha alterato le notifiche push di scadenza');
+assert.match(pushManager, /register\('\/firebase-messaging-sw\.js'[\s\S]*?firebase-cloud-messaging-push-scope/, 'La registrazione non usa il worker Push dedicato');
+assert.match(pushWorker, /onBackgroundMessage[\s\S]*?external_deadline/, 'Il worker dedicato non gestisce le notifiche di scadenza ricevute');
+assert.doesNotMatch(pushManager, /throw new Error\([^\n]*technicalPushError|\$\{details\}/, 'La UI Push può ancora esporre dettagli tecnici grezzi');
+assert.match(cloudFunctions, /deadlineShares[\s\S]*?recipientUids/, 'La revoca delle scadenze ricevute non conserva gli UID risolti');
 
 assert.match(cloudFunctions, /exports\.createMfaRecoveryCodes = onCall/, 'Generazione server dei codici recupero 2FA mancante');
 assert.match(cloudFunctions, /exports\.recoverMfaWithCode = onCall/, 'Recupero 2FA server mancante');

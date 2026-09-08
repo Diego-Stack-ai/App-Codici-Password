@@ -217,7 +217,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     // Le Push di scadenza devono essere visualizzate anche quando
                     // l'app è aperta su una pagina diversa dalle Impostazioni.
-                    if (navigator.onLine) {
+                    const pushScopes = localStorage.getItem('codex_push_active_scopes');
+                    const legacyPushCandidate = pushScopes === null
+                        && Boolean(localStorage.getItem('codex_push_device_id'));
+                    let pushEnabledHere = legacyPushCandidate;
+                    if (pushScopes) {
+                        try { pushEnabledHere = JSON.parse(pushScopes).includes('deadlines'); }
+                        catch { localStorage.removeItem('codex_push_active_scopes'); }
+                    }
+                    if (navigator.onLine
+                        && 'Notification' in window
+                        && Notification.permission === 'granted'
+                        && pushEnabledHere) {
                         // Il listener non produce contenuto necessario alla pagina:
                         // inizializzarlo in background evita di ritardare il primo render.
                         void import('./modules/shared/push-manager.js')
