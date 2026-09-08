@@ -26,6 +26,7 @@ const {
     recoveryAttemptId,
     recoveryCodeHash
 } = require("./recovery-security");
+const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
 
 initializeApp();
 
@@ -35,6 +36,49 @@ const firestore = () => getFirestore();
 firestore.FieldValue = FieldValue;
 const admin = { auth: getAuth, firestore, messaging: getMessaging };
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
+
+exports.applyOfflineMutation = onCall(
+    {region: "europe-west1", enforceAppCheck: true},
+    async (request) => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        let operation;
+        try {
+            operation = validateOfflineMutation(request.data);
+        } catch {
+            throw new HttpsError("invalid-argument", "Operazione offline non valida.");
+        }
+        const store = getFirestore();
+        const userRef = store.collection("users").doc(request.auth.uid);
+        const recordRef = userRef.collection("syncRecords").doc(operation.recordId);
+        const resultRef = userRef.collection("operationResults").doc(operation.operationId);
+        return store.runTransaction(async (transaction) => {
+            const [recordSnapshot, resultSnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(resultRef)
+            ]);
+            const currentRevision = Number(recordSnapshot.data()?.revision || 0);
+            const decision = mutationDecision(
+                currentRevision, operation, resultSnapshot.exists ? resultSnapshot.data() : null
+            );
+            if (decision.duplicate) return decision;
+            if (decision.status === "applied") {
+                transaction.set(recordRef, {
+                    schemaVersion: 1,
+                    revision: decision.revision,
+                    encryptedPayload: operation.encryptedPayload,
+                    lastOperationId: operation.operationId,
+                    updatedAt: FieldValue.serverTimestamp()
+                }, {merge: true});
+            }
+            transaction.set(resultRef, {
+                ...decision,
+                ownerUid: request.auth.uid,
+                deviceId: operation.deviceId,
+                createdAt: FieldValue.serverTimestamp()
+            });
+            return decision;
+        });
+    }
+);
 
 exports.getAppPresentation = onRequest(
     { region: "europe-west1", cors: false },

@@ -2,13 +2,52 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **313**. Duplicati byte-per-byte: **1 gruppi**.
+
+## functions
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `functions/offline-sync-service.js` | JS | 1451 | 34 | File di progetto: offline-sync-service. |
+| `functions/test/offline-sync-service.test.js` | JS | 1273 | 24 | Test automatico: offline-sync-service.test. |
+| `functions/.gitignore` | CONFIG | 21 | 2 | Esclusioni Git per file generati o locali. |
+| `functions/eslint.config.js` | JS | 544 | 25 | File di progetto: eslint.config. |
+| `functions/index.js` | JS | 58081 | 1174 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
+| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
+| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
+| `functions/recovery-security.js` | JS | 1887 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
+| `functions/test/recovery-security.test.js` | JS | 1398 | 35 | Test automatico: recovery-security.test. |
+
+## .firebaserc
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.firebaserc` | CONFIG | 60 | 6 | Associa Firebase CLI al progetto appcodici-password. |
+
+## .github
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.github/copilot-instructions.md` | MD | 1318 | 24 | Documentazione: copilot-instructions. |
+| `.github/workflows/firebase-deploy.yml` | YML | 1102 | 41 | File di progetto: firebase-deploy. |
+
+## .gitignore
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.gitignore` | CONFIG | 1564 | 84 | Esclusioni Git per file generati o locali. |
+
+## .vscode
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
+| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
 
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 5944 | 141 | Supporto frontend: offline-mutation-queue. |
 | `Frontend/GUIDA.md` | MD | 60951 | 979 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 40518 | 477 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3784 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
@@ -105,6 +144,7 @@ File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/core/security-manager.js` | JS | 23255 | 561 | Orchestrazione Master Password, envelope Vault e sblocco biometrico. |
 | `Frontend/public/assets/js/modules/core/vault-session.js` | JS | 3206 | 84 | Sessione Vault cifrata e limitata alla scheda/browser session. |
 | `Frontend/public/assets/js/modules/core/webauthn-manager.js` | JS | 7279 | 237 | Registrazione e uso WebAuthn/PRF della credenziale locale. |
+| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 5944 | 141 | Supporto frontend: offline-mutation-queue. |
 | `Frontend/public/assets/js/modules/data/request-coordinator.js` | JS | 672 | 16 | Supporto frontend: request-coordinator. |
 | `Frontend/public/assets/js/modules/data/vault-repository.js` | JS | 5211 | 104 | Supporto frontend: vault-repository. |
 | `Frontend/public/assets/js/modules/home/home-deadline-dashboard.js` | JS | 2682 | 67 | Supporto frontend: home-deadline-dashboard. |
@@ -214,55 +254,6 @@ File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/sw.js` | JS | 3930 | 95 | Service worker: shell offline, cache runtime, push in background e deep link. |
 | `Frontend/public/termini.html` | HTML | 11549 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
 
-## tests
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `tests/offline-mutation-queue.test.mjs` | MJS | 2560 | 51 | Test automatico: offline-mutation-queue.test. |
-| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
-| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
-| `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
-| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
-| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
-| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
-| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
-| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3789 | 84 | Test automatico: firestore.profile-widgets.rules.test. |
-| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
-| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
-| `tests/offline-sync.rules.test.mjs` | MJS | 2098 | 42 | Test automatico: offline-sync.rules.test. |
-| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
-| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
-| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
-| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 3971 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
-| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
-| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
-
-## .firebaserc
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.firebaserc` | CONFIG | 60 | 6 | Associa Firebase CLI al progetto appcodici-password. |
-
-## .github
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.github/copilot-instructions.md` | MD | 1318 | 24 | Documentazione: copilot-instructions. |
-| `.github/workflows/firebase-deploy.yml` | YML | 1102 | 41 | File di progetto: firebase-deploy. |
-
-## .gitignore
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.gitignore` | CONFIG | 1564 | 84 | Esclusioni Git per file generati o locali. |
-
-## .vscode
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
-| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
-
 ## archive
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -290,7 +281,7 @@ File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19152 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10156 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6027 | 113 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 2780 | 46 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 2797 | 46 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
@@ -338,18 +329,6 @@ File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
 |---|---:|---:|---:|---|
 | `firestore.rules` | RULES | 7337 | 169 | Autorizzazioni Firestore per proprietari, condivisioni, inviti e notifiche. |
 
-## functions
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `functions/.gitignore` | CONFIG | 21 | 2 | Esclusioni Git per file generati o locali. |
-| `functions/eslint.config.js` | JS | 544 | 25 | File di progetto: eslint.config. |
-| `functions/index.js` | JS | 56070 | 1130 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
-| `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
-| `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
-| `functions/recovery-security.js` | JS | 1887 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
-| `functions/test/recovery-security.test.js` | JS | 1398 | 35 | Test automatico: recovery-security.test. |
-
 ## package-lock.json
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -360,7 +339,7 @@ File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 4712 | 69 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 4746 | 69 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
@@ -404,6 +383,29 @@ File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
 | `stylelint.config.mjs` | MJS | 510 | 17 | File di progetto: stylelint.config. |
+
+## tests
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
+| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
+| `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
+| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
+| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
+| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
+| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
+| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3789 | 84 | Test automatico: firestore.profile-widgets.rules.test. |
+| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
+| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
+| `tests/offline-mutation-queue.test.mjs` | MJS | 2560 | 51 | Test automatico: offline-mutation-queue.test. |
+| `tests/offline-sync.rules.test.mjs` | MJS | 2098 | 42 | Test automatico: offline-sync.rules.test. |
+| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
+| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
+| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
+| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 3971 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
+| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
+| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
 
 ## Duplicati esatti
 
