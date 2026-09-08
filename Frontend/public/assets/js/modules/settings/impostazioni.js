@@ -42,10 +42,87 @@ export async function initImpostazioni(user) {
     setupPerformanceDiagnostics();
     setupEncryptedBackup(user);
     setupEncryptedRestore(user);
+    setupCredentialHealth(user);
     await setupPushSettings(user);
     showPendingSecurityNotice();
 
     
+}
+
+function showCredentialHealthResults(report) {
+    const flagLabels = {weak: 'Debole', duplicate: 'Duplicata', dated: 'Datata'};
+    const modal = createElement('div', {className: 'modal-overlay'});
+    const closeButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Chiudi'});
+    closeButton.addEventListener('click', () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    });
+    const list = createElement('div', {className: 'credential-health-list'});
+    if (!report.results.length) {
+        list.appendChild(createElement('p', {
+            className: 'credential-health-empty',
+            textContent: 'Nessuna password debole, duplicata o datata rilevata.'
+        }));
+    } else {
+        report.results.forEach(item => {
+            const context = item.area === 'azienda'
+                ? `Azienda${item.companyName ? ` · ${item.companyName}` : ''}`
+                : 'Privato';
+            const tags = createElement('div', {className: 'credential-health-tags'},
+                item.flags.map(flag => createElement('span', {
+                    className: `credential-health-tag credential-health-${flag}`,
+                    textContent: flagLabels[flag] || flag
+                }))
+            );
+            list.appendChild(createElement('div', {className: 'credential-health-result'}, [
+                createElement('div', {className: 'credential-health-identity'}, [
+                    createElement('strong', {textContent: item.title}),
+                    createElement('span', {textContent: context})
+                ]),
+                tags
+            ]));
+        });
+    }
+    const unavailable = report.unavailable
+        ? ` · ${report.unavailable} non leggibili`
+        : '';
+    modal.appendChild(createElement('div', {className: 'modal-box credential-health-modal'}, [
+        createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'health_and_safety'}),
+        createElement('h3', {className: 'modal-title', textContent: 'Salute credenziali'}),
+        createElement('p', {
+            className: 'modal-text',
+            textContent: `${report.scanned} password controllate · ${report.atRisk} Account da verificare${unavailable}. Analisi eseguita soltanto in memoria.`
+        }),
+        list,
+        createElement('p', {
+            className: 'credential-health-privacy',
+            textContent: 'Il controllo delle violazioni online non è attivo. Nessuna password o impronta viene salvata.'
+        }),
+        createElement('div', {className: 'modal-actions'}, [closeButton])
+    ]));
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function setupCredentialHealth(user) {
+    const button = document.getElementById('btn-credential-health');
+    if (!button) return;
+    button.addEventListener('click', async () => {
+        button.disabled = true;
+        showToast('Sblocca la Vault per avviare il controllo locale…', 'info');
+        try {
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js');
+            const report = await inspectOwnerCredentialHealth(user.uid);
+            showCredentialHealthResults(report);
+        } catch (error) {
+            if (error?.message !== 'USER_CANCELLED') {
+                console.warn('[CREDENTIAL HEALTH] Analisi non disponibile.', error?.message);
+                showToast('Controllo non completato. Nessun dato è stato salvato.', 'error');
+            }
+        } finally {
+            button.disabled = false;
+        }
+    });
 }
 
 function setupEncryptedRestore(user) {

@@ -790,3 +790,73 @@ h3.settings-desc {
     height: 1.25rem;
     flex: 0 0 auto;
 }
+
+.credential-health-modal {
+    width: min(92vw, 38rem);
+    max-height: min(82dvh, 46rem);
+}
+
+.credential-health-list {
+    display: grid;
+    gap: 0.6rem;
+    width: 100%;
+    max-height: 42dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.credential-health-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.credential-health-identity {
+    display: grid;
+    min-width: 0;
+    text-align: left;
+}
+
+.credential-health-identity strong,
+.credential-health-identity span {
+    overflow-wrap: anywhere;
+}
+
+.credential-health-identity span,
+.credential-health-privacy,
+.credential-health-empty {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.credential-health-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.35rem;
+}
+
+.credential-health-tag {
+    padding: 0.2rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.credential-health-weak { background: rgba(239, 68, 68, 0.16); color: #dc2626; }
+.credential-health-duplicate { background: rgba(245, 158, 11, 0.18); color: #b45309; }
+.credential-health-dated { background: rgba(99, 102, 241, 0.16); color: #4f46e5; }
+
+.credential-health-privacy {
+    margin: 0.75rem 0 0;
+}
+
+@media (max-width: 600px) {
+    .credential-health-result { align-items: flex-start; flex-direction: column; }
+    .credential-health-tags { justify-content: flex-start; }
+}

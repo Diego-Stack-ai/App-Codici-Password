@@ -293,8 +293,8 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M5 | laboratorio e architettura completati; attivazione reale subordinata a collaudo fisico, M6, M8 e approvazione |
 | M6 | attiva: modello revisioni, coda cifrata e conflitti dimostrati in laboratorio |
 | M7 | attiva: cestino e purge backend integrati localmente; manca collaudo non produttivo e distribuzione |
-| M8 | attiva: esportazione runtime e callable di ripristino integrate localmente; mancano lettore file, distribuzione e collaudo non produttivo |
-| M9 | laboratorio locale completato; UI, provider violazioni e collaudo fisico restano subordinati ai gate |
+| M8 | attiva: esportazione e ripristino cifrati completi nel runtime locale, compresi lettore in due passaggi, allegati e callable transazionale; mancano distribuzione e collaudo non produttivo |
+| M9 | attiva: laboratorio e UI locale su richiesta completati; provider violazioni resta disattivato in attesa di valutazione privacy e manca il collaudo fisico |
 | M10 | attiva: gate statici e procedura incidenti presenti; restano verifiche reali, matrice fisica e audit indipendente |
 | Post-M10 | revisione lingue e riordino per gruppi della pagina Impostazioni |
 

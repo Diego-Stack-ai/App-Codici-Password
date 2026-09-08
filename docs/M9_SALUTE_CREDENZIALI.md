@@ -17,8 +17,10 @@ Autofill ed estensione browser costituiscono un progetto separato: richiedono as
 - [x] contratto k-anonimo definito e testato senza rete;
 - [x] passkey servizio distinta dalla passkey di sblocco Vault;
 - [x] autofill separato dal progetto PWA e dal percorso critico;
-- [ ] integrazione UI caricata su richiesta dopo lo sblocco;
+- [x] integrazione UI caricata su richiesta dopo lo sblocco: analisi Web Crypto in memoria di Account privati e aziendali, senza persistenza di password o impronte;
 - [ ] verifica privacy e sicurezza del provider prima di abilitare il controllo violazioni;
 - [ ] collaudo fisico e accessibile su iPhone e Windows.
 
 M9 non abilita automaticamente alcuna integrazione esterna.
+
+Per i record correnti la data dedicata `passwordUpdatedAt` ha precedenza. Nei record legacy che non la possiedono, `updatedAt` è usata soltanto come stima prudenziale dell'ultimo salvataggio delle credenziali; una futura modifica dello schema dovrà aggiornare la data dedicata esclusivamente quando cambia la password.
