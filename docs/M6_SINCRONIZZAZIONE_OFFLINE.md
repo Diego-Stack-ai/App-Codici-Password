@@ -38,7 +38,7 @@ Il laboratorio `experiments/offline-sync` dimostra cifratura e autenticità dell
 - [x] lease multi-tab con subentro soltanto dopo scadenza;
 - [x] isolamento degli esiti idempotenti per utente;
 - [x] Rules candidate: lettura puntuale del proprietario e scritture esclusivamente backend;
-- [ ] archivio IndexedDB e coordinamento multi-tab integrati nel runtime;
+- [x] modulo runtime IndexedDB cifrato, Web Locks e BroadcastChannel implementato e testato, non ancora collegato ai form;
 - [~] servizio idempotente dimostrato come modello e Rules testate in emulatore; callable non collegata;
 - [ ] collaudo fisico su due dispositivi.
 

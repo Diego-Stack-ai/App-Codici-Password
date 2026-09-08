@@ -2,81 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **309**. Duplicati byte-per-byte: **1 gruppi**.
-
-## experiments
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `experiments/offline-sync/firestore.candidate.rules` | RULES | 690 | 22 | File di progetto: firestore.candidate. |
-| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
-| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
-| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
-| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
-| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
-| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
-| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
-| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4593 | 68 | File di progetto: offline-mutation-model. |
-| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3901 | 58 | File di progetto: offline-mutation-model.test. |
-| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
-| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
-| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5789 | 139 | File di progetto: record-sharing-crypto. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3594 | 70 | File di progetto: record-sharing-crypto.test. |
-| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1655 | 53 | File di progetto: storage.candidate. |
-
-## tests
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `tests/offline-sync.rules.test.mjs` | MJS | 2098 | 42 | Test automatico: offline-sync.rules.test. |
-| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
-| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
-| `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
-| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
-| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
-| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
-| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
-| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3789 | 84 | Test automatico: firestore.profile-widgets.rules.test. |
-| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
-| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
-| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
-| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
-| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
-| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 3971 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
-| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
-| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
-
-## .firebaserc
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.firebaserc` | CONFIG | 60 | 6 | Associa Firebase CLI al progetto appcodici-password. |
-
-## .github
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.github/copilot-instructions.md` | MD | 1318 | 24 | Documentazione: copilot-instructions. |
-| `.github/workflows/firebase-deploy.yml` | YML | 1102 | 41 | File di progetto: firebase-deploy. |
-
-## .gitignore
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.gitignore` | CONFIG | 1564 | 84 | Esclusioni Git per file generati o locali. |
-
-## .vscode
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
-| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
+File censiti: **311**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## Frontend
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
+| `Frontend/public/assets/js/modules/data/offline-mutation-queue.js` | JS | 5944 | 141 | Supporto frontend: offline-mutation-queue. |
 | `Frontend/GUIDA.md` | MD | 60951 | 979 | Documentazione: GUIDA. |
 | `Frontend/GUIDA_AGGIORNAMENTI.md` | MD | 40518 | 477 | Documentazione: GUIDA AGGIORNAMENTI. |
 | `Frontend/public/account_azienda.html` | HTML | 3784 | 82 | Struttura della pagina account azienda; comportamento demandato ai moduli. |
@@ -282,6 +214,55 @@ File censiti: **309**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/sw.js` | JS | 3930 | 95 | Service worker: shell offline, cache runtime, push in background e deep link. |
 | `Frontend/public/termini.html` | HTML | 11549 | 226 | Struttura della pagina termini; comportamento demandato ai moduli. |
 
+## tests
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `tests/offline-mutation-queue.test.mjs` | MJS | 2560 | 51 | Test automatico: offline-mutation-queue.test. |
+| `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
+| `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
+| `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
+| `tests/crypto-utils.test.mjs` | MJS | 1512 | 35 | Test automatico: crypto-utils.test. |
+| `tests/deadline-config-model.test.mjs` | MJS | 2078 | 45 | Test automatico: deadline-config-model.test. |
+| `tests/deadline-model.test.mjs` | MJS | 2165 | 44 | Test automatico: deadline-model.test. |
+| `tests/deadline-recipient-model.test.mjs` | MJS | 3752 | 83 | Test automatico: deadline-recipient-model.test. |
+| `tests/firestore.profile-widgets.rules.test.mjs` | MJS | 3789 | 84 | Test automatico: firestore.profile-widgets.rules.test. |
+| `tests/fixtures/maturity-dataset.json` | JSON | 2269 | 90 | Test automatico: maturity-dataset. |
+| `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
+| `tests/offline-sync.rules.test.mjs` | MJS | 2098 | 42 | Test automatico: offline-sync.rules.test. |
+| `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
+| `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
+| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
+| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 3971 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
+| `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
+| `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
+
+## .firebaserc
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.firebaserc` | CONFIG | 60 | 6 | Associa Firebase CLI al progetto appcodici-password. |
+
+## .github
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.github/copilot-instructions.md` | MD | 1318 | 24 | Documentazione: copilot-instructions. |
+| `.github/workflows/firebase-deploy.yml` | YML | 1102 | 41 | File di progetto: firebase-deploy. |
+
+## .gitignore
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.gitignore` | CONFIG | 1564 | 84 | Esclusioni Git per file generati o locali. |
+
+## .vscode
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `.vscode/launch.json` | JSON | 286 | 13 | File di progetto: launch. |
+| `.vscode/settings.json` | JSON | 42 | 3 | File di progetto: settings. |
+
 ## archive
 
 | File | Tipo | Byte | Righe | Responsabilità |
@@ -309,7 +290,7 @@ File censiti: **309**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 19152 | 207 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/M5_INVENTARIO_DATI_CONDIVISI.md` | MD | 10156 | 118 | Documentazione: M5 INVENTARIO DATI CONDIVISI. |
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6027 | 113 | Documentazione: M5 PIANO INTEGRAZIONE. |
-| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 2731 | 46 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
+| `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 2780 | 46 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
@@ -317,6 +298,27 @@ File censiti: **309**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
 | `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
+
+## experiments
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
+| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
+| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
+| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
+| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
+| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
+| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
+| `experiments/offline-sync/firestore.candidate.rules` | RULES | 690 | 22 | File di progetto: firestore.candidate. |
+| `experiments/offline-sync/offline-mutation-model.mjs` | MJS | 4593 | 68 | File di progetto: offline-mutation-model. |
+| `experiments/offline-sync/offline-mutation-model.test.mjs` | MJS | 3901 | 58 | File di progetto: offline-mutation-model.test. |
+| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
+| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
+| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5789 | 139 | File di progetto: record-sharing-crypto. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 3594 | 70 | File di progetto: record-sharing-crypto.test. |
+| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1655 | 53 | File di progetto: storage.candidate. |
 
 ## firebase.json
 
@@ -358,7 +360,7 @@ File censiti: **309**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 4674 | 69 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 4712 | 69 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 
