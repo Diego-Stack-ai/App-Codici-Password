@@ -40,7 +40,7 @@
     "test:js-syntax": "node scripts/audit-js-syntax.mjs",
     "test:crypto": "node --test tests/crypto-utils.test.mjs",
     "test:attachments": "node --test tests/attachment-security.test.mjs",
-    "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs tests/shared-record-reader.test.mjs tests/sharing-identity.test.mjs",
+    "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs tests/shared-record-reader.test.mjs tests/sharing-identity.test.mjs tests/sharing-two-device.test.mjs",
     "test:offline-write-prototype": "node --test experiments/offline-sync/*.test.mjs tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs",
     "test:history-prototype": "node --test experiments/history-recovery/*.test.mjs",
     "test:backup-prototype": "node --test experiments/backup-recovery/*.test.mjs",
