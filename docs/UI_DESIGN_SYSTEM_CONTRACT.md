@@ -19,7 +19,7 @@ La struttura di viewport, fondale, contenitori, area scorrevole, fasce e spaziat
 - Token tipografici: `assets/css/core_fonts.css`.
 - Header e footer: `assets/css/core_fascie.css` e `components-v129.js`.
 - Controlli, modali e stati condivisi: `assets/css/core_ui.css`.
-- Campi dei form: `assets/css/moduli.css`; composizione comune dei form Account Privato/Azienda: `assets/css/account_form.css`; fondazioni comuni dei dettagli Account Privato/Azienda: `assets/css/account_detail.css`.
+- Campi dei form: `assets/css/moduli.css`; composizione comune dei form Account Privato/Azienda: `assets/css/account_form.css`; fondazioni comuni dei dettagli Account Privato/Azienda: `assets/css/account_detail.css`; primitive comuni di Dati azienda e Modifica azienda: `assets/css/azienda_shared.css`.
 - Card e righe Account: `modules/shared/account-list-view.js`.
 - Campi sensibili: `modules/shared/card-secret.js`.
 - Stati di pagina: `modules/shared/ui-state-view.js`.

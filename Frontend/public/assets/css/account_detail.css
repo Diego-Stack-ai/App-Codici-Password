@@ -104,18 +104,6 @@
     gap: 0.5rem;
 }
 
-.icon-accent-blue {
-    color: var(--accent);
-}
-
-.icon-accent-emerald {
-    color: var(--status-success);
-}
-
-.icon-accent-amber {
-    color: var(--status-warning);
-}
-
 .base-shield {
     -webkit-text-security: disc;
 }

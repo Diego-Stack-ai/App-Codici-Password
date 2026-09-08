@@ -12,6 +12,7 @@ self.__OFFLINE_ASSETS = [
   "assets/css/aggiungi_scadenza.css",
   "assets/css/archivio_account.css",
   "assets/css/area_privata.css",
+  "assets/css/azienda_shared.css",
   "assets/css/configurazione_automezzi.css",
   "assets/css/configurazione_documenti.css",
   "assets/css/configurazione_generali.css",

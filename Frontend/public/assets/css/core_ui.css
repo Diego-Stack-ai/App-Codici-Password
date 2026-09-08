@@ -329,6 +329,14 @@
     color: var(--accent);
 }
 
+.icon-accent-emerald {
+    color: var(--status-success);
+}
+
+.icon-accent-amber {
+    color: var(--status-warning);
+}
+
 .icon-accent-orange {
     color: var(--status-warning);
 }
