@@ -97,6 +97,36 @@ La validazione completa in GitHub Actions è terminata con esito positivo, compr
 Una verifica diretta sul sito pubblicato ha confermato la presenza del nuovo parametro `receivedDeadlineId`, del percorso `dettaglio_scadenza.html?received=...` e dei comandi di gestione. Resta da eseguire il collaudo funzionale con i due account reali descritto sopra.
 
 
+## Collaudo finale richiesto con i due account reali
+
+Per verificare l'intero percorso occorre usare una notifica generata dopo il deploy del 08/09/2026. Le notifiche già presenti sul dispositivo non contengono il nuovo identificativo `receivedDeadlineId` e continueranno ad aprire il vecchio percorso.
+
+Procedura:
+
+1. Dal proprietario creare una nuova scadenza dentro la finestra di preavviso.
+2. Aggiungere il secondo utente come destinatario.
+3. Lasciare attivi **Email** e **Push**.
+4. Attivare **Può gestire** e salvare.
+5. Dal dispositivo del destinatario premere il nuovo Push.
+6. Verificare l'apertura diretta del dettaglio ricevuto, anche quando è necessario effettuare prima il login.
+7. Verificare che la scadenza compaia nell'elenco con **Ricevuta da…** e **Puoi gestire**, senza comandi di eliminazione o archiviazione.
+8. Provare **Segna come gestita** e controllare l'avviso Push al proprietario.
+9. In una seconda prova inserire la prossima data e premere **Conferma e aggiorna**.
+10. Controllare nell'account proprietario che la data originale sia stata aggiornata e che il nuovo ciclo di promemoria possa ripartire.
+
+Per provare la modalità limitata, lasciare **Può gestire** disattivato mantenendo il Push attivo: il destinatario deve poter consultare la copia ricevuta, ma non completarla né cambiarne la data.
+
+### Riferimenti pubblicati
+
+- Commit applicativo: `2529d1659cb1c7a745f4cd64eaa2af5c93d3f456` — `feat(deadlines): add managed received deadlines`.
+- Commit documentazione deploy: `e63315e8e529431863a5bb541e78baa7eb90e091`.
+- Test completi GitHub Actions: superati.
+- Cloud Functions coinvolte: distribuite prima dell'interfaccia.
+- Hosting, Firestore Rules e Storage: distribuiti con successo.
+- Verifica sul sito pubblicato: presenti il nuovo deep link, `receivedDeadlineId` e i comandi di gestione.
+- Il workflow temporaneo usato per il deploy prudenziale delle Functions è stato rimosso dal ramo operativo; resta recuperabile nella cronologia Git.
+
+
 ## Nota importante sulla copia locale
 
 Questo lavoro è stato eseguito direttamente sul repository GitHub, saltando la normale lavorazione nella cartella locale del PC.
