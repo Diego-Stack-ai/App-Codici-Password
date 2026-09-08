@@ -239,10 +239,10 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 ### M9 — Salute credenziali e integrazioni
 
-- [ ] controllo locale di password deboli, duplicate e datate;
-- [ ] controllo violazioni soltanto con protocollo privacy verificato;
-- [ ] studio separato di estensione browser/autofill e protezione phishing;
-- [ ] passkey dei servizi come tipo di dato distinto dalla passkey di sblocco Vault.
+- [x] controllo locale di password deboli, duplicate e datate dimostrato nel laboratorio;
+- [~] protocollo k-anonimo modellato senza rete; provider e privacy restano da verificare prima dell'attivazione;
+- [x] estensione browser/autofill separata dalla PWA e subordinata a protezione phishing e audit dedicato;
+- [x] passkey dei servizi definita come tipo di dato distinto dalla passkey di sblocco Vault.
 
 **Uscita:** nessuna integrazione riduce la sicurezza o appesantisce il bootstrap.
 
@@ -294,7 +294,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M6 | attiva: modello revisioni, coda cifrata e conflitti dimostrati in laboratorio |
 | M7 | attiva: cestino, ripristino e audit modellati in laboratorio |
 | M8 | attiva: formato backup e Recovery Key dimostrati in laboratorio |
-| M9 | da valutare dopo il core |
+| M9 | laboratorio locale completato; UI, provider violazioni e collaudo fisico restano subordinati ai gate |
 | M10 | da avviare dopo stabilizzazione architetturale |
 | Post-M10 | revisione lingue e riordino per gruppi della pagina Impostazioni |
 
