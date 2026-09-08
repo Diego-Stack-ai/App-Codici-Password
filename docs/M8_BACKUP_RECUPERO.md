@@ -15,8 +15,10 @@ Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso 
 - [x] Recovery Key distinta progettata e testata;
 - [x] identità proprietario vincolata al contenitore;
 - [x] Emergency Access separato esplicitamente;
-- [ ] esportazione streaming con allegati e manifest;
-- [ ] importazione in staging e ripristino transazionale;
+- [x] manifest allegati con riferimenti, dimensioni e digest verificati nel laboratorio;
+- [x] importazione isolata in staging e piano transazionale con blocco collisioni nel laboratorio;
+- [ ] esportazione streaming integrata con gli allegati reali;
+- [ ] ripristino transazionale integrato nel backend;
 - [ ] collaudo fisico esporta/cancella/ripristina su copia non produttiva.
 
 M8 resta attiva fino alla prova reale di ripristino.
