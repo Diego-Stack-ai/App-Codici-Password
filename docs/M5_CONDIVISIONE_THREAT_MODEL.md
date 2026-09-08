@@ -184,7 +184,7 @@ Il laboratorio cifra ogni allegato con una chiave-file casuale e avvolge quest'u
 
 La prova offline conferma il limite del modello: un destinatario revocato che aveva già envelope e ciphertext della generazione precedente può continuare a leggere quella copia. La chiave precedente non apre però la revisione ricifrata con la generazione successiva. UI e documentazione dovranno spiegare che revocare impedisce l'accesso futuro, non cancella copie già viste o esportate.
 
-L'inventario verificato dei percorsi e dei dati è conservato in `M5_INVENTARIO_DATI_CONDIVISI.md`.
+L'inventario verificato dei percorsi e dei dati è conservato in `M5_INVENTARIO_DATI_CONDIVISI.md`; ordine di cutover, doppio lettore e rollback sono definiti in `M5_PIANO_INTEGRAZIONE.md`.
 
 ## Gate di M5
 
@@ -197,7 +197,7 @@ L'inventario verificato dei percorsi e dei dati è conservato in `M5_INVENTARIO_
 - [x] dimostrare rotazione dopo revoca e comportamento della copia offline già consegnata;
 - [x] dimostrare nell'emulatore le ACL Firestore candidate senza modificare le Rules di produzione;
 - [x] dimostrare nell'emulatore l'accesso Storage tramite lo stesso grant e la stessa generazione;
-- [~] definire lettore retrocompatibile, backup e rollback; contratto e simulatore pronti, integrazione runtime non avviata;
+- [x] definire doppio lettore retrocompatibile, stati di migrazione e rollback; integrazione runtime non attivata;
 - [x] provare la trasformazione e il rollback sul dataset fittizio M0;
 - [ ] modificare la produzione soltanto dopo approvazione esplicita.
 

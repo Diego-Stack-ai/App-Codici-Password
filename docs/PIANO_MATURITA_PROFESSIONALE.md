@@ -290,7 +290,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M2 | completata il 06/09/2026 |
 | M3 | completata il 06/09/2026 |
 | M4 | completata l'08/09/2026; matrice estesa di regressione trasferita a M10 |
-| M5 | attiva: threat model e verifica del materiale di decifratura |
+| M5 | laboratorio e architettura completati; attivazione reale subordinata a collaudo fisico, M6, M8 e approvazione |
 | M6 | sola consultazione offline parzialmente operativa |
 | M7 | da avviare |
 | M8 | da avviare |
