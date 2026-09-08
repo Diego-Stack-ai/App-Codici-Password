@@ -6,6 +6,8 @@ Il backup è un file cifrato, autenticato e versionato. L'intestazione espone so
 
 Il laboratorio usa 192 bit casuali, PBKDF2-SHA256 a 600.000 iterazioni e AES-GCM-256 con intestazione autenticata. Prima di scrivere dati, l'importazione valida formato, versione, proprietario e autenticità. Il ripristino definitivo dovrà usare staging, confronto e transazione, mai sovrascrivere direttamente il Vault attivo.
 
+Il formato runtime v2 usa righe cifrate AES-GCM concatenate da numero di sequenza e digest del blocco precedente. Consente una scrittura progressiva, limita la memoria al record o allegato corrente e rende rilevabili manomissione, riordino e troncamento tramite il footer finale autenticato. Il formato v1 resta esclusivamente una fixture di laboratorio.
+
 Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso verificabile. Non viene abilitato implicitamente dalla Recovery Key.
 
 ## Gate
@@ -18,6 +20,7 @@ Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso 
 - [x] manifest allegati con riferimenti, dimensioni e digest verificati nel laboratorio;
 - [x] importazione isolata in staging e piano transazionale con blocco collisioni nel laboratorio;
 - [x] contratto backend dei chunk di ripristino: allowlist delle collezioni, percorsi costruiti dallo UID autenticato, limiti per record/chunk, collisioni e idempotenza verificati;
+- [x] formato runtime v2 incrementale, autenticato e concatenato implementato e verificato;
 - [ ] esportazione streaming integrata con gli allegati reali;
 - [ ] ripristino transazionale integrato nel backend;
 - [ ] collaudo fisico esporta/cancella/ripristina su copia non produttiva.

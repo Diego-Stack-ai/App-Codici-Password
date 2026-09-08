@@ -43,7 +43,7 @@
     "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs tests/shared-record-reader.test.mjs tests/sharing-identity.test.mjs tests/sharing-two-device.test.mjs",
     "test:offline-write-prototype": "node --test experiments/offline-sync/*.test.mjs tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs",
     "test:history-prototype": "node --test experiments/history-recovery/*.test.mjs tests/archive-account-model.test.mjs",
-    "test:backup-prototype": "node --test experiments/backup-recovery/*.test.mjs",
+    "test:backup-prototype": "node --test experiments/backup-recovery/*.test.mjs tests/backup-crypto-runtime.test.mjs",
     "test:credential-health-prototype": "node --test experiments/credential-health/*.test.mjs",
     "test:release-hardening": "node scripts/audit-release-hardening.mjs",
     "test:functions-security": "node --check functions/index.js && node --check functions/recovery-security.js && node --check functions/offline-sync-service.js && node --check functions/history-recovery-service.js && node --check functions/archive-purge-service.js && node --check functions/backup-restore-service.js && node functions/node_modules/eslint/bin/eslint.js --config functions/eslint.config.js functions && node --test functions/test/*.test.js",
