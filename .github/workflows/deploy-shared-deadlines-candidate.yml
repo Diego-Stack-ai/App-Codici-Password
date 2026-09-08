@@ -34,8 +34,4 @@ jobs:
         run: npm test
 
       - name: Deploy deadline Functions before frontend
-        run: >-
-          node node_modules/firebase-tools/lib/bin/firebase.js deploy
-          --only functions:manageReceivedDeadline,functions:onScadenzaCreated,
-          functions:onScadenzaUpdated,functions:onScadenzaDeleted,functions:checkDeadlines
-          --token ${{ secrets.FIREBASE_TOKEN }}
+        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --only "functions:manageReceivedDeadline,functions:onScadenzaCreated,functions:onScadenzaUpdated,functions:onScadenzaDeleted,functions:checkDeadlines" --token ${{ secrets.FIREBASE_TOKEN }}
