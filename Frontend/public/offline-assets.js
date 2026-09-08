@@ -92,6 +92,8 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/core/security-manager.js",
   "assets/js/modules/core/vault-session.js",
   "assets/js/modules/core/webauthn-manager.js",
+  "assets/js/modules/data/offline-mutation-queue.js",
+  "assets/js/modules/data/offline-mutation-sync.js",
   "assets/js/modules/data/request-coordinator.js",
   "assets/js/modules/data/vault-repository.js",
   "assets/js/modules/home/home-deadline-dashboard.js",

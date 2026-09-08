@@ -248,11 +248,11 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 ### M10 — Hardening e rilascio maturo
 
-- [ ] threat model finale e checklist OWASP pertinente;
-- [ ] dipendenze, CSP, App Check e Rules verificate in produzione;
+- [~] checklist tecnica e threat model consolidati; revisione OWASP finale e audit indipendente ancora richiesti;
+- [~] dipendenze, CSP, App Check e Rules coperti da gate statici/emulatori; verifica in produzione ancora richiesta;
 - [ ] test end-to-end su iPhone, Windows e browser supportati;
 - [ ] audit esterno indipendente quando il modello crittografico è stabile;
-- [ ] guida utente, privacy, recupero e risposta agli incidenti.
+- [~] procedura di recupero e risposta agli incidenti aggiunta; guida utente e revisione privacy finali ancora richieste.
 
 **Uscita:** release candidata documentata, misurata e ripristinabile.
 
@@ -295,7 +295,7 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M7 | attiva: cestino, ripristino e audit modellati in laboratorio |
 | M8 | attiva: formato backup e Recovery Key dimostrati in laboratorio |
 | M9 | laboratorio locale completato; UI, provider violazioni e collaudo fisico restano subordinati ai gate |
-| M10 | da avviare dopo stabilizzazione architetturale |
+| M10 | attiva: gate statici e procedura incidenti presenti; restano verifiche reali, matrice fisica e audit indipendente |
 | Post-M10 | revisione lingue e riordino per gruppi della pagina Impostazioni |
 
 Questo documento è la fonte principale del programma di maturazione. `GUIDA.md` resta il contratto tecnico e di sicurezza; `GUIDA_AGGIORNAMENTI.md` registra decisioni e avanzamento delle release.
