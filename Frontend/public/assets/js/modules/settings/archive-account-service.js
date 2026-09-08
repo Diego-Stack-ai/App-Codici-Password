@@ -1,5 +1,5 @@
 import { db } from '../../firebase-config.js?v=1.2.64';
-import { deleteDoc, doc, updateDoc, writeBatch } from '/assets/js/vendor/firebase-runtime.js';
+import { deleteDoc, deleteField, doc, updateDoc, writeBatch } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {
     getCompany,
@@ -92,7 +92,13 @@ export async function loadArchivedAccounts(uid, context = 'all') {
 }
 
 export async function restoreArchivedAccount(uid, account) {
-    await updateDoc(accountReference(uid, account), { isArchived: false });
+    await updateDoc(accountReference(uid, account), {
+        isArchived: false,
+        archiveSchemaVersion: deleteField(),
+        archivedAt: deleteField(),
+        purgeAfter: deleteField(),
+        revision: Number.isInteger(account.revision) ? account.revision + 1 : 1
+    });
 }
 
 export async function deleteArchivedAccount(uid, account) {

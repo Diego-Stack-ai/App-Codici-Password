@@ -18,6 +18,7 @@ Il laboratorio `experiments/history-recovery` dimostra retention, ripristino sen
 - [x] ripristino senza sovrascrittura silenziosa;
 - [x] audit con allowlist e senza segreti;
 - [x] cronologia limitata;
+- [x] Archivio Account riutilizzato come UI cestino; nuovi elementi ricevono data, scadenza a 30 giorni e revisione, mentre i record legacy non vengono eliminati automaticamente;
 - [x] Rules candidate verificate e callable atomiche/idempotenti implementate, non distribuite;
 - [ ] UI cestino e conferma forte integrate;
 - [ ] prova su copia non produttiva.

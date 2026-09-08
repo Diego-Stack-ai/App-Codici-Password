@@ -14,6 +14,7 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {getRecordByPath, getUserProfile, listAcceptedInvites, listPrivateAccounts} from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
+import {createArchiveMetadata} from '../settings/archive-account-model.js';
 
 // --- STATE ---
 let allAccounts = [];
@@ -267,7 +268,8 @@ async function handleArchive(item) {
     const id = item.dataset.id;
     if (item.dataset.owner !== 'true') { showToast(t('error_only_owner_archive'), "error"); filterAndRender(); return; }
     try {
-        await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), { isArchived: true });
+        const account = allAccounts.find(candidate => candidate.id === id);
+        await updateDoc(doc(db, "users", currentUser.uid, "accounts", id), createArchiveMetadata(account));
         showToast(t('success_archived'));
         allAccounts = allAccounts.filter(a => a.id !== id);
         filterAndRender();
@@ -298,4 +300,3 @@ async function handleDelete(item) {
         filterAndRender();
     } catch (e) { logError("Delete", e); }
 }
-
