@@ -16,6 +16,11 @@ assert.equal(header('X-Frame-Options'), 'DENY', 'X-Frame-Options deve negare il 
 assert.equal(header('X-Content-Type-Options'), 'nosniff', 'X-Content-Type-Options mancante');
 assert.match(csp, /frame-ancestors 'none'/, 'CSP frame-ancestors mancante');
 assert.doesNotMatch(csp, /unsafe-eval/, 'CSP non deve consentire unsafe-eval');
+const scriptPolicy = csp.match(/(?:^|;)\s*script-src\s+([^;]+)/)?.[1] ?? '';
+assert.doesNotMatch(scriptPolicy, /'unsafe-inline'/, 'CSP script-src non deve consentire script inline');
+assert.match(csp, /(?:^|;)\s*object-src 'none'/, 'CSP object-src deve negare i plugin');
+assert.match(csp, /(?:^|;)\s*base-uri 'self'/, 'CSP base-uri deve essere confinata');
+assert.match(csp, /(?:^|;)\s*form-action 'self'/, 'CSP form-action deve essere confinata');
 assert.match(firestore, /request\.auth\.uid/, 'Firestore Rules senza vincolo UID');
 assert.match(storage, /request\.auth\.uid/, 'Storage Rules senza vincolo UID');
 assert.equal(packageLock.lockfileVersion >= 3, true, 'package-lock obsoleto');

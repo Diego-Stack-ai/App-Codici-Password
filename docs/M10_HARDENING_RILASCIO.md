@@ -4,7 +4,7 @@
 
 Il gate automatico controlla header di sicurezza Hosting, assenza di `unsafe-eval`, protezione anti-framing, vincoli UID nelle Rules, App Check obbligatorio su tutte le callable e lockfile moderno. La suite completa comprende inoltre sintassi, dipendenze circolari, CSP/riferimenti statici, sicurezza dei dati, emulatori Firestore e Storage e tutti i laboratori M5–M9.
 
-L'audit del 08/09/2026 rileva zero vulnerabilità note nelle dipendenze di produzione. La CSP contiene ancora `unsafe-inline` per script e stili: è un debito esplicito. Va eliminato pagina per pagina mediante file statici, nonce o hash, con test di regressione; non deve essere rimosso globalmente senza migrazione.
+L'audit del 08/09/2026 rileva zero vulnerabilità note nelle dipendenze di produzione. Le pagine non contengono script inline e la CSP non concede più `unsafe-inline` a `script-src`; sono inoltre vincolati `base-uri`, `object-src` e `form-action`. `unsafe-inline` resta per i soli stili perché alcuni componenti runtime impostano ancora proprietà visive dinamiche: è un debito esplicito da eliminare componente per componente, senza una rimozione globale non collaudata.
 
 ## Gate che richiedono ambiente reale
 
