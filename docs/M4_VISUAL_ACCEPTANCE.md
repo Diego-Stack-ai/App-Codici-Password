@@ -69,3 +69,7 @@ Il primo collaudo della Home `v1.2.60` ha eliminato il grigio ma ha mostrato una
 Il collaudo della Home `v1.2.61` conferma la continuità esatta del tema chiaro: sopra e sotto il confine il valore centrale è `rgb(235 244 253)`. Nel tema scuro resta invece una differenza misurabile fra il terminale interno `rgb(12 19 38)` e il canvas esterno `rgb(9 15 29)`. La candidata dark è pertanto affinata a `#0c1326`, mantenendo invariati nebbia e layout.
 
 La successiva verifica iPhone della Home ha confermato la continuità anche in tema scuro e l'utente ha approvato colori ed effetto nebbia senza ulteriori variazioni. Il sotto-gate iPhone resta da completare sulle altre pagine e con tastiera/modale; il sotto-gate Windows non è ancora certificato. M4 rimane quindi formalmente aperta, senza rimettere in discussione la soluzione grafica approvata.
+
+### Verifica Windows preliminare — 8 settembre 2026
+
+La pagina Area privata della release pubblicata `v1.2.62`, aperta in Chrome con finestra desktop massimizzata, presenta fondale continuo, fasce allineate al contenitore e nessun salto della barra di scorrimento. Il contenuto visibile non era sufficientemente lungo per esercitare lo scroll e questa prova non copre la finestra ridotta a circa `390px`. La verifica Windows completa resta quindi aperta. I quattro watermark aggiunti alle altre pagine lista richiedono inoltre la pubblicazione dei commit locali prima del collaudo visivo.
