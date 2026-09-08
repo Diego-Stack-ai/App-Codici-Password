@@ -199,6 +199,145 @@
     transform: scale(1.1);
 }
 
+/* Coordinate bancarie e carte collegate in sola lettura. */
+.banking-card {
+    position: relative;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: var(--surface-glass);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.banking-subcard {
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: var(--surface-glass);
+}
+
+.dark .banking-subcard {
+    background: var(--surface-glass);
+}
+
+.banking-header {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.banking-index {
+    color: var(--status-success);
+    font: var(--font-caption);
+    font-weight: var(--font-strong-weight);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.bank-account-card {
+    position: relative;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.bank-header {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.bank-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bank-expand-icon {
+    color: var(--status-success);
+    font-size: var(--icon-xs);
+    transition: transform 0.2s;
+}
+
+.bank-title {
+    color: var(--status-success);
+    font-size: var(--fs-micro);
+    font-weight: var(--font-strong-weight);
+    text-transform: uppercase;
+}
+
+.bank-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.bank-cards-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bank-cards-header {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-entry {
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--surface-glass);
+}
+
+.card-entry-header {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.card-entry-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-entry-icon {
+    color: var(--status-success);
+    font-size: var(--icon-xs);
+    transition: transform 0.2s;
+}
+
+.card-entry-label {
+    color: var(--status-success);
+    font-size: var(--fs-micro);
+    font-weight: var(--font-strong-weight);
+    text-transform: uppercase;
+}
+
 @media (max-width: 600px) {
     .form-grid-2 {
         grid-template-columns: 1fr;

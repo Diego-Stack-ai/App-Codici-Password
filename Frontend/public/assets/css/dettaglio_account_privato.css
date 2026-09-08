@@ -539,50 +539,6 @@
     opacity: 0;
 }
 
-.banking-card {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--surface-glass);
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    position: relative;
-}
-
-.banking-subcard {
-    background: var(--surface-glass);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.dark .banking-subcard {
-    background: var(--surface-glass);
-}
-
-.banking-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding-bottom: 0.5rem;
-}
-
-.banking-index {
-    font: var(--font-caption);
-    font-weight: var(--font-strong-weight);
-    color: var(--status-success);
-    /* emerald-500 */
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
 .banking-field-box {
     background: var(--surface-glass);
     padding: 0.625rem;
@@ -739,66 +695,6 @@
 }
 
 /* --- 10. BANKING CARDS (READONLY) --- */
-.bank-account-card {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    position: relative;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
-    margin-bottom: 1rem;
-}
-
-.bank-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-}
-
-.bank-header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.bank-expand-icon {
-    font-size: var(--icon-xs);
-    color: var(--status-success);
-    transition: transform 0.2s;
-}
-
-.bank-title {
-    font-size: var(--fs-micro);
-    font-weight: var(--font-strong-weight);
-    text-transform: uppercase;
-    color: var(--status-success);
-}
-
-.bank-details {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    animation: fadeIn 0.3s ease;
-}
-
-.bank-cards-section {
-    margin-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding-top: 1rem;
-}
-
-.bank-cards-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-}
-
 .bank-cards-title,
 .bank-cards-label {
     font-size: var(--fs-micro);
@@ -809,37 +705,3 @@
 }
 
 /* --- 11. CARDS LIST (READONLY) --- */
-.card-entry {
-    background: var(--surface-glass);
-    padding: 1rem;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    margin-bottom: 0.75rem;
-}
-
-.card-entry-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-    cursor: pointer;
-}
-
-.card-entry-title-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.card-entry-icon {
-    font-size: var(--icon-xs);
-    color: var(--status-success);
-    transition: transform 0.2s;
-}
-
-.card-entry-label {
-    font-size: var(--fs-micro);
-    font-weight: var(--font-strong-weight);
-    text-transform: uppercase;
-    color: var(--status-success);
-}
