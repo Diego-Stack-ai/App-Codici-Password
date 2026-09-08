@@ -89,6 +89,14 @@ Il collaudo con i due utenti reali ha confermato che e-mail e Push arrivano corr
 
 Il bottone blu non dipende più dall'interpretazione automatica di Gmail, Outlook o Apple Mail: viene generato esplicitamente nel template e-mail. Il test finale da effettuare dopo il deploy deve coprire creazione, click sul Push, apertura dopo login, sola lettura, gestione autorizzata, aggiornamento della data e avviso al proprietario.
 
+
+### Stato della distribuzione
+
+La validazione completa in GitHub Actions è terminata con esito positivo, comprese le prove delle Firestore Rules nell'emulatore. Sono state distribuite prima le Cloud Functions coinvolte (`manageReceivedDeadline`, `onScadenzaCreated`, `onScadenzaUpdated`, `onScadenzaDeleted`, `checkDeadlines`) e solo dopo il loro successo sono stati pubblicati Hosting, regole Firestore e Storage dal ramo `master`.
+
+Una verifica diretta sul sito pubblicato ha confermato la presenza del nuovo parametro `receivedDeadlineId`, del percorso `dettaglio_scadenza.html?received=...` e dei comandi di gestione. Resta da eseguire il collaudo funzionale con i due account reali descritto sopra.
+
+
 ## Nota importante sulla copia locale
 
 Questo lavoro è stato eseguito direttamente sul repository GitHub, saltando la normale lavorazione nella cartella locale del PC.
