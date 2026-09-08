@@ -14,7 +14,8 @@ export function normalizeDeadlineRecipient(recipient = {}, { defaultSendEmail = 
         displayName: String(recipient.displayName || recipient.name || '').trim(),
         contactId: String(recipient.contactId || '').trim(),
         sendEmail: recipient.sendEmail === undefined ? defaultSendEmail : recipient.sendEmail === true,
-        sendPush: recipient.sendPush === true
+        sendPush: recipient.sendPush === true,
+        canManage: recipient.canManage === true
     };
 }
 
@@ -55,7 +56,8 @@ export function mergeDeadlineRecipient(recipients, candidate) {
         displayName: existing.displayName || normalized.displayName,
         contactId: existing.contactId || normalized.contactId,
         sendEmail: existing.sendEmail === true || normalized.sendEmail,
-        sendPush: existing.sendPush === true || normalized.sendPush
+        sendPush: existing.sendPush === true || normalized.sendPush,
+        canManage: existing.canManage === true || normalized.canManage
     };
     const next = [...recipients];
     next[index] = merged;

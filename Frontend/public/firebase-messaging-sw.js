@@ -22,6 +22,7 @@ firebase.messaging().onBackgroundMessage((payload) => {
         data: {
             eventType: payload.data.eventType,
             deadlineId: payload.data.deadlineId || '',
+            receivedDeadlineId: payload.data.receivedDeadlineId || '',
             notificationId: payload.data.notificationId || ''
         }
     });
@@ -31,7 +32,12 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     const data = event.notification.data || {};
     let path = '/home_page.html';
-    if (data.eventType === 'deadline' || data.eventType === 'external_deadline') {
+    if (data.eventType === 'external_deadline') {
+        const receivedDeadlineId = encodeURIComponent(data.receivedDeadlineId || '');
+        path = receivedDeadlineId
+            ? `/dettaglio_scadenza.html?received=${receivedDeadlineId}`
+            : '/scadenze.html';
+    } else if (data.eventType === 'deadline') {
         const deadlineId = encodeURIComponent(data.deadlineId || '');
         const notificationId = encodeURIComponent(data.notificationId || '');
         const query = notificationId ? `&notification=${notificationId}` : '';

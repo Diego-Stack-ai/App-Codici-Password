@@ -15,7 +15,7 @@ import { t } from '../../translations.js';
 import { initComponents } from '../../components-v129.js?v=1.2.58';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
-import {listDeadlines} from '../data/vault-repository.js';
+import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
 
 let currentUser = null;
 let allScadenze = [];
@@ -108,7 +108,7 @@ export async function initScadenze(user) {
     await loadScadenze();
 
     // Inizializzazione SwipeList (V6)
-    new SwipeList('.deadline-card', {
+    new SwipeList('.deadline-card-owned', {
         threshold: 0.25,
         onSwipeRight: (item) => archiveScadenza(item.dataset.id),
         onSwipeLeft: (item) => deleteScadenza(item.dataset.id)
@@ -125,7 +125,14 @@ export async function initScadenze(user) {
 async function loadScadenze() {
     if (!currentUser) return;
     try {
-        allScadenze = await getScadenze(currentUser.uid);
+        const [owned, received] = await Promise.all([
+            listDeadlines(currentUser.uid),
+            listReceivedDeadlines(currentUser.uid)
+        ]);
+        allScadenze = [
+            ...owned.map(item => ({ ...item, received: false })),
+            ...received.map(item => ({ ...item, received: true }))
+        ];
         renderFilteredScadenze();
     } catch (error) {
         logError("Scadenze Page", error);
@@ -134,10 +141,6 @@ async function loadScadenze() {
             setChildren(scadenzeContainer, p);
         }
     }
-}
-
-async function getScadenze(userId) {
-    return listDeadlines(userId);
 }
 
 function renderFilteredScadenze() {
@@ -176,7 +179,10 @@ function renderFilteredScadenze() {
         const q = searchQuery.toLowerCase();
         filtered = filtered.filter(s => {
             const presentation = deadlinePresentation(s);
-            return [presentation.title, presentation.category, presentation.owner, presentation.vehicle, s.veicolo_targa]
+            return [
+                presentation.title, presentation.category, presentation.owner,
+                presentation.vehicle, s.veicolo_targa, s.ownerLabel
+            ]
                 .some(value => String(value || '').toLowerCase().includes(q));
         });
     }
@@ -244,7 +250,15 @@ function createScadenzaCard(scadenza) {
         createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
     ]);
 
-    const { owner: cardOwner, category: cardCategory, vehicleLabel: cardVehicle } = deadlinePresentation(scadenza);
+    const presentation = deadlinePresentation(scadenza);
+    const cardOwner = scadenza.received
+        ? `Ricevuta da ${scadenza.ownerLabel || 'un utente'}`
+        : presentation.owner;
+    const cardCategory = presentation.category;
+    const permissionLabel = scadenza.permission === 'manage' ? 'Puoi gestire' : 'Solo avviso';
+    const cardVehicle = scadenza.received
+        ? [presentation.vehicle, permissionLabel].filter(Boolean).join(' · ')
+        : presentation.vehicleLabel;
 
     // 2. CONTENUTO VISIBILE (Sopra)
     const swipeContent = createElement('div', { className: 'swipe-content' }, [
@@ -269,13 +283,15 @@ function createScadenzaCard(scadenza) {
     ]);
 
     const card = createElement('div', {
-        className: `deadline-card ${stateClass}`,
+        className: `deadline-card ${scadenza.received ? 'deadline-card-received' : 'deadline-card-owned'} ${stateClass}`,
         dataset: {
             id: scadenza.id,
             action: 'navigate',
-            href: `dettaglio_scadenza.html?id=${scadenza.id}`
+            href: scadenza.received
+                ? `dettaglio_scadenza.html?received=${encodeURIComponent(scadenza.id)}`
+                : `dettaglio_scadenza.html?id=${encodeURIComponent(scadenza.id)}`
         }
-    }, [bgArchive, bgDelete, swipeContent]);
+    }, scadenza.received ? [swipeContent] : [bgArchive, bgDelete, swipeContent]);
 
     card.onclick = () => {
         window.location.href = card.dataset.href;

@@ -35,4 +35,5 @@ test('il modello destinatari copre canali attivi e destinatario sospeso', () => 
   const recipients = data.deadlines.flatMap(deadline => deadline.recipients || []);
   assert.ok(recipients.some(item => item.sendEmail && item.sendPush));
   assert.ok(recipients.some(item => !item.sendEmail && !item.sendPush));
+  assert.ok(recipients.some(item => item.canManage));
 });

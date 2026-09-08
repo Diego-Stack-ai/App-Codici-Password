@@ -1,7 +1,7 @@
 import {after, before, test} from 'node:test';
 import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {deleteDoc, doc, getDoc, setDoc} from 'firebase/firestore';
+import {deleteDoc, doc, getDoc, setDoc, updateDoc} from 'firebase/firestore';
 
 const PROJECT_ID = 'codici-password-rules-test';
 const OWNER_UID = 'owner-user';
@@ -49,4 +49,28 @@ test('i contatti sono gestibili dal proprietario ma la cancellazione diretta è 
   }));
   await assertSucceeds(getDoc(contactRef));
   await assertFails(deleteDoc(contactRef));
+});
+
+test('la scadenza ricevuta è leggibile solo dal destinatario e non è scrivibile dal client', async () => {
+  await testEnv.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'users', OWNER_UID, 'receivedDeadlines', 'received-1'), {
+      ownerUid: OTHER_UID,
+      sourceDeadlineId: 'deadline-1',
+      recipientEmail: 'owner@example.com',
+      permission: 'manage',
+      dueDate: '2027-09-08',
+    });
+  });
+  const ownerRef = doc(
+    testEnv.authenticatedContext(OWNER_UID).firestore(),
+    'users', OWNER_UID, 'receivedDeadlines', 'received-1'
+  );
+  const otherRef = doc(
+    testEnv.authenticatedContext(OTHER_UID).firestore(),
+    'users', OWNER_UID, 'receivedDeadlines', 'received-1'
+  );
+  await assertSucceeds(getDoc(ownerRef));
+  await assertFails(getDoc(otherRef));
+  await assertFails(updateDoc(ownerRef, {dueDate: '2028-09-08'}));
+  await assertFails(deleteDoc(ownerRef));
 });

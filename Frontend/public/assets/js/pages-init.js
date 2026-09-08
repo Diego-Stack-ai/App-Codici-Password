@@ -104,17 +104,17 @@ export async function initDettaglioAccountPrivato(user) {
 
 // --- 4. MODULI SCADENZE ---
 export async function initScadenze(user) {
-    const module = await import('./modules/scadenze/scadenze.js');
+    const module = await import('./modules/scadenze/scadenze.js?deadline-share=20260908a');
     await module.initScadenze(user);
 }
 
 export async function initAggiungiScadenza(user) {
-    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=1.2.58');
+    const module = await import('./modules/scadenze/aggiungi_scadenza.js?v=1.2.58&deadline-share=20260908a');
     await module.initAggiungiScadenza(user);
 }
 
 export async function initDettaglioScadenza(user) {
-    const module = await import('./modules/scadenze/dettaglio_scadenza.js');
+    const module = await import('./modules/scadenze/dettaglio_scadenza.js?deadline-share=20260908a');
     await module.initDettaglioScadenza(user);
 }
 

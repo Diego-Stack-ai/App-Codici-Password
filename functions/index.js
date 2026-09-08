@@ -8,7 +8,7 @@
  */
 
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentDeleted, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
@@ -210,10 +210,82 @@ function deadlineRecipients(scadenza) {
             email,
             displayName: String(item?.displayName || item?.name || previous?.displayName || "").trim().slice(0, 120),
             sendEmail: (previous?.sendEmail === true) || item?.sendEmail !== false,
-            sendPush: (previous?.sendPush === true) || item?.sendPush === true
+            sendPush: (previous?.sendPush === true) || item?.sendPush === true,
+            canManage: (previous?.canManage === true) || item?.canManage === true
         });
     }
     return [...unique.values()];
+}
+
+function receivedDeadlineId(ownerUid, deadlineId) {
+    return crypto.createHash("sha256").update(`${ownerUid}:${deadlineId}`).digest("hex").slice(0, 40);
+}
+
+function receivedDeadlineData(owner, ownerUid, deadlineId, scadenza, recipient) {
+    return {
+        schemaVersion: 1,
+        ownerUid,
+        ownerLabel: String(owner.displayName || owner.email || "Utente").trim().slice(0, 120),
+        sourceDeadlineId: deadlineId,
+        recipientEmail: recipient.email,
+        permission: recipient.canManage ? "manage" : "view",
+        name: String(scadenza.name || "").slice(0, 160),
+        type: String(scadenza.type || scadenza.category || "Scadenza").slice(0, 160),
+        title: String(scadenza.title || "").slice(0, 200),
+        veicolo_modello: String(scadenza.veicolo_modello || "").slice(0, 160),
+        dueDate: String(scadenza.dueDate || ""),
+        notes: String(scadenza.notes || "").slice(0, 4000),
+        referenceUrl: String(scadenza.referenceUrl || scadenza.url || "").slice(0, 2048),
+        completed: scadenza.completed === true,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+}
+
+async function resolveRecipientUsers(recipients, ownerUid) {
+    const resolved = new Map();
+    for (const recipient of recipients.filter((item) => item.sendPush || item.canManage)) {
+        try {
+            const user = await admin.auth().getUserByEmail(recipient.email);
+            if (user.uid !== ownerUid) resolved.set(user.uid, { recipient, user });
+        } catch (error) {
+            if (error.code !== "auth/user-not-found") {
+                console.error("[RECEIVED DEADLINE LOOKUP FAILED]", error.code || error.message);
+            }
+        }
+    }
+    return resolved;
+}
+
+async function syncReceivedDeadlines(db, ownerUid, deadlineId, scadenza, previousScadenza = null) {
+    const owner = await admin.auth().getUser(ownerUid);
+    const current = await resolveRecipientUsers(deadlineRecipients(scadenza), ownerUid);
+    const previous = previousScadenza
+        ? await resolveRecipientUsers(deadlineRecipients(previousScadenza), ownerUid)
+        : new Map();
+    const shareId = receivedDeadlineId(ownerUid, deadlineId);
+    const batch = db.batch();
+
+    for (const [recipientUid] of previous) {
+        if (!current.has(recipientUid)) {
+            batch.delete(db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId));
+        }
+    }
+    for (const [recipientUid, resolved] of current) {
+        const ref = db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId);
+        batch.set(ref, receivedDeadlineData(owner, ownerUid, deadlineId, scadenza, resolved.recipient), { merge: true });
+    }
+    await batch.commit();
+    return current;
+}
+
+async function removeReceivedDeadlines(db, ownerUid, deadlineId, scadenza) {
+    const recipients = await resolveRecipientUsers(deadlineRecipients(scadenza), ownerUid);
+    const shareId = receivedDeadlineId(ownerUid, deadlineId);
+    const batch = db.batch();
+    for (const [recipientUid] of recipients) {
+        batch.delete(db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId));
+    }
+    await batch.commit();
 }
 
 function shouldSendPush(scadenza, diffDays, forceImmediate = false, lastField = "lastPushNotifiedAt") {
@@ -240,6 +312,7 @@ async function activePushDevices(db, uid, scope = "deadlines") {
 }
 
 async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, diffDays, options = {}) {
+    const sharedRecipients = await syncReceivedDeadlines(db, ownerUid, deadlineId, scadenza);
     if (!shouldSendPush(scadenza, diffDays, options.forceImmediate === true, "lastRecipientPushNotifiedAt")) return;
     const recipients = deadlineRecipients(scadenza).filter((recipient) => recipient.sendPush);
     if (!recipients.length) return;
@@ -252,12 +325,23 @@ async function sendRecipientDeadlinePushes(db, ownerUid, deadlineId, scadenza, d
             if (error.code !== "auth/user-not-found") console.error("[RECIPIENT LOOKUP FAILED]", error.code || error.message);
             continue;
         }
+        if (!sharedRecipients.has(recipientUser.uid)) continue;
+        const shareId = receivedDeadlineId(ownerUid, deadlineId);
+        const recipientBody = recipient.canManage
+            ? `${text.body}\nSe la gestisci tu, apri l'app e aggiorna la prossima data.`
+            : `${text.body}\nApri l'app per consultare la scadenza ricevuta.`;
         const devices = await activePushDevices(db, recipientUser.uid, "deadlines");
         for (const device of devices) {
             try {
                 await admin.messaging().send({
                     token: device.data().token,
-                    data: { eventType: "external_deadline", title: text.title, body: text.body, deliveryTag: `external-${deadlineId}-${device.id}` },
+                    data: {
+                        eventType: "external_deadline",
+                        receivedDeadlineId: shareId,
+                        title: text.title,
+                        body: recipientBody,
+                        deliveryTag: `external-${deadlineId}-${device.id}`
+                    },
                     webpush: { headers: { TTL: diffDays === 0 ? "21600" : "86400", Urgency: "high" } }
                 });
                 sent += 1;
@@ -397,6 +481,107 @@ exports.sendDeadlinePushTest = onCall(
             console.error("[PUSH TEST FAILED]", error.code || error.message);
             throw new HttpsError("internal", "Invio della notifica di prova non riuscito.");
         }
+    }
+);
+
+function validFutureIsoDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const candidate = new Date(`${value}T00:00:00Z`);
+    if (Number.isNaN(candidate.getTime()) || candidate.toISOString().slice(0, 10) !== value) return false;
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    return candidate >= today;
+}
+
+async function notifyDeadlineOwner(db, ownerUid, deadlineId, title, body) {
+    const devices = await activePushDevices(db, ownerUid, "deadlines");
+    await Promise.allSettled(devices.map((device) => admin.messaging().send({
+        token: device.data().token,
+        data: {
+            eventType: "deadline",
+            deadlineId,
+            title,
+            body,
+            deliveryTag: `managed-${deadlineId}-${Date.now()}-${device.id}`
+        },
+        webpush: { headers: { TTL: "86400", Urgency: "high" } }
+    })));
+}
+
+exports.manageReceivedDeadline = onCall(
+    { region: "europe-west1", enforceAppCheck: true },
+    async (request) => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        const shareId = String(request.data?.receivedDeadlineId || "");
+        const action = String(request.data?.action || "");
+        const nextDueDate = String(request.data?.nextDueDate || "");
+        if (!/^[a-f0-9]{40}$/.test(shareId) || !["complete", "renew"].includes(action)) {
+            throw new HttpsError("invalid-argument", "Operazione sulla scadenza non valida.");
+        }
+        if (action === "renew" && !validFutureIsoDate(nextDueDate)) {
+            throw new HttpsError("invalid-argument", "Inserisci una prossima data valida, da oggi in avanti.");
+        }
+
+        const db = admin.firestore();
+        const recipientUid = request.auth.uid;
+        const recipientEmail = normalizeEmail(request.auth.token.email);
+        const receivedRef = db.collection("users").doc(recipientUid).collection("receivedDeadlines").doc(shareId);
+        let ownerUid;
+        let deadlineId;
+        let deadlineLabel;
+
+        await db.runTransaction(async (transaction) => {
+            const received = await transaction.get(receivedRef);
+            if (!received.exists) throw new HttpsError("not-found", "Scadenza ricevuta non trovata.");
+            const shared = received.data();
+            if (shared.permission !== "manage" || normalizeEmail(shared.recipientEmail) !== recipientEmail) {
+                throw new HttpsError("permission-denied", "Non puoi gestire questa scadenza.");
+            }
+
+            ownerUid = String(shared.ownerUid || "");
+            deadlineId = String(shared.sourceDeadlineId || "");
+            const sourceRef = db.collection("users").doc(ownerUid).collection("scadenze").doc(deadlineId);
+            const sourceSnapshot = await transaction.get(sourceRef);
+            if (!sourceSnapshot.exists) throw new HttpsError("not-found", "La scadenza originale non esiste più.");
+            const source = sourceSnapshot.data();
+            const stillAuthorized = deadlineRecipients(source)
+                .some((recipient) => recipient.email === recipientEmail && recipient.canManage);
+            if (!stillAuthorized) throw new HttpsError("permission-denied", "Il permesso di gestione è stato revocato.");
+
+            deadlineLabel = String(source.type || source.templateText || "la scadenza").slice(0, 120);
+            const actor = {
+                uid: recipientUid,
+                email: recipientEmail,
+                name: String(request.auth.token.name || shared.recipientEmail || "Destinatario").slice(0, 120)
+            };
+            const sourceUpdate = {
+                completed: action === "complete",
+                lastManagedBy: actor,
+                lastManagedAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            };
+            const receivedUpdate = {
+                completed: action === "complete",
+                managedAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            };
+            if (action === "renew") {
+                sourceUpdate.dueDate = nextDueDate;
+                receivedUpdate.dueDate = nextDueDate;
+            }
+            transaction.update(sourceRef, sourceUpdate);
+            transaction.update(receivedRef, receivedUpdate);
+        });
+
+        const actorName = String(request.auth.token.name || recipientEmail || "Il destinatario").slice(0, 120);
+        const formattedDate = action === "renew"
+            ? new Date(`${nextDueDate}T00:00:00Z`).toLocaleDateString("it-IT")
+            : "";
+        const body = action === "renew"
+            ? `${actorName} ha aggiornato ${deadlineLabel} al ${formattedDate}.`
+            : `${actorName} ha segnato ${deadlineLabel} come gestita.`;
+        await notifyDeadlineOwner(db, ownerUid, deadlineId, "Scadenza condivisa aggiornata", body);
+        return { ok: true, action, dueDate: nextDueDate || null };
     }
 );
 
@@ -615,6 +800,7 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
     .label { color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
     .value { color: #222; font-size: 16px; font-weight: bold; margin-bottom: 16px; }
     .badge { display: inline-block; background: #fff3cd; color: #856404; border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
+    .button { display: inline-block; background: #2563eb; color: white !important; text-decoration: none; border-radius: 8px; padding: 12px 18px; font-size: 14px; font-weight: bold; }
     .footer { color: #aaa; font-size: 11px; text-align: center; margin-top: 24px; }
   </style>
 </head>
@@ -651,12 +837,35 @@ async function sendScadenzaEmail(transporter, gmailUser, s, diffDays, docRef) {
 
     const recipients = deadlineRecipients(s).filter((recipient) => recipient.sendEmail);
     if (!recipients.length) return false;
-    const results = await Promise.allSettled(recipients.map((recipient) => transporter.sendMail({
-        from: `"Codex Notifiche" <${gmailUser}>`,
-        to: recipient.email,
-        subject: `⚠️ Scadenza in arrivo — ${s.type || templateText}`,
-        html: emailBody.replace('</div>\n</body>', `<div class="footer">Usi già Codici & Password? Apri l'app per gestire i tuoi promemoria.<br><a href="https://appcodici-password.web.app/">Apri o installa Codici & Password</a></div></div>\n</body>`),
-    })));
+    const ownerUid = docRef.parent.parent.id;
+    const results = await Promise.allSettled(recipients.map(async (recipient) => {
+        let appUrl = "https://appcodici-password.web.app/";
+        let buttonLabel = "Apri o installa Codici & Password";
+        if (recipient.sendPush || recipient.canManage) {
+            try {
+                const recipientUser = await admin.auth().getUserByEmail(recipient.email);
+                if (recipientUser.uid !== ownerUid) {
+                    const shareId = receivedDeadlineId(ownerUid, docRef.id);
+                    appUrl = `https://appcodici-password.web.app/dettaglio_scadenza.html?received=${shareId}`;
+                    buttonLabel = "Apri la scadenza nell'app";
+                }
+            } catch (error) {
+                if (error.code !== "auth/user-not-found") {
+                    console.error("[EMAIL RECIPIENT LOOKUP FAILED]", error.code || error.message);
+                }
+            }
+        }
+        const instruction = recipient.canManage
+            ? "Se gestisci tu questa scadenza, apri l'app per registrare l'esecuzione o aggiornare la prossima data."
+            : "Apri l'app per consultare la scadenza ricevuta.";
+        const callToAction = `<div style="text-align:center;margin:24px 0;"><p style="color:#555;font-size:14px;">${instruction}</p><a class="button" href="${appUrl}">${buttonLabel}</a></div>`;
+        return transporter.sendMail({
+            from: `"Codex Notifiche" <${gmailUser}>`,
+            to: recipient.email,
+            subject: `⚠️ Scadenza in arrivo — ${s.type || templateText}`,
+            html: emailBody.replace('    <div class="footer">', `${callToAction}\n    <div class="footer">`),
+        });
+    }));
     const sentCount = results.filter((result) => result.status === "fulfilled").length;
     results.filter((result) => result.status === "rejected").forEach((result) => console.error("[EMAIL RECIPIENT FAILED]", result.reason?.message || result.reason));
     if (!sentCount) throw new Error("Nessun destinatario email raggiunto.");
@@ -781,6 +990,12 @@ exports.onScadenzaCreated = onDocumentCreated(
         const s = event.data.data();
         const docRef = event.data.ref;
 
+        try {
+            await syncReceivedDeadlines(admin.firestore(), event.params.uid, event.params.scadenzaId, s);
+        } catch (error) {
+            console.error(`[RECEIVED DEADLINE SYNC FAILED] ${event.params.scadenzaId}:`, error.message);
+        }
+
         // Verifica campi minimi
         if (!s.dueDate || s.completed) return;
 
@@ -841,6 +1056,13 @@ exports.onScadenzaUpdated = onDocumentUpdated(
     async (event) => {
         const before = event.data.before.data();
         const after = event.data.after.data();
+        try {
+            await syncReceivedDeadlines(
+                admin.firestore(), event.params.uid, event.params.scadenzaId, after, before
+            );
+        } catch (error) {
+            console.error(`[RECEIVED DEADLINE SYNC FAILED] ${event.params.scadenzaId}:`, error.message);
+        }
         const completedNow = !before.completed && after.completed === true;
         const dueDateChanged = String(before.dueDate || "") !== String(after.dueDate || "");
         if (!completedNow && !dueDateChanged) return;
@@ -862,5 +1084,23 @@ exports.onScadenzaUpdated = onDocumentUpdated(
             });
         }
         await batch.commit();
+    }
+);
+
+exports.onScadenzaDeleted = onDocumentDeleted(
+    {
+        document: "users/{uid}/scadenze/{scadenzaId}",
+        region: "europe-west1",
+        memory: "256MiB",
+        timeoutSeconds: 60,
+    },
+    async (event) => {
+        try {
+            await removeReceivedDeadlines(
+                admin.firestore(), event.params.uid, event.params.scadenzaId, event.data.data()
+            );
+        } catch (error) {
+            console.error(`[RECEIVED DEADLINE CLEANUP FAILED] ${event.params.scadenzaId}:`, error.message);
+        }
     }
 );

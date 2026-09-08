@@ -246,6 +246,7 @@ export async function listenForDeadlinePushInForeground() {
             data: {
                 eventType: payload.data.eventType,
                 deadlineId: payload.data.deadlineId || '',
+                receivedDeadlineId: payload.data.receivedDeadlineId || '',
                 notificationId: payload.data.notificationId || ''
             }
         });

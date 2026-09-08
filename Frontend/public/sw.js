@@ -25,6 +25,7 @@ firebase.messaging().onBackgroundMessage((payload) => {
         data: {
             eventType: payload.data.eventType,
             deadlineId: payload.data.deadlineId || '',
+            receivedDeadlineId: payload.data.receivedDeadlineId || '',
             notificationId: payload.data.notificationId || ''
         }
     });
@@ -34,7 +35,13 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     if (!['deadline', 'external_deadline', 'share_invite'].includes(event.notification.data?.eventType)) return;
     if (event.notification.data.eventType !== 'deadline') {
-        const target = new URL(event.notification.data.eventType === 'share_invite' ? '/home_page.html' : '/scadenze.html', self.location.origin).href;
+        const receivedDeadlineId = encodeURIComponent(event.notification.data.receivedDeadlineId || '');
+        const path = event.notification.data.eventType === 'share_invite'
+            ? '/home_page.html'
+            : receivedDeadlineId
+                ? `/dettaglio_scadenza.html?received=${receivedDeadlineId}`
+                : '/scadenze.html';
+        const target = new URL(path, self.location.origin).href;
         event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
             const existing = windows.find((client) => client.url.startsWith(self.location.origin));
             if (existing) {

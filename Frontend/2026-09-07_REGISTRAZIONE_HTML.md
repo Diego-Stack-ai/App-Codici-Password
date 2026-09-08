@@ -68,6 +68,27 @@ L'attivazione e la registrazione del dispositivo sono confermate. Resta opportun
 - Conservare la catena di cache-busting della pagina Impostazioni quando vengono modificati i moduli Push.
 - Prima di ulteriori modifiche, sincronizzare la copia locale con `origin/master`.
 
+## Aggiornamento 08/09/2026 — Scadenze ricevute e gestione delegata
+
+Il collaudo con i due utenti reali ha confermato che e-mail e Push arrivano correttamente al destinatario. È però emerso che il Push `external_deadline` non conteneva una destinazione utilizzabile: apriva l'elenco del destinatario, mentre la scadenza originale era leggibile soltanto dal proprietario.
+
+È stato quindi introdotto il seguente contratto:
+
+- ogni destinatario conserva i canali indipendenti **Email** e **Push**;
+- il proprietario può inoltre abilitare **Può gestire**;
+- per un utente registrato con Push o gestione attiva, il backend crea una copia minima sotto `users/{recipientUid}/receivedDeadlines/{receivedDeadlineId}`;
+- la copia non contiene allegati né l'elenco degli altri destinatari;
+- il client può soltanto leggerla: scrittura e sincronizzazione sono riservate alle Cloud Functions;
+- il Push e il pulsante blu dell'e-mail aprono direttamente il dettaglio ricevuto, anche dopo il passaggio dal login;
+- le scadenze ricevute compaiono nell'elenco con l'indicazione del mittente e senza azioni di cancellazione o archiviazione del proprietario;
+- con permesso `view` il destinatario consulta soltanto;
+- con permesso `manage` può scegliere **Segna come gestita** oppure impostare la **Prossima scadenza**;
+- la callable `manageReceivedDeadline` verifica nuovamente identità, email e permesso sul documento originale prima di applicare l'azione;
+- quando il destinatario completa o rinnova la scadenza, il proprietario riceve un Push informativo;
+- la rimozione del destinatario o della scadenza elimina la relativa copia ricevuta.
+
+Il bottone blu non dipende più dall'interpretazione automatica di Gmail, Outlook o Apple Mail: viene generato esplicitamente nel template e-mail. Il test finale da effettuare dopo il deploy deve coprire creazione, click sul Push, apertura dopo login, sola lettura, gestione autorizzata, aggiornamento della data e avviso al proprietario.
+
 ## Nota importante sulla copia locale
 
 Questo lavoro è stato eseguito direttamente sul repository GitHub, saltando la normale lavorazione nella cartella locale del PC.

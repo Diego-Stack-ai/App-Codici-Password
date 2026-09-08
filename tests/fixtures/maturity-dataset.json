@@ -65,13 +65,15 @@
           "displayName": "Maria Esempio",
           "email": "maria.esempio@example.invalid",
           "sendEmail": true,
-          "sendPush": true
+          "sendPush": true,
+          "canManage": true
         },
         {
           "displayName": "Contatto sospeso",
           "email": "sospeso@example.invalid",
           "sendEmail": false,
-          "sendPush": false
+          "sendPush": false,
+          "canManage": false
         }
       ]
     }

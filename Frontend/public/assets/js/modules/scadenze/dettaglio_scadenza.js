@@ -4,21 +4,28 @@
  */
 
 import { getFooterReady } from '../../footer-state.js';
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.58';
+import { auth, db, enableAppCheck, functions, storage } from '../../firebase-config.js?v=1.2.58';
 import { deleteDoc, doc, serverTimestamp, updateDoc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
+import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
 
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { decryptAttachmentBytes, openDecryptedAttachment, openExternalUrl } from '../shared/attachment-security.js';
-import { getDeadline, getDeadlineNotification, getUserProfile } from '../data/vault-repository.js';
+import {
+    getDeadline,
+    getDeadlineNotification,
+    getReceivedDeadline,
+    getUserProfile
+} from '../data/vault-repository.js';
 import { deadlineRecipientsFromRecord } from './deadline-recipient-model.js';
 import { deadlineDate, deadlinePresentation } from './deadline-model.js';
 
 let currentScadenza = null;
 let currentScadenzaId = new URLSearchParams(window.location.search).get('id');
+let currentReceivedDeadlineId = new URLSearchParams(window.location.search).get('received');
 
 async function deleteScadenza(userId, scadenzaId) {
     if (currentScadenza?.sourceRef?.type !== 'profileDocument') {
@@ -43,8 +50,10 @@ async function deleteScadenza(userId, scadenzaId) {
  */
 export async function initDettaglioScadenza(user) {
     if (!user) return;
-    currentScadenzaId = new URLSearchParams(window.location.search).get('id');
-    if (!currentScadenzaId) {
+    const params = new URLSearchParams(window.location.search);
+    currentScadenzaId = params.get('id');
+    currentReceivedDeadlineId = params.get('received');
+    if (!currentScadenzaId && !currentReceivedDeadlineId) {
         window.location.href = 'scadenze.html';
         return;
     }
@@ -54,13 +63,16 @@ export async function initDettaglioScadenza(user) {
 
 async function loadScadenza(uid) {
     try {
-        currentScadenza = await getDeadline(uid, currentScadenzaId);
+        currentScadenza = currentReceivedDeadlineId
+            ? await getReceivedDeadline(uid, currentReceivedDeadlineId)
+            : await getDeadline(uid, currentScadenzaId);
         if (!currentScadenza) {
             showToast("Scadenza non trovata", "error");
             return;
         }
+        if (currentReceivedDeadlineId) currentScadenza.received = true;
         renderScadenza(currentScadenza);
-        await markOpenedDeadlineNotification(uid);
+        if (!currentReceivedDeadlineId) await markOpenedDeadlineNotification(uid);
     } catch (e) {
         console.error(e);
     }
@@ -97,6 +109,11 @@ function setupFooterActions() {
         clearElement(footerRight);
         footerRight.appendChild(settLink);
 
+        if (currentReceivedDeadlineId) {
+            clearElement(footerCenter);
+            return;
+        }
+
         const deleteBtn = createElement('button', {
             className: 'btn-fab-action btn-fab-danger', onclick: handleDelete
         }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })]);
@@ -130,8 +147,103 @@ async function handleDelete() {
     } catch (error) { showToast("Errore", "error"); }
 }
 
+async function handleReceivedDeadlineAction(action, nextDueDate = '') {
+    if (!currentReceivedDeadlineId || !currentScadenza) return;
+    if (action === 'complete') {
+        const confirmed = await showConfirmModal(
+            'SCADENZA GESTITA',
+            'Confermi di aver gestito questa scadenza? Il proprietario riceverà un avviso.',
+            'Conferma'
+        );
+        if (!confirmed) return;
+    }
+    try {
+        document.querySelectorAll('#detail-page-actions button').forEach(button => { button.disabled = true; });
+        enableAppCheck();
+        const result = (await httpsCallable(functions, 'manageReceivedDeadline')({
+            receivedDeadlineId: currentReceivedDeadlineId,
+            action,
+            nextDueDate
+        })).data;
+        currentScadenza.completed = action === 'complete';
+        if (result?.dueDate) currentScadenza.dueDate = result.dueDate;
+        renderScadenza(currentScadenza);
+        showToast(
+            action === 'complete' ? 'Scadenza segnata come gestita' : 'Prossima scadenza aggiornata',
+            'success'
+        );
+    } catch (error) {
+        console.error('[RECEIVED DEADLINE]', error);
+        showToast(error?.message || 'Aggiornamento della scadenza non riuscito', 'error');
+        renderReceivedDeadlineActions(currentScadenza);
+    }
+}
+
+function renderReceivedDeadlineActions(scadenza) {
+    const actions = document.getElementById('detail-page-actions');
+    if (!actions) return;
+    const canManage = scadenza.permission === 'manage';
+    const ownerLabel = scadenza.ownerLabel || 'il proprietario';
+    const children = [
+        createElement('div', { className: 'received-deadline-heading' }, [
+            createElement('span', { className: 'material-symbols-outlined', textContent: canManage ? 'handshake' : 'visibility' }),
+            createElement('div', {}, [
+                createElement('strong', { textContent: canManage ? 'Puoi gestire questa scadenza' : 'Scadenza in sola lettura' }),
+                createElement('p', { textContent: `Ricevuta da ${ownerLabel}` })
+            ])
+        ])
+    ];
+
+    if (scadenza.completed) {
+        children.push(createElement('p', {
+            className: 'received-deadline-status',
+            textContent: 'Questa scadenza risulta gestita. Puoi inserire una nuova data per riattivarla.'
+        }));
+    }
+    if (canManage) {
+        const dateFields = deadlineDateInputFields(scadenza);
+        const nextDate = createElement('input', {
+            id: 'received-next-date',
+            className: 'input',
+            type: 'date',
+            value: dateFields.isoValue,
+            min: new Date().toISOString().slice(0, 10),
+            ariaLabel: 'Prossima data della scadenza'
+        });
+        const managementButtons = [];
+        if (!scadenza.completed) {
+            managementButtons.push(createElement('button', {
+                className: 'btn-modal btn-secondary',
+                type: 'button',
+                textContent: 'Segna come gestita',
+                onclick: () => handleReceivedDeadlineAction('complete')
+            }));
+        }
+        managementButtons.push(createElement('button', {
+            className: 'btn-modal btn-primary',
+            type: 'button',
+            textContent: 'Conferma e aggiorna',
+            onclick: () => {
+                if (!nextDate.value) {
+                    showToast('Inserisci la prossima data', 'error');
+                    return;
+                }
+                handleReceivedDeadlineAction('renew', nextDate.value);
+            }
+        }));
+        children.push(createElement('label', {
+            className: 'received-deadline-date-label',
+            textContent: 'Prossima scadenza'
+        }, [nextDate]));
+        children.push(createElement('div', { className: 'received-deadline-buttons' }, managementButtons));
+    }
+    setChildren(actions, children);
+}
+
 function renderScadenza(scadenza) {
     const presentation = deadlinePresentation(scadenza);
+    const pageLabel = document.querySelector('.detail-page-label');
+    if (pageLabel) pageLabel.textContent = scadenza.received ? 'Scadenza ricevuta' : 'Oggetto Scadenza';
     document.getElementById('detail-title').textContent = presentation.title;
     document.getElementById('detail-intestatario').textContent = presentation.owner;
     document.getElementById('detail-category').textContent = presentation.category;
@@ -202,6 +314,11 @@ function renderScadenza(scadenza) {
 
     const noteBody = document.getElementById('detail-note-body');
     if (scadenza.notes && noteBody) noteBody.textContent = scadenza.notes;
+
+    if (scadenza.received) {
+        renderReceivedDeadlineActions(scadenza);
+        return;
+    }
 
     // Notifiche Email
     const emailSec = document.getElementById('section-emails');

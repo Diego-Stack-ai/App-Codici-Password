@@ -142,6 +142,19 @@
     /* Content handles spacing */
 }
 
+.deadline-card-received {
+    background: none;
+}
+
+.deadline-card-received .swipe-content {
+    border-color: rgba(139, 92, 246, 0.45);
+}
+
+.deadline-card-received .deadline-card-category {
+    color: var(--color-purple);
+    opacity: 1;
+}
+
 /* Swipe Content Support */
 .deadline-card .swipe-action-bg {
     position: absolute;

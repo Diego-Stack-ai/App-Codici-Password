@@ -36,7 +36,7 @@ import { createElement } from './dom-utils.js';
 import { t, applyGlobalTranslations, loadLanguage, getCurrentLanguage } from './translations.js';
 import { initInactivityTimer } from './inactivity-timer.js';
 import { sanitizeEmail } from './utils.js';
-import * as Pages from './pages-init.js?v=1.2.58&push=20260908b';
+import * as Pages from './pages-init.js?v=1.2.58&push=20260908b&deadline-share=20260908a';
 import { initOfflineStatus } from './offline-status.js';
 import { prepareOfflineData } from './offline-sync.js';
 import { startMetric, endMetric, captureNavigationMetric } from './performance-metrics.js';
@@ -294,7 +294,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (inviteUnsubscribe) inviteUnsubscribe();
             // Redirect to Login se pagina protetta
             if (!['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'].includes(currentPage)) {
-                if (currentPage === 'dettaglio_scadenza' && new URLSearchParams(window.location.search).has('notification')) {
+                const deadlineParams = new URLSearchParams(window.location.search);
+                if (currentPage === 'dettaglio_scadenza'
+                    && (deadlineParams.has('notification') || deadlineParams.has('received'))) {
                     sessionStorage.setItem('pending_deadline_link', `${window.location.pathname}${window.location.search}`);
                 }
                 window.location.href = 'login-v115.html';

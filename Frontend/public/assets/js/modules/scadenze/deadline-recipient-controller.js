@@ -16,7 +16,8 @@ export function createDeadlineRecipientController() {
         recipients.forEach((recipient, index) => {
             const emailToggle = createElement('input', { type: 'checkbox', checked: recipient.sendEmail, dataset: { recipientIndex: String(index), channel: 'email' } });
             const pushToggle = createElement('input', { type: 'checkbox', checked: recipient.sendPush, dataset: { recipientIndex: String(index), channel: 'push' } });
-            container.appendChild(createElement('div', { className: `deadline-recipient-card${recipient.sendEmail || recipient.sendPush ? '' : ' is-paused'}` }, [
+            const manageToggle = createElement('input', { type: 'checkbox', checked: recipient.canManage, dataset: { recipientIndex: String(index), channel: 'manage' } });
+            container.appendChild(createElement('div', { className: `deadline-recipient-card${recipient.sendEmail || recipient.sendPush || recipient.canManage ? '' : ' is-paused'}` }, [
                 createElement('div', {}, [
                     createElement('span', { className: 'deadline-recipient-name', textContent: recipient.displayName || 'Destinatario' }),
                     createElement('span', { className: 'deadline-recipient-email', textContent: recipient.email })
@@ -24,6 +25,7 @@ export function createDeadlineRecipientController() {
                 createElement('div', { className: 'deadline-recipient-controls' }, [
                     createElement('label', { className: 'deadline-channel-label' }, [emailToggle, document.createTextNode('Email')]),
                     createElement('label', { className: 'deadline-channel-label' }, [pushToggle, document.createTextNode('Push')]),
+                    createElement('label', { className: 'deadline-channel-label' }, [manageToggle, document.createTextNode('Può gestire')]),
                     createElement('button', { type: 'button', className: 'deadline-recipient-remove', dataset: { recipientRemove: String(index) }, title: 'Rimuovi destinatario' }, [
                         createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
                     ])
@@ -48,7 +50,7 @@ export function createDeadlineRecipientController() {
     function add(contact) {
         const result = mergeDeadlineRecipient(recipients, {
             contactId: contact.id, displayName: [contact.nome, contact.cognome].filter(Boolean).join(' '),
-            email: contact.email, sendEmail: true, sendPush: true
+            email: contact.email, sendEmail: true, sendPush: true, canManage: false
         });
         recipients = result.recipients;
         renderRecipients();
@@ -69,8 +71,11 @@ export function createDeadlineRecipientController() {
             const input = event.target.closest('input[data-recipient-index]');
             const recipient = input ? recipients[Number(input.dataset.recipientIndex)] : null;
             if (!recipient) return;
+            const channelField = input.dataset.channel === 'email'
+                ? 'sendEmail'
+                : input.dataset.channel === 'push' ? 'sendPush' : 'canManage';
             recipients = recipients.map((item, index) => index === Number(input.dataset.recipientIndex)
-                ? { ...item, [input.dataset.channel === 'email' ? 'sendEmail' : 'sendPush']: input.checked }
+                ? { ...item, [channelField]: input.checked }
                 : item);
             renderRecipients();
         });

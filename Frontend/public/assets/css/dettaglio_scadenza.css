@@ -230,6 +230,62 @@
     opacity: 0.2;
 }
 
+.received-deadline-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    border-radius: 16px;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.detail-actions-panel {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.received-deadline-heading p {
+    margin: 0.25rem 0 0;
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+}
+
+.received-deadline-status {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--status-success);
+    font-size: var(--fs-micro);
+}
+
+.received-deadline-date-label {
+    display: grid;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+    font-weight: var(--font-title-weight);
+    text-transform: uppercase;
+}
+
+.received-deadline-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.received-deadline-buttons button:only-child {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 420px) {
+    .received-deadline-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* --- TEST PUSH BUTTON --- */
 .btn-icon-test-push {
     background: var(--button-bg-secondary);

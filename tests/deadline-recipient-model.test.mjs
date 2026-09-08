@@ -17,26 +17,32 @@ test('normalizza e valida l’email senza esporre identificatori tecnici', () =>
 test('mantiene tutte le quattro combinazioni Email e Push', () => {
     for (const [sendEmail, sendPush] of [[false, false], [true, false], [false, true], [true, true]]) {
         assert.deepEqual(normalizeDeadlineRecipient({email: 'maria@example.it', sendEmail, sendPush}), {
-            email: 'maria@example.it', displayName: '', contactId: '', sendEmail, sendPush
+            email: 'maria@example.it', displayName: '', contactId: '', sendEmail, sendPush, canManage: false
         });
     }
 });
 
 test('deduplica per email normalizzata e unisce i canali richiesti', () => {
-    const initial = [{email: 'maria@example.it', displayName: '', contactId: '', sendEmail: true, sendPush: false}];
+    const initial = [{
+        email: 'maria@example.it', displayName: '', contactId: '',
+        sendEmail: true, sendPush: false, canManage: false
+    }];
     const result = mergeDeadlineRecipient(initial, {
-        email: ' MARIA@example.it ', displayName: 'Maria Rossi', contactId: 'c1', sendEmail: false, sendPush: true
+        email: ' MARIA@example.it ', displayName: 'Maria Rossi', contactId: 'c1',
+        sendEmail: false, sendPush: true, canManage: true
     });
     assert.equal(result.recipients.length, 1);
     assert.deepEqual(result.recipients[0], {
-        email: 'maria@example.it', displayName: 'Maria Rossi', contactId: 'c1', sendEmail: true, sendPush: true
+        email: 'maria@example.it', displayName: 'Maria Rossi', contactId: 'c1',
+        sendEmail: true, sendPush: true, canManage: true
     });
     assert.notEqual(result.recipients, initial);
 });
 
 test('legge i destinatari legacy come Email attiva e Push disattiva', () => {
     assert.deepEqual(deadlineRecipientsFromRecord({ email1: ' A@Example.it ', email2: '' }), [{
-        email: 'a@example.it', displayName: '', contactId: '', sendEmail: true, sendPush: false
+        email: 'a@example.it', displayName: '', contactId: '',
+        sendEmail: true, sendPush: false, canManage: false
     }]);
 });
 
@@ -44,7 +50,10 @@ test('i destinatari moderni prevalgono sui campi legacy', () => {
     assert.deepEqual(deadlineRecipientsFromRecord({
         recipients: [{ email: 'push@example.it', sendEmail: false, sendPush: true }],
         email1: 'legacy@example.it'
-    }), [{ email: 'push@example.it', displayName: '', contactId: '', sendEmail: false, sendPush: true }]);
+    }), [{
+        email: 'push@example.it', displayName: '', contactId: '',
+        sendEmail: false, sendPush: true, canManage: false
+    }]);
 });
 
 test('scrive i campi email retrocompatibili senza perdere Push only', () => {
@@ -53,10 +62,21 @@ test('scrive i campi email retrocompatibili senza perdere Push only', () => {
         { email: 'push@example.it', sendEmail: false, sendPush: true }
     ]), {
         recipients: [
-            { email: 'email@example.it', displayName: '', contactId: '', sendEmail: true, sendPush: false },
-            { email: 'push@example.it', displayName: '', contactId: '', sendEmail: false, sendPush: true }
+            {
+                email: 'email@example.it', displayName: '', contactId: '',
+                sendEmail: true, sendPush: false, canManage: false
+            },
+            {
+                email: 'push@example.it', displayName: '', contactId: '',
+                sendEmail: false, sendPush: true, canManage: false
+            }
         ],
         email1: 'email@example.it',
         email2: ''
     });
+});
+
+test('normalizza il permesso di gestione senza abilitarlo implicitamente', () => {
+    assert.equal(normalizeDeadlineRecipient({email: 'view@example.it'}).canManage, false);
+    assert.equal(normalizeDeadlineRecipient({email: 'manage@example.it', canManage: true}).canManage, true);
 });
