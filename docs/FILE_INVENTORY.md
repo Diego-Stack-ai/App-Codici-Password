@@ -229,7 +229,7 @@ File censiti: **291**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/offline-assets.js` | JS | 8218 | 199 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13777 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
 | `Frontend/public/profilo_privato.html` | HTML | 15328 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
-| `Frontend/public/prova.html` | HTML | 1375 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
+| `Frontend/public/prova.html` | HTML | 1377 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
 | `Frontend/public/registrati.html` | HTML | 7415 | 148 | Struttura della pagina registrati; comportamento demandato ai moduli. |
 | `Frontend/public/regole_scadenze.html` | HTML | 6875 | 133 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
 | `Frontend/public/reset_password.html` | HTML | 4137 | 107 | Struttura della pagina reset password; comportamento demandato ai moduli. |
