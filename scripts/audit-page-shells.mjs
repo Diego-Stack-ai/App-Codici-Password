@@ -77,14 +77,18 @@ const internalPageModels = new Map([
   ])]
 ]);
 const pageWatermarks = new Map([
+  ['account_azienda.html', 'business_center'],
+  ['account_privati.html', 'key'],
   ['archivio_account.html', 'archive'],
   ['configurazione_automezzi.html', 'directions_car'],
   ['configurazione_documenti.html', 'description'],
   ['configurazione_generali.html', 'settings_applications'],
   ['gestione_destinatari.html', 'contact_mail'],
   ['impostazioni.html', 'settings'],
+  ['lista_aziende.html', 'apartment'],
   ['privacy.html', 'shield'],
   ['regole_scadenze.html', 'rule'],
+  ['scadenze.html', 'event'],
   ['termini.html', 'gavel']
 ]);
 
