@@ -1,7 +1,7 @@
-import { auth, db, functions, getMessagingInstance } from '../../firebase-config.js?v=1.2.58';
+import { auth, db, functions } from '../../firebase-config.js?v=1.2.58';
 import { doc, serverTimestamp, setDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { httpsCallable } from "/assets/js/vendor/firebase-runtime.js";
-import { deleteToken, getToken, onMessage } from "/assets/js/vendor/firebase-runtime.js";
+import { deleteToken, getPushMessagingInstance, getToken, onMessage } from '../../push-messaging-client.js?push=20260908c';
 import { getPushDevice } from '../data/vault-repository.js';
 
 const VAPID_KEY = 'BA8WqlVxBUaOWPlmyGLTANQz6P_OPT_pvOCSbPsSmx6vfIwtUBWoAzGieZacYK1CLufo2LOWwQxlx9RYEWALhUk';
@@ -155,7 +155,7 @@ async function enablePushScope(scope, user = auth.currentUser) {
 
     let messaging;
     try {
-        messaging = await getMessagingInstance();
+        messaging = await getPushMessagingInstance();
     } catch (error) {
         console.error('[PUSH] Inizializzazione Firebase Messaging fallita.', error);
         throw new Error(pushErrorMessage(error));
@@ -207,7 +207,7 @@ async function disablePushScope(scope, user = auth.currentUser) {
         ? device.notificationScopes : (device?.notificationScope ? [device.notificationScope] : []);
     const remaining = scopes.filter(item => item !== scope);
     if (remaining.length) return setDoc(deviceRef, { notificationScopes: remaining, updatedAt: serverTimestamp() }, { merge: true });
-    const messaging = await getMessagingInstance();
+    const messaging = await getPushMessagingInstance();
     if (messaging) try { await deleteToken(messaging); } catch (error) { console.warn('[PUSH] Revoca token locale non riuscita', error); }
     await deleteDoc(deviceRef);
 }
@@ -230,7 +230,7 @@ export async function sendDeadlinePushTest() {
 
 export async function listenForDeadlinePushInForeground() {
     if (foregroundListenerStarted || Notification.permission !== 'granted') return;
-    const messaging = await getMessagingInstance();
+    const messaging = await getPushMessagingInstance();
     if (!messaging) return;
     foregroundListenerStarted = true;
     onMessage(messaging, async (payload) => {
