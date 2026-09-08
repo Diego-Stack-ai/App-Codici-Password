@@ -1,6 +1,7 @@
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9._:-]{1,160}$/;
 const MAX_RECORDS_PER_CHUNK = 400;
 const MAX_RECORD_BYTES = 800 * 1024;
+const MAX_CHUNK_BYTES = 7 * 1024 * 1024;
 const SCOPES = new Set([
   "profile", "settings", "private-account", "company", "company-account",
   "private-account-attachment", "company-account-attachment",
@@ -59,18 +60,42 @@ function validateRestoreChunk(input = {}, uid) {
     throw new Error("BACKUP_RECORD_COUNT_INVALID");
   }
   const paths = new Set();
+  let chunkBytes = 0;
   const records = input.records.map(record => {
     plainObject(record);
     const data = structuredClone(plainObject(record.data));
     const path = restorePath(uid, record);
     if (paths.has(path)) throw new Error("BACKUP_RECORD_DUPLICATE");
     paths.add(path);
-    if (Buffer.byteLength(JSON.stringify(data), "utf8") > MAX_RECORD_BYTES) {
+    const recordBytes = Buffer.byteLength(JSON.stringify(data), "utf8");
+    chunkBytes += recordBytes;
+    if (recordBytes > MAX_RECORD_BYTES) {
       throw new Error("BACKUP_RECORD_TOO_LARGE");
     }
     return {path, data};
   });
-  return {operationId, backupId, chunkIndex, chunkCount, records};
+  if (chunkBytes > MAX_CHUNK_BYTES) throw new Error("BACKUP_CHUNK_TOO_LARGE");
+  const mode = input.mode === "preview" ? "preview" : input.mode === "apply" ? "apply" : null;
+  if (!mode) throw new Error("BACKUP_MODE_INVALID");
+  return {
+    operationId, backupId, chunkIndex, chunkCount, records, mode,
+    confirmed: input.confirmation === "RESTORE_VALIDATED"
+  };
+}
+
+function decodeFirestoreValue(value, types = {}) {
+  if (Array.isArray(value)) return value.map(item => decodeFirestoreValue(item, types));
+  if (!value || typeof value !== "object") return value;
+  if (value.$type === "timestamp") {
+    if (!types.timestamp) throw new Error("BACKUP_TIMESTAMP_FACTORY_REQUIRED");
+    return types.timestamp(value.seconds, value.nanoseconds);
+  }
+  if (value.$type === "date") return new Date(value.value);
+  if (value.$type === "bytes") {
+    if (!types.bytes) throw new Error("BACKUP_BYTES_FACTORY_REQUIRED");
+    return types.bytes(Uint8Array.from(value.value));
+  }
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, decodeFirestoreValue(item, types)]));
 }
 
 function restoreChunkDecision({previous, collisions = []}) {
@@ -89,6 +114,7 @@ function safeRestoreAudit({uid, operationId, backupId, chunkIndex, recordCount})
 
 module.exports = {
   MAX_RECORDS_PER_CHUNK,
+  decodeFirestoreValue,
   restoreChunkDecision,
   restorePath,
   safeRestoreAudit,

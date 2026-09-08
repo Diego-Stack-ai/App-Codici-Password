@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
-  restoreChunkDecision, restorePath, safeRestoreAudit, validateRestoreChunk
+  decodeFirestoreValue, restoreChunkDecision, restorePath, safeRestoreAudit, validateRestoreChunk
 } = require("../backup-restore-service");
 
 test("costruisce soltanto percorsi appartenenti allo UID autenticato", () => {
@@ -16,16 +16,26 @@ test("costruisce soltanto percorsi appartenenti allo UID autenticato", () => {
 test("valida chunk limitati senza duplicati o prototipi speciali", () => {
   const chunk = validateRestoreChunk({
     operationId: "device:restore:1", backupId: "backup-1", chunkIndex: 0, chunkCount: 1,
-    records: [{scope: "settings", id: "generalConfig", data: {schemaVersion: 1}}]
+    mode: "preview", records: [{scope: "settings", id: "generalConfig", data: {schemaVersion: 1}}]
   }, "owner");
   assert.equal(chunk.records[0].path, "users/owner/settings/generalConfig");
   assert.throws(() => validateRestoreChunk({
     operationId: "op", backupId: "b", chunkIndex: 0, chunkCount: 1,
-    records: [
+    mode: "preview", records: [
       {scope: "contact", id: "c1", data: {}},
       {scope: "contact", id: "c1", data: {}}
     ]
   }, "owner"), /DUPLICATE/);
+});
+
+test("ricostruisce tipi Firestore soltanto tramite factory esplicite", () => {
+  const decoded = decodeFirestoreValue({
+    at: {$type: "timestamp", seconds: 1, nanoseconds: 2},
+    bytes: {$type: "bytes", value: [3, 4]}, date: {$type: "date", value: "2030-01-01T00:00:00.000Z"}
+  }, {timestamp: (seconds, nanoseconds) => ({seconds, nanoseconds}), bytes: value => [...value]});
+  assert.deepEqual(decoded.at, {seconds: 1, nanoseconds: 2});
+  assert.deepEqual(decoded.bytes, [3, 4]);
+  assert.equal(decoded.date.toISOString(), "2030-01-01T00:00:00.000Z");
 });
 
 test("blocca collisioni e rende idempotente un chunk già applicato", () => {

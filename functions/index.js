@@ -13,7 +13,7 @@ const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https")
 const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
-const { FieldValue, getFirestore } = require("firebase-admin/firestore");
+const { Bytes, FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 const { getStorage } = require("firebase-admin/storage");
 const nodemailer = require("nodemailer");
@@ -33,6 +33,9 @@ const {
 const {
     accountPath, isSafeAttachmentPath, purgeDecision, unlinkProfileEmails, validatePurgeCommand
 } = require("./archive-purge-service");
+const {
+    decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
+} = require("./backup-restore-service");
 
 initializeApp();
 
@@ -199,6 +202,61 @@ exports.purgeArchivedAccount = onCall(
             });
         });
         return {status: "purged", duplicate: false};
+    }
+);
+
+exports.restoreBackupChunk = onCall(
+    {region: "europe-west1", enforceAppCheck: true, timeoutSeconds: 120, memory: "512MiB"},
+    async request => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        let command;
+        try { command = validateRestoreChunk(request.data, request.auth.uid); } catch {
+            throw new HttpsError("invalid-argument", "Chunk di ripristino non valido.");
+        }
+        const store = getFirestore();
+        const userRef = store.collection("users").doc(request.auth.uid);
+        const operationRef = userRef.collection("backupRestoreOperations").doc(command.operationId);
+        return store.runTransaction(async transaction => {
+            const references = command.records.map(record => store.doc(record.path));
+            const [previous, ...snapshots] = await Promise.all([
+                transaction.get(operationRef), ...references.map(reference => transaction.get(reference))
+            ]);
+            if (previous.exists) {
+                const data = previous.data();
+                if (data.backupId !== command.backupId || data.chunkIndex !== command.chunkIndex) {
+                    throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+                }
+            }
+            const collisions = snapshots
+                .map((snapshot, index) => snapshot.exists && command.records[index].path !== `users/${request.auth.uid}`
+                    ? command.records[index].path : null)
+                .filter(Boolean);
+            const decision = restoreChunkDecision({previous: previous.exists ? previous.data() : null, collisions});
+            if (decision.duplicate || command.mode === "preview") return decision;
+            if (!command.confirmed) throw new HttpsError("failed-precondition", "Conferma ripristino mancante.");
+            if (decision.status !== "ready") return decision;
+            command.records.forEach((record, index) => {
+                const data = decodeFirestoreValue(record.data, {
+                    timestamp: (seconds, nanoseconds) => new Timestamp(seconds, nanoseconds),
+                    bytes: value => Bytes.fromUint8Array(value)
+                });
+                transaction.set(references[index], data, {merge: record.path === `users/${request.auth.uid}`});
+            });
+            const result = {status: "applied", duplicate: false, recordCount: command.records.length};
+            transaction.set(operationRef, {
+                ...result, backupId: command.backupId, chunkIndex: command.chunkIndex,
+                chunkCount: command.chunkCount, ownerUid: request.auth.uid,
+                appliedAt: FieldValue.serverTimestamp()
+            });
+            transaction.set(userRef.collection("auditEvents").doc(command.operationId), {
+                ...safeRestoreAudit({
+                    uid: request.auth.uid, operationId: command.operationId, backupId: command.backupId,
+                    chunkIndex: command.chunkIndex, recordCount: command.records.length
+                }),
+                at: FieldValue.serverTimestamp()
+            });
+            return result;
+        });
     }
 );
 
