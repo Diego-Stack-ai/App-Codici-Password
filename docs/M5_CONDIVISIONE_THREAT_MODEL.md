@@ -117,12 +117,54 @@ Il primo laboratorio isolato si trova in `experiments/sharing-key-prototype/`. U
 
 Il laboratorio dimostra la proprietà crittografica minima, non decide ancora persistenza, recupero multi-dispositivo, verifica delle chiavi pubbliche, schema Firestore o migrazione. Non è importato dal frontend e non deve essere aggiunto alla cache offline.
 
+## Contratto funzionale candidato
+
+### Ruoli della prima versione
+
+- **Proprietario:** unico soggetto che modifica contenuto, destinatari, scadenza e chiavi.
+- **Lettore:** legge il contenuto e gli eventuali allegati esplicitamente condivisi; non modifica il record e non invita terzi.
+
+Il ruolo editor non entra nella prima versione. Aggiungerlo ora richiederebbe firme delle modifiche, conflitti offline, attribuzione e regole di scrittura più ampie. L'interfaccia può conservare un campo ruolo versionato, ma le Rules devono accettare soltanto `viewer` finché quel protocollo non sarà dimostrato.
+
+### Stati della condivisione
+
+`pending` → `accepted` → `revoked` oppure `expired`; da `pending` si può passare anche a `rejected` o `cancelled`. Solo `accepted` e non scaduto concede ACL ed envelope attivo. Gli stati terminali non vengono riutilizzati: un nuovo invito riceve un nuovo identificatore casuale.
+
+### Scadenza
+
+La scadenza è facoltativa e viene valutata lato server. Il client può mostrarla, ma non costituisce il controllo di sicurezza. Alla scadenza il backend rimuove l'ACL e non distribuisce più envelope o versioni; per impedire accesso alle revisioni successive applica la stessa rotazione prevista dalla revoca.
+
+### Revoca
+
+La revoca produce una nuova chiave per-record, ricifra l'ultima versione e crea nuovi envelope soltanto per proprietario e lettori ancora attivi. Il vecchio ciphertext può rimanere leggibile a chi lo aveva già ricevuto: questa limitazione deve essere dichiarata all'utente. Allegati nuovi o aggiornati usano chiavi collegate alla nuova generazione; gli allegati precedenti richiedono una decisione esplicita fra ricifratura e accesso storico.
+
+### Cronologia minima
+
+La cronologia registra soltanto identificatori opachi, attore UID, azione, ruolo, generazione della chiave e timestamp server. Non registra nome account, email completa, contenuto, password, chiavi, ciphertext o nomi originali degli allegati. Gli eventi minimi sono creazione invito, accettazione/rifiuto, apertura envelope riuscita o fallita in forma aggregata, revoca, scadenza e rotazione.
+
+## Identità crittografica candidata
+
+Ogni utente possiede una coppia ECDH distinta dalla credenziale di login, dalla Master Password e dalla Vault Key. La chiave pubblica è associata all'UID autenticato e versionata. La chiave privata viene esportata soltanto per essere cifrata con una chiave derivata dalla Vault Key dell'utente; Firebase conserva esclusivamente la versione cifrata.
+
+Un nuovo dispositivo, dopo login e sblocco corretto della Vault, scarica e apre la chiave privata cifrata. La rotazione della Master Password riavvolge Vault Key e chiave privata senza ricifrare i record. Il reset irreversibile della Vault non può recuperare condivisioni precedenti senza una Recovery Key progettata in M8.
+
+Il proprietario non deve fidarsi di una chiave pubblica fornita liberamente dal client durante l'invito. La pubblicazione e sostituzione della chiave devono essere autorizzate per lo stesso UID, versionate e protette contro sostituzioni silenziose. Il protocollo definitivo dovrà decidere se mostrare una verifica di impronta per condivisioni ad alto rischio.
+
+## Schema logico candidato, non di produzione
+
+- `users/{uid}/cryptoIdentity/current`: chiave pubblica, versione, algoritmo e chiave privata cifrata per la Vault dell'utente;
+- record condiviso: payload cifrato, `keyGeneration`, versione schema e metadati minimi;
+- `recordShares/{shareId}`: proprietario, record opaco, destinatario UID, ruolo, stato, scadenza ed envelope per quella generazione;
+- eventi append-only separati dal contenuto e leggibili soltanto dai soggetti previsti.
+
+L'ACL Firestore deve leggere documenti di autorizzazione controllabili dalle Rules; non deve fidarsi di un array modificabile dall'invitato. Storage dovrà verificare lo stesso grant attivo usato da Firestore, evitando URL pubblici persistenti.
+
 ## Gate di M5
 
 - [x] mappare attori, dati, confini e flusso attuale;
 - [x] distinguere ACL da decifratura e identificare la lacuna corrente;
 - [~] censire campi, allegati e cache; restano i percorsi legacy e tutti i metadati da classificare;
-- [ ] definire ruoli, scadenza, revoca e cronologia senza plaintext nei log;
+- [x] definire il contratto iniziale per ruoli, scadenza, revoca e cronologia senza plaintext nei log;
 - [x] costruire un prototipo isolato con utenti e chiavi di prova;
 - [x] dimostrare lettura autorizzata e fallimento di lettura non autorizzata;
 - [~] dimostrare rotazione dopo revoca; resta da definire e provare il comportamento offline;
