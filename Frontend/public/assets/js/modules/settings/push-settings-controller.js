@@ -7,7 +7,7 @@ import {
     getCurrentPushState,
     listenForDeadlinePushInForeground,
     sendDeadlinePushTest
-} from '../shared/push-manager.js?push=20260908c';
+} from '../shared/push-manager.js?push=20260908d';
 
 const PUSH_SETTINGS = {
     deadlines: {
