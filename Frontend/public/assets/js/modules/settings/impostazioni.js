@@ -15,7 +15,7 @@ import { enrollTotp, unenrollTotp, getTotpEnrollment, createRecoveryCodes, revok
 import { cacheCompanyAreaPreference, getSyncedCompanyAreaPreference } from '../shared/company-area-preference.js';
 import { clearPerformanceSamples, getPerformanceDiagnosticReport, isPerformanceDiagnosticsEnabled, setPerformanceDiagnosticsEnabled } from '../../performance-metrics.js';
 import { getUserProfile, getUserSetting, listProfileWidgets } from '../data/vault-repository.js';
-import { setupPushSettings } from './push-settings-controller.js';
+import { setupPushSettings } from './push-settings-controller.js?push=20260908b';
 
 // [V8.0] FLAG AMBIENTE — automatico: true solo su localhost, false in produzione
 const DEV_MODE = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
