@@ -91,6 +91,10 @@ La verifica dei tre fogli rappresentativi `area_privata.css`, `profilo_privato.c
 
 Il watermark canonico è definito in `core.css`: posizione, non-interattività, opacità e dimensione predefinite sono comuni. I fogli locali conservano soltanto le differenze intenzionali già esistenti, come opacità `0.08`, contenitore esteso, variazione dell'icona o dimensione da `500px`.
 
+I watermark non sono un disegno unico: il contratto conserva il simbolo semantico di ogni pagina (`archive`, `directions_car`, `description`, `settings_applications`, `contact_mail`, `settings`, `shield`, `rule`, `gavel`). Il gate `test:page-shells` verifica presenza, simbolo e `aria-hidden` nelle nove pagine previste. Le altre pagine non ricevono automaticamente una decorazione soltanto perché appartengono allo stesso modello UI.
+
+La scala globale dei livelli è dichiarata in `core.css` con token semantici, dal fondale arretrato fino agli avvisi critici. Core, fasce, moduli, menu e datepicker usano tali token senza alterare i valori numerici storici. Gli `z-index` locali restano invariati finché il relativo stacking context non viene verificato insieme al componente che lo possiede.
+
 ## Contratto degli stati di pagina
 
 `createUiState()` è la sola implementazione dinamica per i nuovi stati di caricamento, vuoto, avviso ed errore. Usa:

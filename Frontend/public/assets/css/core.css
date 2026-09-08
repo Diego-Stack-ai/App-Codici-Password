@@ -75,11 +75,19 @@ body,
     --touch-target-min: 2.75rem;
     --content-max: 72.5rem;
     --modal-max: 26.25rem;
+    --z-behind: -1;
+    --z-decoration: 0;
+    --z-ambient: 1;
+    --z-control: 2;
     --z-content: 10;
     --z-bars: 50;
+    --z-popover: 100;
     --z-dropdown: 1000;
     --z-modal: 1100;
     --z-toast: 1200;
+    --z-app-status: 10000;
+    --z-date-picker: 99999;
+    --z-critical-toast: 999999;
     --motion-fast: 160ms;
     --motion-normal: 240ms;
     --motion-slow: 360ms;
@@ -192,7 +200,7 @@ body,
     content: "";
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: var(--z-behind);
     width: 100vw;
     height: 100vh;
     height: 100dvh;
@@ -226,7 +234,7 @@ textarea::placeholder {
     flex-direction: column;
     align-items: stretch;
     position: relative;
-    z-index: 10;
+    z-index: var(--z-content);
     min-width: 0;
 }
 
@@ -337,7 +345,7 @@ textarea::placeholder {
     pointer-events: none;
     background: var(--glow-color);
     animation: glowFloat 5s ease-in-out infinite;
-    z-index: 1;
+    z-index: var(--z-ambient);
 }
 
 /* Watermark decorativo condiviso: fuori dal layout e non interattivo. */
@@ -346,7 +354,7 @@ textarea::placeholder {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-10deg);
-    z-index: 0;
+    z-index: var(--z-decoration);
     pointer-events: none;
     opacity: 0.05;
 }
@@ -401,7 +409,7 @@ textarea::placeholder {
 /* Stato di connettività condiviso tra login e area privata. */
 .offline-status-banner {
     position: fixed;
-    z-index: 10000;
+    z-index: var(--z-app-status);
     bottom: calc(76px + env(safe-area-inset-bottom));
     left: 50%;
     width: min(calc(100% - 24px), 620px);

@@ -13,7 +13,7 @@
     left: 50%;
     width: 100%;
     max-width: 1200px;
-    z-index: 50;
+    z-index: var(--z-bars);
     display: flex;
     align-items: center;
     padding: 0 1.5rem;
@@ -80,7 +80,7 @@
         position: absolute;
         left: 0;
         right: 0;
-        z-index: 0;
+        z-index: var(--z-decoration);
         height: 118px;
         pointer-events: none;
         background: rgb(255 255 255 / 86%);
@@ -108,7 +108,7 @@
     .base-header > *,
     .base-footer > * {
         position: relative;
-        z-index: 1;
+        z-index: var(--z-ambient);
     }
 
     .btn-footer-secondary {

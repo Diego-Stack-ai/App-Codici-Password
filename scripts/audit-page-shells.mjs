@@ -76,6 +76,17 @@ const internalPageModels = new Map([
     'termini.html'
   ])]
 ]);
+const pageWatermarks = new Map([
+  ['archivio_account.html', 'archive'],
+  ['configurazione_automezzi.html', 'directions_car'],
+  ['configurazione_documenti.html', 'description'],
+  ['configurazione_generali.html', 'settings_applications'],
+  ['gestione_destinatari.html', 'contact_mail'],
+  ['impostazioni.html', 'settings'],
+  ['privacy.html', 'shield'],
+  ['regole_scadenze.html', 'rule'],
+  ['termini.html', 'gavel']
+]);
 
 const modeledInternalPages = [...internalPageModels.values()]
   .flatMap(pages => [...pages])
@@ -111,6 +122,13 @@ for (const name of publicPages) {
     assert.ok(hasClass(source, 'div', 'pb-footer-extra'), `${name}: pb-footer-extra mancante`);
     assert.ok(hasClass(source, 'header', 'base-header'), `${name}: base-header mancante`);
     assert.ok(hasClass(source, 'footer', 'base-footer'), `${name}: base-footer mancante`);
+    if (pageWatermarks.has(name)) {
+      const watermark = source.match(/<div[^>]*class=["'][^"']*\barchive-watermark\b[^"']*["'][^>]*>[\s\S]*?<\/div>/)?.[0] ?? '';
+      assert.ok(watermark, `${name}: watermark specifico mancante`);
+      assert.match(watermark, new RegExp(`>\\s*${pageWatermarks.get(name)}\\s*<`),
+        `${name}: simbolo watermark atteso ${pageWatermarks.get(name)} mancante`);
+      assert.match(watermark, /aria-hidden=["']true["']/, `${name}: watermark non escluso dall'accessibilità`);
+    }
   } else {
     assert.ok(!hasStylesheet(source, 'core_fascie.css'), `${name}: le fasce non appartengono alla famiglia accesso`);
   }
