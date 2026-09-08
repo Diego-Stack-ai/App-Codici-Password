@@ -40,6 +40,7 @@ Il laboratorio `experiments/offline-sync` dimostra cifratura e autenticità dell
 - [x] Rules candidate: lettura puntuale del proprietario e scritture esclusivamente backend;
 - [x] modulo runtime IndexedDB cifrato, Web Locks e BroadcastChannel implementato e testato, non ancora collegato ai form;
 - [x] callable idempotente implementata, validata e protetta da App Check; Rules candidate testate, client non collegato;
+- [x] orchestratore client sotto lock con stati UI, arresto sul conflitto e retry recuperabile;
 - [ ] collaudo fisico su due dispositivi.
 
 M6 resta attiva finché runtime e backend non dimostrano che nessuna scrittura può essere persa o sovrascritta silenziosamente.
