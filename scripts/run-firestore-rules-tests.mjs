@@ -5,12 +5,15 @@ import {resolve} from 'node:path';
 const projectRoot = resolve(import.meta.dirname, '..');
 const configRoot = resolve(projectRoot, '.codex-tmp', 'firebase-config');
 const firebaseCli = resolve(projectRoot, 'node_modules', 'firebase-tools', 'lib', 'bin', 'firebase.js');
-const testFile = resolve(projectRoot, 'tests', 'firestore.profile-widgets.rules.test.mjs');
+const testFiles = [
+  resolve(projectRoot, 'tests', 'firestore.profile-widgets.rules.test.mjs'),
+  resolve(projectRoot, 'tests', 'sharing-prototype.rules.test.mjs')
+];
 mkdirSync(configRoot, {recursive: true});
 
 const result = spawnSync(process.execPath, [
   firebaseCli, 'emulators:exec', '--project', 'codici-password-rules-test', '--only', 'firestore',
-  `${JSON.stringify(process.execPath)} --test ${JSON.stringify(testFile)}`,
+  `${JSON.stringify(process.execPath)} --test ${testFiles.map(file => JSON.stringify(file)).join(' ')}`,
 ], {
   cwd: projectRoot,
   env: {...process.env, XDG_CONFIG_HOME: configRoot},

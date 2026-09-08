@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(data) { return signedIn() && data.ownerUid == request.auth.uid; }
+    function grantPath(recordId) {
+      return /databases/$(database)/documents/recordAccess/$(recordId)/members/$(request.auth.uid);
+    }
+    function hasActiveGrant(recordId, generation) {
+      return signedIn() &&
+        exists(grantPath(recordId)) &&
+        get(grantPath(recordId)).data.status == 'accepted' &&
+        get(grantPath(recordId)).data.role == 'viewer' &&
+        get(grantPath(recordId)).data.keyGeneration == generation &&
+        get(grantPath(recordId)).data.get('expiresAt', request.time + duration.value(1, 's')) > request.time;
+    }
+
+    // Il client legge un record puntuale dopo aver risolto il proprio grant.
+    // Creazione, migrazione, rotazione e cancellazione restano backend-only.
+    match /sharedRecords/{recordId} {
+      allow get: if owns(resource.data) || hasActiveGrant(recordId, resource.data.keyGeneration);
+      allow list, create, update, delete: if false;
+    }
+
+    // Percorso deterministico necessario alla verifica Rules. Ogni utente può
+    // leggere soltanto il proprio grant; il proprietario opera via backend.
+    match /recordAccess/{recordId}/members/{memberUid} {
+      allow get: if signedIn() && request.auth.uid == memberUid;
+      allow list, create, update, delete: if false;
+    }
+
+    // La chiave pubblica è pubblica soltanto all'interno dell'app autenticata.
+    match /cryptoPublicKeys/{userId} {
+      allow get: if signedIn();
+      allow list, create, update, delete: if false;
+    }
+
+    // La chiave privata cifrata non condivide il documento con quella pubblica.
+    match /users/{userId}/cryptoIdentity/{identityId} {
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow list, create, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
