@@ -51,6 +51,46 @@ Conclusione: l'autorizzazione di lettura è implementata, ma la decifratura end-
 7. Il client tenta la decifratura con la Vault Key della sessione del destinatario: qui manca il ponte crittografico verificato.
 8. La revoca elimina destinatario e invito dalle strutture correnti, ma va ancora dimostrata rispetto a chiavi già consegnate, cache offline e allegati.
 
+## Inventario del percorso dati
+
+### Record Account privato
+
+| Categoria | Campi osservati | Stato attuale |
+|---|---|---|
+| Segreti principali | `username`, `account`, `password`, `note` | cifrati con la Vault Key del proprietario |
+| Dati bancari | `passwordDispositiva`, `cardNumber`, `pin`, `ccv` | cifrati con la Vault Key del proprietario |
+| Classificazione e ACL | `type`, `visibility`, `sharedWith`, `sharedWithUids`, `acceptedCount` | plaintext necessario alle query e alle Rules |
+| Identificazione visiva | `nomeAccount` e altri metadati non inclusi nella lista dei campi cifrati | da classificare rispetto alla privacy prima del nuovo formato |
+
+### Record Account azienda
+
+| Categoria | Campi osservati | Stato attuale |
+|---|---|---|
+| Segreti principali | `username`, `account`, `password`, `numeroIscrizione`, `codiceSocieta`, `note` | cifrati con la Vault Key del proprietario |
+| Dati bancari | `passwordDispositiva`, `cardNumber`, `pin`, `ccv` | cifrati con la Vault Key del proprietario |
+| Classificazione e ACL | stessi campi di condivisione dell'Account privato, più `aziendaId` nell'invito | plaintext necessario al routing e alle Rules |
+| Contesto aziendale | nome account e riferimenti all'azienda | da minimizzare e classificare prima del nuovo formato |
+
+### Inviti e notifiche
+
+Gli inviti contengono in chiaro email di mittente e destinatario, nome dell'account, tipo, identificatori, stato e preferenze di notifica. Non contengono password, Vault Key o chiave per-record. Email e push comunicano l'esistenza dell'invito e possono includere il nome dell'account: questo metadato deve diventare una scelta esplicita di privacy.
+
+L'ID corrente dell'invito deriva da `accountId` ed email sanificata. Prima di considerarlo un identificatore canonico occorre verificare collisioni, rinomina dell'email e omonimia fra percorsi privato/azienda.
+
+### Firestore e cache offline
+
+Le Rules consentono all'UID accettato di leggere il documento Account originale; le scritture del destinatario non sono abilitate. Il repository usa la cache persistente multischeda di Firestore e una strategia cache-first: nella cache resta quindi il ciphertext già autorizzato e scaricato, non il plaintext prodotto in memoria.
+
+La revoca server impedisce letture successive, ma non può presumere la cancellazione immediata del ciphertext dalla cache del dispositivo. Il progetto della chiave per-record deve quindi trattare come permanente ogni ciphertext già consegnato e ruotare chiave e contenuto per le versioni future quando la revoca deve avere effetto crittografico.
+
+### Allegati e Storage
+
+Ogni allegato usa una chiave-file casuale AES-GCM. La chiave-file viene avvolta tramite HKDF e AES-GCM usando la Vault Key del proprietario; nel documento Firestore dell'allegato sono salvati metadati, percorso Storage e materiale di wrapping.
+
+Le Storage Rules limitano lettura, creazione e cancellazione allo UID proprietario. Un invitato non può quindi scaricare l'oggetto del proprietario. Anche se potesse scaricarlo, il client tenterebbe di aprire la chiave-file con la Vault Key dell'invitato. La condivisione allegati non è attualmente end-to-end e dovrà usare lo stesso confine crittografico del record oppure un envelope dedicato.
+
+Nel percorso aziendale il modulo allegati è inizializzato con `currentUid`, non con `ownerId`, e non espone lo stesso flag `readOnly` del percorso privato. Per un account ricevuto questo può indirizzare la raccolta sbagliata e mostrare comandi non coerenti; va corretto soltanto insieme al contratto di condivisione, con test di regressione.
+
 ## Minacce prioritarie
 
 | Minaccia | Controllo attuale | Lacuna da chiudere |
@@ -63,6 +103,9 @@ Conclusione: l'autorizzazione di lettura è implementata, ma la decifratura end-
 | Condivisione estende tutta la Vault | non risulta consegna della Vault Key | vietare esplicitamente la distribuzione della Vault Key completa |
 | Scritture non autorizzate | destinatario in sola lettura nelle Rules esaminate | progettare ruoli prima di aggiungere modifica condivisa |
 | Allegati divergono dai campi | cifratura client presente | accesso Storage e distribuzione della chiave da verificare end-to-end |
+| Metadati sensibili visibili | segreti principali cifrati | nome account, email, tipo e contesto aziendale restano plaintext |
+| Cache dopo revoca | Firestore conserva ciphertext | rotazione della chiave per impedire l'accesso alle versioni future |
+| Percorsi privato/azienda divergenti | UI simile e ACL comune | allegati azienda usano `currentUid` e non lo stesso contratto read-only |
 
 ## Direzione da prototipare, non ancora adottata
 
@@ -70,15 +113,19 @@ La candidata più limitata è una chiave casuale per singolo record. I contenuti
 
 Prima di scegliere algoritmi e formato occorre verificare come associare in modo affidabile una chiave pubblica a ciascun account utente, come proteggerne la chiave privata con la Vault Key locale e come ruotare la chiave del record dopo una revoca. La revoca non può cancellare ciò che un destinatario ha già visto o copiato, ma deve impedirgli di ottenere versioni e chiavi future.
 
+Il primo laboratorio isolato si trova in `experiments/sharing-key-prototype/`. Usa ECDH P-256 soltanto per concordare il materiale dell'envelope, HKDF-SHA-256 per derivare la chiave di wrapping e AES-GCM-256 per cifrare chiave e contenuto. La chiave per-record non è derivata dalla Master Password e la Vault Key del proprietario non viene consegnata al destinatario.
+
+Il laboratorio dimostra la proprietà crittografica minima, non decide ancora persistenza, recupero multi-dispositivo, verifica delle chiavi pubbliche, schema Firestore o migrazione. Non è importato dal frontend e non deve essere aggiunto alla cache offline.
+
 ## Gate di M5
 
 - [x] mappare attori, dati, confini e flusso attuale;
 - [x] distinguere ACL da decifratura e identificare la lacuna corrente;
-- [ ] censire campi, allegati, cache e percorsi legacy coinvolti;
+- [~] censire campi, allegati e cache; restano i percorsi legacy e tutti i metadati da classificare;
 - [ ] definire ruoli, scadenza, revoca e cronologia senza plaintext nei log;
-- [ ] costruire un prototipo isolato con utenti e chiavi di prova;
-- [ ] dimostrare lettura autorizzata e fallimento di lettura non autorizzata;
-- [ ] dimostrare rotazione/revoca e comportamento offline;
+- [x] costruire un prototipo isolato con utenti e chiavi di prova;
+- [x] dimostrare lettura autorizzata e fallimento di lettura non autorizzata;
+- [~] dimostrare rotazione dopo revoca; resta da definire e provare il comportamento offline;
 - [ ] definire lettore retrocompatibile, backup e rollback;
 - [ ] provare la migrazione su una copia non produttiva;
 - [ ] modificare la produzione soltanto dopo approvazione esplicita.
