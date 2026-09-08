@@ -2,6 +2,7 @@ import {getDocSmart, getDocsSmart} from '/assets/js/offline-firestore.js';
 import {db} from '../../firebase-config.js?v=1.2.64';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
+import {readMigratingRecord} from './shared-record-reader.js';
 
 const records = snapshot => snapshot.docs.map(item => ({id: item.id, ...item.data()}));
 const readRecords = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(records);
@@ -101,3 +102,7 @@ export const listProfileWidgets = uid => readRecords(`profile-widgets:${uid}`,
     collection(db, 'users', uid, 'profileWidgets'));
 
 export const getUserProfile = uid => readRecord(`profile:${uid}`, doc(db, 'users', uid));
+
+// Punto d'integrazione M5 deliberatamente inattivo: i chiamanti esistenti
+// continuano a usare i record legacy finché il cutover non viene autorizzato.
+export const getMigratingRecord = options => readMigratingRecord(options);
