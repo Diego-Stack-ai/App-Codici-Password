@@ -18,6 +18,11 @@ const textFiles = files.filter(file => /\.(?:html|js|css|json)$/i.test(file));
 const offlineSource = await readFile(path.join(publicDir, 'offline-assets.js'), 'utf8');
 const assets = JSON.parse(offlineSource.match(/=\s*(\[[\s\S]*\]);?\s*$/)?.[1] || '[]');
 const assetSet = new Set(assets);
+const onlineOnlyDiagnostics = new Set([
+  'prova.html',
+  'assets/css/prova.css',
+  'assets/js/prova.js'
+]);
 const serviceWorker = await readFile(path.join(publicDir, 'sw.js'), 'utf8');
 const pushWorker = await readFile(path.join(publicDir, 'firebase-messaging-sw.js'), 'utf8');
 const loginEntry = await readFile(path.join(publicDir, 'assets/js/login-entry.js'), 'utf8');
@@ -25,9 +30,15 @@ const loginEntry = await readFile(path.join(publicDir, 'assets/js/login-entry.js
 assert.ok(assets.length >= 150, `Shell offline incompleta: solo ${assets.length} risorse`);
 for (const file of files) {
   const relative = path.relative(publicDir, file).replaceAll('\\', '/');
-  if (/\.(?:html|js|css|json|png|jpe?g|svg|webp|woff2)$/i.test(relative) && relative !== 'sw.js') {
+  if (/\.(?:html|js|css|json|png|jpe?g|svg|webp|woff2)$/i.test(relative)
+      && relative !== 'sw.js'
+      && !onlineOnlyDiagnostics.has(relative)) {
     assert.ok(assetSet.has(relative), `Risorsa statica non precaricata: ${relative}`);
   }
+}
+
+for (const diagnostic of onlineOnlyDiagnostics) {
+  assert.ok(!assetSet.has(diagnostic), `Laboratorio diagnostico incluso nella shell offline: ${diagnostic}`);
 }
 
 for (const file of textFiles.filter(file => !file.includes(`${path.sep}vendor${path.sep}`))) {

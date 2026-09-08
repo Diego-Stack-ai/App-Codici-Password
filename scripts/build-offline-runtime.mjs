@@ -103,11 +103,17 @@ await build({
 });
 
 const cacheableExtensions = new Set(['.html', '.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.woff2']);
+const onlineOnlyDiagnostics = new Set([
+  'prova.html',
+  'assets/css/prova.css',
+  'assets/js/prova.js'
+]);
 const publicFiles = await walk(publicDir);
 const offlineAssets = publicFiles
   .filter(file => cacheableExtensions.has(path.extname(file).toLowerCase()))
   .filter(file => path.basename(file) !== 'sw.js')
   .map(file => path.relative(publicDir, file).replaceAll('\\', '/'))
+  .filter(file => !onlineOnlyDiagnostics.has(file))
   .sort();
 await writeFile(
   path.join(publicDir, 'offline-assets.js'),
