@@ -73,3 +73,7 @@ Ogni sostituzione deve conservare: percorso dati leggibile, schema legacy, Rules
 I budget statici sono applicati da `npm run test:performance-budget`. Gli obiettivi runtime in `scripts/page-performance-budget.json` diventano bloccanti soltanto dopo una baseline ripetibile su dispositivi reali; fino ad allora non costituiscono una dichiarazione delle prestazioni correnti.
 
 La diagnostica runtime è attivabile nelle Impostazioni del singolo dispositivo. Conserva localmente al massimo 80 campioni con nome della fase, durata, pagina, stato rete e conteggi tecnici ammessi da una lista chiusa. Non registra contenuti, identificativi utente, email, URL visitati, token, credenziali o valori decifrati; disattivandola vengono cancellati i campioni persistiti.
+
+## Gate reale per le scadenze ricevute
+
+Prima di dichiarare concluso il flusso condiviso occorre un collaudo con due account reali distinti: creare una scadenza con Email e Push attivi; verificare la copia in `receivedDeadlines`; aprire sia il deep link Push sia quello email; controllare il caso sola lettura; ripetere con `canManage`; completare o rinviare dal destinatario; verificare l'aggiornamento dell'originale e della copia; revocare il permesso; confermare il blocco delle modifiche successive. Le vecchie notifiche prive di `receivedDeadlineId` possono aprire la lista come compatibilità, ma non certificano il nuovo percorso.

@@ -43,3 +43,9 @@ Il collaudo del 6 settembre 2026 non ha superato il gate. Le schermate fornite m
 Correzione candidata applicata: su viewport mobile il documento esterno non scorre più e soltanto `.base-main` gestisce lo scorrimento verticale. Il collaudo comparativo del 6 settembre ha scelto la variante "nebbia V2": maschera progressiva sul contenuto, velo bianco tramite pseudo-elemento e blur da 12 px, senza bordi visibili. La tecnica deriva dai commit storici `ba7f85f` e `2c19860` e conserva intenzionalmente l'effetto delle card che sfumano sotto le fasce.
 
 Fallback preservato fuori dal runtime: la variante storica del commit `ab532e2`, il confronto della nebbia e i relativi supporti sono conservati in `archive/home-experiments/`. La specifica descritta in questo documento resta la fonte ufficiale; l'archivio consente un confronto manuale senza pubblicare o memorizzare offline i laboratori. Il gate M4 resta aperto fino al nuovo collaudo su iPhone e Windows.
+
+## Laboratorio radice del viewport
+
+`prova.html` è stato pubblicato temporaneamente per riprodurre su iPhone la sola estensione del fondale con `100vh`/`100dvh` e `viewport-fit=cover`, senza cambiare nebbia, livelli, safe area o componenti dell'app. Serve a stabilire se la fascia inferiore nasce dalla superficie radice oppure dalla shell interna.
+
+Il laboratorio non certifica da solo la correzione. Dopo la prova fisica, la candidata va applicata al CSS comune e ricollaudata almeno su Home, Registrazione e una pagina interna lunga; nebbia V2, ombre, pulsanti e ordine dei livelli devono restare invariati.

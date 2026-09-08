@@ -76,7 +76,9 @@ La struttura HTML di App Codici Password non è un suggerimento estetico, è un'
 
 ### 2.2 Eccezione Ufficiale: Auth Pages (Protocollo .vault)
 ### Spiegazione umana:
-Le pagine di accesso (`index.html`, `registrati.html`, `reset_password.html`) costituiscono un'eccezione formale. Queste pagine non usano Header o Footer applicativi perché l'obiettivo è focalizzare l'utente sul modulo di sicurezza. Utilizzano la classe `.vault` per centrare matematicamente il contenuto nello schermo e forzano il tema Dark (`protocol-forced-dark`) per trasmettere un senso di sicurezza e premiumness fin dal primo contatto.
+Le pagine di accesso (`index.html`, `login-v115.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`) costituiscono un'eccezione formale. Queste pagine non usano Header o Footer applicativi perché l'obiettivo è focalizzare l'utente sul modulo di sicurezza. Utilizzano la classe `.vault` per centrare matematicamente il contenuto nello schermo e forzano il tema Dark (`protocol-forced-dark`) per trasmettere un senso di sicurezza e premiumness fin dal primo contatto.
+
+Il centraggio non può impedire l'uso su schermi bassi o con tastiera aperta. In tali condizioni la famiglia Auth deve consentire lo scorrimento verticale di emergenza; `registrati.css` contiene la correzione locale già collaudabile, senza modificare la shell delle pagine interne.
 
 ### Esempio Struttura Auth Page:
 ```html

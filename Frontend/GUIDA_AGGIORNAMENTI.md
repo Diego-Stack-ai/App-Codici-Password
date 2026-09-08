@@ -464,3 +464,11 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Al primo fallimento l’app revoca esclusivamente token e sottoscrizione Push del dispositivo corrente, quindi tenta una sola nuova registrazione.
 - Nessun dato applicativo, destinatario o dispositivo remoto viene modificato; gli ambiti Scadenze e Condivisioni restano indipendenti.
 - Se il recupero fallisce, la UI mostra un messaggio italiano classificato per permesso, compatibilità o registrazione, senza esporre l’errore interno dell’SDK.
+
+# Consolidamento remoto e laboratorio viewport (07–08/09/2026)
+
+- La registrazione consente lo scroll verticale di emergenza su schermi bassi tramite `registrati.css`; la famiglia Auth resta distinta dalle pagine interne.
+- `prova.html` e `prova.css` sono registrati come laboratorio temporaneo pubblicato per isolare il fondale dinamico del viewport. Non sono una trentesima funzione e restano esclusi dagli audit delle 29 pagine canoniche.
+- La prova non autorizza modifiche a nebbia V2, ombre, pulsanti o ordine dei livelli: la soluzione definitiva deve passare il gate fisico M4 sulle pagine reali.
+- La messaggistica Push usa un worker dedicato, separato da `sw.js`, con scope `/firebase-cloud-messaging-push-scope`; Firebase resta alla versione 12.18.0 per non regredire lo schema IndexedDB.
+- Le Scadenze condivise dispongono di copie minime in `receivedDeadlines`, permesso opzionale `canManage`, callable server `manageReceivedDeadline` e deep link Email/Push. Resta obbligatorio il collaudo completo con due account reali prima della chiusura.

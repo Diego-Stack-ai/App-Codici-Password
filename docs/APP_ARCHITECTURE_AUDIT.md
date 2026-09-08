@@ -22,9 +22,11 @@ Firestore usa come radice `users/{uid}`. I dati personali sono nelle sottocollez
 la loro accettazione è convalidata dalla Cloud Function `respondToInvitation`. Allegati e avatar
 sono in Storage sotto `users/{uid}/...`. Gli allegati della Vault vengono cifrati lato client.
 
-Il service worker precarica una shell minima e mette in cache a runtime le pagine visitate e gli
-asset same-origin. Firestore mantiene inoltre una cache locale persistente multi-tab. Le due cache
-sono complementari: la prima rende disponibile l'interfaccia, la seconda i dati già sincronizzati.
+Il service worker applicativo `sw.js` precarica una shell minima e mette in cache a runtime le pagine
+visitate e gli asset same-origin. Il worker Push `firebase-messaging-sw.js` è separato, usa lo scope
+esplicito `/firebase-cloud-messaging-push-scope` e non importa `sw.js`. Firestore mantiene inoltre una
+cache locale persistente multi-tab. Cache della shell, cache dati e messaggistica hanno quindi
+responsabilità distinte.
 
 ## Flussi principali verificati
 
@@ -35,7 +37,7 @@ sono complementari: la prima rende disponibile l'interfaccia, la seconda i dati 
 5. Azienda: lista → dati azienda → account/dettaglio/form; dati sotto `aziende/{aziendaId}`.
 6. Scadenze: lista/dettaglio/form + configurazioni; notifiche generate dalle Cloud Functions.
 7. Condivisione: invito top-level → validazione server → UID destinatario aggiunto all'account.
-8. Push: device registrato in `pushDevices`; service worker gestisce messaggi e deep link.
+8. Push: `push-messaging-client.js` registra il worker dedicato e il device in `pushDevices`; il worker gestisce messaggi e deep link senza prendere il controllo della navigazione PWA.
 
 ## Evidenze e decisioni conservative
 
@@ -49,6 +51,7 @@ sono complementari: la prima rende disponibile l'interfaccia, la seconda i dati 
   sono caricati direttamente dall'HTML o tramite import dinamico.
 - I laboratori Home e i quattro redirect versionati sono stati rimossi dalla superficie pubblica e
   conservati in `archive/home-experiments/`; il runtime espone soltanto le 29 pagine ufficiali.
+- Firebase Messaging resta sulla versione 12.18.0 già adottata: un downgrade alla 11.1.0 può rendere incompatibile lo schema IndexedDB locale. Le importazioni CDN sono ammesse soltanto nel worker Push isolato; il worker della shell rimane same-origin.
 
 ## Ottimizzazioni applicate
 

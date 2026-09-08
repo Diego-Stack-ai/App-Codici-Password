@@ -22,6 +22,12 @@ Riferimenti storici archiviati in `archive/home-experiments/`:
 
 Questi file non vengono pubblicati, memorizzati offline o inclusi negli audit delle pagine attive.
 
+## Laboratorio viewport temporaneo
+
+`prova.html` e `prova.css` costituiscono un banco di prova isolato, raggiungibile durante il collaudo su dispositivi reali. La pagina mostra soltanto fondale, viewport dinamico e una card neutra: non rappresenta una funzione dell'app e non appartiene alle 29 pagine canoniche.
+
+Il laboratorio è escluso dagli audit che certificano la superficie applicativa. Quando il contratto del viewport sarà validato sulle pagine reali, dovrà essere archiviato o rimosso dalla pubblicazione senza creare alias o suffissi di versione.
+
 ## Domini canonici
 
 - autenticazione: `login-v115.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`;

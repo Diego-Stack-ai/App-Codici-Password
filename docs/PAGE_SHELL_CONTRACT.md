@@ -6,7 +6,8 @@ Questo documento definisce esclusivamente la struttura delle 29 pagine pubbliche
 
 - **Famiglia accesso:** `index.html`, `login-v115.html`, `registrati.html`, `reset_password.html`, `imposta_nuova_password.html`.
 - **Famiglia interna:** le altre 24 pagine canoniche elencate in `CANONICAL_PAGE_REGISTRY.md`.
-- Laboratori e redirect Home sono conservati in `archive/home-experiments/` e non appartengono al runtime pubblico.
+- I confronti Home e i redirect storici sono conservati in `archive/home-experiments/` e non appartengono al runtime pubblico.
+- `prova.html` è un laboratorio temporaneo pubblicato per il collaudo fisico del viewport. Non è una trentesima pagina applicativa, non entra nel conteggio né nel gate statico delle 29 pagine e non può introdurre eccezioni nel contratto definitivo.
 
 ## Strati comuni
 
@@ -39,6 +40,8 @@ Le quattro pagine operative di autenticazione:
 - non caricano `core_fascie.css` e non possiedono header/footer fissi;
 - centrano `.vault` quando entra nello schermo;
 - consentono lo scorrimento verticale di emergenza quando tastiera, orientamento o altezza ridotta non permettono il centraggio.
+
+La registrazione applica attualmente questa regola tramite `registrati.css`: sui dispositivi bassi il documento può scorrere e `.base-container` non deve bloccarlo con `overflow: hidden`. La correzione locale resta compatibile con il contratto e dovrà essere assorbita nella regola comune della famiglia soltanto dopo il collaudo delle cinque pagine di accesso.
 
 `index.html` appartiene alla stessa famiglia come ingresso minimo: mantiene tema dark, fondale comune e inoltra immediatamente alla pagina di accesso senza costruire la shell completa.
 
@@ -88,3 +91,5 @@ La correzione della fascia terminale iOS deve quindi:
 ## Gate
 
 `npm run test:page-shells` controlla classificazione e struttura statica delle 29 pagine. Il collaudo fisico descritto in `M4_VISUAL_ACCEPTANCE.md` resta obbligatorio per safe area, overscroll e ricomposizione grafica di iOS.
+
+`prova.html` serve unicamente a separare il comportamento della superficie radice da header, footer, nebbia e contenuti reali. Un esito positivo nel laboratorio non chiude il gate: la stessa soluzione deve essere riportata nel contratto comune e verificata sulle due famiglie.
