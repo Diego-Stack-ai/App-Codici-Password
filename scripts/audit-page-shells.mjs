@@ -41,22 +41,21 @@ const internalPages = new Set([
 const internalPageModels = new Map([
   ['hub', new Set([
     'area_privata.html',
-    'home_page.html',
-    'impostazioni.html',
-    'lista_aziende.html',
-    'profilo_privato.html'
+    'home_page.html'
   ])],
   ['list', new Set([
     'account_azienda.html',
     'account_privati.html',
     'archivio_account.html',
+    'lista_aziende.html',
     'scadenze.html'
   ])],
   ['detail', new Set([
     'dati_azienda.html',
     'dettaglio_account_azienda.html',
     'dettaglio_account_privato.html',
-    'dettaglio_scadenza.html'
+    'dettaglio_scadenza.html',
+    'profilo_privato.html'
   ])],
   ['form', new Set([
     'aggiungi_scadenza.html',
@@ -69,8 +68,11 @@ const internalPageModels = new Map([
     'configurazione_documenti.html',
     'configurazione_generali.html',
     'gestione_destinatari.html',
-    'privacy.html',
+    'impostazioni.html',
     'regole_scadenze.html',
+  ])],
+  ['information', new Set([
+    'privacy.html',
     'termini.html'
   ])]
 ]);

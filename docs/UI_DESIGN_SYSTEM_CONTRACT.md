@@ -31,13 +31,14 @@ Le due famiglie definite dal contratto strutturale restano il livello esterno:
 - **Accesso**: `index.html` come ingresso tecnico e le quattro pagine di autenticazione;
 - **Operativa**: le 24 pagine dotate di header, area centrale scorrevole e footer condivisi.
 
-La famiglia operativa non implica che tutte le pagine abbiano la stessa composizione interna. Per evitare CSS monolitici e duplicazioni locali, le pagine operative adottano cinque modelli di composizione:
+La famiglia operativa non implica che tutte le pagine abbiano la stessa composizione interna. Per evitare CSS monolitici e duplicazioni locali, le pagine operative adottano sei modelli di composizione, determinati dall'interazione principale e non dalla sola somiglianza grafica:
 
-1. **Hub e rappresentative**: Home, Area privata, Profilo privato, Impostazioni e Lista aziende. Presentano funzioni o identità attraverso hero, card di navigazione, badge, tab e indicatori.
-2. **Elenchi**: Account privati, Account azienda, Scadenze e Archivio account. Ripetono righe o card, ricerca, filtri, ordinamento e azioni sugli elementi.
-3. **Dettagli**: Dettaglio account privato, Dettaglio account azienda, Dettaglio scadenza e Dati azienda. Organizzano informazioni in sezioni, campi consultabili e azioni contestuali.
+1. **Hub e navigazione**: Home e Area privata. Presentano destinazioni, riepiloghi e contatori attraverso grandi card di accesso.
+2. **Elenchi e collezioni**: Account privati, Account azienda, Lista aziende, Scadenze e Archivio account. Ripetono righe o card, ricerca, filtri, ordinamento e azioni sugli elementi.
+3. **Dettagli e consultazione**: Dettaglio account privato, Dettaglio account azienda, Dettaglio scadenza, Dati azienda e Profilo privato. Organizzano un singolo soggetto o record in hero, sezioni, campi consultabili e azioni contestuali.
 4. **Form e modifica**: Form account privato, Form account azienda, Modifica azienda e Aggiungi scadenza. Condividono campi, griglie, validazione, allegati e azioni di salvataggio.
-5. **Configurazione e informative**: Regole scadenze, Gestione destinatari, le tre configurazioni, Privacy e Termini. Usano card amministrative, controlli di configurazione o contenuto documentale.
+5. **Impostazioni e configurazione**: Impostazioni, Regole scadenze, Gestione destinatari e le tre configurazioni. Usano card amministrative, controlli, preferenze e accessi alle gestioni specialistiche.
+6. **Informative**: Privacy e Termini. Condividono una composizione documentale di lettura, distinta dai controlli di configurazione.
 
 Una pagina può usare componenti appartenenti a più modelli, ma deve avere un solo modello primario. Il modello non modifica il contratto del viewport e non autorizza una seconda implementazione di header, footer o area scorrevole.
 
@@ -47,7 +48,7 @@ Una pagina può usare componenti appartenenti a più modelli, ma deve avere un s
 - **Profilo privato** è uno spazio dati operativo: gestisce identità, contatti, indirizzi, documenti, QR e tessera digitale tramite tab e sezioni modificabili.
 - **Impostazioni** è un centro di controllo: raccoglie preferenze, servizi e accessi alle configurazioni.
 
-Le tre pagine condividono il linguaggio visivo rappresentativo, non la stessa struttura funzionale. Hero, card, badge, tab e sezioni devono essere componenti riusabili; i contenuti e il comportamento restano dei rispettivi moduli.
+Le tre pagine condividono il linguaggio visivo rappresentativo, non lo stesso modello funzionale: Area privata è un hub, Profilo privato è un dettaglio operativo e Impostazioni è il centro della famiglia configurazione. La qualità "rappresentativa" è quindi una variante visiva trasversale. Hero, card, badge, tab e sezioni devono essere componenti riusabili; i contenuti e il comportamento restano dei rispettivi moduli.
 
 ## Livelli di proprietà dello stile
 
@@ -55,7 +56,7 @@ Ogni regola deve appartenere al livello più ristretto che ne descrive correttam
 
 1. **Fondazioni**: temi, token, viewport, spazi, tipografia e livelli semantici nel core.
 2. **Componenti**: card, campi glass, badge, tab, pulsanti, allegati e stati riutilizzati da almeno due pagine.
-3. **Modelli di pagina**: composizione interna comune a hub, elenchi, dettagli, form o configurazioni.
+3. **Modelli di pagina**: composizione interna comune a hub, elenchi, dettagli, form, configurazioni o informative.
 4. **Pagina**: solo identità o comportamento realmente esclusivo.
 
 Non si crea un unico foglio globale per assorbire ogni differenza. Una classe locale viene promossa soltanto quando due utilizzi reali hanno stesso significato, stessa struttura e stessi stati. L'uguaglianza puramente estetica non è sufficiente.
@@ -71,7 +72,7 @@ Non si crea un unico foglio globale per assorbire ogni differenza. Una classe lo
 
 ## Debito censito e ordine di consolidamento
 
-La ricognizione M4 ha rilevato una forte sovrapposizione tra i CSS dei form, dei dettagli Account e delle pagine Azienda, mentre Area privata, Profilo privato e Impostazioni condividono soprattutto il linguaggio visivo e non la funzione. Sono inoltre presenti watermark ripetuti, effetti locali e valori di livello non ancora espressi tramite una scala semantica.
+La ricognizione M4 ha rilevato una forte sovrapposizione tra i CSS dei form, dei dettagli Account e delle pagine Azienda, mentre Area privata, Profilo privato e Impostazioni condividono soprattutto una variante visiva rappresentativa e non il modello funzionale. Sono inoltre presenti watermark ripetuti, effetti locali e valori di livello non ancora espressi tramite una scala semantica.
 
 Il consolidamento procede senza variazioni grafiche intenzionali in questo ordine:
 
