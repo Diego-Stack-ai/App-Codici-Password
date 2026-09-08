@@ -16,6 +16,10 @@ L'audit del 08/09/2026 rileva zero vulnerabilità note nelle dipendenze di produ
 
 Finché questi punti non sono firmati, la build è una candidata tecnica e non una release professionale definitiva.
 
+## Collaudo esplorativo v1.2.64
+
+L'8 settembre 2026 il product owner ha navigato nell'app pubblicata e nelle sue pagine senza rilevare malfunzionamenti. Questo costituisce un esito positivo di smoke test generale e conferma l'assenza di regressioni evidenti dopo il rilascio M0–M10. Non sostituisce la matrice M10: dispositivo, sistema, browser, tema, rete offline, riapertura, tastiera e modali non sono stati registrati come singoli casi verificati.
+
 ## Checklist operativa di rilascio
 
 1. working tree pulita, versione unica e suite completa verde;
