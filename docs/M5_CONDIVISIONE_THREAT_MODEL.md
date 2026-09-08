@@ -159,6 +159,19 @@ Il proprietario non deve fidarsi di una chiave pubblica fornita liberamente dal 
 
 L'ACL Firestore deve leggere documenti di autorizzazione controllabili dalle Rules; non deve fidarsi di un array modificabile dall'invitato. Storage dovrà verificare lo stesso grant attivo usato da Firestore, evitando URL pubblici persistenti.
 
+## Compatibilità e migrazione candidata
+
+Il lettore dovrà riconoscere esplicitamente due formati:
+
+- **legacy:** campi sensibili separati, cifrati con la Vault Key del proprietario;
+- **record-key-v1:** payload unico cifrato con chiave per-record e grant separati per UID/generazione.
+
+Durante la preparazione non si esegue una doppia scrittura silenziosa. La migrazione legge e decifra il legacy nella sessione del proprietario, costruisce il nuovo record in memoria, verifica che il nuovo payload torni identico e soltanto allora prepara una scrittura atomica. Il legacy resta disponibile fino alla conferma del nuovo formato; la sua eliminazione appartiene a un cutover successivo e separato.
+
+Il simulatore locale `migration-simulator.mjs` accetta soltanto input con `fixture: true`. Produce record schema 2, grant individuali per proprietario e lettori e un pacchetto di rollback con checksum SHA-256. Non usa Firebase e non accetta percorsi o credenziali di produzione.
+
+Il backup reale non potrà essere un semplice snapshot in chiaro come quello didattico del simulatore: dovrà essere cifrato, versionato, autenticato e coperto dal progetto M8. Per M5 il rollback richiesto consiste nel conservare il documento legacy intatto finché la verifica del nuovo record non è conclusa.
+
 ## Gate di M5
 
 - [x] mappare attori, dati, confini e flusso attuale;
@@ -168,8 +181,8 @@ L'ACL Firestore deve leggere documenti di autorizzazione controllabili dalle Rul
 - [x] costruire un prototipo isolato con utenti e chiavi di prova;
 - [x] dimostrare lettura autorizzata e fallimento di lettura non autorizzata;
 - [~] dimostrare rotazione dopo revoca; resta da definire e provare il comportamento offline;
-- [ ] definire lettore retrocompatibile, backup e rollback;
-- [ ] provare la migrazione su una copia non produttiva;
+- [~] definire lettore retrocompatibile, backup e rollback; contratto e simulatore pronti, integrazione runtime non avviata;
+- [x] provare la trasformazione e il rollback sul dataset fittizio M0;
 - [ ] modificare la produzione soltanto dopo approvazione esplicita.
 
 ## Prossimo passo

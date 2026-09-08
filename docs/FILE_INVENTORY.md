@@ -2,7 +2,23 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **296**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
+
+## experiments
+
+| File | Tipo | Byte | Righe | Responsabilità |
+|---|---:|---:|---:|---|
+| `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
+| `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
+| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
+| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
+| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
+| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
+| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
+| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
+| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 4018 | 99 | File di progetto: record-sharing-crypto. |
+| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 2153 | 41 | File di progetto: record-sharing-crypto.test. |
 
 ## .firebaserc
 
@@ -263,7 +279,7 @@ File censiti: **296**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8697 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 15075 | 178 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 16446 | 191 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
@@ -271,20 +287,6 @@ File censiti: **296**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
 | `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
-
-## experiments
-
-| File | Tipo | Byte | Righe | Responsabilità |
-|---|---:|---:|---:|---|
-| `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
-| `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
-| `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
-| `experiments/card-importer/card-parser.test.mjs` | MJS | 1448 | 33 | File di progetto: card-parser.test. |
-| `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
-| `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
-| `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 4018 | 99 | File di progetto: record-sharing-crypto. |
-| `experiments/sharing-key-prototype/record-sharing-crypto.test.mjs` | MJS | 2153 | 41 | File di progetto: record-sharing-crypto.test. |
 
 ## firebase.json
 
@@ -326,7 +328,7 @@ File censiti: **296**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 4567 | 68 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 4547 | 68 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

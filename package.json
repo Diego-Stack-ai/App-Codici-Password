@@ -40,7 +40,7 @@
     "test:js-syntax": "node scripts/audit-js-syntax.mjs",
     "test:crypto": "node --test tests/crypto-utils.test.mjs",
     "test:attachments": "node --test tests/attachment-security.test.mjs",
-    "test:sharing-prototype": "node --test experiments/sharing-key-prototype/record-sharing-crypto.test.mjs",
+    "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs",
     "test:functions-security": "node --check functions/index.js && node --check functions/recovery-security.js && node functions/node_modules/eslint/bin/eslint.js --config functions/eslint.config.js functions && node --test functions/test/recovery-security.test.js",
     "test:storage-rules": "node scripts/run-storage-rules-tests.mjs",
     "test:firestore-rules": "node scripts/run-firestore-rules-tests.mjs",
