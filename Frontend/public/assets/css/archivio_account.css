@@ -4,13 +4,6 @@
 
 /* --- 1. ELEMENTI STRUTTURALI & DECOR --- */
 .archive-watermark {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-10deg);
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.05;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -19,8 +12,6 @@
 }
 
 .archive-watermark span {
-    font-size: 600px;
-    color: var(--text-primary);
     font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 48;
 }
 

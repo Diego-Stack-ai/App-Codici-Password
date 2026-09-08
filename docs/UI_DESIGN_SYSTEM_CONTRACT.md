@@ -87,6 +87,10 @@ La presenza duplicata di `base-glow` nelle due pagine di dettaglio Account è re
 
 Il consolidamento statico dei dettagli Account è completato in `account_detail.css`: fondazioni, allegati, viste bancarie, richiamo informativo, selettore sorgente e utilità equivalenti sono condivisi. Nei due fogli locali non restano regole esattamente identiche; ogni ulteriore convergenza richiede quindi una scelta visiva esplicita e relativo collaudo, non una semplice deduplicazione meccanica.
 
+La verifica dei tre fogli rappresentativi `area_privata.css`, `profilo_privato.css` e `impostazioni.css` non ha trovato regole di componente identiche da estrarre: le sole corrispondenze testuali complete erano percentuali interne a keyframe. Le tre pagine conservano quindi fogli distinti e condividono esclusivamente le fondazioni del core.
+
+Il watermark canonico è definito in `core.css`: posizione, non-interattività, opacità e dimensione predefinite sono comuni. I fogli locali conservano soltanto le differenze intenzionali già esistenti, come opacità `0.08`, contenitore esteso, variazione dell'icona o dimensione da `500px`.
+
 ## Contratto degli stati di pagina
 
 `createUiState()` è la sola implementazione dinamica per i nuovi stati di caricamento, vuoto, avviso ed errore. Usa:

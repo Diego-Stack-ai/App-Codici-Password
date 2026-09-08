@@ -107,19 +107,8 @@
 }
 
 /* --- 2. WATERMARK & DECOR --- */
-.archive-watermark {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-10deg);
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.05;
-}
-
 .archive-watermark span {
     font-size: 500px;
-    color: var(--text-primary);
 }
 
 .saetta-master {
