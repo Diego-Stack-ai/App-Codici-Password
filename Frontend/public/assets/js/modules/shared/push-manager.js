@@ -39,8 +39,10 @@ export function getPushCompatibility() {
 }
 
 async function serviceWorkerRegistration() {
-    const registration = await navigator.serviceWorker.register('./sw.js');
-    await navigator.serviceWorker.ready;
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/firebase-cloud-messaging-push-scope'
+    });
+    await registration.update();
     return registration;
 }
 
@@ -79,7 +81,9 @@ async function getTokenWithLocalRecovery(messaging, registration) {
             return await getToken(messaging, options);
         } catch (retryError) {
             console.error('[PUSH] Ripristino registrazione locale fallito.', retryError);
-            throw new Error(pushErrorMessage(retryError));
+            const technicalCode = String(retryError?.code || retryError?.name || '').trim();
+            const message = pushErrorMessage(retryError);
+            throw new Error(technicalCode ? `${message} [${technicalCode}]` : message);
         }
     }
 }
