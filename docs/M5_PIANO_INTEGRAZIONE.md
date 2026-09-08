@@ -105,6 +105,7 @@ Un rollback non riattiva grant revocati e non riduce `keyGeneration`.
 - [x] inventario completo dei percorsi e dei metadati correnti;
 - [x] ordine di integrazione, doppio lettore e rollback definiti;
 - [ ] identità crittografica provata su due dispositivi non produttivi;
+- [x] runtime identità ECDH implementato: chiave privata cifrata con materiale Vault, UID e chiave pubblica autenticati, sostituzione silenziosa bloccata;
 - [x] doppio lettore integrato nel repository e testato con flag predefinita disattivata; revoca, autenticità, generazione e divergenza falliscono senza fallback;
 - [ ] backup cifrato e ripristino M8 disponibili prima di `finalized`;
 - [ ] approvazione esplicita per Rules, funzioni, migrazione e cutover di produzione.
