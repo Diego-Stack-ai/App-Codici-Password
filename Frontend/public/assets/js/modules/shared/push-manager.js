@@ -38,12 +38,34 @@ export function getPushCompatibility() {
     return { compatible: true, reason: '' };
 }
 
+async function waitForActiveWorker(registration) {
+    if (registration.active) return registration;
+    const worker = registration.installing || registration.waiting;
+    if (!worker) throw new TypeError('Il Service Worker Push non ha avviato l’installazione.');
+    await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new TypeError('Attivazione del Service Worker Push scaduta.')), 15000);
+        const checkState = () => {
+            if (worker.state === 'activated') {
+                clearTimeout(timeout);
+                worker.removeEventListener('statechange', checkState);
+                resolve();
+            } else if (worker.state === 'redundant') {
+                clearTimeout(timeout);
+                worker.removeEventListener('statechange', checkState);
+                reject(new TypeError('Installazione del Service Worker Push non riuscita.'));
+            }
+        };
+        worker.addEventListener('statechange', checkState);
+        checkState();
+    });
+    return registration;
+}
+
 async function serviceWorkerRegistration() {
     const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
         scope: '/firebase-cloud-messaging-push-scope'
     });
-    await registration.update();
-    return registration;
+    return waitForActiveWorker(registration);
 }
 
 function pushErrorMessage(error) {
@@ -82,8 +104,10 @@ async function getTokenWithLocalRecovery(messaging, registration) {
         } catch (retryError) {
             console.error('[PUSH] Ripristino registrazione locale fallito.', retryError);
             const technicalCode = String(retryError?.code || retryError?.name || '').trim();
+            const technicalMessage = String(retryError?.message || '').trim();
             const message = pushErrorMessage(retryError);
-            throw new Error(technicalCode ? `${message} [${technicalCode}]` : message);
+            const details = [technicalCode, technicalMessage].filter(Boolean).join(': ');
+            throw new Error(details ? `${message} [${details}]` : message);
         }
     }
 }
