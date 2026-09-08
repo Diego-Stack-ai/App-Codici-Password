@@ -70,12 +70,12 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/css/lista_aziende.css` | CSS | 5551 | 260 | Stili della sezione lista aziende. |
 | `Frontend/public/assets/css/moduli.css` | CSS | 12699 | 481 | Stili della sezione moduli. |
 | `Frontend/public/assets/css/privacy.css` | CSS | 5177 | 242 | Stili della sezione privacy. |
-| `Frontend/public/assets/css/profilo_privato.css` | CSS | 29507 | 1226 | Stili della sezione profilo privato. |
+| `Frontend/public/assets/css/profilo_privato.css` | CSS | 29621 | 1232 | Stili della sezione profilo privato. |
 | `Frontend/public/assets/css/prova.css` | CSS | 1989 | 112 | Stili della sezione prova. |
 | `Frontend/public/assets/css/registrati.css` | CSS | 533 | 19 | Stili della sezione registrati. |
 | `Frontend/public/assets/css/regole_scadenze.css` | CSS | 3246 | 148 | Stili della sezione regole scadenze. |
 | `Frontend/public/assets/css/scadenze.css` | CSS | 9473 | 386 | Stili della sezione scadenze. |
-| `Frontend/public/assets/css/vault-assistant.css` | CSS | 8522 | 110 | Stili della sezione vault-assistant. |
+| `Frontend/public/assets/css/vault-assistant.css` | CSS | 9009 | 131 | Stili della sezione vault-assistant. |
 | `Frontend/public/assets/fonts/manrope/manrope-11.woff2` | FONT | 24836 | — | Font locale manrope-11.woff2. |
 | `Frontend/public/assets/fonts/material-symbols/material-symbols-0.woff2` | FONT | 3846876 | — | Font locale material-symbols-0.woff2. |
 | `Frontend/public/assets/images/app-icon-192.png` | PNG | 32104 | — | Asset immagine app-icon-192.png. |
@@ -87,7 +87,7 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/images/user-avatar-5.png` | PNG | 340072 | — | Asset immagine user-avatar-5.png. |
 | `Frontend/public/assets/js/auth.js` | JS | 11423 | 287 | Registrazione, login, TOTP, logout e reset account Firebase Auth. |
 | `Frontend/public/assets/js/cleanup.js` | JS | 8069 | 196 | Supporto frontend: cleanup. |
-| `Frontend/public/assets/js/components-v129.js` | JS | 19194 | 366 | Header, footer e navigazione condivisa. |
+| `Frontend/public/assets/js/components-v129.js` | JS | 19520 | 373 | Header, footer e navigazione condivisa. |
 | `Frontend/public/assets/js/datepicker_v5.js` | JS | 8846 | 241 | Supporto frontend: datepicker v5. |
 | `Frontend/public/assets/js/dom-utils.js` | JS | 4022 | 112 | Creazione DOM sicura e protezione da inserimenti HTML arbitrari. |
 | `Frontend/public/assets/js/env-v126.js` | JS | 256 | 8 | Supporto frontend: env-v126. |
@@ -97,13 +97,13 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/inactivity-timer.js` | JS | 4628 | 140 | Blocco Vault dopo inattività secondo la preferenza utente. |
 | `Frontend/public/assets/js/logger.js` | JS | 663 | 18 | Supporto frontend: logger. |
 | `Frontend/public/assets/js/login-entry.js` | JS | 949 | 24 | Bootstrap minimo della pagina di accesso. |
-| `Frontend/public/assets/js/main-v129.js` | JS | 30745 | 568 | Bootstrap autenticato globale, router, inviti e notifiche. |
-| `Frontend/public/assets/js/modules/assistant/assistant-controller.js` | JS | 3167 | 73 | Modulo dell’assistente Vault: assistant-controller. |
+| `Frontend/public/assets/js/main-v129.js` | JS | 31831 | 584 | Bootstrap autenticato globale, router, inviti e notifiche. |
+| `Frontend/public/assets/js/modules/assistant/assistant-controller.js` | JS | 3383 | 77 | Modulo dell’assistente Vault: assistant-controller. |
 | `Frontend/public/assets/js/modules/assistant/assistant-ui.js` | JS | 12119 | 179 | Modulo dell’assistente Vault: assistant-ui. |
 | `Frontend/public/assets/js/modules/assistant/conversation-engine.js` | JS | 5615 | 120 | Modulo dell’assistente Vault: conversation-engine. |
 | `Frontend/public/assets/js/modules/assistant/package.json` | JSON | 19 | 2 | Modulo dell’assistente Vault: package. |
 | `Frontend/public/assets/js/modules/assistant/search-normalizer.js` | JS | 211 | 5 | Modulo dell’assistente Vault: search-normalizer. |
-| `Frontend/public/assets/js/modules/assistant/vault-data-loader.js` | JS | 4539 | 70 | Modulo dell’assistente Vault: vault-data-loader. |
+| `Frontend/public/assets/js/modules/assistant/vault-data-loader.js` | JS | 4781 | 75 | Modulo dell’assistente Vault: vault-data-loader. |
 | `Frontend/public/assets/js/modules/auth/imposta_nuova_password.js` | JS | 8806 | 231 | Flusso autenticazione: imposta nuova password. |
 | `Frontend/public/assets/js/modules/auth/login.js` | JS | 11990 | 288 | Flusso autenticazione: login. |
 | `Frontend/public/assets/js/modules/auth/registrati.js` | JS | 7113 | 202 | Flusso autenticazione: registrati. |
@@ -135,7 +135,7 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/home/home-deadline-dashboard.js` | JS | 2682 | 67 | Supporto frontend: home-deadline-dashboard. |
 | `Frontend/public/assets/js/modules/home/home-deadline-inbox.js` | JS | 3389 | 71 | Supporto frontend: home-deadline-inbox. |
 | `Frontend/public/assets/js/modules/home/home-presentation.js` | JS | 3581 | 88 | Supporto frontend: home-presentation. |
-| `Frontend/public/assets/js/modules/home/home.js` | JS | 14938 | 373 | Supporto frontend: home. |
+| `Frontend/public/assets/js/modules/home/home.js` | JS | 14076 | 355 | Supporto frontend: home. |
 | `Frontend/public/assets/js/modules/privato/account_privati.js` | JS | 12029 | 302 | Flusso profilo/account personali: account privati. |
 | `Frontend/public/assets/js/modules/privato/area_privata.js` | JS | 21474 | 514 | Flusso profilo/account personali: area privata. |
 | `Frontend/public/assets/js/modules/privato/dettaglio-privato-attachments.js` | JS | 8386 | 218 | Flusso profilo/account personali: dettaglio-privato-attachments. |
@@ -152,9 +152,9 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/privato/profilo-phones-emails.js` | JS | 14298 | 276 | Flusso profilo/account personali: profilo-phones-emails. |
 | `Frontend/public/assets/js/modules/privato/profilo-qr.js` | JS | 5565 | 131 | Flusso profilo/account personali: profilo-qr. |
 | `Frontend/public/assets/js/modules/privato/profilo-sync.js` | JS | 4921 | 113 | Flusso profilo/account personali: profilo-sync. |
-| `Frontend/public/assets/js/modules/privato/profilo-ui.js` | JS | 10642 | 226 | Flusso profilo/account personali: profilo-ui. |
+| `Frontend/public/assets/js/modules/privato/profilo-ui.js` | JS | 10822 | 230 | Flusso profilo/account personali: profilo-ui. |
 | `Frontend/public/assets/js/modules/privato/profilo-widgets.js` | JS | 14797 | 284 | Flusso profilo/account personali: profilo-widgets. |
-| `Frontend/public/assets/js/modules/privato/profilo_privato.js` | JS | 22022 | 467 | Flusso profilo/account personali: profilo privato. |
+| `Frontend/public/assets/js/modules/privato/profilo_privato.js` | JS | 22991 | 488 | Flusso profilo/account personali: profilo privato. |
 | `Frontend/public/assets/js/modules/scadenze/aggiungi_scadenza.js` | JS | 24267 | 604 | Flusso scadenze/configurazione: aggiungi scadenza. |
 | `Frontend/public/assets/js/modules/scadenze/configurazione_automezzi.js` | JS | 13119 | 276 | Flusso scadenze/configurazione: configurazione automezzi. |
 | `Frontend/public/assets/js/modules/scadenze/configurazione_documenti.js` | JS | 12556 | 265 | Flusso scadenze/configurazione: configurazione documenti. |
@@ -170,7 +170,7 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/assets/js/modules/scadenze/scadenze.js` | JS | 15001 | 399 | Flusso scadenze/configurazione: scadenze. |
 | `Frontend/public/assets/js/modules/settings/archive-account-service.js` | JS | 4049 | 107 | Impostazioni applicative: archive-account-service. |
 | `Frontend/public/assets/js/modules/settings/archivio_account.js` | JS | 10640 | 302 | Impostazioni applicative: archivio account. |
-| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 24443 | 523 | Impostazioni applicative: impostazioni. |
+| `Frontend/public/assets/js/modules/settings/impostazioni.js` | JS | 24962 | 533 | Impostazioni applicative: impostazioni. |
 | `Frontend/public/assets/js/modules/settings/push-settings-controller.js` | JS | 3468 | 93 | Impostazioni applicative: push-settings-controller. |
 | `Frontend/public/assets/js/modules/shared/account-banking-view.js` | JS | 6718 | 148 | Supporto frontend: account-banking-view. |
 | `Frontend/public/assets/js/modules/shared/account-list-view.js` | JS | 7582 | 160 | Supporto frontend: account-list-view. |
@@ -220,7 +220,7 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/form_account_azienda.html` | HTML | 18741 | 304 | Struttura della pagina form account azienda; comportamento demandato ai moduli. |
 | `Frontend/public/form_account_privato.html` | HTML | 17240 | 284 | Struttura della pagina form account privato; comportamento demandato ai moduli. |
 | `Frontend/public/gestione_destinatari.html` | HTML | 4304 | 73 | Struttura della pagina gestione destinatari; comportamento demandato ai moduli. |
-| `Frontend/public/home_page.html` | HTML | 6213 | 141 | Struttura della pagina home page; comportamento demandato ai moduli. |
+| `Frontend/public/home_page.html` | HTML | 5896 | 133 | Struttura della pagina home page; comportamento demandato ai moduli. |
 | `Frontend/public/imposta_nuova_password.html` | HTML | 6124 | 132 | Struttura della pagina imposta nuova password; comportamento demandato ai moduli. |
 | `Frontend/public/impostazioni.html` | HTML | 26885 | 457 | Struttura della pagina impostazioni; comportamento demandato ai moduli. |
 | `Frontend/public/index.html` | HTML | 800 | 19 | Struttura della pagina index; comportamento demandato ai moduli. |
@@ -230,7 +230,7 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `Frontend/public/modifica_azienda.html` | HTML | 64633 | 826 | Struttura della pagina modifica azienda; comportamento demandato ai moduli. |
 | `Frontend/public/offline-assets.js` | JS | 8090 | 201 | File di progetto: offline-assets. |
 | `Frontend/public/privacy.html` | HTML | 13804 | 262 | Struttura della pagina privacy; comportamento demandato ai moduli. |
-| `Frontend/public/profilo_privato.html` | HTML | 15350 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
+| `Frontend/public/profilo_privato.html` | HTML | 15327 | 257 | Struttura della pagina profilo privato; comportamento demandato ai moduli. |
 | `Frontend/public/prova.html` | HTML | 1375 | 31 | Struttura della pagina prova; comportamento demandato ai moduli. |
 | `Frontend/public/registrati.html` | HTML | 7415 | 148 | Struttura della pagina registrati; comportamento demandato ai moduli. |
 | `Frontend/public/regole_scadenze.html` | HTML | 6904 | 133 | Struttura della pagina regole scadenze; comportamento demandato ai moduli. |
@@ -346,7 +346,7 @@ File censiti: **298**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/audit-project-inventory.mjs` | MJS | 8428 | 127 | Strumento manutenzione/test: audit-project-inventory. |
 | `scripts/audit-security-flows.mjs` | MJS | 31800 | 273 | Strumento manutenzione/test: audit-security-flows. |
 | `scripts/audit-static-references.mjs` | MJS | 2643 | 60 | Strumento manutenzione/test: audit-static-references. |
-| `scripts/audit-ui-foundations.mjs` | MJS | 10138 | 138 | Strumento manutenzione/test: audit-ui-foundations. |
+| `scripts/audit-ui-foundations.mjs` | MJS | 10366 | 139 | Strumento manutenzione/test: audit-ui-foundations. |
 | `scripts/audit-vault-key-terminology.mjs` | MJS | 1984 | 34 | Strumento manutenzione/test: audit-vault-key-terminology. |
 | `scripts/build-card-importer-prototype.mjs` | MJS | 545 | 17 | Strumento manutenzione/test: build-card-importer-prototype. |
 | `scripts/build-offline-runtime.mjs` | MJS | 4887 | 125 | Strumento manutenzione/test: build-offline-runtime. |

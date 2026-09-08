@@ -131,6 +131,12 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    opacity: 1;
+    transition: opacity 0.16s ease;
+}
+
+.profile-avatar-xl img.profile-avatar-pending {
+    opacity: 0;
 }
 
 .profile-avatar-overlay {

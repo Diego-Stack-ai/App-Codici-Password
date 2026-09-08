@@ -200,12 +200,6 @@ export async function initComponents() {
 
                 // Home Button / Logout
                 if (isHome) {
-                    const assistantStatus = document.getElementById('ai-assistant-status');
-                    if (assistantStatus) {
-                        assistantStatus.classList.add('header-ai-status');
-                        headerRight.appendChild(assistantStatus);
-                    }
-
                     headerRight.appendChild(
                         createElement('button', {
                             id: 'header-logout-btn',
@@ -244,6 +238,19 @@ export async function initComponents() {
             clearElement(footerPh);
             const isOnSettings = path.includes('impostazioni.html');
             const footerLeft = createElement('div', { className: 'header-left' });
+
+            if (!isAuth) {
+                footerLeft.appendChild(createElement('button', {
+                    id: 'ai-assistant-status',
+                    type: 'button',
+                    className: 'ai-assistant-status btn-footer-secondary hidden',
+                    title: 'Apri assistente AI',
+                    ariaLabel: 'Apri assistente AI'
+                }, [
+                    createElement('span', { className: 'material-symbols-outlined', textContent: 'smart_toy' }),
+                    createElement('span', { className: 'ai-assistant-label', textContent: 'AI attiva' })
+                ]));
+            }
 
 
 

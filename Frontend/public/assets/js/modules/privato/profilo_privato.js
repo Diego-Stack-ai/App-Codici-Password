@@ -84,6 +84,18 @@ const nameDisplay = document.getElementById('user-display-name');
 export async function initProfiloPrivato(user) {
     if (!user) return;
     currentUserUid = user.uid;
+    const cachedAvatar = localStorage.getItem(`codex_profile_avatar_${user.uid}`);
+    const immediateAvatar = cachedAvatar || user.photoURL;
+    if (avatarImg && immediateAvatar) {
+        avatarImg.src = immediateAvatar;
+        avatarImg.classList.remove('profile-avatar-pending');
+    }
+    if (avatarImg) avatarImg.onerror = () => {
+        localStorage.removeItem(`codex_profile_avatar_${user.uid}`);
+        avatarImg.onerror = null;
+        avatarImg.src = 'assets/images/user-avatar-5.png';
+        avatarImg.classList.remove('profile-avatar-pending');
+    };
     await loadUserData(user, false);
     const ctx = buildCtx();
 
@@ -241,7 +253,16 @@ async function loadUserData(user, renderImmediately = true) {
         const fullNameRaw = `${currentUserData.nome || ''} ${currentUserData.cognome || ''}`.trim();
         const finalFullName = (fullNameRaw && !fullNameRaw.includes('[ERROR]')) ? fullNameRaw : (user.displayName || 'Utente');
         if (nameDisplay) nameDisplay.textContent = finalFullName;
-        if (avatarImg) avatarImg.src = currentUserData.photoURL || user.photoURL || 'assets/images/user-avatar-5.png';
+        if (avatarImg) {
+            const resolvedAvatar = currentUserData.photoURL || user.photoURL || 'assets/images/user-avatar-5.png';
+            avatarImg.src = resolvedAvatar;
+            avatarImg.classList.remove('profile-avatar-pending');
+            if (currentUserData.photoURL || user.photoURL) {
+                localStorage.setItem(`codex_profile_avatar_${user.uid}`, resolvedAvatar);
+            } else {
+                localStorage.removeItem(`codex_profile_avatar_${user.uid}`);
+            }
+        }
 
         // View Population
         const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };

@@ -43,11 +43,16 @@ function deadlineRecord(id, data) {
 export async function loadVaultSearchRecords(user, { includeCompanies = true } = {}) {
     if (!user?.uid) throw new Error('Utente non autenticato');
     const uid = user.uid;
-    const [profile, accounts, companies, deadlines] = await Promise.all([
+    const results = await Promise.allSettled([
         getUserProfile(uid), listPrivateAccounts(uid),
         includeCompanies ? listCompanies(uid) : Promise.resolve([]),
         listDeadlines(uid)
     ]);
+    const value = (index, fallback) => results[index].status === 'fulfilled' ? results[index].value : fallback;
+    const profile = value(0, null);
+    const accounts = value(1, []);
+    const companies = value(2, []);
+    const deadlines = value(3, []);
     const records = profile ? profileRecords(uid, profile) : [];
     accounts.forEach(item => records.push(accountRecord(item.id, item)));
     deadlines.forEach(item => records.push(deadlineRecord(item.id, item)));
@@ -61,7 +66,7 @@ export async function loadVaultSearchRecords(user, { includeCompanies = true } =
     await Promise.all(Array.from({ length: Math.min(NESTED_ACCOUNT_CONCURRENCY, companyItems.length) }, async () => {
         while (cursor < companyItems.length) {
             const company = companyItems[cursor++];
-            const accounts = await listCompanyAccounts(uid, company.id);
+            const accounts = await listCompanyAccounts(uid, company.id).catch(() => []);
             accounts.forEach(account => records.push(accountRecord(account.id, account, company.id, company.companyName)));
         }
     }));

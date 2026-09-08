@@ -47,7 +47,11 @@ export function setupAvatarEdit() {
             await uploadBytes(sRef, file);
             const url = await getDownloadURL(sRef);
             await updateDoc(doc(db, 'users', currentUserUid), { photoURL: url });
-            if (avatarImg) avatarImg.src = url;
+            localStorage.setItem(`codex_profile_avatar_${currentUserUid}`, url);
+            if (avatarImg) {
+                avatarImg.src = url;
+                avatarImg.classList.remove('profile-avatar-pending');
+            }
             showToast(t('avatar_updated') || 'Avatar aggiornato!');
         } catch (error) {
             logError('AvatarUpload', error);

@@ -247,6 +247,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }).catch((error) => console.warn('[OFFLINE] Sincronizzazione in background non riuscita.', error));
                 }
 
+                // L'assistente è un servizio privato globale e il relativo comando
+                // appartiene al footer comune, non alla sola Home.
+                const assistantOverride = new URLSearchParams(window.location.search).get('assistant') === '1';
+                const assistantEnabled = assistantOverride || userDoc.data()?.settings_ai_assistant === true;
+                if (isPrivatePage && assistantEnabled) {
+                    try {
+                        const trigger = document.getElementById('ai-assistant-status');
+                        const includeCompanies = getSyncedCompanyAreaPreference(userDoc.data() || {}, user.uid);
+                        const { initVaultAssistant } = await import('./modules/assistant/assistant-controller.js?v=1.2.63');
+                        await initVaultAssistant(user, { includeCompanies });
+                        trigger?.classList.remove('hidden');
+                    } catch (error) {
+                        console.warn('[ASSISTANT] Avvio globale non riuscito.', error);
+                    }
+                }
+
                 // ROUTER - Step 2: Inizializza Pagina Privata
                 switch (currentPage) {
                     case 'home': await Pages.initHomePage(user); break;

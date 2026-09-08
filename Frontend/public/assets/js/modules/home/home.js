@@ -85,24 +85,6 @@ export async function initHomePage(user) {
 
     setupFABGroup(aziendes, companyAreaEnabled);
 
-    // L'impostazione sincronizzata contiene soltanto il consenso ad attivare la funzione.
-    // Indice e risultati rimangono esclusivamente nella memoria della pagina.
-    const assistantOverride = new URLSearchParams(window.location.search).get('assistant') === '1';
-    let assistantEnabled = assistantOverride;
-    if (!assistantEnabled) {
-        assistantEnabled = settingsData?.settings_ai_assistant === true;
-    }
-    if (assistantEnabled) {
-        try {
-            document.getElementById('ai-assistant-status')?.classList.remove('hidden');
-            const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.63');
-            await initVaultAssistant(user, { includeCompanies: companyAreaEnabled });
-        } catch (error) {
-            console.warn('[ASSISTANT] Avvio non riuscito.', error);
-        }
-    }
-
-    
 }
 
 /**

@@ -164,6 +164,16 @@ function setupAIAssistantToggle(user, data) {
         try {
             await updateDoc(doc(db, 'users', user.uid), { settings_ai_assistant: enabled });
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
+            const trigger = document.getElementById('ai-assistant-status');
+            if (enabled) {
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.63');
+                await initVaultAssistant(user, {
+                    includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
+                });
+                trigger?.classList.remove('hidden');
+            } else {
+                trigger?.classList.add('hidden');
+            }
             showToast(enabled ? 'Agente AI attivato' : 'Agente AI disattivato', 'success');
         } catch (error) {
             console.error('[ASSISTANT] Salvataggio preferenza fallito.', error);

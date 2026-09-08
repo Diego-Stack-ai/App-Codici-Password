@@ -40,6 +40,8 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
         const label = trigger.querySelector('.ai-assistant-label');
         const previousLabel = label?.textContent;
         trigger.disabled = true;
+        trigger.setAttribute('aria-busy', 'true');
+        trigger.classList.add('assistant-preparing');
         if (label) label.textContent = 'Preparazione…';
         try {
             await prepare();
@@ -59,6 +61,8 @@ export async function initVaultAssistant(user, { includeCompanies = true } = {})
             if (label) label.textContent = 'Non disponibile';
         } finally {
             trigger.disabled = false;
+            trigger.removeAttribute('aria-busy');
+            trigger.classList.remove('assistant-preparing');
             window.setTimeout(() => {
                 if (label) label.textContent = previousLabel || 'AI attiva';
             }, 1200);
