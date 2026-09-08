@@ -18,7 +18,7 @@ Il laboratorio `experiments/history-recovery` dimostra retention, ripristino sen
 - [x] ripristino senza sovrascrittura silenziosa;
 - [x] audit con allowlist e senza segreti;
 - [x] cronologia limitata;
-- [ ] Rules e funzioni candidate in emulatore;
+- [~] Rules candidate verificate in emulatore; funzioni non ancora collegate;
 - [ ] UI cestino e conferma forte integrate;
 - [ ] prova su copia non produttiva.
 

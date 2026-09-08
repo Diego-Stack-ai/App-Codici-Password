@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(uid) { return request.auth != null && request.auth.uid == uid; }
+    match /users/{uid}/trash/{id} {
+      allow get, list: if owns(uid);
+      allow create, update, delete: if false;
+    }
+    match /users/{uid}/recordHistory/{id} {
+      allow get, list: if owns(uid);
+      allow create, update, delete: if false;
+    }
+    match /users/{uid}/auditEvents/{id} {
+      allow get, list: if owns(uid);
+      allow create, update, delete: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
