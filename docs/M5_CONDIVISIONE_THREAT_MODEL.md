@@ -161,7 +161,9 @@ L'ACL Firestore deve leggere documenti di autorizzazione controllabili dalle Rul
 
 Il laboratorio Rules usa per questo `recordAccess/{recordId}/members/{uid}`: il percorso deterministico permette alle Rules di verificare il grant senza query. Il destinatario può leggere soltanto il proprio documento; record, grant e identità sono scritti esclusivamente dal backend. La lista dei record ricevuti dovrà usare un indice personale separato e minimale, mentre l'apertura del contenuto resta una lettura puntuale.
 
-Le Rules candidate sono conservate soltanto nel laboratorio e vengono eseguite dall'emulatore insieme ai test delle Rules correnti. Le prove confermano accesso per proprietario e lettore attivo, diniego per estraneo, revocato, scaduto e grant di generazione obsoleta, isolamento del grant e della chiave privata cifrata e blocco di ogni scrittura client su record, grant e identità. `firestore.rules` di produzione non è stato modificato.
+Le Rules candidate sono conservate soltanto nel laboratorio e vengono eseguite dall'emulatore separatamente dai test delle Rules correnti. Le prove Firestore confermano accesso per proprietario e lettore attivo, diniego per estraneo, revocato, scaduto e grant di generazione obsoleta, isolamento del grant e della chiave privata cifrata e blocco di ogni scrittura client su record, grant e identità. `firestore.rules` di produzione non è stato modificato.
+
+La prova Storage candidata usa lo stesso `recordAccess/{recordId}/members/{uid}` e confronta la sua `keyGeneration` con quella del record. Proprietario e lettore attivo scaricano l'oggetto cifrato; estraneo, anonimo, revocato, scaduto e destinatario con grant di generazione precedente vengono respinti. Creazione e sovrascrittura client restano vietate: gli oggetti condivisi sono prodotti dal backend e non hanno URL pubblici persistenti. Anche `storage.rules` di produzione resta invariato.
 
 ## Compatibilità e migrazione candidata
 
@@ -192,11 +194,11 @@ La prova offline conferma il limite del modello: un destinatario revocato che av
 - [x] dimostrare lettura autorizzata e fallimento di lettura non autorizzata;
 - [x] dimostrare rotazione dopo revoca e comportamento della copia offline già consegnata;
 - [x] dimostrare nell'emulatore le ACL Firestore candidate senza modificare le Rules di produzione;
-- [ ] dimostrare nell'emulatore l'accesso Storage tramite lo stesso grant e la stessa generazione;
+- [x] dimostrare nell'emulatore l'accesso Storage tramite lo stesso grant e la stessa generazione;
 - [~] definire lettore retrocompatibile, backup e rollback; contratto e simulatore pronti, integrazione runtime non avviata;
 - [x] provare la trasformazione e il rollback sul dataset fittizio M0;
 - [ ] modificare la produzione soltanto dopo approvazione esplicita.
 
 ## Prossimo passo
 
-Produrre l'inventario completo dei dati condivisi e dei punti di lettura/scrittura, includendo Firestore, Storage, cache offline e notifiche. Soltanto dopo si definisce il contratto del prototipo per-record.
+Completare la classificazione dei percorsi legacy e dei metadati ancora in chiaro, poi trasformare il contratto retrocompatibile e il rollback già simulati in un piano di integrazione verificabile. Qualunque modifica a dati o Rules di produzione resta subordinata ad approvazione esplicita.

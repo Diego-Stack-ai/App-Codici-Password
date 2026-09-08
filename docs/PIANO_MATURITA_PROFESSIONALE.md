@@ -199,12 +199,12 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 ### M5 — Condivisione professionale
 
-- [ ] threat model completo del flusso proprietario/invitato;
-- [ ] verificare come il destinatario ottiene il materiale necessario alla decifratura;
-- [ ] confrontare ACL attuale e condivisione crittografica;
-- [ ] progettare ruoli, revoca, scadenza e cronologia;
-- [ ] prototipo isolato dell'eventuale chiave per-record;
-- [ ] migrazione soltanto dopo test su copia non produttiva.
+- [x] threat model completo del flusso proprietario/invitato;
+- [x] verificare come il destinatario ottiene il materiale necessario alla decifratura;
+- [x] confrontare ACL attuale e condivisione crittografica;
+- [x] progettare ruoli, revoca, scadenza e cronologia;
+- [x] prototipo isolato della chiave per-record, incluse ACL Firestore e Storage candidate in emulatore;
+- [~] migrazione simulata soltanto su dataset fittizio; integrazione e copia non produttiva reale non avviate.
 
 **Uscita:** autorizzazione e crittografia sono entrambe dimostrate end-to-end.
 

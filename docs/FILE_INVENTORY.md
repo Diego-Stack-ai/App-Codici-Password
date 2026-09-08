@@ -2,13 +2,13 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **300**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **302**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## experiments
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
+| `experiments/sharing-key-prototype/storage.candidate.rules` | RULES | 1655 | 53 | File di progetto: storage.candidate. |
 | `experiments/card-importer/README.md` | MD | 2633 | 63 | Documentazione: README. |
 | `experiments/card-importer/REAL_IMAGE_AUDIT.md` | MD | 2698 | 49 | Documentazione: REAL IMAGE AUDIT. |
 | `experiments/card-importer/card-parser.mjs` | MJS | 2961 | 81 | File di progetto: card-parser. |
@@ -16,6 +16,7 @@ File censiti: **300**. Duplicati byte-per-byte: **1 gruppi**.
 | `experiments/card-importer/prototype.css` | CSS | 1512 | 18 | File di progetto: prototype. |
 | `experiments/card-importer/prototype.html` | HTML | 2121 | 48 | Struttura della pagina prototype; comportamento demandato ai moduli. |
 | `experiments/card-importer/prototype.mjs` | MJS | 13511 | 312 | File di progetto: prototype. |
+| `experiments/sharing-key-prototype/firestore.candidate.rules` | RULES | 2028 | 50 | File di progetto: firestore.candidate. |
 | `experiments/sharing-key-prototype/migration-simulator.mjs` | MJS | 2582 | 81 | File di progetto: migration-simulator. |
 | `experiments/sharing-key-prototype/migration-simulator.test.mjs` | MJS | 2363 | 54 | File di progetto: migration-simulator.test. |
 | `experiments/sharing-key-prototype/record-sharing-crypto.mjs` | MJS | 5789 | 139 | File di progetto: record-sharing-crypto. |
@@ -25,7 +26,7 @@ File censiti: **300**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
+| `tests/sharing-prototype.storage.rules.test.mjs` | MJS | 3971 | 109 | Test automatico: sharing-prototype.storage.rules.test. |
 | `tests/account-mode-model.test.mjs` | MJS | 1891 | 37 | Test automatico: account-mode-model.test. |
 | `tests/attachment-security.test.mjs` | MJS | 2645 | 55 | Test automatico: attachment-security.test. |
 | `tests/banking-model.test.mjs` | MJS | 2035 | 46 | Test automatico: banking-model.test. |
@@ -38,6 +39,7 @@ File censiti: **300**. Duplicati byte-per-byte: **1 gruppi**.
 | `tests/maturity-dataset.test.mjs` | MJS | 1944 | 40 | Test automatico: maturity-dataset.test. |
 | `tests/profile-model.test.mjs` | MJS | 3758 | 67 | Test automatico: profile-model.test. |
 | `tests/request-coordinator.test.mjs` | MJS | 1611 | 37 | Test automatico: request-coordinator.test. |
+| `tests/sharing-prototype.rules.test.mjs` | MJS | 4426 | 94 | Test automatico: sharing-prototype.rules.test. |
 | `tests/storage.rules.test.mjs` | MJS | 4051 | 99 | Test automatico: storage.rules.test. |
 | `tests/vault-session.test.mjs` | MJS | 1827 | 39 | Test automatico: vault-session.test. |
 
@@ -300,11 +302,11 @@ File censiti: **300**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | MD | 2034 | 26 | Documentazione: ENCRYPTED FIELD INVENTORY. |
 | `docs/FUNCTIONAL_DATA_CONTRACT.md` | MD | 8832 | 82 | Documentazione: FUNCTIONAL DATA CONTRACT. |
 | `docs/M4_VISUAL_ACCEPTANCE.md` | MD | 8697 | 82 | Documentazione: M4 VISUAL ACCEPTANCE. |
-| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 18389 | 203 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
+| `docs/M5_CONDIVISIONE_THREAT_MODEL.md` | MD | 18985 | 205 | Documentazione: M5 CONDIVISIONE THREAT MODEL. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
 | `docs/PAGE_SHELL_CONTRACT.md` | MD | 5587 | 96 | Documentazione: PAGE SHELL CONTRACT. |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17521 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | MD | 17618 | 302 | Documentazione: PIANO MATURITA PROFESSIONALE. |
 | `docs/RUNTIME_PERFORMANCE_BASELINE.md` | MD | 3817 | 56 | Documentazione: RUNTIME PERFORMANCE BASELINE. |
 | `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | MD | 10337 | 120 | Documentazione: UI DESIGN SYSTEM CONTRACT. |
 | `docs/VAULT_KEY_CONTRACT.md` | MD | 2704 | 38 | Documentazione: VAULT KEY CONTRACT. |
@@ -376,7 +378,7 @@ File censiti: **300**. Duplicati byte-per-byte: **1 gruppi**.
 | `scripts/normalize-responsive-foundations.mjs` | MJS | 1715 | 33 | Strumento manutenzione/test: normalize-responsive-foundations. |
 | `scripts/page-performance-budget.json` | JSON | 697 | 22 | Strumento manutenzione/test: page-performance-budget. |
 | `scripts/run-firestore-rules-tests.mjs` | MJS | 1022 | 25 | Strumento manutenzione/test: run-firestore-rules-tests. |
-| `scripts/run-storage-rules-tests.mjs` | MJS | 890 | 29 | Strumento manutenzione/test: run-storage-rules-tests. |
+| `scripts/run-storage-rules-tests.mjs` | MJS | 1286 | 35 | Strumento manutenzione/test: run-storage-rules-tests. |
 | `scripts/split-translations.mjs` | MJS | 2892 | 85 | Strumento manutenzione/test: split-translations. |
 | `scripts/test-functions-emulator.mjs` | MJS | 2540 | 59 | Strumento manutenzione/test: test-functions-emulator. |
 | `scripts/test-vault-assistant.mjs` | MJS | 1397 | 21 | Strumento manutenzione/test: test-vault-assistant. |

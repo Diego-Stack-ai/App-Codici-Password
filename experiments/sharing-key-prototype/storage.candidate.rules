@@ -1,0 +1,52 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function recordPath(recordId) {
+      return /databases/(default)/documents/sharedRecords/$(recordId);
+    }
+
+    function grantPath(recordId) {
+      return /databases/(default)/documents/recordAccess/$(recordId)/members/$(request.auth.uid);
+    }
+
+    function recordExists(recordId) {
+      return firestore.exists(recordPath(recordId));
+    }
+
+    function ownsRecord(recordId) {
+      return signedIn() &&
+        recordExists(recordId) &&
+        firestore.get(recordPath(recordId)).data.ownerUid == request.auth.uid;
+    }
+
+    function hasActiveGrant(recordId) {
+      return signedIn() &&
+        recordExists(recordId) &&
+        firestore.exists(grantPath(recordId)) &&
+        firestore.get(grantPath(recordId)).data.status == 'accepted' &&
+        firestore.get(grantPath(recordId)).data.role == 'viewer' &&
+        firestore.get(grantPath(recordId)).data.keyGeneration ==
+          firestore.get(recordPath(recordId)).data.keyGeneration &&
+        firestore.get(grantPath(recordId)).data.get(
+          'expiresAt',
+          request.time + duration.value(1, 's')
+        ) > request.time;
+    }
+
+    // Gli oggetti condivisi sono opachi e immutabili per i client. Il backend
+    // crea nuove versioni dopo una rotazione; non esistono URL pubblici.
+    match /sharedRecords/{recordId}/attachments/{attachmentId} {
+      allow read: if ownsRecord(recordId) || hasActiveGrant(recordId);
+      allow write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
