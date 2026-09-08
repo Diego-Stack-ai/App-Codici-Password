@@ -38,6 +38,48 @@ const internalPages = new Set([
   'scadenze.html',
   'termini.html'
 ]);
+const internalPageModels = new Map([
+  ['hub', new Set([
+    'area_privata.html',
+    'home_page.html',
+    'impostazioni.html',
+    'lista_aziende.html',
+    'profilo_privato.html'
+  ])],
+  ['list', new Set([
+    'account_azienda.html',
+    'account_privati.html',
+    'archivio_account.html',
+    'scadenze.html'
+  ])],
+  ['detail', new Set([
+    'dati_azienda.html',
+    'dettaglio_account_azienda.html',
+    'dettaglio_account_privato.html',
+    'dettaglio_scadenza.html'
+  ])],
+  ['form', new Set([
+    'aggiungi_scadenza.html',
+    'form_account_azienda.html',
+    'form_account_privato.html',
+    'modifica_azienda.html'
+  ])],
+  ['configuration', new Set([
+    'configurazione_automezzi.html',
+    'configurazione_documenti.html',
+    'configurazione_generali.html',
+    'gestione_destinatari.html',
+    'privacy.html',
+    'regole_scadenze.html',
+    'termini.html'
+  ])]
+]);
+
+const modeledInternalPages = [...internalPageModels.values()]
+  .flatMap(pages => [...pages])
+  .sort();
+assert.deepEqual(modeledInternalPages, [...internalPages].sort(),
+  'I modelli UI non classificano esattamente le 24 pagine interne');
 
 const publicPages = (await readdir(publicRoot))
   .filter(name => name.endsWith('.html') && !testPages.has(name))
@@ -55,6 +97,10 @@ for (const name of publicPages) {
   assert.ok(hasClass(source, 'body', 'base-bg'), `${name}: body.base-bg mancante`);
 
   if (internalPages.has(name)) {
+    const expectedModel = [...internalPageModels]
+      .find(([, pages]) => pages.has(name))?.[0];
+    assert.match(source, new RegExp(`<body[^>]*data-ui-model=["']${expectedModel}["']`),
+      `${name}: modello UI ${expectedModel} mancante`);
     assert.ok(hasStylesheet(source, 'core_fascie.css'), `${name}: core_fascie.css mancante`);
     assert.ok(hasClass(source, 'div', 'base-container'), `${name}: base-container mancante`);
     assert.ok(hasClass(source, 'main', 'base-main'), `${name}: base-main mancante`);
