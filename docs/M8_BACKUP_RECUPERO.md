@@ -17,6 +17,7 @@ Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso 
 - [x] Emergency Access separato esplicitamente;
 - [x] manifest allegati con riferimenti, dimensioni e digest verificati nel laboratorio;
 - [x] importazione isolata in staging e piano transazionale con blocco collisioni nel laboratorio;
+- [x] contratto backend dei chunk di ripristino: allowlist delle collezioni, percorsi costruiti dallo UID autenticato, limiti per record/chunk, collisioni e idempotenza verificati;
 - [ ] esportazione streaming integrata con gli allegati reali;
 - [ ] ripristino transazionale integrato nel backend;
 - [ ] collaudo fisico esporta/cancella/ripristina su copia non produttiva.

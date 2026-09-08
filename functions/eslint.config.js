@@ -14,6 +14,7 @@ module.exports = [
         process: "readonly",
         require: "readonly",
         setTimeout: "readonly",
+        structuredClone: "readonly",
       },
     },
     rules: {

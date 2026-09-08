@@ -2,22 +2,24 @@
 
 > Generato da `npm run audit:inventory`. Ogni file sorgente viene letto integralmente per calcolare metadati e hash. I file in `node_modules` e questo rapporto generato sono esclusi dal conteggio.
 
-File censiti: **344**. Duplicati byte-per-byte: **1 gruppi**.
+File censiti: **346**. Duplicati byte-per-byte: **1 gruppi**.
 
 ## functions
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `functions/archive-purge-service.js` | JS | 3037 | 73 | File di progetto: archive-purge-service. |
-| `functions/test/archive-purge-service.test.js` | JS | 2853 | 46 | Test automatico: archive-purge-service.test. |
+| `functions/backup-restore-service.js` | JS | 3239 | 90 | File di progetto: backup-restore-service. |
+| `functions/test/backup-restore-service.test.js` | JS | 2129 | 44 | Test automatico: backup-restore-service.test. |
 | `functions/.gitignore` | CONFIG | 21 | 2 | Esclusioni Git per file generati o locali. |
-| `functions/eslint.config.js` | JS | 544 | 25 | File di progetto: eslint.config. |
+| `functions/archive-purge-service.js` | JS | 3037 | 73 | File di progetto: archive-purge-service. |
+| `functions/eslint.config.js` | JS | 581 | 26 | File di progetto: eslint.config. |
 | `functions/history-recovery-service.js` | JS | 1819 | 37 | File di progetto: history-recovery-service. |
 | `functions/index.js` | JS | 65024 | 1296 | Backend MFA recovery, inviti, email, push e scheduler delle scadenze. |
 | `functions/offline-sync-service.js` | JS | 1451 | 34 | File di progetto: offline-sync-service. |
 | `functions/package-lock.json` | JSON | 165585 | 4435 | Lockfile riproducibile delle dipendenze npm. |
 | `functions/package.json` | JSON | 651 | 27 | Runtime e dipendenze delle Cloud Functions. |
 | `functions/recovery-security.js` | JS | 1887 | 54 | Generazione, hash e rate-limit dei codici MFA di recupero. |
+| `functions/test/archive-purge-service.test.js` | JS | 2853 | 46 | Test automatico: archive-purge-service.test. |
 | `functions/test/history-recovery-service.test.js` | JS | 1407 | 19 | Test automatico: history-recovery-service.test. |
 | `functions/test/offline-sync-service.test.js` | JS | 1273 | 24 | Test automatico: offline-sync-service.test. |
 | `functions/test/recovery-security.test.js` | JS | 1398 | 35 | Test automatico: recovery-security.test. |
@@ -295,7 +297,7 @@ File censiti: **344**. Duplicati byte-per-byte: **1 gruppi**.
 | `docs/M5_PIANO_INTEGRAZIONE.md` | MD | 6394 | 115 | Documentazione: M5 PIANO INTEGRAZIONE. |
 | `docs/M6_SINCRONIZZAZIONE_OFFLINE.md` | MD | 3036 | 48 | Documentazione: M6 SINCRONIZZAZIONE OFFLINE. |
 | `docs/M7_CRONOLOGIA_CESTINO_AUDIT.md` | MD | 1590 | 27 | Documentazione: M7 CRONOLOGIA CESTINO AUDIT. |
-| `docs/M8_BACKUP_RECUPERO.md` | MD | 1550 | 25 | Documentazione: M8 BACKUP RECUPERO. |
+| `docs/M8_BACKUP_RECUPERO.md` | MD | 1731 | 26 | Documentazione: M8 BACKUP RECUPERO. |
 | `docs/M9_SALUTE_CREDENZIALI.md` | MD | 1827 | 25 | Documentazione: M9 SALUTE CREDENZIALI. |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | MD | 2510 | 41 | Documentazione: OFFLINE WRITE CONFLICT POLICY. |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | MD | 5409 | 83 | Documentazione: PAGE PERFORMANCE BASELINE. |
@@ -362,7 +364,7 @@ File censiti: **344**. Duplicati byte-per-byte: **1 gruppi**.
 
 | File | Tipo | Byte | Righe | Responsabilità |
 |---|---:|---:|---:|---|
-| `package.json` | JSON | 5549 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
+| `package.json` | JSON | 5601 | 73 | Comandi di audit, test e versione; dipendenze di sviluppo della radice. |
 
 ## scripts
 

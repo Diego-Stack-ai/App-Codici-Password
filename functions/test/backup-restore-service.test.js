@@ -1,0 +1,43 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const {
+  restoreChunkDecision, restorePath, safeRestoreAudit, validateRestoreChunk
+} = require("../backup-restore-service");
+
+test("costruisce soltanto percorsi appartenenti allo UID autenticato", () => {
+  assert.equal(restorePath("owner", {scope: "profile"}), "users/owner");
+  assert.equal(restorePath("owner", {scope: "private-account", id: "a1"}), "users/owner/accounts/a1");
+  assert.equal(restorePath("owner", {scope: "company-account", companyId: "c1", id: "a1"}), "users/owner/aziende/c1/accounts/a1");
+  assert.throws(() => restorePath("owner", {scope: "notifications", id: "n1"}), /SCOPE/);
+  assert.throws(() => restorePath("owner", {scope: "settings", id: "..\/security"}), /IDENTIFIER/);
+});
+
+test("valida chunk limitati senza duplicati o prototipi speciali", () => {
+  const chunk = validateRestoreChunk({
+    operationId: "device:restore:1", backupId: "backup-1", chunkIndex: 0, chunkCount: 1,
+    records: [{scope: "settings", id: "generalConfig", data: {schemaVersion: 1}}]
+  }, "owner");
+  assert.equal(chunk.records[0].path, "users/owner/settings/generalConfig");
+  assert.throws(() => validateRestoreChunk({
+    operationId: "op", backupId: "b", chunkIndex: 0, chunkCount: 1,
+    records: [
+      {scope: "contact", id: "c1", data: {}},
+      {scope: "contact", id: "c1", data: {}}
+    ]
+  }, "owner"), /DUPLICATE/);
+});
+
+test("blocca collisioni e rende idempotente un chunk già applicato", () => {
+  assert.deepEqual(restoreChunkDecision({previous: {status: "applied"}}), {status: "applied", duplicate: true});
+  assert.equal(restoreChunkDecision({collisions: ["users/owner/accounts/a1"]}).status, "collision");
+  assert.equal(restoreChunkDecision({collisions: []}).status, "ready");
+});
+
+test("audit conserva soltanto contatori e identificatori tecnici", () => {
+  const audit = safeRestoreAudit({
+    uid: "owner", operationId: "op1", backupId: "b1", chunkIndex: 2,
+    recordCount: 10, password: "VIETATA"
+  });
+  assert.equal(JSON.stringify(audit).includes("VIETATA"), false);
+  assert.equal(audit.recordCount, 10);
+});
