@@ -28,6 +28,9 @@ const {
 } = require("./recovery-security");
 const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
 const {
+    privateAccountMutationDecision, validatePrivateAccountMutation
+} = require("./private-account-mutation-service");
+const {
     RETENTION_MS, restoreDecision, safeAudit, trashDecision, validateRecoveryCommand
 } = require("./history-recovery-service");
 const {
@@ -85,6 +88,52 @@ exports.applyOfflineMutation = onCall(
                 createdAt: FieldValue.serverTimestamp()
             });
             return decision;
+        });
+    }
+);
+
+exports.applyPrivateAccountMutation = onCall(
+    {region: "europe-west1", enforceAppCheck: true},
+    async request => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        let operation;
+        try { operation = validatePrivateAccountMutation(request.data); } catch {
+            throw new HttpsError("invalid-argument", "Account privato offline non valido.");
+        }
+        const store = getFirestore();
+        const userRef = store.collection("users").doc(request.auth.uid);
+        const recordRef = userRef.collection("accounts").doc(operation.recordId);
+        const resultRef = userRef.collection("operationResults").doc(operation.operationId);
+        return store.runTransaction(async transaction => {
+            const [recordSnapshot, resultSnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(resultRef)
+            ]);
+            const previous = resultSnapshot.exists ? resultSnapshot.data() : null;
+            if (previous && (previous.domain !== "private-account" || previous.recordId !== operation.recordId)) {
+                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            }
+            const result = privateAccountMutationDecision({
+                exists: recordSnapshot.exists,
+                currentRevision: Number(recordSnapshot.data()?.revision || 0),
+                expectedRevision: operation.expectedRevision,
+                previous
+            });
+            if (result.duplicate || result.status === "conflict") return result;
+            transaction.set(recordRef, {
+                ...operation.record,
+                schemaVersion: 1,
+                revision: result.revision,
+                updatedAt: FieldValue.serverTimestamp()
+            }, {merge: recordSnapshot.exists});
+            transaction.set(resultRef, {
+                ...result,
+                domain: "private-account",
+                recordId: operation.recordId,
+                ownerUid: request.auth.uid,
+                deviceId: operation.deviceId,
+                createdAt: FieldValue.serverTimestamp()
+            });
+            return result;
         });
     }
 );

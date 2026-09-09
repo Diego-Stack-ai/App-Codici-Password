@@ -42,6 +42,7 @@ Il laboratorio `experiments/offline-sync` dimostra cifratura e autenticità dell
 - [x] callable idempotente implementata, validata e protetta da App Check; Rules candidate testate, client non collegato;
 - [x] orchestratore client sotto lock con stati UI, arresto sul conflitto e retry recuperabile;
 - [x] adattatore runtime collega coda, lease, BroadcastChannel e callable reale; flag predefinita disattivata e nessun form ancora instradato;
+- [x] callable pilota separata per Account privati: percorso confinato allo UID, soli record `account/private`, ciphertext obbligatorio, revisione e idempotenza; client ancora non instradato;
 - [ ] collaudo fisico su due dispositivi.
 
 M6 resta attiva finché runtime e backend non dimostrano che nessuna scrittura può essere persa o sovrascritta silenziosamente.
