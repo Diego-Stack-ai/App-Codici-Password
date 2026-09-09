@@ -48,6 +48,6 @@ Il laboratorio `experiments/offline-sync` dimostra cifratura e autenticità dell
 - [x] campi sensibili facoltativi accettano soltanto stringa vuota o ciphertext; errore recuperabile distinto dal salvataggio confermato;
 - [x] secondo salvataggio bloccato dopo che la modifica offline è già stata accodata;
 - [x] collaudo fisico Chrome–Edge: una revisione offline obsoleta viene bloccata dopo una modifica online più recente, senza sovrascrittura silenziosa;
-- [~] risoluzione visiva del conflitto: mantenimento server oppure recupero locale nel modulo, sempre su scelta esplicita dell'utente;
+- [x] risoluzione visiva collaudata: mantenimento server e recupero locale nel modulo avvengono soltanto su scelta esplicita dell'utente;
 
 M6 resta attiva finché runtime e backend non dimostrano che nessuna scrittura può essere persa o sovrascritta silenziosamente.

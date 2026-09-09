@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.78';
+import { auth, db } from '../../firebase-config.js?v=1.2.79';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -172,7 +172,7 @@ export async function savePrivateAccount({
             showToast(t('success_save'), "success");
             setTimeout(() => {
                 const destination = isEditing
-                    ? `dettaglio_account_privato.html?id=${currentDocId}`
+                    ? `dettaglio_account_privato.html?id=${currentDocId}&m6refresh=1`
                     : 'account_privati.html?m6refresh=1';
                 window.location.replace(destination);
             }, 1000);

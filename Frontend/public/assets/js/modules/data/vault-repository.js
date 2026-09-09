@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.78';
+import {db} from '../../firebase-config.js?v=1.2.79';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -46,6 +46,8 @@ export const listAcceptedInvites = email => {
 export const getRecordByPath = recordPath => readRecord(`record:${recordPath}`, doc(db, recordPath));
 
 export const getPrivateAccount = (uid, accountId) => getRecordByPath(`users/${uid}/accounts/${accountId}`);
+export const getPrivateAccountConfirmed = (uid, accountId) => readConfirmedRecord(
+    doc(db, 'users', uid, 'accounts', accountId));
 
 export const findPrivateAccountByLegacyId = (uid, accountId) => coalesceRead(`legacy-account:${uid}:${accountId}`, async () => {
     const snapshot = await getDocsSmart(query(

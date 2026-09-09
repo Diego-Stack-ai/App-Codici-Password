@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.78';
+import { db } from '../../firebase-config.js?v=1.2.79';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -15,7 +15,11 @@ import { decryptIfPossible } from '../core/crypto-utils.js';
 import { openExternalUrl } from '../shared/attachment-security.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
-import { findPrivateAccountByLegacyId, getPrivateAccount } from '../data/vault-repository.js';
+import {
+    findPrivateAccountByLegacyId,
+    getPrivateAccount,
+    getPrivateAccountConfirmed
+} from '../data/vault-repository.js';
 import { initPrivateAttachmentModule, loadPrivateAttachments, openSourceSelector } from './dettaglio-privato-attachments.js';
 import { initPrivateSharingModule, renderPrivateSharingMap } from './dettaglio-privato-sharing.js';
 
@@ -25,6 +29,7 @@ let currentId = null;
 let ownerId = null;
 let isReadOnly = false;
 let accountData = null;
+let requireServerRefresh = false;
 
 // --- INITIALIZATION ---
 /**
@@ -40,6 +45,7 @@ export async function initDettaglioAccountPrivato(user) {
 
     const params = new URLSearchParams(window.location.search);
     currentId = params.get('id');
+    requireServerRefresh = params.get('m6refresh') === '1' && navigator.onLine;
 
     if (!currentId) {
         showToast(t('missing_id') || "ID mancante", "error");
@@ -84,9 +90,18 @@ export async function initDettaglioAccountPrivato(user) {
  */
 async function loadAccount() {
     try {
-        accountData = await getPrivateAccount(ownerId, currentId)
+        accountData = await (requireServerRefresh
+            ? getPrivateAccountConfirmed(ownerId, currentId)
+            : getPrivateAccount(ownerId, currentId))
             || await findPrivateAccountByLegacyId(ownerId, currentId);
         if (!accountData) { showToast(t('account_not_found'), "error"); return; }
+        if (requireServerRefresh) {
+            requireServerRefresh = false;
+            const cleanParams = new URLSearchParams(window.location.search);
+            cleanParams.delete('m6refresh');
+            const cleanQuery = cleanParams.toString();
+            window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
+        }
         const docRef = doc(db, "users", ownerId, "accounts", accountData.id);
         if (!isReadOnly) updateDoc(docRef, { views: increment(1) }).catch(console.warn);
 
