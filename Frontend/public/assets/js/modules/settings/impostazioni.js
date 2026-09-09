@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.69';
+import { auth, db } from '../../firebase-config.js?v=1.2.70';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -178,11 +178,7 @@ function setupEncryptedRestore(user) {
                 const result = await executeBackupRestore(plan, selectedIndexes);
                 working.close();
                 working = null;
-                await showConfirmModal(
-                    'Ripristino completato',
-                    `${result.recordCount} elementi e ${result.attachmentCount} file ripristinati. Riapri l’app per rileggere i dati.`,
-                    'Ricarica', 'Più tardi'
-                ).then(reload => { if (reload) window.location.reload(); });
+                reloadAfterBackupRestore(result);
                 return;
             }
             const typed = await showInputModal(
@@ -194,11 +190,7 @@ function setupEncryptedRestore(user) {
             const result = await executeBackupRestore(plan);
             working.close();
             working = null;
-            await showConfirmModal(
-                'Ripristino completato',
-                `${result.recordCount} record e ${result.attachmentCount} allegati ripristinati. Riapri l’app per rileggere i dati.`,
-                'Ricarica', 'Più tardi'
-            ).then(reload => { if (reload) window.location.reload(); });
+            reloadAfterBackupRestore(result);
         } catch (error) {
             console.error('[BACKUP] Ripristino non riuscito.', error?.message);
             const collision = String(error?.message || '').startsWith('BACKUP_COLLISIONS:');
@@ -210,6 +202,14 @@ function setupEncryptedRestore(user) {
             button.disabled = false;
         }
     });
+}
+
+function reloadAfterBackupRestore(result) {
+    showToast(
+        `Ripristino completato: ${result.recordCount} elementi e ${result.attachmentCount} allegati. Aggiornamento dati…`,
+        'success'
+    );
+    setTimeout(() => window.location.reload(), 900);
 }
 
 function showBackupWorking(title, message) {
@@ -517,7 +517,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.69');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.70');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
