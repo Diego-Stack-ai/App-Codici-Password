@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.79';
+import { auth, db } from '../../firebase-config.js?v=1.2.80';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -549,7 +549,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.79');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.80');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
