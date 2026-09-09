@@ -57,13 +57,17 @@ export function renderProfileOverview() {
         documenti: state.userDocuments
     });
     const summary = [
-        ['badge', 'Codice fiscale', overview.fiscalCode || 'Non indicato'],
+        ['badge', 'Codice fiscale', overview.fiscalCode || 'Non indicato', _callbacks?.editFiscalDocument],
         ['call', 'Telefono principale', overview.primaryPhone?.number || 'Non indicato'],
         ['mail', 'Email principale', overview.primaryEmail?.address || 'Non indicata'],
         ['home', 'Indirizzo principale', overview.primaryAddress ?
             `${overview.primaryAddress.address || ''} ${overview.primaryAddress.civic || ''}, ${overview.primaryAddress.city || ''}`.trim() : 'Non indicato']
     ];
-    const cards = summary.map(([icon, label, value]) => createElement('article', { className: 'profile-summary-card' }, [
+    const cards = summary.map(([icon, label, value, onActivate]) => createElement(onActivate ? 'button' : 'article', {
+        className: `profile-summary-card${onActivate ? ' profile-summary-card-action' : ''}`,
+        type: onActivate ? 'button' : undefined,
+        onclick: onActivate
+    }, [
         createElement('span', { className: 'material-symbols-outlined', textContent: icon }),
         createElement('div', {}, [
             createElement('span', { className: 'data-label', textContent: label }),

@@ -59,10 +59,10 @@ export function buildProfileOverview(profile = {}, now = new Date()) {
         const expiry = new Date(`${item.expiry_date}T00:00:00`);
         return !Number.isNaN(expiry.getTime()) && expiry >= now && expiry <= threshold;
     }).sort((a, b) => String(a.expiry_date).localeCompare(String(b.expiry_date)));
+    const fiscalDocument = documents.find(item => String(item?.type || '').toLowerCase().includes('fiscale'));
     return {
         fullName: [profile.nome, profile.cognome].filter(Boolean).join(' ').trim(),
-        fiscalCode: profile.cf || documents.find(item => String(item.type || '').toLowerCase().includes('fiscale'))?.cf_value ||
-            documents.find(item => String(item.type || '').toLowerCase().includes('fiscale'))?.num_serie || '',
+        fiscalCode: fiscalDocument?.cf_value || fiscalDocument?.num_serie || fiscalDocument?.id_number || fiscalDocument?.cf || '',
         primaryPhone: resolvePrimary(profile.contactPhones),
         primaryEmail: resolvePrimary(profile.contactEmails),
         primaryAddress: resolvePrimary(profile.userAddresses),

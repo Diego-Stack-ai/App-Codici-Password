@@ -255,8 +255,10 @@ assert.match(privateArea, /createCardSecretResolver\(copyValue, encrypted && isP
     'La dashboard privata non risolve le password soltanto su richiesta');
 assert.match(profileDashboard, /activateProfileTab\('personal'\)[\s\S]*?editPersonalData/,
     'Modifica anagrafica dalla Panoramica richiede ancora un secondo passaggio');
-assert.match(profileActions, /key:\s*'cf'[\s\S]*?cf:\s*await encrypt\(normalizedCf, vaultKeyMaterial\)/,
-    'Il codice fiscale non è disponibile o non viene cifrato nell’anagrafica');
+assert.doesNotMatch(profileActions, /cf:\s*await encrypt\(normalizedCf, vaultKeyMaterial\)/,
+    'Il codice fiscale viene ancora duplicato nel documento principale utente');
+assert.match(profileDashboard, /editFiscalDocument/,
+    'La Panoramica non apre direttamente il documento Codice Fiscale');
 assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Firebase Admin non è aggiornato alla baseline P4');
 assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
@@ -280,4 +282,4 @@ assert.match(security, /export async function changeMasterPassword/, 'Cambio Mas
 assert.match(settingsHtml, /id="btn-change-master-password"/, 'Cambio Master Password non esposto in Impostazioni');
 assert.match(coreUi, /passwordType[\s\S]*?bindPasswordChecklist/, 'Il cambio Master Password non mostra i requisiti dinamici');
 
-console.log('Audit sicurezza e offline: 87 controlli superati.');
+console.log('Audit sicurezza e offline: 88 controlli superati.');

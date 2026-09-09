@@ -33,6 +33,18 @@ test('la panoramica sceglie i dati principali e le scadenze entro 90 giorni', ()
     assert.equal(overview.expiringDocuments.length, 1);
 });
 
+test('il codice fiscale canonico proviene esclusivamente dal documento', () => {
+    const profile = model.normalizeLegacyProfile({
+        cf: 'CAMPO-DUPLICATO',
+        documenti: [{ type: 'Codice Fiscale', cf_value: 'RSSMRA80A01H501U' }]
+    });
+    const overview = model.buildProfileOverview(profile);
+    const vcard = qr.buildVCard(profile, { nome: false, cf: true, nascita: false });
+    assert.equal(overview.fiscalCode, 'RSSMRA80A01H501U');
+    assert.match(vcard, /X-CF:RSSMRA80A01H501U/);
+    assert.doesNotMatch(vcard, /CAMPO-DUPLICATO/);
+});
+
 test('vieta segreti e limita i campi dei widget', () => {
     assert.equal(model.isQrEligibleField({ type: 'password', includeInQr: true }), false);
     assert.equal(model.isQrEligibleField({ type: 'text', includeInQr: true }), true);

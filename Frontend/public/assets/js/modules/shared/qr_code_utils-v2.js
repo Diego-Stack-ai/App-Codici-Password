@@ -41,9 +41,9 @@ export function buildVCard(userData, inclusions, options = {}) {
         v.push(`N:${escapeVCard(cognome)};${escapeVCard(nome)};;;`);
         v.push(`FN:${escapeVCard(`${nome} ${cognome}`.trim())}`);
     }
-    const fiscalCode = userData.cf || (userData.documenti || []).find(item =>
-        String(item?.type || '').toLowerCase().includes('fiscale'))?.cf_value ||
-        (userData.documenti || []).find(item => String(item?.type || '').toLowerCase().includes('fiscale'))?.num_serie;
+    const fiscalDocument = (userData.documenti || []).find(item =>
+        String(item?.type || '').toLowerCase().includes('fiscale'));
+    const fiscalCode = fiscalDocument?.cf_value || fiscalDocument?.num_serie || fiscalDocument?.id_number || fiscalDocument?.cf;
     if (inclusions.cf && fiscalCode) {
         v.push(`X-CF:${escapeVCard(fiscalCode)}`);
     }

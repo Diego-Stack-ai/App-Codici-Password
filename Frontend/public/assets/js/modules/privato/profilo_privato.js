@@ -117,6 +117,7 @@ export async function initProfiloPrivato(user) {
             downloadVCard,
             shareVCard,
             editPersonalData: () => editSection('dati-personali', buildCtx()),
+            editFiscalDocument: openFiscalDocument,
             onTabActivated: name => {
                 if (name !== 'digital-card') return;
                 renderDigitalCard();
@@ -198,7 +199,6 @@ async function loadUserData(user, renderImmediately = true) {
         if (vaultKeyMaterial) {
             currentUserData.nome = await decryptIfPossible(currentUserData.nome, vaultKeyMaterial);
             currentUserData.cognome = await decryptIfPossible(currentUserData.cognome, vaultKeyMaterial);
-            currentUserData.cf = await decryptIfPossible(currentUserData.cf, vaultKeyMaterial);
             currentUserData.birth_place = await decryptIfPossible(currentUserData.birth_place, vaultKeyMaterial);
             currentUserData.note = await decryptIfPossible(currentUserData.note, vaultKeyMaterial);
 
@@ -270,11 +270,8 @@ async function loadUserData(user, renderImmediately = true) {
         const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
         set('nome-view', finalFullName);
 
-        let cf = currentUserData.cf || '';
-        if (currentUserData.documenti) {
-            const cfDoc = currentUserData.documenti.find(d => d.type && d.type.toLowerCase().includes('fiscale'));
-            if (!cf && cfDoc) cf = cfDoc.cf_value || cfDoc.num_serie || cfDoc.id_number || '';
-        }
+        const cfDoc = currentUserData.documenti?.find(d => String(d?.type || '').toLowerCase().includes('fiscale'));
+        const cf = cfDoc?.cf_value || cfDoc?.num_serie || cfDoc?.id_number || cfDoc?.cf || '';
         set('cf-view', cf.toUpperCase() || '-');
         set('birth_date-view', formatDateToIT(currentUserData.birth_date));
         set('birth_place-view', `${currentUserData.birth_place || ''} ${currentUserData.birth_province ? '(' + currentUserData.birth_province + ')' : ''}`.trim());
@@ -366,6 +363,12 @@ async function syncData() {
     return _syncData({ currentUserUid, currentUserData, userAddresses, contactPhones, contactEmails, userDocuments });
 }
 
+function openFiscalDocument() {
+    const idx = userDocuments.findIndex(item => String(item?.type || '').toLowerCase().includes('fiscale'));
+    const fiscalType = profileLabels.documentTypes.find(type => String(type).toLowerCase().includes('fiscale')) || 'Codice Fiscale';
+    editUserDocument(idx, buildCtx(), idx === -1 ? fiscalType : '');
+}
+
 // ─── DELEGATION ───────────────────────────────────────────────────────────────
 
 function setupDelegation(ctx) {
@@ -383,6 +386,7 @@ function setupDelegation(ctx) {
             case 'add-utility':   addUtility(idx, ctx); break;
             case 'edit-utility':  editUtility(idx, uIdx, ctx); break;
             case 'edit-doc':      editUserDocument(idx, ctx); break;
+            case 'manage-fiscal-document': openFiscalDocument(); break;
             // profilo-phones-emails.js
             case 'edit-phone':    editPhone(idx); break;
             case 'edit-email':    editEmail(idx); break;
