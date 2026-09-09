@@ -25,6 +25,7 @@ Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso 
 - [x] comando Backup cifrato integrato nelle Impostazioni con caricamento differito, scelta esplicita del file e Recovery Key mostrata una sola volta con conferma obbligatoria di salvataggio;
 - [~] callable transazionale `restoreBackupChunk` integrata localmente con anteprima collisioni, allowlist, conversione tipi, limiti, idempotenza e App Check; manca il collegamento del lettore file e la distribuzione;
 - [~] lettore file in due passaggi e UI di ripristino integrati localmente: verifica completa e anteprima collisioni precedono la conferma digitata; allegati trasferiti soltanto dopo i chunk record; manca distribuzione e collaudo fisico;
+- [x] apertura fisica del `.cpbackup` con Recovery Key e anteprima server verificate il 09/09/2026: il Vault attivo ha prodotto il blocco collisioni previsto senza modificare dati;
 - [ ] collaudo fisico esporta/cancella/ripristina su copia non produttiva.
 
 M8 resta attiva fino alla prova reale di ripristino.
