@@ -116,6 +116,7 @@ export async function initProfiloPrivato(user) {
             getVCard: getProfileVCard,
             downloadVCard,
             shareVCard,
+            editPersonalData: () => editSection('dati-personali', buildCtx()),
             onTabActivated: name => {
                 if (name !== 'digital-card') return;
                 renderDigitalCard();
@@ -197,6 +198,7 @@ async function loadUserData(user, renderImmediately = true) {
         if (vaultKeyMaterial) {
             currentUserData.nome = await decryptIfPossible(currentUserData.nome, vaultKeyMaterial);
             currentUserData.cognome = await decryptIfPossible(currentUserData.cognome, vaultKeyMaterial);
+            currentUserData.cf = await decryptIfPossible(currentUserData.cf, vaultKeyMaterial);
             currentUserData.birth_place = await decryptIfPossible(currentUserData.birth_place, vaultKeyMaterial);
             currentUserData.note = await decryptIfPossible(currentUserData.note, vaultKeyMaterial);
 
@@ -268,10 +270,10 @@ async function loadUserData(user, renderImmediately = true) {
         const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
         set('nome-view', finalFullName);
 
-        let cf = '';
+        let cf = currentUserData.cf || '';
         if (currentUserData.documenti) {
             const cfDoc = currentUserData.documenti.find(d => d.type && d.type.toLowerCase().includes('fiscale'));
-            if (cfDoc) cf = cfDoc.cf_value || cfDoc.num_serie || cfDoc.id_number || '';
+            if (!cf && cfDoc) cf = cfDoc.cf_value || cfDoc.num_serie || cfDoc.id_number || '';
         }
         set('cf-view', cf.toUpperCase() || '-');
         set('birth_date-view', formatDateToIT(currentUserData.birth_date));

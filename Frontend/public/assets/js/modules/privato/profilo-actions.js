@@ -38,21 +38,25 @@ export async function editSection(sectionId, ctx) {
         const fields = [
             { key: 'nome', label: 'Nome', icon: 'person' },
             { key: 'cognome', label: 'Cognome', icon: 'person' },
+            { key: 'cf', label: 'Codice Fiscale', icon: 'badge' },
             { key: 'birth_date', label: 'Data di Nascita', type: 'date', icon: 'calendar_today' },
             { key: 'birth_place', label: 'Luogo di Nascita', icon: 'location_city' },
             { key: 'birth_province', label: 'Provincia Nascita (es. PD)', icon: 'map' }
         ];
         showProfileModal('Dati Personali', fields, currentUserData, async (newData) => {
             try {
+                const vaultKeyMaterial = await ensureVaultKeyMaterial();
+                const normalizedCf = String(newData.cf || '').replace(/\s+/g, '').toUpperCase();
                 const clearData = {
                     nome: newData.nome || '',
                     cognome: newData.cognome || '',
+                    cf: await encrypt(normalizedCf, vaultKeyMaterial),
                     birth_date: newData.birth_date || '',
                     birth_place: newData.birth_place || '',
                     birth_province: newData.birth_province || ''
                 };
                 await updateDoc(doc(db, "users", currentUserUid), clearData);
-                Object.assign(currentUserData, newData);
+                Object.assign(currentUserData, newData, {cf: normalizedCf});
                 await loadUserData(auth.currentUser);
                 showToast(t('success_save'), "success");
             } catch (e) { logError("EditSection", e); showToast(t('error_generic'), "error"); }

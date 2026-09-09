@@ -171,6 +171,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const publicPages = ['index', 'registrati', 'reset', 'imposta', 'privacy', 'termini'];
                 const isPrivatePage = !publicPages.includes(currentPage);
+                if (isPrivatePage) {
+                    await user.reload();
+                    if (!auth.currentUser?.emailVerified) {
+                        window.location.replace('/login-v115.html?verifyEmail=1');
+                        return;
+                    }
+                }
                 if (isPrivatePage && navigator.onLine) firebaseRuntime.enableAppCheck?.();
 
                 // Avvia in parallelo il codice Vault, senza appesantire login e pagine pubbliche.

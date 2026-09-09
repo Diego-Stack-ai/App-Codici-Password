@@ -12,6 +12,31 @@
     }
 }
 
+.auth-verification-panel {
+    display: grid;
+    gap: 1rem;
+    text-align: center;
+}
+
+.auth-verification-panel.hidden {
+    display: none;
+}
+
+.auth-verification-panel h2,
+.auth-verification-panel p {
+    margin: 0;
+}
+
+.auth-verification-panel p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.auth-verification-icon {
+    color: var(--accent-blue);
+    font-size: 3rem;
+}
+
 html[data-i18n="loading"] body {
     animation: forceReveal 0s 1.5s forwards;
 }

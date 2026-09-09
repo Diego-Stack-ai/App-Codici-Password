@@ -83,7 +83,14 @@ export function renderProfileOverview() {
                 createElement('span', { className: 'data-label', textContent: 'Profilo personale' }),
                 createElement('h2', { className: 'profile-overview-name', textContent: overview.fullName || 'Utente' })
             ]),
-            createElement('button', { className: 'btn-upload-trigger', textContent: 'Modifica anagrafica', onclick: () => activateProfileTab('personal') })
+            createElement('button', {
+                className: 'btn-upload-trigger',
+                textContent: 'Modifica anagrafica',
+                onclick: () => {
+                    activateProfileTab('personal');
+                    _callbacks?.editPersonalData?.();
+                }
+            })
         ]),
         createElement('div', { className: 'profile-summary-grid' }, cards),
         createElement('section', { className: 'form-card profile-expiry-card' }, [

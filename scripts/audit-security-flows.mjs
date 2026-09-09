@@ -56,6 +56,8 @@ const companyAccountList = await read('Frontend/public/assets/js/modules/azienda
 const cardSecret = await read('Frontend/public/assets/js/modules/shared/card-secret.js');
 const accountListView = await read('Frontend/public/assets/js/modules/shared/account-list-view.js');
 const privateArea = await read('Frontend/public/assets/js/modules/privato/area_privata.js');
+const profileActions = await read('Frontend/public/assets/js/modules/privato/profilo-actions.js');
+const profileDashboard = await read('Frontend/public/assets/js/modules/privato/profilo-dashboard.js');
 const functionsPackage = JSON.parse(await read('functions/package.json'));
 assert.equal(configuredVersion, `v${JSON.parse(packageJson).version}`, 'La versione UI non coincide con package.json');
 assert.match(serviceWorker, new RegExp(`CACHE_NAME = 'codex-shell-${configuredVersion}'`), 'La cache PWA non coincide con la versione applicativa');
@@ -113,6 +115,11 @@ assert.match(main, /const serviceWorkerEnabled = true/, 'Il Service Worker ricos
 assert.doesNotMatch(main, /controllerchange[\s\S]{0,300}window\.location\.reload/, 'Il Service Worker può ancora innescare un ciclo di ricaricamento');
 assert.match(offlineAssets, /login-v115\.html/, 'La shell offline non usa il nuovo percorso di login');
 assert.match(auth, /login-v115\.html/, 'I redirect Auth non usano il nuovo percorso di login');
+assert.match(auth, /emailVerificationRequired:\s*true/, 'Il login non blocca gli account con email non verificata');
+assert.match(main, /user\.reload\(\)[\s\S]*?emailVerified[\s\S]*?login-v115\.html\?verifyEmail=1/,
+    'Le pagine private non verificano lo stato email prima di leggere la Vault');
+assert.match(loginHtml, /id="email-verification-panel"[\s\S]*?id="btn-email-verified"[\s\S]*?id="btn-resend-verification"/,
+    'Il login non offre il controllo e il reinvio della verifica email');
 assert.match(loginHtml, /data-i18n="ready"/, 'Il login può restare invisibile se il bootstrap JavaScript fallisce');
 
 assert.match(passwordPolicy, /account:[\s\S]*minLength:\s*12/, 'La policy account non richiede almeno 12 caratteri');
@@ -246,6 +253,10 @@ assert.doesNotMatch(privateArea, /data\.password\s*=\s*data\.password\s*\?\s*awa
     'La dashboard privata decifra ancora preventivamente le password più usate');
 assert.match(privateArea, /createCardSecretResolver\(copyValue, encrypted && isPassword\)/,
     'La dashboard privata non risolve le password soltanto su richiesta');
+assert.match(profileDashboard, /activateProfileTab\('personal'\)[\s\S]*?editPersonalData/,
+    'Modifica anagrafica dalla Panoramica richiede ancora un secondo passaggio');
+assert.match(profileActions, /key:\s*'cf'[\s\S]*?cf:\s*await encrypt\(normalizedCf, vaultKeyMaterial\)/,
+    'Il codice fiscale non è disponibile o non viene cifrato nell’anagrafica');
 assert.equal(functionsPackage.dependencies?.['firebase-admin'], '^14.3.0', 'Firebase Admin non è aggiornato alla baseline P4');
 assert.equal(functionsPackage.dependencies?.nodemailer, '^9.1.1', 'Nodemailer non è aggiornato alla baseline P4');
 assert.match(storageRules, /match \/\{allPaths=\*\*\}[\s\S]*?allow read, write: if false;/, 'Storage non usa una chiusura predefinita');
@@ -269,4 +280,4 @@ assert.match(security, /export async function changeMasterPassword/, 'Cambio Mas
 assert.match(settingsHtml, /id="btn-change-master-password"/, 'Cambio Master Password non esposto in Impostazioni');
 assert.match(coreUi, /passwordType[\s\S]*?bindPasswordChecklist/, 'Il cambio Master Password non mostra i requisiti dinamici');
 
-console.log('Audit sicurezza e offline: 82 controlli superati.');
+console.log('Audit sicurezza e offline: 87 controlli superati.');

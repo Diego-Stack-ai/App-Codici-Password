@@ -120,13 +120,13 @@ async function finalizeLogin(user, email) {
 
     await user.reload();
     const updatedUser = auth.currentUser;
+    if (!updatedUser?.emailVerified) {
+        showToast("Verifica l'email prima di accedere alla Vault.", "warning");
+        return { user: updatedUser, mfaRequired: false, emailVerificationRequired: true };
+    }
     await consumePasswordResetPolicyMarker(updatedUser);
     const userDocRef = doc(db, "users", updatedUser.uid);
     const userDoc = await getDoc(userDocRef);
-
-    if (!updatedUser.emailVerified) {
-        showToast("Verifica l'email prima di configurare la 2FA.", "warning");
-    }
 
     if (!userDoc.exists()) {
         await setDoc(userDocRef, {
@@ -218,7 +218,6 @@ async function resetPassword(email) {
  * Checks the user's authentication state and redirects if necessary.
  */
 function checkAuthState() {
-    let initialCheckDone = false;
     onAuthStateChanged(auth, async (user) => {
         const path = window.location.pathname.toLowerCase();
         const reauthFlow = new URLSearchParams(window.location.search).get('reauth');
@@ -228,6 +227,26 @@ function checkAuthState() {
         LOG(`[AUTH CHECK] State: ${user ? 'authenticated' : 'guest'}, Path: ${path}, isAuthPage: ${isAuthPage}`);
 
         if (user) {
+            try {
+                await user.reload();
+            } catch (error) {
+                logError("Auth VerificationRefresh", error);
+                if (!isAuthPage) {
+                    window.location.replace('/login-v115.html?verifyEmail=1');
+                    return;
+                }
+            }
+            const currentUser = auth.currentUser;
+            if (!currentUser?.emailVerified) {
+                if (!isAuthPage) {
+                    window.location.replace('/login-v115.html?verifyEmail=1');
+                } else {
+                    window.dispatchEvent(new CustomEvent('codex:email-verification-required', {
+                        detail: { email: currentUser.email || '' }
+                    }));
+                }
+                return;
+            }
             if (path.includes('login-v115.html') && reauthFlow === 'password-change') {
                 LOG("[AUTH] Reauthentication completed, returning to password change");
                 window.location.replace('imposta_nuova_password.html?reauthenticated=1');
@@ -275,8 +294,16 @@ async function resendVerificationEmail() {
     }
 }
 
+async function refreshEmailVerification() {
+    const user = auth.currentUser;
+    if (!user) return false;
+    await user.reload();
+    return auth.currentUser?.emailVerified === true;
+}
+
 export {
     resendVerificationEmail,
+    refreshEmailVerification,
     register,
     login,
     completeTotpLogin,

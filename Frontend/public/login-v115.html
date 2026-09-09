@@ -122,6 +122,24 @@
 
                 </form>
 
+                <section id="email-verification-panel" class="auth-verification-panel hidden" aria-live="polite">
+                    <span class="material-symbols-outlined auth-verification-icon">mark_email_unread</span>
+                    <h2>Verifica il tuo indirizzo email</h2>
+                    <p>Per proteggere la Vault, l’accesso resta bloccato finché non confermi il collegamento ricevuto via email.</p>
+                    <button type="button" id="btn-email-verified" class="btn-primary">
+                        <span class="material-symbols-outlined">verified</span>
+                        Ho verificato, controlla
+                    </button>
+                    <button type="button" id="btn-resend-verification" class="auth-secondary-action">
+                        <span class="material-symbols-outlined">forward_to_inbox</span>
+                        Reinvia email di verifica
+                    </button>
+                    <button type="button" id="btn-change-verification-email" class="auth-secondary-action">
+                        <span class="material-symbols-outlined">person</span>
+                        Usa un altro account
+                    </button>
+                </section>
+
                 <!-- Registrazione Link -->
                 <div class="auth-footer-links">
                     <a href="registrati.html" class="link-register" data-t="register_link">

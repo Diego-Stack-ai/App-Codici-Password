@@ -4,7 +4,10 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js, modularizzazione.
  */
 
-import { login, completeTotpLogin, checkAuthState } from '../../auth.js?v=1.2.65';
+import {
+    login, completeTotpLogin, checkAuthState, logout,
+    resendVerificationEmail, refreshEmailVerification
+} from '../../auth.js?v=1.2.65';
 import { initComponents } from '../../components-v129.js?v=1.2.65';
 import { t, supportedLanguages, applyGlobalTranslations } from '../../translations.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -30,6 +33,8 @@ export async function initLogin() {
         // initComponents() è già stato chiamato da main.js, ma per sicurezza su auth pages:
         // (Nota: main.js salta setupPasswordToggles su auth pages, quindi qui dobbiamo attivarli specificamente per il login)
 
+        setupEmailVerificationGate();
+
         // 3. CHECK AUTH STATE (Redirect se già loggato)
         checkAuthState(); // Importato da auth.js
 
@@ -42,6 +47,47 @@ export async function initLogin() {
     } catch (err) {
         console.error("[LOGIN] Init Error:", err);
     }
+}
+
+function setupEmailVerificationGate() {
+    const form = document.getElementById('login-form');
+    const panel = document.getElementById('email-verification-panel');
+    if (!form || !panel) return;
+
+    const show = () => {
+        form.classList.add('hidden');
+        panel.classList.remove('hidden');
+        document.getElementById('btn-email-verified')?.focus();
+    };
+    window.addEventListener('codex:email-verification-required', show);
+
+    document.getElementById('btn-email-verified')?.addEventListener('click', async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+            if (await refreshEmailVerification()) {
+                showToast('Email verificata. Accesso autorizzato.', 'success');
+                window.location.replace('home_page.html');
+            } else {
+                showToast('La verifica non risulta ancora completata. Apri il collegamento ricevuto via email.', 'warning');
+            }
+        } catch {
+            showToast('Impossibile controllare la verifica. Verifica la connessione e riprova.', 'error');
+        } finally {
+            button.disabled = false;
+        }
+    });
+    document.getElementById('btn-resend-verification')?.addEventListener('click', async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try { await resendVerificationEmail(); }
+        finally { button.disabled = false; }
+    });
+    document.getElementById('btn-change-verification-email')?.addEventListener('click', async () => {
+        await logout();
+        window.location.replace('login-v115.html');
+    });
+
 }
 
 /**
@@ -191,6 +237,12 @@ function setupLoginForm() {
                 await completeTotpLogin(totpCode, pendingEmail);
             } else {
                 const result = await login(email, password, rememberDevice);
+                if (result?.emailVerificationRequired) {
+                    window.dispatchEvent(new CustomEvent('codex:email-verification-required'));
+                    submitBtn.disabled = false;
+                    document.body.classList.remove('is-auth-progress');
+                    return;
+                }
                 if (result?.mfaRequired) {
                     awaitingTotp = true;
                     pendingEmail = email;
