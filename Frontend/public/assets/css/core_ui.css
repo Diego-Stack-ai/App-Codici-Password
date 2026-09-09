@@ -791,3 +791,18 @@
         grid-template-columns: 1fr;
     }
 }
+/*
+ * Contratto form touch: iOS ingrandisce automaticamente la pagina quando un
+ * controllo con testo inferiore a 16px riceve il focus. Lo zoom manuale resta
+ * disponibile, mentre i campi non possono allargare il layout oltre lo schermo.
+ */
+@media (hover: none) and (pointer: coarse) {
+    .base-container input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+    .base-container select,
+    .base-container textarea {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+        font-size: var(--fs-base) !important;
+    }
+}
