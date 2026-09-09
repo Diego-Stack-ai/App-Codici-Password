@@ -136,6 +136,8 @@ export async function initFormAccountPrivato(user) {
             const outcome = result?.value || result;
             if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
                 showToast('Conflitto M6: il dato remoto è cambiato. Nessuna modifica è stata sovrascritta.', 'warning');
+            } else if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
+                showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
             } else if (Number(outcome?.completed || 0) > 0) {
                 const pendingRecord = lastState?.operation || null;
                 if (pendingRecord?.recordId && pendingRecord?.record) {

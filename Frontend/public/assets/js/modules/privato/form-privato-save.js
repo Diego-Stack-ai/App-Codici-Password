@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.76';
+import { auth, db } from '../../firebase-config.js?v=1.2.77';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -148,7 +148,19 @@ export async function savePrivateAccount({
             }
             if (outcome?.status === 'offline') {
                 showToast('Modifica cifrata e conservata sul dispositivo. Sarà inviata quando torni online.', 'warning');
-                if (btnSave) btnSave.disabled = false;
+                if (btnSave) {
+                    btnSave.disabled = true;
+                    btnSave.dataset.m6Queued = 'true';
+                    btnSave.setAttribute('aria-label', 'Modifica già conservata sul dispositivo');
+                }
+                return;
+            }
+            if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
+                showToast('Invio temporaneamente non disponibile. La modifica cifrata resta conservata sul dispositivo.', 'warning');
+                if (btnSave) {
+                    btnSave.disabled = true;
+                    btnSave.dataset.m6Queued = 'true';
+                }
                 return;
             }
             pilotModule.storePrivateAccountHandoff({
