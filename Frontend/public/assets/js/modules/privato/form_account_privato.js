@@ -138,7 +138,7 @@ export async function initFormAccountPrivato(user) {
                 showToast('Conflitto M6: il dato remoto è cambiato. Nessuna modifica è stata sovrascritta.', 'warning');
             } else if (Number(outcome?.completed || 0) > 0) {
                 showToast('Sincronizzazione M6 completata.', 'success');
-                setTimeout(() => window.location.replace('account_privati.html'), 800);
+                setTimeout(() => window.location.replace('account_privati.html?m6refresh=1'), 800);
             }
         } catch (error) {
             logError('M6PilotResume', error);

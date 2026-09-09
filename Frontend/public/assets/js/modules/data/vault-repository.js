@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.74';
+import {db} from '../../firebase-config.js?v=1.2.75';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -16,6 +16,9 @@ const readConfirmedRecord = reference => getDocServerConfirmed(reference).then(s
     snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
 
 export const listPrivateAccounts = uid => readRecords(`accounts:${uid}`,
+    collection(db, 'users', uid, 'accounts'));
+
+export const listPrivateAccountsConfirmed = uid => readConfirmedRecords(
     collection(db, 'users', uid, 'accounts'));
 
 export const getFirstPrivateAccount = uid => readFirstRecord(`first-account:${uid}`, query(

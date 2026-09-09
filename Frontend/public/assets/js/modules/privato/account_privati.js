@@ -3,7 +3,7 @@
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.74';
+import { db } from '../../firebase-config.js?v=1.2.75';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -11,7 +11,13 @@ import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import {getRecordByPath, getUserProfile, listAcceptedInvites, listPrivateAccounts} from '../data/vault-repository.js';
+import {
+    getRecordByPath,
+    getUserProfile,
+    listAcceptedInvites,
+    listPrivateAccounts,
+    listPrivateAccountsConfirmed
+} from '../data/vault-repository.js';
 import { accountModeFromRecord } from '../shared/account-mode-model.js';
 import { createAccountListView } from '../shared/account-list-view.js';
 import {createArchiveMetadata} from '../settings/archive-account-model.js';
@@ -132,13 +138,16 @@ function setupUI() {
 async function loadAccounts() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
+        const requireServerRefresh = urlParams.get('m6refresh') === '1' && navigator.onLine;
         let sharedWithMe = [];
 
         // 1. Invitations Accepted
         LOG('[ACCOUNTS] Searching invites for authenticated user');
         // Account propri e inviti sono indipendenti: avviamo entrambe le letture
         // subito, mantenendo invariato il successivo assemblaggio delle card.
-        const ownAccountsPromise = listPrivateAccounts(currentUser.uid);
+        const ownAccountsPromise = requireServerRefresh
+            ? listPrivateAccountsConfirmed(currentUser.uid)
+            : listPrivateAccounts(currentUser.uid);
         const invites = await listAcceptedInvites(currentUser.email);
         LOG(`[ACCOUNTS] Found ${invites.length} accepted invites.`);
 
@@ -190,6 +199,12 @@ async function loadAccounts() {
         }).filter(a => !a.isArchived);
 
         allAccounts = [...ownAccounts, ...sharedWithMe];
+
+        if (requireServerRefresh) {
+            urlParams.delete('m6refresh');
+            const cleanQuery = urlParams.toString();
+            window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
+        }
 
         // 🔐 DECRIPTAZIONE GLOBALE (Auto-Unlock Compliant)
         const vaultKeyMaterial = await ensureVaultKeyMaterial().catch(() => null);
