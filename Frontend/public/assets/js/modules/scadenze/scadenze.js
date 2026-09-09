@@ -4,7 +4,7 @@
  * Refactor: Migrazione sotto modules/scadenze/ e standardizzazione import.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.66';
+import { db } from '../../firebase-config.js?v=1.2.67';
 import { getFooterReady } from '../../footer-state.js';
 import { showToast } from '../../ui-core-v129.js';
 import { LOG } from '../../logger.js';
@@ -12,7 +12,7 @@ import { SwipeList } from '../../swipe-list-v6.js';
 import { updateDoc, deleteDoc, doc } from "/assets/js/vendor/firebase-runtime.js";
 import { deadlineDate, deadlinePresentation } from './deadline-model.js';
 import { t } from '../../translations.js';
-import { initComponents } from '../../components-v129.js?v=1.2.66';
+import { initComponents } from '../../components-v129.js?v=1.2.67';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import {listDeadlines, listReceivedDeadlines} from '../data/vault-repository.js';
