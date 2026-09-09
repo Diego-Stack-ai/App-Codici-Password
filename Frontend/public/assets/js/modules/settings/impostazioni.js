@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.70';
+import { auth, db } from '../../firebase-config.js?v=1.2.71';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -254,21 +254,31 @@ function showBackupRestorePreview(plan) {
             contact: 'Contatto', 'profile-widget': 'Widget',
             'private-account-attachment': 'Allegato privato', 'company-account-attachment': 'Allegato aziendale'
         };
+        const scopeCounts = new Map();
+        plan.comparison.entries.forEach(entry => {
+            scopeCounts.set(entry.scope, (scopeCounts.get(entry.scope) || 0) + 1);
+        });
+        const summary = createElement('div', {className: 'backup-preview-summary'}, [...scopeCounts].map(([scope, count]) =>
+            createElement('span', {
+                className: 'backup-preview-summary-item',
+                textContent: `${scopeLabels[scope] || scope}: ${count}`
+            })
+        ));
         const selectable = [];
-        const rows = plan.comparison.entries.slice(0, 100).map(entry => {
+        const rows = plan.comparison.entries.map(entry => {
             const checkbox = createElement('input', {
                 type: 'checkbox', checked: entry.status === 'missing', disabled: entry.status === 'unchanged',
                 'aria-label': `Seleziona ${entry.description}`
             });
             if (entry.status !== 'unchanged') selectable.push({entry, checkbox});
             const details = createElement('span', {className: 'backup-preview-details'}, [
-                createElement('span', {textContent: scopeLabels[entry.scope] || entry.scope}),
-                createElement('small', {textContent: entry.description})
+                createElement('strong', {className: 'backup-preview-name', textContent: entry.description}),
+                createElement('small', {textContent: scopeLabels[entry.scope] || entry.scope})
             ]);
             return createElement('li', {className: `backup-preview-row backup-preview-${entry.status}`}, [
                 checkbox,
                 details,
-                createElement('strong', {textContent: labels[entry.status]})
+                createElement('strong', {className: 'backup-preview-status', textContent: labels[entry.status]})
             ]);
         });
         const close = result => {
@@ -293,6 +303,7 @@ function showBackupRestorePreview(plan) {
                 className: 'modal-text',
                 textContent: `Il backup è integro. Mancanti: ${plan.comparison.counts.missing}; modificati: ${plan.comparison.counts.changed}; invariati: ${plan.comparison.counts.unchanged}. Seleziona cosa recuperare: i mancanti sono già selezionati, i modificati no.`
             }),
+            summary,
             createElement('ul', {className: 'backup-preview-list'}, rows),
             createElement('div', {className: 'modal-actions'}, [closeButton, restoreButton])
         ]));
@@ -517,7 +528,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.70');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.71');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

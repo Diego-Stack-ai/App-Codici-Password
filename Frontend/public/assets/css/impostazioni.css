@@ -848,9 +848,39 @@ h3.settings-desc {
     white-space: nowrap;
 }
 
-.backup-preview-missing strong { color: var(--success-color, #059669); }
-.backup-preview-changed strong { color: var(--warning-color, #d97706); }
-.backup-preview-unchanged strong { color: var(--text-secondary); }
+.backup-preview-name {
+    overflow: hidden;
+    color: var(--text-primary);
+    font: inherit;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.backup-preview-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    width: 100%;
+    margin-top: 0.8rem;
+}
+
+.backup-preview-summary-item {
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--surface-glass);
+    color: var(--text-secondary);
+    font: var(--font-caption);
+}
+
+.backup-preview-status {
+    flex: 0 0 auto;
+}
+
+.backup-preview-missing .backup-preview-status { color: var(--success-color, #059669); }
+.backup-preview-changed .backup-preview-status { color: var(--warning-color, #d97706); }
+.backup-preview-unchanged .backup-preview-status { color: var(--text-secondary); }
 
 .backup-working-overlay {
     cursor: wait;

@@ -81,7 +81,7 @@ export function describeRestoreRecords(records) {
     });
     return records.map(record => {
         if (record.scope === 'profile') return 'Profilo utente';
-        if (record.scope === 'settings') return 'Impostazioni applicazione';
+        if (record.scope === 'settings') return safeLabel(record.id, 'Impostazioni applicazione');
         if (record.scope === 'private-account') return recordName(record, 'Account senza nome');
         if (record.scope === 'company') return recordName(record, 'Azienda senza nome');
         if (record.scope === 'company-account') {
