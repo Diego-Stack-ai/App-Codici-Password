@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.71';
+import { auth, db } from '../../firebase-config.js?v=1.2.72';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -247,6 +247,15 @@ function showBackupRestorePreview(plan) {
         const restoreButton = createElement('button', {
             className: 'btn-modal btn-primary', textContent: 'Ripristina selezionati'
         });
+        const summaryToggle = createElement('button', {
+            type: 'button', className: 'backup-preview-toggle',
+            'aria-expanded': 'true', 'aria-label': 'Riduci riepilogo anteprima'
+        }, [
+            createElement('span', {textContent: 'Riduci riepilogo'}),
+            createElement('span', {
+                className: 'material-symbols-outlined', textContent: 'expand_less', 'aria-hidden': 'true'
+            })
+        ]);
         const labels = {missing: 'Mancante', unchanged: 'Invariato', changed: 'Modificato'};
         const scopeLabels = {
             profile: 'Profilo', settings: 'Impostazione', 'private-account': 'Account privato',
@@ -296,14 +305,26 @@ function showBackupRestorePreview(plan) {
             .filter(item => item.checkbox.checked)
             .map(item => item.entry.index)));
         updateRestoreButton();
-        modal.appendChild(createElement('div', {className: 'modal-box backup-preview-modal'}, [
+        const summaryContent = createElement('div', {className: 'backup-preview-summary-content'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'preview'}),
             createElement('h3', {className: 'modal-title', textContent: 'Anteprima Vault di ripristino'}),
             createElement('p', {
                 className: 'modal-text',
                 textContent: `Il backup è integro. Mancanti: ${plan.comparison.counts.missing}; modificati: ${plan.comparison.counts.changed}; invariati: ${plan.comparison.counts.unchanged}. Seleziona cosa recuperare: i mancanti sono già selezionati, i modificati no.`
             }),
-            summary,
+            summary
+        ]);
+        summaryToggle.addEventListener('click', () => {
+            const expanded = summaryToggle.getAttribute('aria-expanded') === 'true';
+            summaryToggle.setAttribute('aria-expanded', String(!expanded));
+            summaryToggle.setAttribute('aria-label', expanded ? 'Mostra riepilogo anteprima' : 'Riduci riepilogo anteprima');
+            summaryContent.hidden = expanded;
+            summaryToggle.firstElementChild.textContent = expanded ? 'Mostra riepilogo' : 'Riduci riepilogo';
+            summaryToggle.lastElementChild.textContent = expanded ? 'expand_more' : 'expand_less';
+        });
+        modal.appendChild(createElement('div', {className: 'modal-box backup-preview-modal'}, [
+            summaryToggle,
+            summaryContent,
             createElement('ul', {className: 'backup-preview-list'}, rows),
             createElement('div', {className: 'modal-actions'}, [closeButton, restoreButton])
         ]));
@@ -528,7 +549,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.71');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.72');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

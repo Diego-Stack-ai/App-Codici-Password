@@ -800,19 +800,65 @@ h3.settings-desc {
 }
 
 .backup-preview-modal {
+    display: flex;
+    flex-direction: column;
     width: min(92vw, 38rem);
     max-height: min(84dvh, 48rem);
+    overflow: hidden;
+}
+
+.backup-preview-toggle {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 100%;
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: 0.75rem;
+    background: transparent;
+    color: var(--primary-color);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.backup-preview-toggle:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.backup-preview-summary-content {
+    display: grid;
+    flex: 0 1 auto;
+    justify-items: center;
+    width: 100%;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.backup-preview-summary-content[hidden] {
+    display: none;
 }
 
 .backup-preview-list {
     display: grid;
+    flex: 1 1 auto;
     gap: 0.5rem;
     width: 100%;
-    max-height: 40dvh;
+    min-height: 5rem;
     margin: 1rem 0;
     padding: 0;
     overflow-y: auto;
     list-style: none;
+}
+
+.backup-preview-modal > .modal-actions {
+    flex: 0 0 auto;
+    width: 100%;
+    padding-top: 0.5rem;
+    background: var(--surface-glass);
 }
 
 .backup-preview-row {
