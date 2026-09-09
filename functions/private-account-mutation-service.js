@@ -12,6 +12,10 @@ function isCiphertext(value) {
   return typeof value === "string" && value.length >= 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(value);
 }
 
+function isCiphertextOrEmpty(value) {
+  return value === "" || isCiphertext(value);
+}
+
 function validatePrivateAccountMutation(input) {
   const operation = input || {};
   if (operation.schemaVersion !== 1 ||
@@ -26,8 +30,8 @@ function validatePrivateAccountMutation(input) {
   if (Object.keys(record).some(key => !ALLOWED_FIELDS.has(key)) ||
       record.type !== "account" || record.visibility !== "private" || record._encrypted !== true ||
       typeof record.nomeAccount !== "string" || !record.nomeAccount.trim() || record.nomeAccount.length > 240 ||
-      !isCiphertext(record.username) || !isCiphertext(record.account) ||
-      !isCiphertext(record.password) || !isCiphertext(record.note) ||
+      !isCiphertextOrEmpty(record.username) || !isCiphertextOrEmpty(record.account) ||
+      !isCiphertextOrEmpty(record.password) || !isCiphertextOrEmpty(record.note) ||
       record.isBanking === true || (Array.isArray(record.banking) && record.banking.length > 0) ||
       Object.keys(record.sharedWith || {}).length !== 0 ||
       (record.sharedWithUids || []).length !== 0 || Number(record.acceptedCount || 0) !== 0) {

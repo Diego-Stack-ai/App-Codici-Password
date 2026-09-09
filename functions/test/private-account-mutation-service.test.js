@@ -21,9 +21,14 @@ const valid = (overrides = {}) => ({
 
 test("accetta soltanto account privati con segreti gia cifrati", () => {
   assert.equal(validatePrivateAccountMutation(valid()).record.nomeAccount, "Prova M6");
+  assert.equal(validatePrivateAccountMutation({
+    ...valid(),
+    record: {...valid().record, account: "", note: ""}
+  }).record.account, "");
   for (const mutation of [
     valid({record: {...valid().record, visibility: "shared"}}),
     valid({record: {...valid().record, password: "segreto-in-chiaro"}}),
+    valid({record: {...valid().record, note: "nota-in-chiaro"}}),
     valid({record: {...valid().record, isBanking: true, banking: [{iban: "IT00"}]}}),
     valid({record: {...valid().record, sharedWithUids: ["guest"]}}),
     valid({recordId: "../account"})
