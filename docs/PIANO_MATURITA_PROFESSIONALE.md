@@ -256,7 +256,7 @@ M3 completata: le pagine canoniche sono state separate in orchestratori, viste c
 
 **Uscita:** release candidata documentata, misurata e ripristinabile.
 
-### Attività conclusiva dopo M10 — Lingue e riordino Impostazioni
+### Attività conclusiva dopo M10 — Lingue, Impostazioni e campi protetti
 
 Questa attività è un promemoria vincolante, ma **non deve essere anticipata durante le fasi M0–M10**. Una volta completato l’intero programma di maturazione:
 
@@ -266,9 +266,13 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 - riesaminare integralmente la pagina **Impostazioni**;
 - riordinare card e comandi in gruppi logici, coerenti e facilmente riconoscibili;
 - eliminare eventuali doppioni soltanto dopo averne verificato utilizzo e collegamenti;
+- censire in tutte le pagine ogni campo che presenta il lucchetto o un comando per occultare e mostrare dati sensibili;
+- verificare manualmente che ciascun lucchetto sia attivo e che nasconda il valore all'apertura, lo mostri soltanto su richiesta e torni a occultarlo correttamente;
+- controllare i campi protetti sia in visualizzazione sia nei form di inserimento e modifica, su account privati e aziendali;
+- registrare eventuali campi con icona presente ma comportamento assente, incoerente o non accessibile e correggerli prima della chiusura post-M10;
 - collaudare il risultato su iPhone, PC e in tutte le lingue supportate.
 
-**Uscita:** lingue coerenti e pagina Impostazioni organizzata definitivamente per gruppi, dopo la stabilizzazione tecnica M0–M10.
+**Uscita:** lingue coerenti, pagina Impostazioni organizzata definitivamente per gruppi e tutti i campi sensibili realmente protetti da lucchetti funzionanti, dopo la stabilizzazione tecnica M0–M10.
 
 ## 7. Regole di esecuzione
 
@@ -296,6 +300,6 @@ Questa attività è un promemoria vincolante, ma **non deve essere anticipata du
 | M8 | attiva: esportazione e ripristino cifrati completi nel runtime locale, compresi lettore in due passaggi, allegati e callable transazionale; mancano distribuzione e collaudo non produttivo |
 | M9 | attiva: laboratorio e UI locale su richiesta completati; provider violazioni resta disattivato in attesa di valutazione privacy e manca il collaudo fisico |
 | M10 | attiva: gate statici e procedura incidenti presenti; restano verifiche reali, matrice fisica e audit indipendente |
-| Post-M10 | revisione lingue e riordino per gruppi della pagina Impostazioni |
+| Post-M10 | revisione lingue, riordino della pagina Impostazioni e collaudo completo dei campi protetti dal lucchetto |
 
 Questo documento è la fonte principale del programma di maturazione. `GUIDA.md` resta il contratto tecnico e di sicurezza; `GUIDA_AGGIORNAMENTI.md` registra decisioni e avanzamento delle release.
