@@ -34,3 +34,28 @@ export function validateBackupFooter(footer, counts) {
     }
     return true;
 }
+
+function restoreRecordKey(record = {}) {
+    return [record.scope, record.id, record.companyId || '', record.accountId || ''].join(':');
+}
+
+function canonicalJson(value) {
+    if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+    if (value && typeof value === 'object') {
+        return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(',')}}`;
+    }
+    return JSON.stringify(value);
+}
+
+export function compareRestoreRecords(backupRecords, currentRecords) {
+    if (!Array.isArray(backupRecords) || !Array.isArray(currentRecords)) throw new Error('BACKUP_COMPARISON_INVALID');
+    const currentByKey = new Map(currentRecords.map(record => [restoreRecordKey(record), record]));
+    const entries = backupRecords.map((record, index) => {
+        const current = currentByKey.get(restoreRecordKey(record));
+        const status = !current ? 'missing' : canonicalJson(current.data) === canonicalJson(record.data) ? 'unchanged' : 'changed';
+        return {index, scope: record.scope, id: record.id, status};
+    });
+    const counts = {missing: 0, unchanged: 0, changed: 0};
+    entries.forEach(entry => { counts[entry.status] += 1; });
+    return {entries, counts};
+}

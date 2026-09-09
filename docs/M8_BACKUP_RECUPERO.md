@@ -10,6 +10,8 @@ Il formato runtime v2 usa righe cifrate AES-GCM concatenate da numero di sequenz
 
 Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso verificabile. Non viene abilitato implicitamente dalla Recovery Key.
 
+Il ripristino usa un **Vault fantasma** in sola lettura prima di qualsiasi scrittura: confronta il backup aperto in memoria con il Vault corrente e classifica ogni record come mancante, invariato o modificato. Collisioni e differenze producono un'anteprima navigabile e non cancellano né sovrascrivono dati. Recupero selettivo, unione e sostituzione protetta restano passaggi distinti da abilitare soltanto dopo questo confronto.
+
 ## Gate
 
 - [x] formato cifrato e versionato;

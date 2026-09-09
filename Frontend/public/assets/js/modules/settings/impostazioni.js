@@ -162,6 +162,10 @@ function setupEncryptedRestore(user) {
         try {
             const {prepareBackupRestore, executeBackupRestore} = await import('./backup-import-service.js');
             const plan = await prepareBackupRestore(file, user.uid, recoveryKey.trim().toLowerCase());
+            if (plan.collisionCount) {
+                await showBackupRestorePreview(plan);
+                return;
+            }
             const typed = await showInputModal(
                 'Conferma ripristino', '', 'RIPRISTINA',
                 `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Scrivi RIPRISTINA per applicare i dati.`
@@ -183,6 +187,44 @@ function setupEncryptedRestore(user) {
         } finally {
             button.disabled = false;
         }
+    });
+}
+
+function showBackupRestorePreview(plan) {
+    return new Promise(resolve => {
+        const modal = createElement('div', {className: 'modal-overlay'});
+        const closeButton = createElement('button', {
+            className: 'btn-modal btn-primary', textContent: 'Chiudi anteprima'
+        });
+        const labels = {missing: 'Mancante', unchanged: 'Invariato', changed: 'Modificato'};
+        const scopeLabels = {
+            profile: 'Profilo', settings: 'Impostazione', 'private-account': 'Account privato',
+            company: 'Azienda', 'company-account': 'Account aziendale', deadline: 'Scadenza',
+            contact: 'Contatto', 'profile-widget': 'Widget',
+            'private-account-attachment': 'Allegato privato', 'company-account-attachment': 'Allegato aziendale'
+        };
+        const rows = plan.comparison.entries.slice(0, 100).map(entry => createElement('li', {
+            className: `backup-preview-row backup-preview-${entry.status}`
+        }, [
+            createElement('span', {textContent: scopeLabels[entry.scope] || entry.scope}),
+            createElement('strong', {textContent: labels[entry.status]})
+        ]));
+        closeButton.addEventListener('click', () => {
+            modal.classList.remove('active');
+            setTimeout(() => { modal.remove(); resolve(); }, 300);
+        });
+        modal.appendChild(createElement('div', {className: 'modal-box backup-preview-modal'}, [
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'preview'}),
+            createElement('h3', {className: 'modal-title', textContent: 'Anteprima Vault di ripristino'}),
+            createElement('p', {
+                className: 'modal-text',
+                textContent: `Il backup è integro. Mancanti: ${plan.comparison.counts.missing}; modificati: ${plan.comparison.counts.changed}; invariati: ${plan.comparison.counts.unchanged}. Nessun dato è stato scritto.`
+            }),
+            createElement('ul', {className: 'backup-preview-list'}, rows),
+            createElement('div', {className: 'modal-actions'}, [closeButton])
+        ]));
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
     });
 }
 

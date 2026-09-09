@@ -1,7 +1,8 @@
 import {functions, storage} from '../../firebase-config.js?v=1.2.66';
 import {httpsCallable, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
-import {chunkRestoreRecords, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
+import {chunkRestoreRecords, compareRestoreRecords, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
+import {collectOwnerBackup} from './backup-export-service.js';
 
 const MAX_BACKUP_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024 + 1024;
@@ -83,6 +84,8 @@ export async function prepareBackupRestore(file, uid, recoveryKey) {
     });
     const chunks = chunkRestoreRecords(records);
     if (!chunks.length) throw new Error('BACKUP_EMPTY');
+    const current = await collectOwnerBackup(uid);
+    const comparison = compareRestoreRecords(records, current.records);
     const restoreChunk = httpsCallable(functions, 'restoreBackupChunk');
     const previews = [];
     for (let index = 0; index < chunks.length; index += 1) {
@@ -93,11 +96,14 @@ export async function prepareBackupRestore(file, uid, recoveryKey) {
         previews.push(response.data);
     }
     const collisions = previews.reduce((total, item) => total + Number(item?.collisionCount || 0), 0);
-    if (collisions) throw new Error(`BACKUP_COLLISIONS:${collisions}`);
-    return {file, uid, recoveryKey, header: scan.header, chunks, counts: scan.counts, storagePaths: [...storagePaths]};
+    return {
+        file, uid, recoveryKey, header: scan.header, chunks, counts: scan.counts,
+        storagePaths: [...storagePaths], comparison, collisionCount: collisions
+    };
 }
 
 export async function executeBackupRestore(plan) {
+    if (plan.collisionCount) throw new Error(`BACKUP_COLLISIONS:${plan.collisionCount}`);
     const restoreChunk = httpsCallable(functions, 'restoreBackupChunk');
     for (let index = 0; index < plan.chunks.length; index += 1) {
         const response = await restoreChunk({

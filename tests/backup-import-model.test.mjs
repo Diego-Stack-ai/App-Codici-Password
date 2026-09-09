@@ -24,3 +24,20 @@ test('footer e percorsi allegato devono corrispondere esattamente', async () => 
   assert.equal(api.validateRestoreStoragePath('users/owner/accounts/a/attachments/f', 'owner'), 'users/owner/accounts/a/attachments/f');
   assert.throws(() => api.validateRestoreStoragePath('users/other/file', 'owner'), /STORAGE_PATH/);
 });
+
+test('confronta il Vault fantasma senza modificare i record', async () => {
+  const api = await loadModel();
+  const backup = [
+    {scope: 'profile', id: 'u1', data: {name: 'Mario'}},
+    {scope: 'private-account', id: 'a1', data: {value: 1}},
+    {scope: 'private-account', id: 'a2', data: {value: 2}}
+  ];
+  const current = [
+    {scope: 'profile', id: 'u1', data: {name: 'Mario'}},
+    {scope: 'private-account', id: 'a1', data: {value: 9}}
+  ];
+  const result = api.compareRestoreRecords(backup, current);
+  assert.deepEqual(result.counts, {missing: 1, unchanged: 1, changed: 1});
+  assert.deepEqual(result.entries.map(item => item.status), ['unchanged', 'changed', 'missing']);
+  assert.equal(current[1].data.value, 9);
+});
