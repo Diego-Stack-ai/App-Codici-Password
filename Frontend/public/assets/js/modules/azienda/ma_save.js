@@ -7,7 +7,7 @@
  */
 
 import { state } from './ma_state.js';
-import { db, storage } from '../../firebase-config.js?v=1.2.77';
+import { db, storage } from '../../firebase-config.js?v=1.2.78';
 import { doc, updateDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';

@@ -92,3 +92,12 @@ export async function flushPrivateAccountPilot(options) {
         client.close();
     }
 }
+
+export async function discardPrivateAccountPilotOperation(options) {
+    const client = await createPrivateAccountPilotClient(options);
+    try {
+        await client.discard(options.operationId);
+    } finally {
+        client.close();
+    }
+}

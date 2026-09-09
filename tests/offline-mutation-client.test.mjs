@@ -7,7 +7,15 @@ const {createOfflineMutationClientCore, OFFLINE_MUTATION_WRITES_ENABLED} = await
 
 function dependencies() {
   const queued = []; const sent = []; let notified = 0; let closed = 0;
-  const queue = {enqueue: async operation => queued.push(operation), list: async () => queued, close: () => { closed += 1; }};
+  const queue = {
+    enqueue: async operation => queued.push(operation),
+    list: async () => queued,
+    remove: async operationId => {
+      const index = queued.findIndex(operation => operation.operationId === operationId);
+      if (index >= 0) queued.splice(index, 1);
+    },
+    close: () => { closed += 1; }
+  };
   return {
     queued, sent, get notified() { return notified; }, get closed() { return closed; },
     createQueue: async () => queue,
@@ -39,5 +47,7 @@ test('con flag esplicita accoda, notifica e inoltra una sola operazione dello st
   assert.equal(deps.queued.length, 1); assert.equal(deps.sent.length, 1); assert.equal(deps.notified, 1);
   assert.equal(states.at(-1).state, 'syncing');
   await assert.rejects(client.enqueue({...operation, uid: 'other'}), /SCOPE/);
+  await client.discard('op-1');
+  assert.equal(deps.queued.length, 0);
   client.close(); assert.equal(deps.closed, 2);
 });

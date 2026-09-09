@@ -27,6 +27,11 @@ export async function createOfflineMutationClientCore({
             return synchronizer.flush();
         },
         flush: () => synchronizer.flush(),
+        async discard(operationId) {
+            if (!operationId) throw new Error('OFFLINE_OPERATION_ID_REQUIRED');
+            await queue.remove(operationId);
+            channel.notify();
+        },
         close() { channel.close(); queue.close?.(); }
     };
 }

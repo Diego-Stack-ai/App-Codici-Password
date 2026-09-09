@@ -30,6 +30,70 @@ const rerender = () => renderBankAccounts(bankAccounts, rerender);
 // Utility per recupero rapido valori (evita ReferenceError)
 const get = (id) => document.getElementById(id)?.value.trim() || '';
 
+function showM6ConflictChoice() {
+    return new Promise(resolve => {
+        document.getElementById('m6-conflict-modal')?.remove();
+        const modal = createElement('div', {id: 'm6-conflict-modal', className: 'modal-overlay'});
+        const close = choice => {
+            modal.classList.remove('active');
+            setTimeout(() => { modal.remove(); resolve(choice); }, 300);
+        };
+        const keepServer = createElement('button', {
+            className: 'btn-modal btn-primary',
+            textContent: 'Mantieni server',
+            onclick: () => close('server')
+        });
+        const recoverLocal = createElement('button', {
+            className: 'btn-modal btn-secondary',
+            textContent: 'Recupera locale',
+            onclick: () => close('local')
+        });
+        const decideLater = createElement('button', {
+            className: 'btn-modal btn-secondary',
+            textContent: 'Decidi più tardi',
+            onclick: () => close(null)
+        });
+        setChildren(modal, createElement('div', {className: 'modal-box'}, [
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'sync_problem'}),
+            createElement('h3', {className: 'modal-title', textContent: 'Conflitto di sincronizzazione'}),
+            createElement('p', {
+                className: 'modal-text',
+                textContent: 'Questo account è stato modificato altrove. Mantieni il dato più recente del server oppure recupera la modifica offline nel modulo per controllarla prima di salvarla.'
+            }),
+            createElement('div', {className: 'modal-actions'}, [decideLater, recoverLocal, keepServer])
+        ]));
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
+        modal.addEventListener('click', event => { if (event.target === modal) close(null); });
+    });
+}
+
+async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision) {
+    const record = operation.record || {};
+    const decrypted = await Promise.all([
+        decrypt(record.username || '', vaultKeyMaterial),
+        decrypt(record.account || '', vaultKeyMaterial),
+        decrypt(record.password || '', vaultKeyMaterial),
+        decrypt(record.note || '', vaultKeyMaterial)
+    ]);
+    const values = {
+        'account-name': record.nomeAccount || '',
+        'account-username': decrypted[0] || '',
+        'account-code': decrypted[1] || '',
+        'account-password': decrypted[2] || '',
+        'account-url': record.url || '',
+        'account-note': decrypted[3] || '',
+        'ref-name': record.referenteNome || '',
+        'ref-phone': record.referenteTelefono || '',
+        'ref-mobile': record.referenteCellulare || ''
+    };
+    for (const [id, value] of Object.entries(values)) {
+        const input = document.getElementById(id);
+        if (input) input.value = value;
+    }
+    currentRevision = Number(serverRevision || currentRevision);
+}
+
 // --- INITIALIZATION ---
 /**
  * FORM ACCOUNT PRIVATO MODULE (V5.0 ADAPTER)
@@ -135,7 +199,26 @@ export async function initFormAccountPrivato(user) {
             });
             const outcome = result?.value || result;
             if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
-                showToast('Conflitto M6: il dato remoto è cambiato. Nessuna modifica è stata sovrascritta.', 'warning');
+                const operation = outcome?.operation || lastState?.operation;
+                const serverRevision = outcome?.result?.currentRevision || lastState?.result?.currentRevision;
+                showToast('Conflitto M6: nessuna modifica è stata sovrascritta.', 'warning');
+                if (operation?.operationId && operation.recordId === currentDocId) {
+                    const choice = await showM6ConflictChoice();
+                    if (choice === 'server' || choice === 'local') {
+                        await pilot.discardPrivateAccountPilotOperation({
+                            uid: currentUid,
+                            vaultKeyMaterial,
+                            operationId: operation.operationId
+                        });
+                    }
+                    if (choice === 'server') {
+                        showToast('Versione del server mantenuta.', 'success');
+                        setTimeout(() => window.location.replace('account_privati.html?m6refresh=1'), 600);
+                    } else if (choice === 'local') {
+                        await restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision);
+                        showToast('Modifica offline recuperata. Controllala e premi Salva per applicarla.', 'warning');
+                    }
+                }
             } else if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
                 showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
             } else if (Number(outcome?.completed || 0) > 0) {
