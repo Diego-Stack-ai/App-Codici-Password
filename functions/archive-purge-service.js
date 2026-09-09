@@ -39,22 +39,14 @@ function isSafeAttachmentPath(uid, command, storagePath) {
     !storagePath.includes("..") && storagePath.length <= 1024;
 }
 
-function toMillis(value) {
-  if (typeof value === "string") return Date.parse(value);
-  if (typeof value === "number") return value;
-  if (typeof value?.toMillis === "function") return value.toMillis();
-  return Number.NaN;
-}
-
-function purgeDecision({record, expectedRevision, confirmed, now = Date.now(), previous}) {
+function purgeDecision({record, expectedRevision, confirmed, previous}) {
   if (previous?.status === "purged") return {status: "purged", duplicate: true};
   if (previous?.status === "processing" && !record) return {status: "resume", duplicate: false};
   if (!record) return {status: "not-found", duplicate: false};
   if (record.isArchived !== true) return {status: "not-archived", duplicate: false};
   const currentRevision = Number.isInteger(record.revision) ? record.revision : 0;
   if (currentRevision !== expectedRevision) return {status: "conflict", duplicate: false, revision: currentRevision};
-  const retentionExpired = Number.isFinite(toMillis(record.purgeAfter)) && toMillis(record.purgeAfter) <= now;
-  if (!confirmed && !retentionExpired) return {status: "confirmation-required", duplicate: false};
+  if (!confirmed) return {status: "confirmation-required", duplicate: false};
   return {status: "ready", duplicate: false, revision: currentRevision};
 }
 

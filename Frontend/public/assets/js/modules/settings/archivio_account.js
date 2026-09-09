@@ -16,7 +16,6 @@ import {
     restoreArchivedAccount
 } from './archive-account-service.js';
 import { createUiState } from '../shared/ui-state-view.js';
-import {archiveRetention} from './archive-account-model.js';
 
 let allArchived = [];
 let currentUser = null;
@@ -202,12 +201,9 @@ function filterAndRender() {
                 textContent: acc.businessName
             }));
         }
-        const retention = archiveRetention(acc);
         infoCol.appendChild(createElement('span', {
             className: 'archive-badge-context',
-            textContent: retention.legacy
-                ? 'Archivio precedente · eliminazione solo manuale'
-                : retention.expired ? 'Conservazione terminata' : `${retention.daysRemaining} giorni nel cestino`
+            textContent: 'Conservato finché non lo elimini manualmente'
         }));
 
         // Content Wrapper

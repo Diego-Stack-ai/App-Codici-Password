@@ -25,11 +25,11 @@ test("costruisce il percorso aziendale senza accettare attraversamenti", () => {
   assert.equal(isSafeAttachmentPath("u1", command, "users/u2/aziende/c1/accounts/a1/attachments/file.pdf"), false);
 });
 
-test("la cancellazione richiede archivio, revisione e conferma o retention scaduta", () => {
+test("la cancellazione richiede sempre archivio, revisione e conferma manuale", () => {
   const base = {isArchived: true, revision: 3, purgeAfter: "2030-01-31T00:00:00.000Z"};
-  assert.equal(purgeDecision({record: base, expectedRevision: 3, confirmed: false, now: Date.parse("2030-01-01")}).status, "confirmation-required");
+  assert.equal(purgeDecision({record: base, expectedRevision: 3, confirmed: false}).status, "confirmation-required");
   assert.equal(purgeDecision({record: base, expectedRevision: 3, confirmed: true}).status, "ready");
-  assert.equal(purgeDecision({record: base, expectedRevision: 3, confirmed: false, now: Date.parse("2030-02-01")}).status, "ready");
+  assert.equal(purgeDecision({record: base, expectedRevision: 3, confirmed: false}).status, "confirmation-required");
   assert.equal(purgeDecision({record: base, expectedRevision: 2, confirmed: true}).status, "conflict");
   assert.equal(purgeDecision({record: {...base, isArchived: false}, expectedRevision: 3, confirmed: true}).status, "not-archived");
   assert.equal(purgeDecision({record: null, expectedRevision: 0, confirmed: true}).status, "not-found");
