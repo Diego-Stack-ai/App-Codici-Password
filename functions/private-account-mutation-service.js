@@ -28,6 +28,7 @@ function validatePrivateAccountMutation(input) {
       typeof record.nomeAccount !== "string" || !record.nomeAccount.trim() || record.nomeAccount.length > 240 ||
       !isCiphertext(record.username) || !isCiphertext(record.account) ||
       !isCiphertext(record.password) || !isCiphertext(record.note) ||
+      record.isBanking === true || (Array.isArray(record.banking) && record.banking.length > 0) ||
       Object.keys(record.sharedWith || {}).length !== 0 ||
       (record.sharedWithUids || []).length !== 0 || Number(record.acceptedCount || 0) !== 0) {
     throw new Error("PRIVATE_ACCOUNT_MUTATION_INVALID");

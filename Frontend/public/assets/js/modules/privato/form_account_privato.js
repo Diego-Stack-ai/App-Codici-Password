@@ -22,6 +22,7 @@ let profileEmailLinkDraft = null;
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
+let currentRevision = 0;
 
 // Re-render callback per banking-renderer.js
 const rerender = () => renderBankAccounts(bankAccounts, rerender);
@@ -88,6 +89,7 @@ export async function initFormAccountPrivato(user) {
                 currentUid,
                 currentDocId,
                 isEditing,
+                baseRevision: currentRevision,
                 profileEmailLinkDraft
             })
         }, [
@@ -121,6 +123,29 @@ export async function initFormAccountPrivato(user) {
         isEditing ? loadData() : Promise.resolve()
     ]);
 
+    if (new URLSearchParams(window.location.search).get('m6pilot') === '1' && navigator.onLine) {
+        try {
+            const vaultKeyMaterial = await ensureVaultKeyMaterial();
+            const pilot = await import('../data/private-account-offline-pilot.js');
+            let lastState = null;
+            const result = await pilot.flushPrivateAccountPilot({
+                uid: currentUid,
+                vaultKeyMaterial,
+                onState: state => { lastState = state; }
+            });
+            const outcome = result?.value || result;
+            if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
+                showToast('Conflitto M6: il dato remoto è cambiato. Nessuna modifica è stata sovrascritta.', 'warning');
+            } else if (Number(outcome?.completed || 0) > 0) {
+                showToast('Sincronizzazione M6 completata.', 'success');
+                setTimeout(() => window.location.replace('account_privati.html'), 800);
+            }
+        } catch (error) {
+            logError('M6PilotResume', error);
+            showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
+        }
+    }
+
     
 }
 
@@ -131,6 +156,7 @@ async function loadData() {
     try {
         const data = await getPrivateAccount(currentUid, currentDocId);
         if (!data) { showToast(t('account_not_found'), "error"); return; }
+        currentRevision = Number.isInteger(data.revision) ? data.revision : 0;
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario

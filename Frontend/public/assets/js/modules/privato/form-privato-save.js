@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.73';
+import { auth, db } from '../../firebase-config.js?v=1.2.74';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -14,6 +14,7 @@ export async function savePrivateAccount({
     currentUid,
     currentDocId,
     isEditing,
+    baseRevision = 0,
     profileEmailLinkDraft
 }) {
     const get = id => document.getElementById(id)?.value.trim() || '';
@@ -120,6 +121,46 @@ export async function savePrivateAccount({
     }
 
     try {
+        const pilotRequested = new URLSearchParams(window.location.search).get('m6pilot') === '1';
+        const pilotEligible = pilotRequested && !isSharingActive && !data.isBanking &&
+            data.type === 'account' && !profileEmailLinkDraft;
+        if (pilotEligible) {
+            const pilotModule = await import('../data/private-account-offline-pilot.js');
+            const accountRef = isEditing
+                ? doc(db, "users", currentUid, "accounts", currentDocId)
+                : doc(collection(db, "users", currentUid, "accounts"));
+            const pilotRecord = {...data};
+            if (!isEditing) pilotRecord.createdAt = new Date().toISOString();
+            let lastState = null;
+            const result = await pilotModule.enqueuePrivateAccountPilot({
+                uid: currentUid,
+                vaultKeyMaterial,
+                recordId: accountRef.id,
+                expectedRevision: baseRevision,
+                record: pilotRecord,
+                onState: state => { lastState = state; }
+            });
+            const outcome = result?.value || result;
+            if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
+                showToast('Conflitto: questo account è stato modificato su un altro dispositivo.', 'warning');
+                if (btnSave) btnSave.disabled = false;
+                return;
+            }
+            if (outcome?.status === 'offline') {
+                showToast('Modifica cifrata e conservata sul dispositivo. Sarà inviata quando torni online.', 'warning');
+                if (btnSave) btnSave.disabled = false;
+                return;
+            }
+            showToast(t('success_save'), "success");
+            setTimeout(() => {
+                const destination = isEditing
+                    ? `dettaglio_account_privato.html?id=${currentDocId}`
+                    : 'account_privati.html';
+                window.location.replace(destination);
+            }, 1000);
+            return;
+        }
+
         // --- ATOMIC TRANSACTION V3.1 ---
         await runTransaction(db, async (transaction) => {
             const accRef = isEditing ? doc(db, "users", currentUid, "accounts", currentDocId) : doc(collection(db, "users", currentUid, "accounts"));
@@ -289,4 +330,3 @@ export async function savePrivateAccount({
         if (btnSave) btnSave.disabled = false;
     }
 };
-

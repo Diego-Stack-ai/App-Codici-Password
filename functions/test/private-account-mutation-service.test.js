@@ -24,6 +24,7 @@ test("accetta soltanto account privati con segreti gia cifrati", () => {
   for (const mutation of [
     valid({record: {...valid().record, visibility: "shared"}}),
     valid({record: {...valid().record, password: "segreto-in-chiaro"}}),
+    valid({record: {...valid().record, isBanking: true, banking: [{iban: "IT00"}]}}),
     valid({record: {...valid().record, sharedWithUids: ["guest"]}}),
     valid({recordId: "../account"})
   ]) assert.throws(() => validatePrivateAccountMutation(mutation), /INVALID/);
