@@ -10,7 +10,7 @@ Il formato runtime v2 usa righe cifrate AES-GCM concatenate da numero di sequenz
 
 Emergency Access è separato: richiederebbe delegato, attesa, revoca e consenso verificabile. Non viene abilitato implicitamente dalla Recovery Key.
 
-Il ripristino usa un **Vault fantasma** in sola lettura prima di qualsiasi scrittura: confronta il backup aperto in memoria con il Vault corrente e classifica ogni record come mancante, invariato o modificato. Collisioni e differenze producono un'anteprima navigabile e non cancellano né sovrascrivono dati. Recupero selettivo, unione e sostituzione protetta restano passaggi distinti da abilitare soltanto dopo questo confronto.
+Il ripristino usa un **Vault fantasma** in sola lettura prima di qualsiasi scrittura: confronta il backup aperto in memoria con il Vault corrente e classifica ogni record come mancante, invariato o modificato. L'anteprima mostra denominazioni comprensibili senza esporre credenziali, collega gli allegati al relativo account e non scrive dati. Gli elementi mancanti sono preselezionati; quelli modificati richiedono una scelta manuale e una conferma digitata prima della sostituzione. Gli invariati non sono selezionabili.
 
 ## Gate
 
@@ -25,9 +25,9 @@ Il ripristino usa un **Vault fantasma** in sola lettura prima di qualsiasi scrit
 - [x] formato runtime v2 incrementale, autenticato e concatenato implementato e verificato;
 - [x] esportazione runtime integrata con i dati e gli allegati reali; usa scrittura progressiva quando il browser espone File System Access e fallback Blob su iOS; file `.cpbackup`, Recovery Key a visualizzazione singola e conferma di salvataggio verificati fisicamente il 09/09/2026 con account di prova;
 - [x] comando Backup cifrato integrato nelle Impostazioni con caricamento differito, scelta esplicita del file e Recovery Key mostrata una sola volta con conferma obbligatoria di salvataggio;
-- [~] callable transazionale `restoreBackupChunk` integrata localmente con anteprima collisioni, allowlist, conversione tipi, limiti, idempotenza e App Check; manca il collegamento del lettore file e la distribuzione;
-- [~] lettore file in due passaggi e UI di ripristino integrati localmente: verifica completa e anteprima collisioni precedono la conferma digitata; allegati trasferiti soltanto dopo i chunk record; manca distribuzione e collaudo fisico;
+- [x] callable transazionale `restoreBackupChunk` distribuita con anteprima collisioni, allowlist, conversione tipi, limiti, idempotenza, App Check e sostituzione selettiva confermata;
+- [x] lettore file in due passaggi e UI di ripristino distribuiti: verifica completa, nomi leggibili e anteprima precedono la selezione e la conferma digitata; allegati trasferiti soltanto per gli elementi scelti;
 - [x] apertura fisica del `.cpbackup` con Recovery Key e anteprima server verificate il 09/09/2026: il Vault attivo ha prodotto il blocco collisioni previsto senza modificare dati;
-- [ ] collaudo fisico esporta/cancella/ripristina su copia non produttiva.
+- [x] collaudo fisico esporta/cancella/modifica/ripristina su account di prova completato il 09/09/2026: 3 elementi mancanti e 2 modificati sono stati riconosciuti e recuperati, compresi account privato, account aziendale, profilo/codice fiscale e allegato; il secondo confronto li ha classificati invariati.
 
-M8 resta attiva fino alla prova reale di ripristino.
+M8 è chiusa il 09/09/2026. La release 1.2.70 aggiunge il ricaricamento automatico della vista dopo il recupero; la relativa prova visiva resta un controllo di regressione e non rimette in discussione l'integrità del ripristino già verificato.
