@@ -19,8 +19,8 @@ Il laboratorio `experiments/history-recovery` dimostra retention, ripristino sen
 - [x] audit con allowlist e senza segreti;
 - [x] cronologia limitata;
 - [x] Archivio Account riutilizzato come UI cestino; i nuovi elementi ricevono data e revisione, senza scadenza automatica; anche gli eventuali record con il vecchio `purgeAfter` richiedono la cancellazione manuale;
-- [x] Rules candidate verificate e callable atomiche/idempotenti implementate, non distribuite;
-- [x] conferma forte della UI collegata alla callable backend `purgeArchivedAccount`, con controllo archivio/revisione, ripresa idempotente, rimozione degli allegati confinata allo UID e scollegamento delle email del Profilo; implementazione locale non ancora distribuita;
-- [x] archiviazione e ripristino verificati fisicamente il 09/09/2026 con un account di prova; permanenza e cancellazione definitiva manuale restano da verificare dopo la distribuzione del nuovo contratto.
+- [x] Rules verificate e callable atomica/idempotente distribuita;
+- [x] conferma forte della UI collegata alla callable backend `purgeArchivedAccount`, con controllo archivio/revisione, ripresa idempotente, rimozione degli allegati confinata allo UID e scollegamento delle email del Profilo;
+- [x] archiviazione, ripristino, permanenza senza scadenza automatica e cancellazione definitiva manuale verificati fisicamente il 09/09/2026 con account di prova dopo la distribuzione del nuovo contratto.
 
-M7 resta attiva fino all'integrazione verificata.
+M7 è completata e certificata il 09/09/2026.
