@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.68';
+import { auth, db } from '../../firebase-config.js?v=1.2.69';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -158,12 +158,31 @@ function setupEncryptedRestore(user) {
         );
         if (!recoveryKey) return;
         button.disabled = true;
-        showToast('Verifica completa del backup in corso…', 'info');
+        let working = showBackupWorking('Verifica completa del backup…', 'Il file viene aperto e controllato voce per voce. Non chiudere la pagina.');
         try {
             const {prepareBackupRestore, executeBackupRestore} = await import('./backup-import-service.js');
             const plan = await prepareBackupRestore(file, user.uid, recoveryKey.trim().toLowerCase());
+            working.close();
+            working = null;
             if (plan.collisionCount) {
-                await showBackupRestorePreview(plan);
+                const selectedIndexes = await showBackupRestorePreview(plan);
+                if (!selectedIndexes.length) return;
+                const selectedEntries = plan.comparison.entries.filter(entry => selectedIndexes.includes(entry.index));
+                const changedCount = selectedEntries.filter(entry => entry.status === 'changed').length;
+                const typed = await showInputModal(
+                    'Conferma ripristino selettivo', '', 'RIPRISTINA',
+                    `${selectedIndexes.length} elementi selezionati${changedCount ? `, di cui ${changedCount} sostituiranno la versione attuale` : ''}. Scrivi RIPRISTINA per continuare.`
+                );
+                if (typed !== 'RIPRISTINA') return;
+                working = showBackupWorking('Ripristino selettivo in corso…', 'Sto recuperando gli elementi scelti. Non chiudere la pagina.');
+                const result = await executeBackupRestore(plan, selectedIndexes);
+                working.close();
+                working = null;
+                await showConfirmModal(
+                    'Ripristino completato',
+                    `${result.recordCount} elementi e ${result.attachmentCount} file ripristinati. Riapri l’app per rileggere i dati.`,
+                    'Ricarica', 'Più tardi'
+                ).then(reload => { if (reload) window.location.reload(); });
                 return;
             }
             const typed = await showInputModal(
@@ -171,8 +190,10 @@ function setupEncryptedRestore(user) {
                 `File integro: ${plan.counts.records} record e ${plan.counts.attachments} allegati. Nessuna collisione rilevata. Scrivi RIPRISTINA per applicare i dati.`
             );
             if (typed !== 'RIPRISTINA') return;
-            showToast('Ripristino in corso. Non chiudere la pagina.', 'info');
+            working = showBackupWorking('Ripristino in corso…', 'Sto recuperando record e allegati. Non chiudere la pagina.');
             const result = await executeBackupRestore(plan);
+            working.close();
+            working = null;
             await showConfirmModal(
                 'Ripristino completato',
                 `${result.recordCount} record e ${result.attachmentCount} allegati ripristinati. Riapri l’app per rileggere i dati.`,
@@ -185,16 +206,46 @@ function setupEncryptedRestore(user) {
                 ? 'Ripristino bloccato: nel Vault esistono già record con gli stessi identificativi.'
                 : 'Backup non valido, incompleto o non applicabile.', 'error');
         } finally {
+            working?.close();
             button.disabled = false;
         }
     });
+}
+
+function showBackupWorking(title, message) {
+    const modal = createElement('div', {
+        className: 'modal-overlay backup-working-overlay', role: 'alertdialog',
+        'aria-modal': 'true', 'aria-live': 'polite', 'aria-busy': 'true'
+    });
+    modal.appendChild(createElement('div', {className: 'modal-box backup-working-modal'}, [
+        createElement('span', {
+            className: 'material-symbols-outlined modal-icon animate-spin icon-accent-blue',
+            textContent: 'progress_activity', 'aria-hidden': 'true'
+        }),
+        createElement('h3', {className: 'modal-title', textContent: title}),
+        createElement('p', {className: 'modal-text', textContent: message})
+    ]));
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add('active'));
+    let closed = false;
+    return {
+        close() {
+            if (closed) return;
+            closed = true;
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    };
 }
 
 function showBackupRestorePreview(plan) {
     return new Promise(resolve => {
         const modal = createElement('div', {className: 'modal-overlay'});
         const closeButton = createElement('button', {
-            className: 'btn-modal btn-primary', textContent: 'Chiudi anteprima'
+            className: 'btn-modal btn-secondary', textContent: 'Chiudi anteprima'
+        });
+        const restoreButton = createElement('button', {
+            className: 'btn-modal btn-primary', textContent: 'Ripristina selezionati'
         });
         const labels = {missing: 'Mancante', unchanged: 'Invariato', changed: 'Modificato'};
         const scopeLabels = {
@@ -203,25 +254,47 @@ function showBackupRestorePreview(plan) {
             contact: 'Contatto', 'profile-widget': 'Widget',
             'private-account-attachment': 'Allegato privato', 'company-account-attachment': 'Allegato aziendale'
         };
-        const rows = plan.comparison.entries.slice(0, 100).map(entry => createElement('li', {
-            className: `backup-preview-row backup-preview-${entry.status}`
-        }, [
-            createElement('span', {textContent: scopeLabels[entry.scope] || entry.scope}),
-            createElement('strong', {textContent: labels[entry.status]})
-        ]));
-        closeButton.addEventListener('click', () => {
-            modal.classList.remove('active');
-            setTimeout(() => { modal.remove(); resolve(); }, 300);
+        const selectable = [];
+        const rows = plan.comparison.entries.slice(0, 100).map(entry => {
+            const checkbox = createElement('input', {
+                type: 'checkbox', checked: entry.status === 'missing', disabled: entry.status === 'unchanged',
+                'aria-label': `Seleziona ${entry.description}`
+            });
+            if (entry.status !== 'unchanged') selectable.push({entry, checkbox});
+            const details = createElement('span', {className: 'backup-preview-details'}, [
+                createElement('span', {textContent: scopeLabels[entry.scope] || entry.scope}),
+                createElement('small', {textContent: entry.description})
+            ]);
+            return createElement('li', {className: `backup-preview-row backup-preview-${entry.status}`}, [
+                checkbox,
+                details,
+                createElement('strong', {textContent: labels[entry.status]})
+            ]);
         });
+        const close = result => {
+            modal.classList.remove('active');
+            setTimeout(() => { modal.remove(); resolve(result); }, 300);
+        };
+        const updateRestoreButton = () => {
+            const count = selectable.filter(item => item.checkbox.checked).length;
+            restoreButton.disabled = count === 0;
+            restoreButton.textContent = count ? `Ripristina selezionati (${count})` : 'Ripristina selezionati';
+        };
+        selectable.forEach(item => item.checkbox.addEventListener('change', updateRestoreButton));
+        closeButton.addEventListener('click', () => close([]));
+        restoreButton.addEventListener('click', () => close(selectable
+            .filter(item => item.checkbox.checked)
+            .map(item => item.entry.index)));
+        updateRestoreButton();
         modal.appendChild(createElement('div', {className: 'modal-box backup-preview-modal'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'preview'}),
             createElement('h3', {className: 'modal-title', textContent: 'Anteprima Vault di ripristino'}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: `Il backup è integro. Mancanti: ${plan.comparison.counts.missing}; modificati: ${plan.comparison.counts.changed}; invariati: ${plan.comparison.counts.unchanged}. Nessun dato è stato scritto.`
+                textContent: `Il backup è integro. Mancanti: ${plan.comparison.counts.missing}; modificati: ${plan.comparison.counts.changed}; invariati: ${plan.comparison.counts.unchanged}. Seleziona cosa recuperare: i mancanti sono già selezionati, i modificati no.`
             }),
             createElement('ul', {className: 'backup-preview-list'}, rows),
-            createElement('div', {className: 'modal-actions'}, [closeButton])
+            createElement('div', {className: 'modal-actions'}, [closeButton, restoreButton])
         ]));
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('active'), 10);
@@ -444,7 +517,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.68');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.69');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

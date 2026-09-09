@@ -1,4 +1,4 @@
-import {functions, storage} from '../../firebase-config.js?v=1.2.68';
+import {functions, storage} from '../../firebase-config.js?v=1.2.69';
 import {httpsCallable, ref, uploadBytes} from '/assets/js/vendor/firebase-runtime.js';
 import {decryptBackupEntry, deriveBackupKey, parseBackupLine} from './backup-crypto.js';
 import {chunkRestoreRecords, compareRestoreRecords, validateBackupFooter, validateRestoreStoragePath} from './backup-import-model.js';
@@ -97,26 +97,42 @@ export async function prepareBackupRestore(file, uid, recoveryKey) {
     }
     const collisions = previews.reduce((total, item) => total + Number(item?.collisionCount || 0), 0);
     return {
-        file, uid, recoveryKey, header: scan.header, chunks, counts: scan.counts,
+        file, uid, recoveryKey, header: scan.header, records, chunks, counts: scan.counts,
         storagePaths: [...storagePaths], comparison, collisionCount: collisions
     };
 }
 
-export async function executeBackupRestore(plan) {
-    if (plan.collisionCount) throw new Error(`BACKUP_COLLISIONS:${plan.collisionCount}`);
+export async function executeBackupRestore(plan, selectedIndexes = null) {
+    const selective = Array.isArray(selectedIndexes);
+    const selected = selective ? new Set(selectedIndexes) : null;
+    const selectedEntries = selective
+        ? plan.comparison.entries.filter(entry => selected.has(entry.index) && entry.status !== 'unchanged')
+        : plan.comparison.entries;
+    if (!selectedEntries.length) throw new Error('BACKUP_RESTORE_NOTHING_SELECTED');
+    if (!selective && plan.collisionCount) throw new Error(`BACKUP_COLLISIONS:${plan.collisionCount}`);
+    const records = selective ? selectedEntries.map(entry => plan.records[entry.index]) : plan.records;
+    const chunks = chunkRestoreRecords(records);
+    const overwritesExisting = selectedEntries.some(entry => entry.status === 'changed');
+    const executionId = crypto.randomUUID();
     const restoreChunk = httpsCallable(functions, 'restoreBackupChunk');
-    for (let index = 0; index < plan.chunks.length; index += 1) {
+    for (let index = 0; index < chunks.length; index += 1) {
         const response = await restoreChunk({
-            operationId: operationId(plan.header.backupId, index), backupId: plan.header.backupId,
-            chunkIndex: index, chunkCount: plan.chunks.length, mode: 'apply',
-            confirmation: 'RESTORE_VALIDATED', records: plan.chunks[index]
+            operationId: `restore:${plan.header.backupId}:${executionId}:${index}`, backupId: plan.header.backupId,
+            chunkIndex: index, chunkCount: chunks.length, mode: 'apply', overwriteExisting: overwritesExisting,
+            confirmation: overwritesExisting ? 'RESTORE_SELECTED_OVERWRITE' : 'RESTORE_VALIDATED', records: chunks[index]
         });
         if (!['applied'].includes(response.data?.status)) throw new Error('BACKUP_RESTORE_CHUNK_FAILED');
     }
+    const selectedStoragePaths = new Set(records
+        .filter(record => record.scope === 'private-account-attachment' || record.scope === 'company-account-attachment')
+        .map(record => record.data?.storagePath)
+        .filter(Boolean)
+        .map(storagePath => validateRestoreStoragePath(storagePath, plan.uid)));
     let uploaded = 0;
     await scanBackup(plan.file, plan.uid, plan.recoveryKey, async entry => {
         if (entry.kind !== 'attachment') return;
         const storagePath = validateRestoreStoragePath(entry.storagePath, plan.uid);
+        if (selective && !selectedStoragePaths.has(storagePath)) return;
         const bytes = base64ToBytes(entry.content);
         if (!bytes.length || bytes.byteLength > MAX_ATTACHMENT_BYTES) throw new Error('BACKUP_ATTACHMENT_SIZE_INVALID');
         await uploadBytes(ref(storage, storagePath), bytes, {
@@ -124,6 +140,7 @@ export async function executeBackupRestore(plan) {
         });
         uploaded += 1;
     });
-    if (uploaded !== plan.counts.attachments) throw new Error('BACKUP_ATTACHMENT_COUNT_INVALID');
-    return {recordCount: plan.counts.records, attachmentCount: uploaded};
+    const expectedAttachments = selective ? selectedStoragePaths.size : plan.counts.attachments;
+    if (uploaded !== expectedAttachments) throw new Error('BACKUP_ATTACHMENT_COUNT_INVALID');
+    return {recordCount: records.length, attachmentCount: uploaded};
 }

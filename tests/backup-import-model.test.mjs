@@ -39,5 +39,17 @@ test('confronta il Vault fantasma senza modificare i record', async () => {
   const result = api.compareRestoreRecords(backup, current);
   assert.deepEqual(result.counts, {missing: 1, unchanged: 1, changed: 1});
   assert.deepEqual(result.entries.map(item => item.status), ['unchanged', 'changed', 'missing']);
+  assert.deepEqual(result.entries.map(item => item.description), ['Profilo utente', 'Account senza nome', 'Account senza nome']);
   assert.equal(current[1].data.value, 9);
+});
+
+test('descrive account, aziende e allegati senza esporre credenziali', async () => {
+  const api = await loadModel();
+  const descriptions = api.describeRestoreRecords([
+    {scope: 'company', id: 'c1', data: {ragioneSociale: 'Azienda Alfa'}},
+    {scope: 'company-account', companyId: 'c1', id: 'a1', data: {nomeAccount: 'Portale', password: 'segreta'}},
+    {scope: 'company-account-attachment', companyId: 'c1', accountId: 'a1', id: 'f1', data: {originalName: 'contratto.pdf'}}
+  ]);
+  assert.deepEqual(descriptions, ['Azienda Alfa', 'Portale — Azienda Alfa', 'contratto.pdf — Portale']);
+  assert.equal(descriptions.join(' ').includes('segreta'), false);
 });

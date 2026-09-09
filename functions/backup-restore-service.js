@@ -79,7 +79,10 @@ function validateRestoreChunk(input = {}, uid) {
   if (!mode) throw new Error("BACKUP_MODE_INVALID");
   return {
     operationId, backupId, chunkIndex, chunkCount, records, mode,
-    confirmed: input.confirmation === "RESTORE_VALIDATED"
+    overwriteExisting: input.overwriteExisting === true,
+    overwriteConfirmed: input.confirmation === "RESTORE_SELECTED_OVERWRITE",
+    confirmed: input.confirmation === "RESTORE_VALIDATED" ||
+      input.confirmation === "RESTORE_SELECTED_OVERWRITE"
   };
 }
 
@@ -98,9 +101,11 @@ function decodeFirestoreValue(value, types = {}) {
   return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, decodeFirestoreValue(item, types)]));
 }
 
-function restoreChunkDecision({previous, collisions = []}) {
+function restoreChunkDecision({previous, collisions = [], overwriteExisting = false}) {
   if (previous?.status === "applied") return {status: "applied", duplicate: true};
-  if (collisions.length) return {status: "collision", duplicate: false, collisionCount: collisions.length};
+  if (collisions.length && !overwriteExisting) {
+    return {status: "collision", duplicate: false, collisionCount: collisions.length};
+  }
   return {status: "ready", duplicate: false};
 }
 

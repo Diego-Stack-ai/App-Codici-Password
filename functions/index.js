@@ -231,7 +231,11 @@ exports.restoreBackupChunk = onCall(
                 .map((snapshot, index) => snapshot.exists && command.records[index].path !== `users/${request.auth.uid}`
                     ? command.records[index].path : null)
                 .filter(Boolean);
-            const decision = restoreChunkDecision({previous: previous.exists ? previous.data() : null, collisions});
+            const decision = restoreChunkDecision({
+                previous: previous.exists ? previous.data() : null,
+                collisions,
+                overwriteExisting: command.mode === "apply" && command.overwriteExisting && command.overwriteConfirmed
+            });
             if (decision.duplicate || command.mode === "preview") return decision;
             if (!command.confirmed) throw new HttpsError("failed-precondition", "Conferma ripristino mancante.");
             if (decision.status !== "ready") return decision;

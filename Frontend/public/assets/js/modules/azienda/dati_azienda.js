@@ -4,7 +4,7 @@
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.68';
+import { auth, db } from '../../firebase-config.js?v=1.2.69';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';

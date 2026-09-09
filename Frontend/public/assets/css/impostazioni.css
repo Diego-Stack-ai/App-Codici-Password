@@ -826,9 +826,44 @@ h3.settings-desc {
     background: var(--surface-glass);
 }
 
+.backup-preview-row input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--primary-color);
+}
+
+.backup-preview-details {
+    display: grid;
+    flex: 1 1 auto;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.backup-preview-details small {
+    overflow: hidden;
+    color: var(--text-secondary);
+    font: var(--font-caption);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .backup-preview-missing strong { color: var(--success-color, #059669); }
 .backup-preview-changed strong { color: var(--warning-color, #d97706); }
 .backup-preview-unchanged strong { color: var(--text-secondary); }
+
+.backup-working-overlay {
+    cursor: wait;
+}
+
+.backup-working-modal {
+    width: min(88vw, 28rem);
+    text-align: center;
+}
+
+.backup-working-modal .modal-icon {
+    display: inline-block;
+}
 
 .credential-health-modal {
     width: min(92vw, 38rem);
