@@ -3,11 +3,11 @@
  * Il contesto viene inizializzato una sola volta dalla pagina principale.
  */
 
-import { db, storage } from '../../firebase-config.js?v=1.2.80';
+import { db, storage } from '../../firebase-config.js?v=1.2.81';
 import { doc, collection, addDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getBytes } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
-import { showToast, showConfirmModal } from '../../ui-core-v129.js';
+import { showAlertModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { createStorageObjectName, decryptAttachmentBytes, encryptAttachmentFile, openDecryptedAttachment, openExternalUrl, validateAttachmentFile } from '../shared/attachment-security.js';
@@ -61,6 +61,15 @@ export function closeSourceSelector() {
 export async function handleFileUpload(input) {
     closeSourceSelector();
     if (readOnly) return;
+
+    if (!navigator.onLine) {
+        await showAlertModal(
+            'CONNESSIONE NECESSARIA',
+            'Per caricare un allegato devi essere online. Nessun file è stato modificato.'
+        );
+        input.value = '';
+        return;
+    }
 
     const file = input.files[0];
     if (!file) return;
@@ -197,6 +206,13 @@ async function openAttachment(attachment) {
 
 async function deleteAttachment(attachment) {
     if (readOnly) return;
+    if (!navigator.onLine) {
+        await showAlertModal(
+            'CONNESSIONE NECESSARIA',
+            'Per eliminare un allegato devi essere online. Il file resta conservato.'
+        );
+        return;
+    }
     const confirmed = await showConfirmModal(
         'ELIMINA',
         `Sei sicuro di voler eliminare l'allegato ${attachment.name}?`,

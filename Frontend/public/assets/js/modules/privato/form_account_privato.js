@@ -23,6 +23,7 @@ let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
 let currentRevision = 0;
+let hasLinkedProfileField = false;
 
 // Re-render callback per banking-renderer.js
 const rerender = () => renderBankAccounts(bankAccounts, rerender);
@@ -154,7 +155,8 @@ export async function initFormAccountPrivato(user) {
                 currentDocId,
                 isEditing,
                 baseRevision: currentRevision,
-                profileEmailLinkDraft
+                profileEmailLinkDraft,
+                hasLinkedProfileField
             })
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
@@ -187,7 +189,7 @@ export async function initFormAccountPrivato(user) {
         isEditing ? loadData() : Promise.resolve()
     ]);
 
-    if (new URLSearchParams(window.location.search).get('m6pilot') === '1' && navigator.onLine) {
+    if (navigator.onLine) {
         try {
             const vaultKeyMaterial = await ensureVaultKeyMaterial();
             const pilot = await import('../data/private-account-offline-pilot.js');
@@ -251,6 +253,7 @@ async function loadData() {
         const data = await getPrivateAccount(currentUid, currentDocId);
         if (!data) { showToast(t('account_not_found'), "error"); return; }
         currentRevision = Number.isInteger(data.revision) ? data.revision : 0;
+        hasLinkedProfileField = Boolean(data.linkedProfileField?.type && data.linkedProfileField?.id);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario

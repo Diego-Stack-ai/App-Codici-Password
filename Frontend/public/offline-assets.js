@@ -112,6 +112,7 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/privato/dettaglio_account_privato.js",
   "assets/js/modules/privato/form-privato-save.js",
   "assets/js/modules/privato/form_account_privato.js",
+  "assets/js/modules/privato/private-account-offline-policy.js",
   "assets/js/modules/privato/profile-model.js",
   "assets/js/modules/privato/profilo-actions.js",
   "assets/js/modules/privato/profilo-addresses-docs.js",

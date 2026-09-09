@@ -27,11 +27,14 @@ function validatePrivateAccountMutation(input) {
     throw new Error("PRIVATE_ACCOUNT_MUTATION_INVALID");
   }
   const record = operation.record;
+  const isAccount = record.type === "account";
+  const isPrivateMemo = record.type === "memo";
   if (Object.keys(record).some(key => !ALLOWED_FIELDS.has(key)) ||
-      record.type !== "account" || record.visibility !== "private" || record._encrypted !== true ||
+      (!isAccount && !isPrivateMemo) || record.visibility !== "private" || record._encrypted !== true ||
       typeof record.nomeAccount !== "string" || !record.nomeAccount.trim() || record.nomeAccount.length > 240 ||
       !isCiphertextOrEmpty(record.username) || !isCiphertextOrEmpty(record.account) ||
       !isCiphertextOrEmpty(record.password) || !isCiphertextOrEmpty(record.note) ||
+      (isPrivateMemo && [record.username, record.account, record.password].some(value => value !== "")) ||
       record.isBanking === true || (Array.isArray(record.banking) && record.banking.length > 0) ||
       Object.keys(record.sharedWith || {}).length !== 0 ||
       (record.sharedWithUids || []).length !== 0 || Number(record.acceptedCount || 0) !== 0) {

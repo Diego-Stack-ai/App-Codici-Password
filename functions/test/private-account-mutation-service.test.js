@@ -35,6 +35,26 @@ test("accetta soltanto account privati con segreti gia cifrati", () => {
   ]) assert.throws(() => validatePrivateAccountMutation(mutation), /INVALID/);
 });
 
+test("accetta memorandum privati isolati e rifiuta credenziali o condivisioni", () => {
+  const memo = valid({record: {
+    ...valid().record,
+    type: "memo",
+    username: "",
+    account: "",
+    password: "",
+    isExplicitMemo: true
+  }});
+  assert.equal(validatePrivateAccountMutation(memo).record.type, "memo");
+  assert.throws(() => validatePrivateAccountMutation({
+    ...memo,
+    record: {...memo.record, password: cipher}
+  }), /INVALID/);
+  assert.throws(() => validatePrivateAccountMutation({
+    ...memo,
+    record: {...memo.record, visibility: "shared"}
+  }), /INVALID/);
+});
+
 test("creazione, aggiornamento, conflitto e retry sono deterministici", () => {
   assert.deepEqual(privateAccountMutationDecision({exists: false, currentRevision: 0, expectedRevision: 0}),
     {status: "applied", revision: 1, duplicate: false});

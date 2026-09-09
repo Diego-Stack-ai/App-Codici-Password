@@ -49,5 +49,13 @@ Il laboratorio `experiments/offline-sync` dimostra cifratura e autenticità dell
 - [x] secondo salvataggio bloccato dopo che la modifica offline è già stata accodata;
 - [x] collaudo fisico Chrome–Edge: una revisione offline obsoleta viene bloccata dopo una modifica online più recente, senza sovrascrittura silenziosa;
 - [x] risoluzione visiva collaudata: mantenimento server e recupero locale nel modulo avvengono soltanto su scelta esplicita dell'utente;
+- [x] collaudo fisico iPhone: modifica cifrata conservata offline, sincronizzata al ritorno della connessione e mostrata nella lista senza refresh manuale;
+- [x] cutover controllato: il normale salvataggio usa M6 per Account privati e memorandum privati isolati; condivisioni, banca e collegamenti Profilo richiedono la connessione;
+
+## Perimetro del primo cutover
+
+M6 è attivo per creazione e modifica di Account privati semplici e memorandum privati isolati. Gli allegati già associati restano conservati e continuano a seguire il proprio flusso stabile: il cutover non accoda, modifica o cancella allegati. Account e memorandum condivisi, dati bancari e collegamenti diretti ai campi Profilo possono essere modificati soltanto online e saranno migrati soltanto con collaudi dedicati.
+
+La consultazione offline resta distinta dalla modifica offline. Il prossimo gate fisico verifica in particolare l'apertura senza rete dei dati bancari già memorizzati. Per gli allegati, la lista può provenire dalla cache Firestore, mentre il contenuto cifrato su Storage non è garantito offline finché non sarà introdotta una cache locale esplicita con limiti di spazio.
 
 M6 resta attiva finché runtime e backend non dimostrano che nessuna scrittura può essere persa o sovrascritta silenziosamente.

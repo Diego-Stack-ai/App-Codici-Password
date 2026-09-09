@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.80';
+import { db } from '../../firebase-config.js?v=1.2.81';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
@@ -30,15 +30,6 @@ let ownerId = null;
 let isReadOnly = false;
 let accountData = null;
 let requireServerRefresh = false;
-
-// Gate temporaneo per la certificazione fisica M6 su iPhone.
-// Mantiene il pilota confinato al solo record di prova concordato.
-const M6_PHYSICAL_TEST_RECORD_ID = 'YHulXmizhEcUjCtDIHbF';
-
-function privateAccountFormUrl() {
-    const pilotQuery = currentId === M6_PHYSICAL_TEST_RECORD_ID ? '&m6pilot=1' : '';
-    return `form_account_privato.html?id=${encodeURIComponent(currentId)}${pilotQuery}`;
-}
 
 // --- INITIALIZATION ---
 /**
@@ -76,7 +67,7 @@ export async function initDettaglioAccountPrivato(user) {
                 title: t('edit') || 'Modifica',
                 onclick: () => {
                     LOG('[dettaglio] Navigating to form with ID:', currentId);
-                    window.location.href = privateAccountFormUrl();
+                    window.location.href = `form_account_privato.html?id=${encodeURIComponent(currentId)}`;
                 }
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
@@ -212,7 +203,7 @@ function renderAccount(acc) {
         isReadOnly,
         promptText: t('banking_hint'),
         onAddBanking: () => {
-            window.location.href = privateAccountFormUrl();
+            window.location.href = `form_account_privato.html?id=${encodeURIComponent(currentId)}`;
         }
     });
 

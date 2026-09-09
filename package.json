@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.80",
+  "version": "1.2.81",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -41,7 +41,7 @@
     "test:crypto": "node --test tests/crypto-utils.test.mjs",
     "test:attachments": "node --test tests/attachment-security.test.mjs",
     "test:sharing-prototype": "node --test experiments/sharing-key-prototype/*.test.mjs tests/shared-record-reader.test.mjs tests/sharing-identity.test.mjs tests/sharing-two-device.test.mjs",
-    "test:offline-write-prototype": "node --test experiments/offline-sync/*.test.mjs tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs",
+    "test:offline-write-prototype": "node --test experiments/offline-sync/*.test.mjs tests/offline-mutation-queue.test.mjs tests/offline-mutation-sync.test.mjs tests/offline-mutation-client.test.mjs tests/private-account-offline-policy.test.mjs",
     "test:history-prototype": "node --test experiments/history-recovery/*.test.mjs tests/archive-account-model.test.mjs",
     "test:backup-prototype": "node --test experiments/backup-recovery/*.test.mjs tests/backup-crypto-runtime.test.mjs tests/backup-export-model.test.mjs tests/backup-import-model.test.mjs",
     "test:credential-health-prototype": "node --test experiments/credential-health/*.test.mjs tests/credential-health-runtime.test.mjs",

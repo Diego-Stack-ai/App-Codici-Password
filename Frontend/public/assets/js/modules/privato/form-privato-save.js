@@ -1,11 +1,12 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.80';
+import { auth, db } from '../../firebase-config.js?v=1.2.81';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
-import { showToast } from '../../ui-core-v129.js';
+import { showAlertModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
+import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
 
 export async function savePrivateAccount({
     bankAccounts,
@@ -15,7 +16,8 @@ export async function savePrivateAccount({
     currentDocId,
     isEditing,
     baseRevision = 0,
-    profileEmailLinkDraft
+    profileEmailLinkDraft,
+    hasLinkedProfileField = false
 }) {
     const get = id => document.getElementById(id)?.value.trim() || '';
     const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
@@ -97,6 +99,31 @@ export async function savePrivateAccount({
     if (!data.nomeAccount) { showToast("Inserisci un nome account", "error"); if (btnSave) btnSave.disabled = false; return; }
 
     const isSharingActive = data.visibility === 'shared';
+    const offlinePolicy = classifyPrivateAccountOfflineWrite({
+        type: data.type,
+        visibility: data.visibility,
+        isBanking: data.isBanking,
+        hasProfileLink: Boolean(profileEmailLinkDraft || hasLinkedProfileField)
+    });
+
+    if (!navigator.onLine && !offlinePolicy.eligible) {
+        const onlineReasons = {
+            'shared-memo': 'Questo memorandum è condiviso con altri utenti.',
+            'shared-account': 'Questo account è condiviso con altri utenti.',
+            banking: 'Questo account contiene conti o carte bancarie.',
+            'profile-link': 'Questo account è collegato a un campo del Profilo utente.',
+            unsupported: 'Questa tipologia di account non supporta ancora le modifiche offline.'
+        };
+        const onlineReason = onlineReasons[offlinePolicy.reason];
+        if (onlineReason) {
+            await showAlertModal(
+                'CONNESSIONE NECESSARIA',
+                `${onlineReason} Per modificarlo devi essere online. I dati già memorizzati restano disponibili in consultazione.`
+            );
+            if (btnSave) btnSave.disabled = false;
+            return;
+        }
+    }
     
 
     // Gestione Array UI / Contatti Selezionati
@@ -121,9 +148,7 @@ export async function savePrivateAccount({
     }
 
     try {
-        const pilotRequested = new URLSearchParams(window.location.search).get('m6pilot') === '1';
-        const pilotEligible = pilotRequested && !isSharingActive && !data.isBanking &&
-            data.type === 'account' && !profileEmailLinkDraft;
+        const pilotEligible = offlinePolicy.eligible;
         if (pilotEligible) {
             const pilotModule = await import('../data/private-account-offline-pilot.js');
             const accountRef = isEditing

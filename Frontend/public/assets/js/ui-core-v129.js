@@ -178,6 +178,41 @@ export async function showConfirmModal(title, message, confirmText = t('confirm'
 }
 
 /**
+ * [CORE UI] ALERT MODAL
+ * Messaggio bloccante con una sola azione di chiusura.
+ */
+export function showAlertModal(title, message, buttonText = 'Ho capito') {
+    return new Promise((resolve) => {
+        const modalId = 'protocol-alert-modal';
+        document.getElementById(modalId)?.remove();
+
+        const modal = createElement('div', { id: modalId, className: 'modal-overlay' });
+        const btnClose = createElement('button', {
+            id: 'alert-close-btn',
+            className: 'btn-modal btn-primary',
+            textContent: buttonText
+        });
+        const content = createElement('div', { className: 'modal-box' }, [
+            createElement('span', { className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'wifi_off' }),
+            createElement('h3', { className: 'modal-title', textContent: title }),
+            createElement('p', { className: 'modal-text', textContent: message }),
+            createElement('div', { className: 'modal-actions' }, [btnClose])
+        ]);
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            setTimeout(() => { modal.remove(); resolve(); }, 300);
+        };
+        btnClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
+    });
+}
+
+/**
  * [CORE UI] INPUT MODAL
  */
 /**
