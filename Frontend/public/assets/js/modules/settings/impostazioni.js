@@ -190,7 +190,7 @@ function showRecoveryKeyOnce(recoveryKey, summary) {
     return new Promise(resolve => {
         const modal = createElement('div', {className: 'modal-overlay'});
         const keyField = createElement('input', {
-            className: 'modal-input', value: recoveryKey, readOnly: true,
+            className: 'glass-field modal-input-glass backup-recovery-key-field', value: recoveryKey, readOnly: true,
             'aria-label': 'Recovery Key del backup', autocomplete: 'off', spellcheck: false
         });
         const acknowledged = createElement('input', {type: 'checkbox', id: 'backup-key-saved'});

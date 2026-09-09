@@ -791,6 +791,15 @@ h3.settings-desc {
     flex: 0 0 auto;
 }
 
+.backup-recovery-key-field {
+    margin: 1rem 0;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    font-size: clamp(0.78rem, 2.8vw, 0.95rem);
+    letter-spacing: 0.025em;
+    text-align: center;
+}
+
 .credential-health-modal {
     width: min(92vw, 38rem);
     max-height: min(82dvh, 46rem);
