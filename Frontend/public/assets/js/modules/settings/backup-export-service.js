@@ -1,4 +1,4 @@
-import {storage} from '../../firebase-config.js?v=1.2.67';
+import {storage} from '../../firebase-config.js?v=1.2.68';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {
     getBackupProfile, listBackupCompanies, listBackupCompanyAccounts, listBackupCompanyAttachments,
@@ -57,7 +57,12 @@ async function openSink(fileName) {
             types: [{description: 'Backup cifrato Codici & Password', accept: {'application/x-codici-password-backup': ['.cpbackup']}}]
         });
         const writable = await handle.createWritable();
-        return {write: value => writable.write(value), close: () => writable.close(), streamed: true};
+        return {
+            write: value => writable.write(value),
+            close: () => writable.close(),
+            abort: reason => writable.abort(reason),
+            streamed: true
+        };
     }
     const chunks = [];
     return {
@@ -68,6 +73,7 @@ async function openSink(fileName) {
             link.href = url; link.download = fileName; link.click();
             setTimeout(() => URL.revokeObjectURL(url), 30000);
         },
+        abort() { chunks.length = 0; },
         streamed: false
     };
 }
@@ -84,25 +90,34 @@ function bytesToBase64(value) {
 export async function exportOwnerBackup(uid) {
     const date = new Date().toISOString().slice(0, 10);
     const sink = await openSink(`codici-password-${date}.cpbackup`);
-    const recoveryKey = generateRecoveryKey();
-    const header = createBackupHeader(uid);
-    const key = await deriveBackupKey(header, recoveryKey, uid);
-    await sink.write(serializeBackupLine(header));
-    const {records, storagePaths} = await collectOwnerBackup(uid);
-    let sequence = 0;
-    let previousDigest = '';
-    const append = async entry => {
-        const encrypted = await encryptBackupEntry({header, key, sequence, previousDigest, entry});
-        await sink.write(serializeBackupLine(encrypted.envelope));
-        sequence += 1;
-        previousDigest = encrypted.digest;
-    };
-    for (const record of records) await append(record);
-    for (const storagePath of storagePaths) {
-        const content = await getBytes(ref(storage, storagePath), MAX_ATTACHMENT_BYTES);
-        await append({kind: 'attachment', storagePath, content: bytesToBase64(content)});
+    try {
+        const recoveryKey = generateRecoveryKey();
+        const header = createBackupHeader(uid);
+        const key = await deriveBackupKey(header, recoveryKey, uid);
+        await sink.write(serializeBackupLine(header));
+        const {records, storagePaths} = await collectOwnerBackup(uid);
+        let sequence = 0;
+        let previousDigest = '';
+        const append = async entry => {
+            const encrypted = await encryptBackupEntry({header, key, sequence, previousDigest, entry});
+            await sink.write(serializeBackupLine(encrypted.envelope));
+            sequence += 1;
+            previousDigest = encrypted.digest;
+        };
+        for (const record of records) await append(record);
+        for (const storagePath of storagePaths) {
+            const content = await getBytes(ref(storage, storagePath), MAX_ATTACHMENT_BYTES);
+            await append({kind: 'attachment', storagePath, content: bytesToBase64(content)});
+        }
+        await append({kind: 'footer', entryCount: sequence, recordCount: records.length, attachmentCount: storagePaths.length});
+        await sink.close();
+        return {recoveryKey, recordCount: records.length, attachmentCount: storagePaths.length, streamed: sink.streamed};
+    } catch (error) {
+        try {
+            await sink.abort(error);
+        } catch (abortError) {
+            console.warn('Impossibile annullare il file di backup parziale.', abortError);
+        }
+        throw error;
     }
-    await append({kind: 'footer', entryCount: sequence, recordCount: records.length, attachmentCount: storagePaths.length});
-    await sink.close();
-    return {recoveryKey, recordCount: records.length, attachmentCount: storagePaths.length, streamed: sink.streamed};
 }

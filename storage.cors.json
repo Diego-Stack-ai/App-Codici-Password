@@ -1,0 +1,20 @@
+[
+  {
+    "origin": [
+      "https://appcodici-password.web.app",
+      "https://appcodici-password.firebaseapp.com"
+    ],
+    "method": [
+      "GET",
+      "HEAD"
+    ],
+    "responseHeader": [
+      "Accept-Ranges",
+      "Content-Length",
+      "Content-Range",
+      "Content-Type",
+      "ETag"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

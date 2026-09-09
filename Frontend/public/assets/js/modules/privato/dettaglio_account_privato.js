@@ -3,7 +3,7 @@
  * Visualizzazione dettagli, gestione banking e condivisioni.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.67';
+import { db } from '../../firebase-config.js?v=1.2.68';
 import { LOG } from '../../logger.js';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';

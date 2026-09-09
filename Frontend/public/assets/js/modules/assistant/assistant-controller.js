@@ -1,7 +1,7 @@
 import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { loadVaultSearchRecords } from './vault-data-loader.js';
-import { VaultConversationEngine } from './conversation-engine.js?v=1.2.67';
-import { createAssistantUI } from './assistant-ui.js?v=1.2.67';
+import { VaultConversationEngine } from './conversation-engine.js?v=1.2.68';
+import { createAssistantUI } from './assistant-ui.js?v=1.2.68';
 import { decryptIfPossible } from '../core/crypto-utils.js';
 import { getOfflineReadiness } from '../../offline-sync.js';
 
@@ -10,7 +10,7 @@ let activeController = null;
 function attachStyles() {
     if (document.querySelector('link[data-vault-assistant]')) return;
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.67'; link.dataset.vaultAssistant = 'true';
+    link.rel = 'stylesheet'; link.href = '/assets/css/vault-assistant.css?v=1.2.68'; link.dataset.vaultAssistant = 'true';
     document.head.append(link);
 }
 
