@@ -137,6 +137,15 @@ export async function initFormAccountPrivato(user) {
             if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
                 showToast('Conflitto M6: il dato remoto è cambiato. Nessuna modifica è stata sovrascritta.', 'warning');
             } else if (Number(outcome?.completed || 0) > 0) {
+                const pendingRecord = lastState?.operation || null;
+                if (pendingRecord?.recordId && pendingRecord?.record) {
+                    pilot.storePrivateAccountHandoff({
+                        uid: currentUid,
+                        recordId: pendingRecord.recordId,
+                        expectedRevision: pendingRecord.expectedRevision,
+                        record: pendingRecord.record
+                    });
+                }
                 showToast('Sincronizzazione M6 completata.', 'success');
                 setTimeout(() => window.location.replace('account_privati.html?m6refresh=1'), 800);
             }

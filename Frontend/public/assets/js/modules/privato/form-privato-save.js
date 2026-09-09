@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.75';
+import { auth, db } from '../../firebase-config.js?v=1.2.76';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -151,6 +151,12 @@ export async function savePrivateAccount({
                 if (btnSave) btnSave.disabled = false;
                 return;
             }
+            pilotModule.storePrivateAccountHandoff({
+                uid: currentUid,
+                recordId: accountRef.id,
+                expectedRevision: baseRevision,
+                record: pilotRecord
+            });
             showToast(t('success_save'), "success");
             setTimeout(() => {
                 const destination = isEditing

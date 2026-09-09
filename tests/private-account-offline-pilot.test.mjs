@@ -8,6 +8,11 @@ const modelSource = source
     .replace('globalThis.location?.search', 'globalThis.__pilotSearch');
 globalThis.__pilotSearch = '';
 globalThis.localStorage = (() => { const values = new Map(); return {getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value)}; })();
+globalThis.sessionStorage = (() => { const values = new Map(); return {
+  getItem: key => values.get(key) || null,
+  setItem: (key, value) => values.set(key, value),
+  removeItem: key => values.delete(key)
+}; })();
 globalThis.__createClient = () => { throw new Error('non usato'); };
 const pilot = await import(`data:text/javascript;base64,${Buffer.from(modelSource).toString('base64')}`);
 
@@ -24,4 +29,16 @@ test('costruisce un comando revisionato e stabile nello scope utente', () => {
     assert.equal(operation.expectedRevision, 2);
     assert.match(operation.operationId, /^[a-f0-9-]+:[a-f0-9-]+$/i);
     assert.throws(() => pilot.buildPrivateAccountOperation({uid: '', recordId: 'x', expectedRevision: 0, record: {}}), /INVALID/);
+});
+
+test('consegna alla lista soltanto il record cifrato dello stesso utente e una sola volta', () => {
+    const record = {_encrypted: true, nomeAccount: 'Prova', password: 'ciphertext'};
+    pilot.storePrivateAccountHandoff({uid: 'owner', recordId: 'account-2', expectedRevision: 4, record});
+    assert.equal(pilot.consumePrivateAccountHandoff('other'), null);
+    const restored = pilot.consumePrivateAccountHandoff('owner');
+    assert.equal(restored.id, 'account-2');
+    assert.equal(restored.revision, 5);
+    assert.equal(restored.password, 'ciphertext');
+    assert.equal(pilot.consumePrivateAccountHandoff('owner'), null);
+    assert.throws(() => pilot.storePrivateAccountHandoff({uid: 'owner', recordId: 'x', expectedRevision: 0, record: {password: 'plain'}}), /INVALID/);
 });

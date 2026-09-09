@@ -1,5 +1,5 @@
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
-import {functions} from '../../firebase-config.js?v=1.2.75';
+import {functions} from '../../firebase-config.js?v=1.2.76';
 import {createOfflineMutationQueue, createOfflineQueueChannel, withOfflineQueueLease} from './offline-mutation-queue.js';
 import {createOfflineMutationSynchronizer} from './offline-mutation-sync.js';
 import {createOfflineMutationClientCore, OFFLINE_MUTATION_WRITES_ENABLED} from './offline-mutation-client-core.js';

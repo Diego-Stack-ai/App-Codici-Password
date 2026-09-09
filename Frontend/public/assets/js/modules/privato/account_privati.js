@@ -3,7 +3,7 @@
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.75';
+import { db } from '../../firebase-config.js?v=1.2.76';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
@@ -186,6 +186,13 @@ async function loadAccounts() {
         // 2. Own Accounts
         LOG('[ACCOUNTS] Loading own accounts');
         const ownRecords = await ownAccountsPromise;
+        if (requireServerRefresh) {
+            const pilot = await import('../data/private-account-offline-pilot.js');
+            const handoffRecord = pilot.consumePrivateAccountHandoff(currentUser.uid);
+            if (handoffRecord && !ownRecords.some(record => record.id === handoffRecord.id)) {
+                ownRecords.push(handoffRecord);
+            }
+        }
         LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
         const ownAccounts = ownRecords.map(data => {
             const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;
