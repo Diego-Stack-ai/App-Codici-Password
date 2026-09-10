@@ -1,6 +1,6 @@
 import { auth, db } from '../../firebase-config.js?v=1.2.90';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
-import { showConfirmModal, showToast } from '../../ui-core-v129.js';
+import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
 import {listPrivateAccounts} from '../data/vault-repository.js';
@@ -12,6 +12,13 @@ export function openLinkedAccount(accountId) {
 export async function connectEmailAccount(email, syncData) {
     const user = auth.currentUser;
     if (!user || !email?.id) return;
+    if (String(email.password || '').trim()) {
+        await showAlertModal(
+            'PASSWORD EMAIL DA PROTEGGERE',
+            'Questa email contiene ancora una password nel Profilo. Prima salvala nell’Account corretto e poi rimuovila manualmente dall’email. Il collegamento è stato bloccato per evitare la perdita della credenziale.'
+        );
+        return;
+    }
     const accountRecords = await listPrivateAccounts(user.uid);
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
     const accounts = await Promise.all(accountRecords.map(async data => {

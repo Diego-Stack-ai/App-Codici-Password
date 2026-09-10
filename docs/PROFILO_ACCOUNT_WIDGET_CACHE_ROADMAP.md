@@ -73,7 +73,7 @@ Il repository e l'ambiente corrente non forniscono una lettura amministrativa si
 1. [x] formalizzare e testare una lettura `afterWrite`/server-required unica nel repository;
 2. [x] sostituire i due parametri ad hoc con un contratto condiviso, mantenendo il fallback offline;
 3. [x] correggere il contesto proprietario degli allegati aziendali condivisi;
-4. bloccare il collegamento email quando esiste una password legacy non trasferita;
+4. [x] bloccare il collegamento email quando esiste una password legacy non trasferita;
 5. creare l'inventario Firestore aggregato prima di progettare migrazioni;
 6. soltanto dopo, definire schema widget Account, template e ordinamento touch.
 
@@ -88,6 +88,12 @@ Verifiche automatiche superate: build del runtime Firebase locale, shell offline
 ### Secondo blocco implementato — allegati aziendali condivisi
 
 Il modulo allegati distingue ora lo UID proprietario dallo UID del visitatore. La lista usa il percorso canonico del proprietario e conserva `aziendaId`; caricamento, eliminazione e selettore sorgente sono bloccati in modalità condivisa/sola lettura e il pulsante Elimina non viene renderizzato. Non sono stati ampliati i permessi Firestore o Storage: il contenuto degli allegati continua a rispettare il contratto di condivisione esistente.
+
+### Terzo blocco implementato — inventario e protezione password legacy
+
+È disponibile `scripts/audit-firestore-legacy-email-metadata.mjs`, con conferma obbligatoria del progetto e output limitato a conteggi aggregati. Il modello è testato per non restituire nomi, email, password o identificativi. Il tentativo del 10/09/2026 non ha letto Firestore perché nell'ambiente manca Application Default Credentials; non sono stati usati token o metodi alternativi meno sicuri.
+
+In attesa dell'inventario reale, il collegamento email Profilo → Account è fail-closed: se la voce email contiene ancora una password decifrata non vuota, l'operazione viene bloccata e chiede di salvare prima la credenziale nell'Account e rimuoverla poi manualmente dal Profilo. In questo modo il codice non può più sostituire direttamente una password legacy con la stringa vuota durante il collegamento.
 
 ## B — Piano architetturale
 
