@@ -31,6 +31,13 @@ const rerender = () => renderBankAccounts(bankAccounts, rerender);
 // Utility per recupero rapido valori (evita ReferenceError)
 const get = (id) => document.getElementById(id)?.value.trim() || '';
 
+function getPrivateAccountListDestination({refresh = false} = {}) {
+    const type = isExplicitMemo ? 'memo' : 'standard';
+    const params = new URLSearchParams({type});
+    if (refresh) params.set('m6refresh', '1');
+    return `account_privati.html?${params.toString()}`;
+}
+
 function showM6ConflictChoice() {
     return new Promise(resolve => {
         document.getElementById('m6-conflict-modal')?.remove();
@@ -255,7 +262,7 @@ export async function initFormAccountPrivato(user) {
                     }
                     if (choice === 'server') {
                         showToast('Versione del server mantenuta.', 'success');
-                        setTimeout(() => window.location.replace('account_privati.html?m6refresh=1'), 600);
+                        setTimeout(() => window.location.replace(getPrivateAccountListDestination({refresh: true})), 600);
                     } else if (choice === 'local') {
                         await restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision);
                         showToast('Modifica offline recuperata. Controllala e premi Salva per applicarla.', 'warning');
@@ -279,7 +286,7 @@ export async function initFormAccountPrivato(user) {
                     });
                 }
                 showToast('Sincronizzazione M6 completata.', 'success');
-                setTimeout(() => window.location.replace('account_privati.html?m6refresh=1'), 800);
+                setTimeout(() => window.location.replace(getPrivateAccountListDestination({refresh: true})), 800);
             }
         } catch (error) {
             logError('M6PilotResume', error);
