@@ -126,6 +126,17 @@ export const listAccountWidgets = uid => readRecords(`account-widgets:${uid}`,
     collection(db, 'users', uid, 'accountWidgets'));
 export const listAccountWidgetsConfirmed = uid => readConfirmedRecords(
     collection(db, 'users', uid, 'accountWidgets'));
+export const listEmbeddedAccountWidgets = async (uid, account) => (await listAccountWidgets(uid))
+    .filter(widget => widget.kind === 'embedded' && widget.context === account.context &&
+        widget.accountId === account.accountId &&
+        (account.context !== 'company' || widget.companyId === account.companyId))
+    .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
+export const listEmbeddedAccountWidgetsConfirmed = async (uid, account) =>
+    (await listAccountWidgetsConfirmed(uid))
+        .filter(widget => widget.kind === 'embedded' && widget.context === account.context &&
+            widget.accountId === account.accountId &&
+            (account.context !== 'company' || widget.companyId === account.companyId))
+        .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
 
 export const getUserProfile = uid => readRecord(`profile:${uid}`, doc(db, 'users', uid));
 

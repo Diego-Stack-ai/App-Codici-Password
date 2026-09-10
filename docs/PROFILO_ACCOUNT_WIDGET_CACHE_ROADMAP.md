@@ -292,7 +292,9 @@ I test confermano lo stesso formato per Account privati e aziendali, l'esclusion
 
 La callable `manageAccountWidget` implementa creazione, aggiornamento ed eliminazione atomici. Prima di scrivere verifica che l'Account esista nel percorso proprietario corretto, impedisce di trasferire implicitamente un widget fra Account o aziende e usa revisione e `operationId` per conflitti, retry e idempotenza. Le scritture restano riservate al backend e producono soltanto audit tecnico privo dei valori dei campi.
 
-Il gate completo delle funzioni, composto da 28 test, è superato. Il contratto non è ancora scrivibile dalla UI: restano il client cifrato, la verifica del ripristino selettivo e il primo editor controllato.
+Il gate completo delle funzioni, composto da 28 test, è superato. Il client `account-widget-client.js` prepara e cifra il payload localmente, richiede la rete per le modifiche e usa la callable per creare, aggiornare o eliminare. Il repository espone letture cache-first e server-confirmed filtrate per Account, senza query o indici aggiuntivi.
+
+Backup e ripristino riconoscono già gli scope distinti `private-account-widget` e `company-account-widget`; i relativi 16 test cifrati sono superati insieme ai gate di accesso dati, sintassi e riferimenti statici. Resta da attivare il primo editor controllato nell'interfaccia e provarlo con dati fittizi prima di considerare concluso il blocco.
 
 ## D — Matrice minima di test
 
