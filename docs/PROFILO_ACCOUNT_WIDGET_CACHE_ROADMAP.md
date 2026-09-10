@@ -22,6 +22,7 @@ Principi inderogabili:
 5. Confermare nel codice la causa del difetto modifica → salva → dettaglio: `getDocSmart()` può restituire una cache precedente mentre il fetch server in background non provoca un nuovo render.
 6. Mappare tutti i consumer di `getDocSmart()` e `getDocsSmart()` per individuare altre aree soggette allo stesso difetto.
 7. Inventariare `profileWidgets`, wizard, banking, referente, QR, allegati e regole per campi sensibili, distinguendo schemi riutilizzabili da logica specifica.
+8. Rivisitare **Dati azienda** sulla falsariga del Profilo personale: struttura della pagina, panoramica, modifica, recapiti, documenti, sedi, widget e collegamenti, senza uniformare forzatamente dati che hanno significato diverso.
 
 L'audit dei dati reali deve essere soltanto esplorativo e minimizzato: conteggi, percorsi e forma dei documenti, senza esportare segreti nei log.
 
@@ -143,7 +144,29 @@ Accessi previsti:
 
 Creazione centrale e collegamento devono costituire un'unica operazione atomica. La modifica deve avvisare quanti Account saranno interessati. L'eliminazione deve essere bloccata finché esistono collegamenti, mentre lo scollegamento del singolo Account non elimina il dato centrale.
 
-Il percorso centrale è `users/{uid}/sharedVaultData/{datoId}`. Rules, backup e funzione atomica sono predisposti; nessuna migrazione legacy è stata eseguita e la UI applicativa non scrive ancora dati reali.
+Il percorso centrale è `users/{uid}/sharedVaultData/{datoId}`. Rules, backup, funzione atomica e prima UI applicativa sono attivi. Il collaudo reale ha confermato creazione di una Credenziale con più campi e collegamento ad Account privati e aziendali; nessuna migrazione legacy è stata eseguita.
+
+#### Dati azienda ed email/PEC
+
+La pagina **Dati azienda** deve essere riesaminata come famiglia funzionale parallela al Profilo personale, mantenendo però il proprio modello aziendale. La revisione comprende gerarchia e leggibilità di panoramica/modifica, recapiti, sedi, documenti, dati fiscali, widget e collegamenti; non autorizza una riscrittura né una migrazione automatica dei record esistenti.
+
+Per email e PEC il collegamento approvato è a livelli:
+
+`Email o PEC aziendale → Account aziendale di riferimento → eventuale Credenziale comune`
+
+L'indirizzo email/PEC resta un recapito dell'Azienda. Username, password e altri dati di accesso appartengono all'Account aziendale collegato. Un codice condiviso da più Account, come il codice generale di un'app, appartiene invece alla Credenziale comune richiamata dagli Account interessati. Non è previsto un collegamento diretto Email/PEC → Credenziale comune.
+
+Prima di attivare il collegamento occorre:
+
+- censire i formati legacy `emails.pec`, `emails.amministrazione`, `emails.personale`, `emails.extra[]` e `aziendaEmailPassword`;
+- introdurre un identificativo stabile per ogni recapito che ne sia privo;
+- verificare l'esistenza dell'Account aziendale corretto e conservare sempre `aziendaId`;
+- trasferire e verificare ogni password legacy prima di rimuoverla dal documento Azienda;
+- impedire collegamenti a Account privati o appartenenti a un'altra Azienda;
+- mostrare nella panoramica lo stato del collegamento senza duplicare o rivelare la password;
+- includere backup, ripristino, cache e scollegamento controllato nei test.
+
+La migrazione resta manuale e assistita: l'utente crea o conferma l'Account di riferimento, verifica la credenziale trasferita e solo dopo autorizza la rimozione della copia legacy. Nessuna password aziendale viene svuotata automaticamente.
 
 #### Prevenzione duplicati
 
@@ -156,9 +179,11 @@ Ordine previsto:
 1. correggere in modo generale modifica → salva → dettaglio per account privati e aziendali;
 2. rendere coerenti i percorsi aziendali e il trasporto di `aziendaId`;
 3. mettere in sicurezza il collegamento email → Account senza perdita di password legacy;
-4. generalizzare i widget soltanto dopo l'inventario degli schemi esistenti;
+4. completare il modello dei widget incorporati negli Account, senza migrare banking o referente legacy;
 5. introdurre la libreria dei template come definizioni, separata dalle istanze associate agli Account;
-6. valutare dati condivisi di servizio/dispositivo solo su casi reali ricorrenti, senza creare prematuramente una nuova entità `Servizio`.
+6. rivisitare Dati azienda e predisporre il collegamento Email/PEC → Account aziendale con migrazione assistita e non distruttiva;
+7. collaudare la catena Account aziendale → Credenziale comune e l'isolamento fra aziende;
+8. valutare ulteriori dati condivisi di servizio/dispositivo solo su casi reali ricorrenti, senza creare prematuramente una nuova entità `Servizio`.
 
 ## Modello widget desiderato
 
@@ -257,7 +282,7 @@ La callable `manageSharedVaultData` gestisce creazione, aggiornamento, collegame
 
 Il client è collegato a una prima UI controllata. In Impostazioni, **Credenziali comuni** consente elenco, creazione e modifica di schede con uno o più campi; dal dettaglio degli Account privati e aziendali il proprietario può collegare una scheda esistente, rivelarne localmente i campi sensibili e scollegarla senza eliminare il dato centrale. Le letture successive a una modifica sono server-confirmed e non richiedono refresh.
 
-La UI non migra né collega automaticamente email o PEC legacy. Gli Account ricevuti in sola lettura non ereditano la Credenziale comune del proprietario e non mostrano comandi di collegamento. Creazione, modifica, collegamento e scollegamento richiedono rete; la consultazione può usare la cache già sincronizzata. Resta necessario un collaudo isolato con dati fittizi prima di usare il dominio per le PEC reali.
+La UI non migra né collega automaticamente email o PEC legacy. Gli Account ricevuti in sola lettura non ereditano la Credenziale comune del proprietario e non mostrano comandi di collegamento. Creazione, modifica, collegamento e scollegamento richiedono rete; la consultazione può usare la cache già sincronizzata. Il collaudo applicativo ha confermato collegamento, consultazione e scollegamento; l'uso per PEC reali resta subordinato alla revisione di Dati azienda e alla migrazione assistita descritta sopra.
 
 ## D — Matrice minima di test
 
