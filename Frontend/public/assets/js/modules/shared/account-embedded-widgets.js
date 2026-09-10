@@ -180,7 +180,7 @@ async function copyField(field) {
 function widgetCard(widget, context, refresh) {
     let collapsed = widget.collapsed === true;
     let dirty = false;
-    const fields = createElement('div', {className: 'shared-account-fields'});
+    const fields = createElement('div', {className: 'shared-account-fields account-widget-fields'});
     const fieldReaders = [];
     const markDirty = () => { dirty = true; };
     const sourceFields = [...(widget.fields || [])].sort((a, b) => a.order - b.order);
@@ -194,9 +194,9 @@ function widgetCard(widget, context, refresh) {
                 'aria-label': field.label
             });
             input.addEventListener('input', markDirty);
-            const children = [createElement('strong', {textContent: field.label}), input];
+            const controls = [input];
             if (field.encrypted) {
-                children.push(createElement('button', {
+                controls.push(createElement('button', {
                     type: 'button', className: 'shared-account-reveal',
                     'aria-label': `Mostra ${field.label}`,
                     onclick: event => {
@@ -209,8 +209,11 @@ function widgetCard(widget, context, refresh) {
                 }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
             }
             fields.appendChild(createElement('div', {
-                className: 'shared-account-field glass-field border-glow account-widget-display-field account-widget-inline-field'
-            }, children));
+                className: 'account-widget-inline-field'
+            }, [
+                createElement('strong', {textContent: field.label}),
+                createElement('div', {className: 'account-widget-inline-control'}, controls)
+            ]));
             fieldReaders.push(() => ({...field, value: input.value}));
             continue;
         }
@@ -229,14 +232,18 @@ function widgetCard(widget, context, refresh) {
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'content_copy'})]));
         fields.appendChild(createElement('div', {className: 'shared-account-field glass-field border-glow account-widget-display-field'}, children));
     }
-    fields.hidden = collapsed;
+    const applyCollapsedState = () => {
+        fields.hidden = collapsed;
+        fields.classList.toggle('hidden', collapsed);
+    };
+    applyCollapsedState();
     const toggle = createElement('button', {
         type: 'button', className: 'account-widget-toggle',
         'aria-label': `${collapsed ? 'Apri' : 'Chiudi'} ${widget.title}`,
         'aria-expanded': String(!collapsed),
         onclick: event => {
             collapsed = !collapsed;
-            fields.hidden = collapsed;
+            applyCollapsedState();
             event.currentTarget.setAttribute('aria-expanded', String(!collapsed));
             event.currentTarget.setAttribute('aria-label', `${collapsed ? 'Apri' : 'Chiudi'} ${widget.title}`);
             if (context.editable) markDirty();

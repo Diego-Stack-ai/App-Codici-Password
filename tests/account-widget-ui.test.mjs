@@ -19,10 +19,12 @@ test('i widget espongono un comando accessibile per aprire e chiudere i campi', 
   assert.match(widgetSource, /className: 'account-widget-toggle'/);
   assert.match(widgetSource, /'aria-expanded': String\(!collapsed\)/);
   assert.match(widgetSource, /fields\.hidden = collapsed/);
+  assert.match(widgetSource, /fields\.classList\.toggle\('hidden', collapsed\)/);
 });
 
 test('in modifica account i valori sono campi inline e mantengono il tipo originale', () => {
   assert.match(widgetSource, /className: 'account-widget-inline-input'/);
+  assert.match(widgetSource, /className: 'account-widget-inline-control'/);
   assert.match(widgetSource, /fieldReaders\.push\(\(\) => \(\{\.\.\.field, value: input\.value\}\)\)/);
   assert.match(widgetSource, /field\.type && field\.type !== 'sensitive' \? field\.type : 'text'/);
 });
