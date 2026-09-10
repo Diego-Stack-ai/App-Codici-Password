@@ -32,7 +32,7 @@ import { editSection, editAddress, editUserDocument, addUtility, editUtility } f
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureVaultKeyMaterial, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
-import {getUserProfile, getUserSetting} from '../data/vault-repository.js';
+import {getUserProfile, getUserSetting, listDeadlines} from '../data/vault-repository.js';
 import { syncData as _syncData } from './profilo-sync.js';
 import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.js';
 
@@ -44,6 +44,7 @@ import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleS
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
 import { connectEmailAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
+import {resolveProfileDocumentDeadlineState} from './profile-deadline-link-model.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -137,7 +138,7 @@ export async function initProfiloPrivato(user) {
             toggleQRInclusion,
             onAddAddress: () => editAddress(-1, buildCtx()),
             onAddDoc: () => editUserDocument(-1, buildCtx()),
-            createDeadlineFromDocument: documentItem => createDeadlineFromDocument(documentItem, syncData)
+            createDeadlineFromDocument: documentItem => createDeadlineFromDocument(documentItem, syncData, currentUserData)
         }
     );
 
@@ -165,6 +166,10 @@ export async function initProfiloPrivato(user) {
 
     // Render sezioni ora che tutti i moduli sono inizializzati.
     renderAllSections();
+    void listDeadlines(user.uid).then(deadlines => {
+        userDocuments = resolveProfileDocumentDeadlineState(userDocuments, deadlines);
+        renderDocumentiView();
+    }).catch(error => logError('ResolveProfileDocumentDeadlines', error));
     const generateQrWhenIdle = () => generateProfileQRCode();
     if ('requestIdleCallback' in window) window.requestIdleCallback(generateQrWhenIdle, { timeout: 1200 });
     else window.setTimeout(generateQrWhenIdle, 0);

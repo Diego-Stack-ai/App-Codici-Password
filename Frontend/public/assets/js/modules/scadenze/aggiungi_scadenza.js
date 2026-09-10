@@ -175,6 +175,23 @@ export async function initAggiungiScadenza(user) {
             if (typeSelect && profileDocumentLinkDraft.name && [...typeSelect.options].some(option => option.value === profileDocumentLinkDraft.name)) {
                 typeSelect.value = profileDocumentLinkDraft.name;
             }
+            if (typeSelect && profileDocumentLinkDraft.profileDocumentId) {
+                const documentType = profileDocumentLinkDraft.documentType || '';
+                if ([...typeSelect.options].some(option => option.value === documentType)) typeSelect.value = documentType;
+                const template = configController.getSuggestedTemplate(typeSelect.value);
+                const templateSelect = document.getElementById('testo_email_select');
+                if (templateSelect && template && [...templateSelect.options].some(option => option.value === template)) {
+                    templateSelect.value = template;
+                }
+            }
+            const detailsSelect = document.getElementById('modello_veicolo');
+            if (detailsSelect && profileDocumentLinkDraft.detail) {
+                if (![...detailsSelect.options].some(option => option.value === profileDocumentLinkDraft.detail)) {
+                    detailsSelect.appendChild(new Option(profileDocumentLinkDraft.detail, profileDocumentLinkDraft.detail));
+                }
+                detailsSelect.value = profileDocumentLinkDraft.detail;
+            }
+            syncCustomDropdowns();
         }
     }
 

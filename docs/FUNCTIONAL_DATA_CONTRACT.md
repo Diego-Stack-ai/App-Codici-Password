@@ -57,6 +57,14 @@ Le Scadenze nuove usano `recipients[]` con `contactId?`, `displayName`, `email`,
 
 Il backend conserva inoltre in `deadlineShares/{shareId}` l'elenco tecnico degli UID destinatari già risolti. Il client non accede a questa collezione: serve esclusivamente a eliminare in modo affidabile le copie revocate o cancellate anche quando l'email dell'utente non è più risolvibile.
 
+## Collegamento documenti Profilo → Scadenze
+
+Il comando nel Profilo distingue tre stati: creare una nuova scadenza, collegare una scadenza legacy compatibile oppure aprire una scadenza già collegata. Una corrispondenza esplicita usa `sourceRef: {type: 'profileDocument', id}`; per i record anteriori al collegamento, categoria e data uguali producono soltanto una proposta confermata dall'utente. Più corrispondenze bloccano la creazione automatica per evitare associazioni ambigue.
+
+La precompilazione mantiene separati i significati dei campi: il nominativo proviene da nome e cognome del Profilo, la categoria dal tipo di documento, il dettaglio dal tipo e dal numero identificativo, la data da `expiry_date` e il testo email dal template associato alla categoria. Una nuova scadenza collegata e il suo `expiryReference` nel documento Profilo vengono salvati nello stesso batch.
+
+I nominativi digitati nelle Scadenze restano suggerimenti storici nelle configurazioni `names`; non sono utenti né Contatti. Il form consente di eliminare esplicitamente il nominativo selezionato dalla lista del contesto corrente, con conferma. Un nominativo proveniente dalla Rubrica va invece gestito nei Contatti e non viene cancellato indirettamente.
+
 ## Confini offline
 
 | Operazione | Offline atteso |

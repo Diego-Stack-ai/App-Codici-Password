@@ -88,6 +88,7 @@ const MODE_DOCUMENTS = Object.freeze({
 const LIST_FIELDS = ['deadlineTypes', 'models', 'emailTemplates', 'names', 'notificationEmails'];
 
 function configTarget(selectId, mode) {
+    if (selectId === 'nome_cognome') return { field: 'names', docName: MODE_DOCUMENTS[mode] };
     if (selectId === 'tipo_scadenza') return { field: 'deadlineTypes', docName: MODE_DOCUMENTS[mode] };
     if (selectId === 'modello_veicolo' && mode !== 'generali') return { field: 'models', docName: MODE_DOCUMENTS[mode] };
     if (selectId === 'testo_email_select') return { field: 'emailTemplates', docName: MODE_DOCUMENTS[mode] };
@@ -301,14 +302,18 @@ export function createDeadlineConfigController({ recipientController, onRender =
             'Elimina Voce',
             `Sei sicuro di voler eliminare "${value}"? Questa azione non influirà sulle scadenze esistenti, ma la voce non sarà più disponibile per le nuove.`
         );
-        if (!confirmed) return;
+        if (!confirmed) return false;
         const target = configTarget(selectId, mode);
-        if (!target) return;
+        if (!target) return false;
         const config = currentConfig();
         const index = (config[target.field] || []).findIndex(item => itemName(item) === value);
-        if (index < 0) return;
+        if (index < 0) return false;
         const nextConfig = removeDeadlineListItem(config, target.field, index);
-        if (await persist(selectId, nextConfig)) showToast('Voce eliminata', 'success');
+        if (await persist(selectId, nextConfig)) {
+            showToast('Voce eliminata', 'success');
+            return true;
+        }
+        return false;
     }
 
     function initManagementButtons() {
@@ -334,6 +339,17 @@ export function createDeadlineConfigController({ recipientController, onRender =
                 if (value?.trim()) await addItem(selectId, value.trim());
             };
         });
+        const removeSavedName = document.getElementById('btn-remove-saved-name');
+        if (removeSavedName) removeSavedName.onclick = async () => {
+            const input = document.getElementById('nome_cognome');
+            const value = input?.value.trim();
+            if (!value) return showToast('Seleziona prima il nominativo da eliminare.', 'info');
+            const exists = (currentConfig().names || []).some(item => itemName(item) === value);
+            if (!exists) {
+                return showToast('Questo nominativo proviene dalla Rubrica e va gestito nei Contatti.', 'info');
+            }
+            if (await deleteItem('nome_cognome', value) && input) input.value = '';
+        };
     }
 
     return Object.freeze({
@@ -344,6 +360,11 @@ export function createDeadlineConfigController({ recipientController, onRender =
             if (configs.documenti?.deadlineTypes?.some(item => itemName(item) === type)) return 'documenti';
             if (configs.generali?.deadlineTypes?.some(item => itemName(item) === type)) return 'generali';
             return 'automezzi';
+        },
+        getSuggestedTemplate(type) {
+            const config = currentConfig();
+            const index = (config.deadlineTypes || []).findIndex(item => itemName(item) === type);
+            return index >= 0 ? config.emailTemplates?.[index] || '' : '';
         },
         initManagementButtons,
         load,

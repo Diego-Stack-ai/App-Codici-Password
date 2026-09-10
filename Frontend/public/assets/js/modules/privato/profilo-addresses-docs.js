@@ -267,7 +267,11 @@ export function renderDocumentiView() {
                     }) : null,
                     createElement('button', {
                         className: 'btn-upload-trigger',
-                        textContent: docItem.expiryReference?.deadlineId ? 'Apri scadenza collegata' : 'Crea scadenza collegata',
+                        textContent: docItem.expiryReference?.deadlineId
+                            ? 'Apri scadenza collegata'
+                            : docItem.compatibleDeadlineId
+                                ? 'Collega scadenza esistente'
+                                : 'Crea scadenza collegata',
                         onclick: () => _callbacks.createDeadlineFromDocument(docItem)
                     })
                 ])

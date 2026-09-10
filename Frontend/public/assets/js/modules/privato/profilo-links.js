@@ -3,7 +3,8 @@ import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.j
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
-import {listPrivateAccounts} from '../data/vault-repository.js';
+import {listDeadlines, listPrivateAccounts} from '../data/vault-repository.js';
+import {buildProfileDocumentDeadlineDraft, findCompatibleDocumentDeadlines} from './profile-deadline-link-model.js';
 
 export function openLinkedAccount(accountId) {
     if (accountId) window.location.href = `dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}`;
@@ -50,7 +51,7 @@ export async function connectEmailAccount(email, syncData) {
     });
 }
 
-export async function createDeadlineFromDocument(documentItem, syncData) {
+export async function createDeadlineFromDocument(documentItem, syncData, profile = {}) {
     if (documentItem?.expiryReference?.deadlineId) {
         window.location.href = `dettaglio_scadenza.html?id=${encodeURIComponent(documentItem.expiryReference.deadlineId)}`;
         return;
@@ -59,13 +60,40 @@ export async function createDeadlineFromDocument(documentItem, syncData) {
         showToast('Inserisci prima la data di scadenza del documento.', 'warning');
         return;
     }
+    const user = auth.currentUser;
+    if (!user) return;
+    const deadlines = await listDeadlines(user.uid);
+    const legacyMatches = findCompatibleDocumentDeadlines(documentItem, deadlines);
+    if (legacyMatches.length === 1) {
+        const existing = legacyMatches[0];
+        const linkExisting = await showConfirmModal(
+            'Scadenza già presente',
+            `Esiste già una scadenza “${existing.type || documentItem.type}” con la stessa data. Vuoi collegarla a questo documento invece di crearne un’altra?`,
+            'Collega esistente',
+            'Annulla'
+        );
+        if (!linkExisting) return;
+        documentItem.expiryReference = {deadlineId: existing.id};
+        await updateDoc(doc(db, 'users', user.uid, 'scadenze', existing.id), {
+            sourceRef: {type: 'profileDocument', id: documentItem.id}
+        });
+        await syncData();
+        showToast('Scadenza esistente collegata al documento.', 'success');
+        window.location.href = `dettaglio_scadenza.html?id=${encodeURIComponent(existing.id)}`;
+        return;
+    }
+    if (legacyMatches.length > 1) {
+        await showAlertModal(
+            'Più scadenze compatibili',
+            'Esistono più scadenze con la stessa categoria e data. Apri la sezione Scadenze e verifica quale conservare prima di creare il collegamento.'
+        );
+        return;
+    }
     const confirmed = await showConfirmModal('Crea scadenza collegata', `Preparare una scheda per “${documentItem.type || 'Documento'}” con scadenza ${documentItem.expiry_date}?`);
     if (!confirmed) return;
     await syncData();
-    sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify({
-        profileDocumentId: documentItem.id,
-        name: documentItem.type || 'Documento',
-        dueDate: documentItem.expiry_date
-    }));
+    sessionStorage.setItem('profile-deadline-link-draft', JSON.stringify(
+        buildProfileDocumentDeadlineDraft(documentItem, profile)
+    ));
     window.location.href = `aggiungi_scadenza.html?profileDocumentId=${encodeURIComponent(documentItem.id)}`;
 }
