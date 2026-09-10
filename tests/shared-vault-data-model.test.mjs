@@ -52,3 +52,35 @@ test('genera riferimenti deterministici distinti per contesto', async () => {
   assert.equal(privateLink.linkId, 'link:private:account-1:shared-1');
   assert.equal(companyLink.widgetId, 'shared:company:company-1:account-1:shared-1');
 });
+
+test('prepara un solo formato di widget incorporato per Account privato e aziendale', async () => {
+  const {prepareEmbeddedAccountWidget} = await loadModel();
+  const input = {
+    title: 'Domande di sicurezza', order: 2,
+    fields: [
+      {id: 'question-1', label: 'Domanda', type: 'text', value: 'Nome del primo animale?'},
+      {id: 'answer-1', label: 'Risposta', type: 'sensitive', value: 'Lampo'}
+    ]
+  };
+  const encryptValue = async value => `cipher:${value}`;
+  const privateWidget = await prepareEmbeddedAccountWidget(
+    input, {context: 'private', accountId: 'private-1'}, encryptValue
+  );
+  const companyWidget = await prepareEmbeddedAccountWidget(
+    input, {context: 'company', companyId: 'company-1', accountId: 'company-account-1'}, encryptValue
+  );
+  assert.equal(privateWidget.kind, 'embedded');
+  assert.equal(privateWidget.companyId, undefined);
+  assert.equal(companyWidget.companyId, 'company-1');
+  assert.equal(companyWidget.fields[1].valueEnc, 'cipher:Lampo');
+  assert.equal(companyWidget.fields[1].includeInQr, false);
+});
+
+test('rifiuta widget incorporati senza Account o Azienda coerenti', async () => {
+  const {prepareEmbeddedAccountWidget} = await loadModel();
+  const input = {title: 'Dato', fields: [{id: 'x', label: 'Campo', type: 'text', value: ''}]};
+  await assert.rejects(() => prepareEmbeddedAccountWidget(input, {}, async value => value));
+  await assert.rejects(() => prepareEmbeddedAccountWidget(
+    input, {context: 'company', accountId: 'a1'}, async value => value
+  ));
+});

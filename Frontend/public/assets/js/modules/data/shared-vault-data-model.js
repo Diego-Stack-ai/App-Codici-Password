@@ -56,6 +56,30 @@ export async function prepareSharedVaultData(input = {}, encryptValue) {
     };
 }
 
+export async function prepareEmbeddedAccountWidget(input = {}, account = {}, encryptValue) {
+    const context = account.context === 'private' ? 'private' : account.context === 'company' ? 'company' : null;
+    if (!context) throw new Error('Contesto Account non valido.');
+    const accountId = requiredText(account.accountId, 'Identificativo Account', 160);
+    const common = await prepareSharedVaultData(input, encryptValue);
+    const widget = {
+        ...common,
+        kind: 'embedded',
+        context,
+        accountId,
+        order: Number.isInteger(input.order) && input.order >= 0 ? input.order : 0,
+        collapsed: input.collapsed === true,
+        revision: Number.isInteger(input.revision) && input.revision >= 1 ? input.revision : 1
+    };
+    if (context === 'company') {
+        widget.companyId = requiredText(account.companyId, 'Identificativo Azienda', 160);
+    }
+    return widget;
+}
+
+export function createEmbeddedWidgetIdentifiers(widgetId = crypto.randomUUID()) {
+    return {widgetId, operationId: crypto.randomUUID()};
+}
+
 export function createSharedVaultIdentifiers(sharedDataId = crypto.randomUUID()) {
     return {
         sharedDataId,
