@@ -812,6 +812,32 @@
     padding: 0 var(--space-1, 0.25rem);
 }
 
+.account-widget-toggle {
+    display: inline-grid;
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    place-items: center;
+}
+
+.account-widget-toggle .material-symbols-outlined {
+    transition: transform 160ms ease;
+}
+
+.account-widget-toggle[aria-expanded="false"] .material-symbols-outlined {
+    transform: rotate(-90deg);
+}
+
+.account-widget-kind-icon {
+    flex: 0 0 auto;
+}
+
 .account-widget-display-field {
     box-sizing: border-box;
     width: 100%;
@@ -838,6 +864,27 @@
     margin-left: 0;
 }
 
+.account-widget-inline-field {
+    cursor: text;
+}
+
+.account-widget-inline-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    outline: 0;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.account-widget-inline-input:focus {
+    border-color: var(--accent-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgb(var(--accent-rgb, 59 130 246) / 18%);
+}
+
 .account-widget-card-actions .shared-account-reveal {
     margin-left: 0;
 }
@@ -859,6 +906,15 @@
     .account-widget-remove {
         grid-column: 2;
         grid-row: 1 / 4;
+    }
+
+    .account-widget-inline-field {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    .account-widget-inline-field strong {
+        flex-basis: 100%;
     }
 }
 

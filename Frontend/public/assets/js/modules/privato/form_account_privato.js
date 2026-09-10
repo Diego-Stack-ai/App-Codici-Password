@@ -11,7 +11,7 @@ import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, listContacts } from '../data/vault-repository.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.96';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.97';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -25,6 +25,7 @@ let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso
 let invitedEmails = [];
 let currentRevision = 0;
 let hasLinkedProfileField = false;
+let accountWidgetController = null;
 
 // Re-render callback per banking-renderer.js
 const rerender = () => renderBankAccounts(bankAccounts, rerender);
@@ -188,17 +189,27 @@ export async function initFormAccountPrivato(user) {
             id: 'btn-save-footer',
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('save') || 'Salva',
-            onclick: () => savePrivateAccount({
-                bankAccounts,
-                invitedEmails,
-                isExplicitMemo,
-                currentUid,
-                currentDocId,
-                isEditing,
-                baseRevision: currentRevision,
-                profileEmailLinkDraft,
-                hasLinkedProfileField
-            })
+            onclick: async () => {
+                saveBtn.disabled = true;
+                try {
+                    await accountWidgetController?.savePendingChanges();
+                } catch (error) {
+                    showToast(error.message || 'Salvataggio dei campi personalizzati non riuscito.', 'error');
+                    saveBtn.disabled = false;
+                    return;
+                }
+                await savePrivateAccount({
+                    bankAccounts,
+                    invitedEmails,
+                    isExplicitMemo,
+                    currentUid,
+                    currentDocId,
+                    isEditing,
+                    baseRevision: currentRevision,
+                    profileEmailLinkDraft,
+                    hasLinkedProfileField
+                });
+            }
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
         ]);
@@ -237,7 +248,7 @@ export async function initFormAccountPrivato(user) {
         isEditing ? loadData() : Promise.resolve()
     ]);
     if (isEditing) {
-        await initAccountEmbeddedWidgets({
+        accountWidgetController = await initAccountEmbeddedWidgets({
             uid: currentUid, context: 'private', accountId: currentDocId, editable: true
         });
     }
