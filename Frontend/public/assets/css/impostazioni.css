@@ -655,6 +655,83 @@ h3.settings-desc {
     overflow: hidden;
 }
 
+.account-field-usage-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(96vw, 900px);
+    max-height: min(90dvh, 820px);
+    overflow-y: auto;
+}
+
+.account-field-usage-privacy {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgb(59 130 246 / 28%);
+    border-radius: 14px;
+    background: rgb(59 130 246 / 9%);
+    color: var(--text-secondary);
+    font: var(--font-caption);
+}
+
+.account-field-usage-section {
+    display: grid;
+    gap: 0.65rem;
+    width: 100%;
+}
+
+.account-field-usage-section h4 {
+    margin: 0;
+    text-align: left;
+}
+
+.account-field-usage-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+}
+
+.account-field-usage-table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    text-align: left;
+    font: var(--font-caption);
+}
+
+.account-field-usage-table th,
+.account-field-usage-table td {
+    padding: 0.7rem;
+    border-bottom: 1px solid var(--card-border);
+    vertical-align: top;
+}
+
+.account-field-usage-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--card-bg);
+}
+
+.account-field-usage-table tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+.account-field-usage-table th span,
+.account-field-usage-table td span,
+.account-field-usage-table td small {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 600px) {
+    .account-field-usage-modal {
+        width: 96vw;
+        padding-inline: 0.85rem;
+    }
+}
+
 .shared-credentials-heading,
 .shared-credentials-card,
 .shared-credentials-sensitive {
