@@ -11,7 +11,7 @@ import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, listContacts } from '../data/vault-repository.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.98';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.99';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---

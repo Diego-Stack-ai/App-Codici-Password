@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.98';
+import { auth, db } from '../../firebase-config.js?v=1.2.99';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -43,6 +43,7 @@ export async function initImpostazioni(user) {
     setupEncryptedBackup(user);
     setupEncryptedRestore(user);
     setupCredentialHealth(user);
+    setupAccountFieldUsage(user);
     setupSharedCredentials(user);
     await setupPushSettings(user);
     showPendingSecurityNotice();
@@ -53,7 +54,7 @@ export async function initImpostazioni(user) {
 function setupSharedCredentials(user) {
     document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
         try {
-            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.98');
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.99');
             await openSharedCredentialsSettings(user);
         } catch (error) {
             console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
@@ -147,7 +148,7 @@ function setupCredentialHealth(user) {
             'Analisi locale delle credenziali in corso…'
         );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.98');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.99');
             const report = await inspectOwnerCredentialHealth(user.uid);
             working.close();
             showCredentialHealthResults(report);
@@ -156,6 +157,131 @@ function setupCredentialHealth(user) {
             if (error?.message !== 'USER_CANCELLED') {
                 console.warn('[CREDENTIAL HEALTH] Analisi non disponibile.', error?.message);
                 showToast('Controllo non completato. Nessun dato è stato salvato.', 'error');
+            }
+        } finally {
+            button.disabled = false;
+        }
+    });
+}
+
+function usageReportText(report) {
+    const lines = [
+        'Tipo\tCampo\tGruppo\tPrivati\tAziendali\tCompilati\tAccount leggibili\tUtilizzo\tStato\tIndicazione'
+    ];
+    const append = (type, row) => lines.push([
+        type, row.label, row.group || 'Widget', row.privateUsed, row.companyUsed,
+        row.used, row.eligible, `${row.percentage}%`, row.status, row.recommendation
+    ].join('\t'));
+    report.fields.forEach(row => append('Campo standard', row));
+    report.widgets.forEach(row => append('Widget', row));
+    return lines.join('\n');
+}
+
+function usageTable(title, rows) {
+    const body = createElement('tbody');
+    rows.forEach(row => body.appendChild(createElement('tr', {}, [
+        createElement('th', {scope: 'row'}, [
+            createElement('strong', {textContent: row.label}),
+            createElement('span', {textContent: row.group || 'Widget'})
+        ]),
+        createElement('td', {textContent: String(row.privateUsed)}),
+        createElement('td', {textContent: String(row.companyUsed)}),
+        createElement('td', {textContent: `${row.used}/${row.eligible}`}),
+        createElement('td', {textContent: `${row.percentage}%`}),
+        createElement('td', {}, [
+            createElement('strong', {textContent: row.status}),
+            createElement('span', {textContent: row.recommendation}),
+            row.unavailable
+                ? createElement('small', {textContent: `${row.unavailable} valori non leggibili`})
+                : null
+        ])
+    ])));
+    return createElement('section', {className: 'account-field-usage-section'}, [
+        createElement('h4', {textContent: title}),
+        createElement('div', {className: 'account-field-usage-scroll'}, [
+            createElement('table', {className: 'account-field-usage-table'}, [
+                createElement('thead', {}, [createElement('tr', {}, [
+                    createElement('th', {scope: 'col', textContent: 'Campo'}),
+                    createElement('th', {scope: 'col', textContent: 'Priv.'}),
+                    createElement('th', {scope: 'col', textContent: 'Az.'}),
+                    createElement('th', {scope: 'col', textContent: 'Usati'}),
+                    createElement('th', {scope: 'col', textContent: '%'}),
+                    createElement('th', {scope: 'col', textContent: 'Valutazione'})
+                ])]),
+                body
+            ])
+        ])
+    ]);
+}
+
+function showAccountFieldUsage(report) {
+    const modal = createElement('div', {
+        className: 'modal-overlay', role: 'dialog', 'aria-modal': 'true',
+        'aria-labelledby': 'account-field-usage-title'
+    });
+    const closeButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Chiudi'});
+    const copyButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Copia report'});
+    const previouslyFocused = document.activeElement;
+    const close = () => {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.remove();
+            previouslyFocused?.focus?.();
+        }, 300);
+    };
+    closeButton.addEventListener('click', close);
+    copyButton.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(usageReportText(report));
+            showToast('Report aggregato copiato. Non contiene valori degli Account.', 'success');
+        } catch {
+            showToast('Copia non disponibile su questo dispositivo.', 'error');
+        }
+    });
+    modal.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+    const summary = report.totals;
+    const content = [
+        createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'table_view'}),
+        createElement('h3', {id: 'account-field-usage-title', className: 'modal-title', textContent: 'Utilizzo campi Account'}),
+        createElement('p', {
+            className: 'modal-text',
+            textContent: `${summary.accounts} Account analizzati: ${summary.privateAccounts} privati e ${summary.companyAccounts} aziendali. ${summary.archivedExcluded} archiviati esclusi.`
+        }),
+        createElement('p', {
+            className: 'account-field-usage-privacy',
+            textContent: 'I valori sono stati decifrati soltanto in memoria. Il report contiene esclusivamente conteggi.'
+        }),
+        usageTable('Campi standard', report.fields)
+    ];
+    if (report.widgets.length) content.push(usageTable('Campi dei widget', report.widgets));
+    content.push(createElement('div', {className: 'modal-actions'}, [closeButton, copyButton]));
+    modal.appendChild(createElement('div', {className: 'modal-box account-field-usage-modal'}, content));
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => {
+        modal.classList.add('active');
+        closeButton.focus();
+    });
+}
+
+function setupAccountFieldUsage(user) {
+    const button = document.getElementById('btn-account-field-usage');
+    if (!button) return;
+    button.addEventListener('click', async () => {
+        button.disabled = true;
+        const working = showBackupWorking(
+            'Analisi campi Account',
+            'Controllo locale dei campi realmente compilati in corso…'
+        );
+        try {
+            const {inspectAccountFieldUsage} = await import('./account-field-usage-service.js?v=1.2.99');
+            const report = await inspectAccountFieldUsage(user.uid);
+            working.close();
+            showAccountFieldUsage(report);
+        } catch (error) {
+            working.close();
+            if (error?.message !== 'USER_CANCELLED') {
+                console.warn('[ACCOUNT FIELD USAGE] Analisi non disponibile.', error?.message);
+                showToast('Analisi non completata. Nessun dato è stato salvato.', 'error');
             }
         } finally {
             button.disabled = false;
@@ -573,7 +699,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.98');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.99');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
