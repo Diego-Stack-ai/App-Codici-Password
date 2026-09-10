@@ -705,6 +705,53 @@ h3.settings-desc {
     gap: 3px;
 }
 
+.shared-credentials-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.shared-credentials-action {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid rgb(148 163 184 / 34%);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 18%);
+    color: inherit;
+    cursor: pointer;
+    place-items: center;
+}
+
+.shared-credential-account-list {
+    display: grid;
+    gap: 10px;
+}
+
+.shared-credential-account {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px;
+    border: 1px solid rgb(148 163 184 / 34%);
+    border-radius: 15px;
+    background: rgb(255 255 255 / 18%);
+    color: inherit;
+    text-align: left;
+}
+
+.shared-credential-account.linked {
+    border-color: rgb(16 185 129 / 68%);
+    background: rgb(16 185 129 / 13%);
+}
+
+.shared-credential-account-copy {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+}
+
 .shared-credentials-card-copy small,
 .shared-credentials-empty {
     opacity: 0.72;

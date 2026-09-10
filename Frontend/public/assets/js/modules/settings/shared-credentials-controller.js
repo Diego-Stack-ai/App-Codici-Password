@@ -2,12 +2,15 @@ import {createElement, setChildren, clearElement} from '../../dom-utils.js';
 import {showConfirmModal, showToast} from '../../ui-core-v129.js';
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
+    listCompanies, listCompanyAccounts, listPrivateAccounts,
     listSharedVaultData, listSharedVaultDataConfirmed,
     listSharedVaultLinks, listSharedVaultLinksConfirmed
 } from '../data/vault-repository.js';
 import {
     createSharedCredential,
     deleteSharedCredential,
+    linkSharedCredential,
+    unlinkSharedCredential,
     updateSharedCredential
 } from '../data/shared-vault-data-client.js';
 
@@ -67,6 +70,97 @@ async function editableFields(record) {
             ? await decrypt(field.valueEnc, vaultKeyMaterial)
             : field.value ?? ''
     })));
+}
+
+async function accountChoices(uid) {
+    const [privateAccounts, companies] = await Promise.all([
+        listPrivateAccounts(uid), listCompanies(uid)
+    ]);
+    const companyGroups = await Promise.all(companies.map(async company => ({
+        company,
+        accounts: await listCompanyAccounts(uid, company.id)
+    })));
+    return [
+        ...privateAccounts.filter(account => !account.isArchived).map(account => ({
+            context: 'private', accountId: account.id,
+            label: account.nomeAccount || 'Account privato', group: 'Privato'
+        })),
+        ...companyGroups.flatMap(({company, accounts}) => accounts.filter(account => !account.isArchived).map(account => ({
+            context: 'company', companyId: company.id, accountId: account.id,
+            label: account.nomeAccount || 'Account aziendale',
+            group: company.ragioneSociale || company.nome || 'Azienda'
+        })))
+    ];
+}
+
+function sameLink(link, account) {
+    return link.context === account.context && link.accountId === account.accountId &&
+        (account.context !== 'company' || link.companyId === account.companyId);
+}
+
+async function openLinkManager(record, user, refreshParent) {
+    let overlay;
+    const close = () => overlay.remove();
+    const shell = modalShell(`Collegamenti · ${record.title || 'Credenziale'}`, close);
+    overlay = shell.overlay;
+    const accounts = await accountChoices(user.uid);
+    let revision = Number(record.revision || 0);
+    let links = (await listSharedVaultLinksConfirmed(user.uid)).filter(link => link.sharedDataId === record.id);
+    const render = () => {
+        clearElement(shell.body);
+        shell.body.appendChild(createElement('p', {
+            className: 'modal-text',
+            textContent: 'Collega lo stesso dato centrale agli Account che lo utilizzano. Ogni modifica futura sarà visibile da tutti i collegamenti.'
+        }));
+        const list = createElement('div', {className: 'shared-credential-account-list'});
+        if (!accounts.length) list.appendChild(createElement('p', {className: 'shared-credentials-empty', textContent: 'Nessun Account disponibile.'}));
+        for (const account of accounts) {
+            const existing = links.find(link => sameLink(link, account));
+            const button = createElement('button', {
+                type: 'button', className: `shared-credential-account${existing ? ' linked' : ''}`
+            }, [
+                createElement('span', {className: 'material-symbols-outlined', textContent: existing ? 'link' : 'add_link'}),
+                createElement('span', {className: 'shared-credential-account-copy'}, [
+                    createElement('strong', {textContent: account.label}),
+                    createElement('small', {textContent: account.group})
+                ]),
+                createElement('span', {textContent: existing ? 'Collegato' : 'Collega'})
+            ]);
+            button.onclick = async () => {
+                if (!navigator.onLine) {
+                    showToast('La gestione dei collegamenti richiede internet.', 'warning');
+                    return;
+                }
+                button.disabled = true;
+                try {
+                    const payload = {...account, order: existing?.order || links.length, collapsed: false};
+                    delete payload.label;
+                    delete payload.group;
+                    const result = existing
+                        ? await unlinkSharedCredential(record.id, revision, payload)
+                        : await linkSharedCredential(record.id, revision, payload);
+                    revision = Number(result.revision || revision + 1);
+                    if (existing) links = links.filter(link => link.id !== existing.id);
+                    else links = (await listSharedVaultLinksConfirmed(user.uid)).filter(link => link.sharedDataId === record.id);
+                    render();
+                    showToast(existing ? 'Account scollegato.' : 'Account collegato.', 'success');
+                } catch (error) {
+                    showToast(error.message || 'Collegamento non aggiornato.', 'error');
+                    button.disabled = false;
+                }
+            };
+            list.appendChild(button);
+        }
+        shell.body.appendChild(list);
+        shell.body.appendChild(createElement('div', {className: 'modal-actions'}, [
+            createElement('button', {
+                type: 'button', className: 'btn-modal btn-primary', textContent: 'Fine',
+                onclick: async () => { close(); await refreshParent(true); }
+            })
+        ]));
+    };
+    document.body.appendChild(overlay);
+    render();
 }
 
 async function openEditor(record, refresh) {
@@ -134,7 +228,7 @@ async function openEditor(record, refresh) {
         }
     });
     setChildren(form, [
-        createElement('p', {className: 'modal-text', textContent: 'Questi dati restano separati dagli Account. Il collegamento sarà aggiunto nel passaggio successivo.'}),
+        createElement('p', {className: 'modal-text', textContent: 'Questi dati restano separati dagli Account e possono essere collegati dalla scheda centrale o dal dettaglio Account.'}),
         title, description, fieldList, addField,
         createElement('div', {className: 'modal-actions'}, actions)
     ]);
@@ -167,16 +261,22 @@ export async function openSharedCredentialsSettings(user) {
         if (!records.length) list.appendChild(createElement('p', {className: 'shared-credentials-empty', textContent: 'Nessuna Credenziale comune presente.'}));
         for (const record of records) {
             const linkCount = links.filter(link => link.sharedDataId === record.id).length;
-            list.appendChild(createElement('button', {
-                type: 'button', className: 'shared-credentials-card', disabled: !navigator.onLine,
-                onclick: () => openEditor(record, render)
-            }, [
+            list.appendChild(createElement('article', {className: 'shared-credentials-card'}, [
                 createElement('span', {className: 'material-symbols-outlined', textContent: record.icon || 'key'}),
                 createElement('span', {className: 'shared-credentials-card-copy'}, [
                     createElement('strong', {textContent: record.title || 'Credenziale comune'}),
                     createElement('small', {textContent: `${record.fields?.length || 0} campi · ${linkCount} Account collegati`})
                 ]),
-                createElement('span', {className: 'material-symbols-outlined', textContent: 'chevron_right'})
+                createElement('span', {className: 'shared-credentials-card-actions'}, [
+                    createElement('button', {
+                        type: 'button', className: 'shared-credentials-action', disabled: !navigator.onLine,
+                        'aria-label': 'Gestisci collegamenti', onclick: () => openLinkManager(record, user, render)
+                    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'account_tree'})]),
+                    createElement('button', {
+                        type: 'button', className: 'shared-credentials-action', disabled: !navigator.onLine,
+                        'aria-label': 'Modifica credenziale', onclick: () => openEditor(record, render)
+                    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'edit'})])
+                ])
             ]));
         }
         shell.body.appendChild(list);

@@ -4,7 +4,7 @@
  * Refactor: Rimozione innerHTML, uso dom-utils.js e migrazione sotto modules/scadenze/.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.90';
+import { db } from '../../firebase-config.js?v=1.2.91';
 import { LOG } from '../../logger.js';
 import { doc, setDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
