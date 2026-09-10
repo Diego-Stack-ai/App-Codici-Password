@@ -26,6 +26,8 @@ Il 10 settembre 2026 la suite M0–M10 è stata rieseguita integralmente con esi
 
 Questo chiude il gate automatico della candidata v1.2.90. Restano separati e non mascherati: matrice fisica Windows, audit indipendente e consultazione offline reale già registrata in `M6_SINCRONIZZAZIONE_OFFLINE.md`.
 
+La successiva evoluzione dell'Agente Codex è stata sottoposta ad audit prima dell'implementazione. Architettura, confini D0–D4 e nuovo ordine operativo post M0–M10 sono registrati in `AGENTE_CODEX_EVOLUZIONE.md`; modelli locali e servizi remoti non sono stati abilitati.
+
 ## Checklist operativa di rilascio
 
 1. working tree pulita, versione unica e suite completa verde;

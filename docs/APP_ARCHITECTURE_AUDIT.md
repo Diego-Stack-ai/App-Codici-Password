@@ -16,6 +16,9 @@ L'applicazione è una PWA multipagina ospitata da Firebase Hosting. Le pagine pr
 notifiche/inviti e poi importa dinamicamente il modulo della pagina tramite `pages-init.js`.
 La pagina di accesso usa il bootstrap più piccolo `login-entry.js`.
 
+L'audit dedicato dell'Agente locale, il suo confine dati e la roadmap verso conoscenza per pagina,
+ricerca semantica e modelli locali opzionali sono definiti in `AGENTE_CODEX_EVOLUZIONE.md`.
+
 Firestore usa come radice `users/{uid}`. I dati personali sono nelle sottocollezioni `accounts`,
 `aziende`, `scadenze`, `contacts` e `settings`; gli account aziendali sono sotto
 `users/{uid}/aziende/{aziendaId}/accounts`. Gli inviti sono documenti top-level in `invites` e
