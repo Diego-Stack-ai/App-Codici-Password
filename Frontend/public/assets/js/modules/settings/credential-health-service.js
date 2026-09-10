@@ -6,6 +6,25 @@ import {
 import {accountModeFromRecord, ACCOUNT_MODES} from '../shared/account-mode-model.js';
 import {analyzeCredentialHealth} from './credential-health-model.js';
 
+const CONFIRMED_READ_TIMEOUT_MS = 8_000;
+
+async function freshOrCached(freshRead, cachedRead) {
+    let timeoutId;
+    try {
+        return await Promise.race([
+            freshRead(),
+            new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('CREDENTIAL_HEALTH_READ_TIMEOUT')),
+                    CONFIRMED_READ_TIMEOUT_MS);
+            })
+        ]);
+    } catch {
+        return cachedRead();
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
 async function decryptPassword(record, vaultKeyMaterial) {
     if (!record.password) return '';
     if (record._encrypted === false) return String(record.password);
@@ -39,14 +58,20 @@ async function mapWithConcurrency(items, concurrency, worker) {
 export async function inspectOwnerCredentialHealth(uid) {
     if (!uid) throw new Error('CREDENTIAL_HEALTH_UID_REQUIRED');
     const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
-    const readPrivateAccounts = navigator.onLine ? listPrivateAccountsConfirmed : listPrivateAccounts;
-    const readCompanyAccounts = navigator.onLine ? listCompanyAccountsConfirmed : listCompanyAccounts;
     const [privateAccounts, companies] = await Promise.all([
-        readPrivateAccounts(uid), listCompanies(uid)
+        navigator.onLine
+            ? freshOrCached(() => listPrivateAccountsConfirmed(uid), () => listPrivateAccounts(uid))
+            : listPrivateAccounts(uid),
+        listCompanies(uid)
     ]);
     const companyGroups = await Promise.all(companies.map(async company => ({
         company,
-        accounts: await readCompanyAccounts(uid, company.id)
+        accounts: await (navigator.onLine
+            ? freshOrCached(
+                () => listCompanyAccountsConfirmed(uid, company.id),
+                () => listCompanyAccounts(uid, company.id)
+            )
+            : listCompanyAccounts(uid, company.id))
     })));
     const sources = [
         ...privateAccounts.map(account => ({account, area: 'privato', companyName: ''})),

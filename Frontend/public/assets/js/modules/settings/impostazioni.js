@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.89';
+import { auth, db } from '../../firebase-config.js?v=1.2.90';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -129,12 +129,17 @@ function setupCredentialHealth(user) {
     if (!button) return;
     button.addEventListener('click', async () => {
         button.disabled = true;
-        showToast('Analisi locale delle credenziali in corso…', 'info');
+        const working = showBackupWorking(
+            'Salute credenziali',
+            'Analisi locale delle credenziali in corso…'
+        );
         try {
-            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js');
+            const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js?v=1.2.90');
             const report = await inspectOwnerCredentialHealth(user.uid);
+            working.close();
             showCredentialHealthResults(report);
         } catch (error) {
+            working.close();
             if (error?.message !== 'USER_CANCELLED') {
                 console.warn('[CREDENTIAL HEALTH] Analisi non disponibile.', error?.message);
                 showToast('Controllo non completato. Nessun dato è stato salvato.', 'error');
@@ -555,7 +560,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.89');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.90');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
