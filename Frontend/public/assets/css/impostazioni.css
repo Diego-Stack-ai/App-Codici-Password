@@ -688,6 +688,11 @@ h3.settings-desc {
     gap: 12px;
 }
 
+.shared-credentials-list + .modal-actions,
+.shared-credentials-form > .modal-actions {
+    margin-top: var(--space-5, 1.25rem);
+}
+
 .shared-credentials-card {
     width: 100%;
     gap: 12px;
@@ -734,33 +739,18 @@ h3.settings-desc {
     gap: 12px;
 }
 
-.shared-credential-account-toolbar {
+.shared-credential-account-search {
     position: sticky;
     z-index: 2;
     top: 0;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    border: 1px solid rgb(148 163 184 / 30%);
-    border-radius: 16px;
-    background: rgb(241 245 249 / 92%);
+    flex: 0 0 auto;
+    min-width: 0;
+    border-color: var(--input-border);
+    background: var(--card-bg);
+    color: var(--input-text);
+    font: var(--font-body);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-}
-
-.dark .shared-credential-account-toolbar {
-    background: rgb(15 23 42 / 92%);
-}
-
-.shared-credential-account-search {
-    min-width: 0;
-}
-
-.shared-credential-account-summary {
-    grid-column: 2;
-    opacity: 0.7;
 }
 
 .shared-credential-account-actions {
@@ -769,7 +759,7 @@ h3.settings-desc {
     bottom: 0;
     margin: 0;
     padding: 10px 0 2px;
-    background: linear-gradient(to bottom, transparent, var(--bg-primary, #eef4fb) 32%);
+    background: linear-gradient(to bottom, transparent, var(--bg-primary) 32%);
 }
 
 .shared-credential-account {

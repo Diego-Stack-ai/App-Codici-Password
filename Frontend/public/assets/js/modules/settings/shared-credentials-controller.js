@@ -136,15 +136,7 @@ async function openLinkManager(record, user, refreshParent) {
             nextSearch?.focus();
             nextSearch?.setSelectionRange(searchQuery.length, searchQuery.length);
         });
-        const linkedCount = accounts.filter(account => links.some(link => sameLink(link, account))).length;
-        shell.body.appendChild(createElement('div', {className: 'shared-credential-account-toolbar'}, [
-            createElement('span', {className: 'material-symbols-outlined', textContent: 'search'}),
-            search,
-            createElement('small', {
-                className: 'shared-credential-account-summary',
-                textContent: `${linkedCount} collegati · ${visibleAccounts.length} visualizzati`
-            })
-        ]));
+        shell.body.appendChild(search);
         const list = createElement('div', {className: 'shared-credential-account-list'});
         if (!accounts.length) list.appendChild(createElement('p', {className: 'shared-credentials-empty', textContent: 'Nessun Account disponibile.'}));
         else if (!visibleAccounts.length) list.appendChild(createElement('p', {className: 'shared-credentials-empty', textContent: 'Nessun Account corrisponde alla ricerca.'}));
