@@ -43,7 +43,7 @@ export async function initDettaglioAccountAzienda(user) {
     currentId = urlParams.get('id');
     currentAziendaId = urlParams.get('aziendaId');
     ownerId = urlParams.get('ownerId') || user.uid; // V3 Add owner parameter
-    requireServerRefresh = urlParams.get('serverRefresh') === '1' && navigator.onLine;
+    requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('serverRefresh') === '1') && navigator.onLine;
 
     if (!currentId || !currentAziendaId) {
         showToast("Parametri mancanti", "error");
@@ -96,6 +96,7 @@ async function loadAccount() {
         if (requireServerRefresh) {
             requireServerRefresh = false;
             const cleanParams = new URLSearchParams(window.location.search);
+            cleanParams.delete('afterWrite');
             cleanParams.delete('serverRefresh');
             const cleanQuery = cleanParams.toString();
             window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);

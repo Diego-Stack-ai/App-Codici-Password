@@ -205,8 +205,8 @@ export async function savePrivateAccount({
             showToast(t('success_save'), "success");
             setTimeout(() => {
                 const destination = isEditing
-                    ? `dettaglio_account_privato.html?id=${currentDocId}&m6refresh=1`
-                    : 'account_privati.html?m6refresh=1';
+                    ? `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`
+                    : 'account_privati.html?afterWrite=1';
                 window.location.replace(destination);
             }, 1000);
             return;
@@ -370,7 +370,7 @@ export async function savePrivateAccount({
         showToast(t('success_save'), "success");
         setTimeout(() => {
             const destination = isEditing
-                ? `dettaglio_account_privato.html?id=${currentDocId}&m6refresh=1`
+                ? `dettaglio_account_privato.html?id=${currentDocId}&afterWrite=1`
                 : 'account_privati.html';
             window.location.replace(destination);
         }, 1000);

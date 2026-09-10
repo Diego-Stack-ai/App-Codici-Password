@@ -34,7 +34,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
 function getPrivateAccountListDestination({refresh = false} = {}) {
     const type = isExplicitMemo ? 'memo' : 'standard';
     const params = new URLSearchParams({type});
-    if (refresh) params.set('m6refresh', '1');
+    if (refresh) params.set('afterWrite', '1');
     return `account_privati.html?${params.toString()}`;
 }
 

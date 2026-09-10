@@ -45,7 +45,7 @@ export async function initDettaglioAccountPrivato(user) {
 
     const params = new URLSearchParams(window.location.search);
     currentId = params.get('id');
-    requireServerRefresh = params.get('m6refresh') === '1' && navigator.onLine;
+    requireServerRefresh = (params.get('afterWrite') === '1' || params.get('m6refresh') === '1') && navigator.onLine;
 
     if (!currentId) {
         showToast(t('missing_id') || "ID mancante", "error");
@@ -98,6 +98,7 @@ async function loadAccount() {
         if (requireServerRefresh) {
             requireServerRefresh = false;
             const cleanParams = new URLSearchParams(window.location.search);
+            cleanParams.delete('afterWrite');
             cleanParams.delete('m6refresh');
             const cleanQuery = cleanParams.toString();
             window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);

@@ -5,6 +5,11 @@ import {readdir} from 'node:fs/promises';
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
 const repository = await read('Frontend/public/assets/js/modules/data/vault-repository.js');
 const coordinator = await read('Frontend/public/assets/js/modules/data/request-coordinator.js');
+const offlineFirestore = await read('Frontend/public/assets/js/offline-firestore.js');
+const privateSave = await read('Frontend/public/assets/js/modules/privato/form-privato-save.js');
+const privateDetail = await read('Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js');
+const companySave = await read('Frontend/public/assets/js/modules/azienda/form-azienda-save.js');
+const companyDetail = await read('Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js');
 
 assert.match(coordinator, /const pendingReads = new Map\(\)/, 'Coordinatore richieste M2 mancante');
 assert.match(coordinator, /\.finally\(/, 'Le richieste concluse non vengono liberate');
@@ -15,6 +20,18 @@ assert.match(repository, /listCompanyAccounts/, 'Repository Account aziendali ma
 assert.match(repository, /listDeadlines/, 'Repository Scadenze mancante');
 assert.match(repository, /coalesceRead\(key,[\s\S]*?\.then\(records\)/,
     'Il repository non separa la lettura condivisa dagli oggetti consegnati alle pagine');
+assert.match(offlineFirestore, /getDocFromServer/,
+    'La lettura documento server-confirmed non usa una sorgente Firestore esplicita');
+assert.match(offlineFirestore, /getDocsFromServer/,
+    'La lettura collezione server-confirmed non usa una sorgente Firestore esplicita');
+assert.match(privateSave, /afterWrite=1/,
+    'Il salvataggio Account privato non richiede il read-after-write');
+assert.match(companySave, /afterWrite=1/,
+    'Il salvataggio Account aziendale non richiede il read-after-write');
+assert.match(privateDetail, /getPrivateAccountConfirmed/,
+    'Il dettaglio privato non dispone della lettura confermata dopo write');
+assert.match(companyDetail, /getCompanyAccountConfirmed/,
+    'Il dettaglio aziendale non dispone della lettura confermata dopo write');
 
 const migratedPages = await Promise.all([
     'Frontend/public/assets/js/modules/privato/account_privati.js',

@@ -70,12 +70,20 @@ Il repository e l'ambiente corrente non forniscono una lettura amministrativa si
 
 ### Priorità risultante
 
-1. formalizzare e testare una lettura `afterWrite`/server-required unica nel repository;
-2. sostituire i due parametri ad hoc con un contratto condiviso, mantenendo il fallback offline;
+1. [x] formalizzare e testare una lettura `afterWrite`/server-required unica nel repository;
+2. [x] sostituire i due parametri ad hoc con un contratto condiviso, mantenendo il fallback offline;
 3. correggere il contesto proprietario degli allegati aziendali condivisi;
 4. bloccare il collegamento email quando esiste una password legacy non trasferita;
 5. creare l'inventario Firestore aggregato prima di progettare migrazioni;
 6. soltanto dopo, definire schema widget Account, template e ordinamento touch.
+
+### Primo blocco implementato — read-your-writes
+
+Il contratto usa ora `afterWrite=1` per le navigazioni successive a un salvataggio privato o aziendale. I vecchi parametri `m6refresh` e `serverRefresh` restano accettati in lettura per compatibilità con schede o shell già aperte, ma non vengono più prodotti dai form.
+
+Le funzioni `getDocServerConfirmed()` e `getDocsServerConfirmed()` richiedono esplicitamente la sorgente server di Firestore. Le normali funzioni `getDocSmart()` e `getDocsSmart()` restano cache-first: il costo di rete e l'offline-first non cambiano per la navigazione ordinaria.
+
+Verifiche automatiche superate: build del runtime Firebase locale, shell offline, audit accesso dati, navigazione, sintassi JavaScript e riferimenti statici. Resta obbligatorio il collaudo fisico privato/azienda modifica → salva → dettaglio prima del rilascio.
 
 ## B — Piano architetturale
 

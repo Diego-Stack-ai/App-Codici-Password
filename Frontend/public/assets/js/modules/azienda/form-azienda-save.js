@@ -279,7 +279,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         showToast(t('success_save'), "success");
         setTimeout(() => {
             const destination = isEditing
-                ? `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}&serverRefresh=1`
+                ? `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}&afterWrite=1`
                 : `dati_azienda.html?id=${currentAziendaId}`;
             window.location.replace(destination);
         }, 1000);

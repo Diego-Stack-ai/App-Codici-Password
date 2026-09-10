@@ -138,7 +138,7 @@ function setupUI() {
 async function loadAccounts() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
-        const requireServerRefresh = urlParams.get('m6refresh') === '1' && navigator.onLine;
+        const requireServerRefresh = (urlParams.get('afterWrite') === '1' || urlParams.get('m6refresh') === '1') && navigator.onLine;
         let sharedWithMe = [];
 
         // 1. Invitations Accepted
@@ -208,6 +208,7 @@ async function loadAccounts() {
         allAccounts = [...ownAccounts, ...sharedWithMe];
 
         if (requireServerRefresh) {
+            urlParams.delete('afterWrite');
             urlParams.delete('m6refresh');
             const cleanQuery = urlParams.toString();
             window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);

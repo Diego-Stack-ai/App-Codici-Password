@@ -1,8 +1,8 @@
 import {
-    getDoc as getDocOnline,
     getDocFromCache,
-    getDocs as getDocsOnline,
-    getDocsFromCache
+    getDocFromServer,
+    getDocsFromCache,
+    getDocsFromServer
 } from '/assets/js/vendor/firebase-runtime.js';
 
 const requests = new Map();
@@ -22,11 +22,11 @@ function referenceKey(reference, mode) {
 }
 
 export function getDocServerConfirmed(reference) {
-    return deduplicate(referenceKey(reference, 'doc-server'), () => getDocOnline(reference));
+    return deduplicate(referenceKey(reference, 'doc-server'), () => getDocFromServer(reference));
 }
 
 export function getDocsServerConfirmed(reference) {
-    return deduplicate(referenceKey(reference, 'query-server'), () => getDocsOnline(reference));
+    return deduplicate(referenceKey(reference, 'query-server'), () => getDocsFromServer(reference));
 }
 
 export async function getDocSmart(reference) {
