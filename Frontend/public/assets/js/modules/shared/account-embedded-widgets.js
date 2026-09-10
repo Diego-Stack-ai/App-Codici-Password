@@ -15,7 +15,9 @@ async function editableFields(widget) {
     const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
     return Promise.all((widget.fields || []).map(async field => ({
         ...field,
-        value: field.encrypted ? await decrypt(field.valueEnc, vaultKeyMaterial) : field.value ?? ''
+        value: Object.prototype.hasOwnProperty.call(field, 'value')
+            ? field.value ?? ''
+            : field.encrypted ? await decrypt(field.valueEnc, vaultKeyMaterial) : ''
     })));
 }
 
@@ -40,10 +42,24 @@ function fieldRow(field = {}) {
     setChildren(row, [label, value, sensitive, remove]);
     row.getValue = () => ({
         id: field.id || newId('field'), label: label.value, value: value.value,
-        type: sensitive.firstElementChild.checked ? 'sensitive' : 'text',
+        type: sensitive.firstElementChild.checked
+            ? 'sensitive'
+            : (field.type && field.type !== 'sensitive' ? field.type : 'text'),
         encrypted: sensitive.firstElementChild.checked, order: 0
     });
     return row;
+}
+
+function widgetData(widget, fields, collapsed = widget?.collapsed === true) {
+    return {
+        title: widget.title,
+        description: widget.description || '',
+        icon: widget.icon || 'widgets',
+        color: widget.color || '#3b82f6',
+        order: Number(widget.order || 0),
+        collapsed,
+        fields
+    };
 }
 
 async function openEditor(widget, context, refresh, templates = []) {
@@ -90,12 +106,14 @@ async function openEditor(widget, context, refresh, templates = []) {
         }
         save.disabled = true;
         try {
-            const data = {
-                title: title.value, description: widget?.description || '', icon: widget?.icon || 'widgets',
-                color: widget?.color || '#3b82f6', order: widget?.order || 0,
-                collapsed: widget?.collapsed === true,
-                fields: rows.map((row, order) => ({...row.getValue(), order}))
-            };
+            const data = widgetData({
+                title: title.value,
+                description: widget?.description || '',
+                icon: widget?.icon || 'widgets',
+                color: widget?.color || '#3b82f6',
+                order: widget?.order || 0,
+                collapsed: widget?.collapsed === true
+            }, rows.map((row, order) => ({...row.getValue(), order})));
             if (widget) await updateAccountWidget(widget.id, Number(widget.revision || 0), data, context);
             else await createAccountWidget(data, context);
             close();
@@ -160,8 +178,42 @@ async function copyField(field) {
 }
 
 function widgetCard(widget, context, refresh) {
+    let collapsed = widget.collapsed === true;
+    let dirty = false;
     const fields = createElement('div', {className: 'shared-account-fields'});
-    for (const field of [...(widget.fields || [])].sort((a, b) => a.order - b.order)) {
+    const fieldReaders = [];
+    const markDirty = () => { dirty = true; };
+    const sourceFields = [...(widget.fields || [])].sort((a, b) => a.order - b.order);
+    for (const field of sourceFields) {
+        if (context.editable) {
+            const input = createElement('input', {
+                className: 'account-widget-inline-input',
+                type: field.encrypted ? 'password' : 'text',
+                maxlength: 10000,
+                value: field.value ?? '',
+                'aria-label': field.label
+            });
+            input.addEventListener('input', markDirty);
+            const children = [createElement('strong', {textContent: field.label}), input];
+            if (field.encrypted) {
+                children.push(createElement('button', {
+                    type: 'button', className: 'shared-account-reveal',
+                    'aria-label': `Mostra ${field.label}`,
+                    onclick: event => {
+                        const revealed = input.type === 'text';
+                        input.type = revealed ? 'password' : 'text';
+                        event.currentTarget.setAttribute('aria-label', `${revealed ? 'Mostra' : 'Nascondi'} ${field.label}`);
+                        const icon = event.currentTarget.querySelector('.material-symbols-outlined');
+                        if (icon) icon.textContent = revealed ? 'visibility' : 'visibility_off';
+                    }
+                }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
+            }
+            fields.appendChild(createElement('div', {
+                className: 'shared-account-field glass-field border-glow account-widget-display-field account-widget-inline-field'
+            }, children));
+            fieldReaders.push(() => ({...field, value: input.value}));
+            continue;
+        }
         const value = createElement('span', {
             className: 'shared-account-value',
             textContent: field.encrypted ? '••••••••' : String(field.value ?? '—')
@@ -177,10 +229,25 @@ function widgetCard(widget, context, refresh) {
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'content_copy'})]));
         fields.appendChild(createElement('div', {className: 'shared-account-field glass-field border-glow account-widget-display-field'}, children));
     }
+    fields.hidden = collapsed;
+    const toggle = createElement('button', {
+        type: 'button', className: 'account-widget-toggle',
+        'aria-label': `${collapsed ? 'Apri' : 'Chiudi'} ${widget.title}`,
+        'aria-expanded': String(!collapsed),
+        onclick: event => {
+            collapsed = !collapsed;
+            fields.hidden = collapsed;
+            event.currentTarget.setAttribute('aria-expanded', String(!collapsed));
+            event.currentTarget.setAttribute('aria-label', `${collapsed ? 'Apri' : 'Chiudi'} ${widget.title}`);
+            if (context.editable) markDirty();
+        }
+    }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'expand_more'})]);
+    const currentFields = () => fieldReaders.map((read, order) => ({...read(), order}));
+    const draftWidget = () => ({...widget, collapsed, fields: currentFields()});
     const actions = context.editable ? createElement('span', {className: 'account-widget-card-actions'}, [
         createElement('button', {
-            type: 'button', className: 'shared-account-reveal', 'aria-label': 'Modifica widget',
-            onclick: () => openEditor(widget, context, refresh)
+            type: 'button', className: 'shared-account-reveal', 'aria-label': 'Modifica struttura widget',
+            onclick: () => openEditor(draftWidget(), context, refresh)
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'edit'})]),
         createElement('button', {
             type: 'button', className: 'shared-account-reveal account-widget-delete', 'aria-label': 'Elimina widget',
@@ -199,22 +266,40 @@ function widgetCard(widget, context, refresh) {
             }
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})])
     ]) : null;
-    return createElement('article', {className: 'account-widget-block'}, [
+    const card = createElement('article', {className: 'account-widget-block'}, [
         createElement('div', {className: 'shared-account-card-heading account-widget-heading'}, [
-            createElement('span', {className: 'material-symbols-outlined', textContent: widget.icon || 'widgets'}),
+            toggle,
+            createElement('span', {className: 'material-symbols-outlined account-widget-kind-icon', textContent: widget.icon || 'widgets'}),
             createElement('strong', {textContent: widget.title}),
             actions
         ]),
         fields
     ]);
+    card.hasPendingChanges = () => dirty;
+    card.savePendingChanges = async () => {
+        if (!dirty || !context.editable) return false;
+        await updateAccountWidget(
+            widget.id,
+            Number(widget.revision || 0),
+            widgetData(widget, currentFields(), collapsed),
+            context
+        );
+        dirty = false;
+        return true;
+    };
+    return card;
 }
 
 export async function initAccountEmbeddedWidgets(context) {
     const section = document.getElementById('account-widgets-section');
     const list = document.getElementById('account-widgets-list');
     const add = document.getElementById('btn-add-account-widget');
-    if (!section || !list || !context?.uid || !context.accountId) return;
-    if (context.readOnly) { section.classList.add('hidden'); return; }
+    const emptyController = {
+        hasPendingChanges: () => false,
+        savePendingChanges: async () => false
+    };
+    if (!section || !list || !context?.uid || !context.accountId) return emptyController;
+    if (context.readOnly) { section.classList.add('hidden'); return emptyController; }
     const refresh = async confirmed => {
         const read = confirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
         const allWidgets = await read(context.uid);
@@ -231,7 +316,13 @@ export async function initAccountEmbeddedWidgets(context) {
             return true;
         });
         clearElement(list);
-        widgets.forEach(widget => list.appendChild(widgetCard(widget, context, refresh)));
+        const editableWidgets = context.editable
+            ? await Promise.all(widgets.map(editableFields))
+            : widgets.map(widget => widget.fields || []);
+        widgets.forEach((widget, index) => list.appendChild(widgetCard({
+            ...widget,
+            fields: editableWidgets[index]
+        }, context, refresh)));
         section.classList.toggle('hidden', !context.editable && widgets.length === 0);
         if (add) {
             add.classList.toggle('hidden', !context.editable);
@@ -241,4 +332,14 @@ export async function initAccountEmbeddedWidgets(context) {
         }
     };
     await refresh(false);
+    return {
+        hasPendingChanges: () => [...list.children].some(card => card.hasPendingChanges?.()),
+        savePendingChanges: async () => {
+            const pending = [...list.children].filter(card => card.hasPendingChanges?.());
+            if (!pending.length) return false;
+            await Promise.all(pending.map(card => card.savePendingChanges()));
+            await refresh(true);
+            return true;
+        }
+    };
 }

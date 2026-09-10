@@ -5,7 +5,7 @@
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.96';
+import { db } from '../../firebase-config.js?v=1.2.97';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -16,7 +16,7 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
 import { getCompanyAccount, listContacts } from '../data/vault-repository.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.96';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.97';
 
 // --- STATE ---
 let currentUid = null;
@@ -27,6 +27,7 @@ let bankAccounts = [];
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
+let accountWidgetController = null;
 
 // Funzione di re-render locale per banking-renderer
 const rerender = () => renderBankAccounts(bankAccounts, rerender);
@@ -75,7 +76,7 @@ export async function initFormAccountAzienda(user) {
         isEditing ? loadData() : Promise.resolve()
     ]);
     if (isEditing) {
-        await initAccountEmbeddedWidgets({
+        accountWidgetController = await initAccountEmbeddedWidgets({
             uid: currentUid, context: 'company', companyId: currentAziendaId,
             accountId: currentDocId, editable: true
         });
@@ -105,7 +106,20 @@ function initBaseUI() {
             id: 'save-btn-footer',
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('save') || 'Salva',
-            onclick: () => saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing })
+            onclick: async () => {
+                saveBtn.disabled = true;
+                try {
+                    await accountWidgetController?.savePendingChanges();
+                } catch (error) {
+                    showToast(error.message || 'Salvataggio dei campi personalizzati non riuscito.', 'error');
+                    saveBtn.disabled = false;
+                    return;
+                }
+                await saveAccount({
+                    bankAccounts, invitedEmails, isExplicitMemo, currentUid,
+                    currentDocId, currentAziendaId, isEditing
+                });
+            }
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
         ]);
