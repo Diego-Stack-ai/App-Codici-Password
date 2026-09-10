@@ -143,7 +143,7 @@ Accessi previsti:
 
 Creazione centrale e collegamento devono costituire un'unica operazione atomica. La modifica deve avvisare quanti Account saranno interessati. L'eliminazione deve essere bloccata finché esistono collegamenti, mentre lo scollegamento del singolo Account non elimina il dato centrale.
 
-Il percorso centrale candidato è `users/{uid}/sharedVaultData/{datoId}`. L'audit tecnico di Rules, backup e coda offline ha portato al contratto candidato descritto sotto; nessuna collezione è stata ancora creata e il contratto resta soggetto al gate di approvazione prima dell'implementazione.
+Il percorso centrale è `users/{uid}/sharedVaultData/{datoId}`. Rules, backup e funzione atomica sono predisposti; nessuna migrazione legacy è stata eseguita e la UI applicativa non scrive ancora dati reali.
 
 #### Prevenzione duplicati
 
@@ -250,6 +250,14 @@ Il formato cifrato riconosce ora, pur in assenza di dati reali, quattro scope di
 L'esame delle Rules ha fatto scartare le sottocollezioni annidate negli Account: la regola generica storica su `accounts` e `aziende` avrebbe consentito scritture senza la nuova validazione, a meno di un refactor ampio e rischioso. Il contratto è stato quindi corretto verso `accountWidgets`, `sharedVaultData` e `sharedVaultLinks`, tutte sotto il proprietario. Sono escluse dalla regola generica, leggibili soltanto dal proprietario e temporaneamente non scrivibili dai client. Il ripristino amministrativo continua a essere compatibile; le future modifiche atomiche passeranno dal backend.
 
 Verifiche superate: 16 test del backup cifrato e dell'anteprima, 5 test del servizio backend, controllo sintattico di 139 moduli e 15 test Firestore Rules. Nessuna collezione è stata popolata e nessun dato reale è stato modificato. Prima dell'attivazione UI restano da implementare validazione condivisa dello schema, funzioni atomiche e controllo delle dipendenze durante un ripristino selettivo.
+
+### Quinto blocco implementato — funzione atomica e client applicativo isolato
+
+La callable `manageSharedVaultData` gestisce creazione, aggiornamento, collegamento, scollegamento ed eliminazione con revisione, idempotenza e blocco della cancellazione quando esistono collegamenti. Il client applicativo prepara lo stesso schema, cifra ogni valore sensibile prima della chiamata e rifiuta le modifiche offline; link e widget usano identificativi deterministici per impedire duplicazioni.
+
+Il client è collegato a una prima UI controllata. In Impostazioni, **Credenziali comuni** consente elenco, creazione e modifica di schede con uno o più campi; dal dettaglio degli Account privati e aziendali il proprietario può collegare una scheda esistente, rivelarne localmente i campi sensibili e scollegarla senza eliminare il dato centrale. Le letture successive a una modifica sono server-confirmed e non richiedono refresh.
+
+La UI non migra né collega automaticamente email o PEC legacy. Gli Account ricevuti in sola lettura non ereditano la Credenziale comune del proprietario e non mostrano comandi di collegamento. Creazione, modifica, collegamento e scollegamento richiedono rete; la consultazione può usare la cache già sincronizzata. Resta necessario un collaudo isolato con dati fittizi prima di usare il dominio per le PEC reali.
 
 ## D — Matrice minima di test
 

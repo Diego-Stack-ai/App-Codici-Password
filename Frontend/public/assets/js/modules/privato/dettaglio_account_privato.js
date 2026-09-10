@@ -138,6 +138,9 @@ async function loadAccount() {
         const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
         renderPrivateSharingMap(accountData, contactNames);
         await loadPrivateAttachments();
+        import('../shared/account-shared-credentials.js?v=1.2.90').then(({initAccountSharedCredentials}) =>
+            initAccountSharedCredentials({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly})
+        ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
         setupActions();
     } catch (e) {
         logError("LoadAccount", e);

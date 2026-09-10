@@ -43,10 +43,23 @@ export async function initImpostazioni(user) {
     setupEncryptedBackup(user);
     setupEncryptedRestore(user);
     setupCredentialHealth(user);
+    setupSharedCredentials(user);
     await setupPushSettings(user);
     showPendingSecurityNotice();
 
     
+}
+
+function setupSharedCredentials(user) {
+    document.getElementById('btn-shared-credentials')?.addEventListener('click', async () => {
+        try {
+            const {openSharedCredentialsSettings} = await import('./shared-credentials-controller.js?v=1.2.90');
+            await openSharedCredentialsSettings(user);
+        } catch (error) {
+            console.error('[SHARED CREDENTIALS] Apertura fallita.', error);
+            showToast(error.message || 'Impossibile aprire le Credenziali comuni.', 'error');
+        }
+    });
 }
 
 function showCredentialHealthResults(report) {

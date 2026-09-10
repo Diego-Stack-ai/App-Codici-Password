@@ -146,6 +146,12 @@ async function loadAccount() {
         const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
         renderSharingMap(originalData, contactNames);
         await loadAttachments();
+        import('../shared/account-shared-credentials.js?v=1.2.90').then(({initAccountSharedCredentials}) =>
+            initAccountSharedCredentials({
+                uid: currentUid, context: 'company', accountId: currentId,
+                companyId: currentAziendaId, readOnly: isReadOnly
+            })
+        ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
 
         if (isReadOnly) setupReadOnlyUI();
 

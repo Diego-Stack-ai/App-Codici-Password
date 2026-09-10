@@ -653,6 +653,79 @@
     }
 }
 
+.shared-account-credentials,
+.shared-account-fields,
+.shared-account-select-list {
+    display: grid;
+    gap: 12px;
+}
+
+.shared-account-card {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid rgb(255 255 255 / 34%);
+    border-radius: 18px;
+    background: rgb(255 255 255 / 12%);
+}
+
+.shared-account-card-heading,
+.shared-account-field,
+.shared-account-select-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.shared-account-field {
+    min-height: 46px;
+    padding: 10px 12px;
+    border-radius: 13px;
+    background: rgb(255 255 255 / 10%);
+}
+
+.shared-account-field strong {
+    flex: 0 0 38%;
+}
+
+.shared-account-value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.shared-account-reveal,
+.shared-account-unlink {
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.shared-account-unlink {
+    padding: 8px;
+    color: var(--color-danger, #dc2626);
+}
+
+.shared-account-selector {
+    width: min(92vw, 560px);
+}
+
+.shared-account-select-option {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid rgb(148 163 184 / 34%);
+    border-radius: 15px;
+    background: rgb(255 255 255 / 18%);
+    color: inherit;
+    text-align: left;
+}
+
+.shared-account-select-option > span:nth-child(2) {
+    display: grid;
+    gap: 3px;
+}
+
 /* Stati di pagina condivisi: caricamento, vuoto, avviso ed errore. */
 .ui-state {
     grid-column: 1 / -1;
