@@ -294,7 +294,11 @@ La callable `manageAccountWidget` implementa creazione, aggiornamento ed elimina
 
 Il gate completo delle funzioni, composto da 28 test, è superato. Il client `account-widget-client.js` prepara e cifra il payload localmente, richiede la rete per le modifiche e usa la callable per creare, aggiornare o eliminare. Il repository espone letture cache-first e server-confirmed filtrate per Account, senza query o indici aggiuntivi.
 
-Backup e ripristino riconoscono già gli scope distinti `private-account-widget` e `company-account-widget`; i relativi 16 test cifrati sono superati insieme ai gate di accesso dati, sintassi e riferimenti statici. Resta da attivare il primo editor controllato nell'interfaccia e provarlo con dati fittizi prima di considerare concluso il blocco.
+Backup e ripristino riconoscono già gli scope distinti `private-account-widget` e `company-account-widget`; i relativi 16 test cifrati sono superati insieme ai gate di accesso dati, sintassi e riferimenti statici.
+
+La versione 1.2.94 attiva il primo editor controllato nella sezione **Campi personalizzati** dei dettagli Account privati e aziendali. Il proprietario può creare un widget con uno o più campi, marcare singoli valori come sensibili, rivelarli localmente, modificarli ed eliminarli. Le viste ricevute restano escluse e le mutazioni richiedono rete. Template, riordino e migrazione dei campi legacy non fanno parte di questo primo rilascio.
+
+La suite completa è superata. Il gate finale del blocco richiede una prova fisica con dati fittizi: un widget a campo singolo e uno composto, almeno un valore sensibile, modifica immediata senza refresh ed eliminazione, sia nel perimetro privato sia in quello aziendale.
 
 ## D — Matrice minima di test
 

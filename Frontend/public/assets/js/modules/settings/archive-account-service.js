@@ -1,4 +1,4 @@
-import { db, functions } from '../../firebase-config.js?v=1.2.93';
+import { db, functions } from '../../firebase-config.js?v=1.2.94';
 import { deleteField, doc, httpsCallable, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import {
