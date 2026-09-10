@@ -54,7 +54,7 @@ export async function initDettaglioAccountAzienda(user) {
     isReadOnly = (ownerId !== currentUid);
 
     // Inizializza moduli estratti con il contesto corrente
-    initAttachmentModule({ currentUid, currentAziendaId, currentId });
+    initAttachmentModule({ ownerUid: ownerId, currentAziendaId, currentId, readOnly: isReadOnly });
     initSharingModule({ currentUid, currentAziendaId, currentId, isReadOnly, onReload: () => loadAccount() });
 
     initProtocolUI(); // Sync UI setup

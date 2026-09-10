@@ -72,7 +72,7 @@ Il repository e l'ambiente corrente non forniscono una lettura amministrativa si
 
 1. [x] formalizzare e testare una lettura `afterWrite`/server-required unica nel repository;
 2. [x] sostituire i due parametri ad hoc con un contratto condiviso, mantenendo il fallback offline;
-3. correggere il contesto proprietario degli allegati aziendali condivisi;
+3. [x] correggere il contesto proprietario degli allegati aziendali condivisi;
 4. bloccare il collegamento email quando esiste una password legacy non trasferita;
 5. creare l'inventario Firestore aggregato prima di progettare migrazioni;
 6. soltanto dopo, definire schema widget Account, template e ordinamento touch.
@@ -84,6 +84,10 @@ Il contratto usa ora `afterWrite=1` per le navigazioni successive a un salvatagg
 Le funzioni `getDocServerConfirmed()` e `getDocsServerConfirmed()` richiedono esplicitamente la sorgente server di Firestore. Le normali funzioni `getDocSmart()` e `getDocsSmart()` restano cache-first: il costo di rete e l'offline-first non cambiano per la navigazione ordinaria.
 
 Verifiche automatiche superate: build del runtime Firebase locale, shell offline, audit accesso dati, navigazione, sintassi JavaScript e riferimenti statici. Resta obbligatorio il collaudo fisico privato/azienda modifica → salva → dettaglio prima del rilascio.
+
+### Secondo blocco implementato — allegati aziendali condivisi
+
+Il modulo allegati distingue ora lo UID proprietario dallo UID del visitatore. La lista usa il percorso canonico del proprietario e conserva `aziendaId`; caricamento, eliminazione e selettore sorgente sono bloccati in modalità condivisa/sola lettura e il pulsante Elimina non viene renderizzato. Non sono stati ampliati i permessi Firestore o Storage: il contenuto degli allegati continua a rispettare il contratto di condivisione esistente.
 
 ## B — Piano architetturale
 

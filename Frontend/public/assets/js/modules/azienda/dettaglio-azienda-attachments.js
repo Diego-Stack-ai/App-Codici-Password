@@ -17,21 +17,24 @@ import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { listCompanyAccountAttachments } from '../data/vault-repository.js';
 
 // --- STATE (inizializzato da initAttachmentModule, immutabile per tutta la vita della pagina) ---
-let _currentUid = null;
+let _ownerUid = null;
 let _currentAziendaId = null;
 let _currentId = null;
+let _readOnly = false;
 
 /**
  * Inizializza il modulo con il contesto dell'account corrente.
  * Va chiamato in initDettaglioAccountAzienda dopo aver impostato lo stato.
  */
-export function initAttachmentModule({ currentUid, currentAziendaId, currentId }) {
-    _currentUid = currentUid;
+export function initAttachmentModule({ ownerUid, currentAziendaId, currentId, readOnly = false }) {
+    _ownerUid = ownerUid;
     _currentAziendaId = currentAziendaId;
     _currentId = currentId;
+    _readOnly = readOnly;
 }
 
 export function openSourceSelector() {
+    if (_readOnly) return;
     const modal = document.getElementById('source-selector-modal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -53,6 +56,12 @@ export function closeSourceSelector() {
 
 export async function handleFileUpload(input) {
     closeSourceSelector();
+
+    if (_readOnly) {
+        if (input) input.value = '';
+        showToast('Gli allegati condivisi sono disponibili in sola lettura.', 'warning');
+        return;
+    }
 
     const file = input.files[0];
     if (!file) return;
@@ -77,7 +86,7 @@ export async function handleFileUpload(input) {
     showToast("Caricamento in corso...", "info");
 
     try {
-        const storagePath = `users/${_currentUid}/aziende/${_currentAziendaId}/accounts/${_currentId}/attachments/${createStorageObjectName(file)}`;
+        const storagePath = `users/${_ownerUid}/aziende/${_currentAziendaId}/accounts/${_currentId}/attachments/${createStorageObjectName(file)}`;
         const sRef = ref(storage, storagePath);
         const vaultKey = await ensureVaultKeyMaterial();
         const encryptedFile = await encryptAttachmentFile(file, vaultKey);
@@ -86,7 +95,7 @@ export async function handleFileUpload(input) {
         });
         const url = await getDownloadURL(snap.ref);
 
-        const colRef = collection(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments");
+        const colRef = collection(db, "users", _ownerUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments");
         await addDoc(colRef, {
             name: file.name,
             url: url,
@@ -112,7 +121,7 @@ export async function loadAttachments() {
     if (!container) return;
 
     try {
-        const attachments = await listCompanyAccountAttachments(_currentUid, _currentAziendaId, _currentId);
+        const attachments = await listCompanyAccountAttachments(_ownerUid, _currentAziendaId, _currentId);
         renderAttachments(attachments);
     } catch (e) {
         logError("LoadAttachments", e);
@@ -160,13 +169,13 @@ function renderAttachments(list) {
                     createElement('span', { className: 'attachment-status', textContent: `${size} MB • ${date}` })
                 ])
             ]),
-            createElement('button', {
+            !_readOnly ? createElement('button', {
                 type: 'button',
                 className: 'btn-delete-attachment',
                 onclick: (e) => { e.stopPropagation(); deleteAttachment(a); }
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'delete' })
-            ])
+            ]) : null
         ]);
     });
 
@@ -191,6 +200,7 @@ async function openAttachment(attachment) {
 }
 
 async function deleteAttachment(att) {
+    if (_readOnly) return;
     const ok = await showConfirmModal("ELIMINA", `Sei sicuro di voler eliminare l'allegato ${att.name}?`, "Elimina", t('cancel') || "Annulla");
     if (!ok) return;
 
@@ -199,7 +209,7 @@ async function deleteAttachment(att) {
             const sRef = ref(storage, att.storagePath);
             await deleteObject(sRef);
         }
-        const docRef = doc(db, "users", _currentUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments", att.id);
+        const docRef = doc(db, "users", _ownerUid, "aziende", _currentAziendaId, "accounts", _currentId, "attachments", att.id);
         await deleteDoc(docRef);
 
         showToast("Allegato eliminato", "success");

@@ -10,6 +10,7 @@ const privateSave = await read('Frontend/public/assets/js/modules/privato/form-p
 const privateDetail = await read('Frontend/public/assets/js/modules/privato/dettaglio_account_privato.js');
 const companySave = await read('Frontend/public/assets/js/modules/azienda/form-azienda-save.js');
 const companyDetail = await read('Frontend/public/assets/js/modules/azienda/dettaglio_account_azienda.js');
+const companyAttachments = await read('Frontend/public/assets/js/modules/azienda/dettaglio-azienda-attachments.js');
 
 assert.match(coordinator, /const pendingReads = new Map\(\)/, 'Coordinatore richieste M2 mancante');
 assert.match(coordinator, /\.finally\(/, 'Le richieste concluse non vengono liberate');
@@ -32,6 +33,12 @@ assert.match(privateDetail, /getPrivateAccountConfirmed/,
     'Il dettaglio privato non dispone della lettura confermata dopo write');
 assert.match(companyDetail, /getCompanyAccountConfirmed/,
     'Il dettaglio aziendale non dispone della lettura confermata dopo write');
+assert.match(companyDetail, /initAttachmentModule\(\{ ownerUid: ownerId,[^}]+readOnly: isReadOnly \}\)/,
+    'Il dettaglio aziendale non passa proprietario e sola lettura agli allegati');
+assert.match(companyAttachments, /listCompanyAccountAttachments\(_ownerUid,/,
+    'Gli allegati aziendali condivisi vengono letti sotto lo UID del visitatore');
+assert.match(companyAttachments, /if \(_readOnly\) return;/,
+    'Gli allegati aziendali condivisi non bloccano le azioni di scrittura');
 
 const migratedPages = await Promise.all([
     'Frontend/public/assets/js/modules/privato/account_privati.js',
