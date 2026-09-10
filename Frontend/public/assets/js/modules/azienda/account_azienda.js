@@ -3,7 +3,7 @@
  * Gestione lista account per una specifica azienda, allineata allo stile Account Privati.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.85';
+import { db } from '../../firebase-config.js?v=1.2.86';
 import { doc, updateDoc, deleteDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';

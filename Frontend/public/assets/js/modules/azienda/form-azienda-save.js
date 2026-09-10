@@ -5,7 +5,7 @@
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.85';
+import { auth, db } from '../../firebase-config.js?v=1.2.86';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
@@ -15,6 +15,7 @@ import { t } from '../../translations.js';
 import { logError, sanitizeEmail } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
+import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -26,6 +27,12 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
 export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing }) {
     const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
+
+    if (hasInvalidCardExpiry(bankAccounts)) {
+        showToast('Inserisci la scadenza della carta nel formato MM/AA, con un mese da 01 a 12.', 'warning');
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
 
     const hasBankingData = bankAccounts.some(acc => acc.iban?.trim() || (acc.cards && acc.cards.length > 0));
 
@@ -63,7 +70,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
                 cardType: (c.cardType || '').trim(),
                 titolare: (c.titolare || '').trim(),
                 cardNumber: await encrypt((c.cardNumber || '').trim(), vaultKeyMaterial),
-                expiry: (c.expiry || '').trim(),
+                expiry: formatCardExpiry(c.expiry),
                 pin: await encrypt((c.pin || '').trim(), vaultKeyMaterial),
                 ccv: await encrypt((c.ccv || '').trim(), vaultKeyMaterial)
             })))
@@ -272,7 +279,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         showToast(t('success_save'), "success");
         setTimeout(() => {
             const destination = isEditing
-                ? `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}`
+                ? `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}&serverRefresh=1`
                 : `dati_azienda.html?id=${currentAziendaId}`;
             window.location.replace(destination);
         }, 1000);

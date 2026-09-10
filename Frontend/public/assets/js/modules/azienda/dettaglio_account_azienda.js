@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.85';
+import { db } from '../../firebase-config.js?v=1.2.86';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -22,7 +22,7 @@ import {
 import { initSharingModule, renderSharingMap } from './dettaglio-azienda-sharing.js';
 import { initDetailAccountMode } from '../shared/detail-account-mode.js';
 import { renderAccountBanking } from '../shared/account-banking-view.js';
-import {getCompanyAccount} from '../data/vault-repository.js';
+import {getCompanyAccount, getCompanyAccountConfirmed} from '../data/vault-repository.js';
 
 // --- STATE ---
 let currentUid = null;
@@ -31,6 +31,7 @@ let currentAziendaId = null;
 let originalData = null;
 let isReadOnly = false;
 let ownerId = null;
+let requireServerRefresh = false;
 
 // --- INITIALIZATION ---
 export async function initDettaglioAccountAzienda(user) {
@@ -42,6 +43,7 @@ export async function initDettaglioAccountAzienda(user) {
     currentId = urlParams.get('id');
     currentAziendaId = urlParams.get('aziendaId');
     ownerId = urlParams.get('ownerId') || user.uid; // V3 Add owner parameter
+    requireServerRefresh = urlParams.get('serverRefresh') === '1' && navigator.onLine;
 
     if (!currentId || !currentAziendaId) {
         showToast("Parametri mancanti", "error");
@@ -80,7 +82,9 @@ function initProtocolUI() {
 async function loadAccount() {
     try {
         const docRef = doc(db, "users", ownerId, "aziende", currentAziendaId, "accounts", currentId);
-        const account = await getCompanyAccount(ownerId, currentAziendaId, currentId);
+        const account = await (requireServerRefresh
+            ? getCompanyAccountConfirmed(ownerId, currentAziendaId, currentId)
+            : getCompanyAccount(ownerId, currentAziendaId, currentId));
 
         if (!account) {
             showToast(t('account_not_found'), "error");
@@ -89,6 +93,13 @@ async function loadAccount() {
         }
 
         originalData = account;
+        if (requireServerRefresh) {
+            requireServerRefresh = false;
+            const cleanParams = new URLSearchParams(window.location.search);
+            cleanParams.delete('serverRefresh');
+            const cleanQuery = cleanParams.toString();
+            window.history.replaceState(null, '', `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
+        }
 
         // 🔐 DECRIPTAZIONE (Auto-Unlock Compliant)
         if (originalData._encrypted) {

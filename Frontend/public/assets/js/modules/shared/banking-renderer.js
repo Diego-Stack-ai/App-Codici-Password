@@ -23,6 +23,7 @@
 import { createElement, clearElement } from '../../dom-utils.js';
 import { showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
+import { formatCardExpiry } from './banking-model.js';
 
 /**
  * Renderizza la lista dei conti bancari nel container #iban-list-container.
@@ -145,7 +146,12 @@ function _renderCardEntry(bankAccounts, bankIdx, cardIdx, card, rerender) {
             _createInputField('Nome Carta (es. Visa, Mastercard...)', card.cardType, (val) => bankAccounts[bankIdx].cards[cardIdx].cardType = val, 'credit_card'),
             _createInputField('Titolare', card.titolare, (val) => bankAccounts[bankIdx].cards[cardIdx].titolare = val, 'person'),
             _createInputField('Numero Carta', card.cardNumber, (val) => bankAccounts[bankIdx].cards[cardIdx].cardNumber = val, 'numbers'),
-            _createInputField('Scadenza', card.expiry, (val) => bankAccounts[bankIdx].cards[cardIdx].expiry = val, 'event'),
+            _createInputField('Scadenza', card.expiry, (val) => bankAccounts[bankIdx].cards[cardIdx].expiry = val, 'event', 'text', {
+                inputmode: 'numeric',
+                maxlength: 5,
+                placeholder: 'MM/AA',
+                formatter: formatCardExpiry
+            }),
             _createInputField('PIN', card.pin, (val) => bankAccounts[bankIdx].cards[cardIdx].pin = val, 'pin'),
             _createInputField('CCV', card.ccv, (val) => bankAccounts[bankIdx].cards[cardIdx].ccv = val, 'verified_user')
         ]) : null
@@ -161,7 +167,8 @@ function _renderCardEntry(bankAccounts, bankIdx, cardIdx, card, rerender) {
  * @param {string} [type='text'] - Tipo input HTML (text, password, ecc.)
  * @private
  */
-function _createInputField(label, value, onInput, icon, type = 'text') {
+function _createInputField(label, value, onInput, icon, type = 'text', options = {}) {
+    const displayValue = options.formatter ? options.formatter(value || '') : (value || '');
     return createElement('div', { className: 'glass-field-container w-full' }, [
         createElement('label', { className: 'view-label', textContent: label }),
         createElement('div', { className: 'glass-field border-glow' }, [
@@ -169,9 +176,15 @@ function _createInputField(label, value, onInput, icon, type = 'text') {
             createElement('input', {
                 className: 'field-input',
                 type: type,
-                value: value || '',
-                placeholder: label,
-                oninput: (e) => onInput(e.target.value),
+                value: displayValue,
+                placeholder: options.placeholder || label,
+                inputmode: options.inputmode,
+                maxlength: options.maxlength,
+                oninput: (e) => {
+                    const formatted = options.formatter ? options.formatter(e.target.value) : e.target.value;
+                    if (formatted !== e.target.value) e.target.value = formatted;
+                    onInput(formatted);
+                },
                 autocomplete: 'new-password'  // blocca autofill browser su tutti i campi
             })
         ])

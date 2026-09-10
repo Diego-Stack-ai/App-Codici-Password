@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.85';
+import { auth, db } from '../../firebase-config.js?v=1.2.86';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -7,6 +7,7 @@ import { sanitizeEmail } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { classifyPrivateAccountOfflineWrite } from './private-account-offline-policy.js';
+import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
 
 export async function savePrivateAccount({
     bankAccounts,
@@ -22,6 +23,12 @@ export async function savePrivateAccount({
     const get = id => document.getElementById(id)?.value.trim() || '';
     const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
+
+    if (hasInvalidCardExpiry(bankAccounts)) {
+        showToast('Inserisci la scadenza della carta nel formato MM/AA, con un mese da 01 a 12.', 'warning');
+        if (btnSave) btnSave.disabled = false;
+        return;
+    }
 
     // Check if banking actually has data
     const hasBankingData = (bankAccounts || []).some(acc => {
@@ -83,6 +90,7 @@ export async function savePrivateAccount({
             passwordDispositiva: await encrypt(b.passwordDispositiva || '', vaultKeyMaterial),
             cards: await Promise.all((b.cards || []).map(async c => ({
                 ...c,
+                expiry: formatCardExpiry(c.expiry),
                 cardNumber: await encrypt(c.cardNumber || '', vaultKeyMaterial),
                 pin: await encrypt(c.pin || '', vaultKeyMaterial),
                 ccv: await encrypt(c.ccv || '', vaultKeyMaterial)
@@ -362,7 +370,7 @@ export async function savePrivateAccount({
         showToast(t('success_save'), "success");
         setTimeout(() => {
             const destination = isEditing
-                ? `dettaglio_account_privato.html?id=${currentDocId}`
+                ? `dettaglio_account_privato.html?id=${currentDocId}&m6refresh=1`
                 : 'account_privati.html';
             window.location.replace(destination);
         }, 1000);

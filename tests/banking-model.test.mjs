@@ -5,7 +5,13 @@ import test from 'node:test';
 const sourceUrl = new URL('../Frontend/public/assets/js/modules/shared/banking-model.js', import.meta.url);
 const source = await readFile(sourceUrl, 'utf8');
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
-const { hasRealBankingData, normalizeBankingAccounts } = await import(moduleUrl);
+const {
+    formatCardExpiry,
+    hasInvalidCardExpiry,
+    hasRealBankingData,
+    isValidCardExpiry,
+    normalizeBankingAccounts
+} = await import(moduleUrl);
 
 test('mantiene il formato canonico banking[]', () => {
     const banking = [{ iban: 'IT00 A000 0000' }];
@@ -42,4 +48,15 @@ test('non considera reali strutture vuote o campi non significativi', () => {
 test('riconosce i dati reali delle carte nei formati compatibili', () => {
     assert.equal(hasRealBankingData({ banking: [{ cards: [{ type: 'Mastercard' }] }] }), true);
     assert.equal(hasRealBankingData({ cards: [{ pin: '1234' }] }), true);
+});
+
+test('formatta e valida la scadenza carta come MM/AA', () => {
+    assert.equal(formatCardExpiry('12-26'), '12/26');
+    assert.equal(formatCardExpiry('1226'), '12/26');
+    assert.equal(isValidCardExpiry('12/26'), true);
+    assert.equal(isValidCardExpiry('13/26'), false);
+    assert.equal(isValidCardExpiry('1/26'), false);
+    assert.equal(isValidCardExpiry(''), true);
+    assert.equal(hasInvalidCardExpiry([{cards: [{expiry: '00/26'}]}]), true);
+    assert.equal(hasInvalidCardExpiry([{cards: [{expiry: '01/26'}]}]), false);
 });
