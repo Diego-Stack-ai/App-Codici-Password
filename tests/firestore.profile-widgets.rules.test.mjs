@@ -81,3 +81,21 @@ test('l’indice tecnico delle scadenze condivise non è accessibile ai client',
   await assertFails(getDoc(shareRef));
   await assertFails(setDoc(shareRef, {ownerUid: OWNER_UID, recipientUids: [OTHER_UID]}));
 });
+
+test('i nuovi domini protetti sono leggibili dal proprietario ma scrivibili solo dal backend', async () => {
+  await testEnv.withSecurityRulesDisabled(async context => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, 'users', OWNER_UID, 'accountWidgets', 'w1'), {title: 'Domande'});
+    await setDoc(doc(adminDb, 'users', OWNER_UID, 'sharedVaultData', 's1'), {title: 'Codice app'});
+    await setDoc(doc(adminDb, 'users', OWNER_UID, 'sharedVaultLinks', 'l1'), {sharedDataId: 's1'});
+  });
+  const ownerDb = testEnv.authenticatedContext(OWNER_UID).firestore();
+  const otherDb = testEnv.authenticatedContext(OTHER_UID).firestore();
+  for (const [collectionName, id] of [
+    ['accountWidgets', 'w1'], ['sharedVaultData', 's1'], ['sharedVaultLinks', 'l1']
+  ]) {
+    await assertSucceeds(getDoc(doc(ownerDb, 'users', OWNER_UID, collectionName, id)));
+    await assertFails(getDoc(doc(otherDb, 'users', OWNER_UID, collectionName, id)));
+    await assertFails(setDoc(doc(ownerDb, 'users', OWNER_UID, collectionName, 'new'), {title: 'Non ammesso'}));
+  }
+});

@@ -5,6 +5,8 @@ const MAX_CHUNK_BYTES = 7 * 1024 * 1024;
 const SCOPES = new Set([
   "profile", "settings", "private-account", "company", "company-account",
   "private-account-attachment", "company-account-attachment",
+  "private-account-widget", "company-account-widget",
+  "shared-vault-data", "shared-vault-data-link",
   "deadline", "contact", "profile-widget"
 ]);
 
@@ -43,6 +45,22 @@ function restorePath(uid, record) {
   }
   if (record.scope === "company-account-attachment") {
     return `${root}/aziende/${identifier(record.companyId)}/accounts/${identifier(record.accountId)}/attachments/${id}`;
+  }
+  if (record.scope === "private-account-widget") {
+    identifier(record.accountId);
+    return `${root}/accountWidgets/${id}`;
+  }
+  if (record.scope === "company-account-widget") {
+    identifier(record.companyId);
+    identifier(record.accountId);
+    return `${root}/accountWidgets/${id}`;
+  }
+  if (record.scope === "shared-vault-data") {
+    return `${root}/sharedVaultData/${id}`;
+  }
+  if (record.scope === "shared-vault-data-link") {
+    identifier(record.sharedDataId);
+    return `${root}/sharedVaultLinks/${id}`;
   }
   return paths[record.scope];
 }

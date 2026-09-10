@@ -132,6 +132,12 @@ export const listBackupPrivateAttachments = (uid, accountId) => readConfirmedRec
     collection(db, 'users', uid, 'accounts', accountId, 'attachments'));
 export const listBackupCompanyAttachments = (uid, companyId, accountId) => readConfirmedRecords(
     collection(db, 'users', uid, 'aziende', companyId, 'accounts', accountId, 'attachments'));
+export const listBackupAccountWidgets = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'accountWidgets'));
+export const listBackupSharedVaultData = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'sharedVaultData'));
+export const listBackupSharedVaultLinks = uid => readConfirmedRecords(
+    collection(db, 'users', uid, 'sharedVaultLinks'));
 
 // Punto d'integrazione M5 deliberatamente inattivo: i chiamanti esistenti
 // continuano a usare i record legacy finché il cutover non viene autorizzato.

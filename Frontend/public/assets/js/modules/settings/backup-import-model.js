@@ -36,7 +36,9 @@ export function validateBackupFooter(footer, counts) {
 }
 
 function restoreRecordKey(record = {}) {
-    return [record.scope, record.id, record.companyId || '', record.accountId || ''].join(':');
+    return [
+        record.scope, record.id, record.companyId || '', record.accountId || '', record.sharedDataId || ''
+    ].join(':');
 }
 
 function canonicalJson(value) {
@@ -62,7 +64,11 @@ function recordName(record, fallback) {
         contact: ['nomeCompleto', 'nome', 'email'],
         'profile-widget': ['title', 'titolo', 'label'],
         'private-account-attachment': ['originalName', 'fileName', 'nomeFile', 'name'],
-        'company-account-attachment': ['originalName', 'fileName', 'nomeFile', 'name']
+        'company-account-attachment': ['originalName', 'fileName', 'nomeFile', 'name'],
+        'private-account-widget': ['title', 'titolo', 'label'],
+        'company-account-widget': ['title', 'titolo', 'label'],
+        'shared-vault-data': ['title', 'titolo', 'label'],
+        'shared-vault-data-link': ['label', 'title']
     }[record?.scope] || [];
     return safeLabel(fields.map(field => data[field]).find(value => typeof value === 'string' && value.trim()), fallback);
 }
@@ -98,6 +104,22 @@ export function describeRestoreRecords(records) {
             const file = recordName(record, 'Allegato');
             const account = companyAccounts.get(`${record.companyId}:${record.accountId}`);
             return account ? `${file} — ${account}` : file;
+        }
+        if (record.scope === 'private-account-widget') {
+            const widget = recordName(record, 'Widget');
+            const account = privateAccounts.get(record.accountId);
+            return account ? `${widget} — ${account}` : widget;
+        }
+        if (record.scope === 'company-account-widget') {
+            const widget = recordName(record, 'Widget');
+            const account = companyAccounts.get(`${record.companyId}:${record.accountId}`);
+            return account ? `${widget} — ${account}` : widget;
+        }
+        if (record.scope === 'shared-vault-data') {
+            return recordName(record, 'Credenziale comune');
+        }
+        if (record.scope === 'shared-vault-data-link') {
+            return recordName(record, 'Collegamento Credenziale comune');
         }
         return recordName(record, 'Elemento senza nome');
     });

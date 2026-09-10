@@ -33,6 +33,7 @@ export function createRecordDescriptor(scope, snapshot, options = {}) {
     };
     if (options.companyId) descriptor.companyId = assertIdentifier(options.companyId);
     if (options.accountId) descriptor.accountId = assertIdentifier(options.accountId);
+    if (options.sharedDataId) descriptor.sharedDataId = assertIdentifier(options.sharedDataId);
     return descriptor;
 }
 
@@ -42,6 +43,7 @@ export function createRecordDescriptorFromData(scope, record, options = {}) {
     const descriptor = {kind: 'record', scope, id: assertIdentifier(id), data: encodeFirestoreValue(data)};
     if (options.companyId) descriptor.companyId = assertIdentifier(options.companyId);
     if (options.accountId) descriptor.accountId = assertIdentifier(options.accountId);
+    if (options.sharedDataId) descriptor.sharedDataId = assertIdentifier(options.sharedDataId);
     return descriptor;
 }
 

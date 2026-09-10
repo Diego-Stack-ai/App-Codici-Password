@@ -53,3 +53,22 @@ test('descrive account, aziende e allegati senza esporre credenziali', async () 
   assert.deepEqual(descriptions, ['Azienda Alfa', 'Portale — Azienda Alfa', 'contratto.pdf — Portale']);
   assert.equal(descriptions.join(' ').includes('segreta'), false);
 });
+
+test('descrive widget e credenziali comuni senza esporre valori protetti', async () => {
+  const api = await loadModel();
+  const descriptions = api.describeRestoreRecords([
+    {scope: 'private-account', id: 'a1', data: {nomeAccount: 'Portale'}},
+    {scope: 'private-account-widget', accountId: 'a1', id: 'w1', data: {title: 'Domande', fields: [{valueEnc: 'segreto'}]}},
+    {scope: 'company', id: 'c1', data: {ragioneSociale: 'Azienda Alfa'}},
+    {scope: 'company-account', companyId: 'c1', id: 'a2', data: {nomeAccount: 'PEC'}},
+    {scope: 'company-account-widget', companyId: 'c1', accountId: 'a2', id: 'w2', data: {title: 'Referente'}},
+    {scope: 'shared-vault-data', id: 's1', data: {title: 'Codice app', fields: [{valueEnc: 'vietato'}]}},
+    {scope: 'shared-vault-data-link', sharedDataId: 's1', id: 'l1', data: {label: 'Collegamento Legal Mail'}}
+  ]);
+  assert.deepEqual(descriptions, [
+    'Portale', 'Domande — Portale', 'Azienda Alfa', 'PEC — Azienda Alfa',
+    'Referente — PEC', 'Codice app', 'Collegamento Legal Mail'
+  ]);
+  assert.equal(descriptions.join(' ').includes('segreto'), false);
+  assert.equal(descriptions.join(' ').includes('vietato'), false);
+});

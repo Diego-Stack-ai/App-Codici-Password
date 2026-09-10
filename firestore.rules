@@ -96,7 +96,10 @@ service cloud.firestore {
         collection != 'notificationDeliveries' &&
         collection != 'deadlineNotifications' &&
         collection != 'receivedDeadlines' &&
-        collection != 'profileWidgets';
+        collection != 'profileWidgets' &&
+        collection != 'accountWidgets' &&
+        collection != 'sharedVaultData' &&
+        collection != 'sharedVaultLinks';
     }
 
     match /users/{userId}/contacts/{contactId} {
@@ -123,6 +126,24 @@ service cloud.firestore {
         request.resource.data.fields is list &&
         request.resource.data.fields.size() <= 30 &&
         request.resource.data.schemaVersion == 1;
+    }
+
+    // Nuovi domini predisposti per Widget Account e Credenziali comuni.
+    // Le letture appartengono al proprietario; finché le funzioni atomiche non
+    // sono implementate, nessun client può creare collegamenti parziali.
+    match /users/{userId}/accountWidgets/{widgetId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    match /users/{userId}/sharedVaultData/{sharedDataId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
+    match /users/{userId}/sharedVaultLinks/{linkId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
     }
 
     match /users/{userId}/accounts/{accountId} {

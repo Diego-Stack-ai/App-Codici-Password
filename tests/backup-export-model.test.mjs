@@ -24,6 +24,10 @@ test('descrittori e allegati restano confinati al proprietario', async () => {
   const snapshot = {id: 'a1', data: () => ({file: {storagePath: 'users/owner/accounts/a1/attachments/f1'}})};
   const record = api.createRecordDescriptor('private-account', snapshot);
   assert.equal(api.createRecordDescriptorFromData('private-account', {id: 'a2', title: 'Fixture'}).id, 'a2');
+  const linked = api.createRecordDescriptorFromData(
+    'shared-vault-data-link', {id: 'l1', label: 'Legal Mail'}, {sharedDataId: 's1'}
+  );
+  assert.equal(linked.sharedDataId, 's1');
   assert.deepEqual(api.collectStoragePaths([record], 'owner'), ['users/owner/accounts/a1/attachments/f1']);
   assert.throws(() => api.collectStoragePaths([{data: {storagePath: 'users/other/file'}}], 'owner'), /STORAGE_PATH/);
 });

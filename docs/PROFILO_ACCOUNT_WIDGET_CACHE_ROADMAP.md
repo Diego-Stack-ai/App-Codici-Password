@@ -175,23 +175,22 @@ Ogni field sensibile deve essere cifrato, escluso da QR e anteprime in chiaro, p
 
 #### Collocazione dei dati
 
-I widget Account non vengono incorporati nel documento Account. Usano sottocollezioni dedicate:
+I widget Account non vengono incorporati nel documento Account. Usano collezioni proprietarie dedicate:
 
-- privato: `users/{uid}/accounts/{accountId}/widgets/{widgetId}`;
-- aziendale: `users/{uid}/aziende/{aziendaId}/accounts/{accountId}/widgets/{widgetId}`;
+- widget privati e aziendali: `users/{uid}/accountWidgets/{widgetId}`;
 - centrale: `users/{uid}/sharedVaultData/{sharedDataId}`;
-- indice dei collegamenti: `users/{uid}/sharedVaultData/{sharedDataId}/links/{linkId}`.
+- indice dei collegamenti: `users/{uid}/sharedVaultLinks/{linkId}`.
 
-La sottocollezione evita di avvicinarsi al limite Firestore del singolo documento, impedisce che il riordino di un widget riscriva l'intero Account e riduce i conflitti con le modifiche offline delle credenziali standard.
+Le collezioni separate evitano di avvicinarsi al limite Firestore del singolo Account, impediscono che il riordino riscriva l'intero Account e riducono i conflitti con le credenziali standard. Sono state preferite alle sottocollezioni annidate perché l'attuale Rule generica su `accounts` e `aziende` renderebbe impossibile applicare una validazione più stretta ai soli widget senza un refactor rischioso delle regole esistenti.
 
 Ogni documento nella sottocollezione `widgets` ha un solo contratto e un discriminante:
 
 - `kind: embedded`: contiene `fields[]` ed è proprietà dell'Account;
 - `kind: shared-reference`: contiene `sharedDataId` e metadati di presentazione/ordine, ma nessuna copia dei valori centrali.
 
-Campi comuni candidati: `title`, `description`, `icon`, `color`, `order`, `collapsed`, `schemaVersion`, `createdAt`, `updatedAt` e `revision`. Un widget incorporato aggiunge `fields[]`; un riferimento aggiunge esclusivamente `sharedDataId`. Lo schema dei field riusa quello già collaudato in `profileWidgets`, inclusi identificativo stabile, tipo, etichetta, ordine, valore cifrato per i dati sensibili e divieto di esposizione in QR/anteprime.
+Campi comuni candidati: `context`, `accountId`, `companyId` solo per il contesto aziendale, `title`, `description`, `icon`, `color`, `order`, `collapsed`, `schemaVersion`, `createdAt`, `updatedAt` e `revision`. Un widget incorporato aggiunge `fields[]`; un riferimento aggiunge esclusivamente `sharedDataId`. Lo schema dei field riusa quello già collaudato in `profileWidgets`, inclusi identificativo stabile, tipo, etichetta, ordine, valore cifrato per i dati sensibili e divieto di esposizione in QR/anteprime.
 
-La Credenziale comune centrale usa lo stesso modello `fields[]`, con titolo e metadati propri. Non contiene una lista duplicata degli Account nel documento principale: i collegamenti stanno nella sottocollezione `links`, priva di segreti. Ciascun link identifica contesto (`private` o `company`), `accountId` e, se necessario, `companyId`.
+La Credenziale comune centrale usa lo stesso modello `fields[]`, con titolo e metadati propri. Non contiene una lista duplicata degli Account nel documento principale: i collegamenti stanno in `sharedVaultLinks`, priva di segreti. Ciascun link identifica `sharedDataId`, contesto (`private` o `company`), `accountId` e, se necessario, `companyId`.
 
 #### Coerenza e proprietà
 
@@ -243,6 +242,14 @@ Le nuove collezioni non devono ricadere semplicemente nella regola generica prop
 4. funzioni atomiche con test di idempotenza, conflitto e cancellazione bloccata;
 5. prova isolata con un widget incorporato e una Credenziale comune collegata a due Account di aziende diverse;
 6. soltanto dopo, UI completa, ordinamento touch e libreria template.
+
+### Quarto blocco implementato — predisposizione backup e Rules
+
+Il formato cifrato riconosce ora, pur in assenza di dati reali, quattro scope distinti: widget Account privato, widget Account aziendale, Credenziale comune e relativo collegamento. Esportazione e ripristino conservano `accountId`, `companyId` e `sharedDataId`, costruiscono esclusivamente percorsi sotto lo UID autenticato e mostrano nell'anteprima titoli leggibili senza includere valori protetti.
+
+L'esame delle Rules ha fatto scartare le sottocollezioni annidate negli Account: la regola generica storica su `accounts` e `aziende` avrebbe consentito scritture senza la nuova validazione, a meno di un refactor ampio e rischioso. Il contratto è stato quindi corretto verso `accountWidgets`, `sharedVaultData` e `sharedVaultLinks`, tutte sotto il proprietario. Sono escluse dalla regola generica, leggibili soltanto dal proprietario e temporaneamente non scrivibili dai client. Il ripristino amministrativo continua a essere compatibile; le future modifiche atomiche passeranno dal backend.
+
+Verifiche superate: 16 test del backup cifrato e dell'anteprima, 5 test del servizio backend, controllo sintattico di 139 moduli e 15 test Firestore Rules. Nessuna collezione è stata popolata e nessun dato reale è stato modificato. Prima dell'attivazione UI restano da implementare validazione condivisa dello schema, funzioni atomiche e controllo delle dipendenze durante un ripristino selettivo.
 
 ## D — Matrice minima di test
 

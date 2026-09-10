@@ -9,6 +9,10 @@ test("costruisce soltanto percorsi appartenenti allo UID autenticato", () => {
   assert.equal(restorePath("owner", {scope: "private-account", id: "a1"}), "users/owner/accounts/a1");
   assert.equal(restorePath("owner", {scope: "company-account", companyId: "c1", id: "a1"}), "users/owner/aziende/c1/accounts/a1");
   assert.equal(restorePath("owner", {scope: "private-account-attachment", accountId: "a1", id: "f1"}), "users/owner/accounts/a1/attachments/f1");
+  assert.equal(restorePath("owner", {scope: "private-account-widget", accountId: "a1", id: "w1"}), "users/owner/accountWidgets/w1");
+  assert.equal(restorePath("owner", {scope: "company-account-widget", companyId: "c1", accountId: "a1", id: "w1"}), "users/owner/accountWidgets/w1");
+  assert.equal(restorePath("owner", {scope: "shared-vault-data", id: "s1"}), "users/owner/sharedVaultData/s1");
+  assert.equal(restorePath("owner", {scope: "shared-vault-data-link", sharedDataId: "s1", id: "l1"}), "users/owner/sharedVaultLinks/l1");
   assert.throws(() => restorePath("owner", {scope: "notifications", id: "n1"}), /SCOPE/);
   assert.throws(() => restorePath("owner", {scope: "settings", id: "..\/security"}), /IDENTIFIER/);
 });

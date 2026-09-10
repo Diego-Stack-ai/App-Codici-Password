@@ -2,8 +2,9 @@ import {storage} from '../../firebase-config.js?v=1.2.90';
 import {getBytes, ref} from '/assets/js/vendor/firebase-runtime.js';
 import {
     getBackupProfile, listBackupCompanies, listBackupCompanyAccounts, listBackupCompanyAttachments,
+    listBackupAccountWidgets,
     listBackupContacts, listBackupDeadlines, listBackupPrivateAccounts, listBackupPrivateAttachments,
-    listBackupProfileWidgets, listBackupSettings
+    listBackupProfileWidgets, listBackupSettings, listBackupSharedVaultData, listBackupSharedVaultLinks
 } from '../data/vault-repository.js';
 import {
     createBackupHeader, deriveBackupKey, encryptBackupEntry, generateRecoveryKey, serializeBackupLine
@@ -46,6 +47,24 @@ export async function collectOwnerBackup(uid) {
     for (const company of companies) {
         records.push(createRecordDescriptorFromData('company', company));
         records.push(...await accountRecords(uid, await listBackupCompanyAccounts(uid, company.id), company.id));
+    }
+    const [accountWidgets, sharedVaultData, sharedVaultLinks] = await Promise.all([
+        listBackupAccountWidgets(uid), listBackupSharedVaultData(uid), listBackupSharedVaultLinks(uid)
+    ]);
+    for (const widget of accountWidgets) {
+        const companyId = widget.context === 'company' ? widget.companyId : null;
+        const scope = companyId ? 'company-account-widget' : 'private-account-widget';
+        records.push(createRecordDescriptorFromData(scope, widget, {
+            companyId, accountId: widget.accountId
+        }));
+    }
+    for (const sharedData of sharedVaultData) {
+        records.push(createRecordDescriptorFromData('shared-vault-data', sharedData));
+    }
+    for (const link of sharedVaultLinks) {
+        records.push(createRecordDescriptorFromData('shared-vault-data-link', link, {
+            sharedDataId: link.sharedDataId
+        }));
     }
     return {records, storagePaths: collectStoragePaths(records, uid)};
 }
