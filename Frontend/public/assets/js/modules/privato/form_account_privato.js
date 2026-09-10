@@ -196,6 +196,13 @@ export async function initFormAccountPrivato(user) {
         ]);
 
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [cancelBtn, saveBtn]));
+
+        // Se una scrittura M6 è stata accodata offline, il ritorno della rete
+        // riapre automaticamente il bootstrap del form: la coda cifrata viene
+        // sincronizzata prima di qualsiasi nuova modifica dell'utente.
+        window.addEventListener('online', () => {
+            if (saveBtn.dataset.m6Queued === 'true') window.location.reload();
+        }, {once: true});
     }
 
     // Personalizza pulsante Back per tornare al dettaglio (se in modifica)

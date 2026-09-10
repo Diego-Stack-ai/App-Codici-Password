@@ -53,6 +53,7 @@ Il laboratorio `experiments/offline-sync` dimostra cifratura e autenticità dell
 - [x] cutover controllato: il normale salvataggio usa M6 per Account privati e memorandum privati isolati; condivisioni, banca e collegamenti Profilo richiedono la connessione;
 - [x] i form online acquisiscono la revisione confermata dal server prima della modifica; i salvataggi legacy complessi incrementano la stessa revisione;
 - [x] un conflitto appartenente a un altro record non blocca l'utente senza indicazioni: la UI apre il modulo del record corretto senza eliminare la coda;
+- [x] il form con una scrittura già accodata intercetta il ritorno online e riavvia automaticamente il bootstrap di sincronizzazione;
 
 ## Perimetro del primo cutover
 
