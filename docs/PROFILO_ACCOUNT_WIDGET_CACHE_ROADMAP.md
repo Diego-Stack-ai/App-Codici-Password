@@ -143,7 +143,7 @@ Accessi previsti:
 
 Creazione centrale e collegamento devono costituire un'unica operazione atomica. La modifica deve avvisare quanti Account saranno interessati. L'eliminazione deve essere bloccata finché esistono collegamenti, mentre lo scollegamento del singolo Account non elimina il dato centrale.
 
-Lo schema Firestore definitivo non è ancora approvato. Il percorso candidato `users/{uid}/sharedVaultData/{datoId}` dovrà essere confrontato con Rules, backup, offline, condivisione e ripristino prima dell'implementazione.
+Il percorso centrale candidato è `users/{uid}/sharedVaultData/{datoId}`. L'audit tecnico di Rules, backup e coda offline ha portato al contratto candidato descritto sotto; nessuna collezione è stata ancora creata e il contratto resta soggetto al gate di approvazione prima dell'implementazione.
 
 #### Prevenzione duplicati
 
@@ -170,6 +170,79 @@ Ordine previsto:
 I primi template candidati derivano dalle strutture già presenti: referente, banking e domande di sicurezza. Non si duplicano campi o validazioni già esistenti senza aver prima valutato un adattatore o uno schema comune.
 
 Ogni field sensibile deve essere cifrato, escluso da QR e anteprime in chiaro, protetto dallo stato della Vault e mai indicizzato o registrato senza protezione.
+
+### Contratto tecnico candidato — 10/09/2026
+
+#### Collocazione dei dati
+
+I widget Account non vengono incorporati nel documento Account. Usano sottocollezioni dedicate:
+
+- privato: `users/{uid}/accounts/{accountId}/widgets/{widgetId}`;
+- aziendale: `users/{uid}/aziende/{aziendaId}/accounts/{accountId}/widgets/{widgetId}`;
+- centrale: `users/{uid}/sharedVaultData/{sharedDataId}`;
+- indice dei collegamenti: `users/{uid}/sharedVaultData/{sharedDataId}/links/{linkId}`.
+
+La sottocollezione evita di avvicinarsi al limite Firestore del singolo documento, impedisce che il riordino di un widget riscriva l'intero Account e riduce i conflitti con le modifiche offline delle credenziali standard.
+
+Ogni documento nella sottocollezione `widgets` ha un solo contratto e un discriminante:
+
+- `kind: embedded`: contiene `fields[]` ed è proprietà dell'Account;
+- `kind: shared-reference`: contiene `sharedDataId` e metadati di presentazione/ordine, ma nessuna copia dei valori centrali.
+
+Campi comuni candidati: `title`, `description`, `icon`, `color`, `order`, `collapsed`, `schemaVersion`, `createdAt`, `updatedAt` e `revision`. Un widget incorporato aggiunge `fields[]`; un riferimento aggiunge esclusivamente `sharedDataId`. Lo schema dei field riusa quello già collaudato in `profileWidgets`, inclusi identificativo stabile, tipo, etichetta, ordine, valore cifrato per i dati sensibili e divieto di esposizione in QR/anteprime.
+
+La Credenziale comune centrale usa lo stesso modello `fields[]`, con titolo e metadati propri. Non contiene una lista duplicata degli Account nel documento principale: i collegamenti stanno nella sottocollezione `links`, priva di segreti. Ciascun link identifica contesto (`private` o `company`), `accountId` e, se necessario, `companyId`.
+
+#### Coerenza e proprietà
+
+Creazione centrale + collegamento, collegamento esistente e scollegamento devono essere operazioni atomiche che aggiornano insieme il riferimento nell'Account e l'indice centrale. Un identificativo deterministico del collegamento impedisce di collegare due volte la stessa Credenziale allo stesso Account.
+
+La rimozione della Credenziale centrale è rifiutata se esiste almeno un link. Poiché una Rule non può garantire da sola l'assenza di documenti arbitrari in una sottocollezione, creazione/collegamento/scollegamento/eliminazione passano da una funzione backend validata. Le normali letture restano disponibili al proprietario. Nessun destinatario di Account condiviso eredita il dato centrale: il widget collegato mostra uno stato non disponibile, salvo una futura condivisione esplicita separata.
+
+#### Ordinamento
+
+Widget incorporati e collegati condividono lo stesso campo `order`, quindi possono essere intercalati nella pagina. Il riordino touch è consentito soltanto dopo **Sblocca ordinamento** e si conclude con un salvataggio esplicito. Il riordino aggiorna soltanto i documenti interessati e non i dati Account. Non si introduce ora il trascinamento dei singoli campi: l'ordine dei field resta quello dell'array del widget.
+
+#### Template
+
+I template predefiniti sono manifest statici versionati distribuiti con l'app: descrivono struttura e validazioni, non contengono valori utente e non richiedono Firestore. La creazione copia la struttura in una nuova istanza, così un aggiornamento futuro del template non altera silenziosamente i widget esistenti.
+
+Prima libreria candidata, da approvare dopo il confronto con i wizard esistenti:
+
+- Informazioni referente;
+- Dati bancari;
+- Domande di sicurezza;
+- campo singolo personalizzato.
+
+Banking e referente legacy non vengono migrati né rimossi in questa fase. Il template potrà riusarne nomi, tipi e validazioni, ma rimarrà una nuova istanza indipendente finché non sarà definita una migrazione esplicita.
+
+#### Backup e ripristino
+
+Il backup attuale esporta `profileWidgets`, ma non conosce widget Account, Credenziali comuni o relativi link. Prima di rendere scrivibile la nuova UI occorre aggiungere scope distinti per:
+
+- widget Account privato;
+- widget Account aziendale;
+- Credenziale comune;
+- link della Credenziale comune.
+
+Il ripristino deve ricostruire prima i documenti centrali e poi i riferimenti, validare proprietario e percorsi, descrivere chiaramente titolo e Account nell'anteprima e non creare riferimenti orfani. Il backup rimane cifrato; gli allegati conservano il flusso separato già esistente.
+
+#### Offline e coda M6
+
+I widget incorporati potranno entrare nel normale offline-first solo dopo una mutation dedicata e test di conflitto. Le Credenziali comuni coinvolgono più documenti e, nella prima versione, sono **consultabili dalla cache ma creabili, modificabili, collegabili e scollegabili soltanto online**. Questa limitazione è intenzionale e deve essere dichiarata nella UI; evita code parziali o riferimenti orfani. L'estensione offline sarà valutata dopo la certificazione degli account semplici e degli allegati.
+
+#### Rules e limiti
+
+Le nuove collezioni non devono ricadere semplicemente nella regola generica proprietario. Servono Rules nominate che limitino chiavi, tipi, numero massimo di field, lunghezze, `kind`, contesto e versione schema. La validazione profonda già insufficiente in `profileWidgets` va centralizzata in un modello condiviso lato client/backend e coperta da test Rules. Valori sensibili ammessi soltanto nella forma cifrata prevista dalla Vault; nessun valore decifrato può apparire nei link o nei log.
+
+#### Gate prima del codice applicativo
+
+1. approvazione esplicita di percorsi, proprietà e limite online iniziale;
+2. estensione backup/ripristino e relativi test prima della prima scrittura reale;
+3. Rules e test emulator per isolamento privato/aziendale e accesso condiviso negato;
+4. funzioni atomiche con test di idempotenza, conflitto e cancellazione bloccata;
+5. prova isolata con un widget incorporato e una Credenziale comune collegata a due Account di aziende diverse;
+6. soltanto dopo, UI completa, ordinamento touch e libreria template.
 
 ## D — Matrice minima di test
 
