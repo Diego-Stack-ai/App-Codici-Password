@@ -329,6 +329,18 @@
     color: var(--accent);
 }
 
+.modal-input-label {
+    display: block;
+    margin: 1rem 0 -0.75rem;
+    color: var(--text-primary);
+    font: var(--font-label);
+    font-weight: var(--font-strong-weight);
+}
+
+.vault-secret-input {
+    border: 2px solid color-mix(in srgb, var(--accent) 70%, #fff);
+}
+
 .icon-accent-emerald {
     color: var(--status-success);
 }

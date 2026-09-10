@@ -61,4 +61,6 @@ M6 è attivo per creazione e modifica di Account privati semplici e memorandum p
 
 La consultazione offline resta distinta dalla modifica offline. Il prossimo gate fisico verifica in particolare l'apertura senza rete dei dati bancari già memorizzati. Per gli allegati, la lista può provenire dalla cache Firestore, mentre il contenuto cifrato su Storage non è garantito offline finché non sarà introdotta una cache locale esplicita con limiti di spazio.
 
+Il 10/09/2026 la prova fisica su telefono ha confermato che un Account bancario aperto integralmente online non era poi raggiungibile dalla lista Account dopo il distacco della rete: la lista risultava vuota/non disponibile. Il risultato non viene conteggiato come regressione della coda M6, già certificata per le scritture private isolate, ma come gate separato non superato della consultazione offline reale. La relativa revisione deve partire dalla disponibilità della lista e dalla preparazione deterministica della cache, prima di provare PIN, CCV o allegati. Non va mascherata con fallback grafici né usata per estendere ora le mutazioni offline bancarie.
+
 M6 resta attiva finché runtime e backend non dimostrano che nessuna scrittura può essere persa o sovrascritta silenziosamente.

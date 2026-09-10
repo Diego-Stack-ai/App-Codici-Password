@@ -37,7 +37,7 @@ async function mapWithConcurrency(items, concurrency, worker) {
 
 export async function inspectOwnerCredentialHealth(uid) {
     if (!uid) throw new Error('CREDENTIAL_HEALTH_UID_REQUIRED');
-    const vaultKeyMaterial = await ensureVaultKeyMaterial();
+    const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
     const [privateAccounts, companies] = await Promise.all([
         listPrivateAccounts(uid), listCompanies(uid)
     ]);

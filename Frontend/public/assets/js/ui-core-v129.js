@@ -228,6 +228,7 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
 
         const isVaultSecret = options.vaultSecret === true;
         const input = createElement('input', {
+            id: `${modalId}-input`,
             type: 'text',
             value: initialValue,
             placeholder: placeholder,
@@ -240,6 +241,11 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
             'data-lpignore': 'true',
             className: `glass-field modal-input-glass${isVaultSecret ? ' vault-secret-input' : ''}`
         });
+        const inputLabel = isVaultSecret ? createElement('label', {
+            className: 'modal-input-label',
+            htmlFor: input.id,
+            textContent: placeholder || 'Master Password'
+        }) : null;
 
         const btnCancel = createElement('button', { id: 'modal-cancel-btn', className: 'btn-modal btn-secondary', textContent: t('cancel') || 'Annulla' }, []);
         const btnConfirm = createElement('button', { id: 'modal-confirm-btn', className: 'btn-modal btn-primary', textContent: t('confirm') || 'Conferma' }, []);
@@ -283,6 +289,7 @@ export function showInputModal(title, initialValue = '', placeholder = '', descr
             createElement('h3', { className: 'modal-title', textContent: title }),
             createElement('div', { className: 'modal-accent-bar' }),
             description ? createElement('p', { className: 'modal-text', textContent: description }) : null,
+            inputLabel,
             input,
             options.passwordType ? createElement('ul', {
                 className: 'modal-password-requirements',

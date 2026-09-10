@@ -6,7 +6,7 @@
 
 import { encrypt, decrypt, isEncryptedValue, generateVaultKey, createVaultKeyring, wrapVaultKey, unwrapVaultKey, createVaultVerifier, verifyVaultVerifier } from './crypto-utils.js';
 import { showInputModal, showToast, showConfirmModal } from '../../ui-core-v129.js';
-import { db, auth } from '../../firebase-config.js?v=1.2.86';
+import { db, auth } from '../../firebase-config.js?v=1.2.87';
 import { doc, setDoc, updateDoc, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { setupWebAuthnPrf, getPrfOutput, deriveHkdfKey, encryptVaultSecret, decryptVaultSecret, generateHkdfSalt, isWebAuthnSupported } from './webauthn-manager.js';
@@ -288,6 +288,7 @@ export async function ensureVaultKeyMaterial(options = {}) {
 
 async function ensureVaultKeyMaterialInternal(options = {}) {
     const forceReload = typeof options === 'boolean' ? options : !!options.forceReload;
+    const promptImmediately = typeof options === 'object' && options.promptImmediately === true;
 
     if (_vaultKeyMaterial && !forceReload) return _vaultKeyMaterial;
 
@@ -316,7 +317,11 @@ async function ensureVaultKeyMaterialInternal(options = {}) {
     let msg = "Master Password";
     let description = `${passwordPolicyMessage('master')} Deve essere diversa dalla password dell’account. Non è recuperabile.`;
 
-    const offerMasterSuggestion = !isBiometricUnlockConfigured() && await isNewVault(uid);
+    // Nei flussi su richiesta non bloccare l'apertura del campo con letture Firestore.
+    // La verifica completa della Vault resta invariata dopo l'inserimento.
+    const offerMasterSuggestion = !promptImmediately
+        && !isBiometricUnlockConfigured()
+        && await isNewVault(uid);
     const pass = await showInputModal(
         "SBLOCCO VAULT", '', msg, description,
         { vaultSecret: true, ...(offerMasterSuggestion ? { suggestPassword: true, length: 24 } : {}) }
