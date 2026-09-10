@@ -1,5 +1,5 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.82';
-import { collection, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
+import { auth, db } from '../../firebase-config.js?v=1.2.83';
+import { collection, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement, createElement } from '../../dom-utils.js';
 import { showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { sanitizeEmail } from '../../utils.js';
@@ -165,6 +165,7 @@ export async function initDetailAccountMode({ account, ownerId, accountId, azien
                     isExplicitMemo: isMemo, sharedWith,
                     sharedWithUids: Object.values(sharedWith).filter(g => g.status === 'accepted' && g.uid).map(g => g.uid),
                     acceptedCount: Object.values(sharedWith).filter(g => g.status === 'accepted').length,
+                    revision: increment(1),
                     updatedAt: new Date().toISOString()
                 });
             });

@@ -9,7 +9,7 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { getPrivateAccount, listContacts } from '../data/vault-repository.js';
+import { getPrivateAccount, getPrivateAccountConfirmed, listContacts } from '../data/vault-repository.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
 import { savePrivateAccount } from './form-privato-save.js';
 
@@ -66,6 +66,39 @@ function showM6ConflictChoice() {
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('active'), 10);
         modal.addEventListener('click', event => { if (event.target === modal) close(null); });
+    });
+}
+
+function showM6ForeignConflictChoice(accountName) {
+    return new Promise(resolve => {
+        document.getElementById('m6-conflict-modal')?.remove();
+        const modal = createElement('div', {id: 'm6-conflict-modal', className: 'modal-overlay'});
+        const close = openAccount => {
+            modal.classList.remove('active');
+            setTimeout(() => { modal.remove(); resolve(openAccount); }, 300);
+        };
+        const later = createElement('button', {
+            className: 'btn-modal btn-secondary',
+            textContent: 'Più tardi',
+            onclick: () => close(false)
+        });
+        const open = createElement('button', {
+            className: 'btn-modal btn-primary',
+            textContent: 'Apri account',
+            onclick: () => close(true)
+        });
+        setChildren(modal, createElement('div', {className: 'modal-box'}, [
+            createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'sync_problem'}),
+            createElement('h3', {className: 'modal-title', textContent: 'Modifica offline da controllare'}),
+            createElement('p', {
+                className: 'modal-text',
+                textContent: `La coda contiene una modifica di “${accountName || 'un altro account'}”. Apri quel record per scegliere se recuperarla o mantenere il server.`
+            }),
+            createElement('div', {className: 'modal-actions'}, [later, open])
+        ]));
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
+        modal.addEventListener('click', event => { if (event.target === modal) close(false); });
     });
 }
 
@@ -220,6 +253,11 @@ export async function initFormAccountPrivato(user) {
                         await restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision);
                         showToast('Modifica offline recuperata. Controllala e premi Salva per applicarla.', 'warning');
                     }
+                } else if (operation?.recordId) {
+                    const openAccount = await showM6ForeignConflictChoice(operation.record?.nomeAccount);
+                    if (openAccount) {
+                        window.location.replace(`form_account_privato.html?id=${encodeURIComponent(operation.recordId)}`);
+                    }
                 }
             } else if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
                 showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');
@@ -250,7 +288,9 @@ export async function initFormAccountPrivato(user) {
  */
 async function loadData() {
     try {
-        const data = await getPrivateAccount(currentUid, currentDocId);
+        const data = navigator.onLine
+            ? await getPrivateAccountConfirmed(currentUid, currentDocId)
+            : await getPrivateAccount(currentUid, currentDocId);
         if (!data) { showToast(t('account_not_found'), "error"); return; }
         currentRevision = Number.isInteger(data.revision) ? data.revision : 0;
         hasLinkedProfileField = Boolean(data.linkedProfileField?.type && data.linkedProfileField?.id);

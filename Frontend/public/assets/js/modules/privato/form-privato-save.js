@@ -1,6 +1,6 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.82';
+import { auth, db } from '../../firebase-config.js?v=1.2.83';
 import { LOG } from '../../logger.js';
-import { collection, deleteField, doc, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
+import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { sanitizeEmail } from '../../utils.js';
@@ -219,6 +219,7 @@ export async function savePrivateAccount({
             // 2. NOW EXECUTE ALL WRITES
             let finalData = { ...data };
             if (!isEditing) finalData.createdAt = new Date().toISOString();
+            if (isEditing) finalData.revision = increment(1);
 
             // Handle Revocation Logic o Switch to Private
             if (!isSharingActive) {
