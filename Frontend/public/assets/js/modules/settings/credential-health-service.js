@@ -84,14 +84,12 @@ export async function inspectOwnerCredentialHealth(uid) {
             companyName: String(companyName)
         }
     ]));
-    const results = findings
-        .filter(item => item.flags.length)
-        .map(item => ({...item, ...labels.get(item.recordId)}));
+    const results = findings.map(item => ({...item, ...labels.get(item.recordId)}));
 
     readable.length = 0;
     return Object.freeze({
         scanned: findings.length,
-        atRisk: results.length,
+        atRisk: results.filter(item => item.flags.length).length,
         unavailable,
         results
     });

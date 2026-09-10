@@ -15,7 +15,7 @@ async function loadModel() {
     return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
 }
 
-test('il runtime restituisce soltanto identificatore e flag di rischio', async () => {
+test('il runtime restituisce identificatore, livello e flag di rischio', async () => {
     const {analyzeCredentialHealth} = await loadModel();
     const now = Date.parse('2026-09-08T00:00:00Z');
     const results = await analyzeCredentialHealth([
@@ -24,9 +24,9 @@ test('il runtime restituisce soltanto identificatore e flag di rischio', async (
         {id: 'c', password: 'Forte#Fixture123', updatedAt: now}
     ], {now, sessionKey: new Uint8Array(32).fill(7)});
     assert.deepEqual(results, [
-        {recordId: 'a', flags: ['weak']},
-        {recordId: 'b', flags: ['dated', 'duplicate']},
-        {recordId: 'c', flags: ['duplicate']}
+        {recordId: 'a', strength: 'weak', flags: ['weak']},
+        {recordId: 'b', strength: 'strong', flags: ['dated', 'duplicate']},
+        {recordId: 'c', strength: 'strong', flags: ['duplicate']}
     ]);
     assert.equal(JSON.stringify(results).includes('Fixture123'), false);
 });
@@ -34,7 +34,7 @@ test('il runtime restituisce soltanto identificatore e flag di rischio', async (
 test('la chiave HMAC di sessione non compare nei risultati', async () => {
     const {analyzeCredentialHealth} = await loadModel();
     const results = await analyzeCredentialHealth([{id: 'a', password: 'Aa#123456789'}]);
-    assert.deepEqual(Object.keys(results[0]), ['recordId', 'flags']);
+    assert.deepEqual(Object.keys(results[0]), ['recordId', 'strength', 'flags']);
 });
 
 test('date Firestore e date ISO sono confrontate senza serializzare il segreto', async () => {
@@ -44,6 +44,16 @@ test('date Firestore e date ISO sono confrontate senza serializzare il segreto',
         {id: 'timestamp', password: 'Aa#123456789', passwordUpdatedAt: {seconds: 1_700_000_000}},
         {id: 'iso', password: 'Bb#123456789', passwordUpdatedAt: '2026-08-01T00:00:00Z'}
     ], {now});
-    assert.deepEqual(results[0], {recordId: 'timestamp', flags: ['dated']});
-    assert.deepEqual(results[1], {recordId: 'iso', flags: []});
+    assert.deepEqual(results[0], {recordId: 'timestamp', strength: 'strong', flags: ['dated']});
+    assert.deepEqual(results[1], {recordId: 'iso', strength: 'strong', flags: []});
+});
+
+test('distingue password deboli, medie e forti', async () => {
+    const {analyzeCredentialHealth} = await loadModel();
+    const results = await analyzeCredentialHealth([
+        {id: 'weak', password: '1234'},
+        {id: 'medium', password: 'Prova123'},
+        {id: 'strong', password: 'Prova#Sicura123456'}
+    ]);
+    assert.deepEqual(results.map(item => item.strength), ['weak', 'medium', 'strong']);
 });

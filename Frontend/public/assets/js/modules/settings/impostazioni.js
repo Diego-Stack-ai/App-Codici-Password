@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.88';
+import { auth, db } from '../../firebase-config.js?v=1.2.89';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -51,6 +51,7 @@ export async function initImpostazioni(user) {
 
 function showCredentialHealthResults(report) {
     const flagLabels = {weak: 'Debole', duplicate: 'Duplicata', dated: 'Datata'};
+    const strengthLabels = {weak: 'Debole', medium: 'Media', strong: 'Forte'};
     const modal = createElement('div', {
         className: 'modal-overlay', role: 'dialog', 'aria-modal': 'true',
         'aria-labelledby': 'credential-health-title'
@@ -79,12 +80,17 @@ function showCredentialHealthResults(report) {
             const context = item.area === 'azienda'
                 ? `Azienda${item.companyName ? ` · ${item.companyName}` : ''}`
                 : 'Privato';
-            const tags = createElement('div', {className: 'credential-health-tags'},
-                item.flags.map(flag => createElement('span', {
+            const extraFlags = item.flags.filter(flag => flag !== 'weak');
+            const tags = createElement('div', {className: 'credential-health-tags'}, [
+                createElement('span', {
+                    className: `credential-health-tag credential-health-${item.strength}`,
+                    textContent: strengthLabels[item.strength] || item.strength
+                }),
+                ...extraFlags.map(flag => createElement('span', {
                     className: `credential-health-tag credential-health-${flag}`,
                     textContent: flagLabels[flag] || flag
                 }))
-            );
+            ]);
             list.appendChild(createElement('div', {className: 'credential-health-result'}, [
                 createElement('div', {className: 'credential-health-identity'}, [
                     createElement('strong', {textContent: item.title}),
@@ -549,7 +555,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.88');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.89');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });

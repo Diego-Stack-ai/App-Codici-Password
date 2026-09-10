@@ -1,4 +1,4 @@
-const CACHE_NAME = 'codex-shell-v1.2.88';
+const CACHE_NAME = 'codex-shell-v1.2.89';
 const APP_CACHE_PREFIX = 'codex-';
 
 importScripts('./offline-assets.js');

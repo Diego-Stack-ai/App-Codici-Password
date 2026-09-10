@@ -999,6 +999,8 @@ h3.settings-desc {
 }
 
 .credential-health-weak { background: rgba(239, 68, 68, 0.16); color: #dc2626; }
+.credential-health-medium { background: rgba(245, 158, 11, 0.18); color: #b45309; }
+.credential-health-strong { background: rgba(34, 197, 94, 0.16); color: #15803d; }
 .credential-health-duplicate { background: rgba(245, 158, 11, 0.18); color: #b45309; }
 .credential-health-dated { background: rgba(99, 102, 241, 0.16); color: #4f46e5; }
 

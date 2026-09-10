@@ -21,12 +21,13 @@ function tokenToKey(token) {
     return Array.from(token, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-function isWeak(secret) {
-    if (secret.length < 12 || COMMON_PASSWORDS.has(secret.toLowerCase())) return true;
-    return !/[a-z]/.test(secret)
-        || !/[A-Z]/.test(secret)
-        || !/[0-9]/.test(secret)
-        || !/[^A-Za-z0-9]/.test(secret);
+function classifyStrength(secret) {
+    if (COMMON_PASSWORDS.has(secret.toLowerCase())) return 'weak';
+    const classes = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/]
+        .filter(pattern => pattern.test(secret)).length;
+    if (secret.length >= 12 && classes === 4) return 'strong';
+    if (secret.length >= 8 && classes >= 3) return 'medium';
+    return 'weak';
 }
 
 function timestampMillis(value) {
@@ -49,17 +50,18 @@ export async function analyzeCredentialHealth(records, {
     for (const record of records) {
         const secret = String(record.password ?? '');
         const flags = [];
-        if (secret && isWeak(secret)) flags.push('weak');
+        const strength = classifyStrength(secret);
+        if (secret && strength === 'weak') flags.push('weak');
         const changedAt = timestampMillis(record.passwordUpdatedAt ?? record.updatedAt);
         if (secret && changedAt !== null && now - changedAt >= staleDays * DAY_MS) flags.push('dated');
         const token = secret ? tokenToKey(await fingerprint(secret, sessionKey)) : null;
         if (token) fingerprints.set(token, (fingerprints.get(token) ?? 0) + 1);
-        internalResults.push({recordId: String(record.id), flags, token});
+        internalResults.push({recordId: String(record.id), flags, strength, token});
     }
 
-    return internalResults.map(({recordId, flags, token}) => ({
+    return internalResults.map(({recordId, flags, strength, token}) => ({
         recordId,
+        strength,
         flags: token && fingerprints.get(token) > 1 ? [...flags, 'duplicate'] : flags
     }));
 }
-
