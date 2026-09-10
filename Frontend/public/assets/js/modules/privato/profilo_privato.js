@@ -34,7 +34,7 @@ import { encrypt, decrypt, ensureVaultKeyMaterial, clearSession, isAutoUnlockAct
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
 import {getUserProfile, getUserSetting, listDeadlines} from '../data/vault-repository.js';
 import { syncData as _syncData } from './profilo-sync.js';
-import { normalizeLegacyProfile, migrateQrIndexesToIds } from './profile-model.js';
+import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDeadlineState } from './profile-model.js';
 
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
@@ -44,7 +44,6 @@ import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleS
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
 import { connectEmailAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
-import {resolveProfileDocumentDeadlineState} from './profile-deadline-link-model.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };

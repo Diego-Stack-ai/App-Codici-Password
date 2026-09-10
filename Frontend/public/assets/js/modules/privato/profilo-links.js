@@ -4,7 +4,7 @@ import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { showProfileModal } from './profilo-modal.js';
 import {listDeadlines, listPrivateAccounts} from '../data/vault-repository.js';
-import {buildProfileDocumentDeadlineDraft, findCompatibleDocumentDeadlines} from './profile-deadline-link-model.js';
+import {buildProfileDocumentDeadlineDraft, findCompatibleDocumentDeadlines} from './profile-model.js';
 
 export function openLinkedAccount(accountId) {
     if (accountId) window.location.href = `dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}`;

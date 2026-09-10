@@ -4,7 +4,7 @@ import {build} from 'esbuild';
 import {readFile} from 'node:fs/promises';
 
 async function loadModel() {
-  const source = await readFile('Frontend/public/assets/js/modules/privato/profile-deadline-link-model.js', 'utf8');
+  const source = await readFile('Frontend/public/assets/js/modules/privato/profile-model.js', 'utf8');
   const result = await build({
     stdin: {contents: source, loader: 'js'}, bundle: true, format: 'esm', platform: 'browser', write: false
   });
