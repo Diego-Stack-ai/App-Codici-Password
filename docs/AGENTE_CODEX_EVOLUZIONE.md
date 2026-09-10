@@ -184,15 +184,16 @@ Non viene creata ora una prova LLM: prima servono il manifest di pagina e una mi
 
 ## Ordine operativo post M0–M10
 
-1. Agente Codex A0/A1: contesto e conoscenza per pagina senza LLM;
-2. collaudo fisico Windows online;
-3. collaudo offline sistematico con F12 sulle 29 pagine;
-4. correzione della consultazione offline reale emersa dal collaudo;
-5. rifiniture UI rinviate, inclusi lucchetti, modali, watermark, sticky, glass e animazioni;
-6. audit indipendente di crittografia, condivisione, backup e nuovo contratto Agente;
-7. per ultime, lingue e riordino definitivo delle Impostazioni.
+1. coerenza Profilo/Account/Widget/Cache: audit, piano e implementazione per blocchi, con priorità al read-your-writes; il contratto completo è in `PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md`;
+2. Agente Codex A0/A1: contesto e conoscenza per pagina senza LLM, dopo la stabilizzazione dello schema dati;
+3. collaudo fisico Windows online;
+4. collaudo offline sistematico con F12 sulle 29 pagine;
+5. correzione della consultazione offline reale emersa dal collaudo;
+6. rifiniture UI rinviate, inclusi lucchetti, modali, watermark, sticky, glass e animazioni;
+7. audit indipendente di crittografia, condivisione, backup e nuovo contratto Agente;
+8. per ultime, lingue e riordino definitivo delle Impostazioni.
 
-La lista passa quindi da sei a sette attività: l'evoluzione dell'Agente è un lavoro autonomo che precede i collaudi e non deve essere nascosto dentro le rifiniture UI.
+La lista comprende quindi otto attività. Il nuovo blocco precede l'Agente perché cache, collegamenti e widget devono essere stabili prima di diventare conoscenza e strumenti dell'assistente.
 
 ## Fonti tecniche
 
