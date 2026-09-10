@@ -90,6 +90,47 @@ Prima di modifiche strutturali devono essere approvati:
 
 La soluzione read-your-writes dovrà distinguere le normali letture cache-first dalle letture successive a una scrittura confermata. Le alternative da confrontare sono aggiornamento/invalida­zione controllata della cache, passaggio del dato appena scritto o lettura server-confirmed mirata.
 
+### Decisioni funzionali approvate
+
+#### Account e Memorandum
+
+- Account e Account condiviso possono contenere `username`, `account/utente/codice` e `password`.
+- Memorandum e Memorandum condiviso non possono contenere questi tre valori e non devono mostrarne i campi.
+- Il passaggio a Memorandum è bloccato finché l'utente non svuota consapevolmente le credenziali; non si conservano copie nascoste.
+- Se un Memorandum torna Account, i tre campi ricompaiono vuoti.
+- Note, sito, widget e allegati restano disponibili in tutte le tipologie.
+- La validazione deve esistere nel dominio/repository o backend, non soltanto nella UI.
+
+#### Corpo dinamico della pagina
+
+La struttura desiderata è: dati standard, note, corpo dinamico dei widget, allegati, tipologia/condivisione e comandi. Il corpo può allungarsi verticalmente e contenere widget singoli o composti. Widget e campi sono ordinabili; su touch è previsto un blocco/sblocco esplicito dell'ordinamento per evitare trascinamenti involontari.
+
+#### Credenziali comuni
+
+È approvata una terza area autonoma, provvisoriamente denominata **Credenziali comuni** o **Dati comuni protetti**. Non è un Account privato o aziendale e non appartiene a una singola Azienda. Conserva una sola istanza cifrata di un dato realmente riutilizzato, per esempio il codice generale dell'app Legal Mail collegato agli Account PEC di aziende differenti.
+
+Una Credenziale comune usa lo stesso contratto `widget + fields` e può quindi contenere uno o più campi normali o sensibili. Negli Account appare come **widget collegato**, contenente soltanto un riferimento; non viene duplicato il valore.
+
+Si distinguono:
+
+- **widget incorporato**: appartiene a un solo Account;
+- **widget collegato**: riferisce una Credenziale comune centrale utilizzabile da più Account.
+
+La Credenziale comune è di proprietà dell'utente che la crea. Gli Account collegati non ne diventano proprietari. Un destinatario di un Account condiviso non riceve automaticamente accesso alla Credenziale comune e non può modificarla senza un permesso separato ed esplicito.
+
+Accessi previsti:
+
+- Impostazioni → Credenziali comuni: creazione, modifica, elenco dei collegamenti, autorizzazioni e rimozione;
+- Account → Credenziali comuni: collega un dato esistente oppure crea un nuovo dato centrale e collega automaticamente l'Account corrente.
+
+Creazione centrale e collegamento devono costituire un'unica operazione atomica. La modifica deve avvisare quanti Account saranno interessati. L'eliminazione deve essere bloccata finché esistono collegamenti, mentre lo scollegamento del singolo Account non elimina il dato centrale.
+
+Lo schema Firestore definitivo non è ancora approvato. Il percorso candidato `users/{uid}/sharedVaultData/{datoId}` dovrà essere confrontato con Rules, backup, offline, condivisione e ripristino prima dell'implementazione.
+
+#### Prevenzione duplicati
+
+È prevista una ricerca locale preventiva mentre si digita il nome di Account o Memorandum. Normalizzazione, parole in ordine diverso e piccoli errori di battitura producono suggerimenti, mai un blocco assoluto. Il confronto rispetta il perimetro privato/azienda, non usa password e permette sempre di creare legittimamente due Account distinti.
+
 ## C — Implementazione per blocchi
 
 Ordine previsto:
