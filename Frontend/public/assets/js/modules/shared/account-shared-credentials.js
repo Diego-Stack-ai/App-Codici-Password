@@ -24,11 +24,22 @@ function linkPayload(context, order = 0) {
 }
 
 async function revealField(button, field) {
+    const valueElement = button.previousElementSibling;
+    const icon = button.querySelector('.material-symbols-outlined');
+    if (button.dataset.revealed === 'true') {
+        valueElement.textContent = '••••••••';
+        button.dataset.revealed = 'false';
+        if (icon) icon.textContent = 'visibility';
+        button.setAttribute('aria-label', `Mostra ${field.label || 'dato'}`);
+        return;
+    }
     try {
         const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
         const value = field.encrypted ? await decrypt(field.valueEnc, vaultKeyMaterial) : String(field.value ?? '');
-        button.previousElementSibling.textContent = value || '—';
-        button.remove();
+        valueElement.textContent = value || '—';
+        button.dataset.revealed = 'true';
+        if (icon) icon.textContent = 'visibility_off';
+        button.setAttribute('aria-label', `Nascondi ${field.label || 'dato'}`);
     } catch {
         showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
     }

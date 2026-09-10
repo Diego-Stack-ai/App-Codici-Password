@@ -272,8 +272,15 @@ exports.manageAccountWidget = onCall(
         let command;
         try {
             command = validateAccountWidgetCommand(request.data);
-        } catch {
-            throw new HttpsError("invalid-argument", "Operazione Widget Account non valida.");
+        } catch (error) {
+            const validationCode = /^ACCOUNT_WIDGET_|^SHARED_VAULT_/.test(String(error?.message || ""))
+                ? error.message
+                : "ACCOUNT_WIDGET_COMMAND_INVALID";
+            console.warn("[ACCOUNT_WIDGET] Comando rifiutato", {validationCode});
+            throw new HttpsError(
+                "invalid-argument",
+                `Operazione Widget Account non valida (${validationCode}).`
+            );
         }
         const store = getFirestore();
         const paths = accountWidgetPaths(request.auth.uid, command);

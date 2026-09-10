@@ -21,6 +21,15 @@ test("accetta una Credenziale comune con solo ciphertext per il campo sensibile"
   assert.equal(command.data.fields[0].preview, false);
 });
 
+test("accetta un campo sensibile opzionale ancora vuoto senza plaintext", () => {
+  const command = validateSharedVaultCommand({
+    operationId: "op-empty", action: "create", sharedDataId: "shared-empty",
+    data: {title: "Domande", fields: [{...encryptedField, valueEnc: ""}]}
+  });
+  assert.equal(command.data.fields[0].valueEnc, "");
+  assert.equal("value" in command.data.fields[0], false);
+});
+
 test("rifiuta plaintext, QR e copia nei campi sensibili", () => {
   const base = {operationId: "op-1", action: "create", sharedDataId: "shared-1"};
   assert.throws(() => validateSharedVaultCommand({...base, data: {

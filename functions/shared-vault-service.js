@@ -34,7 +34,10 @@ function optionalText(value, maximum, code) {
 
 function fieldValue(field) {
   if (field.encrypted === true) {
-    if (typeof field.valueEnc !== "string" || !field.valueEnc || field.valueEnc.length > 20000 || "value" in field) {
+    // Un campo sensibile può essere opzionale e quindi ancora vuoto. In quel
+    // caso il client lo rappresenta con valueEnc=""; resta comunque vietata
+    // qualsiasi proprietà `value`, così il testo in chiaro non può transitare.
+    if (typeof field.valueEnc !== "string" || field.valueEnc.length > 20000 || "value" in field) {
       throw new Error("SHARED_VAULT_FIELD_ENCRYPTION_INVALID");
     }
     return {valueEnc: field.valueEnc};

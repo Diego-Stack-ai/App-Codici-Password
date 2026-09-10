@@ -1,11 +1,11 @@
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
-import {showConfirmModal, showToast} from '../../ui-core-v129.js';
+import {showInputModal, showToast} from '../../ui-core-v129.js';
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
     createAccountWidget, deleteAccountWidget, updateAccountWidget
 } from '../data/account-widget-client.js';
 import {
-    listEmbeddedAccountWidgets, listEmbeddedAccountWidgetsConfirmed
+    listAccountWidgets, listAccountWidgetsConfirmed
 } from '../data/vault-repository.js';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
@@ -46,7 +46,7 @@ function fieldRow(field = {}) {
     return row;
 }
 
-async function openEditor(widget, context, refresh) {
+async function openEditor(widget, context, refresh, templates = []) {
     const fields = await editableFields(widget);
     const overlay = createElement('div', {className: 'modal-overlay active'});
     const close = () => overlay.remove();
@@ -56,6 +56,25 @@ async function openEditor(widget, context, refresh) {
     });
     const fieldList = createElement('div', {className: 'account-widget-editor-fields'});
     fields.forEach(field => fieldList.appendChild(fieldRow(field)));
+    const templateSelect = !widget && templates.length ? createElement('select', {
+        className: 'shared-account-select-control', 'aria-label': 'Modello di widget esistente'
+    }, [
+        createElement('option', {value: '', textContent: 'Crea widget personalizzato'}),
+        ...templates.map((template, index) => createElement('option', {
+            value: String(index), textContent: `${template.title} · ${template.fields.length} campi`
+        }))
+    ]) : null;
+    templateSelect?.addEventListener('change', () => {
+        if (templateSelect.value === '') return;
+        const template = templates[Number(templateSelect.value)];
+        if (!template) return;
+        title.value = template.title;
+        clearElement(fieldList);
+        template.fields.forEach(field => fieldList.appendChild(fieldRow({
+            id: newId('field'), label: field.label, type: field.type,
+            encrypted: field.encrypted === true, value: ''
+        })));
+    });
     const addField = createElement('button', {
         type: 'button', className: 'btn-modal btn-secondary', textContent: 'Aggiungi campo',
         onclick: () => fieldList.appendChild(fieldRow())
@@ -91,7 +110,7 @@ async function openEditor(widget, context, refresh) {
     setChildren(form, [
         createElement('h2', {className: 'modal-title', textContent: widget ? 'Modifica widget' : 'Nuovo widget'}),
         createElement('p', {className: 'modal-text', textContent: 'Aggiungi uno o più campi specifici per questo Account.'}),
-        title, fieldList, addField,
+        templateSelect, title, fieldList, addField,
         createElement('div', {className: 'modal-actions account-widget-editor-actions'}, [
             createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close}),
             save
@@ -105,12 +124,38 @@ async function openEditor(widget, context, refresh) {
 }
 
 async function reveal(button, field) {
+    const value = button.previousElementSibling;
+    const icon = button.querySelector('.material-symbols-outlined');
+    if (button.dataset.revealed === 'true') {
+        value.textContent = '••••••••';
+        button.dataset.revealed = 'false';
+        if (icon) icon.textContent = 'visibility';
+        button.setAttribute('aria-label', `Mostra ${field.label}`);
+        return;
+    }
     try {
         const key = await ensureVaultKeyMaterial({promptImmediately: true});
-        button.previousElementSibling.textContent = await decrypt(field.valueEnc, key) || '—';
-        button.remove();
+        value.textContent = await decrypt(field.valueEnc, key) || '—';
+        button.dataset.revealed = 'true';
+        if (icon) icon.textContent = 'visibility_off';
+        button.setAttribute('aria-label', `Nascondi ${field.label}`);
     } catch {
         showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
+    }
+}
+
+async function copyField(field) {
+    try {
+        let value = field.value ?? '';
+        if (field.encrypted) {
+            const key = await ensureVaultKeyMaterial({promptImmediately: true});
+            value = await decrypt(field.valueEnc, key) || '';
+        }
+        if (!value) return showToast('Il campo è vuoto.', 'warning');
+        await navigator.clipboard.writeText(String(value));
+        showToast('Copiato!', 'success');
+    } catch {
+        showToast('Sblocca la Vault per copiare il dato.', 'warning');
     }
 }
 
@@ -126,26 +171,39 @@ function widgetCard(widget, context, refresh) {
             type: 'button', className: 'shared-account-reveal', 'aria-label': `Mostra ${field.label}`,
             onclick: event => reveal(event.currentTarget, field)
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
-        fields.appendChild(createElement('div', {className: 'shared-account-field'}, children));
+        children.push(createElement('button', {
+            type: 'button', className: 'shared-account-reveal', 'aria-label': `Copia ${field.label}`,
+            onclick: () => copyField(field)
+        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'content_copy'})]));
+        fields.appendChild(createElement('div', {className: 'shared-account-field glass-field border-glow account-widget-display-field'}, children));
     }
-    return createElement('article', {className: 'shared-account-card'}, [
-        createElement('div', {className: 'shared-account-card-heading'}, [
+    const actions = context.editable ? createElement('span', {className: 'account-widget-card-actions'}, [
+        createElement('button', {
+            type: 'button', className: 'shared-account-reveal', 'aria-label': 'Modifica widget',
+            onclick: () => openEditor(widget, context, refresh)
+        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'edit'})]),
+        createElement('button', {
+            type: 'button', className: 'shared-account-reveal account-widget-delete', 'aria-label': 'Elimina widget',
+            onclick: async () => {
+                const confirmation = await showInputModal(
+                    'Elimina widget', '', widget.title,
+                    `Per eliminare definitivamente “${widget.title}”, riscrivi esattamente il nome del widget.`
+                );
+                if (confirmation === null) return;
+                if (confirmation.trim() !== widget.title.trim()) {
+                    showToast('Il nome inserito non corrisponde. Widget non eliminato.', 'warning');
+                    return;
+                }
+                try { await deleteAccountWidget(widget); await refresh(true); showToast('Widget eliminato.', 'success'); }
+                catch (error) { showToast(error.message || 'Eliminazione non riuscita.', 'error'); }
+            }
+        }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})])
+    ]) : null;
+    return createElement('article', {className: 'account-widget-block'}, [
+        createElement('div', {className: 'shared-account-card-heading account-widget-heading'}, [
             createElement('span', {className: 'material-symbols-outlined', textContent: widget.icon || 'widgets'}),
             createElement('strong', {textContent: widget.title}),
-            createElement('span', {className: 'account-widget-card-actions'}, [
-                createElement('button', {
-                    type: 'button', className: 'shared-account-reveal', 'aria-label': 'Modifica widget',
-                    onclick: () => openEditor(widget, context, refresh)
-                }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'edit'})]),
-                createElement('button', {
-                    type: 'button', className: 'shared-account-reveal account-widget-delete', 'aria-label': 'Elimina widget',
-                    onclick: async () => {
-                        if (!await showConfirmModal('Elimina widget', `Eliminare “${widget.title}”?`, 'Elimina', 'Annulla')) return;
-                        try { await deleteAccountWidget(widget); await refresh(true); showToast('Widget eliminato.', 'success'); }
-                        catch (error) { showToast(error.message || 'Eliminazione non riuscita.', 'error'); }
-                    }
-                }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})])
-            ])
+            actions
         ]),
         fields
     ]);
@@ -158,14 +216,29 @@ export async function initAccountEmbeddedWidgets(context) {
     if (!section || !list || !context?.uid || !context.accountId) return;
     if (context.readOnly) { section.classList.add('hidden'); return; }
     const refresh = async confirmed => {
-        const read = confirmed ? listEmbeddedAccountWidgetsConfirmed : listEmbeddedAccountWidgets;
-        const widgets = await read(context.uid, context);
+        const read = confirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
+        const allWidgets = await read(context.uid);
+        const widgets = allWidgets.filter(widget => widget.kind === 'embedded' &&
+            widget.context === context.context && widget.accountId === context.accountId &&
+            (context.context !== 'company' || widget.companyId === context.companyId))
+            .sort((left, right) => Number(left.order || 0) - Number(right.order || 0));
+        const seenTemplates = new Set();
+        const templates = allWidgets.filter(widget => {
+            if (widget.kind !== 'embedded' || !Array.isArray(widget.fields) || !widget.fields.length) return false;
+            const signature = `${widget.title}|${widget.fields.map(field => `${field.label}:${field.type}`).join('|')}`;
+            if (seenTemplates.has(signature)) return false;
+            seenTemplates.add(signature);
+            return true;
+        });
         clearElement(list);
         widgets.forEach(widget => list.appendChild(widgetCard(widget, context, refresh)));
-        section.classList.remove('hidden');
-        add.onclick = () => navigator.onLine
-            ? openEditor(null, context, refresh)
-            : showToast('La creazione dei Widget richiede internet.', 'warning');
+        section.classList.toggle('hidden', !context.editable && widgets.length === 0);
+        if (add) {
+            add.classList.toggle('hidden', !context.editable);
+            add.onclick = () => navigator.onLine
+                ? openEditor(null, context, refresh, templates)
+                : showToast('La creazione dei Widget richiede internet.', 'warning');
+        }
     };
     await refresh(false);
 }

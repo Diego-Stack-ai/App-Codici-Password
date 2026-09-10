@@ -799,6 +799,45 @@
     margin-left: auto;
 }
 
+.account-widget-block {
+    display: grid;
+    gap: var(--space-3, 0.75rem);
+}
+
+.account-widget-block + .account-widget-block {
+    margin-top: var(--space-5, 1.25rem);
+}
+
+.account-widget-heading {
+    padding: 0 var(--space-1, 0.25rem);
+}
+
+.account-widget-display-field {
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    min-height: 3.5rem;
+    padding: 0 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--surface-glass);
+    color: var(--text-primary);
+}
+
+.account-widget-display-field strong {
+    color: var(--text-secondary);
+    font: var(--font-label);
+    letter-spacing: 0.05em;
+}
+
+.account-widget-display-field .shared-account-value {
+    flex: 1;
+}
+
+.account-widget-display-field .shared-account-reveal {
+    margin-left: 0;
+}
+
 .account-widget-card-actions .shared-account-reveal {
     margin-left: 0;
 }

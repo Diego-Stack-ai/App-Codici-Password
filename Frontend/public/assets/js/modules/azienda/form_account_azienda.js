@@ -5,7 +5,7 @@
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.94';
+import { db } from '../../firebase-config.js?v=1.2.96';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -16,6 +16,7 @@ import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
 import { getCompanyAccount, listContacts } from '../data/vault-repository.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.96';
 
 // --- STATE ---
 let currentUid = null;
@@ -73,6 +74,12 @@ export async function initFormAccountAzienda(user) {
         loadRubrica(),
         isEditing ? loadData() : Promise.resolve()
     ]);
+    if (isEditing) {
+        await initAccountEmbeddedWidgets({
+            uid: currentUid, context: 'company', companyId: currentAziendaId,
+            accountId: currentDocId, editable: true
+        });
+    }
 }
 
 function initBaseUI() {

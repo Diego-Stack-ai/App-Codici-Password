@@ -298,6 +298,10 @@ Backup e ripristino riconoscono già gli scope distinti `private-account-widget`
 
 La versione 1.2.94 attiva il primo editor controllato nella sezione **Campi personalizzati** dei dettagli Account privati e aziendali. Il proprietario può creare un widget con uno o più campi, marcare singoli valori come sensibili, rivelarli localmente, modificarli ed eliminarli. Le viste ricevute restano escluse e le mutazioni richiedono rete. Template, riordino e migrazione dei campi legacy non fanno parte di questo primo rilascio.
 
+La revisione successiva rende ogni widget incorporato già creato una possibile sorgente di template: durante la creazione in un altro Account, un menu consente di copiarne titolo, struttura dei campi e classificazione sensibile. I valori non vengono mai copiati; restano vuoti per impedire la duplicazione involontaria di segreti. Quando più Account devono leggere lo stesso valore, il dominio corretto resta la Credenziale comune.
+
+La presentazione dei widget usa gli stessi campi glass del dettaglio Account. Il comando occhio non viene più rimosso dopo la rivelazione: alterna esplicitamente mostra/nascondi e torna all'icona iniziale quando il valore viene protetto di nuovo.
+
 La suite completa è superata. Il gate finale del blocco richiede una prova fisica con dati fittizi: un widget a campo singolo e uno composto, almeno un valore sensibile, modifica immediata senza refresh ed eliminazione, sia nel perimetro privato sia in quello aziendale.
 
 ## D — Matrice minima di test
