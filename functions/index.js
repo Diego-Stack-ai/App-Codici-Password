@@ -42,6 +42,9 @@ const {
 const {
     revisionDecision, sharedVaultPaths, validateSharedVaultCommand
 } = require("./shared-vault-service");
+const {
+    accountWidgetPaths, validateAccountWidgetCommand, widgetBelongsToCommand
+} = require("./account-widget-service");
 
 initializeApp();
 
@@ -253,6 +256,70 @@ exports.manageSharedVaultData = onCall(
                 .collection("auditEvents").doc(command.operationId), {
                 action: `shared-vault-${command.action}`,
                 sharedDataId: command.sharedDataId,
+                operationId: command.operationId,
+                revision: decision.revision,
+                createdAt: now
+            });
+            return decision;
+        });
+    }
+);
+
+exports.manageAccountWidget = onCall(
+    {region: "europe-west1", enforceAppCheck: true},
+    async request => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        let command;
+        try {
+            command = validateAccountWidgetCommand(request.data);
+        } catch {
+            throw new HttpsError("invalid-argument", "Operazione Widget Account non valida.");
+        }
+        const store = getFirestore();
+        const paths = accountWidgetPaths(request.auth.uid, command);
+        const accountRef = store.doc(paths.account);
+        const widgetRef = store.doc(paths.widget);
+        const operationRef = store.doc(paths.operation);
+        return store.runTransaction(async transaction => {
+            const [accountSnapshot, widgetSnapshot, operationSnapshot] = await Promise.all([
+                transaction.get(accountRef), transaction.get(widgetRef), transaction.get(operationRef)
+            ]);
+            if (!accountSnapshot.exists) throw new HttpsError("not-found", "Account non trovato.");
+            const previous = operationSnapshot.exists ? operationSnapshot.data() : null;
+            if (previous && (previous.domain !== "account-widget" || previous.widgetId !== command.widgetId ||
+                previous.action !== command.action)) {
+                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            }
+            if (widgetSnapshot.exists && !widgetBelongsToCommand(widgetSnapshot.data(), command)) {
+                throw new HttpsError("failed-precondition", "Il Widget appartiene a un altro Account.");
+            }
+            const decision = revisionDecision({
+                exists: widgetSnapshot.exists,
+                currentRevision: Number(widgetSnapshot.data()?.revision || 0),
+                expectedRevision: command.expectedRevision,
+                previous,
+                action: command.action
+            });
+            if (decision.duplicate || decision.status !== "applied") return decision;
+            const now = FieldValue.serverTimestamp();
+            if (command.action === "delete") transaction.delete(widgetRef);
+            else transaction.set(widgetRef, {
+                ...command.data,
+                context: command.context,
+                accountId: command.accountId,
+                ...(command.context === "company" ? {companyId: command.companyId} : {}),
+                revision: decision.revision,
+                createdAt: command.action === "create" ? now : widgetSnapshot.data().createdAt,
+                updatedAt: now
+            });
+            transaction.set(operationRef, {
+                ...decision, domain: "account-widget", action: command.action,
+                widgetId: command.widgetId, ownerUid: request.auth.uid, createdAt: now
+            });
+            transaction.set(store.collection("users").doc(request.auth.uid)
+                .collection("auditEvents").doc(command.operationId), {
+                action: `account-widget-${command.action}`,
+                widgetId: command.widgetId,
                 operationId: command.operationId,
                 revision: decision.revision,
                 createdAt: now

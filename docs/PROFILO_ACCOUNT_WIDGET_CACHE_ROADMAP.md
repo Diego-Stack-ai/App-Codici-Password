@@ -288,7 +288,11 @@ La UI non migra né collega automaticamente email o PEC legacy. Gli Account rice
 
 Il modello client prepara ora `kind: embedded` riutilizzando lo stesso schema `fields[]` e la stessa cifratura delle Credenziali comuni. Il contratto distingue esclusivamente il contesto (`private` o `company`), richiede `accountId` e, per gli Account aziendali, `companyId`; non incorpora il widget nel documento Account e non modifica banking o referente legacy.
 
-I test confermano lo stesso formato per Account privati e aziendali, l'esclusione dal QR dei valori sensibili e il rifiuto di contesti incompleti. Il contratto non è ancora scrivibile dalla UI: prima servono callable atomica, validazione backend, test di revisione/idempotenza e verifica del ripristino selettivo.
+I test confermano lo stesso formato per Account privati e aziendali, l'esclusione dal QR dei valori sensibili e il rifiuto di contesti incompleti.
+
+La callable `manageAccountWidget` implementa creazione, aggiornamento ed eliminazione atomici. Prima di scrivere verifica che l'Account esista nel percorso proprietario corretto, impedisce di trasferire implicitamente un widget fra Account o aziende e usa revisione e `operationId` per conflitti, retry e idempotenza. Le scritture restano riservate al backend e producono soltanto audit tecnico privo dei valori dei campi.
+
+Il gate completo delle funzioni, composto da 28 test, è superato. Il contratto non è ancora scrivibile dalla UI: restano il client cifrato, la verifica del ripristino selettivo e il primo editor controllato.
 
 ## D — Matrice minima di test
 
