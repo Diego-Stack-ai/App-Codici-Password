@@ -1,5 +1,5 @@
 /** Bootstrap minimale della pagina di accesso. */
-import { initLogin } from './modules/auth/login.js?v=1.2.87';
+import { initLogin } from './modules/auth/login.js?v=1.2.88';
 import { loadLanguage, getCurrentLanguage, applyGlobalTranslations } from './translations.js';
 import { initOfflineStatus } from './offline-status.js';
 

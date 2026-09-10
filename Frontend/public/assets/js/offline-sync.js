@@ -1,5 +1,5 @@
 import { collection, getDocsFromServer } from "/assets/js/vendor/firebase-runtime.js";
-import { db } from './firebase-config.js?v=1.2.87';
+import { db } from './firebase-config.js?v=1.2.88';
 import { startMetric, endMetric } from './performance-metrics.js';
 
 const CORE_COLLECTIONS = [

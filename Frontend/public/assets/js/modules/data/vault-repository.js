@@ -1,7 +1,7 @@
 import {
     getDocServerConfirmed, getDocsServerConfirmed, getDocSmart, getDocsSmart
 } from '/assets/js/offline-firestore.js';
-import {db} from '../../firebase-config.js?v=1.2.87';
+import {db} from '../../firebase-config.js?v=1.2.88';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
@@ -71,6 +71,9 @@ export const getFirstCompany = uid => readFirstRecord(`first-company:${uid}`, qu
 ));
 
 export const listCompanyAccounts = (uid, companyId) => readRecords(`company-accounts:${uid}:${companyId}`,
+    collection(db, 'users', uid, 'aziende', companyId, 'accounts'));
+
+export const listCompanyAccountsConfirmed = (uid, companyId) => readConfirmedRecords(
     collection(db, 'users', uid, 'aziende', companyId, 'accounts'));
 
 export const listDeadlines = uid => readRecords(`deadlines:${uid}`,

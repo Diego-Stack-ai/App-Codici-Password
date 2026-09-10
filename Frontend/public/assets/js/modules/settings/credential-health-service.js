@@ -1,6 +1,7 @@
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
-    listCompanies, listCompanyAccounts, listPrivateAccounts
+    listCompanies, listCompanyAccounts, listCompanyAccountsConfirmed,
+    listPrivateAccounts, listPrivateAccountsConfirmed
 } from '../data/vault-repository.js';
 import {accountModeFromRecord, ACCOUNT_MODES} from '../shared/account-mode-model.js';
 import {analyzeCredentialHealth} from './credential-health-model.js';
@@ -38,12 +39,14 @@ async function mapWithConcurrency(items, concurrency, worker) {
 export async function inspectOwnerCredentialHealth(uid) {
     if (!uid) throw new Error('CREDENTIAL_HEALTH_UID_REQUIRED');
     const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
+    const readPrivateAccounts = navigator.onLine ? listPrivateAccountsConfirmed : listPrivateAccounts;
+    const readCompanyAccounts = navigator.onLine ? listCompanyAccountsConfirmed : listCompanyAccounts;
     const [privateAccounts, companies] = await Promise.all([
-        listPrivateAccounts(uid), listCompanies(uid)
+        readPrivateAccounts(uid), listCompanies(uid)
     ]);
     const companyGroups = await Promise.all(companies.map(async company => ({
         company,
-        accounts: await listCompanyAccounts(uid, company.id)
+        accounts: await readCompanyAccounts(uid, company.id)
     })));
     const sources = [
         ...privateAccounts.map(account => ({account, area: 'privato', companyName: ''})),

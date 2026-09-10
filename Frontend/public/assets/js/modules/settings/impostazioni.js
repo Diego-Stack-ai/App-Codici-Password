@@ -3,7 +3,7 @@
  * Gestisce le impostazioni dell'utente, lingua, tema e vincoli di sicurezza.
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.87';
+import { auth, db } from '../../firebase-config.js?v=1.2.88';
 import { signOut } from "/assets/js/vendor/firebase-runtime.js";
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { t, getCurrentLanguage } from '../../translations.js';
@@ -123,7 +123,7 @@ function setupCredentialHealth(user) {
     if (!button) return;
     button.addEventListener('click', async () => {
         button.disabled = true;
-        showToast('Sblocca la Vault per avviare il controllo locale…', 'info');
+        showToast('Analisi locale delle credenziali in corso…', 'info');
         try {
             const {inspectOwnerCredentialHealth} = await import('./credential-health-service.js');
             const report = await inspectOwnerCredentialHealth(user.uid);
@@ -549,7 +549,7 @@ function setupAIAssistantToggle(user, data) {
             if (currentUserData) currentUserData.settings_ai_assistant = enabled;
             const trigger = document.getElementById('ai-assistant-status');
             if (enabled) {
-                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.87');
+                const { initVaultAssistant } = await import('../assistant/assistant-controller.js?v=1.2.88');
                 await initVaultAssistant(user, {
                     includeCompanies: getSyncedCompanyAreaPreference(currentUserData || {}, user.uid)
                 });
