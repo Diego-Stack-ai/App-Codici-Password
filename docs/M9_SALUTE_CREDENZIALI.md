@@ -18,9 +18,13 @@ Autofill ed estensione browser costituiscono un progetto separato: richiedono as
 - [x] passkey servizio distinta dalla passkey di sblocco Vault;
 - [x] autofill separato dal progetto PWA e dal percorso critico;
 - [x] integrazione UI caricata su richiesta dopo lo sblocco: analisi Web Crypto in memoria di Account privati e aziendali, senza persistenza di password o impronte;
+- [x] collaudo fisico su iPhone: apertura, scorrimento completo, chiusura e riservatezza dei risultati verificati dal product owner il 10/09/2026;
+- [x] classificazione Debole, Media e Forte verificata su dati di prova; duplicazione e anzianità restano segnalazioni indipendenti;
 - [ ] verifica privacy e sicurezza del provider prima di abilitare il controllo violazioni;
-- [ ] collaudo fisico e accessibile su iPhone e Windows.
+- [ ] collaudo fisico e accessibile su Windows.
 
 M9 non abilita automaticamente alcuna integrazione esterna.
+
+La certificazione iPhone della v1.2.90 ha confermato 9 password analizzate, 8 Account da verificare e il riconoscimento dell'Account di prova con password robusta come `Forte`. La finestra mostra soltanto nome, area e valutazioni: non espone password, hash o impronte.
 
 Per i record correnti la data dedicata `passwordUpdatedAt` ha precedenza. Nei record legacy che non la possiedono, `updatedAt` è usata soltanto come stima prudenziale dell'ultimo salvataggio delle credenziali; una futura modifica dello schema dovrà aggiornare la data dedicata esclusivamente quando cambia la password.
