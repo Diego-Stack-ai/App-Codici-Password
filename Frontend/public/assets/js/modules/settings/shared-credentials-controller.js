@@ -106,15 +106,49 @@ async function openLinkManager(record, user, refreshParent) {
     const accounts = await accountChoices(user.uid);
     let revision = Number(record.revision || 0);
     let links = (await listSharedVaultLinksConfirmed(user.uid)).filter(link => link.sharedDataId === record.id);
+    let searchQuery = '';
     const render = () => {
         clearElement(shell.body);
+        shell.body.classList.add('shared-credentials-link-manager-body');
         shell.body.appendChild(createElement('p', {
             className: 'modal-text',
             textContent: 'Collega lo stesso dato centrale agli Account che lo utilizzano. Ogni modifica futura sarà visibile da tutti i collegamenti.'
         }));
+        const normalizedQuery = searchQuery.trim().toLocaleLowerCase('it');
+        const visibleAccounts = accounts
+            .filter(account => `${account.label} ${account.group}`.toLocaleLowerCase('it').includes(normalizedQuery))
+            .sort((left, right) => {
+                const leftLinked = links.some(link => sameLink(link, left));
+                const rightLinked = links.some(link => sameLink(link, right));
+                if (leftLinked !== rightLinked) return leftLinked ? -1 : 1;
+                return left.label.localeCompare(right.label, 'it', {sensitivity: 'base'});
+            });
+        const search = createElement('input', {
+            className: 'shared-credentials-input shared-credential-account-search',
+            type: 'search', value: searchQuery,
+            placeholder: 'Cerca Account o azienda…',
+            'aria-label': 'Cerca tra gli Account'
+        });
+        search.addEventListener('input', () => {
+            searchQuery = search.value;
+            render();
+            const nextSearch = shell.body.querySelector('.shared-credential-account-search');
+            nextSearch?.focus();
+            nextSearch?.setSelectionRange(searchQuery.length, searchQuery.length);
+        });
+        const linkedCount = accounts.filter(account => links.some(link => sameLink(link, account))).length;
+        shell.body.appendChild(createElement('div', {className: 'shared-credential-account-toolbar'}, [
+            createElement('span', {className: 'material-symbols-outlined', textContent: 'search'}),
+            search,
+            createElement('small', {
+                className: 'shared-credential-account-summary',
+                textContent: `${linkedCount} collegati · ${visibleAccounts.length} visualizzati`
+            })
+        ]));
         const list = createElement('div', {className: 'shared-credential-account-list'});
         if (!accounts.length) list.appendChild(createElement('p', {className: 'shared-credentials-empty', textContent: 'Nessun Account disponibile.'}));
-        for (const account of accounts) {
+        else if (!visibleAccounts.length) list.appendChild(createElement('p', {className: 'shared-credentials-empty', textContent: 'Nessun Account corrisponde alla ricerca.'}));
+        for (const account of visibleAccounts) {
             const existing = links.find(link => sameLink(link, account));
             const button = createElement('button', {
                 type: 'button', className: `shared-credential-account${existing ? ' linked' : ''}`
@@ -152,7 +186,7 @@ async function openLinkManager(record, user, refreshParent) {
             list.appendChild(button);
         }
         shell.body.appendChild(list);
-        shell.body.appendChild(createElement('div', {className: 'modal-actions'}, [
+        shell.body.appendChild(createElement('div', {className: 'modal-actions shared-credential-account-actions'}, [
             createElement('button', {
                 type: 'button', className: 'btn-modal btn-primary', textContent: 'Fine',
                 onclick: async () => { close(); await refreshParent(true); }

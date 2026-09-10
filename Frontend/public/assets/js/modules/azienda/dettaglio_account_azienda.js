@@ -6,7 +6,7 @@
  * - Condivisione estratta in: dettaglio-azienda-sharing.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.91';
+import { db } from '../../firebase-config.js?v=1.2.92';
 import { doc, updateDoc, increment } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement, createSafeAccountIcon } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -146,7 +146,7 @@ async function loadAccount() {
         const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
         renderSharingMap(originalData, contactNames);
         await loadAttachments();
-        import('../shared/account-shared-credentials.js?v=1.2.91').then(({initAccountSharedCredentials}) =>
+        import('../shared/account-shared-credentials.js?v=1.2.92').then(({initAccountSharedCredentials}) =>
             initAccountSharedCredentials({
                 uid: currentUid, context: 'company', accountId: currentId,
                 companyId: currentAziendaId, readOnly: isReadOnly

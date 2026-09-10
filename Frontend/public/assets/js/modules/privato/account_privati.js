@@ -3,7 +3,7 @@
  * Gestione liste account: personali, condivisi, memorandum.
  */
 
-import { db } from '../../firebase-config.js?v=1.2.91';
+import { db } from '../../firebase-config.js?v=1.2.92';
 import { LOG } from '../../logger.js';
 import { updateDoc, doc, writeBatch } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';

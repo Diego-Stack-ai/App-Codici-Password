@@ -79,23 +79,34 @@ function credentialCard(record, widget, context, refresh) {
     return createElement('article', {className: 'shared-account-card'}, cardChildren);
 }
 
-function selectorModal(records, close, select) {
+function selectorModal(records, close, onSelect) {
     const overlay = createElement('div', {className: 'modal-overlay active'});
-    const options = records.map(record => createElement('button', {
-        type: 'button', className: 'shared-account-select-option', onclick: () => select(record, overlay)
+    const credentialSelect = createElement('select', {
+        className: 'shared-account-select-control',
+        disabled: !records.length,
+        'aria-label': 'Credenziale comune da collegare'
     }, [
-        createElement('span', {className: 'material-symbols-outlined', textContent: record.icon || 'key'}),
-        createElement('span', {}, [
-            createElement('strong', {textContent: record.title || 'Credenziale comune'}),
-            createElement('small', {textContent: `${record.fields?.length || 0} campi`})
-        ])
-    ]));
+        createElement('option', {value: '', textContent: records.length ? 'Seleziona una credenziale…' : 'Nessuna credenziale disponibile'}),
+        ...records.map(record => createElement('option', {
+            value: record.id,
+            textContent: `${record.title || 'Credenziale comune'} · ${record.fields?.length || 0} campi`
+        }))
+    ]);
+    const confirm = createElement('button', {
+        type: 'button', className: 'btn-modal btn-primary', textContent: 'Collega', disabled: true,
+        onclick: () => {
+            const record = records.find(item => item.id === credentialSelect.value);
+            if (record) onSelect(record, overlay);
+        }
+    });
+    credentialSelect.addEventListener('change', () => { confirm.disabled = !credentialSelect.value; });
     setChildren(overlay, createElement('section', {className: 'modal-box shared-account-selector', role: 'dialog', 'aria-modal': 'true'}, [
         createElement('h2', {className: 'modal-title', textContent: 'Collega Credenziale comune'}),
         createElement('p', {className: 'modal-text', textContent: records.length ? 'Scegli un dato centrale esistente.' : 'Non ci sono altre Credenziali comuni disponibili. Creane una dalle Impostazioni.'}),
-        createElement('div', {className: 'shared-account-select-list'}, options),
+        credentialSelect,
         createElement('div', {className: 'modal-actions'}, [
-            createElement('button', {type: 'button', className: 'btn-modal', textContent: 'Chiudi', onclick: () => close(overlay)})
+            createElement('button', {type: 'button', className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: () => close(overlay)}),
+            confirm
         ])
     ]));
     return overlay;

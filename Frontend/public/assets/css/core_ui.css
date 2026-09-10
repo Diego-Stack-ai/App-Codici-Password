@@ -670,8 +670,7 @@
 }
 
 .shared-account-card-heading,
-.shared-account-field,
-.shared-account-select-option {
+.shared-account-field {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -695,35 +694,60 @@
 
 .shared-account-reveal,
 .shared-account-unlink {
-    margin-left: auto;
-    border: 0;
-    background: transparent;
-    color: inherit;
     cursor: pointer;
 }
 
+.shared-account-reveal {
+    display: grid;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    margin-left: auto;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 42%);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 18%);
+    color: var(--accent, #3b82f6);
+    box-shadow: 0 5px 14px rgb(15 23 42 / 12%);
+    place-items: center;
+}
+
 .shared-account-unlink {
-    padding: 8px;
+    justify-self: end;
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0 16px;
+    border: 1px solid rgb(239 68 68 / 36%);
+    border-radius: 16px;
+    background: rgb(239 68 68 / 10%);
     color: var(--color-danger, #dc2626);
+    font: var(--font-button);
+    letter-spacing: 0.04em;
+}
+
+.dark .shared-account-reveal {
+    background: rgb(255 255 255 / 10%);
+    color: #bfdbfe;
+}
+
+.dark .shared-account-unlink {
+    background: rgb(239 68 68 / 16%);
+    color: #fecaca;
 }
 
 .shared-account-selector {
     width: min(92vw, 560px);
 }
 
-.shared-account-select-option {
+.shared-account-select-control {
     width: 100%;
-    padding: 14px;
+    min-height: var(--control-height-lg, 52px);
+    padding: 0 44px 0 14px;
     border: 1px solid rgb(148 163 184 / 34%);
     border-radius: 15px;
     background: rgb(255 255 255 / 18%);
     color: inherit;
-    text-align: left;
-}
-
-.shared-account-select-option > span:nth-child(2) {
-    display: grid;
-    gap: 3px;
+    font: var(--font-body);
 }
 
 /* Stati di pagina condivisi: caricamento, vuoto, avviso ed errore. */
