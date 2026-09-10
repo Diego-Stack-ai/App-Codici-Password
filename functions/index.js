@@ -39,6 +39,9 @@ const {
 const {
     decodeFirestoreValue, restoreChunkDecision, safeRestoreAudit, validateRestoreChunk
 } = require("./backup-restore-service");
+const {
+    revisionDecision, sharedVaultPaths, validateSharedVaultCommand
+} = require("./shared-vault-service");
 
 initializeApp();
 
@@ -134,6 +137,127 @@ exports.applyPrivateAccountMutation = onCall(
                 createdAt: FieldValue.serverTimestamp()
             });
             return result;
+        });
+    }
+);
+
+exports.manageSharedVaultData = onCall(
+    {region: "europe-west1", enforceAppCheck: true},
+    async request => {
+        if (!request.auth) throw new HttpsError("unauthenticated", "Accesso richiesto.");
+        let command;
+        try {
+            command = validateSharedVaultCommand(request.data);
+        } catch {
+            throw new HttpsError("invalid-argument", "Operazione Credenziale comune non valida.");
+        }
+        const store = getFirestore();
+        const paths = sharedVaultPaths(request.auth.uid, command);
+        const dataRef = store.doc(paths.data);
+        const operationRef = store.doc(paths.operation);
+        return store.runTransaction(async transaction => {
+            const reads = [transaction.get(dataRef), transaction.get(operationRef)];
+            let linkRef = null;
+            let widgetRef = null;
+            let accountRef = null;
+            let linksQuery = null;
+            if (paths.link) {
+                linkRef = store.doc(paths.link);
+                widgetRef = store.doc(paths.widget);
+                accountRef = store.doc(paths.account);
+                reads.push(transaction.get(linkRef), transaction.get(widgetRef), transaction.get(accountRef));
+            }
+            if (command.action === "delete") {
+                linksQuery = store.collection(`users/${request.auth.uid}/sharedVaultLinks`)
+                    .where("sharedDataId", "==", command.sharedDataId).limit(1);
+                reads.push(transaction.get(linksQuery));
+            }
+            const snapshots = await Promise.all(reads);
+            const dataSnapshot = snapshots[0];
+            const operationSnapshot = snapshots[1];
+            const previous = operationSnapshot.exists ? operationSnapshot.data() : null;
+            if (previous && (previous.domain !== "shared-vault" ||
+                previous.sharedDataId !== command.sharedDataId || previous.action !== command.action)) {
+                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
+            }
+            const decision = revisionDecision({
+                exists: dataSnapshot.exists,
+                currentRevision: Number(dataSnapshot.data()?.revision || 0),
+                expectedRevision: command.expectedRevision,
+                previous,
+                action: command.action
+            });
+            if (decision.duplicate || decision.status !== "applied") return decision;
+
+            const now = FieldValue.serverTimestamp();
+            if (command.action === "create" || command.action === "update") {
+                const payload = {
+                    ...command.data,
+                    revision: decision.revision,
+                    updatedAt: now
+                };
+                const createdAt = command.action === "create" ? now : dataSnapshot.data().createdAt;
+                if (createdAt !== undefined) payload.createdAt = createdAt;
+                transaction.set(dataRef, payload);
+            } else if (command.action === "link") {
+                const [linkSnapshot, widgetSnapshot, accountSnapshot] = snapshots.slice(2, 5);
+                if (!accountSnapshot.exists) throw new HttpsError("not-found", "Account non trovato.");
+                if (linkSnapshot.exists || widgetSnapshot.exists) {
+                    throw new HttpsError("already-exists", "Credenziale già collegata.");
+                }
+                const linkPayload = {
+                    ...command.link,
+                    sharedDataId: command.sharedDataId,
+                    widgetId: command.widgetId,
+                    schemaVersion: 1,
+                    createdAt: now,
+                    updatedAt: now
+                };
+                transaction.set(linkRef, linkPayload);
+                transaction.set(widgetRef, {
+                    ...command.link,
+                    kind: "shared-reference",
+                    sharedDataId: command.sharedDataId,
+                    linkId: command.linkId,
+                    schemaVersion: 1,
+                    createdAt: now,
+                    updatedAt: now
+                });
+                transaction.update(dataRef, {revision: decision.revision, updatedAt: now});
+            } else if (command.action === "unlink") {
+                const [linkSnapshot, widgetSnapshot] = snapshots.slice(2, 4);
+                if (!linkSnapshot.exists || !widgetSnapshot.exists ||
+                    linkSnapshot.data().sharedDataId !== command.sharedDataId ||
+                    widgetSnapshot.data().sharedDataId !== command.sharedDataId) {
+                    throw new HttpsError("failed-precondition", "Collegamento non coerente.");
+                }
+                transaction.delete(linkRef);
+                transaction.delete(widgetRef);
+                transaction.update(dataRef, {revision: decision.revision, updatedAt: now});
+            } else if (command.action === "delete") {
+                const linksSnapshot = snapshots[2];
+                if (!linksSnapshot.empty) {
+                    throw new HttpsError("failed-precondition", "Scollega prima tutti gli Account.");
+                }
+                transaction.delete(dataRef);
+            }
+            transaction.set(operationRef, {
+                ...decision,
+                domain: "shared-vault",
+                action: command.action,
+                sharedDataId: command.sharedDataId,
+                ownerUid: request.auth.uid,
+                createdAt: now
+            });
+            transaction.set(store.collection("users").doc(request.auth.uid)
+                .collection("auditEvents").doc(command.operationId), {
+                action: `shared-vault-${command.action}`,
+                sharedDataId: command.sharedDataId,
+                operationId: command.operationId,
+                revision: decision.revision,
+                createdAt: now
+            });
+            return decision;
         });
     }
 );
