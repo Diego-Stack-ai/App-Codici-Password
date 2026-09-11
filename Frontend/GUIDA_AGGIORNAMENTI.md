@@ -1,13 +1,18 @@
-# 🧪 LABORATORIO AGGIORNAMENTI & WIP — APP CODICI PASSWORD
+# 🧪 REGISTRO AGGIORNAMENTI, RISCHI E WIP — APP CODICI PASSWORD
 
-In questo documento vengono tracciate le nuove funzionalità, i refactoring in corso e le evoluzioni estetiche non ancora consolidate nel Protocollo Master. Una volta che una funzionalità raggiunge la perfezione tecnica e stilistica, viene migrata nella `GUIDA.md` (Master).
+> **Stato:** registro operativo e cronologico  
+> **Autorità:** roadmap; non è un contratto e non certifica la produzione  
+> **Ultima revisione di gerarchia:** 11 settembre 2026  
+> **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e [Architettura Sicurezza V1](../docs/ARCHITETTURA_SICUREZZA_V1.md)
+
+Questo documento traccia nuove funzioni, refactoring, prove e attività aperte. Le sezioni possono descrivere epoche diverse: la dicitura “completato” vale soltanto per il perimetro e la versione indicati. Una decisione consolidata viene riportata nel contratto specialistico pertinente; `GUIDA.md` conserva le regole implementative e non prevale sulla baseline sicurezza.
 
 ---
 
 ## 1. ROADMAP: END-TO-END ENCRYPTION (E2EE)
 L'obiettivo finale è la **conoscenza zero** (Zero-Knowledge Architecture).
-- **Stato**: In fase di studio logico.
-- **Implementazione**: Uso di `libsodium.js` per cifratura client-side.
+- **Stato aggiornato (11/09/2026)**: la conoscenza zero è l’architettura obiettivo. Il runtime usa AES-GCM per i campi e gli allegati; il modello record-key/grant è dimostrato nel laboratorio M5 ma non ancora migrato in produzione.
+- **Algoritmo**: `libsodium.js` era una proposta storica, non una decisione attiva. Algoritmi e formati possono cambiare soltanto tramite il contratto crittografico, migrazione verificata e audit indipendente.
 - **Dettagli**:
     1. Cifratura sul dispositivo prima dell'invio a Firebase.
     2. Chiave di recupero (Recovery Key) da 24 parole.
@@ -474,3 +479,17 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Le Scadenze condivise dispongono di copie minime in `receivedDeadlines`, permesso opzionale `canManage`, callable server `manageReceivedDeadline` e deep link Email/Push. Resta obbligatorio il collaudo completo con due account reali prima della chiusura.
 - Consolidamento successivo: `sw.js` è tornato a occuparsi soltanto della shell offline; messaggi e click Push appartengono esclusivamente a `firebase-messaging-sw.js`. Il listener online non viene più caricato sui dispositivi certamente disabilitati e gli errori tecnici restano nella console.
 - La revoca delle scadenze ricevute non dipende più dalla possibilità di ritrovare l'email precedente: il backend conserva gli UID risolti in un indice tecnico non accessibile al client e li usa per la pulizia.
+
+
+# Riallineamento documentale — 11/09/2026
+
+- [x] creata `docs/ARCHITETTURA_SICUREZZA_V1.md`;
+- [x] creato audit dei 25 Markdown allora presenti;
+- [x] creata `docs/GUIDA_PROGETTO.md` come indice centrale;
+- [x] aggiornata la gerarchia delle fonti per gli agenti;
+- [x] riallineato `VAULT_KEY_CONTRACT.md`, con session wrapping classificato P0;
+- [x] esclusa ogni interpretazione del Cripto-Healing come migrazione automatica autorizzata;
+- [x] aperta la decisione di retention del cestino;
+- [ ] completare il riallineamento dei contratti specialistici;
+- [ ] eseguire il successivo audit completo di codice, Rules, Functions, Storage, crittografia, offline e configurazione Firebase;
+- [ ] aggiornare la documentazione con gli esiti reali senza confondere test locali e produzione.
