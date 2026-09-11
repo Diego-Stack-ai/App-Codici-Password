@@ -66,6 +66,7 @@ Una dichiarazione più recente non prevale automaticamente: deve avere autorità
 | Guida implementativa/UI | [GUIDA.md](../Frontend/GUIDA.md) | Da consolidare |
 | Attività aperte | [GUIDA_AGGIORNAMENTI.md](../Frontend/GUIDA_AGGIORNAMENTI.md) | Registro operativo |
 | Audit di riallineamento | [AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md](./AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md) | Evidenza 11/09/2026 |
+| Audit completo del progetto | [PIANO_AUDIT_COMPLETO_PROGETTO.md](./PIANO_AUDIT_COMPLETO_PROGETTO.md) | Prossima fase approvata |
 
 ## 5. Regole per aggiornare la documentazione
 
