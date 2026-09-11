@@ -16,7 +16,7 @@
 - la cronologia è limitata agli eventi necessari, non a snapshot illimitati;
 - l'audit usa un'allowlist e non registra password, chiavi, token, ciphertext o testo libero.
 
-Il laboratorio `experiments/history-recovery` dimostra retention, ripristino senza sovrascrittura, revisione, redazione dei segreti e limite della cronologia. Non modifica la produzione.
+Il laboratorio `experiments/history-recovery` dimostra una retention tecnica di prova, ripristino senza sovrascrittura, revisione, redazione dei segreti e limite della cronologia. Non modifica la produzione e non approva una conservazione indefinita.
 
 ## Gate
 
@@ -35,3 +35,17 @@ M7 è completata e certificata il 09/09/2026.
 ## Decisione aperta sulla retention
 
 La cifratura non rende neutra una conservazione indefinita. Prima di attivare il contratto devono essere definiti durata del cestino, effetto della cancellazione account, propagazione ai backup, eccezioni legali e modalità di purge verificabile. Fino ad allora il laboratorio non autorizza retention o cancellazioni sui dati reali.
+
+
+## Decisione di retention aperta
+
+Prima dell’attivazione in produzione occorre stabilire:
+
+- durata ordinaria del cestino;
+- eliminazione immediata richiesta dall’utente e relative eccezioni legali;
+- rapporto tra cestino, cronologia, allegati e backup;
+- purge verificabile e idempotente;
+- informazione mostrata all’utente;
+- prova che il dato non resti raggiungibile nei percorsi applicativi.
+
+La cifratura riduce l’esposizione ma non giustifica la conservazione illimitata.
