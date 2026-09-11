@@ -1,5 +1,9 @@
 # Contratto strutturale delle pagine e del viewport
 
+> **Stato:** attivo per la struttura delle pagine; prove fisiche restano necessarie  
+> **Autorità:** contratto UI subordinato a [Guida progetto](./GUIDA_PROGETTO.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
 Questo documento definisce esclusivamente la struttura delle 29 pagine pubbliche. Non modifica né disciplina ombre, vetro, colori delle card, animazioni, watermark, decorazioni, modali o altri componenti sovrapposti.
 
 ## Perimetro ufficiale
