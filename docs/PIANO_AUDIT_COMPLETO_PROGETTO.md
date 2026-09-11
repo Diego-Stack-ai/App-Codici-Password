@@ -1,6 +1,6 @@
 # Piano di audit completo del progetto
 
-> **Stato:** approvato come prossima fase; esecuzione non ancora iniziata  
+> **Stato:** in esecuzione; fotografia iniziale e audit P0 della sessione Vault completati
 > **Autorità:** piano operativo subordinato a [Guida progetto](./GUIDA_PROGETTO.md) e [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
 > **Versione:** 1.0  
 > **Data:** 11 settembre 2026  
@@ -167,6 +167,11 @@ Ogni affermazione sarà marcata:
 10. presentare il rapporto prima di qualsiasi correzione;
 11. approvare correzioni per blocchi;
 12. implementare, collaudare e documentare ogni blocco separatamente.
+
+### Evidenze prodotte
+
+- [Fotografia iniziale del progetto](./AUDIT_PROGETTO_FASE1_FOTOGRAFIA.md)
+- [Audit P0 della sessione Vault](./AUDIT_VAULT_SESSION_P0.md)
 
 ## 5. Priorità iniziali
 
