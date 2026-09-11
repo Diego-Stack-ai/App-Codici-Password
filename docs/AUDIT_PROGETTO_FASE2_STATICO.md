@@ -170,3 +170,50 @@ Questa fase registra findings e prove statiche. Non autorizza:
 - modifica di `docs/PIANO_MATURITA_PROFESSIONALE.md`.
 
 Le correzioni dovranno essere approvate e realizzate per blocchi separati, con test, migrazione e rollback.
+
+
+## 11. Verifica offline, service worker e conflitti
+
+### Evidenze positive
+
+- il service worker applicativo precarica soltanto la shell dichiarata in `offline-assets.js`;
+- le richieste protette a `/protected-media/presentation` sono escluse dalla Cache API;
+- codice e stili usano rete-prima con fallback sulla stessa URL/versione;
+- Firestore usa `persistentLocalCache` con gestione multischeda;
+- la coda IndexedDB conserva contenitori AES-GCM e non il payload della mutazione in chiaro;
+- la chiave della coda deriva tramite HKDF dal materiale Vault e dall'UID;
+- l'AAD lega versione, UID e `operationId`;
+- il backend verifica revisione e idempotenza prima di applicare le mutazioni;
+- una mutazione viene rimossa dalla coda soltanto dopo esito applicato o duplicato già riconosciuto;
+- un conflitto arresta la sincronizzazione senza sovrascrivere il record remoto;
+- Account condivisi, bancari e collegati al Profilo restano esclusi dalle scritture offline.
+
+### Finding aggiuntivi
+
+| ID | Gravità | Stato | Finding |
+|---|---|---|---|
+| F2-P1-07 | Media | Verificato nel codice | `withOfflineQueueLease` genera errore se Web Locks non è disponibile; non esiste il fallback dichiarato dal contratto |
+| F2-P1-08 | Media | Verificato nel codice | L'handoff dopo salvataggio conserva in `sessionStorage` l'intero record, inclusi metadati non cifrati, con TTL controllato solo alla lettura |
+| F2-P1-09 | Media | Verificato nel codice e da prova dichiarata | Offline, una query cache vuota viene restituita direttamente e non distingue raccolta vuota da cache mai preparata |
+| F2-P1-10 | Media | Verificato nel codice | Il flag globale delle mutazioni è disattivato, ma l'adattatore Account lo forza a `enabled: true`; il nome “pilot” non riflette più chiaramente il cutover dichiarato |
+| F2-P2-01 | Bassa | Verificato nel worker | Una push `share_invite` apre la Home, non una destinazione specifica per l'invito |
+| F2-P2-02 | Bassa | Da verificare | L'installazione usa `Promise.all`: una singola risorsa mancante impedisce l'installazione completa della nuova shell |
+
+### Dettaglio
+
+`offline-firestore.js` usa cache-first quando il dispositivo risulta online e aggiorna dal server in background. Quando `navigator.onLine` è falso, restituisce direttamente la cache. Per una query mai preparata, una cache vuota appare quindi come lista realmente vuota. Questo comportamento è coerente con il fallimento già dichiarato nel test dell'Account bancario su iPhone.
+
+La coda è separata per UID tramite il nome del database e i contenitori restano cifrati. Non è emersa una cancellazione fisica automatica del database IndexedDB al logout. La coda non dovrebbe essere decifrabile senza il materiale Vault, ma cancellazione, revoca dispositivo e recupero della coda residua richiedono una prova specifica.
+
+`private-account-offline-pilot.js` salva per 60 secondi un handoff della UI in `sessionStorage`. Il controllo del TTL avviene quando il dato viene consumato; se la pagina successiva non lo legge, il contenitore può restare oltre il TTL. Il record include ciphertext per le credenziali ma anche i metadati che il normale schema conserva in chiaro.
+
+Il worker Firebase Messaging è separato dal worker della shell. Gestisce correttamente i deep link per Scadenze proprie e ricevute; per `share_invite` usa invece il fallback Home.
+
+### Gate ancora aperti
+
+- apertura offline deterministica delle liste su iPhone;
+- prova su browser privo di Web Locks;
+- logout, cambio UID e revoca con coda pendente;
+- chiusura forzata prima del consumo dell'handoff;
+- aggiornamento della shell quando una risorsa del manifest non è disponibile;
+- concorrenza reale fra due schede e due dispositivi sul runtime distribuito.
