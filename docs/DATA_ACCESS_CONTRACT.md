@@ -1,5 +1,9 @@
 # Contratto di accesso dati local-first
 
+> **Stato:** attivo per le letture; scritture e coda in evoluzione M6  
+> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
 Contratto introdotto in M2 per separare progressivamente le pagine dalla cache e dalla rete.
 
 ## Percorso canonico
