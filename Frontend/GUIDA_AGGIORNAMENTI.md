@@ -491,5 +491,5 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - [x] esclusa ogni interpretazione del Cripto-Healing come migrazione automatica autorizzata;
 - [x] aperta la decisione di retention del cestino;
 - [ ] completare il riallineamento dei contratti specialistici;
-- [ ] eseguire il successivo audit completo di codice, Rules, Functions, Storage, crittografia, offline e configurazione Firebase;
+- [ ] eseguire [il piano di audit completo](../docs/PIANO_AUDIT_COMPLETO_PROGETTO.md) su codice, Rules, Functions, Storage, crittografia, offline e configurazione Firebase;
 - [ ] aggiornare la documentazione con gli esiti reali senza confondere test locali e produzione.
