@@ -1,8 +1,14 @@
 # M7 — Cronologia, cestino e audit
 
+> **Stato:** contratto candidato/laboratorio; retention di produzione non approvata  
+> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima verifica documentale:** 11 settembre 2026
+
 ## Contratto
 
-- la cancellazione ordinaria sposta il record in un cestino cifrato senza scadenza automatica;
+- la cancellazione ordinaria sposta il record in un cestino cifrato;
+- la conservazione senza scadenza automatica descritta dal primo laboratorio non è approvata come politica di produzione;
+- prima del go-live deve essere definita una retention esplicita, con cancellazione, backup e possibili obblighi legali;
 - il cestino conserva ID, proprietario, revisione e data di archiviazione; il contenuto resta ciphertext;
 - il ripristino fallisce se l'ID è occupato e crea una nuova revisione;
 - il purge è backend-only, esclusivamente manuale e richiede sempre conferma forte;
@@ -24,3 +30,8 @@ Il laboratorio `experiments/history-recovery` dimostra retention, ripristino sen
 - [x] archiviazione, ripristino, permanenza senza scadenza automatica e cancellazione definitiva manuale verificati fisicamente il 09/09/2026 con account di prova dopo la distribuzione del nuovo contratto.
 
 M7 è completata e certificata il 09/09/2026.
+
+
+## Decisione aperta sulla retention
+
+La cifratura non rende neutra una conservazione indefinita. Prima di attivare il contratto devono essere definiti durata del cestino, effetto della cancellazione account, propagazione ai backup, eccezioni legali e modalità di purge verificabile. Fino ad allora il laboratorio non autorizza retention o cancellazioni sui dati reali.
