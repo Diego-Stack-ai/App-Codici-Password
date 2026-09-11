@@ -1,5 +1,12 @@
 # Inventario dei campi cifrati
 
+> **Stato:** fotografia M1 incompleta rispetto al runtime corrente  
+> **Autorità:** inventario tecnico, non decisione architetturale  
+> **Baseline:** [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
+> **Gate P0:** prima di migrare o rimuovere campi, rigenerare l’inventario su codice e dati reali tramite output esclusivamente aggregato. Includere widget, credenziali comuni, scadenze, notifiche, allegati, cache e tutti i metadati in chiaro.
+
 Inventario M1 ricavato dalle chiamate a `encrypt`, `decrypt` ed `encryptAttachmentFile`. Il formato testuale è gestito da `crypto-utils.js`; gli allegati nuovi sono blob AES-GCM con wrapping per-file.
 
 | Documento / area | Campi cifrati osservati |
