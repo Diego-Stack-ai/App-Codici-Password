@@ -36,3 +36,60 @@ test('un dispositivo non autorizzato non riapre il pacchetto trasferito', async 
     ...identity, uid: 'recipient-1', vaultKeyMaterial: 'unauthorized-key'
   }), /AUTHENTICITY/);
 });
+
+
+test('proprietario e destinatario usano Vault differenti senza condividere la Vault Key', async () => {
+  const ownerIdentity = await identityApi.createSharingIdentity({
+    uid: 'owner-1', vaultKeyMaterial: 'fixture-owner-vault-key'
+  });
+  const recipientIdentity = await identityApi.createSharingIdentity({
+    uid: 'recipient-1', vaultKeyMaterial: 'fixture-recipient-vault-key'
+  });
+
+  await assert.rejects(identityApi.openSharingIdentity({
+    ...recipientIdentity, uid: 'recipient-1', vaultKeyMaterial: 'fixture-owner-vault-key'
+  }), /AUTHENTICITY/);
+
+  const [ownerKeys, recipientKeys] = await Promise.all([
+    identityApi.openSharingIdentity({
+      ...ownerIdentity, uid: 'owner-1', vaultKeyMaterial: 'fixture-owner-vault-key'
+    }),
+    identityApi.openSharingIdentity({
+      ...recipientIdentity, uid: 'recipient-1', vaultKeyMaterial: 'fixture-recipient-vault-key'
+    })
+  ]);
+
+  const recordKey = sharingApi.generateRecordKey();
+  const encrypted = await sharingApi.encryptRecordPayload(
+    {title: 'fixture condivisa', revision: 1}, recordKey, 'record-distinct-vaults'
+  );
+  const [ownerEnvelope, recipientEnvelope] = await Promise.all([
+    sharingApi.wrapRecordKeyForRecipient(
+      recordKey, ownerKeys.publicKey, 'record-distinct-vaults', 'owner-1'
+    ),
+    sharingApi.wrapRecordKeyForRecipient(
+      recordKey, recipientKeys.publicKey, 'record-distinct-vaults', 'recipient-1'
+    )
+  ]);
+
+  const [ownerRecordKey, recipientRecordKey] = await Promise.all([
+    sharingApi.unwrapRecordKeyForRecipient(
+      ownerEnvelope, ownerKeys.privateKey, 'record-distinct-vaults', 'owner-1'
+    ),
+    sharingApi.unwrapRecordKeyForRecipient(
+      recipientEnvelope, recipientKeys.privateKey, 'record-distinct-vaults', 'recipient-1'
+    )
+  ]);
+
+  assert.deepEqual(
+    await sharingApi.decryptRecordPayload(encrypted, ownerRecordKey, 'record-distinct-vaults'),
+    {title: 'fixture condivisa', revision: 1}
+  );
+  assert.deepEqual(
+    await sharingApi.decryptRecordPayload(encrypted, recipientRecordKey, 'record-distinct-vaults'),
+    {title: 'fixture condivisa', revision: 1}
+  );
+  await assert.rejects(sharingApi.unwrapRecordKeyForRecipient(
+    recipientEnvelope, ownerKeys.privateKey, 'record-distinct-vaults', 'recipient-1'
+  ));
+});
