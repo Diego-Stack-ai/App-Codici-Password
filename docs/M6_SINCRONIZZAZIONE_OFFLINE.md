@@ -1,5 +1,11 @@
 # M6 — Sincronizzazione e scritture offline
 
+> **Stato:** scritture private isolate collaudate; consultazione offline completa non certificata  
+> **Autorità:** contratto specialistico e registro prove, subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
+> **Esito vincolante:** il test iPhone del 10/09/2026 con Account bancario non ha superato la consultazione offline. Nessun altro esito “verde” può essere interpretato come certificazione dell’offline completo finché quel flusso e la matrice prevista non sono superati.
+
 ## Stato iniziale
 
 L'app usa la cache persistente multi-tab di Firestore e preriscalda le raccolte principali. Le letture offline sono quindi parzialmente operative, ma la coda implicita dell'SDK non offre all'interfaccia un contratto esplicito per revisione, idempotenza, conflitto o recupero dopo chiusura forzata.
