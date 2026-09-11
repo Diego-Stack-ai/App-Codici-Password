@@ -412,3 +412,74 @@ Un esempio rilevante è l'audit della sessione Vault: il controllo statico confe
 - coprire flussi positivi, negativi, concorrenza, retry, abuso e revoca;
 - introdurre coverage soltanto come indicatore complementare, non come sostituto dei casi di sicurezza;
 - verificare configurazione Firebase reale e dispositivi esclusivamente dopo autorizzazione specifica.
+
+
+## 15. Visibilità, governance, dipendenze e cronologia Git
+
+### Evidenze verificate
+
+- il repository GitHub è **pubblico** (`private: false`, `visibility: public`) e consente fork;
+- `master` è il branch predefinito e GitHub lo dichiara `protected: false`;
+- tutti i 12 branch elencati risultano non protetti;
+- l'endpoint ruleset restituisce un elenco vuoto;
+- il collegamento usato per l'audit dispone di permessi amministrativi, ma la lettura dettagliata della branch protection è negata all'integrazione; lo stato sintetico dei branch resta comunque `protected: false`;
+- nei 826 commit raggiungibili da `master`, 805 commit risultano non firmati e 21 verificati;
+- il repository non richiede il sign-off dei commit via web;
+- GitHub non rileva una licenza del repository, mentre il solo `package.json` dichiara `ISC`.
+
+Il valore `private: true` nei due manifest npm impedisce la pubblicazione accidentale dei pacchetti su npm. Non rende privato il repository GitHub.
+
+### Finding aggiuntivi
+
+| ID | Gravità | Stato | Finding |
+|---|---|---|---|
+| F2-P0-14 | Alta | Verificato su GitHub e nel workflow | `master` non è protetto e ogni push diretto può avviare test e deploy di Hosting, Firestore Rules e Storage |
+| F2-P1-25 | Media | Verificato su GitHub | Non risultano ruleset; tutti i 12 branch elencati, incluso `master`, hanno `protected: false` |
+| F2-P1-26 | Media | Verificato su GitHub | Il repository del password manager è pubblico e consente fork; ciò amplia la superficie informativa e rende essenziale che nessun dato o segreto operativo sia versionato |
+| F2-P1-27 | Media | Verificato nella cronologia | 805 dei 826 commit raggiungibili da `master` non hanno firma verificata; il sign-off web non è richiesto |
+| F2-P1-28 | Media | Non determinabile con l'accesso disponibile | Alert Dependabot, secret scanning e advisory correnti non sono leggibili dall'integrazione usata |
+| F2-P2-05 | Bassa | Verificato nei metadati | Il manifest dichiara licenza ISC, ma GitHub riporta `license: null`; manca una licenza di repository riconosciuta |
+| F2-P2-06 | Bassa | Verificato nei lockfile | Quattro pacchetti non espongono il campo licenza nel lockfile; uno, `limiter@1.1.5`, è nel grafo Functions non-dev |
+
+### Licenze ricavate dai lockfile
+
+| Lockfile | Pacchetti registrati | Produzione/non-dev | Metadato licenza assente | Copyleft rilevato dal campo |
+|---|---:|---:|---:|---|
+| radice | 935 | 0 | 3 | `postcss-values-parser` — MPL-2.0, dev |
+| Functions | 356 | 283 | 1 | nessuno |
+
+I tre pacchetti dev senza campo licenza nel lockfile radice sono `fuzzy@0.1.3`, `svg-tags@1.0.0` e `valid-url@1.0.9`. Nel lockfile Functions manca il campo per `limiter@1.1.5`.
+
+Questa è una lettura dei metadati versionati, non un parere legale. L'assenza del campo nel lockfile non dimostra automaticamente che un pacchetto sia privo di licenza; richiede verifica sulla fonte del pacchetto prima di una distribuzione formale.
+
+### Vulnerabilità delle dipendenze
+
+Le versioni dirette e transitive sono fissate dai lockfile v3, ma non è stato possibile interrogare gli alert Dependabot o eseguire un advisory audit attendibile attraverso l'accesso disponibile. Non sono stati eseguiti `npm audit fix`, aggiornamenti o modifiche dei lockfile.
+
+Il finding F2-P1-19 rimane quindi aperto: non è corretto dichiarare le dipendenze sicure né vulnerabili senza un risultato advisory aggiornato e valutato.
+
+### Verifica storica dei segreti
+
+La cronologia di `master` contiene 826 commit. Sono stati controllati:
+
+- messaggi e metadati di tutti i commit;
+- commit associati ai percorsi `.env`, `serviceAccountKey.json`, `scripts_import_dati/serviceAccountKey.json` e `Torna alla Login e accedi con.docx`;
+- patch mirate dei commit che introducono Secret Manager e la protezione dei file locali.
+
+Per i quattro percorsi sensibili espliciti GitHub restituisce zero commit. Nelle patch mirate, Gmail usa `defineSecret` e non è emerso il valore della password applicativa.
+
+Limite: la verifica non ha materializzato e analizzato ogni blob di ogni albero storico con uno scanner dedicato. Non certifica quindi l'assenza assoluta di segreti sotto nomi differenti, branch non raggiungibili da `master`, tag, artifact o log Actions.
+
+### Priorità di governance proposta
+
+Prima di qualunque merge dell'audit o futura correzione:
+
+1. disaccoppiare i cambi documentali dal deploy Firebase;
+2. proteggere `master` con pull request e check obbligatori;
+3. aggiungere un'approvazione esplicita per il job di produzione;
+4. rendere esplicito il progetto Firebase di destinazione;
+5. decidere consapevolmente se il repository debba restare pubblico;
+6. abilitare e verificare secret scanning/Dependabot secondo le capacità del piano GitHub;
+7. definire firma o provenance dei commit e una politica licenze.
+
+Qualsiasi modifica a workflow, visibilità, Rules, Functions o deploy resta fuori dal perimetro di questo audit e richiede autorizzazione.
