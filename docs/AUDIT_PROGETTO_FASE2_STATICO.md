@@ -355,3 +355,60 @@ I lockfile rendono riproducibile l'installazione, ma il workflow non esegue una 
 - parametro esplicito `--project`;
 - deploy selettivo basato sugli artifact modificati;
 - matrice di compatibilità fra versione Hosting, Rules e Functions.
+
+
+## 14. Matrice delle prove e significato della CI
+
+### Stato verificato
+
+Il commit di base `6abeeb25674c157723a08d89b7c9fbf7f337bce4` è associato a un'esecuzione riuscita del workflow **Validate and deploy Firebase**:
+
+- run ID: `34596454444`;
+- evento: push su `master`;
+- esito: `success`;
+- intervallo registrato: 11 settembre 2026, 11:56:44–11:57:51 UTC.
+
+L'esito dimostra che i comandi configurati nel workflow sono terminati con successo e che il job ha raggiunto il deploy. Non certifica, da solo, completezza dei test, configurazione remota effettiva, comportamento sui dispositivi o correttezza end-to-end dei flussi critici.
+
+### Inventario delle prove versionate
+
+| Gruppo | Quantità rilevata | Natura prevalente | Valore probatorio |
+|---|---:|---|---|
+| Test principali in `tests/` | 35 | unitari, integrazione locale, contratti e prototipi | Variabile: dipende dal modulo importato |
+| Test unitari Functions in `functions/test/` | 8 | helper e servizi isolati | Non equivalgono a callable/trigger distribuiti |
+| Test in `experiments/` | 7 | protocolli candidati | Provano il prototipo, non il runtime attivo |
+| Script `audit-*.mjs` | 16 | asserzioni statiche e ricerca di pattern | Provano presenza testuale, non comportamento |
+| Runner emulatori | 3 | Firestore Rules, Storage Rules, Functions | Solo Firestore e Storage sono nel gate `npm test` |
+
+I runner Firestore e Storage usano project ID fittizi e avviano emulatori locali. È una separazione positiva dai dati reali. Le rispettive suite includono tuttavia sia Rules di produzione sia regole o protocolli candidati: il successo complessivo deve essere attribuito al singolo file verificato, non all'intera funzionalità nominale.
+
+### Finding aggiuntivi
+
+| ID | Gravità | Stato | Finding |
+|---|---|---|---|
+| F2-P1-20 | Media | Verificato negli script npm | `scripts/test-functions-emulator.mjs` esiste ma non è richiamato da `npm test` |
+| F2-P1-21 | Media | Verificato negli audit script | Molti gate “security” sono asserzioni regex/statiche e dimostrano presenza di costrutti, non efficacia a runtime |
+| F2-P1-22 | Media | Verificato nella composizione del gate | Test di produzione, candidati e prototipi confluiscono nello stesso esito, riducendo la chiarezza sulla maturità effettiva |
+| F2-P1-23 | Media | Verificato nel runner Functions | L'emulatore Functions copre sei scenari basilari/negativi e non i flussi completi di invito, condivisione, scadenze, App Check e abuso |
+| F2-P1-24 | Media | Limite probatorio verificato | La CI riuscita prova l'esecuzione del workflow, ma non le versioni/configurazioni remote effettive né l'enforcement App Check reale |
+| F2-P2-04 | Bassa | Non rilevato | Non è emersa strumentazione di code coverage o una soglia minima bloccante |
+
+### Distinzione fra tipi di evidenza
+
+- **Unit test:** utile per logica pura, validatori e servizi; non attraversa necessariamente Auth, Rules, rete e Admin SDK.
+- **Test emulatore Rules:** prova decisioni di accesso per gli scenari dichiarati; non prova configurazioni o dati di produzione.
+- **Test emulatore Functions:** può attraversare endpoint locali, ma il runner attuale è limitato e fuori dal gate principale.
+- **Audit statico:** individua regressioni testuali e contratti dichiarati; può dare falsi positivi sul comportamento.
+- **Test prototipo:** valida una direzione tecnica; non autorizza a descriverla come implementata.
+- **CI verde:** prova che il set configurato è passato; non prova ciò che il set non esercita.
+
+Un esempio rilevante è l'audit della sessione Vault: il controllo statico conferma il pattern di persistenza previsto dal codice, ma non rende sicuro il fatto che payload cifrato e chiave di wrapping risiedano nella stessa sessione browser.
+
+### Gate aperti
+
+- integrare l'emulatore Functions nel gate solo dopo averne definito isolamento, stabilità e scenari obbligatori;
+- separare chiaramente suite runtime, candidate ed esperimenti nel reporting CI;
+- associare ogni requisito critico a una prova comportamentale e a un ambiente;
+- coprire flussi positivi, negativi, concorrenza, retry, abuso e revoca;
+- introdurre coverage soltanto come indicatore complementare, non come sostituto dei casi di sicurezza;
+- verificare configurazione Firebase reale e dispositivi esclusivamente dopo autorizzazione specifica.
