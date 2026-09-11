@@ -2,8 +2,8 @@
 
 > **Data:** 11 settembre 2026  
 > **Baseline:** [ARCHITETTURA_SICUREZZA_V1.md](./ARCHITETTURA_SICUREZZA_V1.md)  
-> **Branch esaminato:** `master` al commit `b67662b430208771674f59d4084a89b8f5ca38d2`  
-> **Ambito:** tutti i 25 file Markdown presenti nel branch.  
+> **Branch esaminato:** `master`; fotografia iniziale `b67662b430208771674f59d4084a89b8f5ca38d2`, aggiornata durante il consolidamento documentale dell’11 settembre 2026  
+> **Ambito:** tutti i 34 file Markdown presenti nella fotografia consolidata.  
 > **Metodo:** confronto documentale, con controllo puntuale di `firestore.rules` e `storage.rules` per separare dichiarazioni, laboratori e produzione.  
 > **Limite:** questo rapporto non certifica il runtime pubblicato, Firebase Console, i dati reali o la robustezza crittografica. Non modifica automaticamente nessun documento esistente.
 
@@ -22,7 +22,7 @@ I problemi principali sono:
 7. L’offline delle scritture ha prove positive, ma la consultazione reale di un account bancario su iPhone è documentata come non superata.
 8. App Check risulta configurato nel client, ma l’enforcement reale di Firestore e Storage non è documentato come verificato.
 9. L’inventario aggregato dei dati Firestore reali non è stato completato; pertanto nessuna migrazione dei campi può basarsi soltanto sulla documentazione.
-10. `FILE_INVENTORY.md` è generato ma non più aggiornato allo stato corrente e cita documenti assenti.
+10. `FILE_INVENTORY.md` è generato ma non più aggiornato allo stato corrente; deve essere rigenerato dopo il consolidamento.
 
 ## 2. Nuova gerarchia documentale proposta
 
@@ -47,6 +47,8 @@ In caso di conflitto prevale il livello superiore. Nessun documento può dichiar
 | `docs/AGENTE_CODEX_EVOLUZIONE.md` | Compatibile | Elaborazione locale, livelli dati, costo zero e funzionamento senza server personale | Aggiungere la baseline come vincolo; vietare a modelli locali/remoti plaintext persistente, log e azioni sui dati senza autorizzazione; definire consenso per D3/D4 | P2 |
 | `docs/APP_ARCHITECTURE_AUDIT.md` | Storico verificabile | Inventario prudente e distinzione tra audit e pubblicazione | Aggiungere commit/versione di validità e rinvio alla baseline. Non usarlo per descrivere automaticamente il runtime attuale | P2 |
 | `docs/ARCHITETTURA_SICUREZZA_V1.md` | Baseline | Documento di confronto | Nessuna modifica ora. Le decisioni ancora aperte restano esplicitamente aperte | — |
+| `docs/GUIDA_PROGETTO.md` | Indice autorevole | Definisce gerarchia, ordine di lettura e mappa delle fonti | Mantenere breve; aggiornare quando nasce, cambia o viene archiviato un contratto | P0 |
+| `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | Audit | Registra divergenze e piano di riallineamento | Non usarlo come contratto; aggiornare conteggio e stato durante questo consolidamento | P1 |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | Compatibile, fuori ambito sicurezza | Una pagina canonica, niente varianti versionate | Correggere soltanto eventuali riferimenti mancanti; mantenerlo come contratto UI/navigazione | P3 |
 | `docs/DATA_ACCESS_CONTRACT.md` | Compatibile ma transitorio | Repository local-first, cache-first e scritture offline non improvvisate | Aggiornare lo stato M6; aggiungere classificazione diretto/Function e stati UI della baseline; chiarire quali scritture sono oggi realmente attive | P1 |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | Compatibile ma incompleto | Distingue campi cifrati e plaintext e dichiara di fotografare lo stato | Rigenerare dopo audit del codice e dati aggregati; includere widget, credenziali comuni, scadenze, notifiche, allegati, cache e metadati; classificare ogni plaintext necessario | P0 |
@@ -64,6 +66,12 @@ In caso di conflitto prevale il livello superiore. Nessun documento può dichiar
 | `docs/M9_SALUTE_CREDENZIALI.md` | Compatibile | Analisi locale, HMAC effimero, k-anonymity prudente e rete disabilitata | Ripristinare o sostituire il riferimento mancante a `VAULT_KEY_CONTRACT.md`; consenso e privacy prima di attivare provider esterni | P1 |
 | `docs/OFFLINE_WRITE_CONFLICT_POLICY.md` | Fortemente compatibile | revision, schemaVersion, operationId, idempotenza e niente overwrite silenzioso | Allineare lo stato alle implementazioni M6 e indicare entità abilitate/non abilitate; non lasciare “future” regole già parzialmente attive | P1 |
 | `docs/PAGE_PERFORMANCE_BASELINE.md` | Compatibile, generato | Budget e distinzione fra statica e runtime | Rigenerare dopo modifiche; sicurezza e correttezza restano gate separati | P3 |
+| `docs/PAGE_SHELL_CONTRACT.md` | Compatibile, fuori ambito sicurezza | Definisce le 29 pagine e il viewport con gate fisico | Aggiungere intestazione standard e verificare che il laboratorio `prova.html` non sia rimasto pubblico oltre il test | P2 |
+| `docs/PIANO_MATURITA_PROFESSIONALE.md` | Fortemente compatibile ma storico-evolutivo | Modello progressivo, niente riscrittura cieca, fasi M0–M10 e audit indipendente | Subordinarlo alla baseline; aggiornare stati M6/M7/Vault; non usare checkbox storiche come prova di produzione | P1 |
+| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | Compatibile, evidenza storica | Misure senza contenuti sensibili e obiettivi iPhone/PC | Marcare versione/data; affiancare il fallimento offline bancario successivo e rigenerare prima/dopo interventi | P2 |
+| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | Compatibile, fuori ambito sicurezza | Separazione responsabilità, accessibilità, budget e test fisici | Aggiungere intestazione standard e mantenere subordinazione a shell e baseline | P3 |
+| `docs/VAULT_KEY_CONTRACT.md` | In conflitto P0, poi riallineato | Terminologia corretta per Auth, Master Password, KEK, Vault Key ed envelope | Il session wrapping con payload e chiave nello stesso storage è ora rischio da verificare, non garanzia; auditare il codice | P0 |
+| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | Compatibile, riallineato | Segreti esclusi dalle evidenze, staging, rollback e recovery prudente | Completare ruoli, canale, contatti, escalation e obblighi privacy prima del go-live | P1 |
 | `docs/PROFILO_ACCOUNT_WIDGET_CACHE_ROADMAP.md` | Compatibile ma in evoluzione | Blocca perdita password legacy, richiede inventario aggregato, cifra widget e usa Function per coerenza multi-documento | Separare con una tabella ciò che è implementato, collaudato localmente e verificato in produzione; completare audit reale aggregato; applicare la matrice della baseline ai widget semplici e comuni | P0 |
 | `experiments/card-importer/README.md` | Storico/laboratorio compatibile | Isolamento dal runtime e niente dati reali | Mantenere fuori dal bundle; prima di produzione applicare pipeline allegati, consenso, elaborazione locale e cancellazione dei temporanei | P3 |
 | `experiments/card-importer/REAL_IMAGE_AUDIT.md` | Storico con dati descrittivi | Non conserva numeri completi o file originali | Conservare solo se serve come evidenza; definire retention delle fotografie esterne al repo e non usare dati reali nei test futuri | P3 |
@@ -107,20 +115,18 @@ Decisione confermata:
 
 Il controllo puntuale di `firestore.rules` mostra ancora una regola generica proprietario per molte sottocollezioni. Prima di promuovere questa parte a conforme occorre censire i percorsi raggiunti e sostituire l’autorizzazione larga con contratti specifici, senza bloccare i formati legacy.
 
-## 5. Documenti citati ma assenti nel branch corrente
+## 5. Documenti inizialmente non inclusi e situazione risolta
 
-I riferimenti e l’inventario menzionano documenti non presenti nel `master` esaminato:
+Durante il consolidamento il branch ha reso nuovamente disponibili i contratti che la prima fotografia non mostrava. La verifica finale include:
 
-| Documento assente | Impatto | Azione proposta |
-|---|---|---|
-| `docs/VAULT_KEY_CONTRACT.md` | Critico: citato da M9 e dall’inventario | Recuperare una versione valida dalla cronologia oppure ricrearlo dopo audit del codice; non inventarne lo stato |
-| `docs/PIANO_MATURITA_PROFESSIONALE.md` | Alto: citato dalla Guida aggiornamenti | Recuperare o sostituire formalmente con baseline + roadmap aggiornata |
-| `docs/RUNTIME_PERFORMANCE_BASELINE.md` | Medio: mancano misure runtime richiamate | Rigenerare dalle diagnostiche senza dati personali |
-| `docs/PAGE_SHELL_CONTRACT.md` | Medio: riferimento M4 rotto | Recuperare o incorporare il contratto nel documento UI canonico |
-| `docs/UI_DESIGN_SYSTEM_CONTRACT.md` | Medio | Verificare se sostituito dalla Guida; evitare doppia autorità |
-| `docs/RISPOSTA_INCIDENTI_E_RECUPERO.md` | Alto | Ripristinare una procedura incidenti allineata alla baseline |
+- `VAULT_KEY_CONTRACT.md`;
+- `PIANO_MATURITA_PROFESSIONALE.md`;
+- `RUNTIME_PERFORMANCE_BASELINE.md`;
+- `PAGE_SHELL_CONTRACT.md`;
+- `UI_DESIGN_SYSTEM_CONTRACT.md`;
+- `RISPOSTA_INCIDENTI_E_RECUPERO.md`.
 
-Prima di ricrearli va verificata la cronologia Git: potrebbero essere stati rimossi intenzionalmente o esistere in un commit precedente. Il ripristino non è automatico.
+Non sono più classificati come assenti. Vault e risposta incidenti sono stati riallineati; gli altri sono inclusi nella tabella completa. Resta necessario controllare e riparare i collegamenti relativi, quindi rigenerare l’inventario.
 
 ## 6. Verifiche documentali contro Rules correnti
 
@@ -176,9 +182,9 @@ Da correggere o verificare:
 
 ### Blocco C — Contratti mancanti
 
-1. esaminare la cronologia Git dei sei documenti assenti;
-2. recuperare soltanto quelli coerenti;
-3. ricreare `VAULT_KEY_CONTRACT.md` e risposta incidenti se non recuperabili;
+1. verificare la cronologia dei documenti ricomparsi e conservarne lo stato;
+2. applicare intestazioni standard e gerarchia;
+3. mantenere Vault e risposta incidenti come contratti attivi riallineati;
 4. riparare tutti i collegamenti relativi.
 
 ### Blocco D — Stato reale
@@ -207,7 +213,7 @@ Da correggere o verificare:
 - non dichiarare zero-knowledge il runtime finché condivisione e recupero non sono verificati;
 - non cancellare fallback prima dell’inventario dei dati reali;
 - non considerare suite locale verde equivalente a configurazione Firebase reale verificata;
-- non rigenerare documenti mancanti copiando alla cieca versioni storiche.
+- non promuovere versioni storiche senza confronto con baseline, codice e stato reale.
 
 ## 9. Decisione conclusiva
 
