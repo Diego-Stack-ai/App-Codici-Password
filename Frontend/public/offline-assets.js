@@ -141,6 +141,8 @@ self.__OFFLINE_ASSETS = [
   "assets/js/modules/scadenze/deadline-save-service.js",
   "assets/js/modules/scadenze/dettaglio_scadenza.js",
   "assets/js/modules/scadenze/scadenze.js",
+  "assets/js/modules/settings/account-field-usage-model.js",
+  "assets/js/modules/settings/account-field-usage-service.js",
   "assets/js/modules/settings/archive-account-model.js",
   "assets/js/modules/settings/archive-account-service.js",
   "assets/js/modules/settings/archivio_account.js",
