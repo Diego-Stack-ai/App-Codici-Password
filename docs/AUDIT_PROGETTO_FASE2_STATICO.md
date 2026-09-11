@@ -217,3 +217,68 @@ Il worker Firebase Messaging è separato dal worker della shell. Gestisce corret
 - chiusura forzata prima del consumo dell'handoff;
 - aggiornamento della shell quando una risorsa del manifest non è disponibile;
 - concorrenza reale fra due schede e due dispositivi sul runtime distribuito.
+
+
+## 12. Verifica allegati e condivisione
+
+### Finding aggiuntivi
+
+| ID | Gravità | Stato | Finding |
+|---|---|---|---|
+| F2-P0-08 | Bloccante | Verificato nel codice | L'ACL consente al destinatario di leggere il record, ma non esiste un envelope della chiave capace di decifrare i campi del proprietario |
+| F2-P0-09 | Bloccante | Verificato in codice e Rules | Il destinatario non può scaricare gli allegati del proprietario e non possiede la chiave necessaria ad aprirli |
+| F2-P0-10 | Alta | Verificato nel codice | URL Firebase di download vengono persistiti e i lettori legacy li aprono direttamente; il token URL non deve essere trattato come autorizzazione |
+| F2-P0-11 | Alta | Verificato nel codice | La validazione upload si fida del MIME fornito dal browser e non controlla magic bytes/firma del file |
+| F2-P1-11 | Media | Verificato nel codice | L'AAD degli allegati è una costante e non lega proprietario, record, allegato, versione o percorso |
+| F2-P1-12 | Media | Verificato nel codice | Nome originale, tipo, dimensione, URL e percorso Storage restano metadati leggibili in Firestore |
+| F2-P1-13 | Media | Verificato nel runtime | La revoca rimuove l'ACL ma non ruota il materiale crittografico e non può eliminare copie già presenti nella cache |
+| F2-P1-14 | Media | Verificato nei test | I test crittografici della condivisione usano in parte `experiments/sharing-key-prototype` e non certificano il runtime attivo |
+
+### Flusso Account condiviso attuale
+
+1. Il proprietario cifra i campi usando la propria Vault Key.
+2. Il client salva `sharedWith` e crea un invito.
+3. `respondToInvitation` verifica il destinatario e aggiunge il suo UID a `sharedWithUids`.
+4. Le Firestore Rules consentono la lettura del documento originale.
+5. Il client del destinatario tenta di decifrare usando la Vault Key del destinatario.
+6. Non è emerso un envelope che colleghi la chiave del record alla chiave del destinatario.
+
+La separazione fra autorizzazione e decifratura è quindi incompleta: il destinatario può ricevere il ciphertext ma non è dimostrato che possa ottenere correttamente il contenuto.
+
+### Allegati
+
+Il runtime cifra ogni nuovo allegato con una File Key casuale AES-GCM e avvolge la File Key tramite HKDF/AES-GCM usando la Vault Key del proprietario. Questo protegge il contenuto salvato come `application/octet-stream`.
+
+Restano però aperti quattro confini:
+
+- Storage consente la lettura solo all'UID proprietario;
+- la File Key è avvolta per la Vault Key del proprietario, non per il destinatario;
+- l'AAD è `CodiciPassword-Attachment-v1` per tutti gli oggetti e non lega il contesto;
+- il controllo formato usa `file.type`, senza verifica dei magic bytes.
+
+### URL legacy
+
+I moduli privato e azienda continuano a:
+
+- ottenere `getDownloadURL`;
+- salvare l'URL nel documento Firestore;
+- aprire direttamente `attachment.url` quando manca il metadato `encryption`.
+
+Un Firebase download URL può includere un token persistente e non deve essere considerato equivalente a una lettura governata in ogni momento dalle Storage Rules. Per gli oggetti legacy non cifrati, la conoscenza dell'URL può esporre direttamente il contenuto. Non è stato effettuato alcun inventario dei token o degli oggetti reali.
+
+### Identità crittografica candidata
+
+`sharing-identity.js` crea un'identità ECDH P-256, cifra la chiave privata con materiale derivato dalla Vault Key e usa AAD legata a UID e key ID. Il modulo è coperto da test isolati, ma non è emerso un collegamento completo dal form Account al protocollo record-key/grant.
+
+Il modello con Record Key, grant individuali, `keyGeneration` e rotazione resta candidato e non deve essere dichiarato attivo.
+
+### Gate ancora aperti
+
+- condivisione end-to-end fra due Vault realmente differenti;
+- download e apertura allegato da parte del destinatario;
+- inventario aggregato degli URL/token legacy;
+- magic-byte validation per ogni formato ammesso;
+- rotazione dopo revoca;
+- comportamento della cache del destinatario revocato;
+- verifica e sostituzione protetta della chiave pubblica;
+- migrazione con doppio lettore e rollback, solo dopo approvazione.
