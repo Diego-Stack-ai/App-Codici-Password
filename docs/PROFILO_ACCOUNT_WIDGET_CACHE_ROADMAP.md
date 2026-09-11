@@ -1,5 +1,11 @@
 # Profilo, Account, Widget e Cache — roadmap di coerenza dati
 
+> **Stato:** roadmap in evoluzione; contiene blocchi implementati e gate ancora aperti  
+> **Autorità:** roadmap specialistica subordinata ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
+> Le diciture “implementato”, “testato” e “attivo” devono essere lette nel perimetro indicato. Non equivalgono a verifica dei dati reali o della configurazione Firebase pubblicata. Per ogni widget, il percorso diretto/Function segue la matrice della baseline: singolo record con Rules complete può essere diretto; collegamenti multi-documento e credenziali comuni richiedono Function.
+
 ## Scopo e stato
 
 Questa attività precede l'evoluzione funzionale dell'Agente Codex. Deve stabilizzare il modello dati che l'Agente dovrà successivamente descrivere e utilizzare.
