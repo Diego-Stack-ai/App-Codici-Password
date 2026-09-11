@@ -1,5 +1,9 @@
 # Piano di maturità professionale — Codici & Password
 
+> **Stato:** piano evolutivo iniziato sulla v1.2.49; gli stati successivi richiedono verifica nel relativo contratto  
+> **Autorità:** piano, subordinato a [Guida progetto](./GUIDA_PROGETTO.md) e [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
 > Stato iniziale: versione locale 1.2.49. Documento di progetto, non autorizza migrazioni, cancellazioni, deploy o modifiche distruttive.
 
 ## 1. Obiettivo
