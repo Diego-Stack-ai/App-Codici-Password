@@ -1,5 +1,9 @@
 # M9 — Salute credenziali e integrazioni
 
+> **Stato:** analisi locale/laboratorio; integrazione di rete disattivata finché non approvata  
+> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md) e [Contratto Vault Key](./VAULT_KEY_CONTRACT.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
 ## Confine di sicurezza
 
 L'analisi di password deboli, duplicate e datate avviene soltanto in memoria, sul dispositivo e dopo lo sblocco del Vault. Il risultato contiene esclusivamente identificatore del record e categorie di rischio. Le impronte usate per trovare duplicati sono HMAC con una chiave casuale effimera: non vengono persistite, sincronizzate o registrate.
