@@ -1,5 +1,9 @@
 # M8 — Backup e recupero
 
+> **Stato:** contratto candidato e laboratorio; ripristino reale di produzione non certificato  
+> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
 ## Contratto
 
 Il backup è un file cifrato, autenticato e versionato. L'intestazione espone soltanto formato, versione, proprietario, data e parametri crittografici; dati, record, allegati e metadati funzionali restano nel ciphertext. La Recovery Key è casuale, distinta dalla Master Password e mostrata una sola volta; l'app non può recuperarla.
