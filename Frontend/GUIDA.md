@@ -1,6 +1,11 @@
-# 📘 PROTOCOLLO MASTER — COMPLIANT V7.0 (GUIDA TECNICA UNIFICATA)
+# 📘 GUIDA TECNICA UNIFICATA — PROTOCOLLO V7.0
 
-Questa guida rappresenta l'unico punto di verità per lo sviluppo, il refactoring, la sicurezza e l'audit del progetto **App Codici Password**. Rappresenta l'evoluzione finale che unifica i principi delle versioni precedenti (V5/V6) e introduce lo standard **V7.0 Total Blinding**. È un documento vivente che deve essere consultato prima di ogni modifica al codice.
+> **Stato:** guida implementativa consolidata, in riallineamento  
+> **Autorità:** implementazione, UI e comportamento; subordinata a [Guida progetto](../docs/GUIDA_PROGETTO.md) e [Architettura Sicurezza V1](../docs/ARCHITETTURA_SICUREZZA_V1.md)  
+> **Ultima revisione di gerarchia:** 11 settembre 2026  
+> **Avvertenza:** esempi e sezioni storiche descrivono anche fasi precedenti. Una dicitura “Master”, “blindato”, “compliant” o “completato” non certifica da sola il codice o la produzione.
+
+Questa guida raccoglie le regole consolidate di implementazione, interfaccia e comportamento di **App Codici Password**. Non è più l’unica fonte per sicurezza, dati e crittografia: per tali temi prevalgono la baseline e i contratti specialistici indicati nella Guida progetto. Prima di una modifica occorre distinguere regola attiva, fotografia storica, target e laboratorio.
 
 ---
 
@@ -781,7 +786,7 @@ Ogni volta che viene effettuata una modifica agli asset core o al design system,
 ## 20. PROTOCOLLO SICUREZZA UNIFICATA V7.0 (HARDENING & UX)
 
 ### 1️⃣ Spiegazione Umana
-Per garantire un'esperienza "Premium" ed evitare prompt ripetitivi, abbiamo unificato la logica di Sicurezza tra la **Sessione App** e la **Vault Crittografica**. La MasterKey viene "ricordata" in modo sicuro (`sessionStorage`) per tutta la durata della sessione. Il "Blocco Inattività" (Titan-Lock) agisce come un cane da guardia automatico.
+La Sessione App e la Vault Crittografica restano concetti distinti. Il runtime storico usa un meccanismo di session wrapping in `sessionStorage`, ma questo non è promosso a soluzione sicura: il [Contratto Vault Key](../docs/VAULT_KEY_CONTRACT.md) lo classifica come verifica P0, perché payload e chiave di wrapping non possono dipendere dallo stesso storage accessibile agli stessi script. Fino alla chiusura dell’audit, il comportamento esistente è compatibilità da verificare, non modello da replicare. Il blocco inattività deve eliminare il materiale Vault sbloccato senza confondere il blocco con il logout Firebase.
 
 ### 2️⃣ Architettura dei Controlli (Titan-Lock V8.0)
 Per garantire stabilità, il timeout è stato unificato e semplificato rispetto alla V7.0:
@@ -792,7 +797,7 @@ Per garantire stabilità, il timeout è stato unificato e semplificato rispetto 
 ### 3️⃣ Protocollo Agente AI (Security Watchdog)
 > 🤖 **Protocollo AI — Comando Categorico: AUDIT_SECURITY_HARDENING**
 > `enforce_security_v7()`
-> 1. **VAULT CHECK**: Valida l'uso di `sessionStorage` per la permanenza della MasterKey.
+> 1. **VAULT CHECK**: verifica che Master Password e chiavi sbloccate non persistano in localStorage/sessionStorage; ogni contenitore locale deve rispettare il Contratto Vault Key.
 > 2. **AES-GCM**: Imponi la crittografia su ogni campo marcato come sensibile.
 > 3. **TITAN-LOCK**: Riscontra le soglie V8.0: 1, 3 o 5 min. Blocco immediato di ogni occorrenza "Subito" (0).
 > 4. **BIOMETRIC FIRST**: Imponi il tentativo biometrico prima di ogni prompt manuale.
@@ -801,6 +806,8 @@ Per garantire stabilità, il timeout è stato unificato e semplificato rispetto 
 ---
 
 ## 21. PROTOCOLLO V7.0 MASTER: SECURITY PATCH & SELF-HEALING
+
+> **Rettifica 11/09/2026:** il termine “self-healing” non autorizza scritture o migrazioni automatiche sui dati reali. È ammesso il rilevamento fail-closed; la correzione segue Architettura Sicurezza V1.
 
 ### Spiegazione umana:
 Il Protocollo V7.0 impone la **crittografia AES-256-GCM su ogni singolo dato sensibile**. È stato introdotto il **Cripto-Healing**: un sistema che rileva dati vulnerabili (salvati in chiaro o senza flag `_encrypted`) e ne forza la migrazione sicura tramite `migration_security.html`.
@@ -821,7 +828,7 @@ const val = data._encrypted ? await decrypt(data.password, masterKey) : data.pas
 
 ### Note operative per la Sicurezza:
 - **Zero Plaintext**: Nessun valore sensibile in chiaro nella Firebase Console.
-- **Cripto-Healing**: Bonifica automatica record legacy; interfaccia di controllo nascosta in produzione tramite `SAFE_MODE = false`.
+- **Rilevamento legacy**: può segnalare record non conformi senza esporne il contenuto. La bonifica automatica non è autorizzata: ogni migrazione richiede inventario, backup verificato, doppio lettore, confronto, rollback e approvazione. `SAFE_MODE` è una scelta UI e non un controllo di sicurezza.
 - **Crypto Silence**: Divieto assoluto di logging di chiavi, salt o IV (Vedi Sezione 22).
 - **Titan-Lock Reference**: Fare riferimento alla Sezione 22 per le nuove soglie V8.0.
 
