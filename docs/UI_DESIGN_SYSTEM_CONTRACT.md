@@ -1,5 +1,9 @@
 # Contratto UI e design system
 
+> **Stato:** attivo per fondazioni e componenti condivisi  
+> **Autorità:** contratto UI subordinato a [Guida progetto](./GUIDA_PROGETTO.md)  
+> **Ultima revisione documentale:** 11 settembre 2026
+
 Questo documento definisce i vincoli tecnici della fase M4. Non sostituisce la revisione completa di lingue e organizzazione delle Impostazioni prevista dopo M10.
 
 La struttura di viewport, fondale, contenitori, area scorrevole, fasce e spaziatori è regolata separatamente da `PAGE_SHELL_CONTRACT.md`. Ombre, vetro e decorazioni non fanno parte di quel contratto strutturale.
