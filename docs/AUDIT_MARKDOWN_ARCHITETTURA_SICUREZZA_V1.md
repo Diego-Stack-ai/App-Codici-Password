@@ -3,7 +3,7 @@
 > **Data:** 11 settembre 2026  
 > **Baseline:** [ARCHITETTURA_SICUREZZA_V1.md](./ARCHITETTURA_SICUREZZA_V1.md)  
 > **Branch esaminato:** `master`; fotografia iniziale `b67662b430208771674f59d4084a89b8f5ca38d2`, aggiornata durante il consolidamento documentale dell’11 settembre 2026  
-> **Ambito:** tutti i 34 file Markdown presenti nella fotografia consolidata.  
+> **Ambito:** tutti i 35 file Markdown presenti nella fotografia consolidata, incluso il piano di audit creato al termine del riallineamento.  
 > **Metodo:** confronto documentale, con controllo puntuale di `firestore.rules` e `storage.rules` per separare dichiarazioni, laboratori e produzione.  
 > **Limite:** questo rapporto non certifica il runtime pubblicato, Firebase Console, i dati reali o la robustezza crittografica. Non modifica automaticamente nessun documento esistente.
 
@@ -49,6 +49,7 @@ In caso di conflitto prevale il livello superiore. Nessun documento può dichiar
 | `docs/ARCHITETTURA_SICUREZZA_V1.md` | Baseline | Documento di confronto | Nessuna modifica ora. Le decisioni ancora aperte restano esplicitamente aperte | — |
 | `docs/GUIDA_PROGETTO.md` | Indice autorevole | Definisce gerarchia, ordine di lettura e mappa delle fonti | Mantenere breve; aggiornare quando nasce, cambia o viene archiviato un contratto | P0 |
 | `docs/AUDIT_MARKDOWN_ARCHITETTURA_SICUREZZA_V1.md` | Audit | Registra divergenze e piano di riallineamento | Non usarlo come contratto; aggiornare conteggio e stato durante questo consolidamento | P1 |
+| `docs/PIANO_AUDIT_COMPLETO_PROGETTO.md` | Piano operativo | Trasforma il successivo controllo totale in fasi, prove e deliverable | Eseguire inizialmente read-only; non confondere il piano con un audit già svolto | P0 |
 | `docs/CANONICAL_PAGE_REGISTRY.md` | Compatibile, fuori ambito sicurezza | Una pagina canonica, niente varianti versionate | Correggere soltanto eventuali riferimenti mancanti; mantenerlo come contratto UI/navigazione | P3 |
 | `docs/DATA_ACCESS_CONTRACT.md` | Compatibile ma transitorio | Repository local-first, cache-first e scritture offline non improvvisate | Aggiornare lo stato M6; aggiungere classificazione diretto/Function e stati UI della baseline; chiarire quali scritture sono oggi realmente attive | P1 |
 | `docs/ENCRYPTED_FIELD_INVENTORY.md` | Compatibile ma incompleto | Distingue campi cifrati e plaintext e dichiara di fotografare lo stato | Rigenerare dopo audit del codice e dati aggregati; includere widget, credenziali comuni, scadenze, notifiche, allegati, cache e metadati; classificare ogni plaintext necessario | P0 |
