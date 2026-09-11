@@ -282,3 +282,76 @@ Il modello con Record Key, grant individuali, `keyGeneration` e rotazione resta 
 - comportamento della cache del destinatario revocato;
 - verifica e sostituzione protetta della chiave pubblica;
 - migrazione con doppio lettore e rollback, solo dopo approvazione.
+
+
+## 13. Verifica supply chain e workflow di rilascio
+
+### Evidenze positive
+
+- repository marcato `private: true` nei package npm;
+- lockfile v3 presenti sia alla radice sia nelle Functions;
+- dipendenze risolte con hash `integrity`;
+- `.env`, `serviceAccountKey.json`, cache Firebase, log e `node_modules` sono esclusi da Git;
+- la scansione statica dei nomi e dei pattern non ha rilevato chiavi private, service account o valori di `GMAIL_APP_PASSWORD`;
+- i segreti Gmail sono richiamati tramite Secret Manager;
+- il workflow usa `npm ci`, non installazioni non deterministiche;
+- test completi eseguiti prima del comando di deploy;
+- le Functions sono escluse dal deploy automatico corrente.
+
+Le API key Firebase presenti nel frontend e nella Function sono configurazioni del client Firebase e non equivalgono a una chiave privata o service account. La suddivisione della stringa nel frontend non costituisce una misura di sicurezza.
+
+### Finding aggiuntivi
+
+| ID | Gravità | Stato | Finding |
+|---|---|---|---|
+| F2-P0-12 | Alta | Verificato nel workflow | Ogni push su `master`, anche documentale, avvia un deploy di Hosting, Firestore Rules e Storage |
+| F2-P0-13 | Alta | Verificato nel workflow | Il deploy non specifica `--project` e dipende dal progetto predefinito `appcodici-password` in `.firebaserc` |
+| F2-P1-15 | Media | Verificato nel workflow | Autenticazione CI basata su `FIREBASE_TOKEN`, dichiarata legacy dallo stesso repository |
+| F2-P1-16 | Media | Verificato nel workflow | Le GitHub Actions sono referenziate tramite tag maggiori (`@v5`) e non tramite commit SHA immutabile |
+| F2-P1-17 | Media | Verificato nel workflow | Rules/Storage/Hosting vengono ridistribuiti insieme anche quando non sono cambiati |
+| F2-P1-18 | Media | Verificato nel workflow | Functions restano manuali, creando possibilità di disallineamento fra frontend, Rules e backend |
+| F2-P1-19 | Media | Non determinabile | Vulnerabilità correnti delle dipendenze transitive non verificate con audit del lockfile |
+| F2-P2-03 | Bassa | Verificato nel repository | Numerose suite chiamate “prototype” o basate su `experiments/` fanno parte del gate principale e possono essere confuse con copertura del runtime |
+
+### Workflow corrente
+
+Il solo workflow `.github/workflows/firebase-deploy.yml` reagisce direttamente al push su `master`:
+
+1. checkout;
+2. Node.js 22 e Java 21;
+3. `npm ci`;
+4. `npm ci --prefix functions`;
+5. `npm test`;
+6. deploy di Hosting, Firestore Rules e Storage con `FIREBASE_TOKEN`.
+
+Non è emerso un ambiente di approvazione, un gate manuale, una selezione basata sui file modificati o un comando `--project <PROJECT_ID>`. Di conseguenza un merge esclusivamente documentale può causare una nuova distribuzione della configurazione di produzione.
+
+### Segreti e file sensibili
+
+La scansione statica ha cercato nomi e pattern compatibili con:
+
+- chiavi private PEM;
+- service account;
+- file `.env`;
+- backup/credenziali;
+- riferimenti `FIREBASE_TOKEN`;
+- riferimenti `GMAIL_APP_PASSWORD`.
+
+Non sono emersi valori di chiavi private o password Gmail. Questo controllo non certifica la cronologia Git, i branch non esaminati, gli artifact Actions o i segreti configurati nell'account GitHub.
+
+### Dipendenze
+
+I manifest dichiarano fra le dipendenze principali Firebase SDK, Firebase Tools, Rules Unit Testing, esbuild, madge, stylelint, Tesseract.js, ZXing, Firebase Admin, Firebase Functions e Nodemailer.
+
+I lockfile rendono riproducibile l'installazione, ma il workflow non esegue una verifica esplicita di advisory/licenze. La presenza di una versione nel lockfile non dimostra l'assenza di vulnerabilità correnti. Un controllo attendibile richiede esecuzione separata dell'audit e valutazione dei risultati, senza aggiornamenti automatici.
+
+### Gate aperti
+
+- audit delle dipendenze e licenze sul lockfile;
+- scansione della cronologia Git e dei branch residui;
+- verifica ruleset/branch protection;
+- sostituzione del token CI con identità federata a privilegi minimi;
+- ambiente protetto con approvazione deploy;
+- parametro esplicito `--project`;
+- deploy selettivo basato sugli artifact modificati;
+- matrice di compatibilità fra versione Hosting, Rules e Functions.
