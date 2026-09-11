@@ -1,37 +1,136 @@
 # Contratto delle chiavi della Vault
 
-Questo documento fissa la terminologia della fase M1. Non modifica algoritmi, formati o dati.
+> **Stato:** attivo per terminologia e invarianti; implementazione runtime da verificare  
+> **Autorità:** contratto specialistico subordinato ad [Architettura Sicurezza V1](./ARCHITETTURA_SICUREZZA_V1.md)  
+> **Versione:** 1.0 riallineata  
+> **Ultima verifica documentale:** 11 settembre 2026  
+> **Codice interessato:** `security-manager.js`, `vault-session.js`, `crypto-utils.js`, WebAuthn/PRF, backup e condivisione
 
-## Termini canonici
+Questo documento definisce nomi e comportamento obiettivo. Quando descrive il formato esistente lo indica espressamente come **stato corrente da verificare**, non come garanzia di sicurezza.
 
-- **Password account**: credenziale Firebase Authentication. Non cifra la Vault.
-- **Master Password**: segreto conosciuto dall'utente. Verifica lo sblocco e deriva la KEK; non è la chiave dati dei Vault nuovi.
-- **Verifier**: prova cifrata usata per verificare la Master Password senza conservarla. Il formato v2 usa PBKDF2-SHA256 (600.000 iterazioni) e AES-GCM-256.
-- **KEK (Key Encryption Key)**: chiave temporanea derivata dalla Master Password e dal salt dell'envelope. Serve soltanto ad aprire o proteggere la Vault Key.
-- **Vault Key**: segreto casuale a 256 bit che cifra i dati applicativi.
-- **Vault Key material**: valore runtime consumato da `encrypt`/`decrypt`. Può essere una Vault Key singola oppure un keyring di transizione.
-- **Envelope**: oggetto `vault-key-envelope` che contiene la Vault Key cifrata dalla KEK.
-- **Keyring legacy**: valore `CPVK2:` con chiave primaria casuale e fallback del vecchio modello. Le nuove cifrature usano la primaria; il fallback mantiene leggibili i record precedenti.
-- **Session wrapping**: copia temporanea del Vault Key material cifrata in `sessionStorage` con una chiave casuale della stessa scheda.
+## 1. Termini canonici
 
-## Flusso e ciclo di vita
+| Termine | Significato | Persistenza in chiaro |
+|---|---|---|
+| Password account | Credenziale Firebase Authentication; non cifra la Vault | Mai nell’app |
+| Master Password | Segreto conosciuto dall’utente che verifica lo sblocco e deriva la KEK | Vietata |
+| Verifier | Prova per verificare la Master Password senza conservarla | Ammessa solo nel formato autenticato/versionato |
+| KEK | Chiave temporanea derivata dalla Master Password e dal salt | Vietata |
+| Vault Key | Segreto casuale a 256 bit che protegge dati o chiavi inferiori | Vietata |
+| Vault Key material | Valore runtime usato dalle API crittografiche; può includere un keyring di transizione | Vietata |
+| Envelope | Vault Key cifrata e autenticata dalla KEK | Ammesso |
+| Keyring legacy | Chiave primaria e fallback necessari alla lettura transitoria | Solo cifrato |
+| Record Key | Chiave casuale dedicata a un record | Vietata |
+| File Key | Chiave casuale dedicata a un allegato | Vietata |
+| Recovery Key | Segreto indipendente per il recupero | Vietata |
+| Chiave privata di condivisione | Materiale privato dell’identità crittografica | Vietata |
+| Chiave pubblica | Materiale pubblico versionato e legato all’UID | Ammessa |
 
-1. La Master Password viene verificata tramite il verifier.
-2. Da Master Password e salt viene derivata in memoria la KEK.
-3. La KEK apre `vaultKeyEnvelope`; il risultato è il Vault Key material.
-4. Il materiale resta in RAM e può essere session-wrapped nella scheda attiva.
-5. `softLock()` e `clearSession()` azzerano il riferimento in RAM e rimuovono payload e chiave di wrapping dalla sessione.
-6. Il cambio Master Password riavvolge la stessa Vault Key: non ricifra tutti i record e non cambia la password account.
+La variabile storica `_masterKey` non deve essere chiamata Master Password se contiene la Vault Key già sbloccata. Il codice nuovo deve usare nomi non ambigui.
 
-## WebAuthn / PRF
+## 2. Stato documentato del formato esistente
 
-La configurazione biometrica v2 protegge localmente il Vault Key material con una chiave derivata dall'output PRF WebAuthn. Conserva ciphertext, IV, salt e identificatore credenziale, mai la Master Password in chiaro. `encryptedMasterKey` e il formato versione 1 restano soltanto compatibilità di lettura.
+I documenti e il codice storico dichiarano:
 
-## Confini di persistenza
+- verifier v2 con PBKDF2-SHA-256, 600.000 iterazioni e AES-GCM-256;
+- `vaultKeyEnvelope` in `users/{uid}/settings/security`;
+- cache locale di verifier/envelope e contenitore WebAuthn protetto per UID;
+- `_vaultKeyMaterial` in RAM;
+- keyring `CPVK2:` per leggere record precedenti;
+- una funzione di “session wrapping” che salva in `sessionStorage` payload cifrato e chiave casuale di wrapping della stessa scheda.
 
-- Firestore `users/{uid}/settings/security`: `verifier`, `vaultKeyEnvelope`.
-- `localStorage`: copie cache di verifier/envelope e contenitore biometrico protetto per UID.
-- `sessionStorage`: `vault_session_v1` e chiave casuale di wrapping, entrambi eliminati al blocco/logout.
-- RAM: `_vaultKeyMaterial`, eliminato al blocco/logout o cambio utente.
+L’ultimo punto è un **rischio P0 da verificare**: se ciphertext e chiave che lo apre sono entrambi accessibili nello stesso storage/origine, il wrapping non crea una separazione crittografica significativa contro script eseguiti nell’origine. Non deve essere descritto come “sicuro” finché threat model e codice non dimostrano una protezione diversa.
 
-`ensureVaultKeyMaterial()` è il nome API canonico. `ensureMasterKey` rimane temporaneamente un alias per i moduli non ancora rinominati.
+La descrizione dello stato corrente non autorizza a conservarlo.
+
+## 3. Invarianti
+
+1. Password account e Master Password sono separate.
+2. Master Password, KEK, Vault Key, Record Key, File Key, Recovery Key e chiavi private non arrivano a Firestore, Storage, Functions, log, URL o analytics in chiaro.
+3. La Vault Key persistita esiste soltanto come envelope cifrato e autenticato.
+4. Le chiavi sbloccate restano in memoria per il tempo strettamente necessario.
+5. `localStorage` non contiene Master Password o chiavi sbloccate, neppure codificate Base64.
+6. `sessionStorage` non è memoria sicura per una chiave sbloccata.
+7. Un contenitore locale persistito è ammesso soltanto se cifrato/autenticato e se la chiave che lo apre non è conservata nello stesso storage accessibile agli stessi script.
+8. IndexedDB e cache Firestore possono contenere ciphertext, envelope e metadati minimi, non plaintext.
+9. Logout, blocco Vault, cambio UID e revoca dispositivo eliminano il materiale sbloccato raggiungibile dall’app.
+10. Nonce/IV sono unici per chiave e operazione.
+11. Ogni formato è versionato e dispone di lettore retrocompatibile controllato.
+12. Nessuna migrazione crittografica modifica dati reali senza inventario, backup recuperabile, confronto, rollback e approvazione.
+13. Le Functions non ricevono le chiavi necessarie a decifrare il contenuto zero-knowledge.
+
+## 4. Flusso obiettivo
+
+1. La Master Password viene verificata tramite un verifier resistente agli attacchi offline.
+2. Master Password e salt derivano la KEK in memoria.
+3. La KEK apre `vaultKeyEnvelope`.
+4. La KEK viene eliminata appena possibile.
+5. Il Vault Key material resta in RAM durante la sessione sbloccata.
+6. Record e allegati usano chiavi inferiori secondo il formato versionato.
+7. Il blocco elimina il materiale sbloccato.
+8. Il nuovo sblocco richiede Master Password oppure un contenitore protetto realmente dal dispositivo.
+
+Il cambio Master Password deve riavvolgere la Vault Key quando il formato lo consente; non coincide con il cambio della password Firebase e non autorizza una migrazione senza test.
+
+## 5. WebAuthn / PRF
+
+WebAuthn/PRF può proteggere lo sblocco locale se:
+
+- usa capacità reali del dispositivo e non una biometria simulata;
+- conserva soltanto ciphertext, IV, salt, versione e identificatore credenziale;
+- il segreto di apertura non è esportabile nello storage web ordinario;
+- mantiene un fallback/recovery esplicitamente progettato;
+- è collaudato sui browser e dispositivi supportati;
+- revoca e cambio UID eliminano i contenitori non più validi.
+
+I formati `encryptedMasterKey` o versione 1 possono restare lettori legacy soltanto finché inventario e migrazione ne richiedono la presenza.
+
+## 6. KDF, wrapping e gerarchia
+
+I parametri definitivi della KDF non vengono promossi a standard definitivo finché non sono:
+
+- inventariati nel codice e nei dati;
+- misurati su iPhone e Windows supportati;
+- verificati rispetto a salt, dominio d’uso e versione;
+- testati con credenziale errata e contenitore alterato;
+- sottoposti ad audit indipendente.
+
+Cambiare algoritmo o parametri è una migrazione.
+
+La gerarchia obiettivo è:
+
+1. credenziale utente o protezione dispositivo;
+2. KEK/chiave di protezione;
+3. envelope della Vault Key;
+4. Record Key;
+5. File Key.
+
+## 7. Recupero e rotazione
+
+Il recupero zero-knowledge richiede un segreto o dispositivo predisposto. Senza tale materiale il servizio non può promettere il recupero.
+
+Cambio Master Password e rotazione richiedono:
+
+- autenticazione recente;
+- verifica della vecchia credenziale;
+- backup cifrato verificato;
+- trasformazione in memoria;
+- nuova versione;
+- rilettura e confronto;
+- rollback;
+- rigenerazione dei contenitori dispositivo/WebAuthn quando necessaria.
+
+## 8. Verifiche P0 aperte
+
+- determinare esattamente cosa `vault-session.js` scrive in `sessionStorage`;
+- verificare se payload e chiave di wrapping sono entrambi recuperabili dalla stessa origine;
+- cercare residui storici in `localStorage`;
+- censire verifier, envelope, salt, IV, iterazioni e versioni;
+- verificare pulizia a logout, blocco, crash e cambio UID;
+- verificare l’impatto XSS sul Vault sbloccato;
+- censire fallback e keyring legacy;
+- provare sblocco e fallimento su due dispositivi;
+- confermare che Functions e log non ricevano segreti;
+- ottenere revisione crittografica indipendente.
+
+Finché questi punti non sono chiusi, il runtime non deve essere dichiarato definitivamente zero-knowledge o conforme a questo contratto.
