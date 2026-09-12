@@ -586,34 +586,48 @@ function setupExcelExport(user) {
     button.addEventListener('click', () => {
         const modal = createElement('div', {className: 'modal-overlay'});
         const cancelButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Annulla'});
-        const startButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Crea file Excel'});
+        const protectedButton = createElement('button', {className: 'btn-modal btn-secondary', textContent: 'Copia protetta'});
+        const fullButton = createElement('button', {className: 'btn-modal btn-primary', textContent: 'Copia completa'});
         const close = () => { modal.classList.remove('active'); setTimeout(() => modal.remove(), 300); };
         cancelButton.addEventListener('click', close);
-        startButton.addEventListener('click', async () => {
-            startButton.disabled = true;
-            startButton.textContent = 'Preparazione…';
+        const runExport = async includeSecrets => {
+            protectedButton.disabled = true;
+            fullButton.disabled = true;
+            const activeButton = includeSecrets ? fullButton : protectedButton;
+            activeButton.textContent = 'Preparazione…';
             try {
                 const {exportOwnerExcel} = await import('./excel-export-service.js?v=1.2.99');
-                const result = await exportOwnerExcel(user.uid);
+                const result = await exportOwnerExcel(user.uid, {includeSecrets});
                 close();
                 showToast(`File Excel creato: ${result.accountCount} Account esportati.`, 'success');
             } catch (error) {
                 console.error('[EXCEL EXPORT] Esportazione non riuscita.', error?.message);
-                startButton.disabled = false;
-                startButton.textContent = 'Riprova';
+                protectedButton.disabled = false;
+                fullButton.disabled = false;
+                protectedButton.textContent = 'Copia protetta';
+                fullButton.textContent = 'Copia completa';
                 showToast(error?.message === 'BACKUP_REQUIRES_ONLINE'
                     ? 'Per questa prova serve una connessione Internet.'
                     : 'Esportazione non completata. Nessun dato è stato modificato.', 'error');
             }
+        };
+        protectedButton.addEventListener('click', () => runExport(false));
+        fullButton.addEventListener('click', async () => {
+            const typed = await showInputModal(
+                'Esportazione completa non cifrata', '', 'ESPORTA',
+                'Il file conterrà password, PIN e altri segreti leggibili. Chiunque possieda il file potrà usarli. Scrivi ESPORTA per confermare.'
+            );
+            if (typed !== 'ESPORTA') return;
+            await runExport(true);
         });
         modal.appendChild(createElement('div', {className: 'modal-box'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'table_view'}),
             createElement('h3', {className: 'modal-title', textContent: 'Esporta dati per Excel'}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: 'Il file viene creato sul dispositivo con i dati reali. Password, PIN, token e chiavi restano mascherati. Il file non viene caricato online e i dati dell’app non vengono modificati.'
+                textContent: 'Scegli una copia protetta con i segreti mascherati oppure una copia completa e non cifrata. Il file resta sul dispositivo e non modifica i dati dell’app.'
             }),
-            createElement('div', {className: 'modal-actions'}, [cancelButton, startButton])
+            createElement('div', {className: 'modal-actions'}, [cancelButton, protectedButton, fullButton])
         ]));
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('active'), 10);

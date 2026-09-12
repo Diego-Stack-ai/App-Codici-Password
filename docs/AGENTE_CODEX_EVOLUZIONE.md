@@ -1,6 +1,6 @@
 # Evoluzione Agente Codex — audit e roadmap locale
 
-> Audit eseguito il 10/09/2026 sulla v1.2.90. Questo documento approva l'architettura progressiva; non autorizza ancora il download di modelli, API esterne o azioni automatiche sui dati.
+> Audit eseguito il 10/09/2026 e verificato nuovamente il 12/09/2026 sulla v1.2.99. Questo documento approva l'architettura progressiva; non autorizza ancora il download di modelli, API esterne o azioni automatiche sui dati.
 
 ## Decisione
 
@@ -18,14 +18,14 @@ Il livello base deve continuare a funzionare senza API, senza PC del proprietari
 
 | Componente | Responsabilità | Dimensione | gzip indicativo |
 |---|---|---:|---:|
-| `assistant-controller.js` | apertura, sblocco Vault, caricamento dati e ciclo di vita | 3.383 B | 1.255 B |
+| `assistant-controller.js` | apertura, sblocco Vault, caricamento dati e ciclo di vita | 3.441 B | 1.245 B |
 | `assistant-ui.js` | dialogo, testo/voce, risultati, mostra/copia credenziali | 12.119 B | 3.336 B |
 | `conversation-engine.js` | token, sinonimi, fuzzy match, ordinali e apertura | 5.615 B | 1.998 B |
 | `vault-data-loader.js` | profilo, documenti, Account, aziende e Scadenze | 4.781 B | 1.659 B |
 | `search-normalizer.js` | normalizzazione lessicale | 211 B | 175 B |
 | `vault-assistant.css` | interfaccia responsive chiara/scura | 9.009 B | 2.435 B |
 
-Il codice funzionale dell'Agente pesa circa 35 KB non compressi e 10,9 KB gzip, esclusi Firebase e i dati. È caricato su richiesta soltanto se la funzione è attiva. La shell offline include già questi file.
+I cinque moduli JavaScript funzionali pesano circa 26 KB non compressi e 8,4 KB gzip; includendo lo stile dedicato il pacchetto resta nell'ordine di poche decine di KB. È caricato su richiesta soltanto se la funzione è attiva. La shell offline include già questi file.
 
 ## Flusso ricostruito
 
@@ -142,6 +142,8 @@ Requisiti del laboratorio isolato:
 - fallback immediato ad A1 in assenza di capacità o dopo errore.
 
 Safari 26 ha introdotto WebGPU, ma il supporto dell'API non garantisce che ogni iPhone abbia memoria e prestazioni sufficienti. La PWA deve quindi eseguire un benchmark fisico prima di offrire A3.
+
+La Prompt API integrata di Chrome non è una base multipiattaforma: la documentazione corrente esclude ancora Android e iOS dalle API che usano il modello linguistico integrato. Può diventare un'accelerazione opzionale su desktop compatibili, mai il motore obbligatorio dell'app.
 
 ### A4 — remoto opzionale futuro
 

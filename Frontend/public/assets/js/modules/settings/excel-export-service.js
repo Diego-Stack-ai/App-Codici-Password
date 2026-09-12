@@ -36,16 +36,16 @@ function displayValue(value) {
     return String(value);
 }
 
-async function openValue(value, fieldPath, vaultKeyMaterial) {
-    if (SENSITIVE_KEY.test(fieldPath)) return value ? MASK : '';
+async function openValue(value, fieldPath, vaultKeyMaterial, includeSecrets) {
+    if (SENSITIVE_KEY.test(fieldPath) && !includeSecrets) return value ? MASK : '';
     if (Array.isArray(value)) {
-        const opened = await Promise.all(value.map((item, index) => openValue(item, `${fieldPath}.${index}`, vaultKeyMaterial)));
+        const opened = await Promise.all(value.map((item, index) => openValue(item, `${fieldPath}.${index}`, vaultKeyMaterial, includeSecrets)));
         return opened;
     }
     if (value && typeof value === 'object') {
         if (value.$type) return value;
         const entries = await Promise.all(Object.entries(value).map(async ([key, child]) => [
-            key, await openValue(child, `${fieldPath}.${key}`, vaultKeyMaterial)
+            key, await openValue(child, `${fieldPath}.${key}`, vaultKeyMaterial, includeSecrets)
         ]));
         return Object.fromEntries(entries);
     }
@@ -68,8 +68,11 @@ function flatten(value, prefix = '', rows = []) {
     return rows;
 }
 
-function cell(value, style = 'Body') {
-    return `<Cell ss:StyleID="${style}"><Data ss:Type="String">${xml(value)}</Data></Cell>`;
+function cell(input, style = 'Body') {
+    const value = input && typeof input === 'object' && 'value' in input ? input.value : input;
+    const href = input && typeof input === 'object' && input.href ? ` ss:HRef="${xml(input.href)}"` : '';
+    const effectiveStyle = href ? 'Link' : style;
+    return `<Cell ss:StyleID="${effectiveStyle}"${href}><Data ss:Type="String">${xml(value)}</Data></Cell>`;
 }
 
 function row(values, style = 'Body') {
@@ -86,12 +89,12 @@ function accountTitle(record) {
     return data.nomeAccount || data.nome || data.denominazione || data.ragioneSociale || 'Senza nome';
 }
 
-export async function buildExcelXml(uid) {
+export async function buildExcelXml(uid, {includeSecrets = false} = {}) {
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
     if (!vaultKeyMaterial) throw new Error('VAULT_LOCKED');
     const {records} = await collectOwnerBackup(uid);
     const opened = await Promise.all(records.map(async record => ({
-        ...record, data: await openValue(record.data, record.scope, vaultKeyMaterial)
+        ...record, data: await openValue(record.data, record.scope, vaultKeyMaterial, includeSecrets)
     })));
 
     const accountRecords = opened.filter(record => record.scope === 'private-account' || record.scope === 'company-account');
@@ -101,13 +104,17 @@ export async function buildExcelXml(uid) {
     opened.forEach(record => summaryCounts.set(record.scope, (summaryCounts.get(record.scope) || 0) + 1));
     const summaryRows = [
         ['Esportazione', new Date().toLocaleString('it-IT')],
-        ['Protezione', 'Password, PIN, token e segreti mascherati'],
+        ['Protezione', includeSecrets ? 'ESPORTAZIONE COMPLETA: contiene segreti in chiaro' : 'Password, PIN, token e segreti mascherati'],
         ['', ''],
         ['Categoria', 'Elementi'],
         ...[...summaryCounts.entries()].map(([scope, count]) => [SCOPE_LABELS[scope] || scope, String(count)]),
         ['', ''],
-        ['Account', 'Contesto'],
-        ...accountRecords.map(record => [accountTitle(record), record.companyId ? (companyNames.get(record.companyId) || 'Azienda') : 'Privato'])
+        ['Account', 'Contesto', 'Apri'],
+        ...accountRecords.map((record, index) => [
+            accountTitle(record),
+            record.companyId ? (companyNames.get(record.companyId) || 'Azienda') : 'Privato',
+            {value: 'Vai alla riga Account', href: `#Account!R${index + 2}C1`}
+        ])
     ];
 
     const accountRows = accountRecords.map(record => {
@@ -133,7 +140,7 @@ export async function buildExcelXml(uid) {
     });
 
     const sheets = [
-        worksheet('Consultazione', ['Voce', 'Valore'], summaryRows, [190, 330]),
+        worksheet('Consultazione', ['Voce', 'Valore', 'Collegamento'], summaryRows, [190, 330, 150]),
         worksheet('Account', ['ID', 'ID azienda', 'Nome', 'Username', 'Codice account', 'Password', 'Sito', 'Visibilità'], accountRows, [150, 130, 210, 190, 180, 90, 220, 100]),
         worksheet('Campi account', ['ID account', 'ID azienda', 'Account', 'Campo', 'Valore'], detailRows, [150, 130, 210, 210, 360])
     ];
@@ -141,16 +148,17 @@ export async function buildExcelXml(uid) {
         sheets.push(worksheet(name, ['ID record', 'ID azienda', 'ID account', 'Campo', 'Valore'], rows, [150, 130, 150, 220, 360]));
     }
 
-    const workbook = `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10"/></Style><Style ss:ID="Body"><Alignment ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style><Style ss:ID="Header"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#16324F" ss:Pattern="Solid"/></Style></Styles>${sheets.join('')}</Workbook>`;
+    const workbook = `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10"/></Style><Style ss:ID="Body"><Alignment ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style><Style ss:ID="Link"><Alignment ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10" ss:Color="#0563C1" ss:Underline="Single"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style><Style ss:ID="Header"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Aptos" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#16324F" ss:Pattern="Solid"/></Style></Styles>${sheets.join('')}</Workbook>`;
     return {workbook, recordCount: records.length, accountCount: accountRecords.length};
 }
 
-export async function exportOwnerExcel(uid) {
-    const result = await buildExcelXml(uid);
+export async function exportOwnerExcel(uid, options = {}) {
+    const result = await buildExcelXml(uid, options);
     const url = URL.createObjectURL(new Blob([result.workbook], {type: 'application/vnd.ms-excel;charset=utf-8'}));
     const link = document.createElement('a');
     link.href = url;
-    link.download = `codici-password-esportazione-${new Date().toISOString().slice(0, 10)}.xml`;
+    const suffix = options.includeSecrets ? 'completa' : 'protetta';
+    link.download = `codici-password-esportazione-${suffix}-${new Date().toISOString().slice(0, 10)}.xml`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     return result;
