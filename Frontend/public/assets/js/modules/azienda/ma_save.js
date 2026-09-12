@@ -7,7 +7,7 @@
  */
 
 import { state } from './ma_state.js';
-import { db, storage } from '../../firebase-config.js?v=1.2.111';
+import { db, storage } from '../../firebase-config.js?v=1.2.112';
 import { doc, updateDoc, deleteDoc, serverTimestamp, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
@@ -178,13 +178,13 @@ export async function saveAzienda() {
                 transaction.update(ref, data);
             });
             showToast(t('success_save') || "Azienda salvata con successo!", "success");
-            setTimeout(() => window.location.replace(`dati_azienda.html?id=${state.currentAziendaId}`), 1000);
+            window.location.replace(`dati_azienda.html?id=${state.currentAziendaId}&afterWrite=1`);
         } else {
             const { collection, addDoc } = await import("/assets/js/vendor/firebase-runtime.js");
             const colRef = collection(db, "users", state.currentUid, "aziende");
             const newDoc = await addDoc(colRef, data);
             showToast(t('success_save') || "Azienda creata con successo!", "success");
-            setTimeout(() => window.location.replace(`dati_azienda.html?id=${newDoc.id}`), 1000);
+            window.location.replace(`dati_azienda.html?id=${newDoc.id}&afterWrite=1`);
         }
     } catch (e) {
         logError("Save", e);
