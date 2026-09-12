@@ -1,4 +1,4 @@
-import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.109';
+import { auth, functions, enableAppCheck } from '../../firebase-config.js?v=1.2.110';
 import {
     multiFactor,
     TotpMultiFactorGenerator

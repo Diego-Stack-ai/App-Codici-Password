@@ -7,7 +7,7 @@ import { decryptRequiredValue } from '../core/crypto-utils.js';
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.109';
+import { auth, db } from '../../firebase-config.js?v=1.2.110';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -208,8 +208,11 @@ function populateFields(data) {
     }
 
     set('ragione-sociale', data.ragioneSociale);
+    set('company-name-view', data.ragioneSociale);
+    set('company-type-view', data.formaGiuridica);
     set('forma-giuridica', data.formaGiuridica);
-    set('referente-nome', `${data.referenteNome || ''} ${data.referenteCognome || ''}`.trim());
+    set('referente-nome', data.referenteNome);
+    set('referente-cognome', data.referenteCognome);
     set('referente-ruolo', data.referenteTitolo);
     set('referente-cellulare', data.referenteCellulare);
 
@@ -249,43 +252,32 @@ function setupLocations(data) {
     ];
     if (data.altreSedi && Array.isArray(data.altreSedi)) {
         data.altreSedi.forEach(s => {
-            currentLocations.push({ tipo: s.tipo.replace('Sede ', ''), icon: 'domain', data: s });
+            currentLocations.push({ tipo: (s.tipo || 'Aziendale').replace('Sede ', ''), icon: 'domain', data: s });
         });
     }
 
-    const tabs = document.getElementById('locations-tabs-container');
-    if (!tabs) return;
-
-    const btns = currentLocations.map((l, i) => createElement('button', {
-        className: `location-tab-btn ${i === 0 ? 'active' : ''}`,
-        onclick: () => switchLocation(i)
-    }, [
-        createElement('span', { className: 'material-symbols-outlined', textContent: l.icon }),
-        createElement('span', { textContent: l.tipo })
-    ]));
-
-    setChildren(tabs, btns);
-    switchLocation(0);
-}
-
-function switchLocation(index) {
-    const loc = currentLocations[index];
-    const d = loc.data;
-
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
-    const fullAddr = `${d.indirizzo || ''} ${d.civico || ''}`.trim();
-    const cityFull = `${d.cap || ''} ${d.citta || ''} ${d.prov ? '(' + d.prov + ')' : ''}`.trim();
-
-    set('indirizzo-completo', fullAddr || 'Indirizzo non specificato');
-    set('citta-cap-prov', cityFull || '-');
-
-
-    document.querySelectorAll('.location-tab-btn').forEach((btn, i) => {
-        const isActive = i === index;
-        if (isActive) btn.classList.add('active');
-        else btn.classList.remove('active');
-    });
-
+    const list = document.getElementById('company-locations-list');
+    if (!list) return;
+    list.className = 'company-location-list';
+    setChildren(list,currentLocations.map(location=>{
+        const d=location.data;
+        const address=[d.indirizzo,d.civico].filter(Boolean).join(' ');
+        const city=[d.cap,d.citta,d.prov||d.provincia].filter(Boolean).join(' ');
+        return createElement('article',{className:'form-card'},[
+            createElement('div',{className:'profile-contact-header'},[
+                createElement('span',{className:'profile-contact-label',textContent:'Sede '+location.tipo}),
+                createElement('button',{type:'button',className:'profile-contact-mini',title:'Modifica sede','aria-label':'Modifica sede',onclick:()=>{window.location.href=`modifica_azienda.html?id=${encodeURIComponent(currentAziendaId)}`;}},[createElement('span',{className:'material-symbols-outlined',textContent:'edit'})])
+            ]),
+            createElement('div',{className:'data-display-group'},[
+                createElement('span',{className:'view-label',textContent:'Indirizzo'}),
+                createElement('span',{className:'data-value',textContent:address||'Non indicato'})
+            ]),
+            createElement('div',{className:'data-display-group'},[
+                createElement('span',{className:'view-label',textContent:'CAP, città e provincia'}),
+                createElement('span',{className:'data-value',textContent:city||'Non indicati'})
+            ])
+        ]);
+    }));
 }
 
 async function handleLogoAndQR(data) {
@@ -299,6 +291,7 @@ async function handleLogoAndQR(data) {
 
     // Costruisce la vCard e la salva per il lazy zoom
     currentVCard = buildVCard(data);
+    isQRZoomRendered = false;
 
     // Render Preview leggero (88x88 → box 100px con padding 6px) — non blocca il load
     const qrCont = document.getElementById('qrcode-container');

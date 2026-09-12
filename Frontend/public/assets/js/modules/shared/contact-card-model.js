@@ -1,6 +1,35 @@
 const MAX_CARD_BYTES = 12000;
 const supported = /^(?:FN|N|TEL(?:;TYPE=(?:CELL|HOME|WORK))?|EMAIL(?:;TYPE=INTERNET)?|ADR|BDAY|X-CF|X-BIRTHPLACE|NOTE|URL|PHOTO;VALUE=URI):/;
 
+const unescapeText = value => value.replace(/\\([nN,;\\])/g, (_, c) => /n/i.test(c) ? '\n' : c);
+// Split structured vCard values before unescaping their literal semicolons.
+function components(value) {
+    const parts = [''];
+    for (let i = 0; i < value.length; i++) {
+        if (value[i] === '\\' && i + 1 < value.length) parts[parts.length - 1] += value[i] + value[++i];
+        else if (value[i] === ';') parts.push('');
+        else parts[parts.length - 1] += value[i];
+    }
+    return parts.map(unescapeText);
+}
+
+export function contactDetails(card) {
+    return card.lines.flatMap(line => {
+        const colon = line.indexOf(':');
+        const field = line.slice(0, colon).split(';')[0];
+        const raw = line.slice(colon + 1);
+        if (field === 'FN') return [];
+        if (field === 'N') {
+            const parts = components(raw);
+            return [['Nome', parts[1]], ['Cognome', parts[0]]].filter(([, value]) => value).map(([label, value]) => ({label, value}));
+        }
+        const labels = {TEL:'Telefono', EMAIL:'Email', ADR:'Indirizzo', BDAY:'Data di nascita', 'X-CF':'Codice fiscale', 'X-BIRTHPLACE':'Luogo di nascita', NOTE:'Nota', URL:'Sito web'};
+        if (!labels[field]) return [];
+        const value = field === 'ADR' ? components(raw).filter(Boolean).join(', ') : unescapeText(raw);
+        return value ? [{label: labels[field], value}] : [];
+    });
+}
+
 export function validatePhotoURL(value) {
     const url = new URL(value);
     const objectPath = decodeURIComponent(url.pathname);

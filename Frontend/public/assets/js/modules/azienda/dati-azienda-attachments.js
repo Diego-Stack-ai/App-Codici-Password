@@ -2,7 +2,7 @@
  * Rendering e apertura sicura degli allegati incorporati nell'anagrafica azienda.
  */
 
-import { storage } from '../../firebase-config.js?v=1.2.109';
+import { storage } from '../../firebase-config.js?v=1.2.110';
 import { getBytes, ref } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -15,7 +15,10 @@ export function renderCompanyEmbeddedAttachments(attachments) {
     if (!container) return;
     clearElement(container);
 
-    if (!Array.isArray(attachments) || attachments.length === 0) return;
+    if (!Array.isArray(attachments) || attachments.length === 0) {
+        setChildren(container, createElement('p',{className:'form-card no-attachments-text',textContent:'Nessun documento allegato. Usa Modifica documenti per aggiungerlo.'}));
+        return;
+    }
     setChildren(container, attachments.map(attachment => createElement('button', {
         type: 'button',
         onclick: () => openCompanyAttachment(attachment),

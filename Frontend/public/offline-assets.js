@@ -35,6 +35,7 @@ self.__OFFLINE_ASSETS = [
   "assets/css/moduli.css",
   "assets/css/privacy.css",
   "assets/css/profile-contacts.css",
+  "assets/css/profile-layout.css",
   "assets/css/profilo_privato.css",
   "assets/css/registrati.css",
   "assets/css/regole_scadenze.css",
