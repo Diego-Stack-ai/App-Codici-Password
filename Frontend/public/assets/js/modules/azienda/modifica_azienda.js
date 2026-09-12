@@ -14,13 +14,13 @@
  * modifica_azienda.html carica solo main.js → INVARIATO
  */
 
-import { db } from '../../firebase-config.js?v=1.2.110';
+import { db } from '../../firebase-config.js?v=1.2.111';
 import { doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import {getCompany} from '../data/vault-repository.js';
+import {getCompany, getCompanyConfirmed} from '../data/vault-repository.js';
 
 import { state } from './ma_state.js';
 import { populateForm } from './ma_cards.js';
@@ -84,7 +84,11 @@ function initProtocolUI() {
 
 async function loadAzienda() {
     try {
-        const company = await getCompany(state.currentUid, state.currentAziendaId);
+        // Editing needs a current conflict baseline; online cache-first reads can
+        // otherwise reject the user's first save against an already newer server.
+        const company = await (navigator.onLine
+            ? getCompanyConfirmed(state.currentUid, state.currentAziendaId)
+            : getCompany(state.currentUid, state.currentAziendaId));
         if (!company) {
             showToast(t('error_not_found'), "error");
             return;
