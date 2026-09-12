@@ -318,6 +318,56 @@ test('original private-account handler persists prepared ciphertext in the demo 
         assert.equal(after.revision, before.revision); assert.equal(after.password, before.password);
     });
 
+    await t.test('authoritative current scope rejects a reduced private payload without changing any document or creating receipts', async () => {
+        const scopes = {
+            shared: {sharedWithUids: [b.uid], sharedWith: {[b.uid]: {role: 'viewer'}}},
+            banking: {isBanking: true, banking: [{iban: 'SYNTHETIC-BANK-REFERENCE'}]},
+            profile: {linkedProfileFields: [{id: 'synthetic-phone', type: 'phone'}]},
+            archive: {isArchived: true, archivedAt: '2026-09-12T00:00:00.000Z'}
+        };
+        for (const [scope, fields] of Object.entries(scopes)) {
+            const recordId = `scope-${scope}`, operationId = `scope-reject-${scope}`;
+            const reference = getAdminFirestore().doc(`users/${a.uid}/accounts/${recordId}`);
+            await reference.set({...operation.record, ownerId: a.uid, revision: 1, ...fields});
+            const before = await reference.get();
+            // The incoming payload deliberately omits the server's scope markers.
+            const request = {...operation, recordId, operationId, expectedRevision: 1};
+            await assert.rejects(run(a, request), error => error.code === 'failed-precondition' &&
+                error.details?.reason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+            const after = await reference.get();
+            assert.deepEqual(after.data(), before.data());
+            assert.equal(after.updateTime.isEqual(before.updateTime), true);
+            assert.equal((await getAdminFirestore().doc(`mutationResults/${a.uid}/operations/${operationId}`).get()).exists, false);
+            assert.equal((await getAdminFirestore().doc(`users/${a.uid}/operationResults/${operationId}`).get()).exists, false);
+        }
+    });
+
+    await t.test('an isolated current record applies once and its trusted retry survives a later scope change', async () => {
+        const recordId = 'scope-isolated', operationId = 'scope-isolated-apply';
+        const reference = getAdminFirestore().doc(`users/${a.uid}/accounts/${recordId}`);
+        await reference.set({...operation.record, ownerId: a.uid, revision: 1});
+        const request = {...operation, recordId, operationId, expectedRevision: 1};
+        const applied = await run(a, request);
+        assert.equal(applied.status, 'applied'); assert.equal(applied.revision, 2); assert.equal(applied.duplicate, false);
+        assert.equal((await reference.get()).data().password, request.record.password);
+        const receiptRef = getAdminFirestore().doc(`mutationResults/${a.uid}/operations/${operationId}`);
+        const receiptBefore = await receiptRef.get();
+        assert.equal(receiptBefore.data().recordId, recordId);
+        // A subsequent server-authorized operation changes scope and revision.
+        await reference.update({sharedWithUids: [b.uid], isArchived: true, revision: 3});
+        const before = await reference.get();
+        const retried = await run(a, request);
+        assert.equal(retried.status, 'applied'); assert.equal(retried.revision, 2); assert.equal(retried.duplicate, true);
+        const after = await reference.get(), receiptAfter = await receiptRef.get();
+        assert.deepEqual(after.data(), before.data());
+        assert.equal(after.updateTime.isEqual(before.updateTime), true);
+        assert.deepEqual(receiptAfter.data(), receiptBefore.data());
+        assert.equal(receiptAfter.updateTime.isEqual(receiptBefore.updateTime), true);
+        await assert.rejects(run(a, {...request, operationId: 'scope-new-write', expectedRevision: 3}),
+            error => error.code === 'failed-precondition' && error.details?.reason === 'PRIVATE_ACCOUNT_SCOPE_UNSUPPORTED');
+        assert.equal((await getAdminFirestore().doc(`mutationResults/${a.uid}/operations/scope-new-write`).get()).exists, false);
+    });
+
     await t.test('malformed existing revisions are rejected without record changes or receipts in both mutation domains', async () => {
         for (const [index, revision] of [null, '0', -1, 0.5, Number.MAX_SAFE_INTEGER + 1].entries()) {
             for (const domain of ['private', 'offline']) {
