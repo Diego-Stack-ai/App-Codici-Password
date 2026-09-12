@@ -43,6 +43,68 @@ function createCopyBtn(text) {
     ]);
 }
 
+function createLinkedAccountPassword(email) {
+    const masked = '••••••••';
+    const value = createElement('span', { className: 'data-value no-transform profile-linked-password-value', textContent: masked });
+    const status = createElement('span', { className: 'data-value-sub', role: 'status', 'aria-live': 'polite' });
+    const icon = createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' });
+    let revealed = false;
+    let busy = false;
+    const hide = () => {
+        revealed = false;
+        value.textContent = masked;
+        icon.textContent = 'visibility';
+        toggle.setAttribute('aria-label', 'Mostra password Account');
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.title = 'Mostra password Account';
+    };
+    const run = async copyValue => {
+        if (busy) return;
+        if (!copyValue && revealed) { hide(); return; }
+        busy = true;
+        toggle.disabled = copy.disabled = true;
+        status.textContent = 'Caricamento…';
+        try {
+            const password = await _callbacks.readLinkedEmailAccountPassword(email);
+            if (!row.isConnected) return;
+            if (!password) { hide(); status.textContent = 'Nessuna password nell’Account collegato.'; return; }
+            if (copyValue) {
+                await navigator.clipboard.writeText(password);
+                status.textContent = 'Password copiata.';
+            } else {
+                value.textContent = password;
+                revealed = true;
+                icon.textContent = 'visibility_off';
+                toggle.setAttribute('aria-label', 'Nascondi password Account');
+                toggle.setAttribute('aria-pressed', 'true');
+                toggle.title = 'Nascondi password Account';
+                status.textContent = '';
+            }
+        } catch {
+            hide();
+            status.textContent = 'Operazione non riuscita. Verifica il Vault e la connessione, poi riprova.';
+        } finally {
+            busy = false;
+            toggle.disabled = copy.disabled = false;
+        }
+    };
+    const toggle = createElement('button', {
+        className: 'btn-action-mini', type: 'button', title: 'Mostra password Account',
+        'aria-label': 'Mostra password Account', 'aria-pressed': 'false',
+        onclick: event => { event.stopPropagation(); return run(false); }
+    }, [icon]);
+    const copy = createElement('button', {
+        className: 'btn-action-mini', type: 'button', title: 'Copia password Account',
+        'aria-label': 'Copia password Account',
+        onclick: event => { event.stopPropagation(); return run(true); }
+    }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })]);
+    const row = createElement('div', { className: 'card-field-group' }, [
+        createElement('span', { className: 'data-label', textContent: 'Password Account collegato' }),
+        createElement('div', { className: 'field-value-row' }, [value, toggle, copy]), status
+    ]);
+    return row;
+}
+
 function createLegacyPasswordRecovery(password) {
     const maskedValue = '••••••••';
     const value = createElement('span', {
@@ -245,12 +307,16 @@ export function renderEmailsView() {
                 createElement('span', { className: 'data-value truncate', textContent: e.address || '-' }),
                 createCopyBtn(e.address)
             ]),
+            e.linkedAccountId ? createLinkedAccountPassword(e) : null,
             hasLegacyEmailPassword(e)
                 ? createLegacyPasswordRecovery(e.password)
                 : createElement('span', { className: 'data-value-sub', textContent: e.linkedAccountId ? 'Credenziali gestite nell’Account collegato' : 'Nessuna credenziale nel Profilo' }),
             e.note ? createElement('div', {
-                className: 'note-display-lite profile-contact-note'
-            }, [createElement('span', { textContent: e.note })]) : null,
+                className: 'profile-contact-note'
+            }, [
+                createElement('span', { className: 'profile-contact-note-label', textContent: 'Nota' }),
+                createElement('span', { className: 'profile-contact-note-text', textContent: e.note })
+            ]) : null,
             createElement('button', {
                 className: 'btn-upload-trigger',
                 textContent: e.linkedAccountId

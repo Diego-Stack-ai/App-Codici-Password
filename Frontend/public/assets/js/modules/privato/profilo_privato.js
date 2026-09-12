@@ -20,7 +20,7 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.101';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.102';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -40,11 +40,11 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.101';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.102';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
-import { connectEmailAccount, connectPhoneAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
+import { readLinkedEmailAccountPassword, connectEmailAccount, connectPhoneAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -129,7 +129,7 @@ export async function initProfiloPrivato(user) {
 
     initPhonesEmailsModule(
         () => ({ contactPhones, contactEmails, profileLabels, qrCodeInclusions }),
-        { syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, connectPhoneAccount, openLinkedAccount, updateProfileLabelOptions }
+        { readLinkedEmailAccountPassword, syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, connectPhoneAccount, openLinkedAccount, updateProfileLabelOptions }
     );
 
     initAddressesDocsModule(

@@ -238,3 +238,52 @@ test('decifratura reale: confronto esatto e rifiuto di un ciphertext illeggibile
     assert.equal(model.isProfileEmailPasswordTransferred(decoded, 'FIXTURE password con spazi'), false);
     await assert.rejects(decodeProfileContactValue(value, crypto.generateVaultKey()));
 });
+
+for (const company of [false, true]) {
+    test('lettura password collegata ' + (company ? 'aziendale' : 'personale') + ' dal solo Account', async () => {
+        const calls = [];
+        const controller = await loadController('privato/profilo-links.js', {
+            auth: {currentUser: {uid: 'owner'}}, ensureVaultKeyMaterial: async () => 'vault',
+            getPrivateAccountConfirmed: async (...args) => {calls.push(args); return {password: 'cipher'};},
+            getCompanyAccountConfirmed: async (...args) => {calls.push(args); return {password: 'cipher'};},
+            decryptRequiredValue: async (value, key) => {assert.equal(value, 'cipher'); assert.equal(key, 'vault'); return 'account-password';}
+        }, ['readLinkedEmailAccountPassword']);
+        const email = {id: 'e', linkedAccountId: 'a', ...(company ? {linkedAccountCompanyId: 'c'} : {})};
+        assert.equal(await controller.readLinkedEmailAccountPassword(email), 'account-password');
+        assert.deepEqual(calls, [company ? ['owner', 'c', 'a'] : ['owner', 'a']]);
+        assert.equal(Object.hasOwn(email, 'password'), false);
+    });
+}
+
+test('password Account: mascherata all’avvio, copia senza rivelare, mostra e nascondi, errore senza segreti', async () => {
+    const createElement = (tag, props = {}, children = []) => ({tag, ...props, children: children.filter(Boolean), isConnected: true, setAttribute(k,v) {this[k]=v;}});
+    let reads = 0, fail = false;
+    const copied = [];
+    const controller = await loadController('privato/profilo-phones-emails.js', {
+        createElement, navigator: {clipboard: {writeText: async value => copied.push(value)}}
+    }, ['initPhonesEmailsModule', 'createLinkedAccountPassword']);
+    controller.initPhonesEmailsModule(() => ({}), {readLinkedEmailAccountPassword: async () => {reads++; if(fail) throw Error('unreadable'); return 'SECRET-FIXTURE';}});
+    const row = controller.createLinkedAccountPassword({linkedAccountId:'a'});
+    const [value,toggle,copy] = row.children[1].children;
+    const event = {stopPropagation(){}};
+    assert.equal(value.textContent, '••••••••'); assert.equal(reads, 0);
+    await copy.onclick(event); assert.deepEqual(copied, ['SECRET-FIXTURE']); assert.equal(value.textContent, '••••••••');
+    await toggle.onclick(event); assert.equal(value.textContent, 'SECRET-FIXTURE');
+    await toggle.onclick(event); assert.equal(value.textContent, '••••••••'); assert.equal(reads, 2);
+    fail = true; await toggle.onclick(event); assert.equal(value.textContent, '••••••••');
+    assert.match(row.children[2].textContent, /non riuscita/);
+    assert.equal(toggle.disabled, false);
+});
+
+test('lettura password: account mancante e cambio sessione non espongono il dato', async () => {
+    const auth = {currentUser:{uid:'owner'}};
+    let missing = true;
+    const controller = await loadController('privato/profilo-links.js', {
+        auth, ensureVaultKeyMaterial: async () => 'vault',
+        getPrivateAccountConfirmed: async () => missing ? null : {password:'cipher'},
+        decryptRequiredValue: async () => {auth.currentUser = {uid:'other'}; return 'secret';}
+    }, ['readLinkedEmailAccountPassword']);
+    await assert.rejects(controller.readLinkedEmailAccountPassword({linkedAccountId:'a'}), /non disponibile/);
+    missing = false;
+    await assert.rejects(controller.readLinkedEmailAccountPassword({linkedAccountId:'a'}), /Sessione cambiata/);
+});

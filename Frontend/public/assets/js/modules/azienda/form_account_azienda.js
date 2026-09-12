@@ -5,7 +5,7 @@
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.101';
+import { db } from '../../firebase-config.js?v=1.2.102';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -18,7 +18,7 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.101';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.102';
 
 // --- STATE ---
 let currentUid = null;
