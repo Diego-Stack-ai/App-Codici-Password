@@ -65,13 +65,14 @@ export function consumePrivateAccountHandoff(uid, storage = sessionStorage) {
     }
 }
 
-export async function createPrivateAccountPilotClient({uid, vaultKeyMaterial, onState}) {
+export async function createPrivateAccountPilotClient({uid, vaultKeyMaterial, onState, isActive}) {
     return createOfflineMutationClient({
         uid,
         vaultKeyMaterial,
         enabled: true,
         callableName: 'applyPrivateAccountMutation',
-        onState
+        onState,
+        isActive
     });
 }
 
@@ -97,6 +98,15 @@ export async function discardPrivateAccountPilotOperation(options) {
     const client = await createPrivateAccountPilotClient(options);
     try {
         await client.discard(options.operationId);
+    } finally {
+        client.close();
+    }
+}
+
+export async function replacePrivateAccountPilotOperation(options) {
+    const client = await createPrivateAccountPilotClient(options);
+    try {
+        return await client.replace(options.recoveryOperation, buildPrivateAccountOperation(options));
     } finally {
         client.close();
     }

@@ -51,3 +51,38 @@ test('con flag esplicita accoda, notifica e inoltra una sola operazione dello st
   assert.equal(deps.queued.length, 0);
   client.close(); assert.equal(deps.closed, 2);
 });
+
+
+test('sostituzione usa lease e CAS, senza eliminazione separata, poi sincronizza',async()=>{
+    const events=[];const old={uid:'owner',operationId:'old',recordId:'record'},next={...old,operationId:'new'};
+    const client=await createOfflineMutationClientCore({uid:'owner',vaultKeyMaterial:'fixture',enabled:true,
+        createQueue:async()=>({replace:async(a,b)=>{assert.equal(a,old);assert.equal(b,next);events.push('replace')},remove:async()=>assert.fail('no discard')}),
+        createSynchronizer:()=>({flush:async()=>{events.push('flush');return {status:'saved'}}}),
+        withLease:async(_uid,task)=>{events.push('lock');const value=await task();events.push('unlock');return{acquired:true,value}},
+        send:async()=>{},createChannel:()=>({notify:()=>events.push('notify')})});
+    assert.equal((await client.replace(old,next)).status,'saved');assert.deepEqual(events,['lock','replace','unlock','notify','flush']);
+});
+
+test('lease occupato, CAS fallito e sessione scaduta non inviano né dichiarano salvato',async()=>{
+    for(const mode of ['busy','cas','session']){
+        let active=true,sends=0,replaces=0;
+        const client=await createOfflineMutationClientCore({uid:'owner',vaultKeyMaterial:'fixture',enabled:true,isActive:()=>active,
+            createQueue:async()=>({replace:async()=>{replaces++;throw Error('CHANGED')}}),createSynchronizer:()=>({flush:async()=>{sends++;return{status:'saved'}}}),
+            withLease:async(_uid,fn)=>mode==='busy'?{acquired:false}:fn(),send:async()=>{}});
+        if(mode==='session')active=false;
+        const a={uid:'owner',operationId:'old'},b={uid:'owner',operationId:'new'};
+        if(mode==='busy')assert.equal((await client.replace(a,b)).status,'recoverable-error');
+        else await assert.rejects(client.replace(a,b),mode==='cas'?/CHANGED/:/SESSION_CHANGED/);
+        assert.equal(sends,0);assert.equal(replaces,mode==='cas'?1:0);
+    }
+});
+
+
+test('close invalida sessione e sostituzioni tardive',async()=>{
+    let called=0,active;
+    const client=await createOfflineMutationClientCore({uid:'owner',vaultKeyMaterial:'fixture',enabled:true,
+        createQueue:async()=>({replace:async()=>called++,close(){}}),createSynchronizer:options=>{active=options.isActive;return{flush:async()=>{}}},
+        withLease:async(_uid,fn)=>fn(),send:async()=>{}});
+    assert.equal(active(),true);client.close();assert.equal(active(),false);
+    await assert.rejects(client.replace({uid:'owner'},{uid:'owner'}),/SESSION_CHANGED/);assert.equal(called,0);
+});

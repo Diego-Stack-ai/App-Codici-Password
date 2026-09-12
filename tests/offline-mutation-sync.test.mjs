@@ -64,3 +64,35 @@ test('un errore di rete è recuperabile e due flush simultanei sono accorpati', 
     release(); const lease = await first;
     assert.equal(lease.value.status, 'recoverable-error'); assert.equal(states.at(-1).state, 'recoverable-error');
 });
+
+
+test('legacy non verificato ferma la coda con la copia recuperabile e senza altre scritture', async () => {
+    const operation = {uid:'owner',operationId:'old',recordId:'account'};
+    for (const code of ['failed-precondition','functions/failed-precondition']) {
+        const states=[],removed=[];let sends=0;
+        const sync=createOfflineMutationSynchronizer({uid:'owner',queue:{list:async()=>[operation,{operationId:'next'}],remove:async id=>removed.push(id),markForReview:async op=>({...op,_queueState:'reconciliation-required'})},
+            send:async()=>{sends++;throw Object.assign(new Error('legacy'),{code,details:{reason:'LEGACY_MUTATION_RESULT_UNVERIFIED'}})},
+            withLease:async(_uid,fn)=>fn(),isOnline:()=>true,onState:state=>states.push(state)});
+        const result=await sync.flush();assert.equal(result.status,'reconciliation-required');assert.equal(result.operation.operationId,operation.operationId);assert.equal(result.operation._queueState,'reconciliation-required');
+        assert.equal(sends,1);assert.deepEqual(removed,[]);assert.equal(states.at(-1).state,'reconciliation-required');
+    }
+});
+
+test('errore diverso e cambio sessione non diventano riconciliazione o successo', async()=>{
+    for(const legacy of [false,true]){
+        let active=true;const removed=[],states=[];
+        const sync=createOfflineMutationSynchronizer({uid:'owner',queue:{list:async()=>[{operationId:'old'}],remove:async id=>removed.push(id)},
+            send:async()=>{if(legacy){active=false;return {status:'applied'}}throw Object.assign(new Error('other'),{code:'functions/failed-precondition',details:{reason:'OTHER'}})},
+            withLease:async(_uid,fn)=>fn(),isOnline:()=>true,isActive:()=>active,onState:state=>states.push(state)});
+        assert.equal((await sync.flush()).status,'recoverable-error');assert.deepEqual(removed,[]);
+        assert.notEqual(states.at(-1).state,'saved');
+    }
+});
+
+
+test('operazione marcata resta sospesa nei flush successivi senza invio automatico',async()=>{
+    const operation={uid:'owner',operationId:'old',_queueState:'reconciliation-required'};let calls=0;
+    const sync=createOfflineMutationSynchronizer({uid:'owner',queue:{list:async()=>[operation],remove:async()=>assert.fail('remove')},send:async()=>{calls++},withLease:async(_uid,fn)=>fn(),isOnline:()=>true});
+    for(let i=0;i<3;i++)assert.equal((await sync.flush()).status,'reconciliation-required');
+    assert.equal(calls,0);
+});

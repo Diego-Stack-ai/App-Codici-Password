@@ -1,3 +1,5 @@
+import {canRecoverPrivateAccount} from './private-account-offline-policy.js';
+import {auth} from '../../firebase-config.js?v=1.2.110';
 import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
@@ -31,6 +33,8 @@ let invitedEmails = [];
 let currentRevision = 0;
 let hasLinkedProfileField = false;
 let accountWidgetController = null;
+let formVersion = 0;
+let recoveryOperation = null;
 
 // Re-render callback per banking-renderer.js
 const rerender = () => renderBankAccounts(bankAccounts, rerender);
@@ -45,7 +49,7 @@ function getPrivateAccountListDestination({refresh = false} = {}) {
     return `account_privati.html?${params.toString()}`;
 }
 
-function showM6ConflictChoice() {
+function showM6ConflictChoice(reconciliation = false) {
     return new Promise(resolve => {
         document.getElementById('m6-conflict-modal')?.remove();
         const modal = createElement('div', {id: 'm6-conflict-modal', className: 'modal-overlay'});
@@ -70,10 +74,10 @@ function showM6ConflictChoice() {
         });
         setChildren(modal, createElement('div', {className: 'modal-box'}, [
             createElement('span', {className: 'material-symbols-outlined modal-icon icon-accent-blue', textContent: 'sync_problem'}),
-            createElement('h3', {className: 'modal-title', textContent: 'Conflitto di sincronizzazione'}),
+            createElement('h3', {className: 'modal-title', textContent: reconciliation ? 'Salvataggio precedente da verificare' : 'Conflitto di sincronizzazione'}),
             createElement('p', {
                 className: 'modal-text',
-                textContent: 'Questo account è stato modificato altrove. Mantieni il dato più recente del server oppure recupera la modifica offline nel modulo per controllarla prima di salvarla.'
+                textContent: reconciliation ? 'Non possiamo confermare l’esito di una vecchia modifica. La copia cifrata resta conservata: scegli il server oppure recuperala nel modulo per controllarla e salvarla di nuovo.' : 'Questo account è stato modificato altrove. Mantieni il dato più recente del server oppure recupera la modifica offline nel modulo per controllarla prima di salvarla.'
             }),
             createElement('div', {className: 'modal-actions'}, [decideLater, recoverLocal, keepServer])
         ]));
@@ -116,13 +120,14 @@ function showM6ForeignConflictChoice(accountName) {
     });
 }
 
-async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision) {
+async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision, active) {
+    if (!Number.isInteger(serverRevision) || serverRevision < 0) throw new Error('RECOVERY_REVISION_INVALID');
     const record = operation.record || {};
     const decrypted = await Promise.all([
-        decrypt(record.username || '', vaultKeyMaterial),
-        decrypt(record.account || '', vaultKeyMaterial),
-        decrypt(record.password || '', vaultKeyMaterial),
-        decrypt(record.note || '', vaultKeyMaterial)
+        decodeProfileContactValue(record.username || '', vaultKeyMaterial),
+        decodeProfileContactValue(record.account || '', vaultKeyMaterial),
+        decodeProfileContactValue(record.password || '', vaultKeyMaterial),
+        decodeProfileContactValue(record.note || '', vaultKeyMaterial)
     ]);
     const values = {
         'account-name': record.nomeAccount || '',
@@ -135,11 +140,13 @@ async function restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevisio
         'ref-phone': record.referenteTelefono || '',
         'ref-mobile': record.referenteCellulare || ''
     };
+    if (!active()) throw new Error('RECOVERY_SESSION_CHANGED');
     for (const [id, value] of Object.entries(values)) {
         const input = document.getElementById(id);
         if (input) input.value = value;
     }
-    currentRevision = Number(serverRevision || currentRevision);
+    currentRevision = serverRevision;
+    recoveryOperation = structuredClone(operation);
 }
 
 // --- INITIALIZATION ---
@@ -153,6 +160,10 @@ export async function initFormAccountPrivato(user) {
     
     if (!user) return;
     currentUid = user.uid;
+    const version = ++formVersion;
+    const active = () => version === formVersion && auth.currentUser?.uid === user.uid;
+    recoveryOperation = null;
+    window.addEventListener('pagehide', () => { if (version === formVersion) formVersion++; }, {once:true});
 
     const params = new URLSearchParams(window.location.search);
     currentDocId = params.get('id');
@@ -214,7 +225,9 @@ export async function initFormAccountPrivato(user) {
                     isEditing,
                     baseRevision: currentRevision,
                     profileContactLinkDraft,
-                    hasLinkedProfileField
+                    hasLinkedProfileField,
+                    recoveryOperation,
+                    isActive: active
                 });
             }
         }, [
@@ -301,34 +314,41 @@ export async function initFormAccountPrivato(user) {
             const result = await pilot.flushPrivateAccountPilot({
                 uid: currentUid,
                 vaultKeyMaterial,
+                isActive: active,
                 onState: state => { lastState = state; }
             });
             const outcome = result?.value || result;
-            if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
+            if (!active()) return;
+            const reconciliation = lastState?.state === 'reconciliation-required' || outcome?.status === 'reconciliation-required';
+            if (reconciliation || lastState?.state === 'conflict' || outcome?.status === 'conflict') {
                 const operation = outcome?.operation || lastState?.operation;
-                const serverRevision = outcome?.result?.currentRevision || lastState?.result?.currentRevision;
-                showToast('Conflitto M6: nessuna modifica è stata sovrascritta.', 'warning');
-                if (operation?.operationId && operation.recordId === currentDocId) {
-                    const choice = await showM6ConflictChoice();
-                    if (choice === 'server' || choice === 'local') {
-                        await pilot.discardPrivateAccountPilotOperation({
-                            uid: currentUid,
-                            vaultKeyMaterial,
-                            operationId: operation.operationId
-                        });
-                    }
+                const saveButton = document.getElementById('btn-save-footer');
+                if (saveButton) saveButton.disabled = true;
+                showToast('Una modifica offline richiede una verifica. La copia cifrata è conservata.', 'warning');
+                if (operation?.operationId && operation.uid === user.uid && operation.recordId === currentDocId) {
+                    const choice = await showM6ConflictChoice(reconciliation);
+                    if (!active()) return;
                     if (choice === 'server') {
+                        await pilot.discardPrivateAccountPilotOperation({
+                            uid: user.uid, vaultKeyMaterial, isActive: active, operationId: operation.operationId
+                        });
+                        if (!active()) return;
                         showToast('Versione del server mantenuta.', 'success');
-                        setTimeout(() => window.location.replace(getPrivateAccountListDestination({refresh: true})), 600);
+                        setTimeout(() => { if (active()) window.location.replace(getPrivateAccountListDestination({refresh: true})); }, 600);
                     } else if (choice === 'local') {
-                        await restoreM6ConflictDraft(operation, vaultKeyMaterial, serverRevision);
-                        showToast('Modifica offline recuperata. Controllala e premi Salva per applicarla.', 'warning');
+                        const server = await getPrivateAccountConfirmed(user.uid, operation.recordId);
+                        if (!active()) return;
+                        if (!canRecoverPrivateAccount(server, user.uid) || server.type !== operation.record?.type) {
+                            throw new Error('RECOVERY_ACCOUNT_SCOPE_CHANGED');
+                        }
+                        const revision = server.revision === undefined ? 0 : server.revision;
+                        await restoreM6ConflictDraft(operation, vaultKeyMaterial, revision, active);
+                        if (saveButton) saveButton.disabled = false;
+                        showToast('Modifica recuperata. La copia offline resta conservata finché premi Salva.', 'warning');
                     }
                 } else if (operation?.recordId) {
                     const openAccount = await showM6ForeignConflictChoice(operation.record?.nomeAccount);
-                    if (openAccount) {
-                        window.location.replace(`form_account_privato.html?id=${encodeURIComponent(operation.recordId)}`);
-                    }
+                    if (openAccount && active()) window.location.replace(`form_account_privato.html?id=${encodeURIComponent(operation.recordId)}`);
                 }
             } else if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
                 showToast('Sincronizzazione M6 temporaneamente non disponibile. La modifica resta conservata.', 'warning');

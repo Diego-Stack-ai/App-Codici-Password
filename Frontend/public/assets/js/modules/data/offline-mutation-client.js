@@ -1,5 +1,5 @@
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
-import {functions} from '../../firebase-config.js?v=1.2.110';
+import {auth, functions} from '../../firebase-config.js?v=1.2.110';
 import {createOfflineMutationQueue, createOfflineQueueChannel, withOfflineQueueLease} from './offline-mutation-queue.js';
 import {createOfflineMutationSynchronizer} from './offline-mutation-sync.js';
 import {createOfflineMutationClientCore, OFFLINE_MUTATION_WRITES_ENABLED} from './offline-mutation-client-core.js';
@@ -10,6 +10,7 @@ export function createOfflineMutationClient(options) {
     const callable = httpsCallable(functions, options?.callableName || 'applyOfflineMutation');
     return createOfflineMutationClientCore({
         ...options,
+        isActive: () => auth.currentUser?.uid === options.uid && (!options.isActive || options.isActive()),
         createQueue: createOfflineMutationQueue,
         createSynchronizer: createOfflineMutationSynchronizer,
         withLease: withOfflineQueueLease,

@@ -22,8 +22,11 @@ export async function savePrivateAccount({
     isEditing,
     baseRevision = 0,
     profileContactLinkDraft,
+    recoveryOperation = null,
+    isActive = () => auth.currentUser?.uid === currentUid,
     hasLinkedProfileField = false
 }) {
+    if (!isActive()) return;
     const get = id => document.getElementById(id)?.value.trim() || '';
     const btnSave = document.getElementById('btn-save-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
@@ -161,7 +164,11 @@ export async function savePrivateAccount({
     }
 
     try {
+        if (!isActive()) throw new Error('RECOVERY_SESSION_CHANGED');
         const pilotEligible = offlinePolicy.eligible;
+        if (recoveryOperation && (!pilotEligible || recoveryOperation.uid !== currentUid || recoveryOperation.recordId !== currentDocId)) {
+            throw new Error('RECOVERY_ACCOUNT_SCOPE_CHANGED');
+        }
         if (pilotEligible) {
             const pilotModule = await import('../data/private-account-offline-pilot.js');
             const accountRef = isEditing
@@ -170,7 +177,10 @@ export async function savePrivateAccount({
             const pilotRecord = {...data};
             if (!isEditing) pilotRecord.createdAt = new Date().toISOString();
             let lastState = null;
-            const result = await pilotModule.enqueuePrivateAccountPilot({
+            const submit = recoveryOperation ? pilotModule.replacePrivateAccountPilotOperation : pilotModule.enqueuePrivateAccountPilot;
+            const result = await submit({
+                recoveryOperation,
+                isActive,
                 uid: currentUid,
                 vaultKeyMaterial,
                 recordId: accountRef.id,
@@ -178,10 +188,16 @@ export async function savePrivateAccount({
                 record: pilotRecord,
                 onState: state => { lastState = state; }
             });
+            if (!isActive()) return;
             const outcome = result?.value || result;
+            if (lastState?.state === 'reconciliation-required' || outcome?.status === 'reconciliation-required') {
+                showToast('Vecchia modifica da verificare. Riapri l’Account: la copia cifrata resta conservata.', 'warning');
+                if (btnSave) { btnSave.disabled = true; btnSave.dataset.m6Queued = 'true'; }
+                return;
+            }
             if (lastState?.state === 'conflict' || outcome?.status === 'conflict') {
                 showToast('Conflitto: questo account è stato modificato su un altro dispositivo.', 'warning');
-                if (btnSave) btnSave.disabled = false;
+                if (btnSave) { btnSave.disabled = true; btnSave.dataset.m6Queued = 'true'; }
                 return;
             }
             if (outcome?.status === 'offline') {
@@ -193,7 +209,7 @@ export async function savePrivateAccount({
                 }
                 return;
             }
-            if (lastState?.state === 'recoverable-error' || outcome?.status === 'recoverable-error') {
+            if (lastState?.state === 'recoverable-error' || outcome?.status !== 'saved') {
                 showToast('Invio temporaneamente non disponibile. La modifica cifrata resta conservata sul dispositivo.', 'warning');
                 if (btnSave) {
                     btnSave.disabled = true;
