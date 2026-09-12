@@ -54,3 +54,5 @@ Integrazione delle liste, 12/09/2026: otto record sintetici con nomeAccount, use
 Prova dettaglio base, 12/09/2026: nomeAccount, username e account su copie per la vista; password lazy. Proprietario esplicitamente invalido respinto nel percorso candidato, anche se vuoto; campo assente ammesso. Nessun inventario o bonifica di dati reali. [Audit §23](./AUDIT_VAULT_SESSION_P0.md#23-dettaglio-base-protetto-e-ritorno-alla-lista--12092026).
 
 Fixture locale del dettaglio, 12/09/2026: sei campi cifrati per record (nomeAccount, username, account, password, note, url). URL visualizzato come testo copiabile; nessuna apertura esterna. Questo non certifica né converte eventuali URL in chiaro o alias nei dati produttivi. [Audit §24](./AUDIT_VAULT_SESSION_P0.md#24-identità-dei-record-e-campi-aggiuntivi-del-dettaglio--12092026).
+
+Preparazione sperimentale, base `b792b1c0`: patch locale dei sei campi del dettaglio tramite crypto-utils originale. Nessuna ricifratura o migrazione di dati persistiti; compatibilità del titolo/URL con il writer M6 ancora da risolvere. [Audit §25](./AUDIT_VAULT_SESSION_P0.md#25-preparazione-cifrata-delle-modifiche-nella-sessione-in-ram--12092026).

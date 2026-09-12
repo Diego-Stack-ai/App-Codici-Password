@@ -1,5 +1,5 @@
 // Prototype only: no persistence and no Firebase identity provider.
-export function createMemoryVault({unlockKey, decryptRecord, now = Date.now, timeoutMs = 60_000, onLock = () => {}}) {
+export function createMemoryVault({unlockKey, decryptRecord, encryptValue, now = Date.now, timeoutMs = 60_000, onLock = () => {}}) {
     let key = null, uid = null, generation = 0, expiresAt = 0, unlocking = null;
     function lock(reason = 'manual') {
         generation++;
@@ -41,6 +41,16 @@ export function createMemoryVault({unlockKey, decryptRecord, now = Date.now, tim
             const value = await decryptRecord(key, record);
             assertCurrent(owner, epoch);
             return value;
+        },
+        async encrypt(owner, value) {
+            const epoch = generation;
+            assertCurrent(owner, epoch);
+            if (typeof value !== 'string' || !value) throw new Error('PLAINTEXT_REQUIRED');
+            if (typeof encryptValue !== 'function') throw new Error('ENCRYPTION_UNAVAILABLE');
+            const ciphertext = await encryptValue(key, value);
+            assertCurrent(owner, epoch);
+            if (typeof ciphertext !== 'string' || !ciphertext) throw new Error('CIPHERTEXT_REQUIRED');
+            return ciphertext;
         },
         touch() {
             if (isUnlocked()) expiresAt = now() + timeoutMs;

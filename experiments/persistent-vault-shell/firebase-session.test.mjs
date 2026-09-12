@@ -5,6 +5,7 @@ import {initializeApp, deleteApp} from 'firebase/app';
 import {initializeAuth, inMemoryPersistence, connectAuthEmulator, createUserWithEmailAndPassword, signInWithEmailAndPassword} from 'firebase/auth';
 import {getFirestore, connectFirestoreEmulator, doc, setDoc, getDocFromServer, terminate} from 'firebase/firestore';
 import {createFirebaseSession} from './firebase-session.mjs';
+import {preparePrivateAccountPatch} from './prepare-private-account-patch.mjs';
 
 assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, '127.0.0.1:9099', 'Auth emulator is required');
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, '127.0.0.1:8085', 'Firestore emulator is required');
@@ -53,12 +54,39 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
     await t.test('login alone does not unlock; Master Password opens the original private ciphertext', async () => {
         await session.navigate('private');
         assert.equal(context.unlocked, false);
+        await assert.rejects(context.encrypt('BLOCCATO'), /VAULT_LOCKED/);
         await assert.rejects(context.readAccount({id: 'private', field: 'password'}), /VAULT_LOCKED/);
         await session.unlock(); await session.navigate('private');
         assert.equal(await context.readAccount({id: 'private', field: 'password'}), 'SECRET-FITTIZIO-A');
         const stored = (await getDocFromServer(doc(a.db, 'users', ownerA.uid, 'accounts', 'private'))).data();
         assert.equal(stored.password, ownerA.ciphertext);
         assert.notEqual(stored.password, 'SECRET-FITTIZIO-A');
+    });
+    await t.test('route encryption round-trips through the protected reader without writing the source document', async () => {
+        const reference = doc(a.db, 'users', ownerA.uid, 'accounts', 'private');
+        const before = (await getDocFromServer(reference)).data();
+        const encrypted = await context.encrypt('MODIFICA-SOLO-FIXTURE');
+        assert.equal(cryptoApi.isEncryptedValue(encrypted), true);
+        assert.equal(await context.read({ownerId: ownerA.uid, ciphertext: encrypted}), 'MODIFICA-SOLO-FIXTURE');
+        assert.deepEqual((await getDocFromServer(reference)).data(), before);
+        const previous = context;
+        await session.navigate('overview');
+        await assert.rejects(previous.encrypt('VISTA-PRECEDENTE'), /VIEW_DISPOSED/);
+        await session.navigate('private');
+    });
+    await t.test('private patch preparation encrypts all six fields and leaves Firestore unchanged', async () => {
+        const reference = doc(a.db, 'users', ownerA.uid, 'accounts', 'private');
+        const before = (await getDocFromServer(reference)).data();
+        const sourceRecord = Object.freeze({...before, id: 'private', type: 'account', visibility: 'private'});
+        const changes = Object.freeze({nomeAccount: 'Titolo fittizio', username: 'utente-fittizio', account: 'codice-fittizio', password: 'password-fittizia', note: 'Nota fittizia\nSeconda riga', url: 'https://example.invalid/fixture'});
+        const patch = await preparePrivateAccountPatch({context, source: sourceRecord, changes, hasProfileLink: false});
+        assert.deepEqual(Object.keys(patch), Object.keys(changes));
+        for (const [field, value] of Object.entries(changes)) {
+            assert.equal(cryptoApi.isEncryptedValue(patch[field]), true);
+            assert.equal(await context.read({ownerId: ownerA.uid, ciphertext: patch[field]}), value);
+        }
+        assert.deepEqual(sourceRecord, {...before, id: 'private', type: 'account', visibility: 'private'});
+        assert.deepEqual((await getDocFromServer(reference)).data(), before);
     });
     await t.test('company records use the same unlocked context and owner-bound reader', async () => {
         assert.equal(await context.readAccount({id: 'company-record', companyId: 'company', field: 'username'}), 'SECRET-FITTIZIO-A');
@@ -95,6 +123,7 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
         const old = context; await session.logout();
         assert.equal(a.auth.currentUser, null);
         assert.equal(old.signal.aborted, true);
+        await assert.rejects(old.encrypt('SESSIONE-TERMINATA'), /VIEW_DISPOSED/);
         await assert.rejects(old.readAccount({id: 'private', field: 'password'}), /VIEW_DISPOSED/);
         await assert.rejects(session.unlock(), /AUTH_REQUIRED/);
         await assert.rejects(getDocFromServer(doc(a.db, 'users', ownerA.uid, 'accounts', 'private')), error => error.code === 'permission-denied');
@@ -109,6 +138,7 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
     await t.test('dispose closes the active route and prohibits future reads and unlocks', async () => {
         const old = context; session.dispose();
         assert.equal(old.signal.aborted, true);
+        await assert.rejects(old.encrypt('SESSIONE-TERMINATA'), /VIEW_DISPOSED/);
         await assert.rejects(old.readAccount({id: 'private', field: 'password'}), /VIEW_DISPOSED/);
         await assert.rejects(session.unlock(), /SESSION_DISPOSED/);
     });

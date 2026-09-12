@@ -34,6 +34,50 @@ test('current v2 verifier/envelope decrypt the original record without rewriting
     await assert.rejects(f.adapter.read(record), /AUTH_REQUIRED/);
 });
 
+test('adapter encrypts with the original crypto API and supports a round trip without exposing the key', async () => {
+    const f = fixture(); await f.adapter.unlock();
+    const encrypted = await f.adapter.encrypt('synthetic-new-value');
+    assert.equal(typeof encrypted, 'string');
+    assert.equal(cryptoApi.isEncryptedValue(encrypted), true);
+    assert.notEqual(encrypted, 'synthetic-new-value');
+    assert.equal(await cryptoApi.decryptRequiredValue(encrypted, randomKey), 'synthetic-new-value');
+    assert.equal(await f.adapter.read({ownerId: 'a', ciphertext: encrypted}), 'synthetic-new-value');
+    assert.equal(f.adapter.key, undefined);
+    await assert.rejects(f.adapter.encrypt(''), /PLAINTEXT_REQUIRED/);
+    f.adapter.dispose();
+    await assert.rejects(f.adapter.encrypt('fixture'), /AUTH_REQUIRED/);
+});
+
+test('CPVK2 encryption uses the primary key while retaining legacy reads', async () => {
+    const ring = cryptoApi.createVaultKeyring(randomKey, 'SYNTHETIC-OLD-KEY');
+    const wrapped = await cryptoApi.wrapVaultKey(ring, master);
+    const f = fixture({loadSecurity: async () => ({verifier, vaultKeyEnvelope: wrapped})});
+    await f.adapter.unlock();
+    const encrypted = await f.adapter.encrypt('synthetic-primary-value');
+    assert.equal(await cryptoApi.decryptRequiredValue(encrypted, randomKey), 'synthetic-primary-value');
+    await assert.rejects(cryptoApi.decryptRequiredValue(encrypted, 'SYNTHETIC-OLD-KEY'));
+    f.adapter.dispose();
+});
+
+test('adapter rejects encryption output that is not ciphertext', async () => {
+    const f = fixture({cryptoApi: {...cryptoApi, encrypt: async value => value}});
+    await f.adapter.unlock();
+    await assert.rejects(f.adapter.encrypt('plain-fixture'), /CIPHERTEXT_REQUIRED/);
+    f.adapter.dispose();
+});
+
+test('adapter detects an identity change before releasing pending encryption', async () => {
+    let user = {uid: 'a'}, release;
+    const f = fixture({getUser: () => user, cryptoApi: {...cryptoApi,
+        encrypt: () => new Promise(resolve => { release = resolve; })}});
+    await f.adapter.unlock();
+    const operation = f.adapter.encrypt('fixture');
+    const rejected = assert.rejects(operation, /AUTH_CHANGED/);
+    user = {uid: 'b'}; // Provider notification deliberately delayed.
+    release(ciphertext); await rejected;
+    f.adapter.dispose();
+});
+
 test('CPVK2 keyring retains the existing legacy fallback without migration', async () => {
     const legacy = 'FIXTURE-LEGACY-KEY';
     const ring = cryptoApi.createVaultKeyring(randomKey, legacy);
@@ -154,18 +198,22 @@ test('protected routing reads real v2 ciphertext through the legacy adapter and 
                 loadSecurity: async () => ({verifier, vaultKeyEnvelope: envelope}),
                 requestPassword: async () => master, cryptoApi, ...callbacks});
             return {unlock: () => adapter.unlock(), read: (uid, record) => adapter.read(record),
+                encrypt: (uid, value) => adapter.encrypt(value),
                 lock: adapter.lock, isUnlocked: adapter.isUnlocked, touch: adapter.touch, dispose: adapter.dispose};
         },
         routes: {overview: value => { context = value; }}
     });
     await session.unlock(); await session.navigate('overview');
     assert.equal(await context.read({ownerId: 'a', ciphertext}), 'fixture-current');
+    const created = await context.encrypt('synthetic-context-roundtrip');
+    assert.equal(await context.read({ownerId: 'a', ciphertext: created}), 'synthetic-context-roundtrip');
     const old = context;
     user = {uid: 'b'};
     for (const listener of listeners) listener(user);
     assert.equal(old.signal.aborted, true);
     assert.equal(session.check(), false);
     await assert.rejects(old.read({ownerId: 'a', ciphertext}));
+    await assert.rejects(old.encrypt('synthetic-context-roundtrip'), /VIEW_DISPOSED/);
     session.dispose();
     assert.equal(listeners.size, 0);
 });

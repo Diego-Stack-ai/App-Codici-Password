@@ -45,6 +45,7 @@ export function createFirebaseSession({auth, db, cryptoApi, requestPassword, rou
                 }
             });
             return {unlock: () => adapter.unlock(), read: (uid, record) => adapter.read(record),
+                encrypt: (uid, value) => adapter.encrypt(value),
                 lock: adapter.lock, isUnlocked: adapter.isUnlocked, touch: adapter.touch, dispose: adapter.dispose};
         }
     });

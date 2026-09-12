@@ -1,6 +1,6 @@
 import {createMemoryVault} from './memory-vault.mjs';
 
-// Candidate read-only bridge. Firebase/UI/crypto dependencies are explicit;
+// Candidate cryptographic bridge. Firebase/UI/crypto dependencies are explicit;
 // no provisioning, legacy migration, persistence or production activation.
 export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, requestPassword, cryptoApi, onLock, now, timeoutMs}) {
     let disposed = false, observedUid = getUser()?.uid || null;
@@ -38,6 +38,11 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
         async decryptRecord(key, record) {
             if (!cryptoApi.isEncryptedValue(record.ciphertext)) throw new Error('CIPHERTEXT_REQUIRED');
             return cryptoApi.decryptRequiredValue(record.ciphertext, key);
+        },
+        async encryptValue(key, value) {
+            const ciphertext = await cryptoApi.encrypt(value, key);
+            if (!cryptoApi.isEncryptedValue(ciphertext)) throw new Error('CIPHERTEXT_REQUIRED');
+            return ciphertext;
         }
     });
     const unsubscribe = subscribeUser(user => {
@@ -54,6 +59,12 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
             const value = await vault.read(uid, record);
             assertOwner(uid);
             return value;
+        },
+        async encrypt(value) {
+            const uid = owner();
+            const ciphertext = await vault.encrypt(uid, value);
+            assertOwner(uid);
+            return ciphertext;
         },
         isUnlocked: () => !disposed && vault.isUnlocked(),
         touch: () => vault.touch(),

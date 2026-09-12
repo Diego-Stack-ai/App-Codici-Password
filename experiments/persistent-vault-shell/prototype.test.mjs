@@ -12,6 +12,44 @@ function deferred() {
 }
 const fakeVault = options => createMemoryVault({unlockKey: async () => ({}), decryptRecord: async () => 'fixture', ...options});
 
+test('encryption requires the unlocked owner, a nonempty string and an explicit capability', async () => {
+    let calls = 0;
+    const vault = fakeVault({encryptValue: async (_, value) => { calls++; return `cipher:${value}`; }});
+    await assert.rejects(vault.encrypt('a', 'fixture'), /VAULT_LOCKED/);
+    await vault.unlock('a');
+    await assert.rejects(vault.encrypt('b', 'fixture'), /VAULT_LOCKED/);
+    for (const value of ['', null, undefined, 0, {}]) await assert.rejects(vault.encrypt('a', value), /PLAINTEXT_REQUIRED/);
+    assert.equal(calls, 0);
+    assert.equal(await vault.encrypt('a', 'fixture'), 'cipher:fixture');
+    assert.equal(calls, 1); assert.equal(vault.key, undefined);
+    const readerOnly = fakeVault(); await readerOnly.unlock('a');
+    await assert.rejects(readerOnly.encrypt('a', 'fixture'), /ENCRYPTION_UNAVAILABLE/);
+});
+
+for (const reason of ['manual', 'logout', 'new-unlock', 'timeout']) {
+    test(`encryption completion after ${reason} cannot return ciphertext from the old key context`, async () => {
+        let now = 0;
+        const pending = deferred(), vault = fakeVault({now: () => now, timeoutMs: 10, encryptValue: () => pending.promise});
+        await vault.unlock('a');
+        const operation = vault.encrypt('a', 'fixture');
+        const rejected = assert.rejects(operation, /VAULT_LOCKED/);
+        if (reason === 'timeout') now = 10;
+        else if (reason === 'new-unlock') await vault.unlock('b');
+        else vault.lock(reason);
+        pending.resolve('old-ciphertext'); await rejected;
+    });
+}
+
+test('an expired Vault never invokes encryption and invalid dependency outputs are rejected', async () => {
+    let now = 0, calls = 0;
+    const vault = fakeVault({now: () => now, timeoutMs: 10, encryptValue: async () => { calls++; return null; }});
+    await vault.unlock('a'); now = 10;
+    await assert.rejects(vault.encrypt('a', 'fixture'), /VAULT_LOCKED/);
+    assert.equal(calls, 0);
+    await vault.unlock('a');
+    await assert.rejects(vault.encrypt('a', 'fixture'), /CIPHERTEXT_REQUIRED/);
+});
+
 test('synthetic ciphertext is readable across two views with one unlock; key is non-extractable', async () => {
     const f = await createFixture();
     let unlocks = 0;

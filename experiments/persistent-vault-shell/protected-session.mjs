@@ -35,6 +35,14 @@ export function createProtectedSession({getUser, subscribeUser, createVault, rou
                 assertOwner(uid, epoch);
                 if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
                 return value;
+            },
+            async encrypt(value) {
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                assertOwner(uid, epoch);
+                const ciphertext = await vault.encrypt(uid, value);
+                assertOwner(uid, epoch);
+                if (context.signal.aborted) throw new Error('VIEW_DISPOSED');
+                return ciphertext;
             }
         });
     }]));

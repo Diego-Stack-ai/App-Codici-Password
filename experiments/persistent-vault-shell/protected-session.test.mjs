@@ -30,6 +30,37 @@ test('one unlock across canonical route changes exposes a scoped reader without 
     assert.equal(await f.contexts[1].read({}), 'fixture-clear');
     await assert.rejects(f.contexts[0].read({}), /VIEW_DISPOSED/);
 });
+
+test('encryption is a view-scoped capability with no key or unlocked state bypass', async () => {
+    const f = fixture({encryptValue: async (_, value) => `cipher:${value}`});
+    await f.session.navigate('private');
+    await assert.rejects(f.contexts[0].encrypt('fixture'), /VAULT_LOCKED/);
+    await f.session.unlock(); await f.session.navigate('private');
+    const context = f.contexts.at(-1);
+    assert.equal(await context.encrypt('fixture'), 'cipher:fixture');
+    assert.equal(context.key, undefined); assert.equal(context.vault, undefined);
+    await f.session.navigate('company');
+    await assert.rejects(context.encrypt('fixture'), /VIEW_DISPOSED/);
+    assert.equal(await f.contexts.at(-1).encrypt('fixture'), 'cipher:fixture');
+});
+
+for (const boundary of ['lock', 'logout', 'uid-change', 'delayed-auth', 'navigation', 'dispose']) {
+    test(`pending encryption cannot escape its ${boundary} boundary`, async () => {
+        const pending = deferred();
+        const f = fixture({encryptValue: () => pending.promise});
+        await f.session.unlock(); await f.session.navigate('private');
+        const context = f.contexts[0], operation = context.encrypt('fixture');
+        const rejected = assert.rejects(operation, /VAULT_LOCKED|AUTH_CHANGED|VIEW_DISPOSED/);
+        if (boundary === 'lock') f.session.lock();
+        else if (boundary === 'logout') await f.session.logout(async () => f.change(null));
+        else if (boundary === 'uid-change') f.change('b');
+        else if (boundary === 'delayed-auth') f.change('b', false);
+        else if (boundary === 'navigation') await f.session.navigate('company');
+        else f.session.dispose();
+        pending.resolve('stale-ciphertext'); await rejected;
+        await assert.rejects(context.encrypt('again'), /VIEW_DISPOSED/);
+    });
+}
 for (const reason of ['manual', 'pagehide', 'pageshow']) {
     test(`${reason} aborts the mounted view before any pending plaintext can return`, async () => {
         const pending = deferred(); const f = fixture({decryptRecord: () => pending.promise});
