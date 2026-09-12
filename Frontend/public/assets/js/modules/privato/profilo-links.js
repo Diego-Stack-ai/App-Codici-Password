@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.102';
+import { auth, db } from '../../firebase-config.js?v=1.2.103';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -57,7 +57,7 @@ async function connectContactAccount(contact, syncData, contactType) {
             (await listCompanyAccounts(user.uid, company.id)).map(account => ({ ...account, companyId: company.id, companyName: company.name }))
         ));
         const accounts = await Promise.all([...personal.map(account => ({ ...account, companyId: '' })), ...companyAccounts.flat()]
-            .filter(data => !data.isArchived && !data._isGuest && !data.shared && !data.isMemoShared &&
+            .filter(data => !data.linkedCompanyProfileField && !data.isArchived && !data._isGuest && !data.shared && !data.isMemoShared &&
                 data.visibility !== 'shared' && !['memo', 'memorandum'].includes(data.type) && !data.isMemo && !data.hasMemo &&
                 (!data.linkedProfileField || (data.linkedProfileField.id === contact.id && data.linkedProfileField.type === contactType)))
             .map(async data => {

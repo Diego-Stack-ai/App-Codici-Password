@@ -6,9 +6,10 @@
  * Import graph: ma_state, ma_attachments, security-manager, dom-utils, ui-core, translations
  */
 
+import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { state } from './ma_state.js';
 import { renderAttachments } from './ma_attachments.js';
-import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -16,6 +17,8 @@ import { t } from '../../translations.js';
 // ─── POPULATE FORM ────────────────────────────────────────────────────────────
 
 export async function populateForm(data) {
+    state.originalCompany = structuredClone(data);
+    data = structuredClone(data);
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
     set('ragione-sociale', data.ragioneSociale);
@@ -41,27 +44,26 @@ export async function populateForm(data) {
     // 🔐 PROTOCOLLO BLINDA: logica decrypt hoistata fuori da if(data.emails)
     // così copre anche il campo note (cifrato in saveAzienda)
     let vaultKeyMaterial = null;
-    const needsDecryption = data._encrypted === true;
-    if (needsDecryption) {
+    {
         try { vaultKeyMaterial = await ensureVaultKeyMaterial(); } catch (e) {
             showToast('Dati cifrati: chiave obbligatoria per modificare.', 'error');
-            history.back();
-            return;
+            throw new Error('Vault non disponibile');
         }
     }
 
     const decryptIfPossible = async (val) => {
-        if (!needsDecryption || !val) return val;
-        try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return '---ERRORE DECRYPT---'; }
+        if (!val) return val;
+        return decryptRequiredValue(val, vaultKeyMaterial);
     };
 
     // Campo note (cifrato su save) → decifrato qui
     set('note-azienda', await decryptIfPossible(data.note));
 
+    if (!data.emails && (data.aziendaEmail || data.aziendaEmailPassword)) data.emails = {pec:{email:data.aziendaEmail,password:data.aziendaEmailPassword}};
     if (data.emails) {
         set('type-pec', data.emails.pec?.tipo || 'PEC Aziendale');
-        set('email-pec', data.emails.pec?.email);
-        set('email-pec-password', await decryptIfPossible(data.emails.pec?.password));
+        set('email-pec', data.emails.pec?.email || data.aziendaEmail);
+        set('email-pec-password', await decryptIfPossible(data.emails.pec?.password || data.aziendaEmailPassword));
         set('email-pec-note', data.emails.pec?.note);
         set('type-amministrazione', data.emails.amministrazione?.tipo || 'Amministrazione');
         set('email-amministrazione', data.emails.amministrazione?.email);
@@ -72,23 +74,24 @@ export async function populateForm(data) {
         set('email-personale-password', await decryptIfPossible(data.emails.personale?.password));
         set('email-personale-note', data.emails.personale?.note);
 
-        // Extra Sedi
-        const sediContainer = document.getElementById('altre-sedi-container');
-        if (sediContainer) clearElement(sediContainer);
-        if (data.altreSedi && Array.isArray(data.altreSedi)) {
-            data.altreSedi.forEach(s => addExtraSede(s));
-        }
-
         // Extra Email (con decrittazione)
         const emailContainer = document.getElementById('email-extra-container');
         if (emailContainer) clearElement(emailContainer);
         if (data.emails.extra && Array.isArray(data.emails.extra)) {
-            for (const item of data.emails.extra) {
-                const decItem = { ...item, password: await decryptIfPossible(item.password) };
+            for (const [index, item] of data.emails.extra.entries()) {
+                const decItem = { ...item, id: item.id || 'extra-' + index, password: await decryptIfPossible(item.password) };
                 addExtraEmail(decItem);
             }
         }
     }
+
+        // Extra Sedi
+        const sediContainer = document.getElementById('altre-sedi-container');
+        if (sediContainer) clearElement(sediContainer);
+        if (data.altreSedi && Array.isArray(data.altreSedi)) {
+            data.altreSedi.forEach((s,index) => addExtraSede({...s,id:s.id||'sede-'+index}));
+        }
+
 
     if (data.logo) {
         const p = document.getElementById('logo-preview');
@@ -121,7 +124,7 @@ export function addExtraEmail(data = null) {
     const bodyId = `body_${uniqueId}`;
     const arrowId = `arrow-${bodyId}`;
 
-    const wrapper = createElement('div', { className: 'glass-card inside-card email-extra-item' });
+    const wrapper = createElement('div', { className: 'glass-card inside-card email-extra-item', dataset: { contactId: data?.id || crypto.randomUUID() } });
 
     // HEADER
     const header = createElement('div', {
@@ -229,7 +232,7 @@ export function addExtraSede(data = null) {
     const bodyId = `body_${uniqueId}`;
     const arrowId = `arrow-${bodyId}`;
 
-    const wrapper = createElement('div', { className: 'glass-card inside-card extra-sede-item' });
+    const wrapper = createElement('div', { className: 'glass-card inside-card extra-sede-item', dataset: { sedeId: data?.id || crypto.randomUUID() } });
 
     const header = createElement('div', {
         className: 'email-card-header btn-toggle-section',

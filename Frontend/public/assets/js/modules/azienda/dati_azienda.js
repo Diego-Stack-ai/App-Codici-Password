@@ -1,10 +1,13 @@
+import { buildCompanyVCard as buildVCard } from './company-vcard.js';
+import { initCompanyProfile } from './company-profile-ui.js';
+import { decryptRequiredValue } from '../core/crypto-utils.js';
 /**
  * DATI AZIENDA MODULE (V5.0 ADAPTER)
  * Visualizzazione dettagliata anagrafica aziendale, QR vCard, sedi e allegati.
  * - Entry Point: initDatiAzienda(user)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.102';
+import { auth, db } from '../../firebase-config.js?v=1.2.103';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -13,7 +16,7 @@ import { logError } from '../../utils.js';
 import {getCompany} from '../data/vault-repository.js';
 
 import { ensureQRCodeLib, renderQRCode } from '../shared/qr_code_utils.js';
-import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { renderCompanyEmbeddedAttachments } from './dati-azienda-attachments.js';
 
 // --- STATE ---
@@ -137,7 +140,9 @@ function setupEventListeners() {
             const newNote = noteEdit.value.trim();
             try {
                 btnEditNote.disabled = true;
-                await updateDoc(doc(db, "users", auth.currentUser.uid, "aziende", currentAziendaId), { note: newNote });
+                const key = await ensureVaultKeyMaterial();
+                if (!key) throw new Error('Vault bloccato');
+                await updateDoc(doc(db, "users", auth.currentUser.uid, "aziende", currentAziendaId), { note: await encrypt(newNote, key) });
                 noteView.textContent = newNote || '-';
                 showToast(t('success_save'), 'success');
                 exitNoteEdit();
@@ -164,37 +169,18 @@ async function loadData(uid) {
     try {
         const company = await getCompany(uid, currentAziendaId);
         if (company) {
-            currentAziendaData = company;
+            currentAziendaData = structuredClone(company);
 
-            // 🔐 PROTOCOLLO BLINDA (V6.0): Decrittazione automatica dati sensibili (Note e Passwords)
-            if (currentAziendaData._encrypted) {
-                try {
-                    const mk = await ensureVaultKeyMaterial();
-                    const isEnc = (v) => v && typeof v === 'string' && v.length > 30 && /^[A-Za-z0-9+/]+={0,2}$/.test(v);
-
-                    if (isEnc(currentAziendaData.note)) {
-                        currentAziendaData.note = await decrypt(currentAziendaData.note, mk);
-                    }
-
-                    if (currentAziendaData.emails) {
-                        const e = currentAziendaData.emails;
-                        if (e.pec && isEnc(e.pec.password)) e.pec.password = await decrypt(e.pec.password, mk);
-                        if (e.amministrazione && isEnc(e.amministrazione.password)) e.amministrazione.password = await decrypt(e.amministrazione.password, mk);
-                        if (e.personale && isEnc(e.personale.password)) e.personale.password = await decrypt(e.personale.password, mk);
-                        if (Array.isArray(e.extra)) {
-                            for (let ext of e.extra) {
-                                if (isEnc(ext.password)) ext.password = await decrypt(ext.password, mk);
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.warn("[DATI-AZIENDA] Vault Locked: alcune note potrebbero apparire cifrate.");
-                }
+            const noteButton = document.getElementById('btn-edit-note');
+            if (noteButton) noteButton.disabled = false;
+            if (currentAziendaData.note) {
+                try { currentAziendaData.note = await decryptRequiredValue(currentAziendaData.note, await ensureVaultKeyMaterial()); }
+                catch { currentAziendaData.note = 'Nota non disponibile: sblocca il Vault.'; if (noteButton) noteButton.disabled = true; }
             }
-
             populateFields(currentAziendaData);
             handleLogoAndQR(currentAziendaData);
             renderCompanyEmbeddedAttachments(currentAziendaData.allegati);
+            initCompanyProfile(currentAziendaData, currentAziendaId, {buildVCard, reload: () => loadData(uid)});
         } else {
             showToast(t('error_not_found'), "error");
         }
@@ -254,7 +240,7 @@ function populateFields(data) {
     }
 
     setupLocations(data);
-    renderEmailCategories(data);
+
 }
 
 function setupLocations(data) {
@@ -302,128 +288,6 @@ function switchLocation(index) {
 
 }
 
-function renderEmailCategories(data) {
-    const wrap = document.getElementById('wrapper-email-section');
-    const container = document.getElementById('email-list-container');
-    if (!container) return;
-
-    const emailEntries = [
-        { id: 'pec', label: data.emails?.pec?.tipo || 'PEC', icon: 'verified_user', email: data.aziendaEmail || data.emails?.pec?.email, password: data.emails?.pec?.password || data.aziendaEmailPassword },
-        { id: 'amministrazione', label: data.emails?.amministrazione?.tipo || 'Amm.ne', icon: 'payments', email: data.emails?.amministrazione?.email, password: data.emails?.amministrazione?.password },
-        { id: 'personale', label: data.emails?.personale?.tipo || 'Personale', icon: 'group', email: data.emails?.personale?.email, password: data.emails?.personale?.password }
-    ].filter(c => c.email);
-
-    // Add Extra Emails
-    if (data.emails?.extra && Array.isArray(data.emails.extra)) {
-        data.emails.extra.forEach((e, i) => {
-            if (e.email) {
-                emailEntries.push({
-                    id: `extra-${i}`,
-                    label: e.tipo || 'Email',
-                    icon: 'mail',
-                    email: e.email,
-                    password: e.password
-                });
-            }
-        });
-    }
-
-    if (emailEntries.length > 0) {
-        wrap?.classList.remove('hidden');
-        clearElement(container);
-
-        const mainBox = createElement('div', { className: 'glass-card flex-col-gap' });
-
-        emailEntries.forEach((c) => {
-            // Separatore di categoria con icona
-            const catHeader = createElement('div', { className: 'detail-section-header' }, [
-                createElement('span', { className: 'material-symbols-outlined detail-section-icon', textContent: c.icon }),
-                createElement('span', { className: 'detail-section-title', textContent: c.label })
-            ]);
-
-            // Campo email (read-only, con copia + mailto)
-            const emailField = createElement('div', { className: 'glass-field-container' }, [
-                createElement('label', { className: 'view-label', textContent: t('email_address') || 'Email' }),
-                createElement('div', { className: 'detail-field-box border-glow' }, [
-                    createElement('span', { className: 'material-symbols-outlined icon-field-left opacity-low', textContent: 'alternate_email' }),
-                    createElement('input', {
-                        type: 'email',
-                        className: 'detail-field-input no-transform',
-                        value: c.email,
-                        readOnly: true
-                    }),
-                    createElement('div', { className: 'detail-field-actions' }, [
-                        createElement('a', {
-                            href: `mailto:${c.email}`,
-                            className: 'btn-icon-header'
-                        }, [createElement('span', { className: 'material-symbols-outlined icon-accent-emerald', textContent: 'mail' })]),
-                        createElement('button', {
-                            type: 'button',
-                            className: 'btn-icon-header copy-btn',
-                            onclick: () => navigator.clipboard.writeText(c.email).then(() => showToast(t('copied'), 'success'))
-                        }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })])
-                    ])
-                ])
-            ]);
-
-            const fields = [catHeader, emailField];
-
-            // Campo password (se esiste)
-            if (c.password) {
-                const pwdInputId = `pwd-input-${c.id}`;
-                const pwdField = createElement('div', { className: 'glass-field-container' }, [
-                    createElement('label', { className: 'view-label', textContent: t('password') || 'Password' }),
-                    createElement('div', { className: 'detail-field-box border-glow' }, [
-                        createElement('span', { className: 'material-symbols-outlined icon-field-left opacity-low', textContent: 'key' }),
-                        createElement('input', {
-                            id: pwdInputId,
-                            type: 'text',
-                            className: 'detail-field-input base-shield',
-                            value: c.password,
-                            readOnly: true
-                        }),
-                        createElement('div', { className: 'detail-field-actions' }, [
-                            createElement('button', {
-                                type: 'button',
-                                className: 'btn-icon-header',
-                                onclick: (e) => {
-                                    const inp = document.getElementById(pwdInputId);
-                                    const icon = e.currentTarget.querySelector('span');
-                                    if (inp) {
-                                        const isShielded = inp.classList.toggle('base-shield');
-                                        if (icon) icon.textContent = isShielded ? 'visibility' : 'visibility_off';
-                                    }
-                                }
-                            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'visibility' })]),
-                            createElement('button', {
-                                type: 'button',
-                                className: 'btn-icon-header copy-btn',
-                                onclick: () => navigator.clipboard.writeText(c.password).then(() => showToast(t('copied'), 'success'))
-                            }, [createElement('span', { className: 'material-symbols-outlined', textContent: 'content_copy' })])
-                        ])
-                    ])
-                ]);
-                fields.push(pwdField);
-            }
-
-            mainBox.appendChild(createElement('div', { className: 'flex-col-gap-xs' }, fields));
-        });
-
-        container.appendChild(mainBox);
-    }
-}
-
-function togglePwd(id, btn) {
-    const el = document.getElementById(`pwd-${id}`);
-    const icon = btn.querySelector('span');
-    if (el && icon) {
-        const isHidden = el.dataset.hidden === 'true';
-        el.textContent = isHidden ? el.dataset.password : '••••••••';
-        el.dataset.hidden = isHidden ? 'false' : 'true';
-        icon.textContent = isHidden ? 'visibility_off' : 'visibility';
-    }
-}
-
 async function handleLogoAndQR(data) {
     const logoImg = document.getElementById('azienda-logo');
     const logoPlace = document.getElementById('azienda-logo-placeholder');
@@ -452,108 +316,6 @@ async function handleLogoAndQR(data) {
     // Il QR zoom 300x300 viene generato in openQRZoom() alla prima apertura (lazy)
 }
 
-function buildVCard(data) {
-    const config = data.qrConfig || {};
-    let v = "BEGIN:VCARD\nVERSION:3.0\n";
-
-    // Ragione Sociale (FN, ORG)
-    // Default true if config missing (retrocompatibility), explicit false check
-    if (config.ragioneSociale !== false) {
-        v += `FN:${data.ragioneSociale || 'Azienda'}\nORG:${data.ragioneSociale || ''}\n`;
-    }
-
-    // Referente
-    const nome = (config.referenteNome !== false) ? (data.referenteNome || '') : '';
-    const cognome = (config.referenteCognome !== false) ? (data.referenteCognome || '') : '';
-    const titolo = (config.referenteTitolo !== false) ? (data.referenteTitolo || '') : '';
-
-    if (nome || cognome) {
-        v += `N:${cognome};${nome};;;\n`;
-    }
-    if (titolo) {
-        v += `TITLE:${titolo}\n`;
-    }
-
-    // Cellulare Referente
-    if (config.referenteCellulare !== false && data.referenteCellulare) {
-        v += `TEL;TYPE=CELL:${data.referenteCellulare}\n`;
-    }
-
-    // Email (PEC)
-    const pecEmail = data.emails?.pec?.email || data.aziendaEmail;
-    if (config.aziendaEmail !== false && pecEmail) {
-        v += `EMAIL;TYPE=WORK,INTERNET:${pecEmail}\n`;
-    }
-
-    // Email (Amministrazione)
-    const adminEmail = data.emails?.amministrazione?.email;
-    if (config.adminEmail && adminEmail) {
-        v += `EMAIL;TYPE=WORK,INTERNET:${adminEmail}\n`;
-    }
-
-    // Email (Personale)
-    const persEmail = data.emails?.personale?.email;
-    if (config.persEmail && persEmail) {
-        v += `EMAIL;TYPE=HOME,INTERNET:${persEmail}\n`;
-    }
-
-    // Extra Emails
-    if (data.emails?.extra && Array.isArray(data.emails.extra)) {
-        data.emails.extra.forEach(e => {
-            if (e.qr !== false && e.email) {
-                v += `EMAIL;TYPE=WORK,INTERNET:${e.email}\n`;
-            }
-        });
-    }
-
-    // Extra Data in NOTE or Custom Fields
-    let notes = [];
-    if (config.partitaIva !== false && data.partitaIva) notes.push(`P.IVA: ${data.partitaIva}`);
-    if (config.codiceSDI !== false && data.codiceSDI) notes.push(`SDI: ${data.codiceSDI}`);
-    if (config.numeroCCIAA !== false && data.numeroCCIAA) notes.push(`CCIAA: ${data.numeroCCIAA}`);
-
-    if (config.dataIscrizione !== false && data.dataIscrizione) {
-        const d = data.dataIscrizione.split('-');
-        const dIT = d.length === 3 ? `${d[2]}/${d[1]}/${d[0]}` : data.dataIscrizione;
-        notes.push(`Iscr: ${dIT}`);
-    }
-
-    // Sede Legale (qrLegale)
-    if (config.qrLegale !== false) {
-        const addr = data.indirizzoSede || '';
-        const civ = data.civicoSede || '';
-        const cit = data.cittaSede || '';
-        const prov = data.provinciaSede || '';
-        const cap = data.capSede || '';
-        if (addr || cit) {
-            v += `ADR;TYPE=WORK,PREF:;;${addr} ${civ};${cit};${prov};${cap};Italiana\n`;
-        }
-    }
-
-    // Altre Sedi (Dynamic Loop)
-    if (data.altreSedi && Array.isArray(data.altreSedi)) {
-        data.altreSedi.forEach(sede => {
-            if (sede.qr !== false && (sede.indirizzo || sede.citta)) {
-                let typeParams = 'WORK';
-                const tLower = (sede.tipo || '').toLowerCase();
-                if (tLower.includes('amm')) typeParams = 'WORK,POSTAL';
-                else if (tLower.includes('oper') || tLower.includes('magazz') || tLower.includes('logis')) typeParams = 'WORK,PARCEL';
-
-                v += `ADR;TYPE=${typeParams}:;;${sede.indirizzo || ''} ${sede.civico || ''};${sede.citta || ''};${sede.provincia || ''};${sede.cap || ''};Italiana\n`;
-
-                // Add to notes for visibility if reader doesn't support multiple ADRs well
-                notes.push(`${sede.tipo || 'Sede'}: ${sede.indirizzo || ''} ${sede.citta || ''}`);
-            }
-        });
-    }
-
-    if (notes.length > 0) {
-        v += `NOTE:${notes.join(' - ')}\n`;
-    }
-
-    v += "END:VCARD";
-    return v;
-}
 
 function openQRZoom() {
     const modal = document.getElementById('qr-zoom-modal');

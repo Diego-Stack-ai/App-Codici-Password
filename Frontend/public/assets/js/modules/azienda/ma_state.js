@@ -6,6 +6,8 @@
  */
 
 export const state = {
+    originalCompany: null,
+    formLoaded: false,
     currentUid: null,
     currentAziendaId: null,
     selectedFiles: [],

@@ -1,4 +1,4 @@
-import { db } from '../../firebase-config.js?v=1.2.102';
+import { db } from '../../firebase-config.js?v=1.2.103';
 import { doc, setDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { clearElement } from '../../dom-utils.js';
 import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';

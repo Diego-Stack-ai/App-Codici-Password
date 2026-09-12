@@ -1,3 +1,4 @@
+import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
 /**
  * FORM ACCOUNT AZIENDA — SAVE MODULE (V1.0)
  * Salvataggio e cancellazione degli account aziendali.
@@ -5,7 +6,7 @@
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.102';
+import { auth, db } from '../../firebase-config.js?v=1.2.103';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
@@ -112,7 +113,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
     }
 
     Object.assign(data, recordFieldsFromAccountMode(mode));
-    if (profileContactLinkDraft) data.linkedProfileField = { type: profileContactLinkDraft.contactType, id: profileContactLinkDraft.profileContactId };
+    if (profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId) data.linkedProfileField = { type: profileContactLinkDraft.contactType, id: profileContactLinkDraft.profileContactId };
 
     const isSharingActive = data.visibility === 'shared';
 
@@ -147,17 +148,19 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
             // 1. ALL READS FIRST
             const accountSnap = isEditing ? await transaction.get(accRef) : null;
-            const profileRef = profileContactLinkDraft ? doc(db, 'users', currentUid) : null;
+            const profileRef = profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId ? doc(db, 'users', currentUid) : null;
             const profileSnap = profileRef ? await transaction.get(profileRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
+            const companyLink = profileContactLinkDraft?.sourceCompanyId ? await prepareCompanyProfileLink(transaction, { uid: currentUid, draft: profileContactLinkDraft, targetId, targetCompanyId: currentAziendaId, oldData, data, isEditing, baseUpdatedAt }) : null;
             const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
             let linkedContact = null;
-            if (profileContactLinkDraft) {
+            if (profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId) {
                 const draft = profileContactLinkDraft;
                 if (draft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || draft.companyId !== currentAziendaId || !['email', 'phone'].includes(draft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
                 const contact = profileSnap?.data()?.[contactCollection]?.find(item => item.id === draft.profileContactId);
                 if (!contact) throw new Error('Contatto non disponibile.');
                 if (contact.linkedAccountId && (contact.linkedAccountId !== targetId || contact.linkedAccountCompanyId !== currentAziendaId)) throw new Error('Contatto già collegato a un altro Account.');
+                if (oldData?.linkedCompanyProfileField) throw new Error('Account già collegato a un profilo aziendale.');
                 if (oldData?.linkedProfileField && (oldData.linkedProfileField.id !== contact.id || oldData.linkedProfileField.type !== draft.contactType)) throw new Error('Account già collegato a un altro contatto.');
                 if (isEditing && (!oldData || (oldData.updatedAt || '') !== baseUpdatedAt)) throw new Error('Account modificato: ricarica prima di collegare.');
                 if (oldData?.isArchived || data.visibility === 'shared' || data.type === 'memo') throw new Error('Scegli un Account attivo non condiviso.');
@@ -173,6 +176,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
             // 2. NOW EXECUTE ALL WRITES
             const finalData = { ...data };
+            if (companyLink) { finalData.linkedCompanyProfileField = companyLink.backlink; transaction.update(companyLink.ref, companyLink.patch); }
             if (!isEditing) finalData.createdAt = new Date().toISOString();
             finalData.type = (data.type === 'memo') ? 'memo' : 'account'; // Force correct type V3.1
 
