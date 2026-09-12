@@ -547,3 +547,7 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - Le zone Widget caricate in background rispettano subito la linguetta attiva; non compaiono più comandi appartenenti alle altre linguette.
 - Ogni linguetta mostra un solo pulsante `+` per creare Widget. Il numero dei Widget non è limitato; resta soltanto il limite di sicurezza di 30 campi per singolo Widget.
 - Cache applicativa aggiornata a `1.2.100`. Suite completa locale superata, inclusi emulatori Firestore/Storage; test comportamentali per selezione, salvataggio atomico, password differenti, errori e schede del Profilo.
+
+### Pubblicazione anteprima Vault — 12/09/2026
+
+Su autorizzazione del product owner, pubblicato il canale temporaneo `vault-shell-fc9fffe1-0912` dal commit `fc9fffe1`, scadenza 19/09/2026. Contiene dieci file con soli dati fittizi. Verificati sblocco, lista aziendale, worker pronto e refresh bloccato nel browser Windows; collaudo fisico iPhone ancora richiesto. Evidenze e URL in `docs/AUDIT_VAULT_SESSION_P0.md`, sezione 14. Canale live invariato.

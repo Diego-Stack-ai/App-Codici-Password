@@ -193,3 +193,13 @@ Base `553a35d5`. Preparato `legacy-adapter.mjs`, un adattatore candidato di sola
 **Verifica finale:** `npm test` superato con 335 test, gate statici ed emulatori Firestore/Storage; due ulteriori test dell’anteprima superati con `npm run test:vault-preview`. Controllati 104 collegamenti relativi a file nei 38 MD, senza destinazioni mancanti; ancore e URL esterni esclusi dal controllo automatico.
 
 **Gate e prossimo intervento:** autorizzazione esplicita al canale temporaneo e collaudo iPhone/Safari/PWA di sblocco, passaggio liste, Indietro/Avanti, refresh, background/timeout e avvio offline. Questa verifica anticipata serve a validare la direzione prima di ampliare la migrazione degli orchestratori. Restano aperti pagine complete, login/verifier reali, scritture, recupero e compatibilità multi-dispositivo. Nessuna dichiarazione di pronta produzione; rollback del laboratorio senza dati da ripristinare.
+
+## 14. Anteprima temporanea pubblicata — 12/09/2026
+
+Il product owner ha autorizzato esplicitamente la pubblicazione dell’anteprima di sette giorni. Pubblicato il contenuto del commit `fc9fffe1` tramite il solo config Hosting del laboratorio, canale `vault-shell-fc9fffe1-0912`: dieci file fittizi, nessun backend o dato personale. Il canale scade il 19/09/2026.
+
+URL: https://appcodici-password--vault-shell-fc9fffe1-0912-83dusttn.web.app/
+
+Verifica sul canale HTTPS nel browser integrato Windows: caricamento, sblocco fittizio, lista aziendale, indicazione di disponibilità offline e refresh in stato bloccato riusciti. La precedente prova senza server resta locale; non è un collaudo offline fisico su iPhone. Nessun deploy del canale live, push o merge eseguito.
+
+Resta richiesto il collaudo Safari/iPhone: passaggio fra liste e Indietro/Avanti senza nuovo sblocco; refresh con nuovo sblocco; blocco dopo 60 secondi di inattività; riapertura e sblocco senza rete dopo la preparazione offline. Annotare separatamente l’esito da Safari e dall’eventuale collegamento aggiunto alla schermata Home. Questa anteprima non certifica la migrazione delle pagine complete o l’accesso ai dati reali.
