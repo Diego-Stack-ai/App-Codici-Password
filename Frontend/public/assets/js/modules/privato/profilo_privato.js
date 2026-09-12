@@ -30,7 +30,6 @@ import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-run
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
-import { editSection, editAddress, editUserDocument, addUtility, editUtility } from './profilo-actions.js';
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureVaultKeyMaterial, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
@@ -54,6 +53,7 @@ export { encrypt, decrypt };
 // ─── STATE ────────────────────────────────────────────────────────────────────
 
 let currentUserUid = null;
+let profileEditVersion = 0;
 let currentUserData = {};
 let contactEmails = [];
 let userAddresses = [];
@@ -82,10 +82,35 @@ let qrCodeInclusions = {
 const avatarImg = document.getElementById('profile-avatar');
 const nameDisplay = document.getElementById('user-display-name');
 
+// Load editing code only after an explicit action, retaining the originating view.
+async function runProfileEdit(action, args) {
+    const uid = currentUserUid;
+    const version = profileEditVersion;
+    const active = () => uid && auth.currentUser?.uid === uid &&
+        currentUserUid === uid && profileEditVersion === version && nameDisplay?.isConnected;
+    if (!active()) return;
+    try {
+        const editor = await import('./profilo-actions.js');
+        if (!active()) return;
+        return editor[action](...args);
+    } catch (error) {
+        if (active()) {
+            logError('LoadProfileEditor', error);
+            showToast('Editor non disponibile. Riprova.', 'error');
+        }
+    }
+}
+const editSection = (...args) => runProfileEdit('editSection', args);
+const editAddress = (...args) => runProfileEdit('editAddress', args);
+const editUserDocument = (...args) => runProfileEdit('editUserDocument', args);
+const addUtility = (...args) => runProfileEdit('addUtility', args);
+const editUtility = (...args) => runProfileEdit('editUtility', args);
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 
 export async function initProfiloPrivato(user) {
     if (!user) return;
+    profileEditVersion += 1;
     currentUserUid = user.uid;
     const cachedAvatar = localStorage.getItem(`codex_profile_avatar_${user.uid}`);
     const immediateAvatar = cachedAvatar || user.photoURL;
