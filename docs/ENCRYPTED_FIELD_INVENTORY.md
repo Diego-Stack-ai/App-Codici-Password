@@ -50,3 +50,5 @@ Riscontro emulato 12/09/2026, base `0e07621d`: il lettore candidato rifiuta pass
 Prova browser locale 12/09/2026, base `83dffc30`: quattro campi sintetici creati cifrati negli emulatori e letti con crypto-utils originale. Nessun inventario, lettura o modifica di dati personali. [Audit §21](./AUDIT_VAULT_SESSION_P0.md#21-interfaccia-browser-degli-emulatori--12092026).
 
 Integrazione delle liste, 12/09/2026: otto record sintetici con nomeAccount, username, account e password cifrati; soltanto i primi tre campi sono decifrati su copie per ricerca/render. La password resta ciphertext fino al comando esplicito. Nessuna riscrittura del formato o dato reale. [Audit §22](./AUDIT_VAULT_SESSION_P0.md#22-liste-canoniche-e-repository-negli-emulatori--12092026).
+
+Prova dettaglio base, 12/09/2026: nomeAccount, username e account su copie per la vista; password lazy. Proprietario esplicitamente invalido respinto nel percorso candidato, anche se vuoto; campo assente ammesso. Nessun inventario o bonifica di dati reali. [Audit §23](./AUDIT_VAULT_SESSION_P0.md#23-dettaglio-base-protetto-e-ritorno-alla-lista--12092026).

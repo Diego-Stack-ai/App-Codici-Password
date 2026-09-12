@@ -237,12 +237,16 @@ export function mountAccountPrivati(user, options = {}) {
             }
             LOG(`[ACCOUNTS] Found ${ownRecords.length} own accounts.`);
             const ownAccounts = ownRecords.map(data => {
-                const isRealOwner = !data.ownerId || data.ownerId === currentUser.uid;
+                // A scoped reader must see malformed explicit ownership unchanged.
+                const ownerId = options.readField && Object.hasOwn(data, 'ownerId')
+                    ? data.ownerId : (data.ownerId || currentUser.uid);
+                const isRealOwner = options.readField
+                    ? ownerId === currentUser.uid : (!data.ownerId || data.ownerId === currentUser.uid);
                 return {
                     ...data,
                     id: data.id,
                     isOwner: isRealOwner,
-                    ownerId: data.ownerId || currentUser.uid,
+                    ownerId,
                     _isGuest: !isRealOwner
                 };
             }).filter(a => !a.isArchived);

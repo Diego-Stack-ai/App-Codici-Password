@@ -29,7 +29,7 @@ export function createFirebaseSession({auth, db, cryptoApi, requestPassword, rou
             assertActive(context.signal, uid);
             if (!snapshot.exists()) throw new Error('RECORD_NOT_FOUND');
             const record = snapshot.data();
-            if (record.ownerId && record.ownerId !== uid) throw new Error('OWNER_MISMATCH');
+            if (Object.hasOwn(record, 'ownerId') && record.ownerId !== uid) throw new Error('OWNER_MISMATCH');
             // No automatic plaintext fallback or legacy migration.
             return context.read({ownerId: uid, ciphertext: record[field]});
         }

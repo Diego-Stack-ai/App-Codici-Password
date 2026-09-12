@@ -579,3 +579,5 @@ Collegato il bootstrap candidato agli SDK reali e al lettore v2 su utenti e reco
 Laboratorio browser 12/09/2026, base `83dffc30`: comando `npm run prototype:vault-emulators`, due utenti sintetici, accesso e sblocco distinti, letture private/aziendali e pulizia su uscita/refresh verificati nel browser Windows. Anteprima pubblicata invariata. [Audit §21](../docs/AUDIT_VAULT_SESSION_P0.md#21-interfaccia-browser-degli-emulatori--12092026).
 
 Integrazione liste nel laboratorio, 12/09/2026: repository canonico e callback Vault per vista, ricerca e ordinamento su copie decifrate, password letta su richiesta. Nuove opzioni preservano i chiamanti legacy. [Audit §22](../docs/AUDIT_VAULT_SESSION_P0.md#22-liste-canoniche-e-repository-negli-emulatori--12092026).
+
+Dettaglio base locale, 12/09/2026, base `70a6c4c5`: apertura dalle liste senza cambio documento, ritorno con ricerca/ordinamento e pulizia su blocco. Correzione del controllo finale prima di mostra/copia dopo attese asincrone. Nessuna scrittura o pubblicazione. [Audit §23](../docs/AUDIT_VAULT_SESSION_P0.md#23-dettaglio-base-protetto-e-ritorno-alla-lista--12092026).

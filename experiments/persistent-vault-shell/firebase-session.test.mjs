@@ -83,6 +83,14 @@ test('Firebase SDK Auth/Firestore and protected Vault work together in local emu
         await setDoc(doc(a.db, 'users', ownerA.uid, 'accounts', 'conflicting'), {ownerId: ownerB.uid, password: ownerA.ciphertext});
         await assert.rejects(context.readAccount({id: 'conflicting', field: 'password'}), /OWNER_MISMATCH/);
     });
+    await t.test('explicit empty or invalid owner metadata is rejected, while absent metadata remains readable', async () => {
+        for (const ownerId of [null, false, '', 0]) {
+            await setDoc(doc(a.db, 'users', ownerA.uid, 'accounts', 'invalid-owner'), {ownerId, password: ownerA.ciphertext});
+            await assert.rejects(context.readAccount({id: 'invalid-owner', field: 'password'}), /OWNER_MISMATCH/);
+        }
+        await setDoc(doc(a.db, 'users', ownerA.uid, 'accounts', 'absent-owner'), {password: ownerA.ciphertext});
+        assert.equal(await context.readAccount({id: 'absent-owner', field: 'password'}), 'SECRET-FITTIZIO-A');
+    });
     await t.test('Firebase sign-out aborts the view and denies both new unlock and anonymous server read', async () => {
         const old = context; await session.logout();
         assert.equal(a.auth.currentUser, null);

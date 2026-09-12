@@ -31,7 +31,7 @@ export async function buildEmulator() {
     for (const expected of ['modules/data/vault-repository.js', 'assets/js/offline-firestore.js', 'modules/data/request-coordinator.js', 'modules/privato/account_privati.js', 'modules/azienda/account_azienda.js']) {
         if (!inputs.some(name => name.endsWith(expected))) throw new Error(`MISSING_CANONICAL_MODULE: ${expected}`);
     }
-    if (inputs.some(name => !name.startsWith('emulator:') && /(?:firebase-config|security-manager|vault-session|fixture-repository)\.(?:js|mjs)$/.test(name))) throw new Error('UNEXPECTED_PRODUCTION_SESSION');
+    if (inputs.some(name => !name.startsWith('emulator:') && /(?:firebase-config|security-manager|vault-session|fixture-repository|dettaglio_account_privato|dettaglio_account_azienda)\.(?:js|mjs)$/.test(name))) throw new Error('UNEXPECTED_PRODUCTION_SESSION');
     await writeFile(`${base}/dist/emulator-inputs.json`, JSON.stringify(inputs, null, 2));
     for (const name of ['emulator.html', 'emulator.css']) await copyFile(`${base}/${name}`, `${base}/dist/emulator-site/${name}`);
     await copyFile(`${publicRoot}/assets/fonts/material-symbols/material-symbols-0.woff2`, `${base}/dist/emulator-site/symbols.woff2`);

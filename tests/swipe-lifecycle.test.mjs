@@ -169,3 +169,42 @@ for (const field of ['username', 'account']) {
         assert.deepEqual(copied, ['Visible fixture']);
     });
 }
+
+for (const action of ['visibility', 'content_copy']) {
+    test(`${action}: abort in the final await gap suppresses plaintext side effects`, async () => {
+        const f = fixture(), copied = [], toasts = []; let resolve;
+        const pending = new Promise(yes => { resolve = yes; });
+        f.context.navigator = {clipboard: {writeText: async value => copied.push(value)}};
+        f.context.showToast = (...args) => toasts.push(args);
+        f.context.resolveSecret = () => pending;
+        const view = f.run("createAccountListView({readOnly:true, resolveSecret, themes: {standard: {}}, getSubtitle: () => 'fixture'})");
+        view.render([{id: 'fixture', password: 'cipher-password'}]);
+        const button = findButton(f.document.getElementById().children, action);
+        const value = {textContent: '••••••••'}, icon = {};
+        f.document.getElementById = () => value;
+        // Register before the resolver awaits: its continuation passes its own
+        // check, then this queued abort precedes the click handler continuation.
+        pending.then(() => queueMicrotask(() => view.destroy()));
+        const operation = button.props.onclick({stopPropagation() {}, currentTarget: {querySelector: () => icon}});
+        resolve('Must stay private'); await operation;
+        assert.deepEqual(copied, []);
+        assert.equal(value.textContent, '••••••••');
+        assert.equal(icon.textContent, undefined);
+        assert.deepEqual(toasts, []);
+    });
+}
+
+test('clipboard already submitted may finish after destroy without stale notifications', async () => {
+    const f = fixture(), copied = [], toasts = []; let resolve;
+    f.context.navigator = {clipboard: {writeText: value => {
+        copied.push(value); return new Promise(yes => { resolve = yes; });
+    }}};
+    f.context.showToast = (...args) => toasts.push(args);
+    const view = f.run("createAccountListView({readOnly:true, themes: {standard: {}}, getSubtitle: () => 'fixture'})");
+    view.render([{id: 'fixture', username: 'Visible fixture'}]);
+    const button = findButton(f.document.getElementById().children, 'content_copy');
+    const operation = button.props.onclick({stopPropagation() {}});
+    assert.deepEqual(copied, ['Visible fixture']);
+    view.destroy(); resolve(); await operation;
+    assert.deepEqual(toasts, []);
+});

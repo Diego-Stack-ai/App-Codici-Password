@@ -45,6 +45,40 @@ async function fixture(company, overrides = {}) {
     };
 }
 
+test('private: scoped reader receives explicit invalid owners unchanged and excludes their records', async () => {
+    const invalidOwners = [null, false, '', undefined, 0];
+    const source = invalidOwners.map((ownerId, index) => ({id: `invalid-${index}`, ownerId, nomeAccount: 'cipher-invalid'}));
+    source.push({id: 'missing', nomeAccount: 'cipher-missing'}, {id: 'valid', ownerId: user.uid, nomeAccount: 'cipher-valid'});
+    const f = await fixture(false, {listPrivateAccounts: async () => source});
+    const seen = new Map();
+    const mounted = f.mount({readOnly: true, readField: async record => {
+        seen.set(record.id, record.ownerId);
+        if (Object.hasOwn(record, 'ownerId') && record.ownerId !== user.uid) throw new Error('OWNER_MISMATCH');
+        return record.id;
+    }});
+    await mounted.ready;
+    for (const [index, ownerId] of invalidOwners.entries()) assert.equal(seen.get(`invalid-${index}`), ownerId);
+    assert.equal(seen.get('missing'), user.uid);
+    assert.equal(seen.get('valid'), user.uid);
+    assert.equal(f.views[0].renders[0].map(record => record.id).join(','), 'missing,valid');
+    assert.equal(Object.hasOwn(source.at(-2), 'ownerId'), false, 'repository record is not mutated');
+    mounted.destroy();
+});
+
+test('private: legacy mount retains its existing fallback for explicit falsy owners', async () => {
+    const source = [null, false, '', undefined, 0].map((ownerId, index) => ({id: String(index), ownerId, nomeAccount: `Account ${index}`}));
+    const f = await fixture(false, {listPrivateAccounts: async () => source});
+    const mounted = f.mount();
+    await mounted.ready;
+    assert.equal(f.views[0].renders[0].length, source.length);
+    for (const record of f.views[0].renders[0]) {
+        assert.equal(record.ownerId, user.uid);
+        assert.equal(record.isOwner, true);
+        assert.equal(record._isGuest, false);
+    }
+    mounted.destroy();
+});
+
 for (const company of [false, true]) {
     const label = company ? 'company' : 'private';
     test(`${label}: scoped reader decrypts searchable copies and resolves password only on demand`, async () => {

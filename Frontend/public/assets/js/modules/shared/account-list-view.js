@@ -32,13 +32,16 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                         const icon = event.currentTarget.querySelector('span');
                         if (!value || !icon) return;
                         if (value.textContent === '••••••••') {
-                            value.textContent = await resolveCopyValue();
+                            const revealed = await resolveCopyValue();
+                            if (signal.aborted) return;
+                            value.textContent = revealed;
                             icon.textContent = 'visibility_off';
                         } else {
                             value.textContent = '••••••••';
                             icon.textContent = 'visibility';
                         }
                     } catch (error) {
+                        if (signal.aborted) return;
                         logError('RevealCardPassword', error);
                         showToast(t('error_generic'), 'error');
                     }
@@ -53,11 +56,15 @@ function createDataRow(label, displayValue, copyValue = null, isPassword = false
                     event.stopPropagation();
                     try {
                         if (signal.aborted) throw new Error('VIEW_DISPOSED');
-                        await navigator.clipboard.writeText(isPassword
+                        const value = isPassword
                             ? await resolveCopyValue()
-                            : (copyValue || displayValue));
+                            : (copyValue || displayValue);
+                        if (signal.aborted) return;
+                        await navigator.clipboard.writeText(value);
+                        if (signal.aborted) return;
                         showToast(t('copied') || 'Copiato!');
                     } catch (error) {
+                        if (signal.aborted) return;
                         logError('CopyCardValue', error);
                         showToast(t('error_generic'), 'error');
                     }
