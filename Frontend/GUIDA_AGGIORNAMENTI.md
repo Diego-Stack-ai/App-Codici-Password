@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Caricamento iniziale Dati azienda — 12/09/2026
+
+Release 1.2.117: i pannelli delle linguette non attive sono nascosti già nell’HTML. Evita la comparsa temporanea delle vecchie sezioni tutte insieme prima del caricamento dati e dell’attivazione della linguetta memorizzata. Nessuna modifica ai dati o al percorso di collegamento email/Account. Verificati stato iniziale dei dieci pannelli, purezza HTML e budget pagine. Rollback Hosting alla 1.2.116.
+
 ### Stile del selettore widget — 12/09/2026
 
 Release 1.2.116: il controllo chiuso torna allo sfondo trasparente degli altri campi; le opzioni mantengono testo contrastato su azzurro chiaro/blu coerente con le modali. Correzione esclusivamente CSS, senza modifiche a selezione, collegamenti o dati. Verificati CSS, versione, risorse offline e budget pagine. Rollback Hosting alla 1.2.115.
