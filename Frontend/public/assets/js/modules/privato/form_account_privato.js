@@ -1,3 +1,4 @@
+import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
  * FORM ACCOUNT PRIVATO (V6.0 — Unified Banking Renderer)
@@ -14,7 +15,7 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.103';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.104';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -169,7 +170,7 @@ export async function initFormAccountPrivato(user) {
     if (profileContactId) {
         try {
             const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
-            if (draft?.profileContactId === profileContactId && draft.ownerUid === user.uid && !draft.companyId && ['email', 'phone'].includes(draft.contactType)) profileContactLinkDraft = draft;
+            if (draft?.profileContactId === profileContactId && draft.ownerUid === user.uid && !draft.companyId && ['email', 'phone', 'utility', 'document'].includes(draft.contactType)) profileContactLinkDraft = draft;
         } catch { profileContactLinkDraft = null; }
     }
 
@@ -251,12 +252,14 @@ export async function initFormAccountPrivato(user) {
         try {
             const profile = profileContactLinkDraft.sourceCompanyId ? null : await getUserProfile(user.uid);
             const isPhone = profileContactLinkDraft.contactType === 'phone';
-            const contact = profileContactLinkDraft.sourceCompanyId ? await loadCompanyProfileContact(user.uid, profileContactLinkDraft) : profile?.[isPhone ? 'contactPhones' : 'contactEmails']?.find(item => item.id === profileContactLinkDraft.profileContactId);
+            const contact = profileContactLinkDraft.sourceCompanyId ? await loadCompanyProfileContact(user.uid, profileContactLinkDraft) : findProfileAccountItem(profile, profileContactLinkDraft);
             const email = isPhone && contact ? { address: contact.number } : contact;
             if (!email) throw new Error('Contatto del Profilo non disponibile.');
             const key = await ensureVaultKeyMaterial();
             const password = await decodeProfileContactValue(email.password, key);
             const note = await decodeProfileContactValue(email.note, key);
+            if (profileContactLinkDraft.contactType === 'document') email.address = await decodeProfileContactValue(contact.username, key);
+            if (profileContactLinkDraft.contactType === 'utility') email.address = '';
             if (profileContactLinkDraft.sourceCompanyId && contact.username) email.address = await decodeProfileContactValue(contact.username, key);
             const values = prepareProfileEmailAccountValues({ ...email, password, note }, {
                 username: get('account-username'), password: get('account-password'), note: get('account-note')
@@ -265,8 +268,8 @@ export async function initFormAccountPrivato(user) {
                 const input = document.getElementById(`account-${field}`);
                 if (input) input.value = value;
             }
-            if (!get('account-name')) document.getElementById('account-name').value = (isPhone ? 'Telefono ' : 'Email ') + (contact.label || email.address || '');
-            showToast(isPhone ? 'Verifica i dati e salva per collegare il telefono.' : 'Verifica i dati e salva per collegare l’email. Una password diversa rimane anche nel Profilo.', 'info');
+            if (!get('account-name')) document.getElementById('account-name').value = ({phone:'Telefono ',email:'Email ',utility:'Utenza ',document:'Documento '}[profileContactLinkDraft.contactType]) + (contact.label || contact.type || email.address || '');
+            showToast('Verifica i dati e salva per collegare la scheda. Le credenziali esistenti dell’Account vengono mantenute.', 'info');
             document.getElementById('btn-save-footer').disabled = false;
         } catch {
             showToast('Dati del contatto non disponibili: torna al Profilo e riprova. Nessun dato è stato trasferito.', 'error');

@@ -1,3 +1,4 @@
+import { findProfileAccountItem } from '../privato/profile-model.js';
 import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
  * FORM ACCOUNT AZIENDA MODULE (V6.0 SPLIT)
@@ -6,7 +7,7 @@ import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.103';
+import { db } from '../../firebase-config.js?v=1.2.104';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -19,7 +20,7 @@ import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-r
 import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
 import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.103';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.104';
 
 // --- STATE ---
 let currentUid = null;
@@ -54,7 +55,7 @@ export async function initFormAccountAzienda(user) {
     try {
         const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
         if (draft?.profileContactId === urlParams.get('profileContactId') && draft.ownerUid === user.uid &&
-            draft.companyId === currentAziendaId && ['email', 'phone'].includes(draft.contactType)) profileContactLinkDraft = draft;
+            draft.companyId === currentAziendaId && ['email', 'phone', 'utility', 'document'].includes(draft.contactType)) profileContactLinkDraft = draft;
     } catch { profileContactLinkDraft = null; }
     isEditing = !!currentDocId;
     document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
@@ -91,11 +92,13 @@ export async function initFormAccountAzienda(user) {
         try {
             const profile = profileContactLinkDraft.sourceCompanyId ? null : await getUserProfile(user.uid);
             const isPhone = profileContactLinkDraft.contactType === 'phone';
-            const contact = profileContactLinkDraft.sourceCompanyId ? await loadCompanyProfileContact(user.uid, profileContactLinkDraft) : profile?.[isPhone ? 'contactPhones' : 'contactEmails']?.find(item => item.id === profileContactLinkDraft.profileContactId);
+            const contact = profileContactLinkDraft.sourceCompanyId ? await loadCompanyProfileContact(user.uid, profileContactLinkDraft) : findProfileAccountItem(profile, profileContactLinkDraft);
             if (!contact) throw new Error('Contatto non disponibile.');
             const key = await ensureVaultKeyMaterial();
             const email = isPhone ? { address: contact.number } : { ...contact,
                 password: await decryptRequiredValue(contact.password, key), note: await decryptRequiredValue(contact.note, key) };
+            if (profileContactLinkDraft.contactType === 'document') email.address = await decryptRequiredValue(contact.username, key);
+            if (profileContactLinkDraft.contactType === 'utility') email.address = '';
             if (profileContactLinkDraft.sourceCompanyId && contact.username) email.address = await decryptRequiredValue(contact.username, key);
             const values = prepareProfileEmailAccountValues(email, {
                 username: get('account-username'), password: get('account-password'), note: get('account-note')
@@ -104,7 +107,7 @@ export async function initFormAccountAzienda(user) {
                 const input = document.getElementById(`account-${field}`);
                 if (input) input.value = value;
             }
-            if (!get('account-name')) document.getElementById('account-name').value = (isPhone ? 'Telefono ' : 'Email ') + (contact.label || email.address || '');
+            if (!get('account-name')) document.getElementById('account-name').value = ({phone:'Telefono ',email:'Email ',utility:'Utenza ',document:'Documento '}[profileContactLinkDraft.contactType]) + (contact.label || contact.type || email.address || '');
             showToast('Verifica i dati e salva per collegare il contatto all’Account aziendale.', 'info');
             document.getElementById('save-btn-footer').disabled = false;
         } catch {

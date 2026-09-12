@@ -8,7 +8,7 @@
  *   profilo_privato.js → profilo-qr.js → qr_code_utils.js, firebase
  */
 
-import { db } from '../../firebase-config.js?v=1.2.103';
+import { db } from '../../firebase-config.js?v=1.2.104';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement } from '../../dom-utils.js';
 import { ensureQRCodeLib, buildVCard, renderQRCode } from '../shared/qr_code_utils-v2.js';
@@ -83,7 +83,7 @@ export async function setQRScalar(field, value) {
 
 export function getProfileVCard() {
     const { currentUserData, qrCodeInclusions, contactPhones, contactEmails, userAddresses, customWidgets } = _getState();
-    return buildVCard(currentUserData, qrCodeInclusions, {
+    return buildVCard({...currentUserData,photoURL:document.getElementById('profile-avatar')?.getAttribute('src') || currentUserData.photoURL}, qrCodeInclusions, {
         contactPhones, contactEmails, userAddresses,
         customFields: (customWidgets || []).flatMap(widget => widget.fields || [])
     });
@@ -95,7 +95,7 @@ export async function generateProfileQRCode() {
     await ensureQRCodeLib();
     const container = document.getElementById('qrcode-header');
     if (!container) return;
-    const vcard = buildVCard(currentUserData, qrCodeInclusions, {
+    const vcard = buildVCard({...currentUserData,photoURL:document.getElementById('profile-avatar')?.getAttribute('src') || currentUserData.photoURL}, qrCodeInclusions, {
         contactPhones, contactEmails, userAddresses,
         customFields: (customWidgets || []).flatMap(widget => widget.fields || [])
     });

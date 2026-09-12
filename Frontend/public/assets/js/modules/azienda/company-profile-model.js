@@ -26,3 +26,11 @@ export function companyContactLinkPatch(data, contact, type, link) {
 export function companyProfileDraft(contact, sourceCompanyId, type, ownerUid, targetCompanyId = '') {
     return { profileContactId: contact.id, contactType: type, contactValue: contact.address || contact.number, sourceCompanyId, companyId: targetCompanyId, ownerUid };
 }
+
+export function companyAccountReferences(account, reference, remove=false) {
+    const entries=[...(account?.linkedCompanyProfileFields || []),...(account?.linkedCompanyProfileField?[account.linkedCompanyProfileField]:[])];
+    const key=item=>[item.companyId,item.type,item.id].join(':');
+    const unique=new Map(entries.map(item=>[key(item),item]));
+    if(remove)unique.delete(key(reference));else unique.set(key(reference),reference);
+    return [...unique.values()];
+}

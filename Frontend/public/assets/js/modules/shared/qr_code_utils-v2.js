@@ -25,6 +25,9 @@ export async function ensureQRCodeLib() {
  */
 export function buildVCard(userData, inclusions, options = {}) {
     let v = ["BEGIN:VCARD", "VERSION:3.0"];
+    if (inclusions.photo === true && /^https:\/\//i.test(userData.photoURL || '')) {
+        v.push('PHOTO;VALUE=URI:' + String(userData.photoURL).replace(/[\r\n]/g, '').replace(/,/g, '\\,').replace(/;/g, '\\;'));
+    }
     const escapeVCard = (value) => String(value ?? '')
         .replace(/\\/g, '\\\\')
         .replace(/\n/g, '\\n')

@@ -167,14 +167,14 @@ export function renderPhonesView() {
 function _createPhoneCard(phone, idx) {
     const { qrCodeInclusions } = _getState();
     return createElement('div', {
-        className: 'form-card profile-data-card'
+        className: 'form-card profile-data-card profile-contact-card'
     }, [
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'card-icon-stack' }, [
                 createElement('div', { className: 'card-icon-box' }, [
                     createElement('span', { className: 'material-symbols-outlined filled', textContent: 'call' })
                 ]),
-                createElement('span', { className: 'card-title-accent', textContent: phone.label || 'Telefono' })
+                createElement('span', { className: 'card-title-accent profile-contact-label', textContent: phone.label || 'Telefono' })
             ]),
             createElement('div', { className: 'card-actions-row' }, [
                 createElement('button', { className: 'btn-edit-section', onclick: () => editPhone(idx) }, [
@@ -280,7 +280,7 @@ export function renderEmailsView() {
     btnAdd.onclick = () => editEmail(-1);
 
     const items = contactEmails.map((e, idx) => createElement('div', {
-        className: 'form-card profile-data-card'
+        className: 'form-card profile-data-card profile-contact-card'
     }, [
         createElement('div', { className: 'card-header-row' }, [
             createElement('div', { className: 'field-header' }, [
@@ -291,7 +291,7 @@ export function renderEmailsView() {
                     onclick: (ev) => { ev.stopPropagation(); _callbacks.toggleQRInclusion('emails', e.id); }
                 }),
                 createElement('label', { className: 'qr-mini-label', textContent: 'QR' }),
-                createElement('span', { className: 'card-title-accent', textContent: e.label || 'Email' })
+                createElement('span', { className: 'card-title-accent profile-contact-label', textContent: e.label || 'Email' })
             ]),
             createElement('div', { className: 'card-actions-row' }, [
                 createElement('button', { className: 'btn-edit-section', dataset: { action: 'edit-email', idx } }, [

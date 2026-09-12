@@ -1,3 +1,4 @@
+import { findProfileAccountItem, patchProfileAccountItem, profileAccountReferences } from '../privato/profile-model.js';
 import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
 /**
  * FORM ACCOUNT AZIENDA — SAVE MODULE (V1.0)
@@ -6,7 +7,7 @@ import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.103';
+import { auth, db } from '../../firebase-config.js?v=1.2.104';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
@@ -156,18 +157,16 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
             let linkedContact = null;
             if (profileContactLinkDraft && !profileContactLinkDraft.sourceCompanyId) {
                 const draft = profileContactLinkDraft;
-                if (draft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || draft.companyId !== currentAziendaId || !['email', 'phone'].includes(draft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
-                const contact = profileSnap?.data()?.[contactCollection]?.find(item => item.id === draft.profileContactId);
+                if (draft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || draft.companyId !== currentAziendaId || !['email', 'phone', 'utility', 'document'].includes(draft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
+                const contact = findProfileAccountItem(profileSnap?.data(), draft);
                 if (!contact) throw new Error('Contatto non disponibile.');
                 if (contact.linkedAccountId && (contact.linkedAccountId !== targetId || contact.linkedAccountCompanyId !== currentAziendaId)) throw new Error('Contatto già collegato a un altro Account.');
-                if (oldData?.linkedCompanyProfileField) throw new Error('Account già collegato a un profilo aziendale.');
-                if (oldData?.linkedProfileField && (oldData.linkedProfileField.id !== contact.id || oldData.linkedProfileField.type !== draft.contactType)) throw new Error('Account già collegato a un altro contatto.');
                 if (isEditing && (!oldData || (oldData.updatedAt || '') !== baseUpdatedAt)) throw new Error('Account modificato: ricarica prima di collegare.');
                 if (oldData?.isArchived || data.visibility === 'shared' || data.type === 'memo') throw new Error('Scegli un Account attivo non condiviso.');
-                const legacyPassword = contactCollection === 'contactEmails' ? await decryptRequiredValue(contact.password, vaultKeyMaterial) : '';
+                const legacyPassword = profileContactLinkDraft.contactType === 'email' ? await decryptRequiredValue(contact.password, vaultKeyMaterial) : '';
                 const passwordTransferred = isProfileEmailPasswordTransferred(legacyPassword, passwordToSave);
                 retainedProfilePassword = Boolean(legacyPassword) && !passwordTransferred;
-                linkedContact = contactCollection === 'contactEmails'
+                linkedContact = profileContactLinkDraft.contactType === 'email'
                     ? linkProfileEmailToAccount(contact, targetId, { passwordTransferred })
                     : { ...contact, linkedAccountId: targetId };
                 linkedContact.linkedAccountCompanyId = currentAziendaId;
@@ -176,7 +175,12 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
             // 2. NOW EXECUTE ALL WRITES
             const finalData = { ...data };
-            if (companyLink) { finalData.linkedCompanyProfileField = companyLink.backlink; transaction.update(companyLink.ref, companyLink.patch); }
+            if (linkedContact) {
+                const updatedProfile = {...profileSnap.data(), ...patchProfileAccountItem(profileSnap.data(), profileContactLinkDraft, linkedContact)};
+                finalData.linkedProfileFields = profileAccountReferences(updatedProfile, targetId, currentAziendaId);
+                finalData.linkedProfileField = finalData.linkedProfileFields[0];
+            }
+            if (companyLink) { finalData.linkedCompanyProfileFields = companyLink.backlinks; finalData.linkedCompanyProfileField = companyLink.backlinks[0]; transaction.update(companyLink.ref, companyLink.patch); }
             if (!isEditing) finalData.createdAt = new Date().toISOString();
             finalData.type = (data.type === 'memo') ? 'memo' : 'account'; // Force correct type V3.1
 
@@ -304,9 +308,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);
-            if (profileRef) transaction.update(profileRef, {
-                [contactCollection]: profileSnap.data()[contactCollection].map(contact => contact.id === profileContactLinkDraft.profileContactId ? linkedContact : contact)
-            });
+            if (profileRef) transaction.update(profileRef, patchProfileAccountItem(profileSnap.data(), profileContactLinkDraft, linkedContact));
         });
 
         if (profileContactLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
