@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {initializeApp, deleteApp} from 'firebase/app';
 import {initializeAuth, inMemoryPersistence, connectAuthEmulator, createUserWithEmailAndPassword} from 'firebase/auth';
-import {getFirestore, connectFirestoreEmulator, doc, setDoc, getDocFromServer, terminate} from 'firebase/firestore';
+import {getFirestore, connectFirestoreEmulator, doc, setDoc, updateDoc, deleteDoc, getDocFromServer, terminate} from 'firebase/firestore';
 import {createFirebaseSession} from './firebase-session.mjs';
 import {preparePrivateAccountMutation} from './prepare-private-account-mutation.mjs';
 import {createPrivateAccountSaveController} from './private-account-save-controller.mjs';
@@ -18,7 +18,7 @@ assert.equal(process.env.METADATA_SERVER_DETECTION, 'none');
 // Import only after emulator guards. .run invokes the original handler directly:
 // no Functions server, HTTP/App Check validation, scheduled work or trigger dispatch.
 const requireFunctions = createRequire(new URL('../../functions/package.json', import.meta.url));
-const {applyPrivateAccountMutation} = requireFunctions('./index.js');
+const {applyPrivateAccountMutation, applyOfflineMutation} = requireFunctions('./index.js');
 const {getApps, deleteApp: deleteAdminApp} = requireFunctions('firebase-admin/app');
 const {getFirestore: getAdminFirestore} = requireFunctions('firebase-admin/firestore');
 const source = await readFile(new URL('../../Frontend/public/assets/js/modules/core/crypto-utils.js', import.meta.url), 'utf8');
@@ -73,6 +73,9 @@ test('original private-account handler persists prepared ciphertext in the demo 
         assert.equal(cryptoApi.isEncryptedValue(saved.password), true);
         assert.equal(saved.revision, 2);
         assert.equal(await a.context.readAccount({id: 'fixture', field: 'password'}), 'UPDATED-SYNTHETIC-A');
+        const receipt = (await getDocFromServer(doc(a.db, 'mutationResults', a.uid, 'operations', operation.operationId))).data();
+        assert.equal(receipt.operationId, operation.operationId); assert.equal(receipt.bindingVersion, 1);
+        assert.match(receipt.operationHash, /^[a-f0-9]{64}$/);
     });
     await t.test('retrying the same operation is idempotent', async () => {
         const before = await stored(a), result = await run(a, operation), after = await stored(a);
@@ -84,11 +87,23 @@ test('original private-account handler persists prepared ciphertext in the demo 
         const result = await run(a, {...operation, operationId: 'stale-operation'});
         assert.equal(result.status, 'conflict'); assert.equal(result.currentRevision, 2);
         assert.equal((await stored(a)).revision, 2);
-        const audit = await getAdminFirestore().doc(`users/${a.uid}/operationResults/stale-operation`).get();
+        const audit = await getAdminFirestore().doc(`mutationResults/${a.uid}/operations/stale-operation`).get();
         assert.equal(audit.exists, false);
     });
     await t.test('operation identifiers cannot be reused for another record', async () => {
         await assert.rejects(run(a, {...operation, recordId: 'another-record'}), error => error.code === 'already-exists');
+    });
+    await t.test('a committed operation identity cannot be reused with changed ciphertext, device or expected revision', async () => {
+        const before = await stored(a);
+        const changedPassword = await a.context.encrypt('DIFFERENT-SYNTHETIC-PAYLOAD');
+        for (const altered of [
+            {...operation, record: {...operation.record, password: changedPassword}},
+            {...operation, deviceId: 'different-device'},
+            {...operation, expectedRevision: operation.expectedRevision + 1}
+        ]) await assert.rejects(run(a, altered), error => error.code === 'already-exists');
+        const after = await stored(a);
+        assert.equal(after.password, before.password); assert.equal(after.revision, before.revision);
+        assert.equal(after.updatedAt.isEqual(before.updatedAt), true);
     });
     await t.test('another authenticated UID writes only its own namespace and remains separately decryptable', async () => {
         const second = await prepare(b, 'UPDATED-SYNTHETIC-B', 'mutation-a');
@@ -111,7 +126,7 @@ test('original private-account handler persists prepared ciphertext in the demo 
             expectedRevision: source.revision, operationId, deviceId: 'emulator-save-controller', hasProfileLink: false};
     };
     const readResult = async (client, operationId) => {
-        const result = await getDocFromServer(doc(client.db, 'users', client.uid, 'operationResults', operationId));
+        const result = await getDocFromServer(doc(client.db, 'mutationResults', client.uid, 'operations', operationId));
         return result.exists() ? result.data() : null;
     };
     const makeController = (client, overrides = {}) => createPrivateAccountSaveController({
@@ -164,7 +179,7 @@ test('original private-account handler persists prepared ciphertext in the demo 
     });
 
     await t.test('client Rules deny reading another UID operation result', async () => {
-        await assert.rejects(getDocFromServer(doc(b.db, 'users', a.uid, 'operationResults', 'lost-response-reconcile')),
+        await assert.rejects(getDocFromServer(doc(b.db, 'mutationResults', a.uid, 'operations', 'lost-response-reconcile')),
             error => error.code === 'permission-denied');
         const own = await readResult(a, 'lost-response-reconcile');
         assert.equal(own.ownerUid, a.uid); assert.equal(own.recordId, 'fixture');
@@ -177,7 +192,7 @@ test('original private-account handler persists prepared ciphertext in the demo 
             await run(a, envelope); throw new Error('SIMULATED_RESPONSE_LOST');
         }, lookupResult: async operationId => ({...await readResult(a, operationId), ...mismatch})});
         assert.equal((await controller.save(input)).status, 'unknown');
-        for (const altered of [{domain: 'another-domain'}, {recordId: 'another-record'}, {ownerUid: b.uid}]) {
+        for (const altered of [{domain: 'another-domain'}, {recordId: 'another-record'}, {ownerUid: b.uid}, {operationId: 'another-operation'}]) {
             mismatch = altered;
             assert.equal((await controller.reconcile()).status, 'unknown');
         }
@@ -207,26 +222,121 @@ test('original private-account handler persists prepared ciphertext in the demo 
         assert.equal(after.revision, before.revision); assert.equal(after.password, before.password);
         assert.equal(after.updatedAt.isEqual(before.updatedAt), true);
         assert.equal(await readResult(a, input.operationId), null);
-        const adminResult = await getAdminFirestore().doc(`users/${a.uid}/operationResults/${input.operationId}`).get();
+        const adminResult = await getAdminFirestore().doc(`mutationResults/${a.uid}/operations/${input.operationId}`).get();
         assert.equal(adminResult.exists, false);
     });
 
-    await t.test('known gate: owner-writable operation results can forge a duplicate applied response without changing the record', async () => {
-        const input = await inputFor(a, 'known-gate-forged-result', 'MUST-NOT-BE-APPLIED');
+    await t.test('client Rules prevent forged applied receipts and the legitimate handler still commits once', async () => {
+        const input = await inputFor(a, 'blocked-forged-result', 'LEGITIMATE-SYNTHETIC-UPDATE');
         const envelope = await preparePrivateAccountMutation({...input, context: a.context});
         const before = await stored(a);
-        // Characterization of existing Rules/handler trust, not a corrected path.
-        // This write uses the ordinary authenticated client, not Admin privileges.
-        await setDoc(doc(a.db, 'users', a.uid, 'operationResults', input.operationId), {
+        const resultRef = doc(a.db, 'mutationResults', a.uid, 'operations', input.operationId);
+        await assert.rejects(setDoc(resultRef, {
             domain: 'private-account', recordId: input.recordId, ownerUid: a.uid,
             deviceId: input.deviceId, status: 'applied', revision: input.expectedRevision + 1, duplicate: false
-        });
-        const claimed = await run(a, envelope);
-        assert.equal(claimed.status, 'applied'); assert.equal(claimed.duplicate, true);
-        assert.equal(claimed.revision, input.expectedRevision + 1);
+        }), error => error.code === 'permission-denied');
+        assert.equal((await getDocFromServer(resultRef)).exists(), false);
+        assert.equal((await stored(a)).revision, before.revision);
+        const applied = await run(a, envelope);
+        assert.equal(applied.status, 'applied'); assert.equal(applied.duplicate, false);
+        assert.equal(applied.revision, input.expectedRevision + 1);
         const after = await stored(a);
-        assert.equal(after.revision, before.revision); assert.notEqual(after.revision, claimed.revision);
-        assert.equal(after.password, before.password); assert.notEqual(after.password, envelope.record.password);
+        assert.equal(after.revision, before.revision + 1); assert.equal(after.password, envelope.record.password);
+        const retried = await run(a, envelope);
+        assert.equal(retried.duplicate, true); assert.equal(retried.revision, after.revision);
+    });
+
+    await t.test('the owner can read but cannot overwrite, update or delete a backend result', async () => {
+        const resultRef = doc(a.db, 'mutationResults', a.uid, 'operations', 'blocked-forged-result');
+        const before = (await getDocFromServer(resultRef)).data();
+        assert.equal(before.ownerUid, a.uid);
+        await assert.rejects(setDoc(resultRef, {...before, revision: 999}), error => error.code === 'permission-denied');
+        await assert.rejects(updateDoc(resultRef, {status: 'conflict'}), error => error.code === 'permission-denied');
+        await assert.rejects(deleteDoc(resultRef), error => error.code === 'permission-denied');
+        const after = (await getDocFromServer(resultRef)).data();
+        assert.equal(after.revision, before.revision); assert.equal(after.status, before.status);
+        await assert.rejects(setDoc(doc(b.db, 'mutationResults', a.uid, 'operations', 'blocked-forged-result'), {status: 'applied'}),
+            error => error.code === 'permission-denied');
+    });
+
+    await t.test('private and generic offline mutations cannot reuse each other operation identities', async () => {
+        const offline = {schemaVersion: 1, operationId: operation.operationId, recordId: 'sync-fixture',
+            deviceId: operation.deviceId, expectedRevision: 0, encryptedPayload: operation.record.password};
+        const runOffline = data => applyOfflineMutation.run({auth: {uid: a.uid}, data});
+        await assert.rejects(runOffline(offline), error => error.code === 'already-exists');
+        const ownOffline = {...offline, operationId: 'offline-bound-operation'};
+        const applied = await runOffline(ownOffline);
+        assert.equal(applied.status, 'applied'); assert.equal(applied.revision, 1);
+        assert.equal((await runOffline(ownOffline)).duplicate, true);
+        await assert.rejects(runOffline({...ownOffline, encryptedPayload: await a.context.encrypt('DIFFERENT-OFFLINE-SYNTHETIC')}),
+            error => error.code === 'already-exists');
+        await assert.rejects(run(a, {...operation, operationId: ownOffline.operationId}), error => error.code === 'already-exists');
+        const saved = await getAdminFirestore().doc(`users/${a.uid}/syncRecords/${offline.recordId}`).get();
+        assert.equal(saved.data().revision, 1); assert.equal(saved.data().encryptedPayload, ownOffline.encryptedPayload);
+    });
+
+    await t.test('a legacy result without a new server-bound receipt requires explicit reconciliation instead of claiming success', async () => {
+        const input = await inputFor(a, 'legacy-unverified-result', 'MUST-REMAIN-UNAPPLIED');
+        const envelope = await preparePrivateAccountMutation({...input, context: a.context});
+        const before = await stored(a);
+        await assert.rejects(setDoc(doc(a.db, 'users', a.uid, 'operationResults', input.operationId), {status: 'applied'}),
+            error => error.code === 'permission-denied');
+        await getAdminFirestore().doc(`users/${a.uid}/operationResults/${input.operationId}`).set({
+            domain: 'private-account', operationId: input.operationId, recordId: input.recordId, ownerUid: a.uid,
+            deviceId: input.deviceId, status: 'applied', revision: input.expectedRevision + 1, duplicate: false
+        });
+        await assert.rejects(run(a, envelope), error => error.code === 'failed-precondition');
+        const after = await stored(a);
+        assert.equal(after.revision, before.revision); assert.equal(after.password, before.password);
+        assert.equal(await readResult(a, input.operationId), null);
+        const old = await getAdminFirestore().doc(`users/${a.uid}/operationResults/${input.operationId}`).get();
+        assert.equal(old.exists, true, 'legacy evidence is preserved, not migrated or deleted');
+    });
+
+    await t.test('a valid server-bound receipt remains authoritative when a conflicting legacy receipt exists', async () => {
+        const before = await stored(a);
+        await getAdminFirestore().doc(`users/${a.uid}/operationResults/${operation.operationId}`).set({
+            domain: 'private-account', recordId: 'wrong-record', ownerUid: b.uid, status: 'applied', revision: 999
+        });
+        const result = await run(a, operation);
+        assert.equal(result.status, 'applied'); assert.equal(result.duplicate, true); assert.equal(result.revision, 2);
+        const after = await stored(a);
+        assert.equal(after.revision, before.revision); assert.equal(after.password, before.password);
         assert.equal(after.updatedAt.isEqual(before.updatedAt), true);
+    });
+
+    await t.test('a malformed server-bound receipt never falls back to plausible legacy success', async () => {
+        const input = await inputFor(a, 'malformed-trusted-result', 'MUST-REMAIN-UNAPPLIED');
+        const envelope = await preparePrivateAccountMutation({...input, context: a.context});
+        const before = await stored(a);
+        const malformed = {domain: 'private-account', recordId: input.recordId, ownerUid: a.uid,
+            deviceId: input.deviceId, operationId: input.operationId, status: 'applied', revision: input.expectedRevision + 1};
+        await getAdminFirestore().doc(`mutationResults/${a.uid}/operations/${input.operationId}`).set(malformed);
+        await getAdminFirestore().doc(`users/${a.uid}/operationResults/${input.operationId}`).set(malformed);
+        await assert.rejects(run(a, envelope), error => error.code === 'failed-precondition');
+        const after = await stored(a);
+        assert.equal(after.revision, before.revision); assert.equal(after.password, before.password);
+    });
+
+    await t.test('malformed existing revisions are rejected without record changes or receipts in both mutation domains', async () => {
+        for (const [index, revision] of [null, '0', -1, 0.5, Number.MAX_SAFE_INTEGER + 1].entries()) {
+            for (const domain of ['private', 'offline']) {
+                const recordId = `invalid-${domain}-${index}`, operationId = `invalid-revision-${domain}-${index}`;
+                const path = `users/${a.uid}/${domain === 'private' ? 'accounts' : 'syncRecords'}/${recordId}`;
+                const reference = getAdminFirestore().doc(path);
+                const original = domain === 'private' ? {...operation.record, revision} : {revision, encryptedPayload: operation.record.password};
+                await reference.set(original);
+                const request = domain === 'private' ? {...operation, recordId, operationId, expectedRevision: 0} : {
+                    schemaVersion: 1, operationId, recordId, deviceId: operation.deviceId, expectedRevision: 0,
+                    encryptedPayload: operation.record.password
+                };
+                const handler = domain === 'private' ? applyPrivateAccountMutation : applyOfflineMutation;
+                await assert.rejects(handler.run({auth: {uid: a.uid}, data: request}), error => error.code === 'failed-precondition');
+                const after = (await reference.get()).data();
+                assert.equal(after.revision, revision);
+                assert.equal(after[domain === 'private' ? 'password' : 'encryptedPayload'], operation.record.password);
+                assert.equal((await getAdminFirestore().doc(`mutationResults/${a.uid}/operations/${operationId}`).get()).exists, false);
+            }
+        }
     });
 });

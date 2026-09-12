@@ -1,7 +1,7 @@
 import {after, before, test} from 'node:test';
 import {readFile} from 'node:fs/promises';
 import {assertFails, assertSucceeds, initializeTestEnvironment} from '@firebase/rules-unit-testing';
-import {deleteDoc, doc, getDoc, setDoc, updateDoc} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc} from 'firebase/firestore';
 
 const PROJECT_ID = 'codici-password-rules-test';
 const OWNER_UID = 'owner-user';
@@ -99,3 +99,55 @@ test('i nuovi domini protetti sono leggibili dal proprietario ma scrivibili solo
     await assertFails(setDoc(doc(ownerDb, 'users', OWNER_UID, collectionName, 'new'), {title: 'Non ammesso'}));
   }
 });
+
+for (const [namespace, path] of [
+  ['legacy', ['users', OWNER_UID, 'operationResults']],
+  ['backend', ['mutationResults', OWNER_UID, 'operations']],
+]) {
+  const receipt = {
+    status: 'applied', domain: 'private-account', recordId: 'account-1',
+    ownerUid: OWNER_UID, deviceId: 'device-1', revision: 2, duplicate: false,
+  };
+
+  test(`esiti ${namespace}: il backend può registrarli e solo il proprietario può leggerli`, async () => {
+    await testEnv.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), ...path, 'read-result'), receipt);
+    });
+    const ownerDb = testEnv.authenticatedContext(OWNER_UID).firestore();
+    await assertSucceeds(getDoc(doc(ownerDb, ...path, 'read-result')));
+    await assertSucceeds(getDocs(collection(ownerDb, ...path)));
+    for (const context of [
+      testEnv.authenticatedContext(OTHER_UID), testEnv.unauthenticatedContext(),
+    ]) {
+      await assertFails(getDoc(doc(context.firestore(), ...path, 'read-result')));
+      await assertFails(getDocs(collection(context.firestore(), ...path)));
+    }
+  });
+
+  test(`esiti ${namespace}: nessun client può creare, sovrascrivere, aggiornare o eliminare una ricevuta`, async () => {
+    await testEnv.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), ...path, 'immutable-result'), receipt);
+    });
+    for (const [index, context] of [
+      testEnv.authenticatedContext(OWNER_UID), testEnv.authenticatedContext(OTHER_UID),
+      testEnv.unauthenticatedContext(),
+    ].entries()) {
+      const existing = doc(context.firestore(), ...path, 'immutable-result');
+      await assertFails(setDoc(doc(context.firestore(), ...path, `forged-${index}`), receipt));
+      await assertFails(setDoc(existing, {...receipt, revision: 99}));
+      await assertFails(updateDoc(existing, {revision: 99}));
+      await assertFails(deleteDoc(existing));
+    }
+  });
+
+  test(`esiti ${namespace}: i discendenti non riaprono le scritture tramite wildcard`, async () => {
+    const ownerDb = testEnv.authenticatedContext(OWNER_UID).firestore();
+    const nestedPath = [...path, 'parent-result', 'nested', 'child-result'];
+    await assertFails(setDoc(doc(ownerDb, ...nestedPath), receipt));
+    await testEnv.withSecurityRulesDisabled(async context => {
+      await setDoc(doc(context.firestore(), ...nestedPath), receipt);
+    });
+    await assertFails(updateDoc(doc(ownerDb, ...nestedPath), {revision: 99}));
+    await assertFails(deleteDoc(doc(ownerDb, ...nestedPath)));
+  });
+}

@@ -27,6 +27,7 @@ const {
     recoveryCodeHash
 } = require("./recovery-security");
 const {mutationDecision, validateOfflineMutation} = require("./offline-sync-service");
+const {createMutationBinding, verifyMutationResult, currentMutationRevision} = require("./mutation-result-binding");
 const {
     privateAccountMutationDecision, validatePrivateAccountMutation
 } = require("./private-account-mutation-service");
@@ -55,6 +56,26 @@ firestore.FieldValue = FieldValue;
 const admin = { auth: getAuth, firestore, messaging: getMessaging };
 setGlobalOptions({ maxInstances: 10, region: "europe-west1" });
 
+function verifiedMutationRetry(resultSnapshot, legacySnapshot, binding) {
+    if (resultSnapshot.exists) {
+        try { return verifyMutationResult(resultSnapshot.data(), binding); }
+        catch (error) {
+            if (error.code === 'OPERATION_BINDING_MISMATCH') {
+                throw new HttpsError('already-exists', 'Identificatore operazione già utilizzato.');
+            }
+            throw new HttpsError('failed-precondition', 'Esito operazione non verificabile.');
+        }
+    }
+    // Legacy results were owner-writable: never trust or silently reapply them.
+    if (legacySnapshot.exists) throw new HttpsError('failed-precondition', 'Esito precedente da verificare prima di riprovare.');
+    return null;
+}
+
+function verifiedCurrentRevision(recordSnapshot) {
+    try { return currentMutationRevision(recordSnapshot.data()); }
+    catch { throw new HttpsError('failed-precondition', 'Revisione record non valida.'); }
+}
+
 exports.applyOfflineMutation = onCall(
     {region: "europe-west1", enforceAppCheck: true},
     async (request) => {
@@ -68,14 +89,17 @@ exports.applyOfflineMutation = onCall(
         const store = getFirestore();
         const userRef = store.collection("users").doc(request.auth.uid);
         const recordRef = userRef.collection("syncRecords").doc(operation.recordId);
-        const resultRef = userRef.collection("operationResults").doc(operation.operationId);
+        const resultRef = store.collection("mutationResults").doc(request.auth.uid).collection("operations").doc(operation.operationId);
+        const legacyRef = userRef.collection("operationResults").doc(operation.operationId);
+        const binding = createMutationBinding({uid: request.auth.uid, domain: 'offline-sync', operation});
         return store.runTransaction(async (transaction) => {
-            const [recordSnapshot, resultSnapshot] = await Promise.all([
-                transaction.get(recordRef), transaction.get(resultRef)
+            const [recordSnapshot, resultSnapshot, legacySnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(resultRef), transaction.get(legacyRef)
             ]);
-            const currentRevision = Number(recordSnapshot.data()?.revision || 0);
+            const previous = verifiedMutationRetry(resultSnapshot, legacySnapshot, binding);
+            const currentRevision = verifiedCurrentRevision(recordSnapshot);
             const decision = mutationDecision(
-                currentRevision, operation, resultSnapshot.exists ? resultSnapshot.data() : null
+                currentRevision, operation, previous
             );
             if (decision.duplicate) return decision;
             if (decision.status === "applied") {
@@ -89,8 +113,7 @@ exports.applyOfflineMutation = onCall(
             }
             transaction.set(resultRef, {
                 ...decision,
-                ownerUid: request.auth.uid,
-                deviceId: operation.deviceId,
+                ...binding,
                 createdAt: FieldValue.serverTimestamp()
             });
             return decision;
@@ -109,18 +132,17 @@ exports.applyPrivateAccountMutation = onCall(
         const store = getFirestore();
         const userRef = store.collection("users").doc(request.auth.uid);
         const recordRef = userRef.collection("accounts").doc(operation.recordId);
-        const resultRef = userRef.collection("operationResults").doc(operation.operationId);
+        const resultRef = store.collection("mutationResults").doc(request.auth.uid).collection("operations").doc(operation.operationId);
+        const legacyRef = userRef.collection("operationResults").doc(operation.operationId);
+        const binding = createMutationBinding({uid: request.auth.uid, domain: 'private-account', operation});
         return store.runTransaction(async transaction => {
-            const [recordSnapshot, resultSnapshot] = await Promise.all([
-                transaction.get(recordRef), transaction.get(resultRef)
+            const [recordSnapshot, resultSnapshot, legacySnapshot] = await Promise.all([
+                transaction.get(recordRef), transaction.get(resultRef), transaction.get(legacyRef)
             ]);
-            const previous = resultSnapshot.exists ? resultSnapshot.data() : null;
-            if (previous && (previous.domain !== "private-account" || previous.recordId !== operation.recordId)) {
-                throw new HttpsError("already-exists", "Identificatore operazione già utilizzato.");
-            }
+            const previous = verifiedMutationRetry(resultSnapshot, legacySnapshot, binding);
             const result = privateAccountMutationDecision({
                 exists: recordSnapshot.exists,
-                currentRevision: Number(recordSnapshot.data()?.revision || 0),
+                currentRevision: verifiedCurrentRevision(recordSnapshot),
                 expectedRevision: operation.expectedRevision,
                 previous
             });
@@ -133,10 +155,7 @@ exports.applyPrivateAccountMutation = onCall(
             }, {merge: recordSnapshot.exists});
             transaction.set(resultRef, {
                 ...result,
-                domain: "private-account",
-                recordId: operation.recordId,
-                ownerUid: request.auth.uid,
-                deviceId: operation.deviceId,
+                ...binding,
                 createdAt: FieldValue.serverTimestamp()
             });
             return result;

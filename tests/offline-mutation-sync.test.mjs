@@ -40,6 +40,16 @@ test('un conflitto ferma la coda senza rimuovere l’operazione', async () => {
     assert.equal(context.states.at(-1).state, 'conflict');
 });
 
+test('duplicate senza esito applicato non elimina la modifica dalla coda', async () => {
+    for (const result of [{duplicate: true}, {status: 'unknown', duplicate: true}, {status: 'failed', duplicate: true}]) {
+        const context = fixture({results: [result]});
+        const lease = await context.sync.flush();
+        assert.equal(lease.value.status, 'recoverable-error');
+        assert.deepEqual(context.removed, []);
+        assert.equal(context.calls, 1);
+    }
+});
+
 test('un errore di rete è recuperabile e due flush simultanei sono accorpati', async () => {
     let release;
     const gate = new Promise(resolve => { release = resolve; });

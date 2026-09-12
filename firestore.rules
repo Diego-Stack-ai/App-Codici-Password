@@ -25,6 +25,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Esiti delle mutazioni attestati dal backend. Il namespace non eredita
+    // le autorizzazioni generiche delle raccolte proprietario.
+    match /mutationResults/{userId}/operations/{operationId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
     match /users/{userId} {
       allow read, write: if isOwner(userId);
     }
@@ -89,6 +96,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Esiti storici: consultabili, ma mai creabili o alterabili dal client.
+    // Il blocco non certifica la provenienza dei documenti già esistenti.
+    match /users/{userId}/operationResults/{operationId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+
     match /users/{userId}/{collection}/{document=**} {
       allow read, write: if isOwner(userId) &&
         collection != 'contacts' &&
@@ -96,6 +110,7 @@ service cloud.firestore {
         collection != 'notificationDeliveries' &&
         collection != 'deadlineNotifications' &&
         collection != 'receivedDeadlines' &&
+        collection != 'operationResults' &&
         collection != 'profileWidgets' &&
         collection != 'accountWidgets' &&
         collection != 'sharedVaultData' &&

@@ -35,7 +35,7 @@ export function createOfflineMutationSynchronizer({
                         emit('conflict', {operation, result, pending: operations.length - completed});
                         return {status: 'conflict', operation, result, completed};
                     }
-                    if (result.status !== 'applied' && result.duplicate !== true) {
+                    if (result.status !== 'applied') {
                         throw new Error('OFFLINE_SYNC_RESULT_INVALID');
                     }
                     await queue.remove(operation.operationId);

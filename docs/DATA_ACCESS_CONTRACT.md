@@ -78,4 +78,6 @@ Modulo modifica azienda, 12/09/2026: lettura puntuale getCompanyConfirmed online
 
 Prova locale base `1b6a13ed`: riconciliazione di una singola operazione in RAM tramite lookup puntuale iniettato. Assenza del documento esito non prova mancato salvataggio; il namespace operationResults attuale non è esclusivo del backend. Nessun nuovo repository persistente o accesso client attivato. [Audit §29](./AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
 
+Candidato base `a795b462`: il lookup emulato usa il nuovo percorso backend `/mutationResults/{uid}/operations/{operationId}` e richiede anche l'identità dell'operazione. Le conferme storiche non vengono usate come prova o replicate automaticamente. Integrazione repository/UI e recupero pregresso ancora aperti; nessun nuovo percorso attivato sul sito pubblico. [Audit §32](./AUDIT_VAULT_SESSION_P0.md#32-provenienza-e-identità-degli-esiti-di-salvataggio--12092026).
+
 Dati azienda dopo scrittura: afterWrite e callback di modifica collegamenti richiedono getCompanyConfirmed. Il flag è consumato dopo rendering riuscito; errore o offline non dichiarano aggiornata una copia vecchia. Richieste e callback sono vincolati alla vista. [Audit §30](./AUDIT_VAULT_SESSION_P0.md#30-dati-azienda-aggiornati-dopo-il-salvataggio--12092026).

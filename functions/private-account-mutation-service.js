@@ -19,10 +19,10 @@ function isCiphertextOrEmpty(value) {
 function validatePrivateAccountMutation(input) {
   const operation = input || {};
   if (operation.schemaVersion !== 1 ||
-      !OPERATION_PATTERN.test(String(operation.operationId || "")) ||
-      !ID_PATTERN.test(String(operation.recordId || "")) ||
-      !OPERATION_PATTERN.test(String(operation.deviceId || "")) ||
-      !Number.isInteger(operation.expectedRevision) || operation.expectedRevision < 0 ||
+      typeof operation.operationId !== "string" || !OPERATION_PATTERN.test(operation.operationId) ||
+      typeof operation.recordId !== "string" || !ID_PATTERN.test(operation.recordId) ||
+      typeof operation.deviceId !== "string" || !OPERATION_PATTERN.test(operation.deviceId) ||
+      !Number.isSafeInteger(operation.expectedRevision) || operation.expectedRevision < 0 || operation.expectedRevision >= Number.MAX_SAFE_INTEGER ||
       !operation.record || typeof operation.record !== "object" || Array.isArray(operation.record)) {
     throw new Error("PRIVATE_ACCOUNT_MUTATION_INVALID");
   }

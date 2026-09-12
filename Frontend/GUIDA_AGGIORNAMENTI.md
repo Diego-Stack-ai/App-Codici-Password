@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Esiti di salvataggio verificabili — candidato locale, 12/09/2026
+
+Base `a795b462`: correzione candidata della provenienza degli esiti e del riuso di operationId con payload diverso; nessuna modifica ai dati reali o pubblicazione di Rules/Functions. La coda conserva le modifiche quando la risposta non conferma l'applicazione. Recupero delle code pregresse e rollback sono gate prima del rilascio. [Audit §32](../docs/AUDIT_VAULT_SESSION_P0.md#32-provenienza-e-identità-degli-esiti-di-salvataggio--12092026).
+
 ### Compatibilità legacy e anteprima offline — 12/09/2026
 
 Su base `553a35d5`, otto test dell’adattatore di sola lettura con crypto-utils reale e dati fittizi: verifier/envelope correnti, CPVK2, errori e cambi identità. Preparata anteprima Hosting separata di dieci file e verificato refresh/sblocco demo nel browser Windows con server fermo. Due test controllano inventario e worker. [Audit Vault §13](../docs/AUDIT_VAULT_SESSION_P0.md#13-compatibilità-e-anteprima-offline--12092026) conserva limiti e istruzioni; pubblicazione temporanea e collaudo iPhone ancora richiesti. App live invariata.

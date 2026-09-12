@@ -334,3 +334,5 @@ Avanzamento P0, base `b792b1c0`: preparazione di modifiche cifrate nella session
 Avanzamento P0 base `6432cad8`: preparazione del payload M6 e prova locale di salvataggio tramite transazione originale. UI, isolamento autorevole e gestione degli esiti dopo invio restano da integrare. [Audit §26](./AUDIT_VAULT_SESSION_P0.md#26-preparazione-m6-e-transazione-originale-su-dati-emulati--12092026).
 
 Avanzamento P0 base `1b6a13ed`: gestione dell’esito incerto in RAM e collaudo del retry. La provenienza dei risultati non è garantita dalle Rules correnti: correggere namespace degli esiti e legame risultato/operazione prima del salvataggio UI; integrazione della coda canonica ancora aperta. [Audit §29](./AUDIT_VAULT_SESSION_P0.md#29-esito-incerto-retry-e-verifica-del-salvataggio--12092026).
+
+Avanzamento candidato base `a795b462`: nuovo namespace backend degli esiti e legame del retry con l'operazione validata. Gli esiti storici non vengono convertiti automaticamente; recupero delle code pregresse, integrazione UI e rilascio restano gate separati. [Audit §32](./AUDIT_VAULT_SESSION_P0.md#32-provenienza-e-identità-degli-esiti-di-salvataggio--12092026).

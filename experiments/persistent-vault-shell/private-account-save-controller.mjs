@@ -65,7 +65,7 @@ export function createPrivateAccountSaveController({context, getUser, prepare, s
         for (const [field, value] of Object.entries({domain: 'private-account', recordId: operation.recordId, ownerUid: uid, deviceId: operation.deviceId})) {
             if ((fromLookup || Object.hasOwn(result, field)) && result[field] !== value) return null;
         }
-        if (Object.hasOwn(result, 'operationId') && result.operationId !== operation.operationId) return null;
+        if ((fromLookup || Object.hasOwn(result, 'operationId')) && result.operationId !== operation.operationId) return null;
         if (result.status === 'applied' && Number.isSafeInteger(result.revision) && result.revision === operation.expectedRevision + 1 &&
             (typeof result.duplicate === 'boolean' || (fromLookup && result.duplicate === undefined))) {
             return state('applied', {revision: result.revision, duplicate: result.duplicate === true});

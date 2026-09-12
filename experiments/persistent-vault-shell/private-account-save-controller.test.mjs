@@ -10,7 +10,7 @@ const input = () => ({uid: 'owner', domain: 'private', recordId: 'record', opera
 const envelope = value => Object.freeze({schemaVersion: 1, operationId: value.operationId, recordId: value.recordId,
     deviceId: value.deviceId, expectedRevision: value.expectedRevision, record: Object.freeze({password: 'SYNTHETIC-CIPHERTEXT'})});
 const applied = () => ({status: 'applied', revision: 2, duplicate: false});
-const receipt = () => ({...applied(), domain: 'private-account', ownerUid: 'owner', recordId: 'record', deviceId: 'device'});
+const receipt = () => ({...applied(), domain: 'private-account', ownerUid: 'owner', recordId: 'record', deviceId: 'device', operationId: 'operation'});
 function fixture(overrides = {}) {
     const abort = new AbortController(), states = [], sent = [], lookedUp = [];
     let user = {uid: 'owner'}, preparations = 0;
@@ -55,7 +55,7 @@ test('reconciliation confirms a bound receipt without submitting or encrypting a
 
 test('absent, malformed, mismatched or failed reconciliation remains unknown', async () => {
     for (const value of [null, undefined, {}, {...receipt(), ownerUid: 'other'}, {...receipt(), recordId: 'other'},
-        {...receipt(), domain: 'other'}, {...receipt(), operationId: 'other'}, {...receipt(), revision: 1},
+        {...receipt(), domain: 'other'}, {...receipt(), operationId: 'other'}, {...receipt(), operationId: undefined}, {...receipt(), revision: 1},
         {...receipt(), revision: 3}, {...receipt(), revision: -1}, {...receipt(), revision: 1.5},
         {...receipt(), status: 'saved'}, {...receipt(), duplicate: 'true'}, {status: 'applied', revision: 2},
         {...receipt(), deviceId: 'other-device'}, {...receipt(), deviceId: undefined}, {...receipt(), status: 'conflict', currentRevision: 3}]) {
