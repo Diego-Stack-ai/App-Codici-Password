@@ -311,6 +311,8 @@ Queste osservazioni sono una fotografia documentale, non una certificazione runt
 
 ## 18. Metodo per l'audit dei documenti esistenti
 
+Attuazione sperimentale autorizzata 12/09/2026, base `a6f756cc`: [prototipo di navigazione persistente](./AUDIT_VAULT_SESSION_P0.md#11-prototipo-autorizzato--12092026), escluso dal runtime pubblico, con sola fixture fittizia. Dimostra un flusso con chiave in RAM ma non cambia gli invarianti o la classificazione di conformità dell’app reale.
+
 Secondo aggiornamento di attuazione locale del 12/09/2026, base `67288cc3`: operazioni Vault pendenti invalidate dopo logout/blocco/reset e cambio UID; nessuna variazione della baseline o dei formati. [Audit Vault §9–10](./AUDIT_VAULT_SESSION_P0.md#9-correzione-locale-del-12092026--operazioni-concorrenti) distingue la correzione concorrente dalla proposta, ancora da scegliere, di navigazione persistente.
 
 Aggiornamento di attuazione locale, 12/09/2026, base v1.2.110: pulizia esplicita della sessione prima di tutti i sette logout applicativi; dettagli, prove e rollback in [Audit Vault §8](./AUDIT_VAULT_SESSION_P0.md#8-correzione-locale-del-12092026--blocco-1-logout). Questa nota non modifica la baseline approvata: formato, persistenza fra pagine e gate crittografici restano invariati e non certificati. Nessuna distribuzione implicita.

@@ -1,0 +1,22 @@
+:root { font-family: system-ui, sans-serif; color: #20354b; background: #eff5fa; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0 auto; max-width: 1040px; padding: max(28px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 40px max(20px, env(safe-area-inset-left)); }
+header { padding: 24px 0; }
+.eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: .12em; color: #4c6884; }
+h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -.04em; margin: 14px 0; }
+h2 { font-size: 1.25rem; }
+p { line-height: 1.6; }
+.status-panel, #view { background: white; padding: 24px; border: 1px solid #d5e1ed; border-radius: 20px; }
+.status-panel { display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; align-items: center; }
+.status-panel p { margin-bottom: 0; font-size: .875rem; color: #526880; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+button, nav a { border: 1px solid #b6cadc; border-radius: 10px; padding: 12px 16px; background: #f0f6fc; color: #20354b; font: inherit; cursor: pointer; min-height: 44px; text-decoration: none; }
+#unlock { background: #087bdf; border-color: #087bdf; color: white; }
+button:disabled { opacity: .5; cursor: wait; }
+nav { display: flex; gap: 12px; margin: 24px 0; }
+nav a[aria-current="page"] { background: #d5eafd; border-color: #087bdf; }
+#view { min-height: 210px; }
+.secret { padding: 18px; background: #eaf6ef; border-radius: 12px; overflow-wrap: anywhere; }
+aside { margin-top: 28px; color: #526880; }
+.technical { font-size: .8rem; }
+:focus-visible { outline: 3px solid #135fba; outline-offset: 3px; }

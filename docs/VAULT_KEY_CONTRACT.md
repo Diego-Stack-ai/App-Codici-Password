@@ -122,6 +122,8 @@ Cambio Master Password e rotazione richiedono:
 
 ## 8. Verifiche P0 aperte
 
+Prototipo autorizzato 12/09/2026, base `a6f756cc`: navigazione persistente e CryptoKey solo in RAM provate esclusivamente su fixture fittizia in `experiments/persistent-vault-shell`. [Audit Vault §11](./AUDIT_VAULT_SESSION_P0.md#11-prototipo-autorizzato--12092026) definisce threat model, limiti e gate. Non è un lettore alternativo dei dati reali e non sostituisce la sessione produttiva.
+
 Secondo intervento locale del 12/09/2026, base `67288cc3`: invalidazione delle operazioni asincrone dopo logout/blocco/reset e controllo UID prima della pubblicazione della chiave. Contatori solo in RAM, nessun nuovo formato persistito. Prove, compatibilità e limiti in [Audit Vault §9](./AUDIT_VAULT_SESSION_P0.md#9-correzione-locale-del-12092026--operazioni-concorrenti); proposta architetturale nella sezione 10, ancora da scegliere.
 
 Aggiornamento locale 12/09/2026 (base v1.2.110): i sette comandi espliciti di logout cancellano il materiale locale prima di `signOut`, con test del comando comune anche in errore remoto. Evidenza e limiti in [Audit Vault, sezione 8](./AUDIT_VAULT_SESSION_P0.md#8-correzione-locale-del-12092026--blocco-1-logout). Il formato della sessione e gli invarianti restano invariati; la persistenza della chiave di wrapping rimane non conforme.

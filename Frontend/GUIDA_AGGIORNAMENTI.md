@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Laboratorio autorizzato 12/09/2026 — navigazione persistente
+
+Creato prototipo separato su base `a6f756cc`, con due viste, chiave solo in RAM, hash/history e smontaggio controllato. Fixture fittizia senza Firebase o dati personali; 12 test aggiunti al gate Vault e prova browser Windows di navigazione, Indietro/Avanti, refresh e blocco. [Audit Vault §11](../docs/AUDIT_VAULT_SESSION_P0.md#11-prototipo-autorizzato--12092026) conserva istruzioni di avvio, limiti e gate per le vere pagine. App pubblicata e sessione produttiva invariati.
+
 ### Intervento locale 12/09/2026 — invalidazione sblocchi pendenti
 
 Su base `67288cc3`, impedito alle operazioni Vault precedenti a logout/blocco/reset di ripubblicare chiavi o cancellare una sessione successiva; controllo UID e scadenza al termine della decifratura. Aggiunti 14 test di concorrenza al gate Vault. Formati e navigazione invariati, nessun deploy. [Audit Vault §9–10](../docs/AUDIT_VAULT_SESSION_P0.md#9-correzione-locale-del-12092026--operazioni-concorrenti) riporta prove, rollback, limiti e proposta del prossimo modello di navigazione.

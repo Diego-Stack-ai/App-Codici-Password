@@ -145,3 +145,19 @@ Raccomandazione: navigazione persistente per le pagine protette, con chiave solt
 | WebAuthn/PRF a ogni documento | Gesto di sblocco dispositivo a ogni pagina compatibile; Master Password di fallback | Prova fisica delle capacità e dell’esperienza sui dispositivi supportati |
 
 Questa proposta non attiva una nuova modalità e non rende conforme la compatibilità temporanea attuale. L’approvazione della direzione autorizzerà il prototipo; pubblicazione e migrazione restano gate separati.
+
+## 11. Prototipo autorizzato — 12/09/2026
+
+Il product owner ha autorizzato il prototipo isolato della navigazione persistente dopo la proposta della sezione 10. Base: `a6f756cc`, branch `experiment/persistent-vault-shell`. Questa autorizzazione non attiva il modello nell’app pubblicata.
+
+**Implementazione:** `experiments/persistent-vault-shell/` contiene un unico documento e due viste dimostrative, Panoramica e Account. Un router a destinazioni chiuse gestisce hash/history, AbortSignal e smontaggio dei listener; le viste non ricevono la chiave. Il gestore custodisce una CryptoKey non esportabile solo in RAM e verifica UID, generazione e scadenza anche al completamento delle letture asincrone. Blocco, uscita e `pagehide` invalidano la sessione e cancellano il contenuto visibile; `pageshow` da bfcache impone un nuovo sblocco. Refresh crea un gestore bloccato.
+
+**Dati e minacce:** fixture fittizia cifrata con AES-GCM, credenziale dimostrativa pubblica nel sorgente, salt/ciphertext in RAM. Non è un’autenticazione sicura e non accetta password o dati reali; la KDF della fixture non modifica il contratto crittografico produttivo. Nessuna persistenza web, rete Firebase o import del security manager produttivo. Il server serve soltanto sei file esplicitamente ammessi, ascolta su loopback e impone CSP `connect-src 'none'`, niente script inline, nessun framing e `no-store`. Una XSS nel contesto sbloccato resta una minaccia: non esportabilità e sola RAM non impediscono a codice ostile di usare il decryptor. Non viene promessa la cancellazione fisica della memoria o di copie già lette.
+
+**Avvio:** dalla radice repository, `npm run prototype:vault-shell`; aprire `http://127.0.0.1:4187`. Per terminare il server usare Ctrl+C. `npm run test:vault-shell` esegue 12 test ed è incluso nel gate Vault. La demo rimane esterna a `Frontend/public`, manifest e service worker: il gate verifica anche questa separazione. Nessuna pagina canonica aggiunta e nessun incremento del bundle dell’app.
+
+**Prove locali:** 12 test superati, inclusi cifratura reale della fixture, un solo sblocco su tre cambi di vista, cambio UID, timeout, annullamento delle letture e degli sblocchi pendenti, pulizia dei listener, destinazioni non ammesse e isolamento dal runtime. Nel browser integrato su Windows verificati sblocco, passaggio tra le due viste, Indietro/Avanti, refresh bloccato e cancellazione del contenuto al blocco. I test `pagehide/pageshow` del modello non certificano il bfcache reale di Safari.
+
+**Gate prima dell’integrazione:** adattare due vere pagine con montaggio/smontaggio completo e collegamenti originali; integrare Auth/verifier/envelope senza usare la credenziale pubblica della fixture; gestire cambi utente e tutte le operazioni pendenti; verificare deep link, focus, scroll e back/forward; misurare caricamento e memoria su iPhone/Safari/PWA, Chrome ed Edge; definire bootstrap offline e riapertura senza rete. La navigazione della demo già caricata non richiede fetch; un avvio offline da chiusa non è implementato (nessun service worker del laboratorio). Nessuna migrazione di account o condivisioni, né modifica del formato v1 produttivo.
+
+**Rollback:** eliminazione/revert del solo laboratorio e del relativo comando di test, senza toccare i dati. VS-P0-01 rimane aperto nell’app online fino al cutover collaudato; prototipo completato non significa migrazione completata.
