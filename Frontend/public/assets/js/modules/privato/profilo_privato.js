@@ -22,7 +22,7 @@ const unlinkProfileAccount = (...args) => import('../shared/profile-account-mana
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.108';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.109';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -40,9 +40,9 @@ import { syncData as _syncData } from './profilo-sync.js';
 import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDeadlineState } from './profile-model.js';
 
 // — Moduli estratti
-import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
+import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, getProfileQRPayload, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.108';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.109';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -117,6 +117,7 @@ export async function initProfiloPrivato(user) {
             setQRScalar,
             setWidgetFieldQr,
             getVCard: getProfileVCard,
+            getQRPayload: getProfileQRPayload,
             downloadVCard,
             shareVCard,
             editPersonalData: () => editSection('dati-personali', buildCtx()),

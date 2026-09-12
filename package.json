@@ -11,7 +11,7 @@
     "tesseract.js": "^7.0.0"
   },
   "name": "appcodicipassword",
-  "version": "1.2.108",
+  "version": "1.2.109",
   "description": "PWA Firebase per la gestione cifrata di account, aziende e scadenze.",
   "private": true,
   "scripts": {
@@ -50,7 +50,7 @@
     "test:storage-rules": "node scripts/run-storage-rules-tests.mjs",
     "test:firestore-rules": "node scripts/run-firestore-rules-tests.mjs",
     "test:assistant": "node scripts/test-vault-assistant.mjs && node --test experiments/card-importer/card-parser.test.mjs",
-    "test:profile": "node --test tests/profile-model.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs tests/profile-widget-zone.test.mjs tests/profile-contact-link.test.mjs tests/company-profile.test.mjs tests/profile-account-management.test.mjs",
+    "test:profile": "node --test tests/profile-model.test.mjs tests/profile-legacy-email-recovery.test.mjs tests/profile-label-management.test.mjs tests/profile-widget-zone.test.mjs tests/profile-contact-link.test.mjs tests/company-profile.test.mjs tests/profile-account-management.test.mjs tests/contact-card-photo.test.mjs",
     "test:maturity-fixture": "node --test tests/maturity-dataset.test.mjs",
     "test:css": "node node_modules/stylelint/bin/stylelint.mjs \"Frontend/public/assets/css/**/*.css\"",
     "test:dependencies": "node node_modules/madge/bin/cli.js Frontend/public/assets/js --extensions js --circular",
