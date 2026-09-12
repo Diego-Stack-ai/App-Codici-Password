@@ -119,6 +119,8 @@ function setupNewPasswordForm() {
             if (err.code === 'auth/requires-recent-login') {
                 showToast("Per sicurezza devi accedere di nuovo. Dopo il login tornerai qui.", "warning");
                 try {
+                    const { clearSession } = await import('../core/security-manager.js');
+                    clearSession();
                     await signOut(auth);
                 } finally {
                     window.location.replace('login-v115.html?reauth=password-change');
@@ -182,6 +184,8 @@ function setupCancelLogic() {
         const isReset = urlParams.has('oobCode');
 
         if (isRequiredPolicyUpdate) {
+            const { clearSession } = await import('../core/security-manager.js');
+            clearSession();
             await signOut(auth);
             window.location.replace('login-v115.html');
             return;

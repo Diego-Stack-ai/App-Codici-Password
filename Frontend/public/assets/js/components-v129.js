@@ -207,6 +207,8 @@ export async function initComponents() {
                             onclick: async () => {
                                 const confirmed = await showLogoutModal();
                                 if (confirmed) {
+                                    const { clearSession } = await import('./modules/core/security-manager.js');
+                                    clearSession();
                                     await signOut(auth);
                                     window.location.href = 'login-v115.html';
                                 }

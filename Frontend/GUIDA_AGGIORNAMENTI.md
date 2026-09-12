@@ -20,6 +20,10 @@ Questa sezione precede il diario storico. Le vecchie istruzioni V7/V8, le fasi p
 
 ## Diario storico
 
+### Intervento locale 12/09/2026 — pulizia prima del logout
+
+Su base v1.2.110, completata la pulizia esplicita nei quattro comandi mancanti: Home, logout comune e due uscite del cambio password. Ora tutti i sette percorsi eliminano RAM/sessione Vault prima di `signOut`; test del logout riuscito e fallito e censimento automatico aggiunti al gate Vault. Nessun cambio di formato o dati, nessun deploy. Dettagli, rollback e gate ancora aperti in [Audit Vault §8](../docs/AUDIT_VAULT_SESSION_P0.md#8-correzione-locale-del-12092026--blocco-1-logout). La persistenza delle chiavi fra documenti resta da riprogettare.
+
 > **Dipendenze:** [Guida progetto](../docs/GUIDA_PROGETTO.md) e [Architettura Sicurezza V1](../docs/ARCHITETTURA_SICUREZZA_V1.md)
 
 Questo documento traccia nuove funzioni, refactoring, prove e attività aperte. Le sezioni possono descrivere epoche diverse: la dicitura “completato” vale soltanto per il perimetro e la versione indicati. Una decisione consolidata viene riportata nel contratto specialistico pertinente; `GUIDA.md` conserva le regole implementative e non prevale sulla baseline sicurezza.

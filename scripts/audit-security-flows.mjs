@@ -74,6 +74,8 @@ assert.doesNotMatch(homeHtml, /app-version-label">V8\.0/, 'La home contiene anco
 assert.doesNotMatch(components, /app-version-badge/, 'La versione è ancora visualizzata nell’header');
 assert.match(components, /dataset\.appVersion = APP_VERSION/, 'La versione non viene propagata al documento di ogni pagina');
 
+// Compatibilità funzionale legacy: questi controlli non certificano la separazione
+// fra chiave e ciphertext, ancora aperta in AUDIT_VAULT_SESSION_P0.md.
 assert.match(security, /restoreVaultSession\(uid\)/, 'La chiave Vault non viene ripristinata tra le pagine');
 assert.match(security, /saveVaultSession\(_vaultKeyMaterial, uid\)/, 'Lo sblocco Vault non viene conservato nella sessione');
 assert.match(inactivity, /getVaultSessionExpiry\(\)/, 'Il timeout non verifica la scadenza condivisa tra pagine');

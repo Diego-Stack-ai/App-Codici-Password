@@ -30,4 +30,4 @@ assert.deepEqual(ambiguousNames, ['ensureMasterKey'], 'Nuovi nomi masterKey ambi
 const session = findSource(`${path.sep}core${path.sep}vault-session.js`);
 assert.doesNotMatch(session, /\bmasterKey\b/, 'La sessione confonde ancora Master Password e Vault Key');
 assert.match(session, /saveVaultSession\(vaultKeyMaterial, uid/, 'La sessione non dichiara il materiale Vault correttamente');
-console.log('Audit terminologia Vault: contratto M1 rispettato.');
+console.log('Audit terminologia Vault superato; non certifica la sicurezza della persistenza di sessione.');

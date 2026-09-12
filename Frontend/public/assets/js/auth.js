@@ -195,8 +195,8 @@ async function completeTotpLogin(code, email) {
  */
 async function logout() {
     try {
-        // Cleanup proattivo sessione
-
+        const { clearSession } = await import('./modules/core/security-manager.js');
+        clearSession();
         await signOut(auth);
         window.location.href = "login-v115.html";
     } catch (error) {

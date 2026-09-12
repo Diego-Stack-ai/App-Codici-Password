@@ -122,6 +122,8 @@ Cambio Master Password e rotazione richiedono:
 
 ## 8. Verifiche P0 aperte
 
+Aggiornamento locale 12/09/2026 (base v1.2.110): i sette comandi espliciti di logout cancellano il materiale locale prima di `signOut`, con test del comando comune anche in errore remoto. Evidenza e limiti in [Audit Vault, sezione 8](./AUDIT_VAULT_SESSION_P0.md#8-correzione-locale-del-12092026--blocco-1-logout). Il formato della sessione e gli invarianti restano invariati; la persistenza della chiave di wrapping rimane non conforme.
+
 - determinare esattamente cosa `vault-session.js` scrive in `sessionStorage`;
 - verificare se payload e chiave di wrapping sono entrambi recuperabili dalla stessa origine;
 - cercare residui storici in `localStorage`;

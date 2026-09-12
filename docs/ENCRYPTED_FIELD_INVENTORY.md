@@ -9,6 +9,8 @@
 
 Inventario M1 ricavato dalle chiamate a `encrypt`, `decrypt` ed `encryptAttachmentFile`. Il formato testuale è gestito da `crypto-utils.js`; gli allegati nuovi sono blob AES-GCM con wrapping per-file.
 
+Verifica di impatto 12/09/2026, correzione locale logout su base v1.2.110: nessuna aggiunta/rimozione o ricifratura di campi. Cambia soltanto il momento della pulizia della RAM Vault e delle chiavi `vault_session_v1`, `codex_vault_session_wrapping_key_v1`, `vault_s_key`, `vault_s_expiry`, ora prima di tutti i logout espliciti. Verifier, envelope e contenitori WebAuthn non vengono cancellati. L’inventario dei dati reali resta aperto; vedere [Audit Vault §8](./AUDIT_VAULT_SESSION_P0.md#8-correzione-locale-del-12092026--blocco-1-logout).
+
 | Documento / area | Campi cifrati osservati |
 |---|---|
 | `users/{uid}` profilo | `note`; nei dati legacy anche `nome`, `cognome`, `cf`, `birth_place` possono essere letti cifrati |

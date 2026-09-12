@@ -311,6 +311,8 @@ Queste osservazioni sono una fotografia documentale, non una certificazione runt
 
 ## 18. Metodo per l'audit dei documenti esistenti
 
+Aggiornamento di attuazione locale, 12/09/2026, base v1.2.110: pulizia esplicita della sessione prima di tutti i sette logout applicativi; dettagli, prove e rollback in [Audit Vault §8](./AUDIT_VAULT_SESSION_P0.md#8-correzione-locale-del-12092026--blocco-1-logout). Questa nota non modifica la baseline approvata: formato, persistenza fra pagine e gate crittografici restano invariati e non certificati. Nessuna distribuzione implicita.
+
 Ogni Markdown sarà classificato senza modificarlo automaticamente:
 
 | Esito | Significato |
