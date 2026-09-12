@@ -202,14 +202,14 @@ function _createPhoneCard(phone, idx) {
                     createCopyBtn(phone.number)
                 ])
             ]),
-            createElement('button', {
+            createElement('div', {className: phone.linkedAccountId ? 'profile-account-actions' : ''}, [createElement('button', {
                 className: 'btn-upload-trigger',
                 textContent: phone.linkedAccountId ? 'Apri Account collegato' : 'Collega o crea Account',
                 onclick: () => phone.linkedAccountId
                     ? _callbacks.openLinkedAccount(phone.linkedAccountId, phone.linkedAccountCompanyId)
                     : _callbacks.connectPhoneAccount(phone, _callbacks.syncData)
             }),
-            ...accountManagementButtons(phone,'phone')
+            ...accountManagementButtons(phone,'phone')])
         ])
     ]);
 }
@@ -318,7 +318,7 @@ export function renderEmailsView() {
                 createElement('span', { className: 'profile-contact-note-label', textContent: 'Nota' }),
                 createElement('span', { className: 'profile-contact-note-text', textContent: e.note })
             ]) : null,
-            createElement('button', {
+            createElement('div', {className: e.linkedAccountId ? 'profile-account-actions' : ''}, [createElement('button', {
                 className: 'btn-upload-trigger',
                 textContent: e.linkedAccountId
                     ? 'Apri Account collegato'
@@ -327,7 +327,7 @@ export function renderEmailsView() {
                     ? _callbacks.openLinkedAccount(e.linkedAccountId, e.linkedAccountCompanyId)
                     : _callbacks.connectEmailAccount(e, _callbacks.syncData)
             }),
-            ...accountManagementButtons(e,'email'),
+            ...accountManagementButtons(e,'email')]),
             e.linkedAccountId && hasLegacyEmailPassword(e) ? createElement('button', {
                 className: 'btn-upload-trigger',
                 textContent: 'Verifica trasferimento password',

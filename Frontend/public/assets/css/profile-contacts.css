@@ -8,3 +8,37 @@
 .profile-contact-card .company-contact-value { font: var(--font-input); }
 .profile-contact-card .company-contact-actions { display: grid; gap: .75rem; }
 [data-company-panel="contacts"] { width: 100%; max-width: 800px; margin-inline: auto; }
+
+/* The three Account commands share one compact row in every profile section. */
+.profile-account-actions,
+.profile-contact-card .company-contact-actions.profile-account-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: clamp(4px, 1vw, 8px);
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 0.75rem;
+}
+
+.profile-account-actions > button,
+.profile-contact-card .profile-account-actions > button {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 14px;
+    font-size: var(--fs-sm);
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: normal;
+}
+
+@media (max-width: 600px) {
+    .profile-account-actions > button,
+    .profile-contact-card .profile-account-actions > button {
+        padding: 8px;
+        font-size: var(--fs-micro);
+    }
+}

@@ -1,5 +1,5 @@
 import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
-import { auth, db } from '../../firebase-config.js?v=1.2.107';
+import { auth, db } from '../../firebase-config.js?v=1.2.108';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -72,7 +72,7 @@ export function renderCompanyContacts(data, companyId, reload) {
         if (contact.note) fields.push(createElement('div',{className:'company-contact-note'},[text('Nota','view-label'),text(contact.note)]));
         const actions = contact.linkedAccountId ? [button('Apri Account collegato',()=>{window.location.href=profileAccountUrl(contact.linkedAccountId,contact.linkedAccountCompanyId||'');}),button('Cambia Account',()=>changeProfileAccount({contact,type,sourceCompanyId:companyId},reload)),button('Scollega Account',()=>unlinkProfileAccount({contact,type,sourceCompanyId:companyId},reload))] : [button('Collega o crea Account',()=>connectCompanyContact(contact,companyId,type))];
         actions.forEach(action=>action.classList.add('profile-contact-connect'));
-        fields.push(createElement('div',{className:'company-contact-actions'},actions));
+        fields.push(createElement('div',{className:contact.linkedAccountId?'company-contact-actions profile-account-actions':'company-contact-actions'},actions));
         const header = createElement('div',{className:'profile-contact-header'},[text(contact.label,'profile-contact-label'),miniButton('Modifica contatto','edit',()=>{window.location.href=editUrl(companyId)+(type==='email'?'#section-email':'');})]);
         return createElement('article',{className:'company-contact-card profile-contact-card'},[header,createElement('div',{className:'profile-contact-fields'},fields.slice(1))]);
     };
