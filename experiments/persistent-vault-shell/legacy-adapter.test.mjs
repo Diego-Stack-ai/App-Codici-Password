@@ -89,3 +89,55 @@ test('switching owner clears the unlocked memory context', async () => {
     assert.equal(f.adapter.isUnlocked(), false);
     await assert.rejects(f.adapter.read({ownerId: 'b', ciphertext}), /VAULT_LOCKED/);
 });
+
+test('manual lock during security loading prevents a later password prompt', async () => {
+    let release, loadSignal, prompts = 0;
+    const f = fixture({
+        loadSecurity: (uid, {signal}) => { loadSignal = signal; return new Promise(resolve => { release = resolve; }); },
+        requestPassword: async () => { prompts++; return master; }
+    });
+    const unlocking = f.adapter.unlock();
+    const rejected = assert.rejects(unlocking, /UNLOCK_CANCELLED/);
+    f.adapter.lock();
+    assert.equal(loadSignal.aborted, true);
+    release({verifier, vaultKeyEnvelope: envelope});
+    await rejected;
+    assert.equal(prompts, 0);
+});
+
+test('manual lock aborts the password prompt and prevents verifier/decrypt work', async () => {
+    let entered, release, promptSignal, verifications = 0;
+    const waiting = new Promise(resolve => { entered = resolve; });
+    const f = fixture({
+        requestPassword: ({signal}) => { promptSignal = signal; entered(); return new Promise(resolve => { release = resolve; }); },
+        cryptoApi: {...cryptoApi, verifyVaultVerifier: async () => { verifications++; return true; }}
+    });
+    const unlocking = f.adapter.unlock();
+    const rejected = assert.rejects(unlocking, /UNLOCK_CANCELLED/);
+    await waiting; f.adapter.lock();
+    assert.equal(promptSignal.aborted, true);
+    release(master); await rejected;
+    assert.equal(verifications, 0);
+});
+
+test('lock during verifier work prevents envelope unwrapping', async () => {
+    let entered, release, unwraps = 0;
+    const waiting = new Promise(resolve => { entered = resolve; });
+    const f = fixture({cryptoApi: {...cryptoApi,
+        verifyVaultVerifier: () => { entered(); return new Promise(resolve => { release = resolve; }); },
+        unwrapVaultKey: async () => { unwraps++; return randomKey; }
+    }});
+    const unlocking = f.adapter.unlock();
+    const rejected = assert.rejects(unlocking, /UNLOCK_CANCELLED/);
+    await waiting; f.adapter.lock(); release(true); await rejected;
+    assert.equal(unwraps, 0);
+});
+
+test('dispose unsubscribes once even when the UI lock callback fails', () => {
+    let unsubscribes = 0;
+    const f = fixture({subscribeUser: () => () => unsubscribes++, onLock: () => { throw new Error('UI fixture'); }});
+    assert.throws(() => f.adapter.dispose(), /UI fixture/);
+    f.adapter.dispose();
+    assert.equal(unsubscribes, 1);
+    assert.equal(f.adapter.isUnlocked(), false);
+});

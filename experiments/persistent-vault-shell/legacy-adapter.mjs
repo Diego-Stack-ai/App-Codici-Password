@@ -12,23 +12,27 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
     const assertOwner = uid => { if (owner() !== uid) throw new Error('AUTH_CHANGED'); };
     const vault = createMemoryVault({
         onLock, now, timeoutMs,
-        async unlockKey(uid) {
-            assertOwner(uid);
-            const security = await loadSecurity(uid);
-            assertOwner(uid);
+        async unlockKey(uid, {signal}) {
+            const assertActive = () => {
+                assertOwner(uid);
+                if (signal.aborted) throw new Error('UNLOCK_CANCELLED');
+            };
+            assertActive();
+            const security = await loadSecurity(uid, {signal});
+            assertActive();
             const envelope = security?.vaultKeyEnvelope;
             if (!security?.verifier || envelope?.version !== 2 || envelope?.type !== 'vault-key-envelope') {
                 throw new Error('MIGRATION_REQUIRED');
             }
-            const password = await requestPassword();
-            assertOwner(uid);
+            const password = await requestPassword({signal});
+            assertActive();
             if (!password) throw new Error('UNLOCK_CANCELLED');
             if (!await cryptoApi.verifyVaultVerifier(security.verifier, 'APP_CODICI_PASSWORD_VAULT_VERIFIER_V1', password)) {
                 throw new Error('INVALID_MASTER_PASSWORD');
             }
-            assertOwner(uid);
+            assertActive();
             const key = await cryptoApi.unwrapVaultKey(envelope, password);
-            assertOwner(uid);
+            assertActive();
             return key;
         },
         async decryptRecord(key, record) {
@@ -53,6 +57,10 @@ export function createLegacyAdapter({getUser, subscribeUser, loadSecurity, reque
         },
         isUnlocked: () => !disposed && vault.isUnlocked(),
         touch: () => vault.touch(),
-        dispose() { disposed = true; vault.lock('dispose'); unsubscribe(); }
+        dispose() {
+            if (disposed) return;
+            disposed = true;
+            try { vault.lock('dispose'); } finally { unsubscribe(); }
+        }
     });
 }

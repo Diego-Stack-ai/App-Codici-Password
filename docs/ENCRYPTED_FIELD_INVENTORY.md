@@ -38,3 +38,5 @@ Restano leggibili dal modello applicativo date e metadati necessari alle liste, 
 - `_encrypted` segnala i documenti che richiedono decifratura selettiva.
 - `decrypt` prova la chiave primaria e, quando presente, il fallback del keyring legacy.
 - M1 non riscrive documenti, non rimuove fallback e non cambia lo schema Firestore.
+
+Verifica sperimentale 12/09/2026, base `ff006c71`: introdotto AbortSignal per il ciclo di sblocco; nessuna variazione dei campi, della cifratura o della persistenza. [Evidenze](./AUDIT_VAULT_SESSION_P0.md#15-annullamento-e-robustezza-del-laboratorio--12092026).

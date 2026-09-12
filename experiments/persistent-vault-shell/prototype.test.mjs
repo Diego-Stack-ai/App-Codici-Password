@@ -137,3 +137,47 @@ test('prototype runtime has no storage, network API, real Firebase imports or pu
     }
     await walk(publicRoot);
 });
+
+test('lock aborts the active unlock dependency and an older completion cannot detach a newer signal', async () => {
+    const jobs = [];
+    const vault = fakeVault({unlockKey: (uid, {signal}) => {
+        const pending = deferred(); jobs.push({signal, ...pending}); return pending.promise;
+    }});
+    const first = vault.unlock('a');
+    const cancelled = assert.rejects(first, /UNLOCK_CANCELLED/);
+    const second = vault.unlock('a');
+    assert.equal(jobs[0].signal.aborted, true);
+    jobs[0].resolve({}); await cancelled;
+    vault.lock();
+    assert.equal(jobs[1].signal.aborted, true);
+    const secondCancelled = assert.rejects(second, /UNLOCK_CANCELLED/);
+    jobs[1].resolve({}); await secondCancelled;
+    assert.equal(vault.isUnlocked(), false);
+});
+
+test('cleanup failure aborts navigation, reports once and permits a later safe mount', async () => {
+    let mounts = 0, reports = 0, signal;
+    const router = createRouter({onError: () => { reports++; router.stop(); }, routes: {
+        overview: context => { signal = context.signal; return () => { throw new Error('cleanup fixture'); }; },
+        account: () => { mounts++; }
+    }});
+    await router.navigate('overview');
+    await router.navigate('account');
+    assert.equal(signal.aborted, true);
+    assert.equal(reports, 1);
+    assert.equal(mounts, 0);
+    await router.navigate('account');
+    assert.equal(mounts, 1);
+});
+
+test('late asynchronous cleanup failures are reported instead of silently ignored', async () => {
+    const pending = deferred(); let reports = 0;
+    const router = createRouter({onError: () => reports++, routes: {
+        overview: async () => { await pending.promise; return () => { throw new Error('late fixture'); }; },
+        account: () => {}
+    }});
+    const old = router.navigate('overview');
+    await router.navigate('account');
+    pending.resolve(); await old;
+    assert.equal(reports, 1);
+});

@@ -142,3 +142,5 @@ Aggiornamento locale 12/09/2026 (base v1.2.110): i sette comandi espliciti di lo
 - ottenere revisione crittografica indipendente.
 
 Finché questi punti non sono chiusi, il runtime non deve essere dichiarato definitivamente zero-knowledge o conforme a questo contratto.
+
+Aggiornamento sperimentale 12/09/2026, base `ff006c71`: annullamento esplicito delle dipendenze di sblocco e controlli tra caricamento, prompt, verifier e unwrap; errori di smontaggio delle viste segnalati al blocco. Invarianti e formati produttivi invariati. Evidenze: [Audit Vault §15](./AUDIT_VAULT_SESSION_P0.md#15-annullamento-e-robustezza-del-laboratorio--12092026).

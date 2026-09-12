@@ -37,7 +37,7 @@ async function mount({signal, route: name}) {
     const container = element('div', '');
     view.replaceChildren(container);
     let disposeList;
-    const heading = element('h2', name === 'account' ? 'Account demo' : 'Panoramica');
+    const heading = element('h2', {overview: 'Panoramica', account: 'Account demo', private: 'Account privati · dati fittizi', company: 'Account aziendali · dati fittizi'}[name]);
     container.append(heading);
     for (const link of document.querySelectorAll('nav a')) {
         if (link.hash === `#${name}`) link.setAttribute('aria-current', 'page');

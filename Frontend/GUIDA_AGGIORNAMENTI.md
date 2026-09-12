@@ -551,3 +551,7 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 ### Pubblicazione anteprima Vault — 12/09/2026
 
 Su autorizzazione del product owner, pubblicato il canale temporaneo `vault-shell-fc9fffe1-0912` dal commit `fc9fffe1`, scadenza 19/09/2026. Contiene dieci file con soli dati fittizi. Verificati sblocco, lista aziendale, worker pronto e refresh bloccato nel browser Windows; collaudo fisico iPhone ancora richiesto. Evidenze e URL in `docs/AUDIT_VAULT_SESSION_P0.md`, sezione 14. Canale live invariato.
+
+### Robustezza laboratorio Vault — 12/09/2026
+
+Corretti prompt tardivi dopo blocco, dismissione dell’adattatore, errori di smontaggio e titoli dei collegamenti diretti alle liste. Sette test nuovi: gate laboratorio 32/32 e anteprima 2/2. Censiti i vincoli dei due orchestratori reali prima della futura migrazione. [Audit §15](../docs/AUDIT_VAULT_SESSION_P0.md#15-annullamento-e-robustezza-del-laboratorio--12092026). Nessuna attivazione nell’app live.
