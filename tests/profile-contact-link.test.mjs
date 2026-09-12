@@ -58,7 +58,8 @@ test('precompila solo i campi vuoti senza sostituire credenziali esistenti', () 
 
 for (const type of ['email', 'phone']) {
     for (const createNew of [false, true]) {
-        test(`${type}: seleziona e apre ${createNew ? 'un nuovo Account' : 'un Account esistente'} senza passare segreti`, async () => {
+      for (const company of [false, true]) {
+        test(`${type} ${company ? 'azienda' : 'personale'}: seleziona e apre ${createNew ? 'un nuovo Account' : 'un Account esistente'} senza passare segreti`, async () => {
             let modal;
             const storage = new Map();
             const window = { location: { href: '' } };
@@ -70,19 +71,21 @@ for (const type of ['email', 'phone']) {
                     { id: 'archived', isArchived: true }, { id: 'memo', type: 'memorandum' },
                     { id: 'used', linkedProfileField: { type: 'email', id: 'another' } }
                 ],
+                listCompanies: async () => [{ id: 'company-1', ragioneSociale: 'Azienda fixture' }],
+                listCompanyAccounts: async () => [{ id: 'account-b', nomeAccount: 'Account aziendale' }],
                 ensureVaultKeyMaterial: async () => 'key', decrypt: async value => value,
-                showProfileModal: (title, fields, current, onSave) => { modal = { title, fields, current, onSave }; },
+                showProfileAccountPicker: options => { modal = options; },
                 sessionStorage: { setItem: (key, value) => storage.set(key, value) }, window
             };
             const controller = await loadController('privato/profilo-links.js', dependencies, ['connectEmailAccount', 'connectPhoneAccount']);
             const contact = { id: 'contact-1', address: 'fixture@example.test', number: '+390001', password: 'SECRET-FIXTURE', pin: 'PIN-FIXTURE' };
             let synced = 0;
             await controller[type === 'email' ? 'connectEmailAccount' : 'connectPhoneAccount'](contact, async () => { synced++; });
-            const options = modal.fields[0].options;
-            assert.equal(options.length, 3);
-            assert.notEqual(options[1], options[2]);
-            assert.equal(modal.current.account, options[1]);
-            await modal.onSave({ account: createNew ? options[0] : options[2] });
+            assert.equal(modal.accounts.length, 3);
+            assert.equal(modal.accounts.filter(item => item.id === 'account-b').length, 2);
+            await modal.onSelect(createNew ? { companyId: company ? 'company-1' : '' } : modal.accounts.find(item => item.id === 'account-b' && Boolean(item.companyId) === company));
+            assert.equal(window.location.href.includes('aziendaId=company-1'), company);
+            assert.equal(window.location.href.includes('form_account_azienda.html'), company);
             assert.equal(synced, 1);
             assert.match(window.location.href, /profileContactId=contact-1/);
             assert.equal(window.location.href.includes('id=account-b'), !createNew);
@@ -94,27 +97,30 @@ for (const type of ['email', 'phone']) {
     }
 }
 
+}
+
 test('un errore di sincronizzazione non apre il form e non persiste la bozza', async () => {
     let modal, wrote = false;
     const window = { location: { href: '' } };
     const controller = await loadController('privato/profilo-links.js', {
         ...model, ...modes, auth: { currentUser: { uid: 'owner' } },
         listPrivateAccounts: async () => [{ id: 'a' }],
+        listCompanies: async () => [],
         ensureVaultKeyMaterial: async () => 'key',
-        showProfileModal: (title, fields, values, onSave) => { modal = { fields, onSave }; },
+        showProfileAccountPicker: options => { modal = options; },
         sessionStorage: { setItem: () => { wrote = true; } }, window
     }, ['connectPhoneAccount']);
     await controller.connectPhoneAccount({ id: 'p' }, async () => { throw new Error('offline'); });
-    await assert.rejects(modal.onSave({ account: modal.fields[0].options[1] }), /offline/);
+    await assert.rejects(modal.onSelect(modal.accounts[0]), /offline/);
     assert.equal(wrote, false);
     assert.equal(window.location.href, '');
 });
 
-async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false } = {}) {
+async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false } = {}) {
     const profileKey = type === 'phone' ? 'contactPhones' : 'contactEmails';
     const contact = { id: 'contact-1', number: '+390001', address: 'fixture@example.test', password: legacy ? `cipher:${legacy}` : '', note: 'cipher:nota', custom: 'preserve' };
     const profile = { [profileKey]: missing ? [] : [contact, { id: 'other', password: 'cipher:other' }] };
-    const fields = { 'account-name': { value: 'Fixture' }, 'account-password': { value: password }, 'account-username': { value: 'fixture@example.test' }, 'btn-save-footer': { disabled: false } };
+    const fields = { 'account-name': { value: 'Fixture' }, 'account-password': { value: password }, 'account-username': { value: 'fixture@example.test' }, 'btn-save-footer': { disabled: false }, 'save-btn-footer': { disabled: false } };
     const committed = [];
     const messages = [];
     let draftRemoved = false;
@@ -130,7 +136,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         runTransaction: async (db, callback) => {
             const staged = [];
             await callback({
-                get: async reference => ({ exists: () => true, data: () => reference.path === 'users/owner' ? profile : { revision: conflict ? 2 : 1 } }),
+                get: async reference => ({ exists: () => true, data: () => reference.path === 'users/owner' ? profile : { revision: conflict ? 2 : 1, updatedAt: conflict ? 'changed' : '' } }),
                 update: (reference, value) => staged.push({ path: reference.path, value }),
                 set: (reference, value) => staged.push({ path: reference.path, value }), delete: () => {}
             });
@@ -146,9 +152,11 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         sessionStorage: { removeItem: () => { draftRemoved = true; } },
         setTimeout: () => {}, console: { error: () => {} }
     };
-    const controller = await loadController('privato/form-privato-save.js', dependencies, ['savePrivateAccount']);
-    await controller.savePrivateAccount({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', isEditing: editing, baseRevision: 1,
-        profileContactLinkDraft: { profileContactId: 'contact-1', contactType: type, ownerUid: 'owner' } });
+    dependencies.decryptRequiredValue = dependencies.decodeProfileContactValue;
+    const method = company ? 'saveAccount' : 'savePrivateAccount';
+    const controller = await loadController(company ? 'azienda/form-azienda-save.js' : 'privato/form-privato-save.js', dependencies, [method]);
+    await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1,
+        profileContactLinkDraft: { profileContactId: 'contact-1', contactType: type, ownerUid: 'owner', ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
     return { committed, contact, messages, draftRemoved, profileKey };
 }
 
@@ -164,6 +172,41 @@ for (const editing of [true, false]) test(`salvataggio ${editing ? 'esistente' :
     assert.equal(profile.contactEmails[1].password, 'cipher:other');
     assert.equal(result.contact.password, 'cipher:legacy');
     assert.equal(result.draftRemoved, true);
+});
+
+test('ricerca per nome, utente e azienda, senza dipendere da accenti o maiuscole', () => {
+    const accounts = [{ id: 'same', name: 'Caffè', username: 'diego', companyId: '', companyName: '' },
+        { id: 'same', name: 'Portale', username: 'diego', companyId: 'c1', companyName: 'Società Alfa' }];
+    assert.deepEqual(model.filterProfileAccounts(accounts, 'CAFFE'), [accounts[0]]);
+    assert.deepEqual(model.filterProfileAccounts(accounts, 'societa diego'), [accounts[1]]);
+    assert.deepEqual(model.filterProfileAccounts(accounts, '', 'personal'), [accounts[0]]);
+    assert.deepEqual(model.filterProfileAccounts(accounts, '', 'company:c1'), [accounts[1]]);
+    assert.deepEqual(model.filterProfileAccounts(accounts, 'inesistente'), []);
+    assert.equal(model.profileAccountUrl('same', 'c1', { edit: true, contactId: 'phone-1' }), 'form_account_azienda.html?id=same&aziendaId=c1&profileContactId=phone-1');
+    assert.equal(model.profileAccountUrl('same'), 'dettaglio_account_privato.html?id=same');
+});
+
+for (const editing of [true, false]) test(`Account aziendale ${editing ? 'esistente' : 'nuovo'}: trasferimento atomico e riferimento completo`, async () => {
+    const result = await saveFixture({ company: true, editing });
+    assert.equal(result.committed.length, 2);
+    const contact = result.committed.find(item => item.path === 'users/owner').value.contactEmails[0];
+    assert.equal(contact.linkedAccountCompanyId, 'company-1');
+    assert.equal(contact.password, '');
+    assert.equal(result.committed[0].path, `users/owner/aziende/company-1/accounts/${editing ? 'account-1' : 'new-account'}`);
+});
+test('telefono aziendale: conserva i dati e registra anche ID azienda', async () => {
+    const result = await saveFixture({ company: true, type: 'phone' });
+    const contact = result.committed.find(item => item.path === 'users/owner').value.contactPhones[0];
+    assert.deepEqual(contact, { ...result.contact, linkedAccountId: 'account-1', linkedAccountCompanyId: 'company-1' });
+});
+test('Account aziendale con password diversa: conserva la password del Profilo', async () => {
+    const result = await saveFixture({ company: true, password: 'different' });
+    assert.equal(result.committed.find(item => item.path === 'users/owner').value.contactEmails[0].password, 'cipher:legacy');
+});
+for (const condition of ['failCommit', 'conflict', 'missing', 'unreadable', 'wrongCompany']) test(`Account aziendale ${condition}: conserva dati e bozza`, async () => {
+    const result = await saveFixture({ company: true, [condition]: true });
+    assert.deepEqual(result.committed, []);
+    assert.equal(result.draftRemoved, false);
 });
 
 for (const password of ['', 'different']) test(`password Account ${password || 'vuota'}: conserva il valore legacy`, async () => {

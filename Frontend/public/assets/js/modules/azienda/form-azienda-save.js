@@ -5,7 +5,7 @@
  * Entry: saveAccount(ctx), deleteAccount(ctx)
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.100';
+import { auth, db } from '../../firebase-config.js?v=1.2.101';
 import { LOG } from '../../logger.js';
 import {
     doc, collection, runTransaction, deleteDoc, deleteField
@@ -16,6 +16,8 @@ import { logError, sanitizeEmail } from '../../utils.js';
 import { encrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { accountModeFromFlags, recordFieldsFromAccountMode, validateAccountMode } from '../shared/account-mode-model.js';
 import { formatCardExpiry, hasInvalidCardExpiry } from '../shared/banking-model.js';
+import { linkProfileEmailToAccount, isProfileEmailPasswordTransferred } from '../privato/profile-model.js';
+import { decryptRequiredValue } from '../core/crypto-utils.js';
 
 // Utility locale per recupero rapido valori
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -24,7 +26,7 @@ const get = (id) => document.getElementById(id)?.value.trim() || '';
  * Salva o aggiorna un account aziendale con crittografia e gestione condivisione.
  * @param {Object} ctx - Stato corrente del form
  */
-export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing }) {
+export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo, currentUid, currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt = '' }) {
     const btnSave = document.getElementById('save-btn-footer') || document.querySelector('[data-action="save"]');
     if (btnSave) btnSave.disabled = true;
 
@@ -46,11 +48,12 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
         return;
     }
 
+    const passwordToSave = get('account-password');
     const data = {
         nomeAccount: (get('account-name') || '').trim(), // In chiaro
         username: await encrypt((get('account-username') || '').trim(), vaultKeyMaterial),
         account: await encrypt((get('account-code') || '').trim(), vaultKeyMaterial),
-        password: await encrypt((get('account-password') || '').trim(), vaultKeyMaterial),
+        password: await encrypt(passwordToSave, vaultKeyMaterial),
         url: (get('account-url') || '').trim(), // In chiaro
         numeroIscrizione: await encrypt((get('account-numero-iscrizione') || '').trim(), vaultKeyMaterial),
         codiceSocieta: await encrypt((get('account-codice-societa') || '').trim(), vaultKeyMaterial),
@@ -109,6 +112,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
     }
 
     Object.assign(data, recordFieldsFromAccountMode(mode));
+    if (profileContactLinkDraft) data.linkedProfileField = { type: profileContactLinkDraft.contactType, id: profileContactLinkDraft.profileContactId };
 
     const isSharingActive = data.visibility === 'shared';
 
@@ -134,6 +138,7 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
     try {
         const colPath = `users/${currentUid}/aziende/${currentAziendaId}/accounts`;
+        let retainedProfilePassword = false;
 
         // --- ATOMIC TRANSACTION V3.1 ---
         await runTransaction(db, async (transaction) => {
@@ -142,7 +147,28 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
 
             // 1. ALL READS FIRST
             const accountSnap = isEditing ? await transaction.get(accRef) : null;
+            const profileRef = profileContactLinkDraft ? doc(db, 'users', currentUid) : null;
+            const profileSnap = profileRef ? await transaction.get(profileRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
+            const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
+            let linkedContact = null;
+            if (profileContactLinkDraft) {
+                const draft = profileContactLinkDraft;
+                if (draft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || draft.companyId !== currentAziendaId || !['email', 'phone'].includes(draft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
+                const contact = profileSnap?.data()?.[contactCollection]?.find(item => item.id === draft.profileContactId);
+                if (!contact) throw new Error('Contatto non disponibile.');
+                if (contact.linkedAccountId && (contact.linkedAccountId !== targetId || contact.linkedAccountCompanyId !== currentAziendaId)) throw new Error('Contatto già collegato a un altro Account.');
+                if (oldData?.linkedProfileField && (oldData.linkedProfileField.id !== contact.id || oldData.linkedProfileField.type !== draft.contactType)) throw new Error('Account già collegato a un altro contatto.');
+                if (isEditing && (!oldData || (oldData.updatedAt || '') !== baseUpdatedAt)) throw new Error('Account modificato: ricarica prima di collegare.');
+                if (oldData?.isArchived || data.visibility === 'shared' || data.type === 'memo') throw new Error('Scegli un Account attivo non condiviso.');
+                const legacyPassword = contactCollection === 'contactEmails' ? await decryptRequiredValue(contact.password, vaultKeyMaterial) : '';
+                const passwordTransferred = isProfileEmailPasswordTransferred(legacyPassword, passwordToSave);
+                retainedProfilePassword = Boolean(legacyPassword) && !passwordTransferred;
+                linkedContact = contactCollection === 'contactEmails'
+                    ? linkProfileEmailToAccount(contact, targetId, { passwordTransferred })
+                    : { ...contact, linkedAccountId: targetId };
+                linkedContact.linkedAccountCompanyId = currentAziendaId;
+            }
             let currentSharedWith = oldData?.sharedWith || {};
 
             // 2. NOW EXECUTE ALL WRITES
@@ -274,9 +300,13 @@ export async function saveAccount({ bankAccounts, invitedEmails, isExplicitMemo,
             // Update/Create Account V3.1
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);
+            if (profileRef) transaction.update(profileRef, {
+                [contactCollection]: profileSnap.data()[contactCollection].map(contact => contact.id === profileContactLinkDraft.profileContactId ? linkedContact : contact)
+            });
         });
 
-        showToast(t('success_save'), "success");
+        if (profileContactLinkDraft) sessionStorage.removeItem('profile-account-link-draft');
+        showToast(retainedProfilePassword ? 'Account collegato. La password diversa è stata conservata nel Profilo.' : t('success_save'), retainedProfilePassword ? 'warning' : 'success');
         setTimeout(() => {
             const destination = isEditing
                 ? `dettaglio_account_azienda.html?id=${currentDocId}&aziendaId=${currentAziendaId}&afterWrite=1`

@@ -7,6 +7,107 @@
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
+import { filterProfileAccounts } from './profile-model.js';
+
+export function showProfileAccountPicker({ title, accounts, companies, onSelect }) {
+    document.getElementById('profile-account-picker')?.remove();
+    const previousFocus = document.activeElement;
+    let selected = null;
+    let busy = false;
+    const modal = createElement('div', { id: 'profile-account-picker', className: 'modal-overlay active' });
+    const box = createElement('div', {
+        className: 'modal-box profile-account-picker', role: 'dialog',
+        'aria-modal': 'true', 'aria-labelledby': 'profile-account-picker-title'
+    });
+    const search = createElement('input', {
+        type: 'search', className: 'glass-field-input profile-account-search',
+        placeholder: 'Cerca nome, azienda o nome utente…', 'aria-label': 'Cerca Account', autocomplete: 'off'
+    });
+    const scope = createElement('select', { className: 'glass-field-input profile-account-scope', 'aria-label': 'Filtra per ambito' }, [
+        createElement('option', { value: 'all', textContent: 'Tutti gli Account' }),
+        createElement('option', { value: 'personal', textContent: 'Personali' }),
+        ...companies.map(company => createElement('option', { value: `company:${company.id}`, textContent: company.name }))
+    ]);
+    const count = createElement('p', { className: 'profile-account-count', role: 'status', 'aria-live': 'polite' });
+    const list = createElement('div', { className: 'profile-account-results', 'aria-label': 'Account trovati' });
+    const close = () => {
+        if (busy) return;
+        modal.remove();
+        previousFocus?.focus();
+    };
+    const submit = async selection => {
+        if (busy) return;
+        busy = true;
+        confirm.disabled = true;
+        create.disabled = true;
+        try {
+            await onSelect(selection);
+            busy = false;
+            close();
+        } catch {
+            busy = false;
+            confirm.disabled = !selected;
+            create.disabled = false;
+            showToast('Impossibile aprire l’Account. Riprova: nessun collegamento è stato salvato.', 'error');
+        }
+    };
+    const confirm = createElement('button', {
+        className: 'btn-modal btn-primary', textContent: 'Continua', disabled: true,
+        onclick: () => selected && submit(selected)
+    });
+    const create = createElement('button', {
+        className: 'btn-upload-trigger profile-account-create', textContent: '+ Nuovo Account personale',
+        onclick: () => submit({ companyId: scope.value.startsWith('company:') ? scope.value.slice(8) : '' })
+    });
+    const render = () => {
+        selected = null;
+        confirm.disabled = true;
+        const results = filterProfileAccounts(accounts, search.value, scope.value);
+        count.textContent = `${results.length} Account trovati`;
+        create.textContent = scope.value.startsWith('company:') ? '+ Nuovo Account in questa azienda' : '+ Nuovo Account personale';
+        setChildren(list, results.length ? results.map(account => {
+            const button = createElement('button', {
+                className: 'profile-account-result', type: 'button', 'aria-pressed': 'false',
+                onclick: () => {
+                    if (busy) return;
+                    selected = account;
+                    list.querySelectorAll('button').forEach(row => row.setAttribute('aria-pressed', String(row === button)));
+                    confirm.disabled = false;
+                }
+            }, [
+                createElement('span', { className: 'profile-account-result-name', textContent: account.name }),
+                createElement('span', { className: 'profile-account-result-context', textContent: account.companyId ? `Azienda · ${account.companyName}` : 'Personale' }),
+                account.username ? createElement('span', { className: 'profile-account-result-user', textContent: account.username }) : null
+            ]);
+            return button;
+        }) : [createElement('p', { className: 'profile-account-empty', textContent: 'Nessun Account trovato. Prova un altro nome o cambia il filtro.' })]);
+        list.scrollTop = 0;
+    };
+    search.oninput = render;
+    scope.onchange = render;
+    modal.onkeydown = event => {
+        if (event.key === 'Escape') { event.preventDefault(); close(); }
+        if (event.key !== 'Tab') return;
+        const controls = [...box.querySelectorAll('input, select, button:not(:disabled)')];
+        const first = controls[0], last = controls.at(-1);
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    setChildren(box, [
+        createElement('div', { className: 'modal-header' }, [
+            createElement('h3', { id: 'profile-account-picker-title', className: 'modal-title', textContent: title }),
+            createElement('div', { className: 'modal-accent-bar' })
+        ]),
+        createElement('div', { className: 'profile-account-filters' }, [search, scope]), count, list, create,
+        createElement('div', { className: 'modal-actions' }, [
+            createElement('button', { className: 'btn-modal btn-secondary', textContent: 'Annulla', onclick: close }), confirm
+        ])
+    ]);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+    render();
+    search.focus();
+}
 
 /**
  * Mostra un modal di modifica generico per il profilo.

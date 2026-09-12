@@ -42,6 +42,25 @@ export function isProfileEmailPasswordTransferred(legacyPassword, savedPassword)
         legacyPassword !== '--ERRORE--' && legacyPassword === savedPassword;
 }
 
+export function filterProfileAccounts(accounts, search = '', scope = 'all') {
+    const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('it');
+    const terms = normalize(search).split(/\s+/).filter(Boolean);
+    return accounts.filter(account => {
+        if (scope === 'personal' && account.companyId) return false;
+        if (scope.startsWith('company:') && account.companyId !== scope.slice(8)) return false;
+        const text = normalize([account.name, account.username, account.companyName, account.companyId ? 'azienda' : 'personale'].join(' '));
+        return terms.every(term => text.includes(term));
+    });
+}
+
+export function profileAccountUrl(accountId, companyId = '', { edit = false, contactId = '' } = {}) {
+    const params = new URLSearchParams();
+    if (accountId) params.set('id', accountId);
+    if (companyId) params.set('aziendaId', companyId);
+    if (contactId) params.set('profileContactId', contactId);
+    return `${edit ? 'form' : 'dettaglio'}_account_${companyId ? 'azienda' : 'privato'}.html?${params}`;
+}
+
 function normalizedDeadlineText(value) {
     return String(value || '').trim().toLocaleLowerCase('it');
 }

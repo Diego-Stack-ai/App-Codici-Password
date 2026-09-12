@@ -5,7 +5,7 @@
  * - Save/Delete estratto in: form-azienda-save.js
  */
 
-import { db } from '../../firebase-config.js?v=1.2.100';
+import { db } from '../../firebase-config.js?v=1.2.101';
 import { doc, collection } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -14,9 +14,11 @@ import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { logError } from '../../utils.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { saveAccount, deleteAccount } from './form-azienda-save.js';
-import { getCompanyAccount, listContacts } from '../data/vault-repository.js';
+import { getCompanyAccount, getUserProfile, listContacts } from '../data/vault-repository.js';
+import { prepareProfileEmailAccountValues } from '../privato/profile-model.js';
+import { decryptRequiredValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.100';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.101';
 
 // --- STATE ---
 let currentUid = null;
@@ -28,6 +30,8 @@ let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
 let accountWidgetController = null;
+let profileContactLinkDraft = null;
+let baseUpdatedAt = '';
 
 // Funzione di re-render locale per banking-renderer
 const rerender = () => renderBankAccounts(bankAccounts, rerender);
@@ -44,6 +48,13 @@ export async function initFormAccountAzienda(user) {
     const urlParams = new URLSearchParams(window.location.search);
     currentDocId = urlParams.get('id');
     currentAziendaId = urlParams.get('aziendaId');
+    profileContactLinkDraft = null;
+    baseUpdatedAt = '';
+    try {
+        const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
+        if (draft?.profileContactId === urlParams.get('profileContactId') && draft.ownerUid === user.uid &&
+            draft.companyId === currentAziendaId && ['email', 'phone'].includes(draft.contactType)) profileContactLinkDraft = draft;
+    } catch { profileContactLinkDraft = null; }
     isEditing = !!currentDocId;
     document.getElementById('account-mode-edit-controls')?.classList.toggle('hidden', isEditing);
     if (isEditing) {
@@ -75,6 +86,30 @@ export async function initFormAccountAzienda(user) {
         loadRubrica(),
         isEditing ? loadData() : Promise.resolve()
     ]);
+    if (profileContactLinkDraft) {
+        try {
+            const profile = await getUserProfile(user.uid);
+            const isPhone = profileContactLinkDraft.contactType === 'phone';
+            const contact = profile?.[isPhone ? 'contactPhones' : 'contactEmails']?.find(item => item.id === profileContactLinkDraft.profileContactId);
+            if (!contact) throw new Error('Contatto non disponibile.');
+            const key = await ensureVaultKeyMaterial();
+            const email = isPhone ? { address: contact.number } : { ...contact,
+                password: await decryptRequiredValue(contact.password, key), note: await decryptRequiredValue(contact.note, key) };
+            const values = prepareProfileEmailAccountValues(email, {
+                username: get('account-username'), password: get('account-password'), note: get('account-note')
+            });
+            for (const [field, value] of Object.entries(values)) {
+                const input = document.getElementById(`account-${field}`);
+                if (input) input.value = value;
+            }
+            if (!get('account-name')) document.getElementById('account-name').value = (isPhone ? 'Telefono ' : 'Email ') + (contact.label || email.address || '');
+            showToast('Verifica i dati e salva per collegare il contatto all’Account aziendale.', 'info');
+            document.getElementById('save-btn-footer').disabled = false;
+        } catch {
+            showToast('Dati non disponibili: torna al Profilo e riprova. Nessun dato è stato trasferito.', 'error');
+            return;
+        }
+    }
     if (isEditing) {
         accountWidgetController = await initAccountEmbeddedWidgets({
             uid: currentUid, context: 'company', companyId: currentAziendaId,
@@ -104,6 +139,7 @@ function initBaseUI() {
 
         const saveBtn = createElement('button', {
             id: 'save-btn-footer',
+            disabled: Boolean(profileContactLinkDraft),
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('save') || 'Salva',
             onclick: async () => {
@@ -117,7 +153,7 @@ function initBaseUI() {
                 }
                 await saveAccount({
                     bankAccounts, invitedEmails, isExplicitMemo, currentUid,
-                    currentDocId, currentAziendaId, isEditing
+                    currentDocId, currentAziendaId, isEditing, profileContactLinkDraft, baseUpdatedAt
                 });
             }
         }, [
@@ -145,7 +181,12 @@ function initBaseUI() {
 async function loadData() {
     try {
         const data = await getCompanyAccount(currentUid, currentAziendaId, currentDocId);
-        if (!data) { showToast(t('account_not_found'), "error"); return; }
+        if (!data) {
+            showToast(t('account_not_found'), "error");
+            if (profileContactLinkDraft) throw new Error('Account non disponibile.');
+            return;
+        }
+        baseUpdatedAt = data.updatedAt || '';
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario (V6.0)
@@ -163,6 +204,7 @@ async function loadData() {
 
         const decryptIfPossible = async (val) => {
             if (!needsDecryption || !val) return val;
+            if (profileContactLinkDraft) return decryptRequiredValue(val, vaultKeyMaterial);
             try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return "---ERRORE DECRYPT---"; }
         };
 
@@ -254,7 +296,7 @@ async function loadData() {
             document.getElementById('btn-remove-logo')?.classList.remove('hidden');
         }
 
-    } catch (e) { logError("LoadData", e); }
+    } catch (e) { logError("LoadData", e); if (profileContactLinkDraft) throw e; }
     finally { toggleLoading(false); }
 }
 
