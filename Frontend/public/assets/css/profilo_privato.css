@@ -714,13 +714,20 @@ html:not(.dark) .hero-profile-header .saetta-drop {
 }
 
 .profile-contact-note {
+    display: grid;
+    gap: 4px;
     margin-top: 8px;
-    padding-left: 8px;
-    border-left: 2px solid var(--accent);
     color: var(--text-secondary);
-    font: var(--font-micro);
-    line-height: 1.4;
-    opacity: 0.6;
+    font: var(--font-caption);
+}
+
+.profile-contact-note-label {
+    font-weight: var(--font-label-weight);
+}
+
+.profile-contact-note-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .profile-dropdown-item {

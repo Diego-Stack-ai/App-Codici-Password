@@ -249,8 +249,11 @@ export function renderEmailsView() {
                 ? createLegacyPasswordRecovery(e.password)
                 : createElement('span', { className: 'data-value-sub', textContent: e.linkedAccountId ? 'Credenziali gestite nell’Account collegato' : 'Nessuna credenziale nel Profilo' }),
             e.note ? createElement('div', {
-                className: 'note-display-lite profile-contact-note'
-            }, [createElement('span', { textContent: e.note })]) : null,
+                className: 'profile-contact-note'
+            }, [
+                createElement('span', { className: 'profile-contact-note-label', textContent: 'Nota' }),
+                createElement('span', { className: 'profile-contact-note-text', textContent: e.note })
+            ]) : null,
             createElement('button', {
                 className: 'btn-upload-trigger',
                 textContent: e.linkedAccountId

@@ -13,7 +13,7 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.101';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.102';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
