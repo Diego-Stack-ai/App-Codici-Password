@@ -1150,10 +1150,9 @@ html:not(.dark) .hero-profile-header .saetta-drop {
     margin: 0 auto 1.25rem;
     padding: 0.5rem;
     overflow-x: auto;
-    border: 1px solid var(--border-color);
+    border: 0;
     border-radius: 1rem;
-    background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
-    backdrop-filter: blur(18px);
+    background: transparent;
     scrollbar-width: none;
 }
 
