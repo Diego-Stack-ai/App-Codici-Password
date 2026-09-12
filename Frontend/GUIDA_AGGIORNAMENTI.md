@@ -585,3 +585,7 @@ Dettaglio base locale, 12/09/2026, base `70a6c4c5`: apertura dalle liste senza c
 Avanzamento locale 12/09/2026, base `755c68ed`: note/sito web nel dettaglio emulato, correzione ID repository, nessuna mutazione views/edit in dettaglio aziendale readonly e gestione ID fisico dopo lookup privato legacy. Compatibilità dei riferimenti storici da collaudare prima del rilascio. [Audit §24](../docs/AUDIT_VAULT_SESSION_P0.md#24-identità-dei-record-e-campi-aggiuntivi-del-dettaglio--12092026).
 
 Avanzamento locale, base `b792b1c0`: capacità di cifratura legata alla vista e preparatore di patch privata. Nessun pulsante Salva aggiunto; aperti compatibilità writer M6, isolamento autorevole e cancellazione campi. [Audit §25](../docs/AUDIT_VAULT_SESSION_P0.md#25-preparazione-cifrata-delle-modifiche-nella-sessione-in-ram--12092026).
+
+Avanzamento locale base `6432cad8`: preparatore M6 per quattro campi sensibili e test del salvataggio originale su fixture emulata. Titolo/URL preservati, nessuna scrittura UI o pubblicazione. [Audit §26](../docs/AUDIT_VAULT_SESSION_P0.md#26-preparazione-m6-e-transazione-originale-su-dati-emulati--12092026).
+
+Correzione contatti azienda, 12/09/2026: confronto strutturale elimina falsi conflitti dovuti all’ordine delle mappe; modulo online caricato dal server prima di abilitare Salva. Conflitti reali e obbligo di scollegare Account restano protetti. Correzione locale non pubblicata. [Audit §27](../docs/AUDIT_VAULT_SESSION_P0.md#27-falso-conflitto-nella-modifica-dei-contatti-azienda--12092026).
