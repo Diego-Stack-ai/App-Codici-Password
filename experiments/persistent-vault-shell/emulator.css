@@ -12,3 +12,7 @@
 .account-data-value{overflow-wrap:anywhere;flex:1}
 .account-data-label{font-size:.85rem}
 .btn-mini-action{padding:10px;display:inline-flex;align-items:center;justify-content:center}
+.detail-extra-fields{margin-top:20px;padding:0}
+.detail-extra-field{padding:16px 0;border-top:1px solid #c8d8e6}
+.detail-extra-field pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.5}
+.detail-extra-field p{overflow-wrap:anywhere}

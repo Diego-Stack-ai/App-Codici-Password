@@ -1,4 +1,4 @@
-const fields = ['nomeAccount', 'username', 'account', 'password'];
+const fields = ['nomeAccount', 'username', 'account', 'password', 'note', 'url'];
 const segment = value => {
     if (typeof value !== 'string' || !value.trim() || value.includes('/') || value === '.' || value === '..') {
         throw new Error('INVALID_RECORD_ID');

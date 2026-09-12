@@ -1,4 +1,5 @@
 import {createAccountListView} from '../../Frontend/public/assets/js/modules/shared/account-list-view.js';
+import {mountDetailExtraFields} from './detail-extra-fields.mjs';
 
 // Basic experimental detail: reuse the canonical card without activating the
 // legacy detail orchestrators, their writes, or their security manager.
@@ -11,7 +12,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
     const back = document.createElement('button'); back.type = 'button'; back.textContent = 'Torna alla lista';
     const container = document.createElement('div'); container.id = 'accounts-container';
     wrapper.append(title, back, container);
-    let disposed = false, view = null, account = null;
+    let disposed = false, view = null, account = null, extraCleanup = null;
     const assertActive = () => {
         if (disposed || context.signal.aborted) throw new DOMException('View disposed', 'AbortError');
     };
@@ -21,7 +22,7 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         context.signal.removeEventListener('abort', cleanup);
         lifecycle.abort();
         account = null;
-        try { view?.destroy(); } finally { wrapper.remove(); }
+        try { extraCleanup?.(); } finally { try { view?.destroy(); } finally { wrapper.remove(); } }
     };
     context.signal.addEventListener('abort', cleanup, {once: true});
     back.addEventListener('click', () => { assertActive(); onBack(); }, {signal: lifecycle.signal});
@@ -58,6 +59,12 @@ export async function mountEmulatorDetail(root, context, {selection, openAccount
         });
         assertActive();
         view.render([visible]);
+        extraCleanup = await mountDetailExtraFields(wrapper, {account, signal: context.signal,
+            copyText: value => navigator.clipboard.writeText(value),
+            onError: () => { if (!disposed) title.textContent = 'Dettaglio Account · copia non riuscita'; }
+        });
+        if (disposed) extraCleanup?.();
+        assertActive();
         return cleanup;
     } catch (error) {
         cleanup();

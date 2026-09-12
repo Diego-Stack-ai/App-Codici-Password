@@ -25,7 +25,8 @@ for (const suffix of ['A', 'B']) {
             vaultKeyEnvelope: await cryptoApi.wrapVaultKey(key, master)
         });
         for (const domain of ['private', 'company']) for (const title of ['Alfa', 'Zeta']) {
-            const fields = {nomeAccount: `${title} ${domain === 'private' ? 'privato' : 'azienda'} ${suffix}`, username: `${title.toLowerCase()}-${suffix.toLowerCase()}@example.invalid`, account: `CODICE-FITTIZIO-${suffix}`, password: `SEGRETO-FITTIZIO-${domain}-${title}-${suffix}`};
+            const fields = {nomeAccount: `${title} ${domain === 'private' ? 'privato' : 'azienda'} ${suffix}`, username: `${title.toLowerCase()}-${suffix.toLowerCase()}@example.invalid`, account: `CODICE-FITTIZIO-${suffix}`, password: `SEGRETO-FITTIZIO-${domain}-${title}-${suffix}`,
+                note: `Nota fittizia per ${title} ${suffix}\nSeconda riga della nota.`, url: `https://example.invalid/${domain}/${title.toLowerCase()}`};
             const record = {ownerId: user.uid, _encrypted: true};
             for (const [field, value] of Object.entries(fields)) record[field] = await cryptoApi.encrypt(value, key);
             const path = ['users', user.uid];

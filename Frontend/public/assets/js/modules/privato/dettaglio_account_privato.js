@@ -26,6 +26,8 @@ import { initPrivateSharingModule, renderPrivateSharingMap } from './dettaglio-p
 // --- STATE ---
 let currentUid = null;
 let currentId = null;
+let requestedId = null;
+let loadVersion = 0;
 let ownerId = null;
 let isReadOnly = false;
 let accountData = null;
@@ -41,13 +43,21 @@ let requireServerRefresh = false;
 export async function initDettaglioAccountPrivato(user) {
     
     if (!user) return;
+    loadVersion++;
     currentUid = user.uid;
 
     const params = new URLSearchParams(window.location.search);
-    currentId = params.get('id');
+    requestedId = params.get('id');
+    currentId = null;
+    accountData = null;
+    const attachmentButton = document.getElementById('btn-add-attachment');
+    if (attachmentButton) {
+        attachmentButton.onclick = null;
+        attachmentButton.classList.add('hidden');
+    }
     requireServerRefresh = (params.get('afterWrite') === '1' || params.get('m6refresh') === '1') && navigator.onLine;
 
-    if (!currentId) {
+    if (!requestedId) {
         showToast(t('missing_id') || "ID mancante", "error");
         window.location.href = 'account_privati.html';
         return;
@@ -56,6 +66,15 @@ export async function initDettaglioAccountPrivato(user) {
     ownerId = params.get('ownerId') || user.uid;
     isReadOnly = (ownerId !== currentUid);
 
+    // No record actions are available until the repository resolves its physical ID.
+    const footer = document.getElementById('footer-center-actions');
+    if (footer) clearElement(footer);
+    if (isReadOnly) setupReadOnlyUI();
+    setupActions();
+    await loadAccount();
+}
+
+function setupEditAction(resolvedId) {
     // Aggiungi pulsante Edit nel footer (solo se non è read-only)
     if (!isReadOnly) {
         const fCenter = document.getElementById('footer-center-actions');
@@ -66,8 +85,8 @@ export async function initDettaglioAccountPrivato(user) {
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
                 onclick: () => {
-                    LOG('[dettaglio] Navigating to form with ID:', currentId);
-                    window.location.href = `form_account_privato.html?id=${encodeURIComponent(currentId)}`;
+                    if (!currentId || currentId !== resolvedId || isReadOnly) return;
+                    window.location.href = `form_account_privato.html?id=${encodeURIComponent(resolvedId)}`;
                 }
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
@@ -76,25 +95,34 @@ export async function initDettaglioAccountPrivato(user) {
         }
     }
 
-    if (isReadOnly) setupReadOnlyUI();
-    setupActions();
-    initPrivateAttachmentModule({ ownerId, accountId: currentId, readOnly: isReadOnly });
-    initPrivateSharingModule({ currentUid, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
-
-    await loadAccount();
-
-    
 }
 /**
  * LOADING ENGINE
  */
 async function loadAccount() {
+    const version = ++loadVersion;
+    const attachmentButton = document.getElementById('btn-add-attachment');
+    if (attachmentButton) {
+        attachmentButton.onclick = null;
+        attachmentButton.classList.add('hidden');
+    }
+    const lookupId = currentId || requestedId, lookupOwner = ownerId, lookupUid = currentUid;
+    const active = () => version === loadVersion && ownerId === lookupOwner && currentUid === lookupUid;
     try {
-        accountData = await (requireServerRefresh
-            ? getPrivateAccountConfirmed(ownerId, currentId)
-            : getPrivateAccount(ownerId, currentId))
-            || await findPrivateAccountByLegacyId(ownerId, currentId);
-        if (!accountData) { showToast(t('account_not_found'), "error"); return; }
+        let loaded = await (requireServerRefresh
+            ? getPrivateAccountConfirmed(lookupOwner, lookupId)
+            : getPrivateAccount(lookupOwner, lookupId));
+        if (!active()) return;
+        if (!loaded) loaded = await findPrivateAccountByLegacyId(lookupOwner, lookupId);
+        if (!active()) return;
+        if (!loaded) { showToast(t('account_not_found'), "error"); return; }
+        accountData = loaded;
+        currentId = loaded.id;
+        const resolvedId = currentId;
+        const widgetContext = {uid: currentUid, context: 'private', accountId: resolvedId, readOnly: isReadOnly};
+        initPrivateAttachmentModule({ ownerId, accountId: resolvedId, readOnly: isReadOnly });
+        initPrivateSharingModule({ currentUid, ownerId, accountId: resolvedId, readOnly: isReadOnly, onReload: loadAccount });
+        setupEditAction(resolvedId);
         if (requireServerRefresh) {
             requireServerRefresh = false;
             const cleanParams = new URLSearchParams(window.location.search);
@@ -107,17 +135,19 @@ async function loadAccount() {
         if (!isReadOnly) updateDoc(docRef, { views: increment(1) }).catch(console.warn);
 
         // 🔐 PROTOCOLLO BLINDA (Auto-Unlock Compliant)
-        if (accountData._encrypted) {
+        if (loaded._encrypted) {
             try {
                 const vaultKeyMaterial = await ensureVaultKeyMaterial();
-                [accountData.username, accountData.account, accountData.password, accountData.note] = await Promise.all([
-                    decryptIfPossible(accountData.username, vaultKeyMaterial),
-                    decryptIfPossible(accountData.account, vaultKeyMaterial),
-                    decryptIfPossible(accountData.password, vaultKeyMaterial),
-                    decryptIfPossible(accountData.note, vaultKeyMaterial)
+                if (!active()) return;
+                [loaded.username, loaded.account, loaded.password, loaded.note] = await Promise.all([
+                    decryptIfPossible(loaded.username, vaultKeyMaterial),
+                    decryptIfPossible(loaded.account, vaultKeyMaterial),
+                    decryptIfPossible(loaded.password, vaultKeyMaterial),
+                    decryptIfPossible(loaded.note, vaultKeyMaterial)
                 ]);
-                if (Array.isArray(accountData.banking)) {
-                    accountData.banking = await Promise.all(accountData.banking.map(async b => ({
+                if (!active()) return;
+                if (Array.isArray(loaded.banking)) {
+                    loaded.banking = await Promise.all(loaded.banking.map(async b => ({
                         ...b,
                         passwordDispositiva: await decryptIfPossible(b.passwordDispositiva, vaultKeyMaterial),
                         cards: await Promise.all((b.cards || []).map(async c => ({
@@ -129,23 +159,28 @@ async function loadAccount() {
                     })));
                 }
             } catch (e) {
+                if (!active()) return;
                 console.warn("[Dettaglio] Decrittazione saltata o annullata.");
                 showToast("Dati cifrati: sbloccare la Vault per visualizzare.", "warning");
             }
         }
 
-        renderAccount(accountData);
-        const contactNames = await initDetailAccountMode({ account: accountData, ownerId, accountId: currentId, readOnly: isReadOnly, onReload: loadAccount });
-        renderPrivateSharingMap(accountData, contactNames);
+        if (!active()) return;
+        renderAccount(loaded);
+        const contactNames = await initDetailAccountMode({ account: loaded, ownerId, accountId: resolvedId, readOnly: isReadOnly, onReload: loadAccount });
+        if (!active()) return;
+        renderPrivateSharingMap(loaded, contactNames);
         await loadPrivateAttachments();
+        if (!active()) return;
         import('../shared/account-shared-credentials.js?v=1.2.110').then(({initAccountSharedCredentials}) =>
-            initAccountSharedCredentials({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly})
+            active() && initAccountSharedCredentials(widgetContext)
         ).catch(error => console.warn('[SHARED CREDENTIALS] Caricamento saltato.', error));
         import('../shared/account-embedded-widgets.js?v=1.2.110').then(({initAccountEmbeddedWidgets}) =>
-            initAccountEmbeddedWidgets({uid: currentUid, context: 'private', accountId: currentId, readOnly: isReadOnly})
+            active() && initAccountEmbeddedWidgets(widgetContext)
         ).catch(error => console.warn('[ACCOUNT WIDGETS] Caricamento saltato.', error));
         setupActions();
     } catch (e) {
+        if (!active()) return;
         logError("LoadAccount", e);
         showToast(t('error_loading'), "error");
     }
@@ -155,6 +190,8 @@ async function loadAccount() {
  * RENDERING
  */
 function renderAccount(acc) {
+    const resolvedId = acc.id;
+    const renderedVersion = loadVersion;
     document.title = acc.nomeAccount || 'Dettaglio';
 
     // Accent Colors
@@ -210,7 +247,8 @@ function renderAccount(acc) {
         isReadOnly,
         promptText: t('banking_hint'),
         onAddBanking: () => {
-            window.location.href = `form_account_privato.html?id=${encodeURIComponent(currentId)}`;
+            if (!currentId || currentId !== resolvedId || isReadOnly) return;
+            window.location.href = `form_account_privato.html?id=${encodeURIComponent(resolvedId)}`;
         }
     });
 
@@ -232,6 +270,7 @@ function renderAccount(acc) {
             btnAdd.classList.remove('hidden');
             btnAdd.onclick = (e) => {
                 e.preventDefault();
+                if (isReadOnly || !currentId || currentId !== resolvedId || loadVersion !== renderedVersion) return;
                 LOG("[DETTAGLIO] Add Attachment Clicked (onclick)");
                 openSourceSelector();
             };

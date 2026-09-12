@@ -5,15 +5,16 @@ import {db} from '../../firebase-config.js?v=1.2.110';
 import {collection, doc, limit, orderBy, query, where} from '/assets/js/vendor/firebase-runtime.js';
 import {coalesceRead} from './request-coordinator.js';
 
-const records = snapshot => snapshot.docs.map(item => ({id: item.id, ...item.data()}));
+const record = snapshot => ({...snapshot.data(), id: snapshot.id});
+const records = snapshot => snapshot.docs.map(record);
 const readRecords = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(records);
 const readRecord = (key, reference) => coalesceRead(key, () => getDocSmart(reference)).then(snapshot =>
-    snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
+    snapshot.exists() ? record(snapshot) : null);
 const readFirstRecord = (key, reference) => coalesceRead(key, () => getDocsSmart(reference)).then(snapshot =>
-    snapshot.empty ? null : {id: snapshot.docs[0].id, ...snapshot.docs[0].data()});
+    snapshot.empty ? null : record(snapshot.docs[0]));
 const readConfirmedRecords = reference => getDocsServerConfirmed(reference).then(records);
 const readConfirmedRecord = reference => getDocServerConfirmed(reference).then(snapshot =>
-    snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null);
+    snapshot.exists() ? record(snapshot) : null);
 
 export const listPrivateAccounts = uid => readRecords(`accounts:${uid}`,
     collection(db, 'users', uid, 'accounts'));
@@ -49,12 +50,10 @@ export const getPrivateAccount = (uid, accountId) => getRecordByPath(`users/${ui
 export const getPrivateAccountConfirmed = (uid, accountId) => readConfirmedRecord(
     doc(db, 'users', uid, 'accounts', accountId));
 
-export const findPrivateAccountByLegacyId = (uid, accountId) => coalesceRead(`legacy-account:${uid}:${accountId}`, async () => {
-    const snapshot = await getDocsSmart(query(
+export const findPrivateAccountByLegacyId = (uid, accountId) => coalesceRead(`legacy-account:${uid}:${accountId}`, () =>
+    getDocsSmart(query(
         collection(db, 'users', uid, 'accounts'), where('id', '==', accountId), limit(1)
-    ));
-    return snapshot.empty ? null : {id: snapshot.docs[0].id, ...snapshot.docs[0].data()};
-});
+    ))).then(snapshot => snapshot.empty ? null : record(snapshot.docs[0]));
 
 export const getCompany = (uid, companyId) => getRecordByPath(`users/${uid}/aziende/${companyId}`);
 export const getCompanyAccount = (uid, companyId, accountId) =>

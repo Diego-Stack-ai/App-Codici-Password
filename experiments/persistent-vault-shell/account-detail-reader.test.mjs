@@ -56,9 +56,20 @@ test('optional absent fields are empty, unsupported and plaintext fields fail cl
         assert.equal(detail.has(field), false); assert.equal(await detail.read(field), '');
     }
     assert.equal(env.reads.length, 0);
-    assert.throws(() => detail.has('note'), /FIELD_NOT_ALLOWED/);
+    assert.throws(() => detail.has('vaultKeyEnvelope'), /FIELD_NOT_ALLOWED/);
     await assert.rejects(detail.read('ownerId'), /FIELD_NOT_ALLOWED/);
     await assert.rejects(detail.read('password'), /CIPHERTEXT_REQUIRED/);
+});
+
+test('notes and website use the same protected reader and reject plaintext', async () => {
+    const env = setup({note: {encrypted: 'Nota fittizia\nseconda riga'}, url: {encrypted: 'https://example.invalid'}});
+    const detail = await env.open(privateSelection);
+    assert.equal(await detail.read('note'), 'Nota fittizia\nseconda riga');
+    assert.equal(await detail.read('url'), 'https://example.invalid');
+    for (const field of ['note', 'url']) {
+        const plain = await setup({[field]: 'plaintext'}).open(privateSelection);
+        await assert.rejects(plain.read(field), /CIPHERTEXT_REQUIRED/);
+    }
 });
 
 test('snapshot isolates ciphertext from repository and decryptor mutation, ignores stored id', async () => {

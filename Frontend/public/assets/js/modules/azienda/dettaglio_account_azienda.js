@@ -66,12 +66,17 @@ function initProtocolUI() {
     const fCenter = document.getElementById('footer-center-actions');
     if (fCenter) {
         clearElement(fCenter);
+        fCenter.classList.toggle('hidden', isReadOnly);
+        if (isReadOnly) return;
         setChildren(fCenter, createElement('div', { className: 'fab-group' }, [
             createElement('button', {
                 id: 'btn-edit-footer',
                 className: 'btn-fab-action btn-fab-scadenza',
                 title: t('edit') || 'Modifica',
-                onclick: () => window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`
+                onclick: () => {
+                    if (isReadOnly || ownerId !== currentUid) return;
+                    window.location.href = `form_account_azienda.html?id=${currentId}&aziendaId=${currentAziendaId}`;
+                }
             }, [
                 createElement('span', { className: 'material-symbols-outlined', textContent: 'edit' })
             ])
@@ -81,6 +86,8 @@ function initProtocolUI() {
 
 async function loadAccount() {
     try {
+        const loadOwnerId = ownerId;
+        const loadViewerId = currentUid;
         const docRef = doc(db, "users", ownerId, "aziende", currentAziendaId, "accounts", currentId);
         const account = await (requireServerRefresh
             ? getCompanyAccountConfirmed(ownerId, currentAziendaId, currentId)
@@ -140,7 +147,9 @@ async function loadAccount() {
             }
         }
 
-        updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
+        if (!isReadOnly && loadOwnerId === loadViewerId && ownerId === loadOwnerId && currentUid === loadViewerId) {
+            updateDoc(docRef, { views: increment(1) }).catch(e => logError("UpdateViews", e));
+        }
 
         render(originalData);
         const contactNames = await initDetailAccountMode({ account: originalData, ownerId, accountId: currentId, aziendaId: currentAziendaId, readOnly: isReadOnly, onReload: loadAccount });
