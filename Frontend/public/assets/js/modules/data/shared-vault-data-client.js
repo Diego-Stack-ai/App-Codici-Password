@@ -27,16 +27,20 @@ async function send(command) {
     return response.data;
 }
 
-export async function createSharedCredential(data, sharedDataId) {
+export async function createSharedCredential(data, sharedDataId, {isActive = () => true} = {}) {
+    const uid = auth.currentUser?.uid;
+    if (!uid || !isActive()) throw new Error('Accesso richiesto.');
     const ids = createSharedVaultIdentifiers(sharedDataId);
-    return send({...ids, action: 'create', data: await encryptedPayload(data)});
+    const payload = await encryptedPayload(data);
+    if (auth.currentUser?.uid !== uid || !isActive()) throw new Error('Sessione cambiata. Riapri la modifica.');
+    return send({...ids, action: 'create', data: payload});
 }
 
-export async function updateSharedCredential(sharedDataId, expectedRevision, data) {
+export async function updateSharedCredential(sharedDataId, expectedRevision, data, {isActive = () => true} = {}) {
     const uid = auth.currentUser?.uid;
-    if (!uid) throw new Error('Accesso richiesto.');
+    if (!uid || !isActive()) throw new Error('Accesso richiesto.');
     const payload = await encryptedPayload(data);
-    if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata. Riapri la modifica.');
+    if (auth.currentUser?.uid !== uid || !isActive()) throw new Error('Sessione cambiata. Riapri la modifica.');
     return send({
         ...createSharedVaultIdentifiers(sharedDataId), action: 'update', expectedRevision,
         data: payload

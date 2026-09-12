@@ -37,3 +37,30 @@ test('shared update never sends after logout or UID change during encryption', a
         assert.equal(f.calls.length, 0);
     }
 });
+
+
+test('shared update never sends after form teardown with the same UID',async()=>{
+ const f=await fixture();let active=true;
+ const saving=f.client.updateSharedCredential('shared',4,{value:'synthetic'},{isActive:()=>active});
+ active=false;f.release();await assert.rejects(saving,/Sessione cambiata/);assert.equal(f.calls.length,0);
+});
+
+
+test('shared creation keeps the initiating session through encryption', async () => {
+    for (const change of ['none', 'logout', 'uid', 'view']) {
+        const f = await fixture();
+        let active = true;
+        const saving = f.client.createSharedCredential({value:'synthetic'}, 'new', {isActive:()=>active});
+        if (change === 'logout') f.auth.currentUser = null;
+        if (change === 'uid') f.auth.currentUser = {uid:'other'};
+        if (change === 'view') active = false;
+        f.release();
+        if (change === 'none') {
+            assert.equal((await saving).status, 'applied');
+            assert.equal(f.calls.length, 1);
+        } else {
+            await assert.rejects(saving, /Sessione cambiata/);
+            assert.equal(f.calls.length, 0);
+        }
+    }
+});

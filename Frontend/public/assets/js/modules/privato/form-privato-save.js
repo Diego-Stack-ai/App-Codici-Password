@@ -225,6 +225,7 @@ export async function savePrivateAccount({
             });
             showToast(t('success_save'), "success");
             setTimeout(() => {
+                if (!isActive()) return;
                 const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
                     ? `form_account_privato.html?id=${accountRef.id}&linkShared=1#shared-credentials-section`
                     : isEditing
@@ -417,6 +418,7 @@ export async function savePrivateAccount({
             ? 'Account collegato. La password diversa è stata conservata nel Profilo.'
             : t('success_save'), retainedProfilePassword ? 'warning' : 'success');
         setTimeout(() => {
+            if (!isActive()) return;
             const destination = !isEditing && btnSave?.dataset.openSharedCredentials === 'true'
                 ? `form_account_privato.html?id=${savedAccountId}&linkShared=1#shared-credentials-section`
                 : isEditing

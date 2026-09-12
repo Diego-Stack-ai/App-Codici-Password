@@ -217,6 +217,7 @@ export function softLock() {
     _isSoftLocked = true;
     _vaultKeyMaterial = null;
     _clearSessionStorage();
+    globalThis.dispatchEvent?.(new Event('vault-session-locked'));
     updateGlobalState();
 }
 
@@ -417,6 +418,7 @@ export async function resetVault() {
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
     _clearSessionStorage();
+    globalThis.dispatchEvent?.(new Event('vault-session-locked'));
     const uid = auth.currentUser?.uid;
     let syncFailed = false;
     if (uid) {
@@ -591,6 +593,7 @@ export function clearSession() {
     _vaultAutoUnlock = false;
     _isSoftLocked = false;
     _clearSessionStorage();
+    globalThis.dispatchEvent?.(new Event('vault-session-locked'));
     updateGlobalState();
 }
 

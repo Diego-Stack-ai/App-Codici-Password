@@ -7,9 +7,9 @@ function fixture(){
  const nodes=[], updates=[]; let decrypted=0, active=true, confirm=true, fail=false;
  const createElement=(tag, props={},children=[])=>{const n={tag,...props,children, classList:{toggle(){}},appendChild(x){this.children.push(x)},remove(){this.removed=true}};nodes.push(n);return n};
  const body=createElement('body');
- const context={editable:true,active:()=>active};
+ const context={editable:true,active:()=>active,registerCleanup:()=>()=>{},requestDecision:async()=>typeof confirm === 'function' ? confirm() : confirm};
  const record={id:'common',revision:3,title:'Legalmail',fields:[{id:'secret',label:'PIN',type:'sensitive',encrypted:true,valueEnc:'cipher'},{id:'bool',label:'Flag',type:'boolean',value:false,encrypted:false}]};
- const sandbox={createElement,document:{body},ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=>{decrypted++;return 'old'},showConfirmModal:async()=>typeof confirm === 'function' ? confirm() : confirm,showToast(){},updateSharedCredential:async(...args)=>{if(fail)throw Error('failure');updates.push(args)}};
+ const sandbox={clearWidgetValues:root=>{ for(const node of nodes) if(node.tag==='input') node.value=''; },createElement,document:{body},ensureVaultKeyMaterial:async()=> 'key',decrypt:async()=>{decrypted++;return 'old'},showConfirmModal:async()=>typeof confirm === 'function' ? confirm() : confirm,showToast(){},updateSharedCredential:async(...args)=>{if(fail)throw Error('failure');updates.push(args)}};
  vm.createContext(sandbox);vm.runInContext(source,sandbox);
  return {nodes,updates,record,context,open:()=>sandbox.editCredential(record,context,async()=>{}),get decrypted(){return decrypted},set active(v){active=v},set confirm(v){confirm=v},set fail(v){fail=v},button:t=>nodes.find(n=>n.textContent===t),inputs:()=>nodes.filter(n=>n.tag==='input')};
 }

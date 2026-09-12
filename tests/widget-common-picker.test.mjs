@@ -6,9 +6,9 @@ const source=(await readFile(new URL('../Frontend/public/assets/js/modules/share
 function fixture(){
  const nodes=[], links=[];let created=0,decrypted=0, refreshed=0, active=true;
  const createElement=(tag,props={},children=[])=>{const n={tag,value:'',...props,children:children.filter(Boolean),events:{},classList:{toggle(){}},addEventListener(k,fn){this.events[k]=fn},setAttribute(k,v){this[k]=v},appendChild(x){this.children.push(x)},remove(){this.removed=true},focus(){},get firstElementChild(){return this.children[0]}};nodes.push(n);return n};
- const sandbox={createElement,setChildren:(n,c)=>n.children=(Array.isArray(c)?c:[c]).filter(Boolean),clearElement:n=>n.children=[],crypto:{randomUUID:()=> 'fixture'},document:{body:createElement('body')},showToast(){},decrypt:async()=>{decrypted++;throw Error('no common decrypt')},ensureVaultKeyMaterial:async()=>{throw Error('no common unlock')},createAccountWidget:async()=>created++,linkSharedCredential:async(...args)=>links.push(args)};
+ const sandbox={clearWidgetValues:root=>{ for(const node of nodes) if(node.tag==='input') node.value=''; },createElement,setChildren:(n,c)=>n.children=(Array.isArray(c)?c:[c]).filter(Boolean),clearElement:n=>n.children=[],crypto:{randomUUID:()=> 'fixture'},document:{body:createElement('body')},showToast(){},decrypt:async()=>{decrypted++;throw Error('no common decrypt')},ensureVaultKeyMaterial:async()=>{throw Error('no common unlock')},createAccountWidget:async()=>created++,linkSharedCredential:async(...args)=>links.push(args)};
  vm.createContext(sandbox);vm.runInContext(source,sandbox);
- const context={uid:'A',accountId:'second',companyId:'company-B',context:'company',editable:true,active:()=>active,onSharedLinked:async()=>refreshed++};
+ const context={uid:'A',accountId:'second',companyId:'company-B',context:'company',editable:true,active:()=>active,registerCleanup:()=>()=>{},onSharedLinked:async()=>refreshed++};
  return {sandbox,nodes,links,context,get created(){return created},get decrypted(){return decrypted},get refreshed(){return refreshed},set active(v){active=v},open:commons=>sandbox.openEditor(null,context,async()=>{},[],commons)};
 }
 const pec={id:'pec',title:'PEC Legalmail',revision:4,fields:[{valueEnc:'never-read'}]};

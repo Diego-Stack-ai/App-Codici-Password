@@ -110,6 +110,32 @@ function securityFixture(overrides = {}) {
     return {context, auth, saves, authObserver, run: code => vm.runInContext(code, context)};
 }
 
+for (const action of ['softLock()', 'clearSession()', 'resetVault()']) {
+    test(`${action} emits a payload-free lock event after clearing the key with the same UID`, async () => {
+        const events = [];
+        let cleared = false;
+        const f = securityFixture({
+            Event,
+            dispatchEvent: event => {
+                assert.equal(f.run('_vaultKeyMaterial'), null);
+                assert.equal(cleared, true);
+                assert.equal(f.auth.currentUser.uid, 'uid-a');
+                events.push(event);
+            },
+            clearVaultSession: () => { cleared = true; },
+            db: {}, doc() {}, updateDoc: async () => {}, setTimeout() {},
+        });
+        f.run("_vaultKeyMaterial = 'synthetic-key'; clearVaultSession();");
+        assert.equal(events.length, 0);
+        cleared = false;
+        await f.run(action);
+        assert.equal(events.length, 1);
+        assert.equal(events[0].type, 'vault-session-locked');
+        assert.equal(events[0].detail, undefined);
+        assert.equal(events[0].uid, undefined);
+    });
+}
+
 for (const action of ['clearSession()', 'softLock()', 'change-uid', 'auth-logout']) {
     test(`pending session restore is invalidated by ${action}`, async () => {
         const pending = deferred();

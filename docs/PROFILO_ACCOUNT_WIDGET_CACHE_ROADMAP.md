@@ -344,3 +344,10 @@ La suite completa è superata. Il gate finale del blocco richiede una prova fisi
 ## E — Documentazione e gate di chiusura
 
 Registrare decisioni, schema effettivo, compatibilità, eventuali migrazioni, test e problemi aperti negli MD pertinenti. Il blocco si chiude solo quando la proprietà read-your-writes è verificata, l'isolamento aziendale è provato e ogni intervento sui dati legacy ha un inventario e un rollback documentati.
+
+
+### Verifica candidata del ciclo di vita widget — 12/09/2026
+
+Sul ramo `experiment/persistent-vault-shell`, base `1ce18fe2`, ogni montaggio dei widget possiede dialoghi e listener. Cambio UID, blocco Vault, uscita pagina, smontaggio e annullamento invalidano la vista e puliscono i valori nei controlli. Letture e decifrature terminate in ritardo non ricreano la vista; crea/modifica controllano il contesto anche dopo cifratura. Il timer di navigazione del salvataggio privato ricontrolla il modulo prima di cambiare pagina.
+
+Le operazioni già inviate al server non sono annullabili da questo controllo: il risultato viene ignorato dalla vista scaduta e va riletto nel contesto valido. Nessuna migrazione di widget, modifica del formato cifrato o nuova pubblicazione. Rollback del blocco tramite revert dei moduli e test, senza ripristino dei dati. Evidenze complessive nel successivo aggiornamento dell'audit Vault; collaudo fisico ancora aperto.

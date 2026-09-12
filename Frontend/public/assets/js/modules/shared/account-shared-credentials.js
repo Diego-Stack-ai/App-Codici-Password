@@ -1,23 +1,23 @@
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
-import {showConfirmModal, showToast} from '../../ui-core-v129.js';
+import {showToast} from '../../ui-core-v129.js';
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
     listAccountWidgets, listAccountWidgetsConfirmed,
     listSharedVaultData, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential, unlinkSharedCredential, updateSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.110';
-
-let mountVersion = 0;
+import {createAccountWidgetLifecycle, clearWidgetValues, destroyAccountWidgetMount} from './account-widget-lifecycle.js';
 
 async function editCredential(record, context, refresh) {
     if (!context.active() || !context.editable || context.readOnly) return;
-    let rows = [], overlay, closed = false;
+    let rows = [], overlay, closed = false, unregister = () => {};
     const close = () => {
         closed = true;
         rows.forEach(({input}) => { input.value = ''; });
         overlay?.remove();
+        unregister();
     };
+    unregister = context.registerCleanup(close);
     try {
         const key = await ensureVaultKeyMaterial({promptImmediately: true});
         if (!context.active()) return;
@@ -28,7 +28,7 @@ async function editCredential(record, context, refresh) {
             (typeof values[index] !== 'string' || values[index] === '--ERRORE--' || values[index] === field.valueEnc))) {
             throw new Error('Unreadable field');
         }
-        if (!context.active()) return;
+        if (!context.active()) { values.fill(''); return; }
         rows = record.fields.map((field, index) => {
             const input = createElement('input', {
                 type: 'text', className: `account-widget-inline-input${field.encrypted ? ' local-data-masked' : ''}`,
@@ -53,7 +53,7 @@ async function editCredential(record, context, refresh) {
                 if (save.disabled) return;
                 save.disabled = true;
                 try {
-                    const confirmed = await showConfirmModal('Modifica Credenziale comune',
+                    const confirmed = await context.requestDecision('Modifica Credenziale comune',
                         'La modifica sarà visibile in tutti gli Account collegati. Confermi il salvataggio?', 'Salva per tutti', 'Annulla');
                     if (closed || !context.active()) return close();
                     if (!confirmed) return;
@@ -61,7 +61,7 @@ async function editCredential(record, context, refresh) {
                         ...record, fields: rows.map(({field, input}) => ({...field,
                             value: !field.encrypted && input.value === String(field.value ?? '') ? field.value : input.value
                         }))
-                    });
+                    }, {isActive: context.active});
                     close();
                     if (!context.active()) return;
                     await refresh(true);
@@ -105,7 +105,8 @@ function linkPayload(context, order = 0) {
     };
 }
 
-async function revealField(button, field) {
+async function revealField(button, field, context) {
+    if (!context.active()) return;
     const valueElement = button.previousElementSibling;
     const icon = button.querySelector('.material-symbols-outlined');
     if (button.dataset.revealed === 'true') {
@@ -117,13 +118,15 @@ async function revealField(button, field) {
     }
     try {
         const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
+        if (!context.active()) return;
         const value = field.encrypted ? await decrypt(field.valueEnc, vaultKeyMaterial) : String(field.value ?? '');
+        if (!context.active()) return;
         valueElement.textContent = value || '—';
         button.dataset.revealed = 'true';
         if (icon) icon.textContent = 'visibility_off';
         button.setAttribute('aria-label', `Nascondi ${field.label || 'dato'}`);
     } catch {
-        showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
+        if (context.active()) showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
     }
 }
 
@@ -140,7 +143,7 @@ function credentialCard(record, widget, context, refresh) {
         ];
         if (field.encrypted) children.push(createElement('button', {
             type: 'button', className: 'shared-account-reveal', 'aria-label': `Mostra ${field.label || 'dato'}`,
-            onclick: event => revealField(event.currentTarget, field)
+            onclick: event => revealField(event.currentTarget, field, context)
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
         fields.appendChild(createElement('div', {className: 'shared-account-field'}, children));
     }
@@ -158,7 +161,8 @@ function credentialCard(record, widget, context, refresh) {
     if (context.editable && !context.readOnly) cardChildren.push(createElement('button', {
         type: 'button', className: 'shared-account-unlink', textContent: 'Scollega da questo Account',
         onclick: async () => {
-            const confirmed = await showConfirmModal(
+            if (!context.active()) return;
+            const confirmed = await context.requestDecision(
                 'Scollega Credenziale comune',
                 'Il dato centrale non verrà eliminato e resterà disponibile negli altri Account.',
                 'Scollega', 'Annulla'
@@ -166,10 +170,11 @@ function credentialCard(record, widget, context, refresh) {
             if (!confirmed || !context.active()) return;
             try {
                 await unlinkSharedCredential(record.id, Number(record.revision || 0), linkPayload(context, widget.order));
+                if (!context.active()) return;
                 await refresh(true);
-                showToast('Credenziale scollegata.', 'success');
+                if (context.active()) showToast('Credenziale scollegata.', 'success');
             } catch (error) {
-                showToast(error.message || 'Scollegamento non riuscito.', 'error');
+                if (context.active()) showToast(error.message || 'Scollegamento non riuscito.', 'error');
             }
         }
     }));
@@ -213,6 +218,7 @@ export function initNewAccountSharedCredentials({saveButtonId}) {
     const section = document.getElementById('shared-credentials-section');
     const add = document.getElementById('btn-link-shared-credential');
     if (!section || !add) return;
+    destroyAccountWidgetMount(section);
     section.classList.remove('hidden');
     add.textContent = 'Salva Account e collega credenziale';
     add.onclick = () => {
@@ -225,19 +231,23 @@ export function initNewAccountSharedCredentials({saveButtonId}) {
 }
 
 export async function initAccountSharedCredentials(context) {
-    const version = ++mountVersion;
-    context = {...context, active: () => version === mountVersion && auth.currentUser?.uid === context.uid};
     const section = document.getElementById('shared-credentials-section');
     const list = document.getElementById('shared-credentials-list');
     const add = document.getElementById('btn-link-shared-credential');
-    if (!section || !list || !context?.uid || !context.accountId) return;
+    if (!section || !list || !context?.uid || !context.accountId) return {destroy() {}};
+    const lifecycle = createAccountWidgetLifecycle(context, {section, list, add});
+    context = {...context, ...lifecycle};
+    let readVersion = 0;
     const refresh = async (serverConfirmed = false) => {
+        if (!context.active()) return;
+        const reading = ++readVersion;
         const readWidgets = serverConfirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
         const readData = serverConfirmed ? listSharedVaultDataConfirmed : listSharedVaultData;
         const [allWidgets, records] = await Promise.all([readWidgets(context.uid), readData(context.uid)]);
-        if (!context.active()) return;
+        if (!context.active() || reading !== readVersion) return;
         const widgets = allWidgets.filter(widget => belongsToAccount(widget, context)).sort((a, b) => a.order - b.order);
         const recordsById = new Map(records.map(record => [record.id, record]));
+        clearWidgetValues(list);
         clearElement(list);
         for (const widget of widgets) {
             const record = recordsById.get(widget.sharedDataId);
@@ -254,27 +264,31 @@ export async function initAccountSharedCredentials(context) {
                 }
                 const linkedIds = new Set(widgets.map(widget => widget.sharedDataId));
                 const available = records.filter(record => !linkedIds.has(record.id));
-                const close = overlay => overlay.remove();
+                let closed = false, unregister = () => {};
+                const close = overlay => { closed = true; overlay.remove(); unregister(); };
                 const modal = selectorModal(available, close, async (record, overlay) => {
                     try {
-                        if (!context.active()) return close(overlay);
+                        if (closed || !context.active()) return close(overlay);
                         await linkSharedCredential(record.id, Number(record.revision || 0), linkPayload(context, widgets.length));
                         close(overlay);
+                        if (!context.active()) return;
                         await refresh(true);
-                        showToast('Credenziale comune collegata.', 'success');
+                        if (context.active()) showToast('Credenziale comune collegata.', 'success');
                     } catch (error) {
-                        showToast(error.message || 'Collegamento non riuscito.', 'error');
+                        if (context.active()) showToast(error.message || 'Collegamento non riuscito.', 'error');
                     }
                 });
+                unregister = context.registerCleanup(() => close(modal));
                 document.body.appendChild(modal);
             };
         }
     };
-    await refresh(context.editable && navigator.onLine);
+    try { await refresh(context.editable && navigator.onLine); } catch (error) { lifecycle.destroy(); throw error; }
     if (context.editable && !context.readOnly && context.active() && new URLSearchParams(globalThis.location?.search || '').get('linkShared') === '1') {
         const url = new URL(globalThis.location.href);
         url.searchParams.delete('linkShared');
         window.history.replaceState(null, '', url.pathname + url.search + url.hash);
         add?.click();
     }
+    return {destroy: lifecycle.destroy};
 }

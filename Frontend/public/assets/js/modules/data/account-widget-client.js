@@ -1,4 +1,4 @@
-import {functions} from '../../firebase-config.js?v=1.2.110';
+import {auth, functions} from '../../firebase-config.js?v=1.2.110';
 import {httpsCallable} from '/assets/js/vendor/firebase-runtime.js';
 import {encrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
@@ -21,6 +21,12 @@ async function send(command) {
     return response.data;
 }
 
+function assertSession(account, uid) {
+    if (!uid || auth.currentUser?.uid !== uid || (account?.uid && account.uid !== uid) || (account?.active && !account.active())) {
+        throw new Error('WIDGET_SESSION_CHANGED');
+    }
+}
+
 async function prepare(data, account) {
     const vaultKeyMaterial = await ensureVaultKeyMaterial({promptImmediately: true});
     return prepareEmbeddedAccountWidget(data, account, value => encrypt(value, vaultKeyMaterial));
@@ -35,22 +41,29 @@ function contextFields(widget) {
 }
 
 export async function createAccountWidget(data, account, widgetId) {
+    const uid = auth.currentUser?.uid;
+    assertSession(account, uid);
     const ids = createEmbeddedWidgetIdentifiers(widgetId);
     const widget = await prepare(data, account);
+    assertSession(account, uid);
     const result = await send({...ids, action: 'create', ...contextFields(widget), data: widget});
     return {...result, widgetId: ids.widgetId};
 }
 
 export async function updateAccountWidget(widgetId, expectedRevision, data, account) {
+    const uid = auth.currentUser?.uid;
+    assertSession(account, uid);
     const ids = createEmbeddedWidgetIdentifiers(widgetId);
     const widget = await prepare({...data, revision: expectedRevision}, account);
+    assertSession(account, uid);
     return send({
         ...ids, action: 'update', expectedRevision,
         ...contextFields(widget), data: widget
     });
 }
 
-export async function deleteAccountWidget(widget) {
+export async function deleteAccountWidget(widget, account) {
+    assertSession(account, auth.currentUser?.uid);
     const ids = createEmbeddedWidgetIdentifiers(widget.id);
     return send({
         ...ids, action: 'delete', expectedRevision: Number(widget.revision || 0),

@@ -11,7 +11,6 @@ import { createElement, setChildren, clearElement } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
-import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
 import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
 import { prepareProfileEmailAccountValues } from './profile-model.js';
@@ -36,8 +35,23 @@ let accountWidgetController = null;
 let formVersion = 0;
 let recoveryOperation = null;
 
-// Re-render callback per banking-renderer.js
-const rerender = () => renderBankAccounts(bankAccounts, rerender);
+let bankingRenderVersion = 0;
+const rerender = async () => {
+    const version = formVersion, uid = currentUid, rendering = ++bankingRenderVersion;
+    const active = () => version === formVersion && uid === currentUid && auth.currentUser?.uid === uid && rendering === bankingRenderVersion;
+    if (!active()) return;
+    if (!bankAccounts.length) {
+        const container = document.getElementById('iban-list-container');
+        if (container) clearElement(container);
+        return;
+    }
+    try {
+        const {renderBankAccounts} = await import('../shared/banking-renderer.js');
+        if (active()) renderBankAccounts(bankAccounts, rerender);
+    } catch {
+        if (active()) showToast('Impossibile visualizzare i dati bancari. Riprova ad aprire la sezione.', 'warning');
+    }
+};
 
 // Utility per recupero rapido valori (evita ReferenceError)
 const get = (id) => document.getElementById(id)?.value.trim() || '';
@@ -473,7 +487,7 @@ async function loadData() {
             bankAccounts = loadedBanking;
             document.getElementById('flag-banking').checked = true;
             document.getElementById('banking-section').classList.remove('hidden');
-            renderBankAccounts(bankAccounts, rerender);
+            await rerender();
         } else {
             // Se non ci sono dati reali, il flag rimane spento e la sezione chiusa
             document.getElementById('flag-banking').checked = false;
@@ -613,7 +627,7 @@ function setupUI() {
             if (bToggle.checked && bankAccounts.length === 0) {
                 bankAccounts = [{ iban: '', passwordDispositiva: '', referenteTelefono: '', referenteCellulare: '', cards: [], _isOpen: true }];
             }
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         };
     }
 
@@ -631,7 +645,7 @@ function setupUI() {
                 cards: [],
                 _isOpen: true
             });
-            renderBankAccounts(bankAccounts, rerender);
+            rerender();
         };
     }
 

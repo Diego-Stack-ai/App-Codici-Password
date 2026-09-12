@@ -1,5 +1,5 @@
 import {createElement, setChildren, clearElement} from '../../dom-utils.js';
-import {showInputModal, showToast} from '../../ui-core-v129.js';
+import {showToast} from '../../ui-core-v129.js';
 import {decrypt, ensureVaultKeyMaterial} from '../core/security-manager.js';
 import {
     createAccountWidget, deleteAccountWidget, updateAccountWidget
@@ -8,10 +8,10 @@ import {
     listAccountWidgets, listAccountWidgetsConfirmed, listSharedVaultDataConfirmed
 } from '../data/vault-repository.js';
 import {linkSharedCredential} from '../data/shared-vault-data-client.js';
-import {auth} from '../../firebase-config.js?v=1.2.110';
+import {createAccountWidgetLifecycle, clearWidgetValues} from './account-widget-lifecycle.js';
 
 const newId = prefix => `${prefix}-${crypto.randomUUID()}`;
-let mountVersion = 0;
+
 
 function availableCommonCredentials(records, widgets, context) {
     const linked = new Set(widgets.filter(widget => widget.kind === 'shared-reference' &&
@@ -94,10 +94,23 @@ function widgetData(widget, fields, collapsed = widget?.collapsed === true) {
 }
 
 async function openEditor(widget, context, refresh, templates = [], commonRecords = []) {
-    const fields = await editableFields(widget);
+    if (!context.active()) return;
+    let fields;
+    try { fields = await editableFields(widget); } catch {
+        if (context.active()) showToast('Impossibile aprire i campi del Widget.', 'warning');
+        return;
+    }
+    if (!context.active()) { fields.forEach(field => { field.value = ''; }); return; }
     const overlay = createElement('div', {className: 'modal-overlay active'});
-    let closed = false;
-    const close = () => { closed = true; overlay.remove(); };
+    let closed = false, unregister = () => {};
+    const close = () => {
+        closed = true;
+        clearWidgetValues(overlay);
+        fields.forEach(field => { field.value = ''; });
+        overlay.remove();
+        unregister();
+    };
+    unregister = context.registerCleanup(close);
     const title = createElement('input', {
         className: 'shared-account-select-control', type: 'text', maxlength: 120,
         placeholder: 'Titolo del widget', value: widget?.title || '', required: true
@@ -139,7 +152,7 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
     const form = createElement('form', {className: 'account-widget-editor', autocomplete: 'off', 'data-form-type': 'other'});
     form.addEventListener('submit', async event => {
         event.preventDefault();
-        if (save.disabled || closed) return;
+        if (save.disabled || closed || !context.active()) return;
         if (templateSelect?.value.startsWith('common:')) {
             const record = commonRecords[Number(templateSelect.value.slice(7))];
             if (!record || !context.editable || context.readOnly || !context.active?.()) return;
@@ -177,10 +190,11 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
             if (widget) await updateAccountWidget(widget.id, Number(widget.revision || 0), data, context);
             else await createAccountWidget(data, context);
             close();
+            if (!context.active()) return;
             await refresh(true);
-            showToast(widget ? 'Widget aggiornato.' : 'Widget creato.', 'success');
+            if (context.active()) showToast(widget ? 'Widget aggiornato.' : 'Widget creato.', 'success');
         } catch (error) {
-            showToast(error.message || 'Salvataggio del Widget non riuscito.', 'error');
+            if (context.active()) showToast(error.message || 'Salvataggio del Widget non riuscito.', 'error');
         } finally {
             save.disabled = false;
         }
@@ -201,7 +215,8 @@ async function openEditor(widget, context, refresh, templates = [], commonRecord
     title.focus();
 }
 
-async function reveal(button, field) {
+async function reveal(button, field, context) {
+    if (!context.active()) return;
     const value = button.previousElementSibling;
     const icon = button.querySelector('.material-symbols-outlined');
     if (button.dataset.revealed === 'true') {
@@ -213,27 +228,33 @@ async function reveal(button, field) {
     }
     try {
         const key = await ensureVaultKeyMaterial({promptImmediately: true});
-        value.textContent = await decrypt(field.valueEnc, key) || '—';
+        if (!context.active()) return;
+        const decoded = await decrypt(field.valueEnc, key);
+        if (!context.active()) return;
+        value.textContent = decoded || '—';
         button.dataset.revealed = 'true';
         if (icon) icon.textContent = 'visibility_off';
         button.setAttribute('aria-label', `Nascondi ${field.label}`);
     } catch {
-        showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
+        if (context.active()) showToast('Sblocca la Vault per visualizzare il dato.', 'warning');
     }
 }
 
-async function copyField(field) {
+async function copyField(field, context) {
+    if (!context.active()) return;
     try {
         let value = field.value ?? '';
         if (field.encrypted) {
             const key = await ensureVaultKeyMaterial({promptImmediately: true});
+            if (!context.active()) return;
             value = await decrypt(field.valueEnc, key) || '';
         }
+        if (!context.active()) return;
         if (!value) return showToast('Il campo è vuoto.', 'warning');
         await navigator.clipboard.writeText(String(value));
-        showToast('Copiato!', 'success');
+        if (context.active()) showToast('Copiato!', 'success');
     } catch {
-        showToast('Sblocca la Vault per copiare il dato.', 'warning');
+        if (context.active()) showToast('Sblocca la Vault per copiare il dato.', 'warning');
     }
 }
 
@@ -263,6 +284,7 @@ function widgetCard(widget, context, refresh) {
                     type: 'button', className: 'shared-account-reveal',
                     'aria-label': `Mostra ${field.label}`,
                     onclick: event => {
+                        if (!context.active()) return;
                         const revealed = !input.classList.contains('local-data-masked');
                         input.classList.toggle('local-data-masked', revealed);
                         event.currentTarget.setAttribute('aria-label', `${revealed ? 'Mostra' : 'Nascondi'} ${field.label}`);
@@ -287,11 +309,11 @@ function widgetCard(widget, context, refresh) {
         const children = [createElement('strong', {textContent: field.label}), value];
         if (field.encrypted) children.push(createElement('button', {
             type: 'button', className: 'shared-account-reveal', 'aria-label': `Mostra ${field.label}`,
-            onclick: event => reveal(event.currentTarget, field)
+            onclick: event => reveal(event.currentTarget, field, context)
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'visibility'})]));
         children.push(createElement('button', {
             type: 'button', className: 'shared-account-reveal', 'aria-label': `Copia ${field.label}`,
-            onclick: () => copyField(field)
+            onclick: () => copyField(field, context)
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'content_copy'})]));
         fields.appendChild(createElement('div', {className: 'shared-account-field glass-field border-glow account-widget-display-field'}, children));
     }
@@ -305,6 +327,7 @@ function widgetCard(widget, context, refresh) {
         'aria-label': `${collapsed ? 'Apri' : 'Chiudi'} ${widget.title}`,
         'aria-expanded': String(!collapsed),
         onclick: event => {
+            if (!context.active()) return;
             collapsed = !collapsed;
             applyCollapsedState();
             event.currentTarget.setAttribute('aria-expanded', String(!collapsed));
@@ -322,17 +345,22 @@ function widgetCard(widget, context, refresh) {
         createElement('button', {
             type: 'button', className: 'shared-account-reveal account-widget-delete', 'aria-label': 'Elimina widget',
             onclick: async () => {
-                const confirmation = await showInputModal(
-                    'Elimina widget', '', widget.title,
-                    `Per eliminare definitivamente “${widget.title}”, riscrivi esattamente il nome del widget.`
-                );
-                if (confirmation === null) return;
+                if (!context.active()) return;
+                const confirmation = await context.requestDecision('Elimina widget',
+                    `Per eliminare definitivamente “${widget.title}”, riscrivi esattamente il nome del widget.`,
+                    'Elimina', 'Annulla', {placeholder: widget.title});
+                if (!context.active() || confirmation === null) return;
                 if (confirmation.trim() !== widget.title.trim()) {
                     showToast('Il nome inserito non corrisponde. Widget non eliminato.', 'warning');
                     return;
                 }
-                try { await deleteAccountWidget(widget); await refresh(true); showToast('Widget eliminato.', 'success'); }
-                catch (error) { showToast(error.message || 'Eliminazione non riuscita.', 'error'); }
+                try {
+                    await deleteAccountWidget(widget, context);
+                    if (!context.active()) return;
+                    await refresh(true);
+                    if (context.active()) showToast('Widget eliminato.', 'success');
+                }
+                catch (error) { if (context.active()) showToast(error.message || 'Eliminazione non riuscita.', 'error'); }
             }
         }, [createElement('span', {className: 'material-symbols-outlined', textContent: 'delete'})])
     ]) : null;
@@ -345,8 +373,17 @@ function widgetCard(widget, context, refresh) {
         ]),
         fields
     ]);
-    card.hasPendingChanges = () => dirty;
+    let unregister = () => {};
+    card.destroy = () => {
+        dirty = false;
+        clearWidgetValues(card);
+        if (context.editable) widget.fields.forEach(field => { field.value = ''; });
+        unregister();
+    };
+    unregister = context.registerCleanup(card.destroy);
+    card.hasPendingChanges = () => context.active() && dirty;
     card.savePendingChanges = async () => {
+        if (!context.active()) throw new Error('WIDGET_VIEW_DISPOSED');
         if (!dirty || !context.editable) return false;
         await updateAccountWidget(
             widget.id,
@@ -354,6 +391,7 @@ function widgetCard(widget, context, refresh) {
             widgetData(widget, currentFields(), collapsed),
             context
         );
+        if (!context.active()) throw new Error('WIDGET_VIEW_DISPOSED');
         dirty = false;
         return true;
     };
@@ -361,20 +399,25 @@ function widgetCard(widget, context, refresh) {
 }
 
 export async function initAccountEmbeddedWidgets(context) {
-    const version = ++mountVersion;
-    context = {...context, active: () => version === mountVersion && auth.currentUser?.uid === context.uid};
     const section = document.getElementById('account-widgets-section');
     const list = document.getElementById('account-widgets-list');
     const add = document.getElementById('btn-add-account-widget');
     const emptyController = {
+        destroy() {},
         hasPendingChanges: () => false,
         savePendingChanges: async () => false
     };
     if (!section || !list || !context?.uid || !context.accountId) return emptyController;
-    if (context.readOnly) { section.classList.add('hidden'); return emptyController; }
+    const lifecycle = createAccountWidgetLifecycle(context, {section, list, add});
+    context = {...context, ...lifecycle};
+    if (context.readOnly) { section.classList.add('hidden'); return {...emptyController, destroy: lifecycle.destroy}; }
+    let readVersion = 0;
     const refresh = async confirmed => {
+        if (!context.active()) return;
+        const reading = ++readVersion;
         const read = confirmed ? listAccountWidgetsConfirmed : listAccountWidgets;
         const allWidgets = await read(context.uid);
+        if (!context.active() || reading !== readVersion) return;
         const widgets = allWidgets.filter(widget => widget.kind === 'embedded' &&
             widget.context === context.context && widget.accountId === context.accountId &&
             (context.context !== 'company' || widget.companyId === context.companyId))
@@ -387,10 +430,16 @@ export async function initAccountEmbeddedWidgets(context) {
             seenTemplates.add(signature);
             return true;
         });
-        clearElement(list);
         const editableWidgets = context.editable
             ? await Promise.all(widgets.map(editableFields))
             : widgets.map(widget => widget.fields || []);
+        if (!context.active() || reading !== readVersion) {
+            if (context.editable) editableWidgets.flat().forEach(field => { field.value = ''; });
+            return;
+        }
+        for (const card of list.children) card.destroy?.();
+        clearWidgetValues(list);
+        clearElement(list);
         widgets.forEach((widget, index) => list.appendChild(widgetCard({
             ...widget,
             fields: editableWidgets[index]
@@ -414,14 +463,17 @@ export async function initAccountEmbeddedWidgets(context) {
             };
         }
     };
-    await refresh(false);
+    try { await refresh(false); } catch (error) { lifecycle.destroy(); throw error; }
     return {
-        hasPendingChanges: () => [...list.children].some(card => card.hasPendingChanges?.()),
+        destroy: lifecycle.destroy,
+        hasPendingChanges: () => context.active() && [...list.children].some(card => card.hasPendingChanges?.()),
         savePendingChanges: async () => {
+            if (!context.active()) throw new Error('WIDGET_VIEW_DISPOSED');
             const pending = [...list.children].filter(card => card.hasPendingChanges?.());
             if (!pending.length) return false;
             await Promise.all(pending.map(card => card.savePendingChanges()));
             await refresh(true);
+            if (!context.active()) throw new Error('WIDGET_VIEW_DISPOSED');
             return true;
         }
     };

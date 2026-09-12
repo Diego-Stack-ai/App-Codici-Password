@@ -27,7 +27,7 @@ test('decifratura fallita o cambio sessione lasciano modulo e copia recupero int
  }
 });
 
-async function saveFixture(status,{recover=true,active=true}={}){
+async function saveFixture(status,{recover=true,active=true,expireBeforeNavigation=false}={}){
  let replaced=0,enqueued=0,handoffs=0;const messages=[],navigations=[];
  const button={disabled:false,dataset:{},setAttribute(){}};
  const nodes={'btn-save-footer':button,'account-name':{value:'Fixture'}};
@@ -36,7 +36,7 @@ async function saveFixture(status,{recover=true,active=true}={}){
   showToast:message=>messages.push(message),hasInvalidCardExpiry:()=>false,ensureVaultKeyMaterial:async()=> 'key',encrypt:async v=>v?'cipher':'',
   accountModeFromFlags:()=> 'account-private',validateAccountMode:()=>({}),recordFieldsFromAccountMode:()=>({type:'account',visibility:'private'}),
   classifyPrivateAccountOfflineWrite:()=>({eligible:true}),navigator:{onLine:true},doc:()=>({id:'record'}),t:x=>x,console:{error(){}},
-  setTimeout:fn=>fn(),window:{location:{replace:url=>navigations.push(url)}}};
+  setTimeout:fn=>{if(expireBeforeNavigation)active=false;fn()},window:{location:{replace:url=>navigations.push(url)}}};
  let source=await readFile(new URL(path+'form-privato-save.js',import.meta.url),'utf8');
  source=source.replace(/^import[\s\S]*?;\r?\n/gm,'').replace('export async function','async function').replace("await import('../data/private-account-offline-pilot.js')",'pilotFixture');
  vm.createContext(sandbox);vm.runInContext(source,sandbox);
@@ -73,4 +73,10 @@ test('scelta locale o più tardi non elimina la coda; solo scelta server la scar
   vm.createContext(sandbox);vm.runInContext(flow,sandbox);await sandbox.resume();
   assert.equal(discarded,choice==='server'?1:0);assert.equal(restored,choice==='local'?1:0);assert.equal(button.disabled,choice!=='local');
  }
+});
+
+
+test('sessione chiusa dopo conferma non naviga dal timer del vecchio modulo',async()=>{
+ const f=await saveFixture({status:'saved'},{expireBeforeNavigation:true});
+ assert.equal(f.replaced,1);assert.equal(f.handoffs,1);assert.deepEqual(f.navigations,[]);
 });
