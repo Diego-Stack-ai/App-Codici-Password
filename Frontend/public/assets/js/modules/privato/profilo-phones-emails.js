@@ -208,7 +208,8 @@ function _createPhoneCard(phone, idx) {
                 onclick: () => phone.linkedAccountId
                     ? _callbacks.openLinkedAccount(phone.linkedAccountId, phone.linkedAccountCompanyId)
                     : _callbacks.connectPhoneAccount(phone, _callbacks.syncData)
-            })
+            }),
+            ...accountManagementButtons(phone,'phone')
         ])
     ]);
 }
@@ -326,6 +327,7 @@ export function renderEmailsView() {
                     ? _callbacks.openLinkedAccount(e.linkedAccountId, e.linkedAccountCompanyId)
                     : _callbacks.connectEmailAccount(e, _callbacks.syncData)
             }),
+            ...accountManagementButtons(e,'email'),
             e.linkedAccountId && hasLegacyEmailPassword(e) ? createElement('button', {
                 className: 'btn-upload-trigger',
                 textContent: 'Verifica trasferimento password',
@@ -393,3 +395,8 @@ export async function editEmail(idx) {
 }
 
 // Fine modulo contatti profilo.
+
+function accountManagementButtons(contact,type) {
+    if(!contact.linkedAccountId) return [];
+    return [createElement('button',{className:'btn-upload-trigger',textContent:'Cambia Account',onclick:()=>_callbacks.changeProfileAccount({contact,type})}),createElement('button',{className:'btn-upload-trigger',textContent:'Scollega Account',onclick:()=>_callbacks.unlinkProfileAccount({contact,type})})];
+}

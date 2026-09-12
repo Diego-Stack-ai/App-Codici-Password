@@ -1,4 +1,5 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.104';
+import { changeProfileAccount, unlinkProfileAccount } from '../shared/profile-account-management.js';
+import { auth, db } from '../../firebase-config.js?v=1.2.105';
 import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -61,25 +62,6 @@ export async function connectCompanyContact(contact, companyId, type) {
         }});
     } catch { showToast('Impossibile caricare gli Account. Controlla il Vault e la connessione.', 'error'); }
 }
-async function unlinkContact(contact, companyId, type, reload) {
-    if (!await showConfirmModal('Scollega Account', 'Rimuovere il collegamento? Il contatto e le credenziali rimangono salvati.')) return;
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-    try {
-        await runTransaction(db, async tx => {
-            const source = doc(db,'users',uid,'aziende',companyId);
-            const snap = await tx.get(source);
-            const current = snap.exists() && findCompanyProfileContact(snap.data(),type,contact.id);
-            if (!current || current.linkedAccountId !== contact.linkedAccountId || (current.linkedAccountCompanyId||'') !== (contact.linkedAccountCompanyId||'')) throw new Error('Collegamento modificato');
-            const target = current.linkedAccountCompanyId ? doc(db,'users',uid,'aziende',current.linkedAccountCompanyId,'accounts',current.linkedAccountId) : doc(db,'users',uid,'accounts',current.linkedAccountId);
-            const targetSnap = await tx.get(target);
-            const backlinks = companyAccountReferences(targetSnap.data(), {companyId,id:contact.id,type}, true);
-            if (targetSnap.exists()) tx.update(target,{linkedCompanyProfileFields:backlinks,linkedCompanyProfileField:backlinks[0] || deleteField()});
-            tx.update(source,companyContactLinkPatch(snap.data(),current,type,{linkedAccountId:'',linkedAccountCompanyId:''}));
-        });
-        await reload();
-    } catch { showToast('Collegamento non rimosso. Ricarica e riprova.', 'error'); }
-}
 export function renderCompanyContacts(data, companyId, reload) {
     const contacts = companyProfileContacts(data);
     const card = (contact,type) => {
@@ -88,7 +70,7 @@ export function renderCompanyContacts(data, companyId, reload) {
         if (contact.linkedAccountId) fields.push(secretField('Password Account collegato',()=>readLinkedPassword(contact)));
         if (contact.password) fields.push(secretField('Password nel profilo aziendale',async()=>decryptRequiredValue(contact.password,await ensureVaultKeyMaterial())), text('Conservata fino alla verifica del trasferimento nell’Account.','company-contact-note'));
         if (contact.note) fields.push(createElement('div',{className:'company-contact-note'},[text('Nota','view-label'),text(contact.note)]));
-        const actions = contact.linkedAccountId ? [button('Apri Account collegato',()=>{window.location.href=profileAccountUrl(contact.linkedAccountId,contact.linkedAccountCompanyId||'');}),button('Scollega',()=>unlinkContact(contact,companyId,type,reload))] : [button('Collega o crea Account',()=>connectCompanyContact(contact,companyId,type))];
+        const actions = contact.linkedAccountId ? [button('Apri Account collegato',()=>{window.location.href=profileAccountUrl(contact.linkedAccountId,contact.linkedAccountCompanyId||'');}),button('Cambia Account',()=>changeProfileAccount({contact,type,sourceCompanyId:companyId},reload)),button('Scollega Account',()=>unlinkProfileAccount({contact,type,sourceCompanyId:companyId},reload))] : [button('Collega o crea Account',()=>connectCompanyContact(contact,companyId,type))];
         actions.forEach(action=>action.classList.add('profile-contact-connect'));
         fields.push(createElement('div',{className:'company-contact-actions'},actions));
         const header = createElement('div',{className:'profile-contact-header'},[text(contact.label,'profile-contact-label'),miniButton('Modifica contatto','edit',()=>{window.location.href=editUrl(companyId)+(type==='email'?'#section-email':'');})]);

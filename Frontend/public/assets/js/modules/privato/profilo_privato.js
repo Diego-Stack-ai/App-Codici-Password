@@ -1,3 +1,5 @@
+const changeProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.changeProfileAccount(...args));
+const unlinkProfileAccount = (...args) => import('../shared/profile-account-management.js').then(module => module.unlinkProfileAccount(...args));
 /**
  * PROFILO PRIVATO MODULE (V7.0 — Dashboard modulare e caricamento progressivo)
  * Entry point e orchestratore del profilo privato utente.
@@ -20,7 +22,7 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.104';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.105';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -40,7 +42,7 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.104';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.105';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
@@ -129,13 +131,13 @@ export async function initProfiloPrivato(user) {
 
     initPhonesEmailsModule(
         () => ({ contactPhones, contactEmails, profileLabels, qrCodeInclusions }),
-        { readLinkedEmailAccountPassword, syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, connectPhoneAccount, openLinkedAccount, updateProfileLabelOptions }
+        { changeProfileAccount, unlinkProfileAccount, readLinkedEmailAccountPassword, syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, connectPhoneAccount, openLinkedAccount, updateProfileLabelOptions }
     );
 
     initAddressesDocsModule(
         () => ({ userAddresses, qrCodeInclusions, userDocuments }),
         {
-            toggleQRInclusion, openLinkedAccount, syncData, connectUtilityAccount, connectDocumentAccount,
+            changeProfileAccount, unlinkProfileAccount, toggleQRInclusion, openLinkedAccount, syncData, connectUtilityAccount, connectDocumentAccount,
             onAddAddress: () => editAddress(-1, buildCtx()),
             onAddDoc: () => editUserDocument(-1, buildCtx()),
             createDeadlineFromDocument: documentItem => createDeadlineFromDocument(documentItem, syncData, currentUserData)
