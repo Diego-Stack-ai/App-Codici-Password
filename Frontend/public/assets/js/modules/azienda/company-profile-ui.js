@@ -1,0 +1,127 @@
+import { auth, db } from '../../firebase-config.js?v=1.2.103';
+import { doc, runTransaction, deleteField, updateDoc } from '/assets/js/vendor/firebase-runtime.js';
+import { createElement, setChildren } from '../../dom-utils.js';
+import { showToast, showConfirmModal } from '../../ui-core-v129.js';
+import { ensureVaultKeyMaterial } from '../core/security-manager.js';
+import { decryptRequiredValue } from '../core/crypto-utils.js';
+import { getPrivateAccountConfirmed, getCompanyAccountConfirmed, listPrivateAccounts, listCompanies, listCompanyAccounts } from '../data/vault-repository.js';
+import { showProfileAccountPicker } from '../privato/profilo-modal.js';
+import { profileAccountUrl } from '../privato/profile-model.js';
+import { companyProfileContacts, companyProfileDraft, findCompanyProfileContact, companyContactLinkPatch } from './company-profile-model.js';
+import { renderQRCode } from '../shared/qr_code_utils.js';
+
+const button = (label, onclick) => createElement('button', { type: 'button', className: 'company-profile-action', textContent: label, onclick });
+const text = (value, className = 'company-contact-value') => createElement('span', {className, textContent: value});
+const editUrl = id => `modifica_azienda.html?id=${encodeURIComponent(id)}`;
+function copyButton(getValue) {
+    return button('Copia', async () => { try { const value = await getValue(); if (!value) return; await navigator.clipboard.writeText(value); showToast('Copiato!', 'success'); } catch { showToast('Impossibile copiare. Sblocca il Vault e riprova.', 'error'); } });
+}
+function secretField(label, read) {
+    const value = text('••••••••');
+    let revealed = false;
+    const toggle = button('Mostra', async () => {
+        if (revealed) { value.textContent = '••••••••'; toggle.textContent = 'Mostra'; revealed = false; return; }
+        toggle.disabled = true;
+        try { const password = await read(); value.textContent = password || 'Nessuna password'; revealed = true; toggle.textContent = 'Nascondi'; }
+        catch { showToast('Password non disponibile. Sblocca il Vault e controlla il collegamento.', 'error'); }
+        finally { toggle.disabled = false; }
+    });
+    toggle.setAttribute('aria-label', 'Mostra o nascondi ' + label);
+    return createElement('div', {}, [text(label, 'view-label'), createElement('div', {className:'company-contact-row'}, [value, toggle, copyButton(read)])]);
+}
+async function readLinkedPassword(contact) {
+    const uid = auth.currentUser?.uid;
+    const key = await ensureVaultKeyMaterial();
+    if (!uid || auth.currentUser?.uid !== uid || !key) throw new Error('Vault bloccato');
+    const account = contact.linkedAccountCompanyId ? await getCompanyAccountConfirmed(uid, contact.linkedAccountCompanyId, contact.linkedAccountId) : await getPrivateAccountConfirmed(uid, contact.linkedAccountId);
+    if (!account || account.isArchived) throw new Error('Account mancante');
+    const value = await decryptRequiredValue(account.password, key);
+    if (auth.currentUser?.uid !== uid) throw new Error('Sessione cambiata');
+    return value;
+}
+export async function connectCompanyContact(contact, companyId, type) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    try {
+        const [personal, companies, key] = await Promise.all([listPrivateAccounts(uid), listCompanies(uid), ensureVaultKeyMaterial()]);
+        const active = companies.filter(c => !c.isArchived).map(c => ({id:c.id, name:c.ragioneSociale || 'Azienda'}));
+        const nested = await Promise.all(active.map(async c => (await listCompanyAccounts(uid,c.id)).map(a => ({...a,companyId:c.id,companyName:c.name}))));
+        const accounts = await Promise.all([...personal.map(a => ({...a,companyId:''})), ...nested.flat()].filter(a => !a.isArchived && !a.linkedProfileField && !a.linkedCompanyProfileField && !a._isGuest && a.visibility !== 'shared' && !a.shared && !a.isMemo && !a.hasMemo && !a.isMemoShared && !['memo','memorandum'].includes(a.type)).map(async a => {
+            let username = '';
+            try { username = await decryptRequiredValue(a.username,key); } catch { /* La ricerca resta disponibile senza credenziali illeggibili. */ }
+            return {id:a.id,companyId:a.companyId,companyName:a.companyName||'',name:a.nomeAccount||'Account',username};
+        }));
+        accounts.sort((a,b)=>a.name.localeCompare(b.name,'it'));
+        showProfileAccountPicker({ title: type === 'email' ? 'Collega Account email aziendale' : 'Collega Account telefono aziendale', accounts, companies:active, initialScope: `company:${companyId}`, onSelect: async selected => {
+            sessionStorage.setItem('profile-account-link-draft',JSON.stringify(companyProfileDraft(contact,companyId,type,uid,selected.companyId||'')));
+            window.location.href = profileAccountUrl(selected.id||'',selected.companyId||'',{edit:true,contactId:contact.id});
+        }});
+    } catch { showToast('Impossibile caricare gli Account. Controlla il Vault e la connessione.', 'error'); }
+}
+async function unlinkContact(contact, companyId, type, reload) {
+    if (!await showConfirmModal('Scollega Account', 'Rimuovere il collegamento? Il contatto e le credenziali rimangono salvati.')) return;
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    try {
+        await runTransaction(db, async tx => {
+            const source = doc(db,'users',uid,'aziende',companyId);
+            const snap = await tx.get(source);
+            const current = snap.exists() && findCompanyProfileContact(snap.data(),type,contact.id);
+            if (!current || current.linkedAccountId !== contact.linkedAccountId || (current.linkedAccountCompanyId||'') !== (contact.linkedAccountCompanyId||'')) throw new Error('Collegamento modificato');
+            const target = current.linkedAccountCompanyId ? doc(db,'users',uid,'aziende',current.linkedAccountCompanyId,'accounts',current.linkedAccountId) : doc(db,'users',uid,'accounts',current.linkedAccountId);
+            const targetSnap = await tx.get(target);
+            const backlink = targetSnap.data()?.linkedCompanyProfileField;
+            if (backlink?.companyId === companyId && backlink.id === contact.id && backlink.type === type) tx.update(target,{linkedCompanyProfileField:deleteField()});
+            tx.update(source,companyContactLinkPatch(snap.data(),current,type,{linkedAccountId:'',linkedAccountCompanyId:''}));
+        });
+        await reload();
+    } catch { showToast('Collegamento non rimosso. Ricarica e riprova.', 'error'); }
+}
+export function renderCompanyContacts(data, companyId, reload) {
+    const contacts = companyProfileContacts(data);
+    const card = (contact,type) => {
+        const fields = [text(contact.label,'view-label'),createElement('div',{className:'company-contact-row'},[text(contact.address||contact.number),copyButton(async()=>contact.address||contact.number)])];
+        if (contact.username) fields.push(createElement('div',{},[text('Username','view-label'),text(contact.username)]));
+        if (contact.linkedAccountId) fields.push(secretField('Password Account collegato',()=>readLinkedPassword(contact)));
+        if (contact.password) fields.push(secretField('Password nel profilo aziendale',async()=>decryptRequiredValue(contact.password,await ensureVaultKeyMaterial())), text('Conservata fino alla verifica del trasferimento nell’Account.','company-contact-note'));
+        if (contact.note) fields.push(createElement('div',{className:'company-contact-note'},[text('Nota','view-label'),text(contact.note)]));
+        const actions = contact.linkedAccountId ? [button('Apri Account collegato',()=>{window.location.href=profileAccountUrl(contact.linkedAccountId,contact.linkedAccountCompanyId||'');}),button('Scollega',()=>unlinkContact(contact,companyId,type,reload))] : [button('Collega o crea Account',()=>connectCompanyContact(contact,companyId,type))];
+        fields.push(createElement('div',{className:'company-contact-actions'},actions));
+        return createElement('article',{className:'company-contact-card'},fields);
+    };
+    setChildren(document.getElementById('email-list-container'),contacts.emails.length ? contacts.emails.map(e=>card(e,'email')) : [text('Nessuna email. Usa Modifica contatti per aggiungerla.')]);
+    setChildren(document.getElementById('company-phone-list'),contacts.phones.length ? contacts.phones.map(p=>card(p,'phone')) : [text('Nessun telefono. Usa Modifica contatti per aggiungerlo.')]);
+}
+export function initCompanyProfile(data, companyId, {buildVCard, reload}) {
+    const tabs = [...document.querySelectorAll('[data-company-tab]')];
+    const actions = document.getElementById('company-section-actions');
+    tabs.forEach(tab => {
+        tab.id = 'company-tab-' + tab.dataset.companyTab;
+        const panels = [...document.querySelectorAll('[data-company-panel]')].filter(panel => panel.dataset.companyPanel === tab.dataset.companyTab);
+        panels.forEach((panel,index) => { panel.id ||= 'company-panel-' + tab.dataset.companyTab + '-' + index; panel.setAttribute('role','tabpanel'); panel.setAttribute('aria-labelledby',tab.id); });
+        tab.setAttribute('aria-controls',panels.map(panel=>panel.id).join(' '));
+    });
+    const activate = name => {
+        if (!tabs.some(tab=>tab.dataset.companyTab===name)) name='overview';
+        tabs.forEach(tab=>{const active=tab.dataset.companyTab===name;tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
+        document.querySelectorAll('[data-company-panel]').forEach(panel=>panel.classList.toggle('hidden',panel.dataset.companyPanel!==name));
+        const labels={overview:'Modifica azienda',personal:'Modifica anagrafica',contacts:'Modifica contatti',addresses:'Modifica indirizzi',documents:'Gestisci documenti e allegati','digital-card':'Altre opzioni tessera'};
+        setChildren(actions,button(labels[name],()=>{window.location.href=editUrl(companyId)+(name==='contacts'?'#section-email':'');}));
+        sessionStorage.setItem('company-profile-tab:'+companyId,name);
+    };
+    tabs.forEach((tab,index)=>{tab.onclick=()=>activate(tab.dataset.companyTab);tab.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowLeft'?-1:1)+tabs.length)%tabs.length;tabs[next].focus();activate(tabs[next].dataset.companyTab);};});
+    const summary=[['Partita IVA',data.partitaIva,'personal'],['Email principale',companyProfileContacts(data).emails[0]?.address,'contacts'],['Telefono',data.telefonoAzienda,'contacts'],['Sede legale',[data.indirizzoSede,data.civicoSede,data.cittaSede].filter(Boolean).join(' '),'addresses']];
+    setChildren(document.getElementById('company-overview'),[createElement('h2',{className:'detail-section-title',textContent:'Panoramica aziendale'}),createElement('div',{className:'company-summary-grid'},summary.map(([label,value,tab])=>createElement('button',{type:'button',className:'company-summary-card',onclick:()=>activate(tab)},[text(label,'view-label'),text(value||'Non indicato')])))]);
+    const qr=document.getElementById('company-digital-card');
+    const options=[['ragioneSociale','Ragione sociale'],['partitaIva','Partita IVA'],['codiceSDI','Codice SDI'],['numeroCCIAA','CCIAA'],['dataIscrizione','Data iscrizione'],['referenteNome','Nome referente'],['referenteCognome','Cognome referente'],['referenteTitolo','Ruolo referente'],['referenteCellulare','Cellulare referente'],['aziendaEmail','PEC'],['adminEmail','Email amministrazione'],['persEmail','Email personale'],['qrLegale','Sede legale']];
+    const preview=createElement('div',{className:'company-qr-preview'});
+    const config={...data.qrConfig};
+    const refresh=()=>renderQRCode(preview,buildVCard({...data,qrConfig:config}),{width:220,height:220,colorDark:'#000000',colorLight:'#ffffff'});
+    const checks=options.map(([key,label])=>createElement('label',{},[createElement('input',{type:'checkbox',checked:config[key]===undefined?!['adminEmail','persEmail'].includes(key):Boolean(config[key]),onchange:event=>{config[key]=event.target.checked;refresh();}}),text(label)]));
+    const save=button('Salva selezione',async()=>{try{save.disabled=true;await updateDoc(doc(db,'users',auth.currentUser.uid,'aziende',companyId),{qrConfig:config});showToast('Tessera aggiornata','success');await reload();}catch{showToast('Impossibile salvare la tessera','error');}finally{save.disabled=false;}});
+    const download=button('Scarica contatto',()=>{const blob=new Blob([buildVCard({...data,qrConfig:config})],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=createElement('a',{href:url,download:'contatto-azienda.vcf'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+    setChildren(qr,[createElement('h2',{className:'detail-section-title',textContent:'Tessera digitale aziendale'}),text('Seleziona i dati da condividere. Password e credenziali sono escluse.'),preview,createElement('div',{className:'company-qr-options'},checks),createElement('div',{className:'company-contact-actions'},[save,download])]);
+    refresh();
+    renderCompanyContacts(data,companyId,reload);
+    activate(new URLSearchParams(window.location.search).get('profileTab')||sessionStorage.getItem('company-profile-tab:'+companyId)||'overview');
+}

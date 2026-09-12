@@ -1,4 +1,5 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.102';
+import { prepareCompanyProfileLink } from '../azienda/company-profile-link.js';
+import { auth, db } from '../../firebase-config.js?v=1.2.103';
 import { LOG } from '../../logger.js';
 import { collection, deleteField, doc, increment, runTransaction } from '/assets/js/vendor/firebase-runtime.js';
 import { showAlertModal, showToast } from '../../ui-core-v129.js';
@@ -102,7 +103,7 @@ export async function savePrivateAccount({
         updatedAt: new Date().toISOString(),
         _encrypted: true // Flag per indicare che i dati sono cifrati (V6.0)
     };
-    if (profileContactLinkDraft?.profileContactId) {
+    if (profileContactLinkDraft?.profileContactId && !profileContactLinkDraft.sourceCompanyId) {
         data.linkedProfileField = { type: profileContactLinkDraft.contactType, id: profileContactLinkDraft.profileContactId };
     }
 
@@ -222,16 +223,18 @@ export async function savePrivateAccount({
 
             // 1. ALL READS FIRST
             const accountSnap = isEditing ? await transaction.get(accRef) : null;
-            const profileUserRef = profileContactLinkDraft?.profileContactId ? doc(db, 'users', currentUid) : null;
+            const profileUserRef = profileContactLinkDraft?.profileContactId && !profileContactLinkDraft.sourceCompanyId ? doc(db, 'users', currentUid) : null;
             const profileUserSnap = profileUserRef ? await transaction.get(profileUserRef) : null;
             const oldData = accountSnap?.exists() ? accountSnap.data() : null;
+            const companyLink = profileContactLinkDraft?.sourceCompanyId ? await prepareCompanyProfileLink(transaction, { uid: currentUid, draft: profileContactLinkDraft, targetId, targetCompanyId: '', oldData, data, isEditing, baseRevision }) : null;
             let linkedContact = null;
             const contactCollection = profileContactLinkDraft?.contactType === 'phone' ? 'contactPhones' : 'contactEmails';
-            if (profileContactLinkDraft?.profileContactId) {
+            if (profileContactLinkDraft?.profileContactId && !profileContactLinkDraft.sourceCompanyId) {
                 if (profileContactLinkDraft.ownerUid !== currentUid || auth.currentUser?.uid !== currentUid || Boolean(profileContactLinkDraft.companyId) || !['email', 'phone'].includes(profileContactLinkDraft.contactType)) throw new Error('Collegamento non valido per questa sessione.');
                 const email = profileUserSnap?.data()?.[contactCollection]?.find(item => item.id === profileContactLinkDraft.profileContactId);
                 if (!email) throw new Error('Contatto del Profilo non più disponibile.');
                 if (email.linkedAccountId && (email.linkedAccountId !== targetId || email.linkedAccountCompanyId)) throw new Error('Email già collegata a un altro Account.');
+                if (oldData?.linkedCompanyProfileField) throw new Error('Account già collegato a un profilo aziendale.');
                 if (oldData?.linkedProfileField && (oldData.linkedProfileField.id !== email.id || oldData.linkedProfileField.type !== profileContactLinkDraft.contactType)) throw new Error('Account già collegato a un altro campo del Profilo.');
                 if (isEditing && Number(oldData?.revision || 0) !== Number(baseRevision)) throw new Error('Account modificato su un altro dispositivo. Ricarica prima di collegare.');
                 if (oldData?.isArchived || data.visibility === 'shared' || data.type === 'memo') throw new Error('Scegli un Account privato attivo per collegare il contatto.');
@@ -246,6 +249,10 @@ export async function savePrivateAccount({
 
             // 2. NOW EXECUTE ALL WRITES
             let finalData = { ...data };
+            if (companyLink) {
+                finalData.linkedCompanyProfileField = companyLink.backlink;
+                transaction.update(companyLink.ref, companyLink.patch);
+            }
             if (!isEditing) finalData.createdAt = new Date().toISOString();
             if (isEditing) finalData.revision = increment(1);
 
@@ -375,7 +382,7 @@ export async function savePrivateAccount({
             if (isEditing) transaction.update(accRef, finalData);
             else transaction.set(accRef, finalData);
 
-            if (profileContactLinkDraft?.profileContactId) {
+            if (profileContactLinkDraft?.profileContactId && !profileContactLinkDraft.sourceCompanyId) {
                 const contacts = profileUserSnap?.data()?.[contactCollection] || [];
                 transaction.update(profileUserRef, {
                     [contactCollection]: contacts.map(email => email.id === profileContactLinkDraft.profileContactId

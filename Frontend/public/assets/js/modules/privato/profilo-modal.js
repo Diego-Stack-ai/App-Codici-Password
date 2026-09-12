@@ -9,7 +9,7 @@ import { showConfirmModal, showInputModal, showToast } from '../../ui-core-v129.
 import { t } from '../../translations.js';
 import { filterProfileAccounts } from './profile-model.js';
 
-export function showProfileAccountPicker({ title, accounts, companies, onSelect }) {
+export function showProfileAccountPicker({ title, accounts, companies, onSelect, initialScope = 'all' }) {
     document.getElementById('profile-account-picker')?.remove();
     const previousFocus = document.activeElement;
     let selected = null;
@@ -28,6 +28,8 @@ export function showProfileAccountPicker({ title, accounts, companies, onSelect 
         createElement('option', { value: 'personal', textContent: 'Personali' }),
         ...companies.map(company => createElement('option', { value: `company:${company.id}`, textContent: company.name }))
     ]);
+    scope.value = initialScope;
+    if (!scope.value) scope.value = 'all';
     const count = createElement('p', { className: 'profile-account-count', role: 'status', 'aria-live': 'polite' });
     const list = createElement('div', { className: 'profile-account-results', 'aria-label': 'Account trovati' });
     const close = () => {

@@ -14,7 +14,7 @@
  * modifica_azienda.html carica solo main.js → INVARIATO
  */
 
-import { db } from '../../firebase-config.js?v=1.2.102';
+import { db } from '../../firebase-config.js?v=1.2.103';
 import { doc } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, clearElement, setChildren } from '../../dom-utils.js';
 import { showToast } from '../../ui-core-v129.js';
@@ -32,6 +32,8 @@ import { saveAzienda, deleteAzienda } from './ma_save.js';
 export async function initModificaAzienda(user) {
     if (!user) return;
     state.currentUid = user.uid;
+    state.originalCompany = null;
+    state.formLoaded = false;
 
     const urlParams = new URLSearchParams(window.location.search);
     state.currentAziendaId = urlParams.get('id');
@@ -70,6 +72,7 @@ function initProtocolUI() {
         setChildren(fRight, createElement('button', {
             id: 'btn-save',
             className: 'footer-action-btn btn-primary',
+            disabled: Boolean(state.currentAziendaId),
             onclick: saveAzienda
         }, [
             createElement('span', { className: 'material-symbols-outlined', textContent: 'save' })
@@ -87,6 +90,9 @@ async function loadAzienda() {
             return;
         }
         await populateForm(company);
+        state.formLoaded = true;
+        const save = document.getElementById('btn-save');
+        if (save) save.disabled = false;
     } catch (e) {
         logError("LoadAzienda", e);
         showToast(t('error_generic'), "error");

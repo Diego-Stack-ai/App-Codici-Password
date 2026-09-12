@@ -4,22 +4,22 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Dati Azienda - PROTOCOLLO OPERATORE V5.4</title>
+    <title>Profilo aziendale</title>
 
     <!-- PWA / Mobile Capable -->
-    <link rel="manifest" href="manifest.json?v=1.2.102" />
+    <link rel="manifest" href="manifest.json?v=1.2.103" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Design System Master (PROTOCOLLO V5.0) -->
-    <link rel="stylesheet" href="assets/css/core.css?v=1.2.102">
+    <link rel="stylesheet" href="assets/css/core.css?v=1.2.103">
     <link rel="stylesheet" href="assets/css/core_fonts.css">
     <link rel="stylesheet" href="assets/css/core_fascie.css">
-    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.102">
-    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.102">
-    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.102">
+    <link rel="stylesheet" href="assets/css/core_ui.css?v=1.2.103">
+    <link rel="stylesheet" href="assets/css/azienda_shared.css?v=1.2.103">
+    <link rel="stylesheet" href="assets/css/dati_azienda.css?v=1.2.103">
 
     <!-- CORE JS -->
     <script src="assets/js/theme-init.js"></script>
@@ -71,7 +71,18 @@
                     </div>
                 </div>
 
-                <div class="detail-content-wrap">
+                <nav class="company-profile-tabs" role="tablist" aria-label="Sezioni profilo aziendale">
+<button type="button" role="tab" data-company-tab="overview" aria-selected="true">Panoramica</button>
+<button type="button" role="tab" data-company-tab="personal" aria-selected="false">Anagrafica</button>
+<button type="button" role="tab" data-company-tab="contacts" aria-selected="false">Contatti</button>
+<button type="button" role="tab" data-company-tab="addresses" aria-selected="false">Indirizzi</button>
+<button type="button" role="tab" data-company-tab="documents" aria-selected="false">Documenti</button>
+<button type="button" role="tab" data-company-tab="digital-card" aria-selected="false">Tessera digitale</button>
+</nav>
+<div class="detail-content-wrap">
+<section data-company-panel="overview" class="detail-section" id="company-overview"></section>
+<section data-company-panel="digital-card" class="detail-section hidden" id="company-digital-card"></section>
+<div id="company-section-actions" class="company-section-actions"></div>
                     <!-- 🛡️ Trappola Anti-autofill (V7.0 Hardened) -->
                     <div class="anti-autofill-trap" aria-hidden="true">
                         <input type="text" name="user_login_trap" autocomplete="username" tabindex="-1">
@@ -79,7 +90,7 @@
                     </div>
 
                     <!-- Section: Referente -->
-                    <section class="detail-section">
+                    <section data-company-panel="personal" class="detail-section">
                         <button class="accordion-trigger-premium group" id="toggle-referente-btn">
                             <div class="detail-section-actions">
                                 <span
@@ -90,7 +101,7 @@
                                 class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
                         </button>
 
-                        <div id="referente-container" class="mt-content hidden">
+                        <div id="referente-container" class="mt-content">
                             <div class="glass-card">
                                 <div class="referent-header">
                                     <div class="referent-avatar-box">
@@ -132,7 +143,7 @@
                     </section>
 
                     <!-- Section: Sedi -->
-                    <section class="detail-section">
+                    <section data-company-panel="addresses" class="detail-section">
                         <div class="detail-section-header">
                             <span
                                 class="material-symbols-outlined detail-section-icon icon-accent-blue">location_on</span>
@@ -151,51 +162,9 @@
                         </div>
                     </section>
 
-                    <!-- Section: Contatti Diretti -->
-                    <section class="detail-section">
-                        <div class="detail-section-header">
-                            <span
-                                class="material-symbols-outlined detail-section-icon icon-accent-blue">contact_phone</span>
-                            <h3 class="detail-section-title" data-t="direct_contacts">Contatti Diretti</h3>
-                        </div>
-
-                        <div class="glass-card flex-col-gap">
-                            <div class="glass-field-container">
-                                <label class="view-label" for="telefono-azienda" data-t="phone">Telefono</label>
-                                <div class="detail-field-box border-glow">
-                                    <span class="material-symbols-outlined icon-field-left opacity-low">call</span>
-                                    <input id="telefono-azienda" readonly class="detail-field-input no-transform"
-                                        value="-">
-                                    <div class="detail-field-actions">
-                                        <a id="btn-call-tel" href="tel:" class="btn-icon-header">
-                                            <span class="material-symbols-outlined icon-accent-emerald">call</span>
-                                        </a>
-                                        <button class="btn-icon-header copy-btn" type="button"
-                                            data-copy-target="telefono-azienda" data-field="telefono-azienda">
-                                            <span class="material-symbols-outlined">content_copy</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="glass-field-container">
-                                <label class="view-label" for="fax-azienda" data-t="fax">Fax</label>
-                                <div class="detail-field-box border-glow">
-                                    <span class="material-symbols-outlined icon-field-left opacity-low">fax</span>
-                                    <input id="fax-azienda" readonly class="detail-field-input no-transform" value="-">
-                                    <div class="detail-field-actions">
-                                        <button class="btn-icon-header copy-btn" type="button"
-                                            data-copy-target="fax-azienda" data-field="fax-azienda">
-                                            <span class="material-symbols-outlined">content_copy</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Section: Email Categorizzate -->
-                    <section id="wrapper-email-section" class="detail-section">
+                    <section data-company-panel="contacts" class="detail-section"><h3 class="detail-section-title">Telefoni e referente</h3><div id="company-phone-list"></div></section>
+<!-- Section: Email Categorizzate -->
+                    <section data-company-panel="contacts" id="wrapper-email-section" class="detail-section">
                         <button class="accordion-trigger-premium group" id="toggle-email-btn">
                             <div class="detail-section-actions">
                                 <span
@@ -210,13 +179,13 @@
                                     class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
                             </div>
                         </button>
-                        <div id="email-list-container" class="mt-content hidden">
+                        <div id="email-list-container" class="mt-content">
                             <!-- Generato via JS -->
                         </div>
                     </section>
 
                     <!-- Section: Dati Fiscali -->
-                    <section class="detail-section">
+                    <section data-company-panel="personal" class="detail-section">
                         <button class="accordion-trigger-premium group" id="toggle-fiscal-btn">
                             <div class="detail-section-actions">
                                 <span
@@ -232,7 +201,7 @@
                             </div>
                         </button>
 
-                        <div id="fiscal-container" class="mt-content hidden">
+                        <div id="fiscal-container" class="mt-content">
                             <div class="glass-card flex-col-gap">
                                 <div class="glass-field-container">
                                     <label class="view-label" for="piva" data-t="vat_number">Partita IVA</label>
@@ -287,7 +256,7 @@
                     </section>
 
                     <!-- Section: Note -->
-                    <section class="detail-section">
+                    <section data-company-panel="overview" class="detail-section">
                         <div class="detail-section-header">
                             <div class="detail-section-actions">
                                 <span
@@ -309,7 +278,7 @@
                     </section>
 
                     <!-- Section: Allegati -->
-                    <section class="detail-section section-bottom">
+                    <section data-company-panel="documents" class="detail-section section-bottom">
                         <button class="accordion-trigger-premium group" id="toggle-allegati-btn">
                             <div class="detail-section-actions">
                                 <span
@@ -320,7 +289,7 @@
                                 class="material-symbols-outlined icon-chevron transition-transform">expand_more</span>
                         </button>
 
-                        <div id="allegati-container" class="mt-content hidden">
+                        <div id="allegati-container" class="mt-content">
                             <div id="allegati-list" class="flex-col-gap-xs">
                                 <p class="no-attachments-text" data-t="no_attachments">Nessun allegato</p>
                             </div>

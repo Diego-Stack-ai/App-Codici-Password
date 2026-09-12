@@ -8,6 +8,7 @@ async function sourceModule(path) {
     return import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 }
 const model = await sourceModule('privato/profile-model.js');
+const companyModel = await sourceModule('azienda/company-profile-model.js');
 const modes = await sourceModule('shared/account-mode-model.js');
 const crypto = await sourceModule('core/crypto-utils.js');
 
@@ -116,10 +117,11 @@ test('un errore di sincronizzazione non apre il form e non persiste la bozza', a
     assert.equal(window.location.href, '');
 });
 
-async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false } = {}) {
+async function saveFixture({ type = 'email', password = 'legacy', legacy = 'legacy', failCommit = false, conflict = false, missing = false, editing = true, unreadable = false, company = false, wrongCompany = false, sourceCompany = false } = {}) {
     const profileKey = type === 'phone' ? 'contactPhones' : 'contactEmails';
     const contact = { id: 'contact-1', number: '+390001', address: 'fixture@example.test', password: legacy ? `cipher:${legacy}` : '', note: 'cipher:nota', custom: 'preserve' };
     const profile = { [profileKey]: missing ? [] : [contact, { id: 'other', password: 'cipher:other' }] };
+    const sourceData = {emails:{extra:[{...contact,email:contact.address}]},telefonoAzienda:contact.number};
     const fields = { 'account-name': { value: 'Fixture' }, 'account-password': { value: password }, 'account-username': { value: 'fixture@example.test' }, 'btn-save-footer': { disabled: false }, 'save-btn-footer': { disabled: false } };
     const committed = [];
     const messages = [];
@@ -136,7 +138,7 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         runTransaction: async (db, callback) => {
             const staged = [];
             await callback({
-                get: async reference => ({ exists: () => true, data: () => reference.path === 'users/owner' ? profile : { revision: conflict ? 2 : 1, updatedAt: conflict ? 'changed' : '' } }),
+                get: async reference => ({ exists: () => true, data: () => reference.path === 'users/owner/aziende/source' ? sourceData : reference.path === 'users/owner' ? profile : { revision: conflict ? 2 : 1, updatedAt: conflict ? 'changed' : '' } }),
                 update: (reference, value) => staged.push({ path: reference.path, value }),
                 set: (reference, value) => staged.push({ path: reference.path, value }), delete: () => {}
             });
@@ -152,11 +154,12 @@ async function saveFixture({ type = 'email', password = 'legacy', legacy = 'lega
         sessionStorage: { removeItem: () => { draftRemoved = true; } },
         setTimeout: () => {}, console: { error: () => {} }
     };
+    dependencies.prepareCompanyProfileLink = (await loadController('azienda/company-profile-link.js',{...dependencies,...companyModel},['prepareCompanyProfileLink'])).prepareCompanyProfileLink;
     dependencies.decryptRequiredValue = dependencies.decodeProfileContactValue;
     const method = company ? 'saveAccount' : 'savePrivateAccount';
     const controller = await loadController(company ? 'azienda/form-azienda-save.js' : 'privato/form-privato-save.js', dependencies, [method]);
     await controller[method]({ bankAccounts: [], invitedEmails: [], currentUid: 'owner', currentDocId: 'account-1', currentAziendaId: 'company-1', isEditing: editing, baseRevision: 1,
-        profileContactLinkDraft: { profileContactId: 'contact-1', contactType: type, ownerUid: 'owner', ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
+        profileContactLinkDraft: { profileContactId: sourceCompany && type === 'phone' ? 'telefonoAzienda' : 'contact-1', contactType: type, ownerUid: 'owner', ...(sourceCompany ? {sourceCompanyId:'source',contactValue:type==='phone'?contact.number:contact.address} : {}), ...(company ? { companyId: wrongCompany ? 'wrong-company' : 'company-1' } : {}) } });
     return { committed, contact, messages, draftRemoved, profileKey };
 }
 
@@ -286,4 +289,22 @@ test('lettura password: account mancante e cambio sessione non espongono il dato
     await assert.rejects(controller.readLinkedEmailAccountPassword({linkedAccountId:'a'}), /non disponibile/);
     missing = false;
     await assert.rejects(controller.readLinkedEmailAccountPassword({linkedAccountId:'a'}), /Sessione cambiata/);
+});
+
+for (const company of [false,true]) for (const editing of [false,true]) for (const type of ['email','phone']) test('Profilo aziendale → Account '+(company?'aziendale':'personale')+' '+(editing?'esistente':'nuovo')+' '+type,async()=>{
+    const result=await saveFixture({sourceCompany:true,company,editing,type});
+    assert.equal(result.committed.length,2,JSON.stringify(result.messages));
+    const source=result.committed.find(item=>item.path==='users/owner/aziende/source').value;
+    const account=result.committed.find(item=>item.path.includes('/accounts/'));
+    const link=type==='email'?source.emails.extra[0]:source.phoneAccountLinks.telefonoAzienda;
+    assert.equal(link.linkedAccountId,account.path.split('/').at(-1));
+    assert.equal(link.linkedAccountCompanyId,company?'company-1':'');
+    if(type==='email'){assert.equal(link.password,'cipher:legacy');assert.equal(link.custom,'preserve');}
+    assert.deepEqual(account.value.linkedCompanyProfileField,{companyId:'source',type,id:type==='email'?'contact-1':'telefonoAzienda'});
+    assert.equal(account.value.linkedProfileField,undefined);
+    assert.equal(result.draftRemoved,true);
+});
+for(const company of [false,true]) for(const condition of ['conflict','failCommit']) test('Profilo aziendale: nessuna modifica parziale '+company+' '+condition,async()=>{
+    const result=await saveFixture({sourceCompany:true,company,[condition]:true});
+    assert.deepEqual(result.committed,[]);assert.equal(result.draftRemoved,false);
 });

@@ -1,3 +1,4 @@
+import { loadCompanyProfileContact } from '../azienda/company-profile-link.js';
 /**
  * FORM ACCOUNT PRIVATO (V6.0 — Unified Banking Renderer)
  * Creazione e modifica account con gestione IBAN dinamica.
@@ -13,7 +14,7 @@ import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listCont
 import { prepareProfileEmailAccountValues } from './profile-model.js';
 import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.102';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.103';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -248,14 +249,15 @@ export async function initFormAccountPrivato(user) {
     ]);
     if (profileContactLinkDraft) {
         try {
-            const profile = await getUserProfile(user.uid);
+            const profile = profileContactLinkDraft.sourceCompanyId ? null : await getUserProfile(user.uid);
             const isPhone = profileContactLinkDraft.contactType === 'phone';
-            const contact = profile?.[isPhone ? 'contactPhones' : 'contactEmails']?.find(item => item.id === profileContactLinkDraft.profileContactId);
+            const contact = profileContactLinkDraft.sourceCompanyId ? await loadCompanyProfileContact(user.uid, profileContactLinkDraft) : profile?.[isPhone ? 'contactPhones' : 'contactEmails']?.find(item => item.id === profileContactLinkDraft.profileContactId);
             const email = isPhone && contact ? { address: contact.number } : contact;
             if (!email) throw new Error('Contatto del Profilo non disponibile.');
             const key = await ensureVaultKeyMaterial();
             const password = await decodeProfileContactValue(email.password, key);
             const note = await decodeProfileContactValue(email.note, key);
+            if (profileContactLinkDraft.sourceCompanyId && contact.username) email.address = await decodeProfileContactValue(contact.username, key);
             const values = prepareProfileEmailAccountValues({ ...email, password, note }, {
                 username: get('account-username'), password: get('account-password'), note: get('account-note')
             });
@@ -354,7 +356,7 @@ async function loadData() {
             return;
         }
         currentRevision = Number.isInteger(data.revision) ? data.revision : 0;
-        hasLinkedProfileField = Boolean(data.linkedProfileField?.type && data.linkedProfileField?.id);
+        hasLinkedProfileField = Boolean(data.linkedProfileField?.id || data.linkedCompanyProfileField?.id);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
 
         // 🔐 PROTOCOLLO BLINDA: Decrittazione automatica se necessario
@@ -365,6 +367,7 @@ async function loadData() {
                 vaultKeyMaterial = await ensureVaultKeyMaterial();
             } catch (e) {
                 showToast("Dati cifrati: chiave obbligatoria.", "error");
+                if (profileContactLinkDraft) throw e;
                 history.back();
                 return;
             }

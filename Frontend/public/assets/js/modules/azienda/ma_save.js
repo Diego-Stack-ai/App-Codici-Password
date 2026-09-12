@@ -7,8 +7,8 @@
  */
 
 import { state } from './ma_state.js';
-import { db, storage } from '../../firebase-config.js?v=1.2.102';
-import { doc, updateDoc, deleteDoc, serverTimestamp } from "/assets/js/vendor/firebase-runtime.js";
+import { db, storage } from '../../firebase-config.js?v=1.2.103';
+import { doc, updateDoc, deleteDoc, serverTimestamp, runTransaction } from "/assets/js/vendor/firebase-runtime.js";
 import { ref, uploadBytes, getDownloadURL } from "/assets/js/vendor/firebase-runtime.js";
 import { createElement, setChildren } from '../../dom-utils.js';
 import { showToast, showConfirmModal } from '../../ui-core-v129.js';
@@ -43,10 +43,15 @@ export async function saveAzienda() {
     }
 
     try {
-        const qrConfig = {};
+        if (!vaultKeyMaterial) throw new Error('Sblocca il Vault prima di salvare.');
+        if (state.currentAziendaId && !state.formLoaded) throw new Error('Ricarica l’azienda prima di salvare.');
+        const original = state.originalCompany || {};
+        const qrConfig = {...original.qrConfig};
         document.querySelectorAll('input[data-qr-field]').forEach(cb => qrConfig[cb.dataset.qrField] = cb.checked);
 
         const altreSedi = Array.from(document.querySelectorAll('.extra-sede-item')).map(el => ({
+            ...(original.altreSedi || []).find((item,index)=>(item.id || 'sede-'+index) === el.dataset.sedeId),
+            id: el.dataset.sedeId,
             tipo: el.querySelector('.sede-tipo')?.value.trim(),
             indirizzo: el.querySelector('.sede-indirizzo')?.value.trim(),
             civico: el.querySelector('.sede-civico')?.value.trim(),
@@ -61,6 +66,7 @@ export async function saveAzienda() {
             tipoSedeLegale: document.getElementById('tipo-sede-legale')?.value.trim() || 'Sede Legale',
             telefonoAzienda: document.getElementById('telefono-azienda')?.value.trim(),
             faxAzienda: document.getElementById('fax-azienda')?.value.trim(),
+            codiceSDI: document.getElementById('codice-sdi')?.value.trim() || '',
             partitaIva: document.getElementById('piva')?.value.trim(),
             formaGiuridica: document.getElementById('forma-giuridica')?.value.trim() || '',
             referenteTitolo: document.getElementById('referente-ruolo')?.value.trim() || '',
@@ -75,19 +81,23 @@ export async function saveAzienda() {
             numeroCCIAA: document.getElementById('cciaa')?.value.trim() || '',
             dataIscrizione: document.getElementById('data-iscrizione')?.value || '',
             emails: {
+                ...original.emails,
                 pec: document.getElementById('type-pec') ? {
+                    ...original.emails?.pec,
                     tipo: document.getElementById('type-pec').value.trim(),
                     email: document.getElementById('email-pec')?.value.trim(),
-                    password: await encrypt(document.getElementById('email-pec-password')?.value.trim() || '', vaultKeyMaterial),
+                    password: await encrypt(document.getElementById('email-pec-password')?.value || '', vaultKeyMaterial),
                     note: document.getElementById('email-pec-note')?.value.trim()
                 } : null,
                 amministrazione: document.getElementById('type-amministrazione') ? {
+                    ...original.emails?.amministrazione,
                     tipo: document.getElementById('type-amministrazione').value.trim(),
                     email: document.getElementById('email-amministrazione')?.value.trim(),
                     password: await encrypt(document.getElementById('email-amministrazione-password')?.value.trim() || '', vaultKeyMaterial),
                     note: document.getElementById('email-amministrazione-note')?.value.trim()
                 } : null,
                 personale: document.getElementById('type-personale') ? {
+                    ...original.emails?.personale,
                     tipo: document.getElementById('type-personale').value.trim(),
                     email: document.getElementById('email-personale')?.value.trim(),
                     password: await encrypt(document.getElementById('email-personale-password')?.value.trim() || '', vaultKeyMaterial),
@@ -95,6 +105,8 @@ export async function saveAzienda() {
                 } : null,
                 extra: await Promise.all(
                     Array.from(document.querySelectorAll('.email-extra-item')).map(async el => ({
+                        ...(original.emails?.extra || []).find((item,index) => (item.id || 'extra-' + index) === el.dataset.contactId),
+                        id: el.dataset.contactId,
                         tipo: el.querySelector('.email-type')?.value.trim(),
                         email: el.querySelector('.email-value')?.value.trim(),
                         password: await encrypt(el.querySelector('.email-pass')?.value.trim() || '', vaultKeyMaterial),
@@ -140,7 +152,22 @@ export async function saveAzienda() {
         data.allegati = [...state.existingAttachments, ...newAtt];
 
         if (state.currentAziendaId) {
-            await updateDoc(doc(db, "users", state.currentUid, "aziende", state.currentAziendaId), data);
+            await runTransaction(db, async transaction => {
+                const ref = doc(db, 'users', state.currentUid, 'aziende', state.currentAziendaId);
+                const snap = await transaction.get(ref);
+                if (!snap.exists()) throw new Error('Azienda non disponibile');
+                const current = snap.data();
+                for (const key of ['emails', 'aziendaEmail', 'aziendaEmailPassword', 'phoneAccountLinks', 'telefonoAzienda', 'faxAzienda', 'referenteCellulare']) {
+                    if (JSON.stringify(current[key] || null) !== JSON.stringify(original[key] || null)) throw new Error('Contatti modificati: ricarica prima di salvare.');
+                }
+                const oldContacts = [original.emails?.pec, original.emails?.amministrazione, original.emails?.personale, ...(original.emails?.extra || [])].filter(Boolean);
+                const newContacts = [data.emails.pec, data.emails.amministrazione, data.emails.personale, ...data.emails.extra].filter(Boolean);
+                if (oldContacts.some(old => old.linkedAccountId && !newContacts.some(item => item.linkedAccountId === old.linkedAccountId && item.email === old.email))) throw new Error('Scollega l’Account prima di eliminare o cambiare l’email.');
+                for (const field of ['telefonoAzienda','faxAzienda','referenteCellulare']) {
+                    if (original.phoneAccountLinks?.[field]?.linkedAccountId && data[field] !== (original[field] || '')) throw new Error('Scollega l’Account prima di cambiare il telefono.');
+                }
+                transaction.update(ref, data);
+            });
             showToast(t('success_save') || "Azienda salvata con successo!", "success");
             setTimeout(() => window.location.replace(`dati_azienda.html?id=${state.currentAziendaId}`), 1000);
         } else {
@@ -152,7 +179,7 @@ export async function saveAzienda() {
         }
     } catch (e) {
         logError("Save", e);
-        showToast(t('error_generic'), "error");
+        showToast(e.message?.startsWith('Scollega') || e.message?.startsWith('Contatti modificati') ? e.message : t('error_generic'), "error");
         if (btn) {
             btn.disabled = false;
             setChildren(btn, createElement('span', { className: 'material-symbols-outlined', textContent: 'save' }));
