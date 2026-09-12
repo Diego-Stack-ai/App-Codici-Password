@@ -68,5 +68,5 @@ jobs:
 
       # Le Functions restano escluse e richiedono un'autorizzazione separata.
       # FIREBASE_TOKEN resta temporaneamente il metodo CI esistente.
-      - name: Deploy Hosting and security rules
-        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only hosting,firestore:rules,storage --token ${{ secrets.FIREBASE_TOKEN }}
+      - name: Deploy Hosting only
+        run: node node_modules/firebase-tools/lib/bin/firebase.js deploy --project appcodici-password --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
