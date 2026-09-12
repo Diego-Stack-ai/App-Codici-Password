@@ -1,4 +1,4 @@
-import { auth, db } from '../../firebase-config.js?v=1.2.99';
+import { auth, db } from '../../firebase-config.js?v=1.2.100';
 import { collection, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showAlertModal, showConfirmModal, showToast } from '../../ui-core-v129.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
@@ -7,58 +7,61 @@ import {listDeadlines, listPrivateAccounts} from '../data/vault-repository.js';
 import {
     buildProfileAccountLinkDraft,
     buildProfileDocumentDeadlineDraft,
-    findCompatibleDocumentDeadlines,
-    hasLegacyEmailPassword,
-    linkProfileEmailToAccount
+    findCompatibleDocumentDeadlines
 } from './profile-model.js';
 
 export function openLinkedAccount(accountId) {
     if (accountId) window.location.href = `dettaglio_account_privato.html?id=${encodeURIComponent(accountId)}`;
 }
 
-export async function connectEmailAccount(email, syncData) {
+export const connectEmailAccount = (email, syncData) => connectContactAccount(email, syncData, 'email');
+export const connectPhoneAccount = (phone, syncData) => connectContactAccount(phone, syncData, 'phone');
+
+async function connectContactAccount(email, syncData, contactType) {
     const user = auth.currentUser;
     if (!user || !email?.id) return;
-    if (hasLegacyEmailPassword(email)) {
-        const create = await showConfirmModal(
-            'Crea Account per questa email',
-            'Prima mostra o copia la password legacy dalla scheda Email. Nella pagina successiva inseriscila nel nuovo Account: verrà rimossa dal Profilo soltanto dopo il salvataggio riuscito.',
-            'Apri creazione Account',
-            'Annulla'
-        );
-        if (!create) return;
+    if (email.linkedAccountId) {
         await syncData();
-        sessionStorage.setItem('profile-account-link-draft', JSON.stringify(buildProfileAccountLinkDraft(email)));
-        window.location.href = `form_account_privato.html?profileEmailId=${encodeURIComponent(email.id)}`;
+        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
+        window.location.href = `form_account_privato.html?id=${encodeURIComponent(email.linkedAccountId)}&profileContactId=${encodeURIComponent(email.id)}`;
         return;
     }
     const accountRecords = await listPrivateAccounts(user.uid);
     const vaultKeyMaterial = await ensureVaultKeyMaterial();
-    const accounts = await Promise.all(accountRecords.map(async data => {
+    const accounts = await Promise.all(accountRecords.filter(data =>
+        !data.isArchived && !data._isGuest && !data.shared && !data.isMemoShared &&
+        data.visibility !== 'shared' && !['memo', 'memorandum'].includes(data.type) && !data.isMemo && !data.hasMemo &&
+        (!data.linkedProfileField || (data.linkedProfileField.id === email.id && data.linkedProfileField.type === contactType))
+    ).map(async data => {
         let username = '';
         try { username = data._encrypted && data.username ? await decrypt(data.username, vaultKeyMaterial) : (data.username || ''); } catch { username = ''; }
         return { id: data.id, name: data.nomeAccount || 'Account', username };
     }));
     if (accounts.length === 0) {
-        const create = await showConfirmModal('Account email assente', 'Non esiste ancora un Account collegabile. Vuoi aprire la creazione guidata?');
+        const create = await showConfirmModal('Nessun Account collegabile', 'Non esiste ancora un Account collegabile. Vuoi aprire la creazione guidata?');
         if (!create) return;
         await syncData();
-        sessionStorage.setItem('profile-account-link-draft', JSON.stringify(buildProfileAccountLinkDraft(email)));
-        window.location.href = `form_account_privato.html?profileEmailId=${encodeURIComponent(email.id)}`;
+        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
+        window.location.href = `form_account_privato.html?profileContactId=${encodeURIComponent(email.id)}`;
         return;
     }
-    const labels = accounts.map(account => `${account.name}${account.username ? ` — ${account.username}` : ''} · ${account.id.slice(0, 6)}`);
-    showProfileModal('Collega Account email', [
-        { key: 'account', label: 'Account', type: 'select', options: labels, icon: 'link' }
+    const labels = accounts.map((account, index) => `${index + 1}. ${account.name}${account.username ? ` — ${account.username}` : ''}`);
+    const createLabel = '＋ Crea un nuovo Account';
+    const options = [createLabel, ...labels];
+    showProfileModal(contactType === 'phone' ? 'Collega o crea Account telefono' : 'Collega o crea Account email', [
+        { key: 'account', label: 'Account', type: 'select', options, icon: 'link' }
     ], { account: labels[0] }, async values => {
+        if (values.account === createLabel) {
+            await syncData();
+            sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
+            window.location.href = `form_account_privato.html?profileContactId=${encodeURIComponent(email.id)}`;
+            return;
+        }
         const selected = accounts[labels.indexOf(values.account)];
         if (!selected) return;
-        await updateDoc(doc(db, 'users', user.uid, 'accounts', selected.id), {
-            linkedProfileField: { type: 'email', id: email.id }
-        });
-        Object.assign(email, linkProfileEmailToAccount(email, selected.id));
         await syncData();
-        showToast('Email e Account collegati senza duplicare le credenziali.', 'success');
+        sessionStorage.setItem('profile-account-link-draft', JSON.stringify({ ...buildProfileAccountLinkDraft(email, contactType), ownerUid: user.uid }));
+        window.location.href = `form_account_privato.html?id=${encodeURIComponent(selected.id)}&profileContactId=${encodeURIComponent(email.id)}`;
     });
 }
 

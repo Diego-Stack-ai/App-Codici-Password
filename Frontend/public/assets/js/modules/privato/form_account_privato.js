@@ -9,9 +9,11 @@ import { t } from '../../translations.js';
 import { logError } from '../../utils.js';
 import { renderBankAccounts } from '../shared/banking-renderer.js';
 import { decrypt, ensureVaultKeyMaterial } from '../core/security-manager.js';
-import { getPrivateAccount, getPrivateAccountConfirmed, listContacts } from '../data/vault-repository.js';
+import { getPrivateAccount, getPrivateAccountConfirmed, getUserProfile, listContacts } from '../data/vault-repository.js';
+import { prepareProfileEmailAccountValues } from './profile-model.js';
+import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import { accountModeFromFlags, accountModeFromRecord, validateAccountMode } from '../shared/account-mode-model.js';
-import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.99';
+import { initAccountEmbeddedWidgets } from '../shared/account-embedded-widgets.js?v=1.2.100';
 import { savePrivateAccount } from './form-privato-save.js';
 
 // --- STATE ---
@@ -19,7 +21,7 @@ let currentUid = null;
 let currentDocId = null;
 let isEditing = false;
 let bankAccounts = []; // Inizialmente vuoto per nuovi account
-let profileEmailLinkDraft = null;
+let profileContactLinkDraft = null;
 let myContacts = [];
 let isExplicitMemo = false; // V5.2: Differenzia Memo Reale da Account condiviso come Memo
 let invitedEmails = [];
@@ -161,12 +163,13 @@ export async function initFormAccountPrivato(user) {
         const returnTo = `${window.location.pathname.split('/').pop()}${window.location.search}`;
         link.href = `gestione_destinatari.html?return=${encodeURIComponent(returnTo)}`;
     });
-    const profileEmailId = params.get('profileEmailId');
-    if (!isEditing && profileEmailId) {
+    const profileContactId = params.get('profileContactId');
+    profileContactLinkDraft = null;
+    if (profileContactId) {
         try {
             const draft = JSON.parse(sessionStorage.getItem('profile-account-link-draft') || 'null');
-            if (draft?.profileEmailId === profileEmailId) profileEmailLinkDraft = draft;
-        } catch { profileEmailLinkDraft = null; }
+            if (draft?.profileContactId === profileContactId && draft.ownerUid === user.uid && ['email', 'phone'].includes(draft.contactType)) profileContactLinkDraft = draft;
+        } catch { profileContactLinkDraft = null; }
     }
 
     // Footer actions setup
@@ -187,6 +190,7 @@ export async function initFormAccountPrivato(user) {
 
         const saveBtn = createElement('button', {
             id: 'btn-save-footer',
+            disabled: Boolean(profileContactLinkDraft),
             className: 'btn-fab-action btn-fab-scadenza',
             title: t('save') || 'Salva',
             onclick: async () => {
@@ -206,7 +210,7 @@ export async function initFormAccountPrivato(user) {
                     currentDocId,
                     isEditing,
                     baseRevision: currentRevision,
-                    profileEmailLinkDraft,
+                    profileContactLinkDraft,
                     hasLinkedProfileField
                 });
             }
@@ -237,16 +241,38 @@ export async function initFormAccountPrivato(user) {
             ]));
         }
     }
-    if (profileEmailLinkDraft?.email) {
-        const usernameInput = document.getElementById('account-username');
-        if (usernameInput) usernameInput.value = profileEmailLinkDraft.email;
-    }
-
     setupUI();
     await Promise.all([
         loadRubrica(),
         isEditing ? loadData() : Promise.resolve()
     ]);
+    if (profileContactLinkDraft) {
+        try {
+            const profile = await getUserProfile(user.uid);
+            const isPhone = profileContactLinkDraft.contactType === 'phone';
+            const contact = profile?.[isPhone ? 'contactPhones' : 'contactEmails']?.find(item => item.id === profileContactLinkDraft.profileContactId);
+            const email = isPhone && contact ? { address: contact.number } : contact;
+            if (!email) throw new Error('Contatto del Profilo non disponibile.');
+            const key = await ensureVaultKeyMaterial();
+            const password = await decodeProfileContactValue(email.password, key);
+            const note = await decodeProfileContactValue(email.note, key);
+            const values = prepareProfileEmailAccountValues({ ...email, password, note }, {
+                username: get('account-username'), password: get('account-password'), note: get('account-note')
+            });
+            for (const [field, value] of Object.entries(values)) {
+                const input = document.getElementById(`account-${field}`);
+                if (input) input.value = value;
+            }
+            if (!get('account-name')) document.getElementById('account-name').value = (isPhone ? 'Telefono ' : 'Email ') + (contact.label || email.address || '');
+            showToast(isPhone ? 'Verifica i dati e salva per collegare il telefono.' : 'Verifica i dati e salva per collegare l’email. Una password diversa rimane anche nel Profilo.', 'info');
+            document.getElementById('btn-save-footer').disabled = false;
+        } catch {
+            showToast('Dati del contatto non disponibili: torna al Profilo e riprova. Nessun dato è stato trasferito.', 'error');
+            const saveButton = document.getElementById('btn-save-footer');
+            if (saveButton) saveButton.disabled = true;
+            return;
+        }
+    }
     if (isEditing) {
         accountWidgetController = await initAccountEmbeddedWidgets({
             uid: currentUid, context: 'private', accountId: currentDocId, editable: true
@@ -322,7 +348,11 @@ async function loadData() {
         const data = navigator.onLine
             ? await getPrivateAccountConfirmed(currentUid, currentDocId)
             : await getPrivateAccount(currentUid, currentDocId);
-        if (!data) { showToast(t('account_not_found'), "error"); return; }
+        if (!data) {
+            showToast(t('account_not_found'), "error");
+            if (profileContactLinkDraft) throw new Error('Account non disponibile per il collegamento.');
+            return;
+        }
         currentRevision = Number.isInteger(data.revision) ? data.revision : 0;
         hasLinkedProfileField = Boolean(data.linkedProfileField?.type && data.linkedProfileField?.id);
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
@@ -342,6 +372,7 @@ async function loadData() {
 
         const decryptIfPossible = async (val) => {
             if (!needsDecryption || !val) return val;
+            if (profileContactLinkDraft) return decodeProfileContactValue(val, vaultKeyMaterial);
             try { return await decrypt(val, vaultKeyMaterial); } catch (e) { return "---ERRORE DECRYPT---"; }
         };
 
@@ -447,7 +478,10 @@ async function loadData() {
             document.getElementById('logo-placeholder').classList.add('hidden');
         }
 
-    } catch (e) { logError("LoadData", e); }
+    } catch (e) {
+        logError("LoadData", e);
+        if (profileContactLinkDraft) throw e;
+    }
 }
 
 async function loadRubrica() {

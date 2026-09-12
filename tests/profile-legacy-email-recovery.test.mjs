@@ -22,15 +22,20 @@ test('il passaggio alla creazione Account non mette la password in sessionStorag
         password: 'FIXTURE-NON-SEGRETO-password'
     });
 
-    assert.deepEqual(draft, {profileEmailId: 'email-1', email: 'fixture@example.test'});
+    assert.deepEqual(draft, {profileContactId: 'email-1', contactType: 'email', value: 'fixture@example.test'});
     assert.equal(Object.hasOwn(draft, 'password'), false);
 });
 
 test('la password legacy viene rimossa solo quando il collegamento Account è pronto', () => {
     const source = {id: 'email-1', address: 'fixture@example.test', password: 'ciphertext'};
-    const linked = linkProfileEmailToAccount(source, 'account-1');
+    const linked = linkProfileEmailToAccount(source, 'account-1', {passwordTransferred: true});
 
     assert.equal(source.password, 'ciphertext');
     assert.equal(linked.password, '');
     assert.equal(linked.linkedAccountId, 'account-1');
+});
+
+test('il solo collegamento non autorizza la cancellazione della password', () => {
+    const source = {id: 'email-1', password: 'ciphertext'};
+    assert.equal(linkProfileEmailToAccount(source, 'account-1').password, 'ciphertext');
 });

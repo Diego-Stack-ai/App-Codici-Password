@@ -20,7 +20,7 @@
  * Entry Point: initProfiloPrivato(user)
  */
 
-import { auth, db, storage } from '../../firebase-config.js?v=1.2.99';
+import { auth, db, storage } from '../../firebase-config.js?v=1.2.100';
 import { LOG } from '../../logger.js';
 import { onAuthStateChanged } from "/assets/js/vendor/firebase-runtime.js";
 import { deleteField, doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
@@ -32,6 +32,7 @@ import { editSection, editAddress, editUserDocument, addUtility, editUtility } f
 import { logError, formatDateToIT } from '../../utils.js';
 import { encrypt, decrypt, ensureVaultKeyMaterial, clearSession, isAutoUnlockActive } from '../core/security-manager.js';
 import { decryptIfPossible, isEncryptedValue } from '../core/crypto-utils.js';
+import { decryptRequiredValue as decodeProfileContactValue } from '../core/crypto-utils.js';
 import {getUserProfile, getUserSetting, listDeadlines} from '../data/vault-repository.js';
 import { syncData as _syncData } from './profilo-sync.js';
 import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDeadlineState } from './profile-model.js';
@@ -39,11 +40,11 @@ import { normalizeLegacyProfile, migrateQrIndexesToIds, resolveProfileDocumentDe
 // — Moduli estratti
 import { initQRModule, setupQRToggles, toggleQRInclusion, setQRScalar, getProfileVCard, generateProfileQRCode } from './profilo-qr.js';
 import { initPhonesEmailsModule, renderPhonesView, renderEmailsView, editPhone, editEmail } from './profilo-phones-emails.js';
-import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.99';
+import { initAddressesDocsModule, renderAddressesView, renderDocumentiView } from './profilo-addresses-docs.js?v=1.2.100';
 import { initUIModule, setupAvatarEdit, setupPersonalDataCopy, setupCollapsibleSections, initProxyDropdowns, updateProfileLabelOptions } from './profilo-ui.js';
 import { initProfileDashboard, renderProfileOverview, renderDigitalCard } from './profilo-dashboard.js';
 import { initProfileWidgets, setWidgetFieldQr } from './profilo-widgets.js';
-import { connectEmailAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
+import { connectEmailAccount, connectPhoneAccount, createDeadlineFromDocument, openLinkedAccount } from './profilo-links.js';
 
 // Le funzioni crypto sono disponibili solo via import ES6 (non esposte globalmente per sicurezza)
 export { encrypt, decrypt };
@@ -128,7 +129,7 @@ export async function initProfiloPrivato(user) {
 
     initPhonesEmailsModule(
         () => ({ contactPhones, contactEmails, profileLabels, qrCodeInclusions }),
-        { syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, openLinkedAccount, updateProfileLabelOptions }
+        { syncData, toggleQRInclusion, deletePhone, deleteEmail, connectEmailAccount, connectPhoneAccount, openLinkedAccount, updateProfileLabelOptions }
     );
 
     initAddressesDocsModule(
@@ -200,6 +201,7 @@ async function loadUserData(user, renderImmediately = true) {
 
         // 🔐 PROTOCOLLO BLINDA (V6.1.5): Decrittazione Granulare Universale
         const vaultKeyMaterial = await ensureVaultKeyMaterial();
+        if (!vaultKeyMaterial) throw new Error('Sblocca il Vault per aprire il Profilo.');
         if (vaultKeyMaterial) {
             currentUserData.nome = await decryptIfPossible(currentUserData.nome, vaultKeyMaterial);
             currentUserData.cognome = await decryptIfPossible(currentUserData.cognome, vaultKeyMaterial);
@@ -246,8 +248,8 @@ async function loadUserData(user, renderImmediately = true) {
             if (Array.isArray(currentUserData.contactEmails)) {
                 currentUserData.contactEmails = await Promise.all(currentUserData.contactEmails.map(async e => ({
                     ...e,
-                    password: await decryptIfPossible(e.password, vaultKeyMaterial),
-                    note: await decryptIfPossible(e.note, vaultKeyMaterial)
+                    password: await decodeProfileContactValue(e.password, vaultKeyMaterial),
+                    note: await decodeProfileContactValue(e.note, vaultKeyMaterial)
                 })));
             }
             LOG('[VaultCheck] Decrittazione granulare V6.1.5 completata.');
@@ -309,6 +311,7 @@ async function loadUserData(user, renderImmediately = true) {
     } catch (e) {
         logError('LoadProfile', e);
         showToast(t('error_generic'), 'error');
+        throw e;
     }
 }
 
@@ -437,9 +440,17 @@ async function deleteUtility(aIdx, uIdx) {
 async function deletePhone(idx) {
     if (!await showConfirmModal(t('confirm_delete_title'), 'Eliminare questo numero?')) return;
     try {
+        const linkedAccountId = contactPhones[idx]?.linkedAccountId;
         contactPhones.splice(idx, 1);
         contactPhones = contactPhones.filter(p => p !== undefined && p !== null);
         await syncData();
+        if (linkedAccountId) {
+            try {
+                await updateDoc(doc(db, 'users', currentUserUid, 'accounts', linkedAccountId), { linkedProfileField: deleteField() });
+            } catch {
+                showToast('Telefono eliminato. Il riferimento nell’Account non è stato aggiornato.', 'warning');
+            }
+        }
         renderPhonesView();
         LOG(`[Phone] Eliminato numero #${idx}. Rimanenti: ${contactPhones.length}`);
     } catch (e) {

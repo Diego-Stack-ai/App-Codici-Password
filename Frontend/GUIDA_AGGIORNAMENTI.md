@@ -500,3 +500,14 @@ Il programma M0–M10 conserva tutte le funzioni attuali e permette di eliminare
 - [ ] completare il riallineamento dei contratti specialistici;
 - [ ] eseguire [il piano di audit completo](../docs/PIANO_AUDIT_COMPLETO_PROGETTO.md) su codice, Rules, Functions, Storage, crittografia, offline e configurazione Firebase;
 - [ ] aggiornare la documentazione con gli esiti reali senza confondere test locali e produzione.
+
+# Collegamento email e telefoni, password e widget Profilo — 12/09/2026
+
+- Un’email del Profilo può scegliere dal medesimo menu se collegare un Account privato esistente oppure crearne uno nuovo, anche quando conserva una password legacy.
+- Anche ogni telefono può scegliere un Account privato esistente o crearne uno nuovo; dopo il salvataggio compare “Apri Account collegato”. Non vengono aggiunti campi PIN/PUK né spostati i dati telefonici già presenti.
+- Entrambe le scelte aprono il form Account per verificare i dati. I campi vuoti vengono precompilati; credenziali e note già presenti nell’Account vengono conservate.
+- La password email legacy viene rimossa soltanto se coincide esattamente con la password salvata nell’Account, nella stessa transazione. Se è diversa resta visibile, inizialmente oscurata, e copiabile nel Profilo anche dopo il collegamento. “Verifica trasferimento password” riapre il relativo Account.
+- Errori di lettura, salvataggio o conflitti non eliminano la password. Nessuna password viene copiata in `sessionStorage`; la bozza è associata all’utente autenticato.
+- Le zone Widget caricate in background rispettano subito la linguetta attiva; non compaiono più comandi appartenenti alle altre linguette.
+- Ogni linguetta mostra un solo pulsante `+` per creare Widget. Il numero dei Widget non è limitato; resta soltanto il limite di sicurezza di 30 campi per singolo Widget.
+- Cache applicativa aggiornata a `1.2.100`. Suite completa locale superata, inclusi emulatori Firestore/Storage; test comportamentali per selezione, salvataggio atomico, password differenti, errori e schede del Profilo.

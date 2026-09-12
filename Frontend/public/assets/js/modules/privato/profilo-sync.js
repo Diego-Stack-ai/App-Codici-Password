@@ -11,7 +11,7 @@
  *   profilo_privato.js → profilo-sync.js → firebase, security-manager, utils
  */
 
-import { auth, db } from '../../firebase-config.js?v=1.2.99';
+import { auth, db } from '../../firebase-config.js?v=1.2.100';
 import { doc, updateDoc } from "/assets/js/vendor/firebase-runtime.js";
 import { showToast } from '../../ui-core-v129.js';
 import { t } from '../../translations.js';
@@ -37,14 +37,13 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
     try {
         const user = auth.currentUser;
         if (!user) {
-            showToast("Sessione scaduta: ricarica la pagina.", "error");
-            return;
+            throw new Error('Sessione scaduta: ricarica la pagina.');
         }
+        if (user.uid !== currentUserUid) throw new Error('Il contatto appartiene a una sessione diversa.');
 
         const vaultKeyMaterial = await ensureVaultKeyMaterial();
         if (!vaultKeyMaterial) {
-            showToast("Chiave Master mancante: impossibile cifrare.", "error");
-            return;
+            throw new Error('Sblocca il Vault prima di salvare.');
         }
 
         LOG("[VaultCheck] Cifratura in corso...");
@@ -108,5 +107,6 @@ export async function syncData({ currentUserUid, currentUserData, userAddresses,
     } catch (e) {
         logError("SyncData", e);
         showToast("Errore di sicurezza durante il salvataggio.", "error");
+        throw e;
     }
 }

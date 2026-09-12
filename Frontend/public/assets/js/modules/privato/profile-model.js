@@ -13,19 +13,33 @@ export function hasLegacyEmailPassword(email) {
     return Boolean(String(email?.password || '').trim());
 }
 
-export function buildProfileAccountLinkDraft(email) {
+export function buildProfileAccountLinkDraft(contact, contactType = 'email') {
     return {
-        profileEmailId: email?.id || '',
-        email: email?.address || ''
+        profileContactId: contact?.id || '',
+        contactType,
+        value: contactType === 'phone' ? (contact?.number || '') : (contact?.address || '')
     };
 }
 
-export function linkProfileEmailToAccount(email, accountId) {
+export function linkProfileEmailToAccount(email, accountId, { passwordTransferred = false } = {}) {
     return {
         ...email,
         linkedAccountId: accountId,
-        password: ''
+        password: passwordTransferred ? '' : (email.password || '')
     };
+}
+
+export function prepareProfileEmailAccountValues(email, account = {}) {
+    return {
+        username: account.username || email.address || '',
+        password: account.password || email.password || '',
+        note: account.note || email.note || ''
+    };
+}
+
+export function isProfileEmailPasswordTransferred(legacyPassword, savedPassword) {
+    return typeof legacyPassword === 'string' && legacyPassword.length > 0 &&
+        legacyPassword !== '--ERRORE--' && legacyPassword === savedPassword;
 }
 
 function normalizedDeadlineText(value) {

@@ -79,7 +79,7 @@ function createLegacyPasswordRecovery(password) {
         createElement('div', { className: 'field-value-row' }, [value, toggle, copy]),
         createElement('span', {
             className: 'data-value-sub',
-            textContent: 'Recuperala qui e salvala in un Account dedicato. Rimane nel Profilo finché il nuovo Account non viene salvato.'
+            textContent: 'Rimane nel Profilo finché la stessa password non è salvata nell’Account collegato.'
         })
     ]);
 }
@@ -139,7 +139,14 @@ function _createPhoneCard(phone, idx) {
                     createElement('span', { className: 'data-value', textContent: phone.number || '-' }),
                     createCopyBtn(phone.number)
                 ])
-            ])
+            ]),
+            createElement('button', {
+                className: 'btn-upload-trigger',
+                textContent: phone.linkedAccountId ? 'Apri Account collegato' : 'Collega o crea Account',
+                onclick: () => phone.linkedAccountId
+                    ? _callbacks.openLinkedAccount(phone.linkedAccountId)
+                    : _callbacks.connectPhoneAccount(phone, _callbacks.syncData)
+            })
         ])
     ]);
 }
@@ -238,7 +245,7 @@ export function renderEmailsView() {
                 createElement('span', { className: 'data-value truncate', textContent: e.address || '-' }),
                 createCopyBtn(e.address)
             ]),
-            hasLegacyEmailPassword(e) && !e.linkedAccountId
+            hasLegacyEmailPassword(e)
                 ? createLegacyPasswordRecovery(e.password)
                 : createElement('span', { className: 'data-value-sub', textContent: e.linkedAccountId ? 'Credenziali gestite nell’Account collegato' : 'Nessuna credenziale nel Profilo' }),
             e.note ? createElement('div', {
@@ -248,11 +255,16 @@ export function renderEmailsView() {
                 className: 'btn-upload-trigger',
                 textContent: e.linkedAccountId
                     ? 'Apri Account collegato'
-                    : (hasLegacyEmailPassword(e) ? 'Crea Account e trasferisci' : 'Collega un Account'),
+                    : 'Collega o crea Account',
                 onclick: () => e.linkedAccountId
                     ? _callbacks.openLinkedAccount(e.linkedAccountId)
                     : _callbacks.connectEmailAccount(e, _callbacks.syncData)
-            })
+            }),
+            e.linkedAccountId && hasLegacyEmailPassword(e) ? createElement('button', {
+                className: 'btn-upload-trigger',
+                textContent: 'Verifica trasferimento password',
+                onclick: () => _callbacks.connectEmailAccount(e, _callbacks.syncData)
+            }) : null
         ])
     ]));
 
