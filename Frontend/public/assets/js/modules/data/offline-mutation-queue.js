@@ -20,6 +20,11 @@ function assertIdentity(uid, operation) {
     }
 }
 
+function comparableJson(value) {
+    return JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
+        ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
+}
+
 export async function deriveOfflineQueueKey(vaultKeyMaterial, uid) {
     if (!vaultKeyMaterial || !uid) throw new Error('OFFLINE_QUEUE_KEY_REQUIRED');
     const material = await crypto.subtle.importKey(
@@ -93,6 +98,52 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
     const [database, key] = await Promise.all([
         openDatabase(uid, indexedDb), deriveOfflineQueueKey(vaultKeyMaterial, uid)
     ]);
+    async function swap(expectedOperation, replacement, {isActive = () => true} = {}, sameId = false) {
+            const checkActive = () => { if (!isActive()) throw new Error('OFFLINE_SESSION_CHANGED'); };
+            checkActive();
+            const expected = JSON.parse(JSON.stringify(expectedOperation));
+            const next = JSON.parse(JSON.stringify(replacement));
+            assertIdentity(uid, expected);
+            assertIdentity(uid, next);
+            if (expected.recordId !== next.recordId || (expected.operationId === next.operationId) !== sameId) {
+                throw new Error('OFFLINE_REPLACEMENT_SCOPE_INVALID');
+            }
+            const read = database.transaction(STORE, 'readonly');
+            const readDone = transactionDone(read);
+            const [original] = await Promise.all([requestResult(read.objectStore(STORE).get(`${uid}:${expected.operationId}`)), readDone]);
+            checkActive();
+            if (!original) throw new Error('OFFLINE_REPLACEMENT_MISSING');
+            const decoded = await openOfflineOperation(original, key, uid);
+            checkActive();
+            if (comparableJson(decoded) !== comparableJson(expected)) throw new Error('OFFLINE_REPLACEMENT_CHANGED');
+            const sealed = await sealOfflineOperation(next, key);
+            checkActive();
+            sealed.queuedAt = original.queuedAt;
+
+            // Crypto must finish before IndexedDB starts: the final transaction only performs the CAS and writes.
+            const tx = database.transaction(STORE, 'readwrite');
+            const done = transactionDone(tx);
+            const store = tx.objectStore(STORE);
+            const current = store.get(original.id);
+            const collision = store.get(sealed.id);
+            let remaining = 2, failure;
+            const commit = () => {
+                if (--remaining) return;
+                try { checkActive(); } catch (error) { failure = error; return tx.abort(); }
+                if (!current.result || comparableJson(current.result) !== comparableJson(original)) {
+                    failure = new Error('OFFLINE_REPLACEMENT_CHANGED');
+                } else if (!sameId && collision.result) {
+                    failure = new Error('OFFLINE_REPLACEMENT_EXISTS');
+                }
+                if (failure) return tx.abort();
+                store.delete(original.id);
+                store.add(sealed);
+            };
+            current.onsuccess = commit;
+            collision.onsuccess = commit;
+            try { await done; } catch (error) { throw failure || error; }
+            return sealed.operationId;
+    }
     return {
         async enqueue(operation) {
             assertIdentity(uid, operation);
@@ -101,6 +152,15 @@ export async function createOfflineMutationQueue({uid, vaultKeyMaterial, indexed
             tx.objectStore(STORE).put(container);
             await transactionDone(tx);
             return container.operationId;
+        },
+        replace(expectedOperation, replacement, options) {
+            return swap(expectedOperation, replacement, options);
+        },
+        async markForReview(expectedOperation, options) {
+            const expected = JSON.parse(JSON.stringify(expectedOperation));
+            const marked = {...expected, _queueState: 'reconciliation-required'};
+            await swap(expected, marked, options, true);
+            return marked;
         },
         async list() {
             const tx = database.transaction(STORE, 'readonly');
